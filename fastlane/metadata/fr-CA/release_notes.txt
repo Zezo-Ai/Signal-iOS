@@ -1,1 +1,1 @@
-• On a tous le droit de changer d'avis : le sélecteur d'images ne s'affichera donc plus par erreur lorsque vous collez une pièce jointe dans une conversation et décidez finalement de ne pas l'envoyer.
+• Now when you archive an unread message thread it will stay unread. We drew inspiration from the timeless tradition of putting a book back on the shelf even though you haven’t finished reading it yet.

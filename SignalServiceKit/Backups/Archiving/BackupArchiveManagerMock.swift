@@ -9,6 +9,13 @@ import Foundation
 public import LibSignalClient
 
 open class BackupArchiveManagerMock: BackupArchiveManager {
+    public func backupCdnInfo(
+        localIdentifiers: LocalIdentifiers,
+        auth: ChatServiceAuth
+    ) async throws -> AttachmentDownloads.CdnInfo {
+        return AttachmentDownloads.CdnInfo(contentLength: 0, lastModified: Date())
+    }
+
     public func downloadEncryptedBackup(
         localIdentifiers: LocalIdentifiers,
         auth: ChatServiceAuth
@@ -68,6 +75,7 @@ open class BackupArchiveManagerMock: BackupArchiveManager {
         fileUrl: URL,
         localIdentifiers: LocalIdentifiers,
         backupKey: BackupKey,
+        backupPurpose: MessageBackupPurpose,
         progress: OWSProgressSink?
     ) async throws {
         let source = await progress?.addSource(withLabel: "", unitCount: 1)
@@ -76,6 +84,7 @@ open class BackupArchiveManagerMock: BackupArchiveManager {
     public func importPlaintextBackup(
         fileUrl: URL,
         localIdentifiers: LocalIdentifiers,
+        backupPurpose: MessageBackupPurpose,
         progress: OWSProgressSink?
     ) async throws {
         let source = await progress?.addSource(withLabel: "", unitCount: 1)

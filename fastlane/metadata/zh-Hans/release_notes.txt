@@ -1,1 +1,1 @@
-• 我们修复了一个漏洞，该漏洞会在用户将附件粘贴到聊天后无故打开图片选择器。
+• Now when you archive an unread message thread it will stay unread. We drew inspiration from the timeless tradition of putting a book back on the shelf even though you haven’t finished reading it yet.

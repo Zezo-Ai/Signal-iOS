@@ -1,1 +1,1 @@
-• Opravili sme chybu, ktorá mohla spôsobiť, že sa po vložení prílohy do četu otvoril výber obrázkov.
+• Now when you archive an unread message thread it will stay unread. We drew inspiration from the timeless tradition of putting a book back on the shelf even though you haven’t finished reading it yet.

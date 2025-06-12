@@ -333,6 +333,14 @@ public class RegistrationNavigationController: OWSNavigationController {
                 },
                 update: nil
             )
+        case .confirmRestoreFromBackup(let state):
+            return Controller(
+                type: RegistrationRestoreFromBackupConfirmationViewController.self,
+                make: { presenter in
+                    return RegistrationRestoreFromBackupConfirmationViewController(state: state, presenter: presenter)
+                },
+                update: nil
+            )
         case .deviceTransfer(let state):
             return Controller(
                 type: RegistrationTransferStatusViewController.self,
@@ -361,9 +369,9 @@ public class RegistrationNavigationController: OWSNavigationController {
             )
         case .enterBackupKey:
             return Controller(
-                type: RegistrationEnterBackupKeyViewController.self,
+                type: RegistrationEnterAccountEntropyPoolViewController.self,
                 make: { presenter in
-                    return RegistrationEnterBackupKeyViewController(presenter: presenter)
+                    return RegistrationEnterAccountEntropyPoolViewController(presenter: presenter)
                 },
                 // No state to update.
                 update: nil
@@ -653,7 +661,7 @@ extension RegistrationNavigationController: RegistrationReglockTimeoutPresenter 
     }
 }
 
-extension RegistrationNavigationController: RegistrationEnterBackupKeyPresenter {
+extension RegistrationNavigationController: RegistrationEnterAccountEntropyPoolPresenter {
     func next(accountEntropyPool: AccountEntropyPool) {
         let guarantee = coordinator.updateAccountEntropyPool(accountEntropyPool)
         pushNextController(guarantee)
@@ -687,6 +695,13 @@ extension RegistrationNavigationController: RegistrationQuickRestoreQRCodePresen
 extension RegistrationNavigationController: RegistrationTransferStatusPresenter {
     func cancelTransfer() {
         let guarantee = coordinator.resetRestoreMethodChoice()
+        pushNextController(guarantee)
+    }
+}
+
+extension RegistrationNavigationController: RegistrationRestoreFromBackupConfirmationPresenter {
+    func restoreFromBackupConfirmed() {
+        let guarantee = coordinator.confirmRestoreFromBackup()
         pushNextController(guarantee)
     }
 }

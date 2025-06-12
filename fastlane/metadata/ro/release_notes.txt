@@ -1,1 +1,1 @@
-• Este întotdeauna în regulă să te răzgândești, așa că am remediat o eroare care făcea ca selectorul de imagini să se deschidă după ce lipeai un atașament într-un chat și apoi decideai să nu îl trimiți.
+• Now when you archive an unread message thread it will stay unread. We drew inspiration from the timeless tradition of putting a book back on the shelf even though you haven’t finished reading it yet.

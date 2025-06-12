@@ -1,1 +1,1 @@
-• 改變主意當然沒問題，因此我們修復了一個錯誤，以後在聊天中貼上附件之後決定不傳送時，圖片選擇器就不會再打開。
+• Now when you archive an unread message thread it will stay unread. We drew inspiration from the timeless tradition of putting a book back on the shelf even though you haven’t finished reading it yet.

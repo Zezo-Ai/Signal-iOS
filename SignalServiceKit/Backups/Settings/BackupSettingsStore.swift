@@ -52,8 +52,8 @@ public struct BackupSettingsStore {
     }
 
     private enum Keys {
-        static let haveEverBeenEnabled = "haveEverBeenEnabled"
-        static let plan = "plan"
+        static let haveEverBeenEnabled = "haveEverBeenEnabledKey"
+        static let plan = "planKey"
         static let lastBackupDate = "lastBackupDate"
         static let lastBackupSizeBytes = "lastBackupSizeBytes"
         static let backupFrequency = "backupFrequency"
@@ -91,12 +91,16 @@ public struct BackupSettingsStore {
         return .disabled
     }
 
-    public func setBackupPlan(_ backupPlan: BackupPlan, tx: DBWriteTransaction) {
-        kvStore.setBool(true, key: Keys.haveEverBeenEnabled, transaction: tx)
-        kvStore.setInt(backupPlan.rawValue, key: Keys.plan, transaction: tx)
+    public func setBackupPlan(_ newBackupPlan: BackupPlan, tx: DBWriteTransaction) {
+        let currentBackupPlan = backupPlan(tx: tx)
 
-        tx.addSyncCompletion {
-            NotificationCenter.default.post(name: Notifications.backupPlanChanged, object: nil)
+        kvStore.setBool(true, key: Keys.haveEverBeenEnabled, transaction: tx)
+        kvStore.setInt(newBackupPlan.rawValue, key: Keys.plan, transaction: tx)
+
+        if currentBackupPlan != newBackupPlan {
+            tx.addSyncCompletion {
+                NotificationCenter.default.post(name: Notifications.backupPlanChanged, object: nil)
+            }
         }
     }
 

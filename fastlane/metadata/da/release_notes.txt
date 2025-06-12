@@ -1,1 +1,1 @@
-• Det er altid okay at skifte mening, så vi har rettet en fejl, der fik billedvælgeren til at åbne sig, efter man havde indsat en vedhæftet fil i en chat og derefter besluttet ikke at sende den.
+• Now when you archive an unread message thread it will stay unread. We drew inspiration from the timeless tradition of putting a book back on the shelf even though you haven’t finished reading it yet.

@@ -1,1 +1,1 @@
-• मन कभी भी बदल सकता है, इसलिए हमने उस गड़बड़ी को ठीक कर दिया है जिसकी वजह से चैट में अटैचमेंट पेस्ट करने और उसे भेजने का फ़ैसला न करने के बाद इमेज पिकर खुल जाता था।
+• Now when you archive an unread message thread it will stay unread. We drew inspiration from the timeless tradition of putting a book back on the shelf even though you haven’t finished reading it yet.

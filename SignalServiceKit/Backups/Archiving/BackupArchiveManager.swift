@@ -10,6 +10,12 @@ public protocol BackupArchiveManager {
 
     // MARK: - Interact with remotes
 
+    /// Fetch the CDN info for the current backup
+    func backupCdnInfo(
+        localIdentifiers: LocalIdentifiers,
+        auth: ChatServiceAuth
+    ) async throws -> AttachmentDownloads.CdnInfo
+
     /// Download the encrypted backup for the current user to a local file.
     func downloadEncryptedBackup(
         localIdentifiers: LocalIdentifiers,
@@ -57,6 +63,7 @@ public protocol BackupArchiveManager {
         fileUrl: URL,
         localIdentifiers: LocalIdentifiers,
         backupKey: BackupKey,
+        backupPurpose: MessageBackupPurpose,
         progress: OWSProgressSink?
     ) async throws
 
@@ -64,6 +71,7 @@ public protocol BackupArchiveManager {
     func importPlaintextBackup(
         fileUrl: URL,
         localIdentifiers: LocalIdentifiers,
+        backupPurpose: MessageBackupPurpose,
         progress: OWSProgressSink?
     ) async throws
 

@@ -231,7 +231,8 @@ public class MessageSender {
                 for: protocolAddress,
                 sessionStore: DependenciesBridge.shared.signalProtocolStoreManager.signalProtocolStore(for: .aci).sessionStore,
                 identityStore: identityManager.libSignalStore(for: .aci, tx: transaction),
-                context: transaction
+                context: transaction,
+                usePqRatchet: false
             )
         } catch SignalError.untrustedIdentity(_), IdentityManagerError.identityKeyMismatchForOutgoingMessage {
             Logger.warn("Found untrusted identity for \(serviceId)")
@@ -381,11 +382,19 @@ public class MessageSender {
     // MARK: - Constructing Message Sends
 
     public func sendMessage(_ preparedOutgoingMessage: PreparedOutgoingMessage) async throws {
+        do {
+            Logger.info("Sending \(preparedOutgoingMessage)")
+            try await _sendMessage(preparedOutgoingMessage)
+        } catch {
+            Logger.warn("Couldn't send \(preparedOutgoingMessage); there may also be individual send failures, but the overall failure is: \(error)")
+            throw error
+        }
+    }
+
+    private func _sendMessage(_ preparedOutgoingMessage: PreparedOutgoingMessage) async throws {
         await SSKEnvironment.shared.databaseStorageRef.awaitableWrite { tx in
             preparedOutgoingMessage.updateAllUnsentRecipientsAsSending(tx: tx)
         }
-
-        Logger.info("Sending \(preparedOutgoingMessage)")
 
         // We create a PendingTask so we can block on flushing all current message sends.
         let pendingTask = pendingTasks.buildPendingTask()
@@ -430,8 +439,11 @@ public class MessageSender {
                 // Only try to update the signed prekey; updating it is sufficient to
                 // re-enable message sending.
                 return Task {
+                    defer {
+                        // If this succeeds, or if we hit an error, allow another attempt.
+                        self.pendingPreKeyRotation.set(nil)
+                    }
                     try await self.preKeyManager.rotateSignedPreKeysIfNeeded().value
-                    self.pendingPreKeyRotation.set(nil)
                 }
             }
             return nil
@@ -589,7 +601,7 @@ public class MessageSender {
         if !areAttachmentsUploadedWithSneakyTransaction(for: message) {
             throw OWSUnretryableMessageSenderError()
         }
-        if DependenciesBridge.shared.appExpiry.isExpired {
+        if DependenciesBridge.shared.appExpiry.isExpired(now: Date()) {
             throw AppExpiredError()
         }
         if DependenciesBridge.shared.tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegistered.negated {

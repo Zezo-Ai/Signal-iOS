@@ -1,1 +1,1 @@
-• Vi har åtgärdat ett fel som kunde leda till att bildväljaren öppnades efter att en bilaga klistrats in i en chatt.
+• Now when you archive an unread message thread it will stay unread. We drew inspiration from the timeless tradition of putting a book back on the shelf even though you haven’t finished reading it yet.

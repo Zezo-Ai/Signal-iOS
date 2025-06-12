@@ -1,1 +1,1 @@
-• It's always OK to change your mind, so we fixed a bug that caused the image picker to open after pasting an attachment into a chat and then deciding not to send it.
+• Now when you archive an unread message thread it will stay unread. We drew inspiration from the timeless tradition of putting a book back on the shelf even though you haven’t finished reading it yet.

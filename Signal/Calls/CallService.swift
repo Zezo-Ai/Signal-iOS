@@ -28,6 +28,7 @@ final class CallService: CallServiceStateObserver, CallServiceStateDelegate {
     private let appReadiness: AppReadiness
     private var audioSession: AudioSession { SUIEnvironment.shared.audioSessionRef }
     private var callLinkStore: any CallLinkRecordStore { DependenciesBridge.shared.callLinkStore }
+    private var chatConnectionManager: any ChatConnectionManager { DependenciesBridge.shared.chatConnectionManager }
     let authCredentialManager: any AuthCredentialManager
     private var databaseStorage: SDSDatabaseStorage { SSKEnvironment.shared.databaseStorageRef }
     private let db: any DB
@@ -179,19 +180,34 @@ final class CallService: CallServiceStateObserver, CallServiceStateDelegate {
         }
     }
 
+    @MainActor
+    private var shouldRebuildCallUIAdapter = false
+
     /**
      * Choose whether to use CallKit or a Notification backed interface for calling.
      */
+    @MainActor
     public func rebuildCallUIAdapter() {
         if let currentCall = callServiceState.currentCall {
-            Logger.warn("ending current call in. Did user toggle callkit preference while in a call?")
-            callServiceState.terminateCall(currentCall)
+            Logger.warn("Ending current call because the user toggled a CallKit preference during a call.")
+            self.callUIAdapter.localHangupCall(currentCall)
         }
+        self.shouldRebuildCallUIAdapter = true
+        self.rebuildCallUIAdapterIfNeeded()
+    }
 
+    @MainActor
+    private func rebuildCallUIAdapterIfNeeded() {
+        guard self.shouldRebuildCallUIAdapter else {
+            return
+        }
+        self.shouldRebuildCallUIAdapter = false
         self.callUIAdapter = CallUIAdapter()
     }
 
     private let sleepBlockObject = DeviceSleepBlockObject(blockReason: "call")
+
+    private var connectionTokens = [OWSChatConnection.ConnectionToken]()
 
     func didUpdateCall(from oldValue: SignalCall?, to newValue: SignalCall?) {
         switch oldValue?.mode {
@@ -225,6 +241,11 @@ final class CallService: CallServiceStateObserver, CallServiceStateDelegate {
 
         updateIsVideoEnabled()
 
+        // Keep the connection open while we have an active call.
+        let oldTokens = self.connectionTokens
+        self.connectionTokens = (newValue != nil) ? self.chatConnectionManager.requestConnections(shouldReconnectIfConnectedElsewhere: true) : []
+        oldTokens.forEach { $0.releaseConnection() }
+
         // Prevent device from sleeping while we have an active call.
         if oldValue != nil {
             self.deviceSleepManager.removeBlock(blockObject: sleepBlockObject)
@@ -239,6 +260,12 @@ final class CallService: CallServiceStateObserver, CallServiceStateDelegate {
             }
             if newValue != nil {
                 UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+            }
+        }
+
+        if newValue == nil {
+            MainActor.assumeIsolated {
+                self.rebuildCallUIAdapterIfNeeded()
             }
         }
 
