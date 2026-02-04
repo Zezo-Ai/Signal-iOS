@@ -14,6 +14,7 @@ class DebugUIPrompts: DebugUIPage {
     func section(thread: TSThread?) -> OWSTableSection? {
         let db = DependenciesBridge.shared.db
         let inactiveLinkedDeviceFinder = DependenciesBridge.shared.inactiveLinkedDeviceFinder
+        let keyTransparencyStore = KeyTransparencyStore()
         let usernameEducationManager = DependenciesBridge.shared.usernameEducationManager
 
         var items = [OWSTableItem]()
@@ -21,7 +22,7 @@ class DebugUIPrompts: DebugUIPage {
         items += [
             OWSTableItem(title: "Reenable KT first-time education", actionBlock: {
                 db.write { tx in
-                    KeyTransparencyManager.setHasShownFirstTimeEducation(false, tx: tx)
+                    keyTransparencyStore.setHasShownFirstTimeEducation(false, tx: tx)
                 }
             }),
 

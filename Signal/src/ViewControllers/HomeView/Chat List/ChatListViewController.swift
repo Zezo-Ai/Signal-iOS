@@ -372,6 +372,7 @@ public class ChatListViewController: OWSViewController, HomeTabViewController {
             donationReceiptCredentialResultStore: DependenciesBridge.shared.donationReceiptCredentialResultStore,
             donationSubscriptionManager: DonationSubscriptionManager.self,
             db: DependenciesBridge.shared.db,
+            keyTransparencyStore: KeyTransparencyStore(),
             networkManager: SSKEnvironment.shared.networkManagerRef,
             profileManager: SSKEnvironment.shared.profileManagerRef,
         )

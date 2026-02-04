@@ -53,6 +53,7 @@ class ChatListFYISheetCoordinator {
     private let donationReceiptCredentialResultStore: DonationReceiptCredentialResultStore
     private let donationSubscriptionManager: DonationSubscriptionManager.Type
     private let db: DB
+    private let keyTransparencyStore: KeyTransparencyStore
     private let networkManager: NetworkManager
     private let profileManager: ProfileManager
 
@@ -62,6 +63,7 @@ class ChatListFYISheetCoordinator {
         donationReceiptCredentialResultStore: DonationReceiptCredentialResultStore,
         donationSubscriptionManager: DonationSubscriptionManager.Type,
         db: DB,
+        keyTransparencyStore: KeyTransparencyStore,
         networkManager: NetworkManager,
         profileManager: ProfileManager,
     ) {
@@ -70,6 +72,7 @@ class ChatListFYISheetCoordinator {
         self.donationReceiptCredentialResultStore = donationReceiptCredentialResultStore
         self.donationSubscriptionManager = donationSubscriptionManager
         self.db = db
+        self.keyTransparencyStore = keyTransparencyStore
         self.networkManager = networkManager
         self.profileManager = profileManager
     }
@@ -116,7 +119,7 @@ class ChatListFYISheetCoordinator {
             return .backupSubscriptionExpired(FYISheet.BackupSubscriptionExpired(subscriptionType: .testFlight))
         } else if backupSubscriptionIssueStore.shouldWarnIAPSubscriptionFailedToRenew(tx: tx) {
             return .backupSubscriptionFailedToRenew(FYISheet.BackupSubscriptionFailedToRenew())
-        } else if KeyTransparencyManager.shouldWarnSelfCheckFailed(tx: tx) {
+        } else if keyTransparencyStore.shouldWarnSelfCheckFailed(tx: tx) {
             return .keyTransparencySelfCheckFailed(FYISheet.KeyTransparencySelfCheckFailed())
         } else {
             return nil
@@ -453,7 +456,7 @@ class ChatListFYISheetCoordinator {
 
         chatListViewController.present(sheet, animated: true) { [self] in
             db.write { tx in
-                KeyTransparencyManager.setWarnedSelfCheckFailed(tx: tx)
+                keyTransparencyStore.setWarnedSelfCheckFailed(tx: tx)
             }
         }
     }

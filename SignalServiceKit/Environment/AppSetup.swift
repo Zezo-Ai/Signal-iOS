@@ -1233,11 +1233,13 @@ extension AppSetup.GlobalsContinuation {
             whoAmIManager: whoAmIManager,
         ))
 
+        let keyTransparencyStore = KeyTransparencyStore()
         let keyTransparencyManager = KeyTransparencyManager(
             chatConnectionManager: chatConnectionManager,
             dateProvider: dateProvider,
             db: db,
             identityManager: identityManager,
+            keyTransparencyStore: keyTransparencyStore,
             localUsernameManager: localUsernameManager,
             recipientDatabaseTable: recipientDatabaseTable,
             storageServiceManager: storageServiceManager,
@@ -1379,6 +1381,7 @@ extension AppSetup.GlobalsContinuation {
             avatarFetcher: backupArchiveAvatarFetcher,
             blockingManager: BackupArchive.Wrappers.BlockingManager(blockingManager),
             contactManager: BackupArchive.Wrappers.ContactManager(contactManager),
+            keyTransparencyStore: keyTransparencyStore,
             nicknameManager: nicknameManager,
             profileManager: BackupArchive.Wrappers.ProfileManager(profileManager),
             recipientHidingManager: recipientHidingManager,
@@ -1423,6 +1426,7 @@ extension AppSetup.GlobalsContinuation {
                 disappearingMessageConfigurationStore: disappearingMessagesConfigurationStore,
                 donationSubscriptionManager: BackupArchive.Wrappers.DonationSubscriptionManager(),
                 imageQuality: BackupArchive.Wrappers.ImageQuality(),
+                keyTransparencyStore: keyTransparencyStore,
                 linkPreviewSettingStore: linkPreviewSettingStore,
                 localUsernameManager: localUsernameManager,
                 mediaBandwidthPreferenceStore: mediaBandwidthPreferenceStore,

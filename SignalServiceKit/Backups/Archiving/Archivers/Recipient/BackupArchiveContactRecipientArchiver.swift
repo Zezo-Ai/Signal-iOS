@@ -22,6 +22,7 @@ public class BackupArchiveContactRecipientArchiver: BackupArchiveProtoStreamWrit
     private let avatarFetcher: BackupArchiveAvatarFetcher
     private let blockingManager: BackupArchive.Shims.BlockingManager
     private let contactManager: BackupArchive.Shims.ContactManager
+    private let keyTransparencyStore: KeyTransparencyStore
     private let nicknameManager: NicknameManager
     private let profileManager: BackupArchive.Shims.ProfileManager
     private let recipientHidingManager: RecipientHidingManager
@@ -38,6 +39,7 @@ public class BackupArchiveContactRecipientArchiver: BackupArchiveProtoStreamWrit
         avatarFetcher: BackupArchiveAvatarFetcher,
         blockingManager: BackupArchive.Shims.BlockingManager,
         contactManager: BackupArchive.Shims.ContactManager,
+        keyTransparencyStore: KeyTransparencyStore,
         nicknameManager: NicknameManager,
         profileManager: BackupArchive.Shims.ProfileManager,
         recipientHidingManager: RecipientHidingManager,
@@ -53,6 +55,7 @@ public class BackupArchiveContactRecipientArchiver: BackupArchiveProtoStreamWrit
         self.avatarFetcher = avatarFetcher
         self.blockingManager = blockingManager
         self.contactManager = contactManager
+        self.keyTransparencyStore = keyTransparencyStore
         self.nicknameManager = nicknameManager
         self.profileManager = profileManager
         self.recipientHidingManager = recipientHidingManager
@@ -264,7 +267,7 @@ public class BackupArchiveContactRecipientArchiver: BackupArchiveProtoStreamWrit
                     tx: context.tx,
                 ),
                 keyTransparencyBlob: recipient.aci.flatMap { aci in
-                    KeyTransparencyManager.getKeyTransparencyBlob(aci: aci, tx: context.tx)
+                    self.keyTransparencyStore.getKeyTransparencyBlob(aci: aci, tx: context.tx)
                 },
             )
 
@@ -875,7 +878,7 @@ public class BackupArchiveContactRecipientArchiver: BackupArchiveProtoStreamWrit
             contactProto.hasKeyTransparencyData,
             let aci = backupContactAddress.aci
         {
-            KeyTransparencyManager.setKeyTransparencyBlob(
+            keyTransparencyStore.setKeyTransparencyBlob(
                 contactProto.keyTransparencyData,
                 aci: aci,
                 tx: context.tx,

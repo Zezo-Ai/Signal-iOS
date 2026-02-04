@@ -58,6 +58,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
     private let disappearingMessageConfigurationStore: DisappearingMessagesConfigurationStore
     private let donationSubscriptionManager: BackupArchive.Shims.DonationSubscriptionManager
     private let imageQuality: BackupArchive.Shims.ImageQuality
+    private let keyTransparencyStore: KeyTransparencyStore
     private let linkPreviewSettingStore: LinkPreviewSettingStore
     private let localUsernameManager: LocalUsernameManager
     private let logger: PrefixedLogger
@@ -86,6 +87,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
         disappearingMessageConfigurationStore: DisappearingMessagesConfigurationStore,
         donationSubscriptionManager: BackupArchive.Shims.DonationSubscriptionManager,
         imageQuality: BackupArchive.Shims.ImageQuality,
+        keyTransparencyStore: KeyTransparencyStore,
         linkPreviewSettingStore: LinkPreviewSettingStore,
         localUsernameManager: LocalUsernameManager,
         mediaBandwidthPreferenceStore: MediaBandwidthPreferenceStore,
@@ -112,6 +114,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
         self.disappearingMessageConfigurationStore = disappearingMessageConfigurationStore
         self.donationSubscriptionManager = donationSubscriptionManager
         self.imageQuality = imageQuality
+        self.keyTransparencyStore = keyTransparencyStore
         self.linkPreviewSettingStore = linkPreviewSettingStore
         self.localUsernameManager = localUsernameManager
         self.logger = PrefixedLogger(prefix: "[Backups]")
@@ -195,7 +198,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
             }
 
             if
-                let keyTransparencyBlob = KeyTransparencyManager.getKeyTransparencyBlob(
+                let keyTransparencyBlob = keyTransparencyStore.getKeyTransparencyBlob(
                     aci: context.localIdentifiers.aci,
                     tx: context.tx,
                 )
@@ -325,7 +328,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
         }
 
         accountSettings.allowSealedSenderFromAnyone = udManager.shouldAllowUnrestrictedAccessLocal(tx: context.tx)
-        accountSettings.allowAutomaticKeyVerification = KeyTransparencyManager.isEnabled(tx: context.tx)
+        accountSettings.allowAutomaticKeyVerification = keyTransparencyStore.isEnabled(tx: context.tx)
         accountSettings.defaultSentMediaQuality = imageQuality.fetchValue(tx: context.tx) == .high ? .high : .standard
 
         var downloadSettings = BackupProto_AccountData.AutoDownloadSettings()
@@ -572,7 +575,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
             }
 
             udManager.setShouldAllowUnrestrictedAccessLocal(settings.allowSealedSenderFromAnyone, tx: context.tx)
-            KeyTransparencyManager.setIsEnabled(settings.allowAutomaticKeyVerification, tx: context.tx)
+            keyTransparencyStore.setIsEnabled(settings.allowAutomaticKeyVerification, tx: context.tx)
 
             switch settings.defaultSentMediaQuality {
             case .high:
@@ -666,7 +669,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
         }
 
         if accountData.hasKeyTransparencyData {
-            KeyTransparencyManager.setKeyTransparencyBlob(
+            keyTransparencyStore.setKeyTransparencyBlob(
                 accountData.keyTransparencyData,
                 aci: context.localIdentifiers.aci,
                 tx: context.tx,

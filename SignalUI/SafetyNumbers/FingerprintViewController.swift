@@ -28,6 +28,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
         let db = DependenciesBridge.shared.db
         let identityManager = DependenciesBridge.shared.identityManager
         let keyTransparencyManager = DependenciesBridge.shared.keyTransparencyManager
+        let keyTransparencyStore = KeyTransparencyStore()
         let tsAccountManager = DependenciesBridge.shared.tsAccountManager
 
         let fingerprintResult: FingerprintResult?
@@ -55,13 +56,13 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
                 return (nil, nil, false)
             }
 
-            let keyTransparencyIsEnabled = KeyTransparencyManager.isEnabled(tx: tx)
+            let keyTransparencyIsEnabled = keyTransparencyStore.isEnabled(tx: tx)
             let keyTransparencyCheckParams = keyTransparencyManager.prepareCheck(
                 aci: theirAci,
                 localIdentifiers: localIdentifiers,
                 tx: tx,
             )
-            let keyTransparencyShouldShowEducation = KeyTransparencyManager.shouldShowFirstTimeEducation(tx: tx)
+            let keyTransparencyShouldShowEducation = keyTransparencyStore.shouldShowFirstTimeEducation(tx: tx)
 
             return (
                 FingerprintResult(
@@ -120,7 +121,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
         if keyTransparencyShouldShowEducation {
             let educationSheet = KeyTransparencyFirstTimeEducationHeroSheet {
                 db.write { tx in
-                    KeyTransparencyManager.setHasShownFirstTimeEducation(true, tx: tx)
+                    keyTransparencyStore.setHasShownFirstTimeEducation(true, tx: tx)
                 }
 
                 viewController.present(navigationController, animated: true)

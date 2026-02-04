@@ -10,29 +10,11 @@ public final class KeyTransparencyManager {
     private static let logger = PrefixedLogger(prefix: "[KT]")
     private var logger: PrefixedLogger { Self.logger }
 
-    private static let kvStore = NewKeyValueStore(collection: "KeyTransparencyManager")
-    private var kvStore: NewKeyValueStore { Self.kvStore }
-
-    /// Keys for `kvStore`.
-    /// - Important
-    /// If you're adding a new key here, consider whether it should be wiped
-    /// when Key Transparency is disabled. See: `setIsEnabled`.
-    private enum KVStoreKeys {
-        /// Keys to a `Bool` representing whether or not KT is enabled.
-        static let isEnabled = "isEnabled"
-        /// Keys to a `SelfCheckState`'s raw value.
-        static let selfCheckState = "selfCheckState"
-        /// Keys to a `Bool` representing whether or not we should show
-        /// first-time education about KT.
-        static let shouldShowFirstTimeEducation = "shouldShowFirstTimeEducation"
-        /// Keys to an opaque LibSignalClient blob.
-        static let distinguishedTreeHead = "distinguishedTreeHead"
-    }
-
     private let chatConnectionManager: ChatConnectionManager
     private let dateProvider: DateProvider
     private let db: DB
     private let identityManager: OWSIdentityManager
+    private let keyTransparencyStore: KeyTransparencyStore
     private let localUsernameManager: LocalUsernameManager
     private let recipientDatabaseTable: RecipientDatabaseTable
     private let storageServiceManager: StorageServiceManager
@@ -46,6 +28,7 @@ public final class KeyTransparencyManager {
         dateProvider: @escaping DateProvider,
         db: DB,
         identityManager: OWSIdentityManager,
+        keyTransparencyStore: KeyTransparencyStore,
         localUsernameManager: LocalUsernameManager,
         recipientDatabaseTable: RecipientDatabaseTable,
         storageServiceManager: StorageServiceManager,
@@ -56,6 +39,7 @@ public final class KeyTransparencyManager {
         self.dateProvider = dateProvider
         self.db = db
         self.identityManager = identityManager
+        self.keyTransparencyStore = keyTransparencyStore
         self.localUsernameManager = localUsernameManager
         self.recipientDatabaseTable = recipientDatabaseTable
         self.storageServiceManager = storageServiceManager
@@ -98,7 +82,7 @@ public final class KeyTransparencyManager {
         let logger = logger.suffixed(with: "[\(aci)]")
         logger.info("")
 
-        guard Self.isEnabled(tx: tx) else {
+        guard keyTransparencyStore.isEnabled(tx: tx) else {
             logger.warn("Is opted out.")
             return nil
         }
@@ -193,20 +177,23 @@ public final class KeyTransparencyManager {
         logger: PrefixedLogger,
     ) async throws {
         let ktClient = try await chatConnectionManager.keyTransparencyClient()
-        let libSignalStore = KeyTransparencyStoreForLibSignal(db: db)
+        let libSignalStore = KeyTransparencyStoreForLibSignal(
+            db: db,
+            keyTransparencyStore: keyTransparencyStore,
+        )
 
         let existingKeyTransparencyBlob: Data?
-        let selfCheckState: SelfCheckState?
+        let selfCheckState: KeyTransparencyStore.SelfCheckState?
         (
             existingKeyTransparencyBlob,
             selfCheckState,
         ) = db.read { tx in
             return (
-                Self.getKeyTransparencyBlob(
+                keyTransparencyStore.getKeyTransparencyBlob(
                     aci: params.aciInfo.aci,
                     tx: tx,
                 ),
-                Self.selfCheckState(tx: tx),
+                keyTransparencyStore.selfCheckState(tx: tx),
             )
         }
 
@@ -263,54 +250,7 @@ public final class KeyTransparencyManager {
         }
     }
 
-    // MARK: - Self-check state
-
-    private enum SelfCheckState: Int64 {
-        case succeeded = 1
-        case failedOnce = 2
-        case failedRepeatedly = 3
-        case failedRepeatedlyAndWarned = 4
-    }
-
-    private static func selfCheckState(tx: DBReadTransaction) -> SelfCheckState? {
-        return kvStore.fetchValue(
-            Int64.self,
-            forKey: KVStoreKeys.selfCheckState,
-            tx: tx,
-        )
-        .map { SelfCheckState(rawValue: $0)! }
-    }
-
-    private static func setSelfCheckState(_ state: SelfCheckState, tx: DBWriteTransaction) {
-        kvStore.writeValue(state.rawValue, forKey: KVStoreKeys.selfCheckState, tx: tx)
-    }
-
-    public static func shouldWarnSelfCheckFailed(tx: DBReadTransaction) -> Bool {
-        switch selfCheckState(tx: tx) {
-        case .failedRepeatedly:
-            return true
-        case nil, .succeeded, .failedOnce, .failedRepeatedlyAndWarned:
-            return false
-        }
-    }
-
-    public static func setWarnedSelfCheckFailed(tx: DBWriteTransaction) {
-        switch selfCheckState(tx: tx) {
-        case .failedRepeatedly:
-            Self.setSelfCheckState(.failedRepeatedlyAndWarned, tx: tx)
-        case nil, .succeeded, .failedOnce, .failedRepeatedlyAndWarned:
-            owsFailDebug("Unexpectedly setting warned, but shouldn't have warned?")
-        }
-    }
-
     // MARK: - Self-check
-
-    private static let selfCheckCronStore = CronStore(uniqueKey: .keyTransparencySelfCheck)
-    private static let selfCheckCronInterval: TimeInterval = if BuildFlags.KeyTransparency.conservativeSelfCheck {
-        .day
-    } else {
-        .week
-    }
 
     /// Use `Cron` to periodically perform a Key Transparency validation on the
     /// local user.
@@ -323,25 +263,25 @@ public final class KeyTransparencyManager {
                 return false
             },
             operation: { [self] () async throws -> Void in
-                let mostRecentDate: Date
-                let localIdentifiers: LocalIdentifiers?
                 let isEnabled: Bool
+                let localIdentifiers: LocalIdentifiers?
+                let isTimeForSelfCheck: Bool
                 (
-                    mostRecentDate,
-                    localIdentifiers,
                     isEnabled,
+                    localIdentifiers,
+                    isTimeForSelfCheck,
                 ) = db.read { tx in
                     return (
-                        Self.selfCheckCronStore.mostRecentDate(tx: tx),
+                        keyTransparencyStore.isEnabled(tx: tx),
                         tsAccountManager.localIdentifiers(tx: tx),
-                        Self.isEnabled(tx: tx),
+                        keyTransparencyStore.getIsTimeForSelfCheckCronJob(now: dateProvider(), tx: tx),
                     )
                 }
 
                 guard
                     isEnabled,
                     let localIdentifiers,
-                    dateProvider() > mostRecentDate.addingTimeInterval(Self.selfCheckCronInterval)
+                    isTimeForSelfCheck
                 else {
                     return
                 }
@@ -366,7 +306,7 @@ public final class KeyTransparencyManager {
 
     public func debugUI_setSelfCheckFailed() {
         db.write { tx in
-            Self.setSelfCheckState(.failedRepeatedly, tx: tx)
+            keyTransparencyStore.setSelfCheckState(.failedRepeatedly, tx: tx)
         }
     }
 
@@ -442,11 +382,10 @@ public final class KeyTransparencyManager {
 
             await db.awaitableWrite { tx in
                 logger.info("Self-check success.")
-                Self.setSelfCheckState(.succeeded, tx: tx)
-
-                Self.selfCheckCronStore.setMostRecentDate(
-                    dateProvider(),
-                    jitter: Self.selfCheckCronInterval / Cron.jitterFactor,
+                keyTransparencyStore.setSelfCheckState(.succeeded, tx: tx)
+                keyTransparencyStore.setSelfCheckCronJobCompletedAt(
+                    now: dateProvider(),
+                    specialIntervalTillNextCron: nil,
                     tx: tx,
                 )
             }
@@ -461,14 +400,14 @@ public final class KeyTransparencyManager {
     }
 
     private func recordSelfCheckFailure(tx: DBWriteTransaction) {
-        let intervalTillNextCron: TimeInterval
-        let newSelfCheckState: SelfCheckState?
+        let specialIntervalTillNextCron: TimeInterval?
+        let newSelfCheckState: KeyTransparencyStore.SelfCheckState?
 
-        switch Self.selfCheckState(tx: tx) {
+        switch keyTransparencyStore.selfCheckState(tx: tx) {
         case nil, .succeeded:
             logger.warn("Self-check first failure.")
             newSelfCheckState = .failedOnce
-            intervalTillNextCron = .day
+            specialIntervalTillNextCron = .day
 
             // A known failure mode is if a linked device changed something
             // KT-related (e.g., a username) and this device hasn't yet learned
@@ -484,12 +423,12 @@ public final class KeyTransparencyManager {
         case .failedOnce:
             logger.warn("Self-check second failure.")
             newSelfCheckState = .failedRepeatedly
-            intervalTillNextCron = Self.selfCheckCronInterval
+            specialIntervalTillNextCron = nil
 
         case .failedRepeatedly:
             logger.warn("Self-check continued failure.")
             newSelfCheckState = nil
-            intervalTillNextCron = Self.selfCheckCronInterval
+            specialIntervalTillNextCron = nil
 
         case .failedRepeatedlyAndWarned:
             logger.warn("Self-check continued failure, already warned.")
@@ -500,27 +439,54 @@ public final class KeyTransparencyManager {
             } else {
                 nil
             }
-            intervalTillNextCron = Self.selfCheckCronInterval
+            specialIntervalTillNextCron = nil
         }
 
         if let newSelfCheckState {
-            Self.setSelfCheckState(newSelfCheckState, tx: tx)
+            keyTransparencyStore.setSelfCheckState(newSelfCheckState, tx: tx)
         }
 
-        // Tell Cron we last completed in the past such that we'll try again
-        // after the appropriate interval.
-        Self.selfCheckCronStore.setMostRecentDate(
-            dateProvider()
-                .addingTimeInterval(-Self.selfCheckCronInterval)
-                .addingTimeInterval(intervalTillNextCron),
-            jitter: intervalTillNextCron / Cron.jitterFactor,
+        keyTransparencyStore.setSelfCheckCronJobCompletedAt(
+            now: dateProvider(),
+            specialIntervalTillNextCron: specialIntervalTillNextCron,
             tx: tx,
         )
+    }
+}
+
+// MARK: - KeyTransparencyStore
+
+public struct KeyTransparencyStore {
+
+    /// Keys for `kvStore`.
+    /// - Important
+    /// If you're adding a new key here, consider whether it should be wiped
+    /// when Key Transparency is disabled. See: `setIsEnabled`.
+    private enum KVStoreKeys {
+        /// Keys to a `Bool` representing whether or not KT is enabled.
+        static let isEnabled = "isEnabled"
+        /// Keys to a `SelfCheckState`'s raw value.
+        static let selfCheckState = "selfCheckState"
+        /// Keys to a `Bool` representing whether or not we should show
+        /// first-time education about KT.
+        static let shouldShowFirstTimeEducation = "shouldShowFirstTimeEducation"
+        /// Keys to an opaque LibSignalClient blob.
+        static let distinguishedTreeHead = "distinguishedTreeHead"
+    }
+
+    private let cronStore: CronStore
+    private let kvStore: NewKeyValueStore
+    private let logger: PrefixedLogger
+
+    public init() {
+        self.cronStore = CronStore(uniqueKey: .keyTransparencySelfCheck)
+        self.kvStore = NewKeyValueStore(collection: "KeyTransparency")
+        self.logger = PrefixedLogger(prefix: "[KT]")
     }
 
     // MARK: - Opt-out
 
-    public static func isEnabled(tx: DBReadTransaction) -> Bool {
+    public func isEnabled(tx: DBReadTransaction) -> Bool {
         guard BuildFlags.KeyTransparency.enabled else {
             return false
         }
@@ -528,7 +494,7 @@ public final class KeyTransparencyManager {
         return kvStore.fetchValue(Bool.self, forKey: KVStoreKeys.isEnabled, tx: tx) ?? true
     }
 
-    public static func setIsEnabled(_ isEnabled: Bool, tx: DBWriteTransaction) {
+    public func setIsEnabled(_ isEnabled: Bool, tx: DBWriteTransaction) {
         logger.info("\(isEnabled)")
 
         kvStore.writeValue(isEnabled, forKey: KVStoreKeys.isEnabled, tx: tx)
@@ -536,7 +502,7 @@ public final class KeyTransparencyManager {
         if !isEnabled {
             kvStore.removeValue(forKey: KVStoreKeys.distinguishedTreeHead, tx: tx)
             kvStore.removeValue(forKey: KVStoreKeys.selfCheckState, tx: tx)
-            selfCheckCronStore.setMostRecentDate(.distantPast, jitter: 0, tx: tx)
+            cronStore.setMostRecentDate(.distantPast, jitter: 0, tx: tx)
             failIfThrows {
                 try KeyTransparencyRecord.deleteAll(tx.database)
             }
@@ -545,25 +511,109 @@ public final class KeyTransparencyManager {
 
     // MARK: - First-time education
 
-    public static func shouldShowFirstTimeEducation(tx: DBReadTransaction) -> Bool {
+    public func shouldShowFirstTimeEducation(tx: DBReadTransaction) -> Bool {
         return kvStore.fetchValue(Bool.self, forKey: KVStoreKeys.shouldShowFirstTimeEducation, tx: tx) ?? true
     }
 
-    public static func setHasShownFirstTimeEducation(_ value: Bool, tx: DBWriteTransaction) {
+    public func setHasShownFirstTimeEducation(_ value: Bool, tx: DBWriteTransaction) {
         kvStore.writeValue(value, forKey: KVStoreKeys.shouldShowFirstTimeEducation, tx: tx)
     }
 
-    // MARK: -
+    // MARK: - SelfCheckState
 
-    fileprivate static func getLastDistinguishedTreeHead(tx: DBReadTransaction) -> Data? {
+    fileprivate enum SelfCheckState: Int64 {
+        case succeeded = 1
+        case failedOnce = 2
+        case failedRepeatedly = 3
+        case failedRepeatedlyAndWarned = 4
+    }
+
+    fileprivate func selfCheckState(tx: DBReadTransaction) -> SelfCheckState? {
+        return kvStore.fetchValue(
+            Int64.self,
+            forKey: KVStoreKeys.selfCheckState,
+            tx: tx,
+        )
+        .map { SelfCheckState(rawValue: $0)! }
+    }
+
+    fileprivate func setSelfCheckState(_ state: SelfCheckState, tx: DBWriteTransaction) {
+        kvStore.writeValue(state.rawValue, forKey: KVStoreKeys.selfCheckState, tx: tx)
+    }
+
+    public func shouldWarnSelfCheckFailed(tx: DBReadTransaction) -> Bool {
+        switch selfCheckState(tx: tx) {
+        case .failedRepeatedly:
+            return true
+        case nil, .succeeded, .failedOnce, .failedRepeatedlyAndWarned:
+            return false
+        }
+    }
+
+    public func setWarnedSelfCheckFailed(tx: DBWriteTransaction) {
+        switch selfCheckState(tx: tx) {
+        case .failedRepeatedly:
+            setSelfCheckState(.failedRepeatedlyAndWarned, tx: tx)
+        case nil, .succeeded, .failedOnce, .failedRepeatedlyAndWarned:
+            owsFailDebug("Unexpectedly setting warned, but shouldn't have warned?")
+        }
+    }
+
+    // MARK: - Self-check and Cron
+
+    private let selfCheckCronInterval: TimeInterval = if BuildFlags.KeyTransparency.conservativeSelfCheck {
+        .day
+    } else {
+        .week
+    }
+
+    fileprivate func getIsTimeForSelfCheckCronJob(
+        now: Date,
+        tx: DBReadTransaction,
+    ) -> Bool {
+        let mostRecentDate = cronStore.mostRecentDate(tx: tx)
+        return now > mostRecentDate.addingTimeInterval(selfCheckCronInterval)
+    }
+
+    /// Set that the self-check `Cron` job just completed.
+    /// - Parameter specialIntervalTillNextCheck
+    /// If non-`nil`, indicates when the next `Cron` job should run. If `nil`,
+    /// the next `Cron` job will run at the default interval.
+    fileprivate func setSelfCheckCronJobCompletedAt(
+        now: Date,
+        specialIntervalTillNextCron: TimeInterval?,
+        tx: DBWriteTransaction,
+    ) {
+        var mostRecentDate = now
+
+        // Cron tracks the most-recent date, not the next date. If we want to
+        // run at a specific future date, set the most-recent date in the past
+        // such that our next check will happen at that future interval.
+        if let specialIntervalTillNextCron {
+            mostRecentDate.addTimeInterval(-selfCheckCronInterval)
+            mostRecentDate.addTimeInterval(specialIntervalTillNextCron)
+        }
+
+        cronStore.setMostRecentDate(
+            mostRecentDate,
+            jitter: (specialIntervalTillNextCron ?? selfCheckCronInterval) / Cron.jitterFactor,
+            tx: tx,
+        )
+    }
+
+    // MARK: - LastDistinguishedTreeHead
+
+    fileprivate func getLastDistinguishedTreeHead(tx: DBReadTransaction) -> Data? {
         return kvStore.fetchValue(Data.self, forKey: KVStoreKeys.distinguishedTreeHead, tx: tx)
     }
 
-    fileprivate static func setLastDistinguishedTreeHead(_ blob: Data, tx: DBWriteTransaction) {
+    fileprivate func setLastDistinguishedTreeHead(_ blob: Data, tx: DBWriteTransaction) {
         kvStore.writeValue(blob, forKey: KVStoreKeys.distinguishedTreeHead, tx: tx)
     }
 
-    public static func getKeyTransparencyBlob(
+    // MARK: - LibSignal blobs
+
+    public func getKeyTransparencyBlob(
         aci: Aci,
         tx: DBReadTransaction,
     ) -> Data? {
@@ -572,7 +622,7 @@ public final class KeyTransparencyManager {
         }
     }
 
-    public static func setKeyTransparencyBlob(
+    public func setKeyTransparencyBlob(
         _ libsignalBlob: Data,
         aci: Aci,
         tx: DBWriteTransaction,
@@ -594,33 +644,34 @@ public final class KeyTransparencyManager {
 /// exclusively when calling LibSignal's KT APIs.
 private struct KeyTransparencyStoreForLibSignal: KeyTransparency.Store {
     let db: DB
+    let keyTransparencyStore: KeyTransparencyStore
 
     func getLastDistinguishedTreeHead() async -> Data? {
         db.read { tx in
-            KeyTransparencyManager.getLastDistinguishedTreeHead(tx: tx)
+            keyTransparencyStore.getLastDistinguishedTreeHead(tx: tx)
         }
     }
 
     func setLastDistinguishedTreeHead(to blob: Data) async {
         await db.awaitableWrite { tx in
-            KeyTransparencyManager.setLastDistinguishedTreeHead(blob, tx: tx)
+            keyTransparencyStore.setLastDistinguishedTreeHead(blob, tx: tx)
         }
     }
 
     func getAccountData(for aci: Aci) async -> Data? {
         db.read { tx in
-            KeyTransparencyManager.getKeyTransparencyBlob(aci: aci, tx: tx)
+            keyTransparencyStore.getKeyTransparencyBlob(aci: aci, tx: tx)
         }
     }
 
     func setAccountData(_ data: Data, for aci: Aci) async {
         await db.awaitableWrite { tx in
-            KeyTransparencyManager.setKeyTransparencyBlob(data, aci: aci, tx: tx)
+            keyTransparencyStore.setKeyTransparencyBlob(data, aci: aci, tx: tx)
         }
     }
 }
 
-// MARK: -
+// MARK: - KeyTransparencyRecord
 
 private struct KeyTransparencyRecord: Codable, FetchableRecord, PersistableRecord {
     static let databaseTableName: String = "KeyTransparency"
