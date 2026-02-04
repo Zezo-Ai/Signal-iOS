@@ -51,7 +51,7 @@ public final class KeyTransparencyManager {
     /// Parameters required to do a Key Transparency check.
     public struct CheckParams {
         fileprivate let aciInfo: KeyTransparency.AciInfo
-        fileprivate let e164Info: KeyTransparency.E164Info
+        fileprivate let e164Info: KeyTransparency.E164Info?
         fileprivate let username: Username?
         fileprivate let localIdentifiers: LocalIdentifiers
 
@@ -60,7 +60,9 @@ public final class KeyTransparencyManager {
         }
     }
 
-    /// Prepare to perform a Key Transparency check.
+    /// Prepare to perform a Key Transparency check for a contact.
+    /// - Important
+    /// Must not be called for the local user. See `prepareAndPerformSelfCheck`.
     /// - Returns
     /// Params required for the KT check, or `nil` if a check cannot be
     /// performed.
@@ -69,6 +71,11 @@ public final class KeyTransparencyManager {
         localIdentifiers: LocalIdentifiers,
         tx: DBReadTransaction,
     ) -> CheckParams? {
+        owsPrecondition(
+            !localIdentifiers.contains(serviceId: aci),
+            "External callers shouldn't be self-checking.",
+        )
+
         let logger = logger.suffixed(with: "[\(aci)]")
         logger.info("")
 
@@ -78,15 +85,7 @@ public final class KeyTransparencyManager {
         }
 
         let aciInfo: KeyTransparency.AciInfo
-        if
-            localIdentifiers.contains(serviceId: aci),
-            let localIdentityKey = identityManager.identityKeyPair(for: .aci, tx: tx)
-        {
-            aciInfo = KeyTransparency.AciInfo(
-                aci: aci,
-                identityKey: localIdentityKey.identityKeyPair.identityKey,
-            )
-        } else if let identityKey = try? identityManager.identityKey(for: aci, tx: tx) {
+        if let identityKey = try? identityManager.identityKey(for: aci, tx: tx) {
             aciInfo = KeyTransparency.AciInfo(
                 aci: aci,
                 identityKey: identityKey,
@@ -114,26 +113,8 @@ public final class KeyTransparencyManager {
             return nil
         }
 
-        // We only check the username hash for the local user.
-        let username: Username?
-        if localIdentifiers.contains(serviceId: aci) {
-            switch localUsernameManager.usernameState(tx: tx) {
-            case .unset:
-                username = nil
-            case .available(let _username, _), .linkCorrupted(let _username):
-                do {
-                    username = try Username(_username)
-                } catch {
-                    logger.warn("Failed to hash local username! \(error)")
-                    return nil
-                }
-            case .usernameAndLinkCorrupted:
-                logger.warn("Local username is corrupted.")
-                return nil
-            }
-        } else {
-            username = nil
-        }
+        // We don't currently use the username when checking other users.
+        let username: Username? = nil
 
         return CheckParams(
             aciInfo: aciInfo,
@@ -235,7 +216,7 @@ public final class KeyTransparencyManager {
             // Require a self-check to succeed before checking others.
             switch selfCheckState {
             case nil:
-                try await performSelfCheck(localIdentifiers: params.localIdentifiers)
+                try await prepareAndPerformSelfCheck(localIdentifiers: params.localIdentifiers)
             case .succeeded:
                 break
             case .failedOnce, .failedRepeatedly, .failedRepeatedlyAndWarned:
@@ -306,7 +287,7 @@ public final class KeyTransparencyManager {
         }
     }
 
-    // MARK: - Perform self-check using Cron
+    // MARK: - Self-check
 
     private static let selfCheckCronStore = CronStore(uniqueKey: .keyTransparencySelfCheck)
     private static let selfCheckCronInterval: TimeInterval = if BuildFlags.KeyTransparency.conservativeSelfCheck {
@@ -349,22 +330,22 @@ public final class KeyTransparencyManager {
                     return
                 }
 
-                try await performSelfCheck(localIdentifiers: localIdentifiers)
+                try await prepareAndPerformSelfCheck(localIdentifiers: localIdentifiers)
             },
             handleResult: { _ in
-                // performSelfCheck manages Cron state internally.
+                // prepareAndPerformSelfCheck manages Cron state internally.
             },
         )
     }
 
 #if USE_DEBUG_UI
 
-    public func debugUI_performSelfCheck() async throws {
+    public func debugUI_prepareAndPerformSelfCheck() async throws {
         guard let localIdentifiers = tsAccountManager.localIdentifiersWithMaybeSneakyTransaction else {
             throw OWSAssertionError("Missing local identifiers!")
         }
 
-        try await performSelfCheck(localIdentifiers: localIdentifiers)
+        try await prepareAndPerformSelfCheck(localIdentifiers: localIdentifiers)
     }
 
     public func debugUI_setSelfCheckFailed() {
@@ -375,20 +356,70 @@ public final class KeyTransparencyManager {
 
 #endif
 
-    private func performSelfCheck(
+    private func prepareSelfCheck(
+        localIdentifiers: LocalIdentifiers,
+        tx: DBReadTransaction,
+    ) throws(OWSAssertionError) -> CheckParams {
+        let logger = logger.suffixed(with: "[self]")
+        logger.info("")
+
+        let aciInfo: KeyTransparency.AciInfo
+        if let localIdentityKey = identityManager.identityKeyPair(for: .aci, tx: tx) {
+            aciInfo = KeyTransparency.AciInfo(
+                aci: localIdentifiers.aci,
+                identityKey: localIdentityKey.identityKeyPair.identityKey,
+            )
+        } else {
+            throw OWSAssertionError("Missing AciInfo.", logger: logger)
+        }
+
+        let e164Info: KeyTransparency.E164Info?
+        if let uak = udManager.udAccessKey(for: localIdentifiers.aci, tx: tx) {
+            if tsAccountManager.phoneNumberDiscoverability(tx: tx).orDefault.isDiscoverable {
+                e164Info = KeyTransparency.E164Info(
+                    e164: localIdentifiers.phoneNumber,
+                    unidentifiedAccessKey: uak.keyData,
+                )
+            } else {
+                // If discoverability is disabled, we still want to do a
+                // self-check but won't be able to self-check our E164.
+                e164Info = nil
+            }
+        } else {
+            throw OWSAssertionError("Missing E164Info.", logger: logger)
+        }
+
+        let username: Username?
+        switch localUsernameManager.usernameState(tx: tx) {
+        case .unset:
+            username = nil
+        case .available(let _username, _), .linkCorrupted(let _username):
+            do {
+                username = try Username(_username)
+            } catch {
+                throw OWSAssertionError("Failed to hash local username! \(error)", logger: logger)
+            }
+        case .usernameAndLinkCorrupted:
+            throw OWSAssertionError("Local username is corrupted.", logger: logger)
+        }
+
+        return CheckParams(
+            aciInfo: aciInfo,
+            e164Info: e164Info,
+            username: username,
+            localIdentifiers: localIdentifiers,
+        )
+    }
+
+    private func prepareAndPerformSelfCheck(
         localIdentifiers: LocalIdentifiers,
     ) async throws {
         do {
-            guard
-                let selfCheckParams = db.read(block: { tx in
-                    return prepareCheck(
-                        aci: localIdentifiers.aci,
-                        localIdentifiers: localIdentifiers,
-                        tx: tx,
-                    )
-                })
-            else {
-                throw OWSAssertionError("Failed to prepare self-check params for the local user!")
+            let selfCheckParams = try db.read { tx in
+                return try prepareSelfCheck(
+                    localIdentifiers: localIdentifiers,
+                    tx: tx,
+                )
             }
 
             try await performCheck(params: selfCheckParams)

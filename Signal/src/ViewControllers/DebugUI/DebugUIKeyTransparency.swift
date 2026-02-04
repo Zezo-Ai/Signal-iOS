@@ -25,7 +25,7 @@ final class DebugUIKeyTransparency: DebugUIPage {
 
                 Task { @MainActor in
                     do {
-                        try await keyTransparencyManager.debugUI_performSelfCheck()
+                        try await keyTransparencyManager.debugUI_prepareAndPerformSelfCheck()
                         frontmostVC.presentToast(text: "Self-check succeeded!")
                     } catch {
                         frontmostVC.presentToast(text: "Self-check failed!")
