@@ -839,10 +839,9 @@ public class StickerManager: NSObject {
     }
 
     public class func suggestedStickers(for emoji: Character, tx: DBReadTransaction) -> [InstalledStickerRecord] {
-        let installedStickerCache = SSKEnvironment.shared.modelReadCachesRef.installedStickerCache
         let stickerIds = emojiMapStore.orderedUniqueArray(forKey: String(emoji), tx: tx)
         return stickerIds.compactMap { stickerId in
-            guard let installedSticker = installedStickerCache.getInstalledSticker(uniqueId: stickerId, transaction: tx) else {
+            guard let installedSticker = InstalledStickerRecord.anyFetch(uniqueId: stickerId, transaction: tx) else {
                 owsFailDebug("Missing installed sticker.")
                 return nil
             }
@@ -962,11 +961,10 @@ public class StickerManager: NSObject {
     //
     // Only returns installed stickers.
     private class func recentStickers(transaction: DBReadTransaction) -> [StickerInfo] {
-        let installedStickerCache = SSKEnvironment.shared.modelReadCachesRef.installedStickerCache
         let keys = store.orderedUniqueArray(forKey: kRecentStickersKey, tx: transaction)
         var result = [StickerInfo]()
         for key in keys {
-            guard let installedSticker = installedStickerCache.getInstalledSticker(uniqueId: key, transaction: transaction) else {
+            guard let installedSticker = InstalledStickerRecord.anyFetch(uniqueId: key, transaction: transaction) else {
                 owsFailDebug("Couldn't fetch sticker")
                 continue
             }
