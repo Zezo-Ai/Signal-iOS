@@ -68,7 +68,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
                 ),
                 keyTransparencyManager.prepareCheck(
                     aci: theirAci,
-                    identityKey: theirAciIdentityKey,
+                    localIdentifiers: localIdentifiers,
                     tx: tx,
                 ),
             )

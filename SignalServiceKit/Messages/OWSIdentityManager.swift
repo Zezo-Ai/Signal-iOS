@@ -20,11 +20,16 @@ public protocol OWSIdentityManager {
     func removeRecipientIdentity(for recipientUniqueId: RecipientUniqueId, tx: DBWriteTransaction)
 
     func generateNewIdentityKeyPair() -> ECKeyPair
+
+    /// The local identity key for the given identity type, if present.
     func identityKeyPair(for identity: OWSIdentity, tx: DBReadTransaction) -> ECKeyPair?
+    /// Set the local identity key for the given identity type.
     func setIdentityKeyPair(_ keyPair: ECKeyPair?, for identity: OWSIdentity, tx: DBWriteTransaction)
     func wipeIdentityKeysFromFailedProvisioning(tx: DBWriteTransaction)
 
+    /// The raw data of the `IdentityKey` for the given address, if known.
     func identityKey(for address: SignalServiceAddress, tx: DBReadTransaction) -> Data?
+    /// The `IdentityKey` for the given service ID, if known.
     func identityKey(for serviceId: ServiceId, tx: DBReadTransaction) throws -> IdentityKey?
 
     @discardableResult

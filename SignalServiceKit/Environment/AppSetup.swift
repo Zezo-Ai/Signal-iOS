@@ -1235,9 +1235,12 @@ extension AppSetup.GlobalsContinuation {
 
         let keyTransparencyManager = KeyTransparencyManager(
             chatConnectionManager: chatConnectionManager,
+            dateProvider: dateProvider,
             db: db,
+            identityManager: identityManager,
             localUsernameManager: localUsernameManager,
             recipientDatabaseTable: recipientDatabaseTable,
+            storageServiceManager: storageServiceManager,
             tsAccountManager: tsAccountManager,
             udManager: udManager,
         )

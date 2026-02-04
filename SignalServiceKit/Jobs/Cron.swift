@@ -77,6 +77,7 @@ public class Cron {
         case fetchStaleProfiles
         case fetchStorageService
         case fetchSubscriptionConfig
+        case keyTransparencySelfCheck
         case refreshBackup
         case updateAttributes
     }

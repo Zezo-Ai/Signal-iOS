@@ -38,11 +38,14 @@ class ChatListFYISheetCoordinator {
 
         struct BackupSubscriptionFailedToRenew {}
 
+        struct KeyTransparencySelfCheckFailed {}
+
         case badgeThanks(BadgeThanks)
         case badgeIssue(BadgeIssue)
         case badgeExpiration(BadgeExpiration)
         case backupSubscriptionExpired(BackupSubscriptionExpired)
         case backupSubscriptionFailedToRenew(BackupSubscriptionFailedToRenew)
+        case keyTransparencySelfCheckFailed(KeyTransparencySelfCheckFailed)
     }
 
     private let backupExportJobRunner: BackupExportJobRunner
@@ -113,6 +116,8 @@ class ChatListFYISheetCoordinator {
             return .backupSubscriptionExpired(FYISheet.BackupSubscriptionExpired(subscriptionType: .testFlight))
         } else if backupSubscriptionIssueStore.shouldWarnIAPSubscriptionFailedToRenew(tx: tx) {
             return .backupSubscriptionFailedToRenew(FYISheet.BackupSubscriptionFailedToRenew())
+        } else if KeyTransparencyManager.shouldWarnSelfCheckFailed(tx: tx) {
+            return .keyTransparencySelfCheckFailed(FYISheet.KeyTransparencySelfCheckFailed())
         } else {
             return nil
         }
@@ -221,6 +226,8 @@ class ChatListFYISheetCoordinator {
             await _present(backupSubscriptionExpired: backupSubscriptionExpired, from: chatListViewController)
         case .backupSubscriptionFailedToRenew(let backupSubscriptionFailedToRenew):
             await _present(backupSubscriptionFailedToRenew: backupSubscriptionFailedToRenew, from: chatListViewController)
+        case .keyTransparencySelfCheckFailed(let keyTransparencySelfCheckFailed):
+            await _present(keyTransparencySelfCheckFailed: keyTransparencySelfCheckFailed, from: chatListViewController)
         }
     }
 
@@ -432,6 +439,24 @@ class ChatListFYISheetCoordinator {
             }
         }
     }
+
+    private func _present(
+        keyTransparencySelfCheckFailed: FYISheet.KeyTransparencySelfCheckFailed,
+        from chatListViewController: ChatListViewController,
+    ) async {
+        let logger = PrefixedLogger(prefix: "[KT]")
+        logger.info("Showing KeyTransparencySelfCheckFailed FYI sheet.")
+
+        let sheet = KeyTransparencySelfCheckFailedHeroSheet(
+            presentingFrom: chatListViewController,
+        )
+
+        chatListViewController.present(sheet, animated: true) { [self] in
+            db.write { tx in
+                KeyTransparencyManager.setWarnedSelfCheckFailed(tx: tx)
+            }
+        }
+    }
 }
 
 // MARK: - ChatListViewController: BadgeIssueSheetDelegate
@@ -522,6 +547,46 @@ private class BackupSubscriptionFailedToRenewHeroSheet: HeroSheetViewController 
             ),
             secondaryButton: .dismissing(
                 title: CommonStrings.notNowButton,
+                style: .secondary,
+            ),
+        )
+    }
+}
+
+// MARK: -
+
+private final class KeyTransparencySelfCheckFailedHeroSheet: HeroSheetViewController {
+    init(presentingFrom fromViewController: UIViewController) {
+        super.init(
+            hero: .image(.errorCircle, tintColor: .Signal.label),
+            title: OWSLocalizedString(
+                "KEY_TRANSPARENCY_SELF_CHECK_FAILED_SHEET_TITLE",
+                comment: "Title for a sheet shown when a Key Transparency self-check fails.",
+            ),
+            body: OWSLocalizedString(
+                "KEY_TRANSPARENCY_SELF_CHECK_FAILED_SHEET_BODY",
+                comment: "Body for a sheet shown when a Key Transparency self-check fails.",
+            ),
+            primaryButton: HeroSheetViewController.Button(
+                title: OWSLocalizedString(
+                    "KEY_TRANSPARENCY_SELF_CHECK_FAILED_SHEET_PRIMARY_BUTTON_TITLE",
+                    comment: "Title for the primary button in a sheet shown when a Key Transparency self-check fails.",
+                ),
+                action: { [fromViewController] sheet in
+                    sheet.dismiss(animated: true) {
+                        ContactSupportActionSheet.present(
+                            emailFilter: .custom("AutomaticKeyVerificationFailure"),
+                            logDumper: .fromGlobals(),
+                            fromViewController: fromViewController,
+                        )
+                    }
+                },
+            ),
+            secondaryButton: .dismissing(
+                title: OWSLocalizedString(
+                    "KEY_TRANSPARENCY_SELF_CHECK_FAILED_SHEET_SECONDARY_BUTTON_TITLE",
+                    comment: "Title for the secondary button in a sheet shown when a Key Transparency self-check fails.",
+                ),
                 style: .secondary,
             ),
         )

@@ -13,8 +13,26 @@ final class DebugUIKeyTransparency: DebugUIPage {
 
     func section(thread: TSThread?) -> OWSTableSection? {
         let db = DependenciesBridge.shared.db
+        let keyTransparencyManager = DependenciesBridge.shared.keyTransparencyManager
 
         let items: [OWSTableItem] = [
+            OWSTableItem(title: "Pretend self-check failed", actionBlock: {
+                keyTransparencyManager.debugUI_setSelfCheckFailed()
+            }),
+            OWSTableItem(title: "Perform self-check", actionBlock: {
+                guard let frontmostVC = CurrentAppContext().frontmostViewController() else {
+                    return
+                }
+
+                Task { @MainActor in
+                    do {
+                        try await keyTransparencyManager.debugUI_performSelfCheck()
+                        frontmostVC.presentToast(text: "Self-check succeeded!")
+                    } catch {
+                        frontmostVC.presentToast(text: "Self-check failed!")
+                    }
+                }
+            }),
             OWSTableItem(title: "Wipe all KT data", actionBlock: {
                 db.write { tx in
                     KeyTransparencyManager.wipeAllKeyTransparencyData(tx: tx)
