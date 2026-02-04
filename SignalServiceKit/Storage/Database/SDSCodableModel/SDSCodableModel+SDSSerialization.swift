@@ -40,4 +40,18 @@ struct SDSCodableModelLegacySerializer: SDSSerializer {
         }
         return result
     }
+
+    func deserializeLegacyArchivedArray<T: NSObject & NSSecureCoding>(_ encodedValue: Data, ofClass cls: T.Type) throws -> [T] {
+        let result: [T]?
+        do {
+            result = try NSKeyedUnarchiver.unarchivedArrayOfObjects(ofClass: cls, from: encodedValue)
+        } catch {
+            Logger.warn("couldn't decode legacy data: \(error)")
+            throw SDSError.invalidValue()
+        }
+        guard let result else {
+            throw SDSError.invalidValue()
+        }
+        return result
+    }
 }

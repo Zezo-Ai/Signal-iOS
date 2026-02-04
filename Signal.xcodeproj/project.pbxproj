@@ -672,6 +672,7 @@
 		503C2F432977752B00217527 /* OWSURLSessionEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503C2F422977752B00217527 /* OWSURLSessionEndpoint.swift */; };
 		50423CA42BBF427900DCB8F5 /* StaleProfileFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50423CA32BBF427900DCB8F5 /* StaleProfileFetcher.swift */; };
 		504271B62BB4C54500E33C01 /* SystemContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504271B52BB4C54500E33C01 /* SystemContact.swift */; };
+		50428EA52F2BD81700B0C969 /* StickerPackItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50428EA42F2BD81700B0C969 /* StickerPackItem.swift */; };
 		5042EAA3287F96FB00C9B19F /* VisibleBadgeResolverTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5042EAA2287F96FB00C9B19F /* VisibleBadgeResolverTest.swift */; };
 		50438A8E2ECBBDF600FCB28F /* BackupRefreshManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04B975452E43A4AA00E20364 /* BackupRefreshManager.swift */; };
 		50438A8F2ECBBE1D00FCB28F /* BackupRefreshManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04B975472E43BFE000E20364 /* BackupRefreshManagerTest.swift */; };
@@ -745,6 +746,7 @@
 		507C07402F116E9200ECFEFA /* NormalizedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507C073F2F116E9200ECFEFA /* NormalizedImage.swift */; };
 		507C6AF52ED10BD900A7C74C /* RegisteredState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507C6AF42ED10BD900A7C74C /* RegisteredState.swift */; };
 		507CD5E529660D5100E47DAC /* ServiceId.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507CD5E429660D5100E47DAC /* ServiceId.swift */; };
+		507F4F0E2F2A86F8000E6D7D /* StickerPackRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507F4F0D2F2A86F8000E6D7D /* StickerPackRecord.swift */; };
 		508622AD2D026F5200931BF9 /* CanonicalPhoneNumberTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 508622AC2D026F5200931BF9 /* CanonicalPhoneNumberTest.swift */; };
 		508C72242C2DFCB2000811F3 /* OWSOutgoingResendResponseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 508C72232C2DFCB2000811F3 /* OWSOutgoingResendResponseTest.swift */; };
 		508F0346296F72F4001D88D0 /* CustomCellBackgroundColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 508F0345296F72F4001D88D0 /* CustomCellBackgroundColor.swift */; };
@@ -3595,14 +3597,11 @@
 		F9C5CC0B289453B300548EEE /* StickerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C919289453B100548EEE /* StickerManager.swift */; };
 		F9C5CC0C289453B300548EEE /* CDNDownloadOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C91A289453B100548EEE /* CDNDownloadOperation.swift */; };
 		F9C5CC0D289453B300548EEE /* StickerMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C91B289453B100548EEE /* StickerMetadata.swift */; };
-		F9C5CC0E289453B300548EEE /* StickerPack+SDS.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C91C289453B100548EEE /* StickerPack+SDS.swift */; };
-		F9C5CC0F289453B300548EEE /* StickerPack.h in Headers */ = {isa = PBXBuildFile; fileRef = F9C5C91D289453B100548EEE /* StickerPack.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F9C5CC11289453B300548EEE /* DefaultStickers.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C91F289453B100548EEE /* DefaultStickers.swift */; };
 		F9C5CC12289453B300548EEE /* InstalledSticker+SDS.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C920289453B100548EEE /* InstalledSticker+SDS.swift */; };
 		F9C5CC13289453B300548EEE /* StickerInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C921289453B100548EEE /* StickerInfo.m */; };
 		F9C5CC14289453B300548EEE /* DownloadStickerOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C922289453B100548EEE /* DownloadStickerOperation.swift */; };
 		F9C5CC15289453B300548EEE /* InstalledSticker.m in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C923289453B100548EEE /* InstalledSticker.m */; };
-		F9C5CC17289453B300548EEE /* StickerPack.m in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C925289453B100548EEE /* StickerPack.m */; };
 		F9C5CC18289453B300548EEE /* DownloadStickerPackOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C926289453B100548EEE /* DownloadStickerPackOperation.swift */; };
 		F9C5CC19289453B300548EEE /* MessageSticker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C927289453B100548EEE /* MessageSticker.swift */; };
 		F9C5CC1B289453B300548EEE /* StickerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C929289453B100548EEE /* StickerError.swift */; };
@@ -4835,6 +4834,7 @@
 		503C2F422977752B00217527 /* OWSURLSessionEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OWSURLSessionEndpoint.swift; sourceTree = "<group>"; };
 		50423CA32BBF427900DCB8F5 /* StaleProfileFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaleProfileFetcher.swift; sourceTree = "<group>"; };
 		504271B52BB4C54500E33C01 /* SystemContact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemContact.swift; sourceTree = "<group>"; };
+		50428EA42F2BD81700B0C969 /* StickerPackItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerPackItem.swift; sourceTree = "<group>"; };
 		5042EAA2287F96FB00C9B19F /* VisibleBadgeResolverTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibleBadgeResolverTest.swift; sourceTree = "<group>"; };
 		50468F2829EE130A00948E02 /* InteractionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractionStore.swift; sourceTree = "<group>"; };
 		50468F2A29EE19C300948E02 /* PhoneNumberChangedMessageInserterTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneNumberChangedMessageInserterTest.swift; sourceTree = "<group>"; };
@@ -4900,6 +4900,7 @@
 		507D614B2BE433EE00DA7BA3 /* be */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = be; path = translations/be.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		507D614C2BE433EE00DA7BA3 /* be */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = be; path = translations/be.lproj/Localizable.strings; sourceTree = "<group>"; };
 		507D614D2BE433EE00DA7BA3 /* be */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = be; path = translations/be.lproj/PluralAware.stringsdict; sourceTree = "<group>"; };
+		507F4F0D2F2A86F8000E6D7D /* StickerPackRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerPackRecord.swift; sourceTree = "<group>"; };
 		508347052AABBF9900DD2EC0 /* ProfileManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManagerTest.swift; sourceTree = "<group>"; };
 		508622AC2D026F5200931BF9 /* CanonicalPhoneNumberTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanonicalPhoneNumberTest.swift; sourceTree = "<group>"; };
 		508C72232C2DFCB2000811F3 /* OWSOutgoingResendResponseTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OWSOutgoingResendResponseTest.swift; sourceTree = "<group>"; };
@@ -7794,14 +7795,11 @@
 		F9C5C919289453B100548EEE /* StickerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StickerManager.swift; sourceTree = "<group>"; };
 		F9C5C91A289453B100548EEE /* CDNDownloadOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CDNDownloadOperation.swift; sourceTree = "<group>"; };
 		F9C5C91B289453B100548EEE /* StickerMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StickerMetadata.swift; sourceTree = "<group>"; };
-		F9C5C91C289453B100548EEE /* StickerPack+SDS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "StickerPack+SDS.swift"; sourceTree = "<group>"; };
-		F9C5C91D289453B100548EEE /* StickerPack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StickerPack.h; sourceTree = "<group>"; };
 		F9C5C91F289453B100548EEE /* DefaultStickers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultStickers.swift; sourceTree = "<group>"; };
 		F9C5C920289453B100548EEE /* InstalledSticker+SDS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "InstalledSticker+SDS.swift"; sourceTree = "<group>"; };
 		F9C5C921289453B100548EEE /* StickerInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StickerInfo.m; sourceTree = "<group>"; };
 		F9C5C922289453B100548EEE /* DownloadStickerOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadStickerOperation.swift; sourceTree = "<group>"; };
 		F9C5C923289453B100548EEE /* InstalledSticker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InstalledSticker.m; sourceTree = "<group>"; };
-		F9C5C925289453B100548EEE /* StickerPack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StickerPack.m; sourceTree = "<group>"; };
 		F9C5C926289453B100548EEE /* DownloadStickerPackOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadStickerPackOperation.swift; sourceTree = "<group>"; };
 		F9C5C927289453B100548EEE /* MessageSticker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageSticker.swift; sourceTree = "<group>"; };
 		F9C5C929289453B100548EEE /* StickerError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StickerError.swift; sourceTree = "<group>"; };
@@ -14545,10 +14543,9 @@
 				F9C5C921289453B100548EEE /* StickerInfo.m */,
 				F9C5C919289453B100548EEE /* StickerManager.swift */,
 				F9C5C91B289453B100548EEE /* StickerMetadata.swift */,
-				F9C5C91C289453B100548EEE /* StickerPack+SDS.swift */,
-				F9C5C91D289453B100548EEE /* StickerPack.h */,
-				F9C5C925289453B100548EEE /* StickerPack.m */,
 				F9479EF7293D212C003B3503 /* StickerPackInfo.swift */,
+				50428EA42F2BD81700B0C969 /* StickerPackItem.swift */,
+				507F4F0D2F2A86F8000E6D7D /* StickerPackRecord.swift */,
 			);
 			path = Stickers;
 			sourceTree = "<group>";
@@ -15303,7 +15300,6 @@
 				F9C5C8A7289451B900548EEE /* SignalServiceKit.h in Headers */,
 				F9C5CD2C289453B300548EEE /* SSKAccessors+SDS.h in Headers */,
 				F9C5CC1C289453B300548EEE /* StickerInfo.h in Headers */,
-				F9C5CC0F289453B300548EEE /* StickerPack.h in Headers */,
 				668A01142C2B6077007B8808 /* Threading.h in Headers */,
 				F9C5CBC8289453B300548EEE /* TSCall.h in Headers */,
 				F9C5CCD1289453B300548EEE /* TSContactThread.h in Headers */,
@@ -19391,9 +19387,9 @@
 				F9C5CC13289453B300548EEE /* StickerInfo.m in Sources */,
 				F9C5CC0B289453B300548EEE /* StickerManager.swift in Sources */,
 				F9C5CC0D289453B300548EEE /* StickerMetadata.swift in Sources */,
-				F9C5CC0E289453B300548EEE /* StickerPack+SDS.swift in Sources */,
-				F9C5CC17289453B300548EEE /* StickerPack.m in Sources */,
 				F9479EF8293D212C003B3503 /* StickerPackInfo.swift in Sources */,
+				50428EA52F2BD81700B0C969 /* StickerPackItem.swift in Sources */,
+				507F4F0E2F2A86F8000E6D7D /* StickerPackRecord.swift in Sources */,
 				500CC1EB2F15D1E5001A86F7 /* StickerPackSyncMessage.swift in Sources */,
 				725465532BA0282D00EABFD2 /* StorageService+GroupsV2.swift in Sources */,
 				F9C5CCA3289453B300548EEE /* StorageService.pb.swift in Sources */,

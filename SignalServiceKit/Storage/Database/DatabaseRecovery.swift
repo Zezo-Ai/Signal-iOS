@@ -527,7 +527,7 @@ public enum DatabaseRecovery {
             PendingViewedReceiptRecord.databaseTableName,
             // Can be recovered in other ways, after recovery is done.
             ProfileBadge.databaseTableName,
-            StickerPack.table.tableName,
+            StickerPackRecord.databaseTableName,
             HiddenRecipient.databaseTableName,
             // Not essential.
             StoryContextAssociatedData.databaseTableName,

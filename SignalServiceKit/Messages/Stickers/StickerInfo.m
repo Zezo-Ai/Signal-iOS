@@ -10,7 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @implementation StickerInfo
 
-- (instancetype)initWithPackId:(NSData *)packId packKey:(NSData *)packKey stickerId:(UInt32)stickerId
+- (instancetype)initWithPackId:(nullable NSData *)packId packKey:(nullable NSData *)packKey stickerId:(UInt32)stickerId
 {
     self = [super init];
 

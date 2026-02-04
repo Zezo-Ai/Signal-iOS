@@ -6,13 +6,13 @@
 import Foundation
 
 enum DownloadStickerPackOperation {
-    static func run(stickerPackInfo: StickerPackInfo) async throws -> StickerPack {
+    static func run(stickerPackInfo: StickerPackInfo) async throws -> StickerPackRecord {
         return try await Retry.performWithBackoff(maxAttempts: 4) {
             return try await self._run(stickerPackInfo: stickerPackInfo)
         }
     }
 
-    private static func _run(stickerPackInfo: StickerPackInfo) async throws -> StickerPack {
+    private static func _run(stickerPackInfo: StickerPackInfo) async throws -> StickerPackRecord {
         owsAssertDebug(stickerPackInfo.packId.count > 0)
         owsAssertDebug(stickerPackInfo.packKey.count > 0)
 
@@ -54,7 +54,7 @@ enum DownloadStickerPackOperation {
         }
     }
 
-    private static func parseStickerPackManifest(stickerPackInfo: StickerPackInfo, manifestData: Data) throws -> StickerPack {
+    private static func parseStickerPackManifest(stickerPackInfo: StickerPackInfo, manifestData: Data) throws -> StickerPackRecord {
         owsAssertDebug(manifestData.count > 0)
 
         let manifestProto: SSKProtoPack
@@ -79,8 +79,7 @@ enum DownloadStickerPackOperation {
         }
         let cover = manifestCover ?? firstItem
 
-        let stickerPack = StickerPack(info: stickerPackInfo, title: title, author: author, cover: cover, stickers: items)
-        return stickerPack
+        return StickerPackRecord(info: stickerPackInfo, title: title, author: author, cover: cover, items: items)
     }
 
     private static func parseOptionalString(_ value: String?) -> String? {

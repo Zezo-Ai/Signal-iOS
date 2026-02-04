@@ -102,11 +102,11 @@ public class StickerPackCollectionView: UICollectionView {
 
     // MARK: Modes
 
-    public func showInstalledPack(stickerPack: StickerPack) {
+    public func showInstalledPack(stickerPack: StickerPackRecord) {
         stickerPackDataSource = InstalledStickerPackDataSource(stickerPackInfo: stickerPack.info)
     }
 
-    public func showUninstalledPack(stickerPack: StickerPack) {
+    public func showUninstalledPack(stickerPack: StickerPackRecord) {
         stickerPackDataSource = TransientStickerPackDataSource(
             stickerPackInfo: stickerPack.info,
             shouldDownloadAllStickers: true,
@@ -117,7 +117,7 @@ public class StickerPackCollectionView: UICollectionView {
         stickerPackDataSource = RecentStickerPackDataSource()
     }
 
-    public func showInstalledPackOrRecents(stickerPack: StickerPack?) {
+    public func showInstalledPackOrRecents(stickerPack: StickerPackRecord?) {
         if let stickerPack {
             showInstalledPack(stickerPack: stickerPack)
         } else {
@@ -225,7 +225,7 @@ public class StickerPackCollectionView: UICollectionView {
         let installedStickerInfos = stickerPackDataSource.installedStickerInfos
 
         if stickerPackDataSource is TransientStickerPackDataSource {
-            guard let allStickerInfos = stickerPackDataSource.getStickerPack()?.stickerInfos else {
+            guard let allStickerInfos = stickerPackDataSource.getStickerPack()?.stickerInfos() else {
                 stickerInfos = []
                 owsAssertDebug(installedStickerInfos.isEmpty)
                 return

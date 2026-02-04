@@ -60,7 +60,7 @@ public class BackupArchiveStickerPackArchiver: BackupArchiveProtoStreamWriter {
         var handledPacks = Set<Data>()
 
         func archiveInstalledStickerPack(
-            _ installedStickerPack: StickerPack,
+            _ installedStickerPack: StickerPackRecord,
             _ frameBencher: BackupArchive.Bencher.FrameBencher,
         ) {
             autoreleasepool {
@@ -88,12 +88,11 @@ public class BackupArchiveStickerPackArchiver: BackupArchiveProtoStreamWriter {
             }
         }
 
-        func enumerateStickerPackRecord(tx: DBReadTransaction, block: (StickerPack) throws -> Void) throws {
+        func enumerateStickerPackRecord(tx: DBReadTransaction, block: (StickerPackRecord) throws -> Void) throws {
             let cursor = try StickerPackRecord
                 .filter(Column(StickerPackRecord.CodingKeys.isInstalled) == true)
                 .fetchCursor(tx.database)
-            while let next = try cursor.next() {
-                let stickerPack = try StickerPack.fromRecord(next)
+            while let stickerPack = try cursor.next() {
                 try block(stickerPack)
             }
         }

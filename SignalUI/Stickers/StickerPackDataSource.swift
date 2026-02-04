@@ -22,7 +22,7 @@ public protocol StickerPackDataSource: AnyObject {
     var title: String? { get }
     var author: String? { get }
 
-    func getStickerPack() -> StickerPack?
+    func getStickerPack() -> StickerPackRecord?
 
     var installedCoverInfo: StickerInfo? { get }
     var installedStickerInfos: [StickerInfo] { get }
@@ -118,7 +118,7 @@ public class InstalledStickerPackDataSource: BaseStickerPackDataSource {
 
     private let stickerPackInfo: StickerPackInfo
 
-    fileprivate var stickerPack: StickerPack? {
+    fileprivate var stickerPack: StickerPackRecord? {
         didSet {
             AssertIsOnMainThread()
 
@@ -195,7 +195,7 @@ public class InstalledStickerPackDataSource: BaseStickerPackDataSource {
     }
 
     private static func fetchInstalledState(for stickerPackInfo: StickerPackInfo, readTx: DBReadTransaction) -> (
-        stickerPack: StickerPack?,
+        stickerPack: StickerPackRecord?,
         installedCoverInfo: StickerInfo?,
         installedStickers: [StickerInfo],
     ) {
@@ -273,7 +273,7 @@ extension InstalledStickerPackDataSource: StickerPackDataSource {
         return stickerPack?.author
     }
 
-    public func getStickerPack() -> StickerPack? {
+    public func getStickerPack() -> StickerPackRecord? {
         return stickerPack
     }
 
@@ -313,7 +313,7 @@ public class TransientStickerPackDataSource: BaseStickerPackDataSource {
     // If false, only download manifest and cover.
     private let shouldDownloadAllStickers: Bool
 
-    fileprivate var stickerPack: StickerPack? {
+    fileprivate var stickerPack: StickerPackRecord? {
         didSet {
             AssertIsOnMainThread()
 
@@ -394,7 +394,7 @@ public class TransientStickerPackDataSource: BaseStickerPackDataSource {
 
         if shouldDownloadAllStickers {
             var downloadedStickerInfos = [StickerInfo]()
-            for stickerInfo in stickerPack.stickerInfos {
+            for stickerInfo in stickerPack.stickerInfos() {
                 if ensureStickerDownload(stickerPack: stickerPack, stickerInfo: stickerInfo) {
                     downloadedStickerInfos.append(stickerInfo)
                 }
@@ -448,7 +448,7 @@ public class TransientStickerPackDataSource: BaseStickerPackDataSource {
 
     // Returns true if sticker is already downloaded.
     // If not, kicks off the download.
-    private func ensureStickerDownload(stickerPack: StickerPack, stickerInfo: StickerInfo) -> Bool {
+    private func ensureStickerDownload(stickerPack: StickerPackRecord, stickerInfo: StickerInfo) -> Bool {
         AssertIsOnMainThread()
 
         guard let stickerPackItem = stickerPack.stickerPackItem(forStickerInfo: stickerInfo) else {
@@ -552,7 +552,7 @@ extension TransientStickerPackDataSource: StickerPackDataSource {
         return stickerPack?.author
     }
 
-    public func getStickerPack() -> StickerPack? {
+    public func getStickerPack() -> StickerPackRecord? {
         AssertIsOnMainThread()
 
         if let stickerPack = installedDataSource.getStickerPack() {
@@ -657,7 +657,7 @@ extension RecentStickerPackDataSource: StickerPackDataSource {
         return nil
     }
 
-    public func getStickerPack() -> StickerPack? {
+    public func getStickerPack() -> StickerPackRecord? {
         owsFailDebug("This method should never be called.")
         return nil
     }
@@ -684,7 +684,7 @@ extension RecentStickerPackDataSource: StickerPackDataSource {
 
 // MARK: -
 
-extension StickerPack {
+extension StickerPackRecord {
     func stickerPackItem(forStickerInfo stickerInfo: StickerInfo) -> StickerPackItem? {
         if cover.stickerId == stickerInfo.stickerId {
             return cover

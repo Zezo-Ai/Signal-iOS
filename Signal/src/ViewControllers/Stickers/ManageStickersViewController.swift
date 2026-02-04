@@ -140,8 +140,8 @@ public class ManageStickersViewController: OWSTableViewController2 {
         updateMapWithOldSources(&oldTransientSources, availableBuiltInStickerPackSources)
         updateMapWithOldSources(&oldTransientSources, knownStickerPackSources)
 
-        var installedStickerPacks = [StickerPack]()
-        var availableBuiltInStickerPacks = [StickerPack]()
+        var installedStickerPacks = [StickerPackRecord]()
+        var availableBuiltInStickerPacks = [StickerPackRecord]()
         var availableKnownStickerPacksFromMessages = [DatedStickerPackInfo]()
         SSKEnvironment.shared.databaseStorageRef.read { transaction in
             let allPacks = StickerManager.allStickerPacks(transaction: transaction)
@@ -521,7 +521,7 @@ public class ManageStickersViewController: OWSTableViewController2 {
         self.sendMessageFlow = sendMessageFlow
     }
 
-    private func install(stickerPack: StickerPack) {
+    private func install(stickerPack: StickerPackRecord) {
         AssertIsOnMainThread()
 
         let modalVC = ModalActivityIndicatorViewController(canCancel: false, presentationDelay: 0)

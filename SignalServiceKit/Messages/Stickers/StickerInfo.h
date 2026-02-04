@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSData *packKey;
 @property (nonatomic, readonly) UInt32 stickerId;
 
-- (instancetype)initWithPackId:(NSData *)packId packKey:(NSData *)packKey stickerId:(UInt32)stickerId;
+- (instancetype)initWithPackId:(nullable NSData *)packId packKey:(nullable NSData *)packKey stickerId:(UInt32)stickerId;
 
 - (NSString *)asKey;
 + (NSString *)keyWithPackId:(NSData *)packId stickerId:(UInt32)stickerId;
