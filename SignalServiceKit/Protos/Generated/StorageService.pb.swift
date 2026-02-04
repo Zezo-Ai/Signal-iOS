@@ -888,6 +888,12 @@ struct StorageServiceProtos_AccountRecord: @unchecked Sendable {
   /// Clears the value of `avatarColor`. Subsequent reads from it will return its default value.
   mutating func clearAvatarColor() {_uniqueStorage()._avatarColor = nil}
 
+  /// 44 and 45 related to notification profiles
+  var automaticKeyVerificationDisabled: Bool {
+    get {return _storage._automaticKeyVerificationDisabled}
+    set {_uniqueStorage()._automaticKeyVerificationDisabled = newValue}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum PhoneNumberSharingMode: SwiftProtobuf.Enum, Swift.CaseIterable {
@@ -1974,7 +1980,7 @@ extension StorageServiceProtos_GroupV2Record.StorySendMode: SwiftProtobuf._Proto
 
 extension StorageServiceProtos_AccountRecord: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".AccountRecord"
-  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}profileKey\0\u{1}givenName\0\u{1}familyName\0\u{1}avatarUrl\0\u{1}noteToSelfArchived\0\u{1}readReceipts\0\u{1}sealedSenderIndicators\0\u{1}typingIndicators\0\u{1}proxiedLinkPreviews\0\u{1}noteToSelfMarkedUnread\0\u{1}linkPreviews\0\u{1}phoneNumberSharingMode\0\u{1}notDiscoverableByPhoneNumber\0\u{1}pinnedConversations\0\u{1}preferContactAvatars\0\u{1}payments\0\u{1}universalExpireTimer\0\u{2}\u{2}e164\0\u{1}preferredReactionEmoji\0\u{1}donorSubscriberID\0\u{1}donorSubscriberCurrencyCode\0\u{1}displayBadgesOnProfile\0\u{1}donorSubscriptionManuallyCancelled\0\u{1}keepMutedChatsArchived\0\u{1}myStoryPrivacyHasBeenSet\0\u{1}viewedOnboardingStory\0\u{2}\u{2}storiesDisabled\0\u{1}storyViewReceiptsEnabled\0\u{1}readOnboardingStory\0\u{2}\u{2}username\0\u{1}completedUsernameOnboarding\0\u{1}usernameLink\0\u{2}\u{5}backupTier\0\u{1}backupSubscriberData\0\u{1}avatarColor\0\u{c}\u{12}\u{1}\u{c}\u{1c}\u{1}\u{c} \u{1}\u{c}$\u{1}\u{c}%\u{1}\u{c}&\u{1}\u{c}'\u{1}")
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}profileKey\0\u{1}givenName\0\u{1}familyName\0\u{1}avatarUrl\0\u{1}noteToSelfArchived\0\u{1}readReceipts\0\u{1}sealedSenderIndicators\0\u{1}typingIndicators\0\u{1}proxiedLinkPreviews\0\u{1}noteToSelfMarkedUnread\0\u{1}linkPreviews\0\u{1}phoneNumberSharingMode\0\u{1}notDiscoverableByPhoneNumber\0\u{1}pinnedConversations\0\u{1}preferContactAvatars\0\u{1}payments\0\u{1}universalExpireTimer\0\u{2}\u{2}e164\0\u{1}preferredReactionEmoji\0\u{1}donorSubscriberID\0\u{1}donorSubscriberCurrencyCode\0\u{1}displayBadgesOnProfile\0\u{1}donorSubscriptionManuallyCancelled\0\u{1}keepMutedChatsArchived\0\u{1}myStoryPrivacyHasBeenSet\0\u{1}viewedOnboardingStory\0\u{2}\u{2}storiesDisabled\0\u{1}storyViewReceiptsEnabled\0\u{1}readOnboardingStory\0\u{2}\u{2}username\0\u{1}completedUsernameOnboarding\0\u{1}usernameLink\0\u{2}\u{5}backupTier\0\u{1}backupSubscriberData\0\u{1}avatarColor\0\u{2}\u{4}automaticKeyVerificationDisabled\0\u{c}\u{12}\u{1}\u{c}\u{1c}\u{1}\u{c} \u{1}\u{c}$\u{1}\u{c}%\u{1}\u{c}&\u{1}\u{c}'\u{1}\u{c}+\u{1}")
 
   fileprivate class _StorageClass {
     var _profileKey: Data = Data()
@@ -2012,6 +2018,7 @@ extension StorageServiceProtos_AccountRecord: SwiftProtobuf.Message, SwiftProtob
     var _backupTier: UInt64? = nil
     var _backupSubscriberData: StorageServiceProtos_AccountRecord.IAPSubscriberData? = nil
     var _avatarColor: StorageServiceProtos_AvatarColor? = nil
+    var _automaticKeyVerificationDisabled: Bool = false
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -2057,6 +2064,7 @@ extension StorageServiceProtos_AccountRecord: SwiftProtobuf.Message, SwiftProtob
       _backupTier = source._backupTier
       _backupSubscriberData = source._backupSubscriberData
       _avatarColor = source._avatarColor
+      _automaticKeyVerificationDisabled = source._automaticKeyVerificationDisabled
     }
   }
 
@@ -2110,6 +2118,7 @@ extension StorageServiceProtos_AccountRecord: SwiftProtobuf.Message, SwiftProtob
         case 40: try { try decoder.decodeSingularUInt64Field(value: &_storage._backupTier) }()
         case 41: try { try decoder.decodeSingularMessageField(value: &_storage._backupSubscriberData) }()
         case 42: try { try decoder.decodeSingularEnumField(value: &_storage._avatarColor) }()
+        case 46: try { try decoder.decodeSingularBoolField(value: &_storage._automaticKeyVerificationDisabled) }()
         default: break
         }
       }
@@ -2227,6 +2236,9 @@ extension StorageServiceProtos_AccountRecord: SwiftProtobuf.Message, SwiftProtob
       try { if let v = _storage._avatarColor {
         try visitor.visitSingularEnumField(value: v, fieldNumber: 42)
       } }()
+      if _storage._automaticKeyVerificationDisabled != false {
+        try visitor.visitSingularBoolField(value: _storage._automaticKeyVerificationDisabled, fieldNumber: 46)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -2271,6 +2283,7 @@ extension StorageServiceProtos_AccountRecord: SwiftProtobuf.Message, SwiftProtob
         if _storage._backupTier != rhs_storage._backupTier {return false}
         if _storage._backupSubscriberData != rhs_storage._backupSubscriberData {return false}
         if _storage._avatarColor != rhs_storage._avatarColor {return false}
+        if _storage._automaticKeyVerificationDisabled != rhs_storage._automaticKeyVerificationDisabled {return false}
         return true
       }
       if !storagesAreEqual {return false}

@@ -49,6 +49,27 @@ public final class KeyTransparencyManager {
         self.taskQueue = KeyedConcurrentTaskQueue(concurrentLimitPerKey: 1)
     }
 
+    // MARK: Opt-out
+
+    public func isEnabled(tx: DBReadTransaction) -> Bool {
+        return keyTransparencyStore.isEnabled(tx: tx)
+    }
+
+    public func setIsEnabled(
+        _ value: Bool,
+        updateStorageService: Bool,
+        tx: DBWriteTransaction,
+    ) {
+        logger.info("\(value)")
+        keyTransparencyStore.setIsEnabled(value, tx: tx)
+
+        if updateStorageService {
+            tx.addSyncCompletion { [self] in
+                storageServiceManager.recordPendingLocalAccountUpdates()
+            }
+        }
+    }
+
     // MARK: - Key Transparency Checks
 
     /// Parameters required to do a Key Transparency check.
@@ -476,17 +497,15 @@ public struct KeyTransparencyStore {
 
     private let cronStore: CronStore
     private let kvStore: NewKeyValueStore
-    private let logger: PrefixedLogger
 
     public init() {
         self.cronStore = CronStore(uniqueKey: .keyTransparencySelfCheck)
         self.kvStore = NewKeyValueStore(collection: "KeyTransparency")
-        self.logger = PrefixedLogger(prefix: "[KT]")
     }
 
     // MARK: - Opt-out
 
-    public func isEnabled(tx: DBReadTransaction) -> Bool {
+    fileprivate func isEnabled(tx: DBReadTransaction) -> Bool {
         guard BuildFlags.KeyTransparency.enabled else {
             return false
         }
@@ -494,9 +513,7 @@ public struct KeyTransparencyStore {
         return kvStore.fetchValue(Bool.self, forKey: KVStoreKeys.isEnabled, tx: tx) ?? true
     }
 
-    public func setIsEnabled(_ isEnabled: Bool, tx: DBWriteTransaction) {
-        logger.info("\(isEnabled)")
-
+    fileprivate func setIsEnabled(_ isEnabled: Bool, tx: DBWriteTransaction) {
         kvStore.writeValue(isEnabled, forKey: KVStoreKeys.isEnabled, tx: tx)
 
         if !isEnabled {

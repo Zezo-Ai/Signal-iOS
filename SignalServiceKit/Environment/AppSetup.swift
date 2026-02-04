@@ -1426,6 +1426,7 @@ extension AppSetup.GlobalsContinuation {
                 disappearingMessageConfigurationStore: disappearingMessagesConfigurationStore,
                 donationSubscriptionManager: BackupArchive.Wrappers.DonationSubscriptionManager(),
                 imageQuality: BackupArchive.Wrappers.ImageQuality(),
+                keyTransparencyManager: keyTransparencyManager,
                 keyTransparencyStore: keyTransparencyStore,
                 linkPreviewSettingStore: linkPreviewSettingStore,
                 localUsernameManager: localUsernameManager,

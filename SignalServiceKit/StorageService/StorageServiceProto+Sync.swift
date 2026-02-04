@@ -1193,6 +1193,7 @@ class StorageServiceAccountRecordUpdater: StorageServiceRecordUpdater {
     private let dmConfigurationStore: DisappearingMessagesConfigurationStore
     private let linkPreviewSettingStore: LinkPreviewSettingStore
     private let localUsernameManager: LocalUsernameManager
+    private let keyTransparencyManager: KeyTransparencyManager
     private let paymentsHelper: PaymentsHelperSwift
     private let phoneNumberDiscoverabilityManager: PhoneNumberDiscoverabilityManager
     private let pinnedThreadManager: PinnedThreadManager
@@ -1218,6 +1219,7 @@ class StorageServiceAccountRecordUpdater: StorageServiceRecordUpdater {
         dmConfigurationStore: DisappearingMessagesConfigurationStore,
         linkPreviewSettingStore: LinkPreviewSettingStore,
         localUsernameManager: LocalUsernameManager,
+        keyTransparencyManager: KeyTransparencyManager,
         paymentsHelper: PaymentsHelperSwift,
         phoneNumberDiscoverabilityManager: PhoneNumberDiscoverabilityManager,
         pinnedThreadManager: PinnedThreadManager,
@@ -1243,6 +1245,7 @@ class StorageServiceAccountRecordUpdater: StorageServiceRecordUpdater {
         self.dmConfigurationStore = dmConfigurationStore
         self.linkPreviewSettingStore = linkPreviewSettingStore
         self.localUsernameManager = localUsernameManager
+        self.keyTransparencyManager = keyTransparencyManager
         self.paymentsHelper = paymentsHelper
         self.phoneNumberDiscoverabilityManager = phoneNumberDiscoverabilityManager
         self.pinnedThreadManager = pinnedThreadManager
@@ -1428,6 +1431,10 @@ class StorageServiceAccountRecordUpdater: StorageServiceRecordUpdater {
         } else {
             // Leave backupTier unset.
         }
+
+        // Note that Storage Service stores the boolean inverted, because of a
+        // misunderstanding when we added the field.
+        builder.setAutomaticKeyVerificationDisabled(!keyTransparencyManager.isEnabled(tx: transaction))
 
         return builder.buildInfallibly()
     }
@@ -1758,6 +1765,18 @@ class StorageServiceAccountRecordUpdater: StorageServiceRecordUpdater {
 
         if mergeDefaultAvatarColor(in: record, tx: transaction) {
             needsUpdate = true
+        }
+
+        // Note that Storage Service stores the boolean inverted, because of a
+        // misunderstanding when we added the field.
+        let localKeyTransparencyEnabled = keyTransparencyManager.isEnabled(tx: transaction)
+        let remoteKeyTransparencyEnabled = !record.automaticKeyVerificationDisabled
+        if localKeyTransparencyEnabled != remoteKeyTransparencyEnabled {
+            keyTransparencyManager.setIsEnabled(
+                remoteKeyTransparencyEnabled,
+                updateStorageService: false,
+                tx: transaction,
+            )
         }
 
         return .merged(needsUpdate: needsUpdate, ())

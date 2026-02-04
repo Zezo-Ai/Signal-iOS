@@ -270,6 +270,9 @@ message AccountRecord {
   optional uint64 backupTier = 40;
   IAPSubscriberData backupSubscriberData = 41;
   optional AvatarColor avatarColor = 42;
+  reserved /*backupTierHistory*/ 43;
+  // 44 and 45 related to notification profiles
+  bool automaticKeyVerificationDisabled = 46;
 }
 
 message StoryDistributionListRecord {

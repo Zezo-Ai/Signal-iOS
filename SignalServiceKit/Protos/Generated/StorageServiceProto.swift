@@ -3471,6 +3471,9 @@ public struct StorageServiceProtoAccountRecord: Codable, CustomDebugStringConver
         return proto.hasAvatarColor
     }
 
+    public var automaticKeyVerificationDisabled: Bool {
+        return proto.automaticKeyVerificationDisabled
+    }
     public var hasUnknownFields: Bool {
         return !proto.unknownFields.data.isEmpty
     }
@@ -3610,6 +3613,7 @@ extension StorageServiceProtoAccountRecord {
         if let _value = avatarColor {
             builder.setAvatarColor(_value)
         }
+        builder.setAutomaticKeyVerificationDisabled(automaticKeyVerificationDisabled)
         if let _value = unknownFields {
             builder.setUnknownFields(_value)
         }
@@ -3835,6 +3839,10 @@ public struct StorageServiceProtoAccountRecordBuilder {
 
     public mutating func setAvatarColor(_ valueParam: StorageServiceProtoAvatarColor) {
         proto.avatarColor = StorageServiceProtoAvatarColorUnwrap(valueParam)
+    }
+
+    public mutating func setAutomaticKeyVerificationDisabled(_ valueParam: Bool) {
+        proto.automaticKeyVerificationDisabled = valueParam
     }
 
     public mutating func setUnknownFields(_ unknownFields: SwiftProtobuf.UnknownStorage) {

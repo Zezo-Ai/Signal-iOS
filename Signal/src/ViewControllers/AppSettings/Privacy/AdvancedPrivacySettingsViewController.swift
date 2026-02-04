@@ -164,16 +164,20 @@ class AdvancedPrivacySettingsViewController: OWSTableViewController2 {
             ),
             isOn: {
                 let db = DependenciesBridge.shared.db
-                let keyTransparencyStore = KeyTransparencyStore()
+                let keyTransparencyManager = DependenciesBridge.shared.keyTransparencyManager
                 return db.read { tx in
-                    keyTransparencyStore.isEnabled(tx: tx)
+                    keyTransparencyManager.isEnabled(tx: tx)
                 }
             },
             actionBlock: { uiSwitch in
                 let db = DependenciesBridge.shared.db
-                let keyTransparencyStore = KeyTransparencyStore()
+                let keyTransparencyManager = DependenciesBridge.shared.keyTransparencyManager
                 db.write { tx in
-                    keyTransparencyStore.setIsEnabled(uiSwitch.isOn, tx: tx)
+                    keyTransparencyManager.setIsEnabled(
+                        uiSwitch.isOn,
+                        updateStorageService: true,
+                        tx: tx,
+                    )
                 }
             },
         ))

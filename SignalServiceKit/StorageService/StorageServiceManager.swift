@@ -2130,6 +2130,7 @@ class StorageServiceOperation {
                 dmConfigurationStore: DependenciesBridge.shared.disappearingMessagesConfigurationStore,
                 linkPreviewSettingStore: DependenciesBridge.shared.linkPreviewSettingStore,
                 localUsernameManager: DependenciesBridge.shared.localUsernameManager,
+                keyTransparencyManager: DependenciesBridge.shared.keyTransparencyManager,
                 paymentsHelper: SSKEnvironment.shared.paymentsHelperRef,
                 phoneNumberDiscoverabilityManager: DependenciesBridge.shared.phoneNumberDiscoverabilityManager,
                 pinnedThreadManager: DependenciesBridge.shared.pinnedThreadManager,

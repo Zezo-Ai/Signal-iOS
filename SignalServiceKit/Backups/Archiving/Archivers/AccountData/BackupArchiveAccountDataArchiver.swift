@@ -58,6 +58,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
     private let disappearingMessageConfigurationStore: DisappearingMessagesConfigurationStore
     private let donationSubscriptionManager: BackupArchive.Shims.DonationSubscriptionManager
     private let imageQuality: BackupArchive.Shims.ImageQuality
+    private let keyTransparencyManager: KeyTransparencyManager
     private let keyTransparencyStore: KeyTransparencyStore
     private let linkPreviewSettingStore: LinkPreviewSettingStore
     private let localUsernameManager: LocalUsernameManager
@@ -87,6 +88,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
         disappearingMessageConfigurationStore: DisappearingMessagesConfigurationStore,
         donationSubscriptionManager: BackupArchive.Shims.DonationSubscriptionManager,
         imageQuality: BackupArchive.Shims.ImageQuality,
+        keyTransparencyManager: KeyTransparencyManager,
         keyTransparencyStore: KeyTransparencyStore,
         linkPreviewSettingStore: LinkPreviewSettingStore,
         localUsernameManager: LocalUsernameManager,
@@ -114,6 +116,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
         self.disappearingMessageConfigurationStore = disappearingMessageConfigurationStore
         self.donationSubscriptionManager = donationSubscriptionManager
         self.imageQuality = imageQuality
+        self.keyTransparencyManager = keyTransparencyManager
         self.keyTransparencyStore = keyTransparencyStore
         self.linkPreviewSettingStore = linkPreviewSettingStore
         self.localUsernameManager = localUsernameManager
@@ -328,7 +331,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
         }
 
         accountSettings.allowSealedSenderFromAnyone = udManager.shouldAllowUnrestrictedAccessLocal(tx: context.tx)
-        accountSettings.allowAutomaticKeyVerification = keyTransparencyStore.isEnabled(tx: context.tx)
+        accountSettings.allowAutomaticKeyVerification = keyTransparencyManager.isEnabled(tx: context.tx)
         accountSettings.defaultSentMediaQuality = imageQuality.fetchValue(tx: context.tx) == .high ? .high : .standard
 
         var downloadSettings = BackupProto_AccountData.AutoDownloadSettings()
@@ -575,7 +578,12 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
             }
 
             udManager.setShouldAllowUnrestrictedAccessLocal(settings.allowSealedSenderFromAnyone, tx: context.tx)
-            keyTransparencyStore.setIsEnabled(settings.allowAutomaticKeyVerification, tx: context.tx)
+
+            keyTransparencyManager.setIsEnabled(
+                settings.allowAutomaticKeyVerification,
+                updateStorageService: false,
+                tx: context.tx,
+            )
 
             switch settings.defaultSentMediaQuality {
             case .high:

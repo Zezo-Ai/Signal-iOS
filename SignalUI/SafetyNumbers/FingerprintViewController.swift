@@ -56,7 +56,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
                 return (nil, nil, false)
             }
 
-            let keyTransparencyIsEnabled = keyTransparencyStore.isEnabled(tx: tx)
+            let keyTransparencyIsEnabled = keyTransparencyManager.isEnabled(tx: tx)
             let keyTransparencyCheckParams = keyTransparencyManager.prepareCheck(
                 aci: theirAci,
                 localIdentifiers: localIdentifiers,
