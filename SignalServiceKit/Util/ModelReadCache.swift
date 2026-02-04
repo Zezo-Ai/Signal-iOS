@@ -452,14 +452,13 @@ public class InteractionReadCache: NSObject {
 
 // MARK: -
 
-@objc
-public class InstalledStickerCache: NSObject {
-    private class Adapter: ModelCacheAdapter<String, InstalledSticker> {
-        override func read(key: String, transaction: DBReadTransaction) -> InstalledSticker? {
-            return InstalledSticker.anyFetch(uniqueId: key, transaction: transaction, ignoreCache: true)
+public class InstalledStickerCache {
+    private class Adapter: ModelCacheAdapter<String, InstalledStickerRecord> {
+        override func read(key: String, transaction: DBReadTransaction) -> InstalledStickerRecord? {
+            return InstalledStickerRecord.anyFetch(uniqueId: key, transaction: transaction)
         }
 
-        override func key(forValue value: InstalledSticker) -> String {
+        override func key(forValue value: InstalledStickerRecord) -> String {
             value.uniqueId
         }
 
@@ -467,12 +466,12 @@ public class InstalledStickerCache: NSObject {
             return ModelCacheKey(key: key)
         }
 
-        override func copy(value: InstalledSticker) throws -> InstalledSticker {
-            return try DeepCopies.deepCopy(value)
+        override func copy(value: InstalledStickerRecord) throws -> InstalledStickerRecord {
+            return value.deepCopy()
         }
     }
 
-    private let cache: ModelReadCache<String, InstalledSticker>
+    private let cache: ModelReadCache<String, InstalledStickerRecord>
     private static var cacheCountLimit: Int {
         if CurrentAppContext().isMainApp {
             // Large enough to hold three pages of max-size stickers.
@@ -483,31 +482,26 @@ public class InstalledStickerCache: NSObject {
         }
     }
 
-    private let adapter = Adapter(cacheName: "InstalledSticker", cacheCountLimit: InstalledStickerCache.cacheCountLimit)
+    private let adapter = Adapter(cacheName: "InstalledStickerRecord", cacheCountLimit: InstalledStickerCache.cacheCountLimit)
 
-    @objc
     public init(_ factory: ModelReadCacheFactory) {
         cache = factory.create(adapter: adapter)
     }
 
-    @objc(getInstalledStickerForUniqueId:transaction:)
-    public func getInstalledSticker(uniqueId: String, transaction: DBReadTransaction) -> InstalledSticker? {
+    public func getInstalledSticker(uniqueId: String, transaction: DBReadTransaction) -> InstalledStickerRecord? {
         let cacheKey = adapter.cacheKey(forKey: uniqueId)
         return cache.getValue(for: cacheKey, transaction: transaction)
     }
 
-    @objc(didRemoveInstalledSticker:transaction:)
-    public func didRemove(installedSticker: InstalledSticker, transaction: DBWriteTransaction) {
+    public func didRemove(installedSticker: InstalledStickerRecord, transaction: DBWriteTransaction) {
         cache.didRemove(value: installedSticker, transaction: transaction)
     }
 
-    @objc(didInsertOrUpdateInstalledSticker:transaction:)
-    public func didInsertOrUpdate(installedSticker: InstalledSticker, transaction: DBWriteTransaction) {
+    public func didInsertOrUpdate(installedSticker: InstalledStickerRecord, transaction: DBWriteTransaction) {
         cache.didInsertOrUpdate(value: installedSticker, transaction: transaction)
     }
 
-    @objc
-    public func didReadInstalledSticker(_ installedSticker: InstalledSticker, transaction: DBReadTransaction) {
+    public func didReadInstalledSticker(_ installedSticker: InstalledStickerRecord, transaction: DBReadTransaction) {
         cache.didRead(value: installedSticker, transaction: transaction)
     }
 }
@@ -525,15 +519,11 @@ public class ModelReadCaches: NSObject {
 
     @objc
     public let threadReadCache: ThreadReadCache
-    @objc
     public let interactionReadCache: InteractionReadCache
-    @objc
     public let installedStickerCache: InstalledStickerCache
 
-    @objc
     fileprivate static let evacuateAllModelCaches = Notification.Name("EvacuateAllModelCaches")
 
-    @objc
     public func evacuateAllCaches() {
         NotificationCenter.default.post(name: Self.evacuateAllModelCaches, object: nil)
     }

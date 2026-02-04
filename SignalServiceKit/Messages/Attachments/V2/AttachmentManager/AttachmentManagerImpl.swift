@@ -1109,13 +1109,13 @@ extension AttachmentManagerImpl {
 }
 
 public protocol _AttachmentManagerImpl_StickerManagerShim {
-    func fetchInstalledSticker(packId: Data, stickerId: UInt32, tx: DBReadTransaction) -> InstalledSticker?
+    func fetchInstalledSticker(packId: Data, stickerId: UInt32, tx: DBReadTransaction) -> InstalledStickerRecord?
 }
 
 public class _AttachmentManagerImpl_StickerManagerWrapper: _AttachmentManagerImpl_StickerManagerShim {
     public init() {}
 
-    public func fetchInstalledSticker(packId: Data, stickerId: UInt32, tx: DBReadTransaction) -> InstalledSticker? {
+    public func fetchInstalledSticker(packId: Data, stickerId: UInt32, tx: DBReadTransaction) -> InstalledStickerRecord? {
         return StickerManager.fetchInstalledSticker(packId: packId, stickerId: stickerId, transaction: tx)
     }
 }

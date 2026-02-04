@@ -532,7 +532,7 @@ public enum DatabaseRecovery {
             // Not essential.
             StoryContextAssociatedData.databaseTableName,
             ExperienceUpgrade.databaseTableName,
-            InstalledSticker.table.tableName,
+            InstalledStickerRecord.databaseTableName,
             CancelledGroupRing.databaseTableName,
             CdsPreviousE164.databaseTableName,
             SpamReportingTokenRecord.databaseTableName,

@@ -934,7 +934,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         private nonisolated func quoteUnquoteDownloadStickerFromInstalledPackIfPossible(
             record: QueuedAttachmentDownloadRecord,
         ) async -> Bool {
-            let installedSticker: InstalledSticker? = db.read { tx in
+            let installedSticker: InstalledStickerRecord? = db.read { tx in
                 var stickerMetadata: AttachmentReference.Owner.MessageSource.StickerMetadata?
                 attachmentStore.enumerateAllReferences(
                     toAttachmentId: record.attachmentId,
@@ -1846,7 +1846,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         }
 
         func validateAndPrepareInstalledSticker(
-            _ sticker: InstalledSticker,
+            _ sticker: InstalledStickerRecord,
         ) async throws -> PendingAttachment {
             let attachmentValidator = self.attachmentValidator
             let stickerManager = self.stickerManager
@@ -2550,19 +2550,19 @@ extension AttachmentDownloadManagerImpl {
 
 public protocol _AttachmentDownloadManagerImpl_StickerManagerShim {
 
-    func fetchInstalledSticker(packId: Data, stickerId: UInt32, tx: DBReadTransaction) -> InstalledSticker?
+    func fetchInstalledSticker(packId: Data, stickerId: UInt32, tx: DBReadTransaction) -> InstalledStickerRecord?
 
-    func stickerDataUrl(forInstalledSticker: InstalledSticker, verifyExists: Bool) -> URL?
+    func stickerDataUrl(forInstalledSticker: InstalledStickerRecord, verifyExists: Bool) -> URL?
 }
 
 public class _AttachmentDownloadManagerImpl_StickerManagerWrapper: _AttachmentDownloadManagerImpl_StickerManagerShim {
     public init() {}
 
-    public func fetchInstalledSticker(packId: Data, stickerId: UInt32, tx: DBReadTransaction) -> InstalledSticker? {
+    public func fetchInstalledSticker(packId: Data, stickerId: UInt32, tx: DBReadTransaction) -> InstalledStickerRecord? {
         return StickerManager.fetchInstalledSticker(packId: packId, stickerId: stickerId, transaction: tx)
     }
 
-    public func stickerDataUrl(forInstalledSticker: InstalledSticker, verifyExists: Bool) -> URL? {
+    public func stickerDataUrl(forInstalledSticker: InstalledStickerRecord, verifyExists: Bool) -> URL? {
         return StickerManager.stickerDataUrl(forInstalledSticker: forInstalledSticker, verifyExists: verifyExists)
     }
 }

@@ -848,6 +848,7 @@
 		50F75E312AD9F18F0032530F /* RecipientDatabaseTableTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F75E302AD9F18F0032530F /* RecipientDatabaseTableTest.swift */; };
 		50F86FC42AFEFEC20045F58B /* TimeGatedBatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F86FC32AFEFEC20045F58B /* TimeGatedBatch.swift */; };
 		50F946102AD768AF002EF293 /* MockIdentityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F9460F2AD768AF002EF293 /* MockIdentityManager.swift */; };
+		50FA1B822F2D2935000DDCF9 /* InstalledStickerRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50FA1B812F2D2935000DDCF9 /* InstalledStickerRecord.swift */; };
 		557238D32F2D53FD0033BC9A /* RingrtcVp9Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557238D22F2D53EF0033BC9A /* RingrtcVp9Config.swift */; };
 		55B753602D97304100CCC91C /* RemoteMuteToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55B7535F2D97303A00CCC91C /* RemoteMuteToast.swift */; };
 		55BD355C2F16DAC0008E989C /* input_video.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 5531BE0E2F15B97F002AF66F /* input_video.mp4 */; };
@@ -3593,15 +3594,12 @@
 		F9C5CC05289453B300548EEE /* OWSOutgoingPaymentMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = F9C5C912289453B100548EEE /* OWSOutgoingPaymentMessage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F9C5CC06289453B300548EEE /* OWSOutgoingPaymentMessage+SDS.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C913289453B100548EEE /* OWSOutgoingPaymentMessage+SDS.swift */; };
 		F9C5CC07289453B300548EEE /* OWSOutgoingPaymentMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C914289453B100548EEE /* OWSOutgoingPaymentMessage.m */; };
-		F9C5CC0A289453B300548EEE /* InstalledSticker.h in Headers */ = {isa = PBXBuildFile; fileRef = F9C5C918289453B100548EEE /* InstalledSticker.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F9C5CC0B289453B300548EEE /* StickerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C919289453B100548EEE /* StickerManager.swift */; };
 		F9C5CC0C289453B300548EEE /* CDNDownloadOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C91A289453B100548EEE /* CDNDownloadOperation.swift */; };
 		F9C5CC0D289453B300548EEE /* StickerMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C91B289453B100548EEE /* StickerMetadata.swift */; };
 		F9C5CC11289453B300548EEE /* DefaultStickers.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C91F289453B100548EEE /* DefaultStickers.swift */; };
-		F9C5CC12289453B300548EEE /* InstalledSticker+SDS.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C920289453B100548EEE /* InstalledSticker+SDS.swift */; };
 		F9C5CC13289453B300548EEE /* StickerInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C921289453B100548EEE /* StickerInfo.m */; };
 		F9C5CC14289453B300548EEE /* DownloadStickerOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C922289453B100548EEE /* DownloadStickerOperation.swift */; };
-		F9C5CC15289453B300548EEE /* InstalledSticker.m in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C923289453B100548EEE /* InstalledSticker.m */; };
 		F9C5CC18289453B300548EEE /* DownloadStickerPackOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C926289453B100548EEE /* DownloadStickerPackOperation.swift */; };
 		F9C5CC19289453B300548EEE /* MessageSticker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C927289453B100548EEE /* MessageSticker.swift */; };
 		F9C5CC1B289453B300548EEE /* StickerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C929289453B100548EEE /* StickerError.swift */; };
@@ -4999,6 +4997,7 @@
 		50F86FC32AFEFEC20045F58B /* TimeGatedBatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeGatedBatch.swift; sourceTree = "<group>"; };
 		50F9460F2AD768AF002EF293 /* MockIdentityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockIdentityManager.swift; sourceTree = "<group>"; };
 		50F96F3A28ECBC3200541EED /* ms */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ms; path = translations/ms.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		50FA1B812F2D2935000DDCF9 /* InstalledStickerRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledStickerRecord.swift; sourceTree = "<group>"; };
 		538291A33C75754BC577D8C3 /* Pods-SignalShareExtension.testable release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SignalShareExtension.testable release.xcconfig"; path = "Target Support Files/Pods-SignalShareExtension/Pods-SignalShareExtension.testable release.xcconfig"; sourceTree = "<group>"; };
 		5531BE0E2F15B97F002AF66F /* input_video.mp4 */ = {isa = PBXFileReference; lastKnownFileType = text; path = input_video.mp4; sourceTree = "<group>"; };
 		557238D22F2D53EF0033BC9A /* RingrtcVp9Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingrtcVp9Config.swift; sourceTree = "<group>"; };
@@ -7791,15 +7790,12 @@
 		F9C5C912289453B100548EEE /* OWSOutgoingPaymentMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OWSOutgoingPaymentMessage.h; sourceTree = "<group>"; };
 		F9C5C913289453B100548EEE /* OWSOutgoingPaymentMessage+SDS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "OWSOutgoingPaymentMessage+SDS.swift"; sourceTree = "<group>"; };
 		F9C5C914289453B100548EEE /* OWSOutgoingPaymentMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OWSOutgoingPaymentMessage.m; sourceTree = "<group>"; };
-		F9C5C918289453B100548EEE /* InstalledSticker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InstalledSticker.h; sourceTree = "<group>"; };
 		F9C5C919289453B100548EEE /* StickerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StickerManager.swift; sourceTree = "<group>"; };
 		F9C5C91A289453B100548EEE /* CDNDownloadOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CDNDownloadOperation.swift; sourceTree = "<group>"; };
 		F9C5C91B289453B100548EEE /* StickerMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StickerMetadata.swift; sourceTree = "<group>"; };
 		F9C5C91F289453B100548EEE /* DefaultStickers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultStickers.swift; sourceTree = "<group>"; };
-		F9C5C920289453B100548EEE /* InstalledSticker+SDS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "InstalledSticker+SDS.swift"; sourceTree = "<group>"; };
 		F9C5C921289453B100548EEE /* StickerInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StickerInfo.m; sourceTree = "<group>"; };
 		F9C5C922289453B100548EEE /* DownloadStickerOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadStickerOperation.swift; sourceTree = "<group>"; };
-		F9C5C923289453B100548EEE /* InstalledSticker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InstalledSticker.m; sourceTree = "<group>"; };
 		F9C5C926289453B100548EEE /* DownloadStickerPackOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadStickerPackOperation.swift; sourceTree = "<group>"; };
 		F9C5C927289453B100548EEE /* MessageSticker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageSticker.swift; sourceTree = "<group>"; };
 		F9C5C929289453B100548EEE /* StickerError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StickerError.swift; sourceTree = "<group>"; };
@@ -14533,9 +14529,7 @@
 				F9C5C91F289453B100548EEE /* DefaultStickers.swift */,
 				F9C5C922289453B100548EEE /* DownloadStickerOperation.swift */,
 				F9C5C926289453B100548EEE /* DownloadStickerPackOperation.swift */,
-				F9C5C920289453B100548EEE /* InstalledSticker+SDS.swift */,
-				F9C5C918289453B100548EEE /* InstalledSticker.h */,
-				F9C5C923289453B100548EEE /* InstalledSticker.m */,
+				50FA1B812F2D2935000DDCF9 /* InstalledStickerRecord.swift */,
 				F9C5C927289453B100548EEE /* MessageSticker.swift */,
 				66E793E42BC0D8A600929E5E /* MessageStickerManager.swift */,
 				F9C5C929289453B100548EEE /* StickerError.swift */,
@@ -15277,7 +15271,6 @@
 			files = (
 				F9C5CD77289453B300548EEE /* BaseModel.h in Headers */,
 				668A00E02C2B5ECF007B8808 /* DebuggerUtils.h in Headers */,
-				F9C5CC0A289453B300548EEE /* InstalledSticker.h in Headers */,
 				F9C5CC1E289453B300548EEE /* OWSAddToContactsOfferMessage.h in Headers */,
 				F9C5CC84289453B300548EEE /* OWSAddToProfileWhitelistOfferMessage.h in Headers */,
 				C190F8F72C1B48BE00D1EAC9 /* OWSArchivedPaymentMessage.h in Headers */,
@@ -18880,8 +18873,7 @@
 				D979CC262AD3933B006AAC49 /* IndividualCallRecordManager.swift in Sources */,
 				D9B95A9B29E8923B00D7CB95 /* InMemoryDB.swift in Sources */,
 				C1DD78AB2BB1CEF80020F064 /* InputStreamable.swift in Sources */,
-				F9C5CC12289453B300548EEE /* InstalledSticker+SDS.swift in Sources */,
-				F9C5CC15289453B300548EEE /* InstalledSticker.m in Sources */,
+				50FA1B822F2D2935000DDCF9 /* InstalledStickerRecord.swift in Sources */,
 				F9C5CE0F289453B400548EEE /* Int+SSK.swift in Sources */,
 				D9247EAA2BFD424800DFEF6F /* InteractionDeleteManager.swift in Sources */,
 				F9C5CD18289453B300548EEE /* InteractionFinder.swift in Sources */,
