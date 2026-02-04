@@ -1735,7 +1735,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     throw OWSGenericError("Attachment download length exceeds max size.")
                 }
                 let tmpFile = OWSFileSystem.temporaryFileUrl()
-                try OWSFileSystem.copyFile(from: downloadUrl, to: tmpFile)
+                try OWSFileSystem.moveFile(from: downloadUrl, to: tmpFile)
                 return tmpFile
             } onError: { error, attemptCount in
                 Logger.warn("Error: \(error)")
