@@ -7,12 +7,14 @@ import GRDB
 public import LibSignalClient
 
 public final class KeyTransparencyManager {
+    private static let logger = PrefixedLogger(prefix: "[KT]")
+    private var logger: PrefixedLogger { Self.logger }
+
     private let chatConnectionManager: ChatConnectionManager
     private let dateProvider: DateProvider
     private let db: DB
     private let identityManager: OWSIdentityManager
     private let localUsernameManager: LocalUsernameManager
-    private let logger: PrefixedLogger
     private let recipientDatabaseTable: RecipientDatabaseTable
     private let storageServiceManager: StorageServiceManager
     private let tsAccountManager: TSAccountManager
@@ -36,7 +38,6 @@ public final class KeyTransparencyManager {
         self.db = db
         self.identityManager = identityManager
         self.localUsernameManager = localUsernameManager
-        self.logger = PrefixedLogger(prefix: "[KT]")
         self.recipientDatabaseTable = recipientDatabaseTable
         self.storageServiceManager = storageServiceManager
         self.tsAccountManager = tsAccountManager
@@ -49,11 +50,14 @@ public final class KeyTransparencyManager {
 
     /// Parameters required to do a Key Transparency check.
     public struct CheckParams {
-        fileprivate let isLocalUser: Bool
-
         fileprivate let aciInfo: KeyTransparency.AciInfo
         fileprivate let e164Info: KeyTransparency.E164Info
         fileprivate let username: Username?
+        fileprivate let localIdentifiers: LocalIdentifiers
+
+        fileprivate var isLocalUser: Bool {
+            localIdentifiers.contains(serviceId: aciInfo.aci)
+        }
     }
 
     /// Prepare to perform a Key Transparency check.
@@ -68,15 +72,9 @@ public final class KeyTransparencyManager {
         let logger = logger.suffixed(with: "[\(aci)]")
         logger.info("")
 
-        // Require having succeeded a self-check before checking someone else.
-        if !localIdentifiers.contains(serviceId: aci) {
-            switch Self.selfCheckState(tx: tx) {
-            case .succeeded:
-                break
-            case nil, .failedOnce, .failedRepeatedly, .failedRepeatedlyAndWarned:
-                logger.warn("Must have succeeded a self-check.")
-                return nil
-            }
+        guard Self.isEnabled(tx: tx) else {
+            logger.warn("Is opted out.")
+            return nil
         }
 
         let aciInfo: KeyTransparency.AciInfo
@@ -138,10 +136,10 @@ public final class KeyTransparencyManager {
         }
 
         return CheckParams(
-            isLocalUser: localIdentifiers.contains(serviceId: aci),
             aciInfo: aciInfo,
             e164Info: e164Info,
             username: username,
+            localIdentifiers: localIdentifiers,
         )
     }
 
@@ -197,52 +195,71 @@ public final class KeyTransparencyManager {
         let ktClient = try await chatConnectionManager.keyTransparencyClient()
         let libSignalStore = KeyTransparencyStoreForLibSignal(db: db)
 
-        let existingKeyTransparencyRecord = db.read { tx in
-            return Self.getKeyTransparencyRecord(
-                aci: params.aciInfo.aci,
-                tx: tx,
+        let existingKeyTransparencyRecord: KeyTransparencyRecord?
+        let selfCheckState: SelfCheckState?
+        (
+            existingKeyTransparencyRecord,
+            selfCheckState,
+        ) = db.read { tx in
+            return (
+                Self.getKeyTransparencyRecord(
+                    aci: params.aciInfo.aci,
+                    tx: tx,
+                ),
+                Self.selfCheckState(tx: tx),
             )
         }
 
-        if
-            params.isLocalUser,
-            existingKeyTransparencyRecord != nil
-        {
-            logger.info("Monitoring for self.")
+        if params.isLocalUser {
+            if existingKeyTransparencyRecord != nil {
+                logger.info("Monitoring for self.")
 
-            try await ktClient.monitor(
-                for: .`self`,
-                account: params.aciInfo,
-                e164: params.e164Info,
-                usernameHash: params.username?.hash,
-                store: libSignalStore,
-            )
-        } else if params.isLocalUser {
-            logger.info("Searching for self.")
+                try await ktClient.monitor(
+                    for: .`self`,
+                    account: params.aciInfo,
+                    e164: params.e164Info,
+                    usernameHash: params.username?.hash,
+                    store: libSignalStore,
+                )
+            } else {
+                logger.info("Searching for self.")
 
-            try await ktClient.search(
-                account: params.aciInfo,
-                e164: params.e164Info,
-                usernameHash: params.username?.hash,
-                store: libSignalStore,
-            )
-        } else if existingKeyTransparencyRecord != nil {
-            logger.info("Monitoring for other.")
-
-            try await ktClient.monitor(
-                for: .other,
-                account: params.aciInfo,
-                e164: params.e164Info,
-                store: libSignalStore,
-            )
+                try await ktClient.search(
+                    account: params.aciInfo,
+                    e164: params.e164Info,
+                    usernameHash: params.username?.hash,
+                    store: libSignalStore,
+                )
+            }
         } else {
-            logger.info("Searching for other.")
+            // Require a self-check to succeed before checking others.
+            switch selfCheckState {
+            case nil:
+                try await performSelfCheck(localIdentifiers: params.localIdentifiers)
+            case .succeeded:
+                break
+            case .failedOnce, .failedRepeatedly, .failedRepeatedlyAndWarned:
+                throw OWSGenericError("Cannot check other with failed self-check.")
+            }
 
-            try await ktClient.search(
-                account: params.aciInfo,
-                e164: params.e164Info,
-                store: libSignalStore,
-            )
+            if existingKeyTransparencyRecord != nil {
+                logger.info("Monitoring for other.")
+
+                try await ktClient.monitor(
+                    for: .other,
+                    account: params.aciInfo,
+                    e164: params.e164Info,
+                    store: libSignalStore,
+                )
+            } else {
+                logger.info("Searching for other.")
+
+                try await ktClient.search(
+                    account: params.aciInfo,
+                    e164: params.e164Info,
+                    store: libSignalStore,
+                )
+            }
         }
     }
 
@@ -256,22 +273,19 @@ public final class KeyTransparencyManager {
     }
 
     private static let selfCheckKVStore = NewKeyValueStore(collection: "KT.SelfCheck")
-
-    private enum SelfCheckStoreKeys {
-        static let state = "state"
-    }
+    private static let selfCheckKVStoreKey = "state"
 
     private static func selfCheckState(tx: DBReadTransaction) -> SelfCheckState? {
         return selfCheckKVStore.fetchValue(
             Int64.self,
-            forKey: SelfCheckStoreKeys.state,
+            forKey: selfCheckKVStoreKey,
             tx: tx,
         )
         .map { SelfCheckState(rawValue: $0)! }
     }
 
     private static func setSelfCheckState(_ state: SelfCheckState, tx: DBWriteTransaction) {
-        selfCheckKVStore.writeValue(state.rawValue, forKey: SelfCheckStoreKeys.state, tx: tx)
+        selfCheckKVStore.writeValue(state.rawValue, forKey: selfCheckKVStoreKey, tx: tx)
     }
 
     public static func shouldWarnSelfCheckFailed(tx: DBReadTransaction) -> Bool {
@@ -314,17 +328,21 @@ public final class KeyTransparencyManager {
             operation: { [self] () async throws -> Void in
                 let mostRecentDate: Date
                 let localIdentifiers: LocalIdentifiers?
+                let isEnabled: Bool
                 (
                     mostRecentDate,
                     localIdentifiers,
+                    isEnabled,
                 ) = db.read { tx in
                     return (
                         Self.selfCheckCronStore.mostRecentDate(tx: tx),
                         tsAccountManager.localIdentifiers(tx: tx),
+                        Self.isEnabled(tx: tx),
                     )
                 }
 
                 guard
+                    isEnabled,
                     let localIdentifiers,
                     dateProvider() > mostRecentDate.addingTimeInterval(Self.selfCheckCronInterval)
                 else {
@@ -417,17 +435,17 @@ public final class KeyTransparencyManager {
             }
 
         case .failedOnce:
-            logger.info("Self-check second failure.")
+            logger.warn("Self-check second failure.")
             newSelfCheckState = .failedRepeatedly
             intervalTillNextCron = Self.selfCheckCronInterval
 
         case .failedRepeatedly:
-            logger.info("Self-check continued failure.")
+            logger.warn("Self-check continued failure.")
             newSelfCheckState = nil
             intervalTillNextCron = Self.selfCheckCronInterval
 
         case .failedRepeatedlyAndWarned:
-            logger.info("Self-check continued failure, already warned.")
+            logger.warn("Self-check continued failure, already warned.")
             newSelfCheckState = if BuildFlags.KeyTransparency.conservativeSelfCheck {
                 // Wipe the fact that we've already warned about these
                 // continued failures, so we warn again.
@@ -453,13 +471,31 @@ public final class KeyTransparencyManager {
         )
     }
 
-    // MARK: -
+    // MARK: - Opt-out
 
-    public static func wipeAllKeyTransparencyData(tx: DBWriteTransaction) {
-        distinguishedTreeKVStore.removeAll(tx: tx)
-        selfCheckKVStore.removeAll(tx: tx)
-        failIfThrows {
-            try KeyTransparencyRecord.deleteAll(tx.database)
+    private static let isEnabledKVStore = NewKeyValueStore(collection: "KT.IsEnabled")
+    private static let isEnabledKVStoreKey = "isEnabled"
+
+    public static func isEnabled(tx: DBReadTransaction) -> Bool {
+        guard BuildFlags.KeyTransparency.enabled else {
+            return false
+        }
+
+        return isEnabledKVStore.fetchValue(Bool.self, forKey: isEnabledKVStoreKey, tx: tx) ?? true
+    }
+
+    public static func setIsEnabled(_ isEnabled: Bool, tx: DBWriteTransaction) {
+        logger.info("\(isEnabled)")
+
+        isEnabledKVStore.writeValue(isEnabled, forKey: isEnabledKVStoreKey, tx: tx)
+
+        if !isEnabled {
+            selfCheckKVStore.removeAll(tx: tx)
+            selfCheckCronStore.setMostRecentDate(.distantPast, jitter: 0, tx: tx)
+            distinguishedTreeKVStore.removeAll(tx: tx)
+            failIfThrows {
+                try KeyTransparencyRecord.deleteAll(tx.database)
+            }
         }
     }
 

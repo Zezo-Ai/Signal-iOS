@@ -156,6 +156,36 @@ class AdvancedPrivacySettingsViewController: OWSTableViewController2 {
         ))
         contents.add(relayCallsSection)
 
+        let keyTransparencySection = OWSTableSection()
+        keyTransparencySection.add(.switch(
+            withText: OWSLocalizedString(
+                "SETTINGS_KEY_TRANSPARENCY_OPT_OUT_SWITCH_TITLE",
+                comment: "Title for for a settings option describing that Key Transparency is enabled.",
+            ),
+            isOn: {
+                let db = DependenciesBridge.shared.db
+                return db.read { tx in
+                    KeyTransparencyManager.isEnabled(tx: tx)
+                }
+            },
+            actionBlock: { uiSwitch in
+                let db = DependenciesBridge.shared.db
+                db.write { tx in
+                    KeyTransparencyManager.setIsEnabled(uiSwitch.isOn, tx: tx)
+                }
+            },
+        ))
+        keyTransparencySection.footerAttributedTitle = NSAttributedString.composed(of: [
+            OWSLocalizedString(
+                "SETTINGS_KEY_TRANSPARENCY_OPT_OUT_FOOTER",
+                comment: "Footer for settings section describing Key Transparency.",
+            ),
+            " ",
+            CommonStrings.learnMore.styled(with: .link(URL.Support.keyTransparency)),
+        ])
+        .styled(with: defaultFooterTextStyle)
+        contents.add(keyTransparencySection)
+
         let sealedSenderSection = OWSTableSection()
         sealedSenderSection.headerTitle = OWSLocalizedString(
             "SETTINGS_UNIDENTIFIED_DELIVERY_SECTION_TITLE",

@@ -31,10 +31,10 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
         let tsAccountManager = DependenciesBridge.shared.tsAccountManager
 
         let fingerprintResult: FingerprintResult?
-        let keyTransparencyCheckParams: KeyTransparencyManager.CheckParams?
+        let keyTransparencyState: KeyTransparencyState?
         (
             fingerprintResult,
-            keyTransparencyCheckParams,
+            keyTransparencyState,
         ) = db.read { tx in
             guard let theirAci else {
                 return (nil, nil)
@@ -53,6 +53,13 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
                 return (nil, nil)
             }
 
+            let keyTransparencyIsEnabled = KeyTransparencyManager.isEnabled(tx: tx)
+            let keyTransparencyCheckParams = keyTransparencyManager.prepareCheck(
+                aci: theirAci,
+                localIdentifiers: localIdentifiers,
+                tx: tx,
+            )
+
             return (
                 FingerprintResult(
                     theirAci: theirAci,
@@ -66,15 +73,15 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
                         theirName: theirName,
                     ),
                 ),
-                keyTransparencyManager.prepareCheck(
-                    aci: theirAci,
-                    localIdentifiers: localIdentifiers,
-                    tx: tx,
+                KeyTransparencyState(
+                    isEnabled: keyTransparencyIsEnabled,
+                    checkParams: keyTransparencyCheckParams,
+                    viewInitialState: keyTransparencyCheckParams == nil ? .unableToVerify : .readyToVerify,
                 ),
             )
         }
 
-        guard let fingerprintResult else {
+        guard let fingerprintResult, let keyTransparencyState else {
             let actionSheet = ActionSheetController(message: OWSLocalizedString(
                 "CANT_VERIFY_IDENTITY_EXCHANGE_MESSAGES",
                 comment: "Alert shown when the user needs to exchange messages to see the safety number.",
@@ -97,8 +104,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
             recipientIdentity: fingerprintResult.theirRecipientIdentity,
             recipientVerificationState: fingerprintResult.theirVerificationState,
             fingerprint: fingerprintResult.fingerprint,
-            keyTransparencyCheckParams: keyTransparencyCheckParams,
-            keyTransparencyViewInitialState: keyTransparencyCheckParams == nil ? .unableToVerify : .readyToVerify,
+            keyTransparencyState: keyTransparencyState,
             deps: FingerprintViewController.Deps(
                 db: db,
                 identityManager: identityManager,
@@ -111,26 +117,23 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
 
     // MARK: -
 
-    public var preferredNavigationBarStyle: OWSNavigationBarStyle {
-        return .solid
-    }
-
-    override public var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return .portrait
-    }
-
     fileprivate struct Deps {
         let db: DB
         let identityManager: OWSIdentityManager
         let keyTransparencyManager: KeyTransparencyManager
     }
 
+    fileprivate struct KeyTransparencyState {
+        let isEnabled: Bool
+        let checkParams: KeyTransparencyManager.CheckParams?
+        let viewInitialState: KeyTransparencyView.State
+    }
+
     private let recipientAci: Aci
     private let recipientIdentity: OWSRecipientIdentity
     private let recipientVerificationState: VerificationState
     private let fingerprint: OWSFingerprint
-    private let keyTransparencyCheckParams: KeyTransparencyManager.CheckParams?
-    private let keyTransparencyViewInitialState: KeyTransparencyView.State
+    private let keyTransparencyState: KeyTransparencyState
 
     private let deps: Deps?
     private var identityStateChangeObserver: AnyObject?
@@ -140,8 +143,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
         recipientIdentity: OWSRecipientIdentity,
         recipientVerificationState: VerificationState,
         fingerprint: OWSFingerprint,
-        keyTransparencyCheckParams: KeyTransparencyManager.CheckParams?,
-        keyTransparencyViewInitialState: KeyTransparencyView.State,
+        keyTransparencyState: KeyTransparencyState,
         deps: Deps?,
     ) {
         // We snapshot state when we present this view and dismiss the view when
@@ -152,8 +154,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
         self.recipientIdentity = recipientIdentity
         self.recipientVerificationState = recipientVerificationState
         self.fingerprint = fingerprint
-        self.keyTransparencyCheckParams = keyTransparencyCheckParams
-        self.keyTransparencyViewInitialState = keyTransparencyViewInitialState
+        self.keyTransparencyState = keyTransparencyState
 
         self.deps = deps
 
@@ -175,6 +176,14 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
         if let identityStateChangeObserver {
             NotificationCenter.default.removeObserver(identityStateChangeObserver)
         }
+    }
+
+    public var preferredNavigationBarStyle: OWSNavigationBarStyle {
+        return .solid
+    }
+
+    override public var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return .portrait
     }
 
     override public func viewDidLoad() {
@@ -220,7 +229,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
     }()
 
     private lazy var keyTransparencyView = KeyTransparencyView(
-        initialState: keyTransparencyViewInitialState,
+        initialState: keyTransparencyState.viewInitialState,
         controller: self,
     )
 
@@ -236,7 +245,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
 
         containerView.addSubview(fingerprintCard)
         containerView.addSubview(instructionsTextView)
-        if BuildFlags.KeyTransparency.enabled {
+        if keyTransparencyState.isEnabled {
             containerView.addSubview(keyTransparencyView)
         }
 
@@ -248,7 +257,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
         instructionsTextView.autoPinEdge(.leading, to: .leading, of: containerView, withOffset: .scaleFromIPhone5To7Plus(18, 28))
         instructionsTextView.autoPinEdge(.trailing, to: .trailing, of: containerView, withOffset: -.scaleFromIPhone5To7Plus(18, 28))
 
-        if BuildFlags.KeyTransparency.enabled {
+        if keyTransparencyState.isEnabled {
             keyTransparencyView.autoPinEdge(.top, to: .bottom, of: instructionsTextView, withOffset: 44)
             keyTransparencyView.autoPinEdge(.leading, to: .leading, of: containerView, withOffset: 16)
             keyTransparencyView.autoPinEdge(.trailing, to: .trailing, of: containerView, withOffset: -16)
@@ -586,7 +595,6 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
 
             // This configuration is updated in updateForCurrentState() as well.
             var configuration = UIButton.Configuration.filled()
-            configuration.title = "Placeholder"
             configuration.imagePadding = 12
             configuration.imagePlacement = .trailing
             configuration.contentInsets = buttonInsets
@@ -722,19 +730,21 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
     }
 
     fileprivate func didTapKeyTransparencyButton(state: KeyTransparencyView.State) {
+        owsPrecondition(keyTransparencyState.isEnabled)
+
         switch state {
         case .unableToVerify:
             present(KeyTransparencyNotAvailableHeroSheet(), animated: true)
         case .readyToVerify:
             guard
                 let deps,
-                let keyTransparencyCheckParams
+                let checkParams = keyTransparencyState.checkParams
             else { return }
 
             keyTransparencyView.state = .verifying
             Task { @MainActor [weak self] in
                 do {
-                    try await deps.keyTransparencyManager.performCheck(params: keyTransparencyCheckParams)
+                    try await deps.keyTransparencyManager.performCheck(params: checkParams)
                     self?.keyTransparencyView.state = .verifiedSuccess
                 } catch {
                     self?.keyTransparencyView.state = .verifiedFailure
@@ -848,6 +858,7 @@ private extension IdentityKey {
 private final class FingerprintPreviewViewController: UINavigationController {
     init(
         theirVerificationState: VerificationState = .verified,
+        keyTransparencyIsEnabled: Bool = true,
         keyTransparencyViewInitialState: FingerprintViewController.KeyTransparencyView.State = .readyToVerify,
     ) {
         let recipientAci = Aci.randomForTesting()
@@ -870,8 +881,11 @@ private final class FingerprintPreviewViewController: UINavigationController {
                 theirAciIdentityKey: recipientIdentityKey,
                 theirName: "Boba Fett",
             ),
-            keyTransparencyCheckParams: nil,
-            keyTransparencyViewInitialState: keyTransparencyViewInitialState,
+            keyTransparencyState: FingerprintViewController.KeyTransparencyState(
+                isEnabled: keyTransparencyIsEnabled,
+                checkParams: nil,
+                viewInitialState: keyTransparencyViewInitialState,
+            ),
             deps: nil,
         )
 
@@ -909,6 +923,11 @@ private final class FingerprintPreviewViewController: UINavigationController {
 @available(iOS 17, *)
 #Preview("KT Failure") {
     FingerprintPreviewViewController(keyTransparencyViewInitialState: .verifiedFailure)
+}
+
+@available(iOS 17, *)
+#Preview("KT Disabled") {
+    FingerprintPreviewViewController(keyTransparencyIsEnabled: false)
 }
 
 #endif

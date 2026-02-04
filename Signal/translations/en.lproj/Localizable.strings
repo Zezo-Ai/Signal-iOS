@@ -8152,6 +8152,12 @@
 /* When a chat is archived and receives a new message, it is unarchived. Turning this switch on disables this feature if the chat in question is also muted. This string is a brief label for a switch paired with a longer description underneath, in the Chats settings. */
 "SETTINGS_KEEP_MUTED_ARCHIVED_LABEL" = "Keep Muted Chats Archived";
 
+/* Footer for settings section describing Key Transparency. */
+"SETTINGS_KEY_TRANSPARENCY_OPT_OUT_FOOTER" = "When enabled, Signal will attempt to automatically verify the encryption of 1:1 chats.";
+
+/* Title for for a settings option describing that Key Transparency is enabled. */
+"SETTINGS_KEY_TRANSPARENCY_OPT_OUT_SWITCH_TITLE" = "Automatic Key Verification";
+
 /* No comment provided by engineer. */
 "SETTINGS_LEGAL_TERMS_CELL" = "Terms & Privacy Policy";
 
