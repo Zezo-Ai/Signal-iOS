@@ -19,6 +19,11 @@ class DebugUIPrompts: DebugUIPage {
         var items = [OWSTableItem]()
 
         items += [
+            OWSTableItem(title: "Reenable KT first-time education", actionBlock: {
+                db.write { tx in
+                    KeyTransparencyManager.setHasShownFirstTimeEducation(false, tx: tx)
+                }
+            }),
 
             OWSTableItem(title: "Reenable disabled inactive linked device reminder megaphones", actionBlock: {
                 db.write { tx in

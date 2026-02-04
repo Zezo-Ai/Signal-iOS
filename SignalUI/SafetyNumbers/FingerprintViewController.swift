@@ -32,12 +32,14 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
 
         let fingerprintResult: FingerprintResult?
         let keyTransparencyState: KeyTransparencyState?
+        let keyTransparencyShouldShowEducation: Bool
         (
             fingerprintResult,
             keyTransparencyState,
+            keyTransparencyShouldShowEducation,
         ) = db.read { tx in
             guard let theirAci else {
-                return (nil, nil)
+                return (nil, nil, false)
             }
 
             let theirAddress = SignalServiceAddress(theirAci)
@@ -50,7 +52,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
                 let localIdentifiers = tsAccountManager.localIdentifiers(tx: tx),
                 let myAciIdentityKey = identityManager.identityKeyPair(for: .aci, tx: tx)?.keyPair.identityKey
             else {
-                return (nil, nil)
+                return (nil, nil, false)
             }
 
             let keyTransparencyIsEnabled = KeyTransparencyManager.isEnabled(tx: tx)
@@ -59,6 +61,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
                 localIdentifiers: localIdentifiers,
                 tx: tx,
             )
+            let keyTransparencyShouldShowEducation = KeyTransparencyManager.shouldShowFirstTimeEducation(tx: tx)
 
             return (
                 FingerprintResult(
@@ -78,6 +81,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
                     checkParams: keyTransparencyCheckParams,
                     viewInitialState: keyTransparencyCheckParams == nil ? .unableToVerify : .readyToVerify,
                 ),
+                keyTransparencyShouldShowEducation,
             )
         }
 
@@ -112,7 +116,19 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
             ),
         )
         let navigationController = OWSNavigationController(rootViewController: fingerprintViewController)
-        viewController.present(navigationController, animated: true)
+
+        if keyTransparencyShouldShowEducation {
+            let educationSheet = KeyTransparencyFirstTimeEducationHeroSheet {
+                db.write { tx in
+                    KeyTransparencyManager.setHasShownFirstTimeEducation(true, tx: tx)
+                }
+
+                viewController.present(navigationController, animated: true)
+            }
+            viewController.present(educationSheet, animated: true)
+        } else {
+            viewController.present(navigationController, animated: true)
+        }
     }
 
     // MARK: -
@@ -840,6 +856,32 @@ private final class KeyTransparencyFailureHeroSheet: HeroSheetViewController {
                 theirName,
             ),
             primaryButton: .dismissing(title: CommonStrings.okButton),
+        )
+    }
+}
+
+// MARK: -
+
+private final class KeyTransparencyFirstTimeEducationHeroSheet: HeroSheetViewController {
+    init(onContinue: @MainActor @escaping () -> Void) {
+        super.init(
+            hero: .image(UIImage(named: "safety-number-verification")!),
+            title: OWSLocalizedString(
+                "SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_EDUCATION_SHEET_TITLE",
+                comment: "Title for a sheet introducing Key Transparency.",
+            ),
+            body: OWSLocalizedString(
+                "SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_EDUCATION_SHEET_BODY",
+                comment: "Body for a sheet introducing Key Transparency.",
+            ),
+            primaryButton: HeroSheetViewController.Button(
+                title: CommonStrings.continueButton,
+                action: { sheet in
+                    sheet.dismiss(animated: true) {
+                        onContinue()
+                    }
+                },
+            ),
         )
     }
 }

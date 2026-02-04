@@ -10,6 +10,25 @@ public final class KeyTransparencyManager {
     private static let logger = PrefixedLogger(prefix: "[KT]")
     private var logger: PrefixedLogger { Self.logger }
 
+    private static let kvStore = NewKeyValueStore(collection: "KeyTransparencyManager")
+    private var kvStore: NewKeyValueStore { Self.kvStore }
+
+    /// Keys for `kvStore`.
+    /// - Important
+    /// If you're adding a new key here, consider whether it should be wiped
+    /// when Key Transparency is disabled. See: `setIsEnabled`.
+    private enum KVStoreKeys {
+        /// Keys to a `Bool` representing whether or not KT is enabled.
+        static let isEnabled = "isEnabled"
+        /// Keys to a `SelfCheckState`'s raw value.
+        static let selfCheckState = "selfCheckState"
+        /// Keys to a `Bool` representing whether or not we should show
+        /// first-time education about KT.
+        static let shouldShowFirstTimeEducation = "shouldShowFirstTimeEducation"
+        /// Keys to an opaque LibSignalClient blob.
+        static let distinguishedTreeHead = "distinguishedTreeHead"
+    }
+
     private let chatConnectionManager: ChatConnectionManager
     private let dateProvider: DateProvider
     private let db: DB
@@ -253,20 +272,17 @@ public final class KeyTransparencyManager {
         case failedRepeatedlyAndWarned = 4
     }
 
-    private static let selfCheckKVStore = NewKeyValueStore(collection: "KT.SelfCheck")
-    private static let selfCheckKVStoreKey = "state"
-
     private static func selfCheckState(tx: DBReadTransaction) -> SelfCheckState? {
-        return selfCheckKVStore.fetchValue(
+        return kvStore.fetchValue(
             Int64.self,
-            forKey: selfCheckKVStoreKey,
+            forKey: KVStoreKeys.selfCheckState,
             tx: tx,
         )
         .map { SelfCheckState(rawValue: $0)! }
     }
 
     private static func setSelfCheckState(_ state: SelfCheckState, tx: DBWriteTransaction) {
-        selfCheckKVStore.writeValue(state.rawValue, forKey: selfCheckKVStoreKey, tx: tx)
+        kvStore.writeValue(state.rawValue, forKey: KVStoreKeys.selfCheckState, tx: tx)
     }
 
     public static func shouldWarnSelfCheckFailed(tx: DBReadTransaction) -> Bool {
@@ -504,43 +520,47 @@ public final class KeyTransparencyManager {
 
     // MARK: - Opt-out
 
-    private static let isEnabledKVStore = NewKeyValueStore(collection: "KT.IsEnabled")
-    private static let isEnabledKVStoreKey = "isEnabled"
-
     public static func isEnabled(tx: DBReadTransaction) -> Bool {
         guard BuildFlags.KeyTransparency.enabled else {
             return false
         }
 
-        return isEnabledKVStore.fetchValue(Bool.self, forKey: isEnabledKVStoreKey, tx: tx) ?? true
+        return kvStore.fetchValue(Bool.self, forKey: KVStoreKeys.isEnabled, tx: tx) ?? true
     }
 
     public static func setIsEnabled(_ isEnabled: Bool, tx: DBWriteTransaction) {
         logger.info("\(isEnabled)")
 
-        isEnabledKVStore.writeValue(isEnabled, forKey: isEnabledKVStoreKey, tx: tx)
+        kvStore.writeValue(isEnabled, forKey: KVStoreKeys.isEnabled, tx: tx)
 
         if !isEnabled {
-            selfCheckKVStore.removeAll(tx: tx)
+            kvStore.removeValue(forKey: KVStoreKeys.distinguishedTreeHead, tx: tx)
+            kvStore.removeValue(forKey: KVStoreKeys.selfCheckState, tx: tx)
             selfCheckCronStore.setMostRecentDate(.distantPast, jitter: 0, tx: tx)
-            distinguishedTreeKVStore.removeAll(tx: tx)
             failIfThrows {
                 try KeyTransparencyRecord.deleteAll(tx.database)
             }
         }
     }
 
+    // MARK: - First-time education
+
+    public static func shouldShowFirstTimeEducation(tx: DBReadTransaction) -> Bool {
+        return kvStore.fetchValue(Bool.self, forKey: KVStoreKeys.shouldShowFirstTimeEducation, tx: tx) ?? true
+    }
+
+    public static func setHasShownFirstTimeEducation(_ value: Bool, tx: DBWriteTransaction) {
+        kvStore.writeValue(value, forKey: KVStoreKeys.shouldShowFirstTimeEducation, tx: tx)
+    }
+
     // MARK: -
 
-    private static let distinguishedTreeKVStore = NewKeyValueStore(collection: "KT.DistinguishedTree")
-    private static let distinguishedTreeKVStoreKey = "head"
-
     fileprivate static func getLastDistinguishedTreeHead(tx: DBReadTransaction) -> Data? {
-        return distinguishedTreeKVStore.fetchValue(Data.self, forKey: distinguishedTreeKVStoreKey, tx: tx)
+        return kvStore.fetchValue(Data.self, forKey: KVStoreKeys.distinguishedTreeHead, tx: tx)
     }
 
     fileprivate static func setLastDistinguishedTreeHead(_ blob: Data, tx: DBWriteTransaction) {
-        distinguishedTreeKVStore.writeValue(blob, forKey: distinguishedTreeKVStoreKey, tx: tx)
+        kvStore.writeValue(blob, forKey: KVStoreKeys.distinguishedTreeHead, tx: tx)
     }
 
     fileprivate static func getKeyTransparencyRecord(
