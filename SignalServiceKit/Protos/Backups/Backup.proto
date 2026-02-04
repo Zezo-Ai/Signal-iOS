@@ -16,6 +16,7 @@ message BackupInfo {
   bytes mediaRootBackupKey = 3; // 32-byte random value generated when the backup is uploaded for the first time.
   string currentAppVersion = 4;
   string firstAppVersion = 5;
+  bytes debugInfo = 6; // Client-specific data field for debug info during testing
 }
 
 // Frames must follow in the following ordering rules:
@@ -138,6 +139,7 @@ message AccountData {
     AppTheme appTheme = 28;  // If unset, treat the same as "Unknown" case
     CallsUseLessDataSetting callsUseLessDataSetting = 29;  // If unset, treat the same as "Unknown" case
     bool allowSealedSenderFromAnyone = 30;
+    bool allowAutomaticKeyVerification = 31;
   }
 
   message SubscriberData {
@@ -159,8 +161,15 @@ message AccountData {
   }
 
   message AndroidSpecificSettings {
+    enum NavigationBarSize {
+      UNKNOWN_BAR_SIZE = 0; // Intepret as "Normal"
+      NORMAL = 1;
+      COMPACT = 2;
+    }
+
     bool useSystemEmoji = 1;
     bool screenshotSecurity = 2;
+    NavigationBarSize navigationBarSize = 3; // If unset, treat the same as "Unknown" case
   }
 
   bytes profileKey = 1;
@@ -177,6 +186,8 @@ message AccountData {
   AndroidSpecificSettings androidSpecificSettings = 12;
   string bioText = 13;
   string bioEmoji = 14;
+  // Opaque blob containing key transparency data for the account
+  optional bytes keyTransparencyData = 15;
 }
 
 message Recipient {
@@ -265,6 +276,8 @@ message Contact {
   string systemFamilyName = 19;
   string systemNickname = 20;
   optional AvatarColor avatarColor = 21;
+  // Opaque blob containing key transparency data for the contact
+  optional bytes keyTransparencyData = 22;
 }
 
 message Group {
@@ -320,7 +333,7 @@ message Group {
       ADMINISTRATOR = 2;
     }
 
-    bytes userId = 1;
+    bytes user_id = 1;
     Role role = 2;
     reserved /*profileKey*/ 3; // This field is ignored in Backups, in favor of Contact frames for members
     reserved /*presentation*/ 4; // This field is deprecated in the context of static group state
@@ -336,14 +349,14 @@ message Group {
   }
 
   message MemberPendingAdminApproval {
-    bytes userId = 1;
+    bytes user_id = 1;
     reserved /*profileKey*/ 2; // This field is ignored in Backups, in favor of Contact frames for members
     reserved /*presentation*/ 3; // This field is deprecated in the context of static group state
     uint64 timestamp = 4;
   }
 
   message MemberBanned {
-    bytes userId = 1;
+    bytes user_id = 1;
     uint64 timestamp = 2;
   }
 
@@ -457,7 +470,6 @@ message ChatItem {
 
   message DirectionlessMessageDetails {
   }
-
 
   message PinDetails {
     uint64 pinnedAtTimestamp = 1;
@@ -762,13 +774,12 @@ message MessageAttachment {
 }
 
 message FilePointer {
-
   message LocatorInfo {
     // Must be non-empty if transitCdnKey or plaintextHash are set/nonempty.
     // Otherwise must be empty.
     bytes key = 1;
 
-    reserved /*bytes legacyDigest*/ 2;
+    reserved /*legacyDigest*/ 2;
 
     oneof integrityCheck {
       // Set if file was at one point downloaded and its plaintextHash was calculated
@@ -796,7 +807,7 @@ message FilePointer {
     // has not rotated since last upload; even if currently free tier.
     optional uint32 mediaTierCdnNumber = 7;
 
-    reserved /*string legacyMediaName*/ 8;
+    reserved /*legacyMediaName*/ 8;
 
     // Separate key used to encrypt this file for the local backup.
     // Generally required for local backups.
@@ -809,6 +820,7 @@ message FilePointer {
   reserved /*backupLocator*/ 1;
   reserved /*attachmentLocator*/ 2;
   reserved /*invalidAttachmentLocator*/ 3;
+  reserved /*localLocator*/ 12;
 
   optional string contentType = 4;
   optional bytes incrementalMac = 5;

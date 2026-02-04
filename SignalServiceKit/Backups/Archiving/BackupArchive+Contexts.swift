@@ -17,6 +17,8 @@ extension BackupArchive {
     /// archiving to be updating the database, just reading from it.
     /// (The exception to this is enqueuing attachment uploads.)
     open class ArchivingContext {
+        /// `LocalIdentifiers` for the user doing the archiving.
+        let localIdentifiers: LocalIdentifiers
         /// The timestamp at which the archiving process started.
         let startDate: Date
         /// The remote config at the start of archiving.
@@ -31,6 +33,7 @@ extension BackupArchive {
         let tx: DBReadTransaction
 
         init(
+            localIdentifiers: LocalIdentifiers,
             startDate: Date,
             remoteConfig: RemoteConfig,
             bencher: BackupArchive.ArchiveBencher,
@@ -38,6 +41,7 @@ extension BackupArchive {
             includedContentFilter: IncludedContentFilter,
             tx: DBReadTransaction,
         ) {
+            self.localIdentifiers = localIdentifiers
             self.startDate = startDate
             self.remoteConfig = remoteConfig
             self.bencher = bencher
@@ -49,6 +53,8 @@ extension BackupArchive {
 
     /// Base context class used for restoring from a backup.
     open class RestoringContext {
+        /// `LocalIdentifiers` for the user doing the restore.
+        public let localIdentifiers: LocalIdentifiers
         /// The timestamp at which we began restoring.
         public let startDate: Date
         /// The remote config at the start of restoring.
@@ -61,12 +67,14 @@ extension BackupArchive {
         public let tx: DBWriteTransaction
 
         init(
+            localIdentifiers: LocalIdentifiers,
             startDate: Date,
             remoteConfig: RemoteConfig,
             attachmentByteCounter: BackupArchiveAttachmentByteCounter,
             isPrimaryDevice: Bool,
             tx: DBWriteTransaction,
         ) {
+            self.localIdentifiers = localIdentifiers
             self.startDate = startDate
             self.remoteConfig = remoteConfig
             self.attachmentByteCounter = attachmentByteCounter

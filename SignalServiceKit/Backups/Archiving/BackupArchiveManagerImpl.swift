@@ -490,6 +490,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
             try Task.checkCancellation()
 
             let customChatColorContext = BackupArchive.CustomChatColorArchivingContext(
+                localIdentifiers: localIdentifiers,
                 startDate: startDate,
                 remoteConfig: remoteConfig,
                 bencher: bencher,
@@ -540,9 +541,9 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
             }
 
             let recipientArchivingContext = BackupArchive.RecipientArchivingContext(
-                localIdentifiers: localIdentifiers,
                 localRecipientId: localRecipientId,
                 localSignalRecipientRowId: localSignalRecipientRowId,
+                localIdentifiers: localIdentifiers,
                 startDate: startDate,
                 remoteConfig: remoteConfig,
                 bencher: bencher,
@@ -620,6 +621,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
             let chatArchivingContext = BackupArchive.ChatArchivingContext(
                 customChatColorContext: customChatColorContext,
                 recipientContext: recipientArchivingContext,
+                localIdentifiers: localIdentifiers,
                 startDate: startDate,
                 remoteConfig: remoteConfig,
                 bencher: bencher,
@@ -656,6 +658,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
             }
 
             let archivingContext = BackupArchive.ArchivingContext(
+                localIdentifiers: localIdentifiers,
                 startDate: startDate,
                 remoteConfig: remoteConfig,
                 bencher: bencher,
@@ -1016,6 +1019,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
                 ) {
                     accountData = BackupArchive.AccountDataRestoringContext(
                         backupPurpose: backupPurpose,
+                        localIdentifiers: localIdentifiers,
                         startDate: startDate,
                         remoteConfig: remoteConfig,
                         attachmentByteCounter: attachmentByteCounter,
@@ -1024,6 +1028,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
                     )
                     customChatColor = BackupArchive.CustomChatColorRestoringContext(
                         accountDataContext: accountData,
+                        localIdentifiers: localIdentifiers,
                         startDate: startDate,
                         remoteConfig: remoteConfig,
                         attachmentByteCounter: attachmentByteCounter,
@@ -1041,6 +1046,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
                     chat = BackupArchive.ChatRestoringContext(
                         customChatColorContext: customChatColor,
                         recipientContext: recipient,
+                        localIdentifiers: localIdentifiers,
                         startDate: startDate,
                         remoteConfig: remoteConfig,
                         attachmentByteCounter: attachmentByteCounter,
@@ -1051,6 +1057,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
                         accountDataContext: accountData,
                         chatContext: chat,
                         recipientContext: recipient,
+                        localIdentifiers: localIdentifiers,
                         startDate: startDate,
                         remoteConfig: remoteConfig,
                         attachmentByteCounter: attachmentByteCounter,
@@ -1058,6 +1065,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
                         tx: tx,
                     )
                     stickerPack = BackupArchive.RestoringContext(
+                        localIdentifiers: localIdentifiers,
                         startDate: startDate,
                         remoteConfig: remoteConfig,
                         attachmentByteCounter: attachmentByteCounter,

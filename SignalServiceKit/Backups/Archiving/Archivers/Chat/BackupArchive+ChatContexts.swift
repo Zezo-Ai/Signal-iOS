@@ -107,6 +107,7 @@ extension BackupArchive {
         init(
             customChatColorContext: CustomChatColorArchivingContext,
             recipientContext: RecipientArchivingContext,
+            localIdentifiers: LocalIdentifiers,
             startDate: Date,
             remoteConfig: RemoteConfig,
             bencher: BackupArchive.ArchiveBencher,
@@ -117,6 +118,7 @@ extension BackupArchive {
             self.customChatColorContext = customChatColorContext
             self.recipientContext = recipientContext
             super.init(
+                localIdentifiers: localIdentifiers,
                 startDate: startDate,
                 remoteConfig: remoteConfig,
                 bencher: bencher,
@@ -173,6 +175,7 @@ extension BackupArchive {
         init(
             customChatColorContext: CustomChatColorRestoringContext,
             recipientContext: RecipientRestoringContext,
+            localIdentifiers: LocalIdentifiers,
             startDate: Date,
             remoteConfig: RemoteConfig,
             attachmentByteCounter: BackupArchiveAttachmentByteCounter,
@@ -182,6 +185,7 @@ extension BackupArchive {
             self.customChatColorContext = customChatColorContext
             self.recipientContext = recipientContext
             super.init(
+                localIdentifiers: localIdentifiers,
                 startDate: startDate,
                 remoteConfig: remoteConfig,
                 attachmentByteCounter: attachmentByteCounter,
@@ -344,24 +348,6 @@ extension BackupArchive {
         private var currentCustomChatColorId = CustomChatColorId(value: 1)
         private let map = SharedMap<CustomChatColor.Key, CustomChatColorId>()
 
-        override init(
-            startDate: Date,
-            remoteConfig: RemoteConfig,
-            bencher: BackupArchive.ArchiveBencher,
-            attachmentByteCounter: BackupArchiveAttachmentByteCounter,
-            includedContentFilter: IncludedContentFilter,
-            tx: DBReadTransaction,
-        ) {
-            super.init(
-                startDate: startDate,
-                remoteConfig: remoteConfig,
-                bencher: bencher,
-                attachmentByteCounter: attachmentByteCounter,
-                includedContentFilter: includedContentFilter,
-                tx: tx,
-            )
-        }
-
         func assignCustomChatColorId(to customChatColorKey: CustomChatColor.Key) -> CustomChatColorId {
             defer {
                 currentCustomChatColorId = CustomChatColorId(value: currentCustomChatColorId.value + 1)
@@ -383,6 +369,7 @@ extension BackupArchive {
 
         init(
             accountDataContext: AccountDataRestoringContext,
+            localIdentifiers: LocalIdentifiers,
             startDate: Date,
             remoteConfig: RemoteConfig,
             attachmentByteCounter: BackupArchiveAttachmentByteCounter,
@@ -391,6 +378,7 @@ extension BackupArchive {
         ) {
             self.accountDataContext = accountDataContext
             super.init(
+                localIdentifiers: localIdentifiers,
                 startDate: startDate,
                 remoteConfig: remoteConfig,
                 attachmentByteCounter: attachmentByteCounter,

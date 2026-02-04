@@ -263,6 +263,9 @@ public class BackupArchiveContactRecipientArchiver: BackupArchiveProtoStreamWrit
                     useCase: .contact(recipient: recipient),
                     tx: context.tx,
                 ),
+                keyTransparencyBlob: recipient.aci.flatMap { aci in
+                    KeyTransparencyManager.getKeyTransparencyBlob(aci: aci, tx: context.tx)
+                },
             )
 
             writeToStream(contact: contact, contactAddress: contactAddress, contactDbRowId: recipient.id, frameBencher: frameBencher)
@@ -377,6 +380,7 @@ public class BackupArchiveContactRecipientArchiver: BackupArchiveProtoStreamWrit
                         useCase: .contactWithoutRecipient(address: contactAddress.asInteropAddress()),
                         tx: context.tx,
                     ),
+                    keyTransparencyBlob: nil, // Can't do Key Transparency without a recipient
                 )
 
                 writeToStream(
@@ -447,6 +451,7 @@ public class BackupArchiveContactRecipientArchiver: BackupArchiveProtoStreamWrit
                 useCase: .contactWithoutRecipient(address: address.asInteropAddress()),
                 tx: context.tx,
             ),
+            keyTransparencyBlob: nil,
         )
 
         let recipientAddress = address.asArchivingAddress()
@@ -489,6 +494,7 @@ public class BackupArchiveContactRecipientArchiver: BackupArchiveProtoStreamWrit
         identity: OWSRecipientIdentity?,
         signalAccount: SignalAccount?,
         defaultAvatarColor: AvatarTheme,
+        keyTransparencyBlob: Data?,
     ) -> BackupProto_Contact {
         var contact = BackupProto_Contact()
         contact.blocked = isBlocked
@@ -554,6 +560,10 @@ public class BackupArchiveContactRecipientArchiver: BackupArchiveProtoStreamWrit
             contact.systemNickname = signalAccount.nickname
         }
         contact.avatarColor = defaultAvatarColor.asBackupProtoAvatarColor
+
+        if let keyTransparencyBlob {
+            contact.keyTransparencyData = keyTransparencyBlob
+        }
 
         return contact
     }
@@ -859,6 +869,17 @@ public class BackupArchiveContactRecipientArchiver: BackupArchiveProtoStreamWrit
             } catch let error {
                 partialErrors.append(.restoreFrameError(.databaseInsertionFailed(error), recipientProto.recipientId))
             }
+        }
+
+        if
+            contactProto.hasKeyTransparencyData,
+            let aci = backupContactAddress.aci
+        {
+            KeyTransparencyManager.setKeyTransparencyBlob(
+                contactProto.keyTransparencyData,
+                aci: aci,
+                tx: context.tx,
+            )
         }
 
         if partialErrors.isEmpty {

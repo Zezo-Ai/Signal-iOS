@@ -194,6 +194,15 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
                 accountData.svrPin = pin
             }
 
+            if
+                let keyTransparencyBlob = KeyTransparencyManager.getKeyTransparencyBlob(
+                    aci: context.localIdentifiers.aci,
+                    tx: context.tx,
+                )
+            {
+                accountData.keyTransparencyData = keyTransparencyBlob
+            }
+
             let error = Self.writeFrameToStream(
                 stream,
                 objectId: BackupArchive.AccountDataId.localUser,
@@ -316,6 +325,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
         }
 
         accountSettings.allowSealedSenderFromAnyone = udManager.shouldAllowUnrestrictedAccessLocal(tx: context.tx)
+        accountSettings.allowAutomaticKeyVerification = KeyTransparencyManager.isEnabled(tx: context.tx)
         accountSettings.defaultSentMediaQuality = imageQuality.fetchValue(tx: context.tx) == .high ? .high : .standard
 
         var downloadSettings = BackupProto_AccountData.AutoDownloadSettings()
@@ -562,6 +572,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
             }
 
             udManager.setShouldAllowUnrestrictedAccessLocal(settings.allowSealedSenderFromAnyone, tx: context.tx)
+            KeyTransparencyManager.setIsEnabled(settings.allowAutomaticKeyVerification, tx: context.tx)
 
             switch settings.defaultSentMediaQuality {
             case .high:
@@ -652,6 +663,14 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
 
         if !accountData.svrPin.isEmpty {
             ows2FAManager.restorePinFromBackup(accountData.svrPin, tx: context.tx)
+        }
+
+        if accountData.hasKeyTransparencyData {
+            KeyTransparencyManager.setKeyTransparencyBlob(
+                accountData.keyTransparencyData,
+                aci: context.localIdentifiers.aci,
+                tx: context.tx,
+            )
         }
 
         if partialErrors.isEmpty {

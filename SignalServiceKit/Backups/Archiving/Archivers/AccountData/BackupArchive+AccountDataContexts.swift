@@ -19,6 +19,7 @@ extension BackupArchive {
 
         init(
             backupPurpose: MessageBackupPurpose,
+            localIdentifiers: LocalIdentifiers,
             startDate: Date,
             remoteConfig: RemoteConfig,
             attachmentByteCounter: BackupArchiveAttachmentByteCounter,
@@ -27,6 +28,7 @@ extension BackupArchive {
         ) {
             self.backupPurpose = backupPurpose
             super.init(
+                localIdentifiers: localIdentifiers,
                 startDate: startDate,
                 remoteConfig: remoteConfig,
                 attachmentByteCounter: attachmentByteCounter,

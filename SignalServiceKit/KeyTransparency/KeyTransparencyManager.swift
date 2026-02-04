@@ -195,14 +195,14 @@ public final class KeyTransparencyManager {
         let ktClient = try await chatConnectionManager.keyTransparencyClient()
         let libSignalStore = KeyTransparencyStoreForLibSignal(db: db)
 
-        let existingKeyTransparencyRecord: KeyTransparencyRecord?
+        let existingKeyTransparencyBlob: Data?
         let selfCheckState: SelfCheckState?
         (
-            existingKeyTransparencyRecord,
+            existingKeyTransparencyBlob,
             selfCheckState,
         ) = db.read { tx in
             return (
-                Self.getKeyTransparencyRecord(
+                Self.getKeyTransparencyBlob(
                     aci: params.aciInfo.aci,
                     tx: tx,
                 ),
@@ -211,7 +211,7 @@ public final class KeyTransparencyManager {
         }
 
         if params.isLocalUser {
-            if existingKeyTransparencyRecord != nil {
+            if existingKeyTransparencyBlob != nil {
                 logger.info("Monitoring for self.")
 
                 try await ktClient.monitor(
@@ -242,7 +242,7 @@ public final class KeyTransparencyManager {
                 throw OWSGenericError("Cannot check other with failed self-check.")
             }
 
-            if existingKeyTransparencyRecord != nil {
+            if existingKeyTransparencyBlob != nil {
                 logger.info("Monitoring for other.")
 
                 try await ktClient.monitor(
@@ -563,16 +563,16 @@ public final class KeyTransparencyManager {
         kvStore.writeValue(blob, forKey: KVStoreKeys.distinguishedTreeHead, tx: tx)
     }
 
-    fileprivate static func getKeyTransparencyRecord(
+    public static func getKeyTransparencyBlob(
         aci: Aci,
         tx: DBReadTransaction,
-    ) -> KeyTransparencyRecord? {
+    ) -> Data? {
         return failIfThrows {
-            try KeyTransparencyRecord.fetchOne(tx.database, key: aci.rawUUID)
+            try KeyTransparencyRecord.fetchOne(tx.database, key: aci.rawUUID)?.libsignalBlob
         }
     }
 
-    fileprivate static func setKeyTransparencyBlob(
+    public static func setKeyTransparencyBlob(
         _ libsignalBlob: Data,
         aci: Aci,
         tx: DBWriteTransaction,
@@ -609,7 +609,7 @@ private struct KeyTransparencyStoreForLibSignal: KeyTransparency.Store {
 
     func getAccountData(for aci: Aci) async -> Data? {
         db.read { tx in
-            KeyTransparencyManager.getKeyTransparencyRecord(aci: aci, tx: tx)?.libsignalBlob
+            KeyTransparencyManager.getKeyTransparencyBlob(aci: aci, tx: tx)
         }
     }
 

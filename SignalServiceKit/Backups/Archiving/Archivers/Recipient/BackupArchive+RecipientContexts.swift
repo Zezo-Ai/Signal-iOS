@@ -112,7 +112,6 @@ extension BackupArchive {
 
         let localRecipientId: RecipientId
         let localSignalRecipientRowId: SignalRecipient.RowId
-        let localIdentifiers: LocalIdentifiers
 
         var localRecipientAddress: ContactAddress {
             return .init(
@@ -133,9 +132,9 @@ extension BackupArchive {
         private let callLinkIdMap = SharedMap<CallLinkRecordId, RecipientId>()
 
         init(
-            localIdentifiers: LocalIdentifiers,
             localRecipientId: RecipientId,
             localSignalRecipientRowId: SignalRecipient.RowId,
+            localIdentifiers: LocalIdentifiers,
             startDate: Date,
             remoteConfig: RemoteConfig,
             bencher: BackupArchive.ArchiveBencher,
@@ -143,7 +142,6 @@ extension BackupArchive {
             includedContentFilter: IncludedContentFilter,
             tx: DBReadTransaction,
         ) {
-            self.localIdentifiers = localIdentifiers
             self.localRecipientId = localRecipientId
             self.localSignalRecipientRowId = localSignalRecipientRowId
 
@@ -161,6 +159,7 @@ extension BackupArchive {
             }
 
             super.init(
+                localIdentifiers: localIdentifiers,
                 startDate: startDate,
                 remoteConfig: remoteConfig,
                 bencher: bencher,
@@ -271,7 +270,6 @@ extension BackupArchive {
             case callLink(CallLinkRecordId)
         }
 
-        let localIdentifiers: LocalIdentifiers
         var localSignalRecipientRowId: SignalRecipient.RowId?
 
         private let map = SharedMap<RecipientId, Address>()
@@ -281,24 +279,6 @@ extension BackupArchive {
         /// We cache the TSGroupThread here to avoid fetching later when we do restore the Chat.
         private let groupThreadCache = SharedMap<GroupId, TSGroupThread>()
         private let callLinkRecordCache = SharedMap<CallLinkRecordId, CallLinkRecord>()
-
-        init(
-            localIdentifiers: LocalIdentifiers,
-            startDate: Date,
-            remoteConfig: RemoteConfig,
-            attachmentByteCounter: BackupArchiveAttachmentByteCounter,
-            isPrimaryDevice: Bool,
-            tx: DBWriteTransaction,
-        ) {
-            self.localIdentifiers = localIdentifiers
-            super.init(
-                startDate: startDate,
-                remoteConfig: remoteConfig,
-                attachmentByteCounter: attachmentByteCounter,
-                isPrimaryDevice: isPrimaryDevice,
-                tx: tx,
-            )
-        }
 
         subscript(_ id: RecipientId) -> Address? {
             get { map[id] }

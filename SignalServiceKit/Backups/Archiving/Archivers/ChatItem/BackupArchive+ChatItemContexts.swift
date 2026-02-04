@@ -17,6 +17,7 @@ extension BackupArchive {
             accountDataContext: AccountDataRestoringContext,
             chatContext: ChatRestoringContext,
             recipientContext: RecipientRestoringContext,
+            localIdentifiers: LocalIdentifiers,
             startDate: Date,
             remoteConfig: RemoteConfig,
             attachmentByteCounter: BackupArchiveAttachmentByteCounter,
@@ -27,6 +28,7 @@ extension BackupArchive {
             self.recipientContext = recipientContext
             self.chatContext = chatContext
             super.init(
+                localIdentifiers: localIdentifiers,
                 startDate: startDate,
                 remoteConfig: remoteConfig,
                 attachmentByteCounter: attachmentByteCounter,

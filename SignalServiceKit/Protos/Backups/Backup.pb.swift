@@ -177,6 +177,9 @@ public struct BackupProto_BackupInfo: Sendable {
 
   public var firstAppVersion: String = String()
 
+  /// Client-specific data field for debug info during testing
+  public var debugInfo: Data = Data()
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -381,6 +384,16 @@ public struct BackupProto_AccountData: @unchecked Sendable {
     get {return _storage._bioEmoji}
     set {_uniqueStorage()._bioEmoji = newValue}
   }
+
+  /// Opaque blob containing key transparency data for the account
+  public var keyTransparencyData: Data {
+    get {return _storage._keyTransparencyData ?? Data()}
+    set {_uniqueStorage()._keyTransparencyData = newValue}
+  }
+  /// Returns true if `keyTransparencyData` has been explicitly set.
+  public var hasKeyTransparencyData: Bool {return _storage._keyTransparencyData != nil}
+  /// Clears the value of `keyTransparencyData`. Subsequent reads from it will return its default value.
+  public mutating func clearKeyTransparencyData() {_uniqueStorage()._keyTransparencyData = nil}
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -871,6 +884,11 @@ public struct BackupProto_AccountData: @unchecked Sendable {
       set {_uniqueStorage()._allowSealedSenderFromAnyone = newValue}
     }
 
+    public var allowAutomaticKeyVerification: Bool {
+      get {return _storage._allowAutomaticKeyVerification}
+      set {_uniqueStorage()._allowAutomaticKeyVerification = newValue}
+    }
+
     public var unknownFields = SwiftProtobuf.UnknownStorage()
 
     public init() {}
@@ -945,7 +963,50 @@ public struct BackupProto_AccountData: @unchecked Sendable {
 
     public var screenshotSecurity: Bool = false
 
+    /// If unset, treat the same as "Unknown" case
+    public var navigationBarSize: BackupProto_AccountData.AndroidSpecificSettings.NavigationBarSize = .unknownBarSize
+
     public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    public enum NavigationBarSize: SwiftProtobuf.Enum, Swift.CaseIterable {
+      public typealias RawValue = Int
+
+      /// Intepret as "Normal"
+      case unknownBarSize // = 0
+      case normal // = 1
+      case compact // = 2
+      case UNRECOGNIZED(Int)
+
+      public init() {
+        self = .unknownBarSize
+      }
+
+      public init?(rawValue: Int) {
+        switch rawValue {
+        case 0: self = .unknownBarSize
+        case 1: self = .normal
+        case 2: self = .compact
+        default: self = .UNRECOGNIZED(rawValue)
+        }
+      }
+
+      public var rawValue: Int {
+        switch self {
+        case .unknownBarSize: return 0
+        case .normal: return 1
+        case .compact: return 2
+        case .UNRECOGNIZED(let i): return i
+        }
+      }
+
+      // The compiler won't synthesize support with the UNRECOGNIZED case.
+      public static let allCases: [BackupProto_AccountData.AndroidSpecificSettings.NavigationBarSize] = [
+        .unknownBarSize,
+        .normal,
+        .compact,
+      ]
+
+    }
 
     public init() {}
   }
@@ -1194,6 +1255,16 @@ public struct BackupProto_Contact: @unchecked Sendable {
   public var hasAvatarColor: Bool {return _storage._avatarColor != nil}
   /// Clears the value of `avatarColor`. Subsequent reads from it will return its default value.
   public mutating func clearAvatarColor() {_uniqueStorage()._avatarColor = nil}
+
+  /// Opaque blob containing key transparency data for the contact
+  public var keyTransparencyData: Data {
+    get {return _storage._keyTransparencyData ?? Data()}
+    set {_uniqueStorage()._keyTransparencyData = newValue}
+  }
+  /// Returns true if `keyTransparencyData` has been explicitly set.
+  public var hasKeyTransparencyData: Bool {return _storage._keyTransparencyData != nil}
+  /// Clears the value of `keyTransparencyData`. Subsequent reads from it will return its default value.
+  public mutating func clearKeyTransparencyData() {_uniqueStorage()._keyTransparencyData = nil}
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -6447,7 +6518,7 @@ extension BackupProto_GroupV2AccessLevel: SwiftProtobuf._ProtoNameProviding {
 
 extension BackupProto_BackupInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".BackupInfo"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}version\0\u{1}backupTimeMs\0\u{1}mediaRootBackupKey\0\u{1}currentAppVersion\0\u{1}firstAppVersion\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}version\0\u{1}backupTimeMs\0\u{1}mediaRootBackupKey\0\u{1}currentAppVersion\0\u{1}firstAppVersion\0\u{1}debugInfo\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -6460,6 +6531,7 @@ extension BackupProto_BackupInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageI
       case 3: try { try decoder.decodeSingularBytesField(value: &self.mediaRootBackupKey) }()
       case 4: try { try decoder.decodeSingularStringField(value: &self.currentAppVersion) }()
       case 5: try { try decoder.decodeSingularStringField(value: &self.firstAppVersion) }()
+      case 6: try { try decoder.decodeSingularBytesField(value: &self.debugInfo) }()
       default: break
       }
     }
@@ -6481,6 +6553,9 @@ extension BackupProto_BackupInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageI
     if !self.firstAppVersion.isEmpty {
       try visitor.visitSingularStringField(value: self.firstAppVersion, fieldNumber: 5)
     }
+    if !self.debugInfo.isEmpty {
+      try visitor.visitSingularBytesField(value: self.debugInfo, fieldNumber: 6)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -6490,6 +6565,7 @@ extension BackupProto_BackupInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageI
     if lhs.mediaRootBackupKey != rhs.mediaRootBackupKey {return false}
     if lhs.currentAppVersion != rhs.currentAppVersion {return false}
     if lhs.firstAppVersion != rhs.firstAppVersion {return false}
+    if lhs.debugInfo != rhs.debugInfo {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -6666,7 +6742,7 @@ extension BackupProto_Frame: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
 
 extension BackupProto_AccountData: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".AccountData"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}profileKey\0\u{1}username\0\u{1}usernameLink\0\u{1}givenName\0\u{1}familyName\0\u{1}avatarUrlPath\0\u{1}donationSubscriberData\0\u{2}\u{2}accountSettings\0\u{1}backupsSubscriberData\0\u{1}svrPin\0\u{1}androidSpecificSettings\0\u{1}bioText\0\u{1}bioEmoji\0\u{c}\u{8}\u{1}")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}profileKey\0\u{1}username\0\u{1}usernameLink\0\u{1}givenName\0\u{1}familyName\0\u{1}avatarUrlPath\0\u{1}donationSubscriberData\0\u{2}\u{2}accountSettings\0\u{1}backupsSubscriberData\0\u{1}svrPin\0\u{1}androidSpecificSettings\0\u{1}bioText\0\u{1}bioEmoji\0\u{1}keyTransparencyData\0\u{c}\u{8}\u{1}")
 
   fileprivate class _StorageClass {
     var _profileKey: Data = Data()
@@ -6682,6 +6758,7 @@ extension BackupProto_AccountData: SwiftProtobuf.Message, SwiftProtobuf._Message
     var _androidSpecificSettings: BackupProto_AccountData.AndroidSpecificSettings? = nil
     var _bioText: String = String()
     var _bioEmoji: String = String()
+    var _keyTransparencyData: Data? = nil
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -6705,6 +6782,7 @@ extension BackupProto_AccountData: SwiftProtobuf.Message, SwiftProtobuf._Message
       _androidSpecificSettings = source._androidSpecificSettings
       _bioText = source._bioText
       _bioEmoji = source._bioEmoji
+      _keyTransparencyData = source._keyTransparencyData
     }
   }
 
@@ -6736,6 +6814,7 @@ extension BackupProto_AccountData: SwiftProtobuf.Message, SwiftProtobuf._Message
         case 12: try { try decoder.decodeSingularMessageField(value: &_storage._androidSpecificSettings) }()
         case 13: try { try decoder.decodeSingularStringField(value: &_storage._bioText) }()
         case 14: try { try decoder.decodeSingularStringField(value: &_storage._bioEmoji) }()
+        case 15: try { try decoder.decodeSingularBytesField(value: &_storage._keyTransparencyData) }()
         default: break
         }
       }
@@ -6787,6 +6866,9 @@ extension BackupProto_AccountData: SwiftProtobuf.Message, SwiftProtobuf._Message
       if !_storage._bioEmoji.isEmpty {
         try visitor.visitSingularStringField(value: _storage._bioEmoji, fieldNumber: 14)
       }
+      try { if let v = _storage._keyTransparencyData {
+        try visitor.visitSingularBytesField(value: v, fieldNumber: 15)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -6809,6 +6891,7 @@ extension BackupProto_AccountData: SwiftProtobuf.Message, SwiftProtobuf._Message
         if _storage._androidSpecificSettings != rhs_storage._androidSpecificSettings {return false}
         if _storage._bioText != rhs_storage._bioText {return false}
         if _storage._bioEmoji != rhs_storage._bioEmoji {return false}
+        if _storage._keyTransparencyData != rhs_storage._keyTransparencyData {return false}
         return true
       }
       if !storagesAreEqual {return false}
@@ -6929,7 +7012,7 @@ extension BackupProto_AccountData.AutoDownloadSettings.AutoDownloadOption: Swift
 
 extension BackupProto_AccountData.AccountSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = BackupProto_AccountData.protoMessageName + ".AccountSettings"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}readReceipts\0\u{1}sealedSenderIndicators\0\u{1}typingIndicators\0\u{1}linkPreviews\0\u{1}notDiscoverableByPhoneNumber\0\u{1}preferContactAvatars\0\u{1}universalExpireTimerSeconds\0\u{1}preferredReactionEmoji\0\u{1}displayBadgesOnProfile\0\u{1}keepMutedChatsArchived\0\u{1}hasSetMyStoriesPrivacy\0\u{1}hasViewedOnboardingStory\0\u{1}storiesDisabled\0\u{1}storyViewReceiptsEnabled\0\u{1}hasSeenGroupStoryEducationSheet\0\u{1}hasCompletedUsernameOnboarding\0\u{1}phoneNumberSharingMode\0\u{1}defaultChatStyle\0\u{1}customChatColors\0\u{1}optimizeOnDeviceStorage\0\u{1}backupTier\0\u{2}\u{2}defaultSentMediaQuality\0\u{1}autoDownloadSettings\0\u{2}\u{2}screenLockTimeoutMinutes\0\u{1}pinReminders\0\u{1}appTheme\0\u{1}callsUseLessDataSetting\0\u{1}allowSealedSenderFromAnyone\0\u{c}\u{16}\u{1}\u{c}\u{19}\u{1}")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}readReceipts\0\u{1}sealedSenderIndicators\0\u{1}typingIndicators\0\u{1}linkPreviews\0\u{1}notDiscoverableByPhoneNumber\0\u{1}preferContactAvatars\0\u{1}universalExpireTimerSeconds\0\u{1}preferredReactionEmoji\0\u{1}displayBadgesOnProfile\0\u{1}keepMutedChatsArchived\0\u{1}hasSetMyStoriesPrivacy\0\u{1}hasViewedOnboardingStory\0\u{1}storiesDisabled\0\u{1}storyViewReceiptsEnabled\0\u{1}hasSeenGroupStoryEducationSheet\0\u{1}hasCompletedUsernameOnboarding\0\u{1}phoneNumberSharingMode\0\u{1}defaultChatStyle\0\u{1}customChatColors\0\u{1}optimizeOnDeviceStorage\0\u{1}backupTier\0\u{2}\u{2}defaultSentMediaQuality\0\u{1}autoDownloadSettings\0\u{2}\u{2}screenLockTimeoutMinutes\0\u{1}pinReminders\0\u{1}appTheme\0\u{1}callsUseLessDataSetting\0\u{1}allowSealedSenderFromAnyone\0\u{1}allowAutomaticKeyVerification\0\u{c}\u{16}\u{1}\u{c}\u{19}\u{1}")
 
   fileprivate class _StorageClass {
     var _readReceipts: Bool = false
@@ -6960,6 +7043,7 @@ extension BackupProto_AccountData.AccountSettings: SwiftProtobuf.Message, SwiftP
     var _appTheme: BackupProto_AccountData.AppTheme = .unknownAppTheme
     var _callsUseLessDataSetting: BackupProto_AccountData.CallsUseLessDataSetting = .unknownCallDataSetting
     var _allowSealedSenderFromAnyone: Bool = false
+    var _allowAutomaticKeyVerification: Bool = false
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -6998,6 +7082,7 @@ extension BackupProto_AccountData.AccountSettings: SwiftProtobuf.Message, SwiftP
       _appTheme = source._appTheme
       _callsUseLessDataSetting = source._callsUseLessDataSetting
       _allowSealedSenderFromAnyone = source._allowSealedSenderFromAnyone
+      _allowAutomaticKeyVerification = source._allowAutomaticKeyVerification
     }
   }
 
@@ -7044,6 +7129,7 @@ extension BackupProto_AccountData.AccountSettings: SwiftProtobuf.Message, SwiftP
         case 28: try { try decoder.decodeSingularEnumField(value: &_storage._appTheme) }()
         case 29: try { try decoder.decodeSingularEnumField(value: &_storage._callsUseLessDataSetting) }()
         case 30: try { try decoder.decodeSingularBoolField(value: &_storage._allowSealedSenderFromAnyone) }()
+        case 31: try { try decoder.decodeSingularBoolField(value: &_storage._allowAutomaticKeyVerification) }()
         default: break
         }
       }
@@ -7140,6 +7226,9 @@ extension BackupProto_AccountData.AccountSettings: SwiftProtobuf.Message, SwiftP
       if _storage._allowSealedSenderFromAnyone != false {
         try visitor.visitSingularBoolField(value: _storage._allowSealedSenderFromAnyone, fieldNumber: 30)
       }
+      if _storage._allowAutomaticKeyVerification != false {
+        try visitor.visitSingularBoolField(value: _storage._allowAutomaticKeyVerification, fieldNumber: 31)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -7177,6 +7266,7 @@ extension BackupProto_AccountData.AccountSettings: SwiftProtobuf.Message, SwiftP
         if _storage._appTheme != rhs_storage._appTheme {return false}
         if _storage._callsUseLessDataSetting != rhs_storage._callsUseLessDataSetting {return false}
         if _storage._allowSealedSenderFromAnyone != rhs_storage._allowSealedSenderFromAnyone {return false}
+        if _storage._allowAutomaticKeyVerification != rhs_storage._allowAutomaticKeyVerification {return false}
         return true
       }
       if !storagesAreEqual {return false}
@@ -7290,7 +7380,7 @@ extension BackupProto_AccountData.IAPSubscriberData: SwiftProtobuf.Message, Swif
 
 extension BackupProto_AccountData.AndroidSpecificSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = BackupProto_AccountData.protoMessageName + ".AndroidSpecificSettings"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}useSystemEmoji\0\u{1}screenshotSecurity\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}useSystemEmoji\0\u{1}screenshotSecurity\0\u{1}navigationBarSize\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -7300,6 +7390,7 @@ extension BackupProto_AccountData.AndroidSpecificSettings: SwiftProtobuf.Message
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularBoolField(value: &self.useSystemEmoji) }()
       case 2: try { try decoder.decodeSingularBoolField(value: &self.screenshotSecurity) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.navigationBarSize) }()
       default: break
       }
     }
@@ -7312,15 +7403,23 @@ extension BackupProto_AccountData.AndroidSpecificSettings: SwiftProtobuf.Message
     if self.screenshotSecurity != false {
       try visitor.visitSingularBoolField(value: self.screenshotSecurity, fieldNumber: 2)
     }
+    if self.navigationBarSize != .unknownBarSize {
+      try visitor.visitSingularEnumField(value: self.navigationBarSize, fieldNumber: 3)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: BackupProto_AccountData.AndroidSpecificSettings, rhs: BackupProto_AccountData.AndroidSpecificSettings) -> Bool {
     if lhs.useSystemEmoji != rhs.useSystemEmoji {return false}
     if lhs.screenshotSecurity != rhs.screenshotSecurity {return false}
+    if lhs.navigationBarSize != rhs.navigationBarSize {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
+}
+
+extension BackupProto_AccountData.AndroidSpecificSettings.NavigationBarSize: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0UNKNOWN_BAR_SIZE\0\u{1}NORMAL\0\u{1}COMPACT\0")
 }
 
 extension BackupProto_Recipient: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
@@ -7465,7 +7564,7 @@ extension BackupProto_Recipient: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
 
 extension BackupProto_Contact: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Contact"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}aci\0\u{1}pni\0\u{1}username\0\u{1}e164\0\u{1}blocked\0\u{1}visibility\0\u{1}registered\0\u{1}notRegistered\0\u{1}profileKey\0\u{1}profileSharing\0\u{1}profileGivenName\0\u{1}profileFamilyName\0\u{1}hideStory\0\u{1}identityKey\0\u{1}identityState\0\u{1}nickname\0\u{1}note\0\u{1}systemGivenName\0\u{1}systemFamilyName\0\u{1}systemNickname\0\u{1}avatarColor\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}aci\0\u{1}pni\0\u{1}username\0\u{1}e164\0\u{1}blocked\0\u{1}visibility\0\u{1}registered\0\u{1}notRegistered\0\u{1}profileKey\0\u{1}profileSharing\0\u{1}profileGivenName\0\u{1}profileFamilyName\0\u{1}hideStory\0\u{1}identityKey\0\u{1}identityState\0\u{1}nickname\0\u{1}note\0\u{1}systemGivenName\0\u{1}systemFamilyName\0\u{1}systemNickname\0\u{1}avatarColor\0\u{1}keyTransparencyData\0")
 
   fileprivate class _StorageClass {
     var _aci: Data? = nil
@@ -7488,6 +7587,7 @@ extension BackupProto_Contact: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     var _systemFamilyName: String = String()
     var _systemNickname: String = String()
     var _avatarColor: BackupProto_AvatarColor? = nil
+    var _keyTransparencyData: Data? = nil
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -7518,6 +7618,7 @@ extension BackupProto_Contact: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
       _systemFamilyName = source._systemFamilyName
       _systemNickname = source._systemNickname
       _avatarColor = source._avatarColor
+      _keyTransparencyData = source._keyTransparencyData
     }
   }
 
@@ -7581,6 +7682,7 @@ extension BackupProto_Contact: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
         case 19: try { try decoder.decodeSingularStringField(value: &_storage._systemFamilyName) }()
         case 20: try { try decoder.decodeSingularStringField(value: &_storage._systemNickname) }()
         case 21: try { try decoder.decodeSingularEnumField(value: &_storage._avatarColor) }()
+        case 22: try { try decoder.decodeSingularBytesField(value: &_storage._keyTransparencyData) }()
         default: break
         }
       }
@@ -7661,6 +7763,9 @@ extension BackupProto_Contact: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
       try { if let v = _storage._avatarColor {
         try visitor.visitSingularEnumField(value: v, fieldNumber: 21)
       } }()
+      try { if let v = _storage._keyTransparencyData {
+        try visitor.visitSingularBytesField(value: v, fieldNumber: 22)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -7690,6 +7795,7 @@ extension BackupProto_Contact: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
         if _storage._systemFamilyName != rhs_storage._systemFamilyName {return false}
         if _storage._systemNickname != rhs_storage._systemNickname {return false}
         if _storage._avatarColor != rhs_storage._avatarColor {return false}
+        if _storage._keyTransparencyData != rhs_storage._keyTransparencyData {return false}
         return true
       }
       if !storagesAreEqual {return false}
@@ -8079,7 +8185,7 @@ extension BackupProto_Group.GroupAttributeBlob: SwiftProtobuf.Message, SwiftProt
 
 extension BackupProto_Group.Member: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = BackupProto_Group.protoMessageName + ".Member"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}userId\0\u{1}role\0\u{2}\u{3}joinedAtVersion\0\u{3}label_emoji\0\u{3}label_string\0\u{c}\u{3}\u{1}\u{c}\u{4}\u{1}")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0\u{1}role\0\u{2}\u{3}joinedAtVersion\0\u{3}label_emoji\0\u{3}label_string\0\u{c}\u{3}\u{1}\u{c}\u{4}\u{1}")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -8177,7 +8283,7 @@ extension BackupProto_Group.MemberPendingProfileKey: SwiftProtobuf.Message, Swif
 
 extension BackupProto_Group.MemberPendingAdminApproval: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = BackupProto_Group.protoMessageName + ".MemberPendingAdminApproval"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}userId\0\u{2}\u{3}timestamp\0\u{c}\u{2}\u{1}\u{c}\u{3}\u{1}")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0\u{2}\u{3}timestamp\0\u{c}\u{2}\u{1}\u{c}\u{3}\u{1}")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -8212,7 +8318,7 @@ extension BackupProto_Group.MemberPendingAdminApproval: SwiftProtobuf.Message, S
 
 extension BackupProto_Group.MemberBanned: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = BackupProto_Group.protoMessageName + ".MemberBanned"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}userId\0\u{1}timestamp\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0\u{1}timestamp\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -10842,7 +10948,7 @@ extension BackupProto_MessageAttachment.Flag: SwiftProtobuf._ProtoNameProviding 
 
 extension BackupProto_FilePointer: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".FilePointer"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\u{4}contentType\0\u{1}incrementalMac\0\u{1}incrementalMacChunkSize\0\u{1}fileName\0\u{1}width\0\u{1}height\0\u{1}caption\0\u{1}blurHash\0\u{2}\u{2}locatorInfo\0\u{c}\u{1}\u{1}\u{c}\u{2}\u{1}\u{c}\u{3}\u{1}")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\u{4}contentType\0\u{1}incrementalMac\0\u{1}incrementalMacChunkSize\0\u{1}fileName\0\u{1}width\0\u{1}height\0\u{1}caption\0\u{1}blurHash\0\u{2}\u{2}locatorInfo\0\u{c}\u{1}\u{1}\u{c}\u{2}\u{1}\u{c}\u{3}\u{1}\u{c}\u{c}\u{1}")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
