@@ -24,6 +24,7 @@ public class QuotedMessageView: ManualStackViewWithLayer {
         let isOutgoing: Bool
         let isForPreview: Bool
         let quotedAuthorName: String
+        let memberLabel: String?
 
         var quotedInteractionIdentifier: InteractionSnapshotIdentifier? {
             guard let timestamp = quotedReplyModel.originalMessageTimestamp else {
@@ -46,7 +47,7 @@ public class QuotedMessageView: ManualStackViewWithLayer {
     private let remotelySourcedContentStack = ManualStackViewWithLayer(name: "remotelySourcedContentStack")
 
     private let stripeView = UIView()
-    private let quotedAuthorLabel = CVLabel()
+    private var quotedAuthorLabel = UILabel()
     private let quotedTextLabel = CVLabel()
     private let quoteContentSourceLabel = CVLabel()
     private let quoteReactionHeaderLabel = CVLabel()
@@ -76,6 +77,7 @@ public class QuotedMessageView: ManualStackViewWithLayer {
                 for: quotedReplyModel.originalMessageAuthorAddress,
                 tx: transaction,
             ).resolvedValue(),
+            memberLabel: quotedReplyModel.originalMessageMemberLabel,
         )
     }
 
@@ -102,6 +104,7 @@ public class QuotedMessageView: ManualStackViewWithLayer {
                 for: quotedReplyModel.originalMessageAuthorAddress,
                 tx: transaction,
             ).resolvedValue(),
+            memberLabel: quotedReplyModel.originalMessageMemberLabel,
         )
     }
 
@@ -118,7 +121,14 @@ public class QuotedMessageView: ManualStackViewWithLayer {
         var isOutgoing: Bool { state.isOutgoing }
         var isIncoming: Bool { !isOutgoing }
         var isForPreview: Bool { state.isForPreview }
-        var quotedAuthorName: String { state.quotedAuthorName }
+        fileprivate var quotedAuthorName: NSAttributedString {
+            let padding = " " + String(repeating: SignalSymbol.LeadingCharacter.nonBreakingSpace.rawValue, count: 2)
+            if let labelString = state.memberLabel {
+                return NSAttributedString(string: state.quotedAuthorName + padding + labelString)
+            } else {
+                return NSAttributedString(string: state.quotedAuthorName)
+            }
+        }
 
         let stripeThickness: CGFloat = 4
         var quotedAuthorFont: UIFont { UIFont.dynamicTypeSubheadlineClamped.semibold() }
@@ -264,7 +274,7 @@ public class QuotedMessageView: ManualStackViewWithLayer {
             if quotedReplyModel.originalMessageAuthorAddress.isLocalAddress {
                 authorName = CommonStrings.you
             } else {
-                authorName = quotedAuthorName
+                authorName = quotedAuthorName.string
             }
 
             let text: String
@@ -556,8 +566,23 @@ public class QuotedMessageView: ManualStackViewWithLayer {
 
         var innerVStackSubviews = [UIView]()
 
-        let quotedAuthorLabelConfig = configurator.quotedAuthorLabelConfig
-        quotedAuthorLabelConfig.applyForRendering(label: quotedAuthorLabel)
+        if let memberLabel = state.memberLabel {
+            quotedAuthorLabel = CVCapsuleLabel(
+                attributedText: configurator.quotedAuthorName,
+                textColor: configurator.quotedTextColor,
+                font: configurator.quotedAuthorFont,
+                highlightRange: (configurator.quotedAuthorName.string as NSString).range(of: memberLabel, options: .backwards),
+                highlightFont: .dynamicTypeFootnote,
+                axLabelPrefix: nil,
+                isQuotedReply: true,
+                lineBreakMode: .byTruncatingTail,
+                numberOfLines: 1,
+            )
+        } else {
+            let quotedAuthorLabelConfig = configurator.quotedAuthorLabelConfig
+            quotedAuthorLabelConfig.applyForRendering(label: quotedAuthorLabel)
+        }
+
         innerVStackSubviews.append(quotedAuthorLabel)
 
         let quotedTextLabelConfig = configurator.quotedTextLabelConfig
@@ -854,10 +879,19 @@ public class QuotedMessageView: ManualStackViewWithLayer {
         var innerVStackSubviewInfos = [ManualStackSubviewInfo]()
 
         let quotedAuthorLabelConfig = configurator.quotedAuthorLabelConfig
-        let quotedAuthorSize = CVText.measureLabel(
-            config: quotedAuthorLabelConfig,
-            maxWidth: maxLabelWidth,
-        )
+        let quotedAuthorSize: CGSize
+        if state.memberLabel != nil {
+            quotedAuthorSize = CVCapsuleLabel.measureLabel(
+                config: quotedAuthorLabelConfig,
+                maxWidth: maxLabelWidth,
+            )
+        } else {
+            quotedAuthorSize = CVText.measureLabel(
+                config: quotedAuthorLabelConfig,
+                maxWidth: maxLabelWidth,
+            )
+        }
+
         innerVStackSubviewInfos.append(quotedAuthorSize.asManualSubviewInfo)
 
         let quotedTextLabelConfig = configurator.quotedTextLabelConfig

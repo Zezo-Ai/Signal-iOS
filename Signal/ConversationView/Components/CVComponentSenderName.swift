@@ -59,7 +59,6 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
 
         let outerStack = componentView.outerStack
         let innerStack = componentView.innerStack
-        let label = componentView.label
 
         outerStack.reset()
         innerStack.reset()
@@ -71,7 +70,6 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
             innerStack.addSubviewToFillSuperviewEdges(backgroundView)
         }
 
-        labelConfig.applyForRendering(label: label)
         if let memberLabel = state.memberLabel {
             // Finds the first or last occurance of the member label.
             // Since member label is appended to the end in LTR and beginning in RTL, this
@@ -80,13 +78,21 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
             if !CurrentAppContext().isRTL {
                 options.insert(.backwards)
             }
-
-            label.highlightRange = (senderName.string as NSString).range(of: memberLabel, options: options)
-            label.highlightFont = .dynamicTypeFootnote
+            componentView.label = CVCapsuleLabel(
+                attributedText: senderName,
+                textColor: senderNameColor,
+                font: UIFont.dynamicTypeFootnote.semibold(),
+                highlightRange: (senderName.string as NSString).range(of: memberLabel, options: options),
+                highlightFont: .dynamicTypeFootnote,
+                axLabelPrefix: nil, // handled separately in CVItemViewState
+                isQuotedReply: false,
+            )
+        } else {
+            labelConfig.applyForRendering(label: componentView.label)
         }
 
         var subviews: [UIView] = []
-        subviews.append(label)
+        subviews.append(componentView.label)
 
         innerStack.configure(
             config: innerStackConfig,
@@ -110,18 +116,6 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
         let font = UIFont.dynamicTypeFootnote.semibold()
         return CVLabelConfig(
             text: .attributedText(senderName),
-            displayConfig: .forUnstyledText(font: font, textColor: senderNameColor),
-            font: font,
-            textColor: senderNameColor,
-            numberOfLines: 0,
-            lineBreakMode: .byWordWrapping,
-        )
-    }
-
-    private var memberLabelConfig: CVLabelConfig {
-        let font = UIFont.dynamicTypeFootnote
-        return CVLabelConfig(
-            text: .text(memberLabel ?? ""),
             displayConfig: .forUnstyledText(font: font, textColor: senderNameColor),
             font: font,
             textColor: senderNameColor,
@@ -165,7 +159,15 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
         )
 
         var subviewInfos: [ManualStackSubviewInfo] = []
-        let labelSize = CVCapsuleLabel.measureLabel(config: labelConfig, maxWidth: maxWidth)
+        let labelSize: CGSize
+        if state.memberLabel != nil {
+            labelSize = CVCapsuleLabel.measureLabel(
+                config: labelConfig,
+                maxWidth: maxWidth,
+            )
+        } else {
+            labelSize = CVText.measureLabel(config: labelConfig, maxWidth: maxWidth)
+        }
         let labelInfo = labelSize.asManualSubviewInfo
         subviewInfos.insert(labelInfo, at: 0)
 
@@ -192,7 +194,7 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
     // It could be the entire item or some part thereof.
     public class CVComponentViewSenderName: NSObject, CVComponentView {
 
-        fileprivate let label = CVCapsuleLabel()
+        fileprivate var label = UILabel()
 
         fileprivate let outerStack = ManualStackView(name: "CVComponentViewSenderName.outerStack")
         fileprivate let innerStack = ManualStackView(name: "CVComponentViewSenderName.innerStack")

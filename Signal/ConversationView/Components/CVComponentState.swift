@@ -1556,7 +1556,18 @@ private extension CVComponentState.Builder {
                     transaction: transaction,
                 )
             } else if let quotedMessage = message.quotedMessage {
-                return QuotedReplyModel.build(replyMessage: message, quotedMessage: quotedMessage, transaction: transaction)
+                var memberLabel: String?
+                if
+                    BuildFlags.MemberLabel.display, let groupThread = thread as? TSGroupThread,
+                    let originalMessageAuthor = quotedMessage.authorAddress.aci
+                {
+                    memberLabel = groupThread.groupModel.groupMembership.memberLabel(for: originalMessageAuthor)?.labelForRendering()
+                    memberLabel = memberLabel?
+                        .components(separatedBy: .whitespaces)
+                        .joined(separator: SignalSymbol.LeadingCharacter.nonBreakingSpace.rawValue)
+                }
+
+                return QuotedReplyModel.build(replyMessage: message, quotedMessage: quotedMessage, memberLabel: memberLabel, transaction: transaction)
             } else {
                 return nil
             }

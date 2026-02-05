@@ -526,15 +526,17 @@ struct ConversationHeaderBuilder {
 
     mutating func addMemberLabel(label: String, color: UIColor) -> UILabel {
         subviews.append(UIView.spacer(withHeight: 4))
-        let memberLabelLabel = CVCapsuleLabel()
-        memberLabelLabel.text = label
-        memberLabelLabel.textColor = color
-        memberLabelLabel.numberOfLines = 0
-        memberLabelLabel.highlightRange = NSRange(location: 0, length: (label as NSString).length)
-        memberLabelLabel.highlightFont = .dynamicTypeSubheadlineClamped
-        memberLabelLabel.axLabelPrefix = OWSLocalizedString(
-            "MEMBER_LABEL_AX_PREFIX",
-            comment: "Accessibility prefix for member labels.",
+        let memberLabelLabel = CVCapsuleLabel(
+            attributedText: NSAttributedString(string: label),
+            textColor: color,
+            font: nil,
+            highlightRange: NSRange(location: 0, length: (label as NSString).length),
+            highlightFont: .dynamicTypeSubheadlineClamped,
+            axLabelPrefix: OWSLocalizedString(
+                "MEMBER_LABEL_AX_PREFIX",
+                comment: "Accessibility prefix for member labels.",
+            ),
+            isQuotedReply: false,
         )
 
         subviews.append(memberLabelLabel)

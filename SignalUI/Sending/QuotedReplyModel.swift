@@ -17,6 +17,8 @@ public class QuotedReplyModel {
     /// Address of the original message's author, be it StoryMessage or TSMessage.
     public let originalMessageAuthorAddress: SignalServiceAddress
 
+    public let originalMessageMemberLabel: String?
+
     public let isOriginalMessageAuthorLocalUser: Bool
 
     /// IFF the original's content was a story message, the emoji used
@@ -248,6 +250,7 @@ public class QuotedReplyModel {
             return QuotedReplyModel(
                 originalMessageTimestamp: storyMessage.timestamp,
                 originalMessageAuthorAddress: storyMessage.authorAddress,
+                originalMessageMemberLabel: nil,
                 isOriginalMessageAuthorLocalUser: isOriginalAuthorLocalUser,
                 storyReactionEmoji: reactionEmoji,
                 originalContent: originalContent,
@@ -319,6 +322,7 @@ public class QuotedReplyModel {
             return QuotedReplyModel(
                 originalMessageTimestamp: storyTimestamp,
                 originalMessageAuthorAddress: SignalServiceAddress(storyAuthorAci),
+                originalMessageMemberLabel: nil,
                 isOriginalMessageAuthorLocalUser: isOriginalMessageAuthorLocalUser,
                 storyReactionEmoji: message.storyReactionEmoji,
                 originalContent: .expiredStory,
@@ -336,6 +340,7 @@ public class QuotedReplyModel {
     public static func build(
         replyMessage message: TSMessage,
         quotedMessage: TSQuotedMessage,
+        memberLabel: String?,
         transaction: DBReadTransaction,
     ) -> QuotedReplyModel {
         func buildQuotedReplyModel(
@@ -350,6 +355,7 @@ public class QuotedReplyModel {
             return QuotedReplyModel(
                 originalMessageTimestamp: quotedMessage.timestampValue?.uint64Value,
                 originalMessageAuthorAddress: quotedMessage.authorAddress,
+                originalMessageMemberLabel: isOriginalAuthorLocalUser ? nil : memberLabel,
                 isOriginalMessageAuthorLocalUser: isOriginalAuthorLocalUser,
                 storyReactionEmoji: nil,
                 originalContent: originalContent,
@@ -458,6 +464,7 @@ public class QuotedReplyModel {
     private init(
         originalMessageTimestamp: UInt64?,
         originalMessageAuthorAddress: SignalServiceAddress,
+        originalMessageMemberLabel: String?,
         isOriginalMessageAuthorLocalUser: Bool,
         storyReactionEmoji: String?,
         originalContent: OriginalContent,
@@ -465,6 +472,7 @@ public class QuotedReplyModel {
     ) {
         self.originalMessageTimestamp = originalMessageTimestamp
         self.originalMessageAuthorAddress = originalMessageAuthorAddress
+        self.originalMessageMemberLabel = originalMessageMemberLabel
         self.isOriginalMessageAuthorLocalUser = isOriginalMessageAuthorLocalUser
         self.storyReactionEmoji = storyReactionEmoji
         self.originalContent = originalContent

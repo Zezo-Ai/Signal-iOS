@@ -234,15 +234,17 @@ public class ContactCellView: ManualStackView {
                 if
                     let memberLabel = configuration.memberLabel
                 {
-                    let memberLabelLabel = CVCapsuleLabel()
-                    memberLabelLabel.text = memberLabel.label
-                    memberLabelLabel.textColor = memberLabel.groupNameColor
-                    memberLabelLabel.numberOfLines = 0
-                    memberLabelLabel.highlightRange = NSRange(location: 0, length: (memberLabel.label as NSString).length)
-                    memberLabelLabel.highlightFont = .dynamicTypeCaption1Clamped
-                    memberLabelLabel.axLabelPrefix = OWSLocalizedString(
-                        "MEMBER_LABEL_AX_PREFIX",
-                        comment: "Accessibility prefix for member labels.",
+                    let memberLabelLabel = CVCapsuleLabel(
+                        attributedText: NSAttributedString(string: memberLabel.label),
+                        textColor: memberLabel.groupNameColor,
+                        font: nil,
+                        highlightRange: NSRange(location: 0, length: (memberLabel.label as NSString).length),
+                        highlightFont: .dynamicTypeCaption1Clamped,
+                        axLabelPrefix: OWSLocalizedString(
+                            "MEMBER_LABEL_AX_PREFIX",
+                            comment: "Accessibility prefix for member labels.",
+                        ),
+                        isQuotedReply: false,
                     )
 
                     textStackSubviews.append(memberLabelLabel)
