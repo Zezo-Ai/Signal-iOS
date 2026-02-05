@@ -261,8 +261,10 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
         if let updatedMemberLabel {
             memberLabel = MemberLabel(label: updatedMemberLabel, labelEmoji: updatedEmoji)
         }
-        updateDelegate?.updateLabelForLocalUser(memberLabel: memberLabel)
-        dismiss(animated: true)
+        dismiss(animated: true, completion: { [weak self] in
+            guard let self else { return }
+            self.updateDelegate?.updateLabelForLocalUser(memberLabel: memberLabel)
+        })
     }
 
     @objc

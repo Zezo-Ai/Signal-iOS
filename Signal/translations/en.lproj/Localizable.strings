@@ -1807,6 +1807,9 @@
 /* Message displayed on chat list when Filter by Unread is enabled but no unread chats are available */
 "CHAT_LIST_UNREAD_FILTER_NO_CHATS" = "No unread chats";
 
+/* Message indicating a user should check connection and try again. */
+"CHECK_YOUR_CONNECTION_TRY_AGAIN_WARNING" = "Check your internet connection and try again.";
+
 /* Text for a bullet point in a list of Backup features, describing that all media is included. */
 "CHOOSE_BACKUP_PLAN_BULLET_FULL_MEDIA_BACKUP" = "Full media backup";
 
@@ -5010,6 +5013,15 @@
 
 /* Accessibility prefix for member labels. */
 "MEMBER_LABEL_AX_PREFIX" = "Member label: ";
+
+/* Error indicating member label could not save. */
+"MEMBER_LABEL_FAIL_TO_SAVE" = "Couldn't Save Member Label";
+
+/* Body for a sheet shown if a user will show their member label over their About message in a group. */
+"MEMBER_LABEL_HERO_SHEET_ABOUT_OVERRIDE_BODY" = "In this group, your Member Label will be displayed beside your photo in place of your About.";
+
+/* Title for a sheet shown if a user will show their member label over their About message in a group. */
+"MEMBER_LABEL_HERO_SHEET_ABOUT_OVERRIDE_TITLE" = "Member Label Display";
 
 /* Heading shown above the preview of a message bubble with the edited member label. */
 "MEMBER_LABEL_PREVIEW_HEADING" = "Preview";

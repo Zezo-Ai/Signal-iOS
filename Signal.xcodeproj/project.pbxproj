@@ -91,6 +91,7 @@
 		04E66D452E00AB6A0059DBAC /* BackupSettingsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E66D432E00AB3A0059DBAC /* BackupSettingsStoreTests.swift */; };
 		04FAAD0C2E7F067C00E4AAC3 /* NewPollViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04FAAD0B2E7F067300E4AAC3 /* NewPollViewController.swift */; };
 		04FAAD0E2E82EEAE00E4AAC3 /* CVComponentBottomLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04FAAD0D2E82EEA900E4AAC3 /* CVComponentBottomLabel.swift */; };
+		04FE6C6B2F32789D00A2ACF4 /* MemberLabelHeroSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04FE6C6A2F32789800A2ACF4 /* MemberLabelHeroSheets.swift */; };
 		05104D182C8A151100F8851F /* AsyncViewTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05104D172C8A151100F8851F /* AsyncViewTask.swift */; };
 		05104E3A2C8B541000F8851F /* AccessibleLayoutMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05104E392C8B540C00F8851F /* AccessibleLayoutMetric.swift */; };
 		0510F69E2C91EB3000FA3FDE /* ScrollBounceBehaviorIfAvailable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0510F69D2C91EB2800FA3FDE /* ScrollBounceBehaviorIfAvailable.swift */; };
@@ -4125,6 +4126,7 @@
 		04E66D432E00AB3A0059DBAC /* BackupSettingsStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupSettingsStoreTests.swift; sourceTree = "<group>"; };
 		04FAAD0B2E7F067300E4AAC3 /* NewPollViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPollViewController.swift; sourceTree = "<group>"; };
 		04FAAD0D2E82EEA900E4AAC3 /* CVComponentBottomLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CVComponentBottomLabel.swift; sourceTree = "<group>"; };
+		04FE6C6A2F32789800A2ACF4 /* MemberLabelHeroSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberLabelHeroSheets.swift; sourceTree = "<group>"; };
 		05104D172C8A151100F8851F /* AsyncViewTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncViewTask.swift; sourceTree = "<group>"; };
 		05104E392C8B540C00F8851F /* AccessibleLayoutMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibleLayoutMetric.swift; sourceTree = "<group>"; };
 		0510F69D2C91EB2800FA3FDE /* ScrollBounceBehaviorIfAvailable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollBounceBehaviorIfAvailable.swift; sourceTree = "<group>"; };
@@ -9128,6 +9130,7 @@
 				76C87FE028BE8E2400BD8709 /* LinkPreviewAttachmentViewController.swift */,
 				88A9729322FB4D02004B4FBF /* LocationPicker.swift */,
 				3496744E2076ACCE00080B5F /* LongTextViewController.swift */,
+				04FE6C6A2F32789800A2ACF4 /* MemberLabelHeroSheets.swift */,
 				04441DEE2F194B770095E1F4 /* MemberLabelViewController.swift */,
 				4CFF4C0920F55BBA005DA313 /* MessageActionsToolbar.swift */,
 				34CA1C261F7156F300E51C51 /* MessageDetailViewController.swift */,
@@ -18046,6 +18049,7 @@
 				4C8A6DFC22E5499300469AE7 /* MediaZoomAnimationController.swift in Sources */,
 				8837F74123DA0B0F00772A32 /* MegaphoneView.swift in Sources */,
 				88A357B923639384009D6B9A /* MemberActionSheet.swift in Sources */,
+				04FE6C6B2F32789D00A2ACF4 /* MemberLabelHeroSheets.swift in Sources */,
 				04441DEF2F194B800095E1F4 /* MemberLabelViewController.swift in Sources */,
 				346EAA14250199A400E8AB6F /* MemberRequestView.swift in Sources */,
 				4CB5F26920F7D060004D1B42 /* MessageActions.swift in Sources */,
