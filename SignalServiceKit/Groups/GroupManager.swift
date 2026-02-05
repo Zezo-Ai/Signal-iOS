@@ -485,6 +485,22 @@ public class GroupManager: NSObject {
 
     // MARK: - Change Member Role
 
+    private static func acisToClearMemberLabelsFor(groupModel: TSGroupModelV2, access: GroupV2Access) -> [Aci] {
+        let acisToClearMemberLabelsFor: [Aci] = []
+
+        switch access {
+        case .administrator:
+            let adminSet = groupModel.groupMembership.fullMemberAdministrators
+            let memberSet = groupModel.groupMembership.fullMembers
+            let nonAdminMembers = memberSet.subtracting(adminSet)
+            return nonAdminMembers.compactMap { $0.aci }
+        case .unknown, .any, .member, .unsatisfiable:
+            break
+        }
+
+        return acisToClearMemberLabelsFor
+    }
+
     public static func changeMemberRoleV2(
         groupModel: TSGroupModelV2,
         aci: Aci,
@@ -492,6 +508,9 @@ public class GroupManager: NSObject {
     ) async throws {
         try await updateGroupV2(groupModel: groupModel, description: "Change member role") { groupChangeSet in
             groupChangeSet.changeRoleForMember(aci, role: role)
+            if role == .normal, groupModel.access.attributes == .administrator {
+                groupChangeSet.changeLabelForMember(aci, label: nil)
+            }
         }
     }
 
@@ -500,6 +519,10 @@ public class GroupManager: NSObject {
     public static func changeGroupAttributesAccessV2(groupModel: TSGroupModelV2, access: GroupV2Access) async throws {
         try await updateGroupV2(groupModel: groupModel, description: "Change group attributes access") { groupChangeSet in
             groupChangeSet.setAccessForAttributes(access)
+            let acisToClear = acisToClearMemberLabelsFor(groupModel: groupModel, access: access)
+            for aci in acisToClear {
+                groupChangeSet.changeLabelForMember(aci, label: nil)
+            }
         }
     }
 
