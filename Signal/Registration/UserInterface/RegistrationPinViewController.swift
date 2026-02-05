@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
+import BonMot
 import Foundation
 import SafariServices
 import SignalServiceKit
@@ -607,9 +608,9 @@ class RegistrationPinViewController: OWSViewController {
                 fromFormat: format,
                 attributedFormatArgs: [.string(
                     attemptRemainingString,
-                    attributes: [.font: ActionSheetController.messageLabelFont.semibold()],
+                    attributes: [.font: UIFont.dynamicTypeSubheadlineClamped.semibold()],
                 )],
-                defaultAttributes: [.font: ActionSheetController.messageLabelFont],
+                defaultAttributes: [.font: UIFont.dynamicTypeSubheadlineClamped],
             )
         }()
 
@@ -799,7 +800,7 @@ class RegistrationPinViewController: OWSViewController {
                     ),
                     CommonStrings.learnMore.styled(with: .link(URL.Support.pin)),
                 ],
-                baseStyle: ActionSheetController.messageBaseStyle,
+                baseStyle: BonMot.StringStyle(.font(messageLabelFont), .alignment(.center)),
                 separator: " ",
             ),
         )

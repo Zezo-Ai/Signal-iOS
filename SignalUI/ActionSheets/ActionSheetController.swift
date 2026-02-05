@@ -112,12 +112,6 @@ open class ActionSheetController: OWSViewController {
         return stackView.height + view.safeAreaInsets.bottom
     }
 
-    public static var messageLabelFont: UIFont { .dynamicTypeSubheadlineClamped }
-
-    public static var messageBaseStyle: BonMot.StringStyle {
-        return BonMot.StringStyle(.font(messageLabelFont), .alignment(.center))
-    }
-
     override public init() {
         super.init()
         modalPresentationStyle = .custom
