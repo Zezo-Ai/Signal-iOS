@@ -800,7 +800,7 @@ class RegistrationPinViewController: OWSViewController {
                     ),
                     CommonStrings.learnMore.styled(with: .link(URL.Support.pin)),
                 ],
-                baseStyle: BonMot.StringStyle(.font(messageLabelFont), .alignment(.center)),
+                baseStyle: BonMot.StringStyle(.font(.dynamicTypeSubheadlineClamped), .alignment(.center)),
                 separator: " ",
             ),
         )
