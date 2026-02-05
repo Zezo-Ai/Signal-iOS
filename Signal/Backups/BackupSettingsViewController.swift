@@ -697,6 +697,7 @@ class BackupSettingsViewController:
                     comment: "Message shown in an action sheet when the user disables Backups, explaining that their media is downloading first.",
                 ),
             )
+            downloadsActionSheet.addAction(.okay)
             await OWSActionSheets.showAndAwaitActionSheet(downloadsActionSheet, fromViewController: self)
         }
 
