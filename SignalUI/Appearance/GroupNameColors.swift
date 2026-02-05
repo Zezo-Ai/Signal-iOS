@@ -24,7 +24,7 @@ public struct GroupNameColors {
         GroupNameColors(colorMap: [:], defaultColor: Theme.primaryTextColor)
     }
 
-    public static func forThread(_ thread: TSThread, localAci: Aci) -> GroupNameColors {
+    public static func forThread(_ thread: TSThread) -> GroupNameColors {
         guard let groupThread = thread as? TSGroupThread else {
             return .defaultColors
         }
@@ -32,7 +32,7 @@ public struct GroupNameColors {
         let isDarkThemeEnabled = Theme.isDarkThemeEnabled
         var colorMap = [Aci: UIColor]()
         let groupMembers = groupThread.groupMembership.fullMembers
-            .compactMap(\.aci).filter { $0 != localAci }.sorted(by: <)
+            .compactMap(\.aci).sorted(by: <)
         for (index, aci) in groupMembers.enumerated() {
             colorMap[aci] = values[index % values.count].color(isDarkThemeEnabled: isDarkThemeEnabled)
         }
@@ -61,24 +61,20 @@ public struct GroupNameColors {
             darkTheme: UIColor(rgbHex: 0x00A7FA),
         ),
         GroupNameColorValue(
-            lightTheme: UIColor(rgbHex: 0x007A3D),
-            darkTheme: UIColor(rgbHex: 0x00B85C),
-        ),
-        GroupNameColorValue(
-            lightTheme: UIColor(rgbHex: 0xC13215),
-            darkTheme: UIColor(rgbHex: 0xFF6F52),
+            lightTheme: UIColor(rgbHex: 0x067906),
+            darkTheme: UIColor(rgbHex: 0x0AB80A),
         ),
         GroupNameColorValue(
             lightTheme: UIColor(rgbHex: 0xB814B8),
             darkTheme: UIColor(rgbHex: 0xF65AF6),
         ),
         GroupNameColorValue(
-            lightTheme: UIColor(rgbHex: 0x5B6976),
-            darkTheme: UIColor(rgbHex: 0x8BA1B6),
+            lightTheme: UIColor(rgbHex: 0xC13215),
+            darkTheme: UIColor(rgbHex: 0xFF6F52),
         ),
         GroupNameColorValue(
-            lightTheme: UIColor(rgbHex: 0x3D7406),
-            darkTheme: UIColor(rgbHex: 0x5EB309),
+            lightTheme: UIColor(rgbHex: 0x5B6976),
+            darkTheme: UIColor(rgbHex: 0x8BA1B6),
         ),
         GroupNameColorValue(
             lightTheme: UIColor(rgbHex: 0xCC0066),
@@ -89,12 +85,12 @@ public struct GroupNameColors {
             darkTheme: UIColor(rgbHex: 0x8599FF),
         ),
         GroupNameColorValue(
-            lightTheme: UIColor(rgbHex: 0x9C5711),
-            darkTheme: UIColor(rgbHex: 0xD5920B),
-        ),
-        GroupNameColorValue(
             lightTheme: UIColor(rgbHex: 0x007575),
             darkTheme: UIColor(rgbHex: 0x00B2B2),
+        ),
+        GroupNameColorValue(
+            lightTheme: UIColor(rgbHex: 0x9C5711),
+            darkTheme: UIColor(rgbHex: 0xD5920B),
         ),
         GroupNameColorValue(
             lightTheme: UIColor(rgbHex: 0xD00B4D),
@@ -105,12 +101,16 @@ public struct GroupNameColors {
             darkTheme: UIColor(rgbHex: 0xBF80FF),
         ),
         GroupNameColorValue(
+            lightTheme: UIColor(rgbHex: 0x3D7406),
+            darkTheme: UIColor(rgbHex: 0x5EB309),
+        ),
+        GroupNameColorValue(
             lightTheme: UIColor(rgbHex: 0xD00B0B),
             darkTheme: UIColor(rgbHex: 0xFF7070),
         ),
         GroupNameColorValue(
-            lightTheme: UIColor(rgbHex: 0x067906),
-            darkTheme: UIColor(rgbHex: 0x0AB80A),
+            lightTheme: UIColor(rgbHex: 0x007A3D),
+            darkTheme: UIColor(rgbHex: 0x00B85C),
         ),
         GroupNameColorValue(
             lightTheme: UIColor(rgbHex: 0x5151F6),

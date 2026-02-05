@@ -375,7 +375,6 @@ public class CVLoader: NSObject {
                 threadAssociatedData: threadAssociatedData,
                 threadViewModel: threadViewModel,
                 itemBuildingContext: itemBuildingContext,
-                localAci: localAci,
                 transaction: transaction,
             )
         else {

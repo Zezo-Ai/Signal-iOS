@@ -156,7 +156,7 @@ struct CVItemModelBuilder: CVItemBuilding {
             owsAssertDebug(item != nil)
         }
 
-        let groupNameColors = GroupNameColors.forThread(thread, localAci: localAci)
+        let groupNameColors = GroupNameColors.forThread(thread)
         let displayNameCache = DisplayNameCache()
 
         // Update the properties of the view items.
@@ -190,7 +190,6 @@ struct CVItemModelBuilder: CVItemBuilding {
         threadAssociatedData: ThreadAssociatedData,
         threadViewModel: ThreadViewModel,
         itemBuildingContext: CVItemBuildingContext,
-        localAci: Aci,
         transaction: DBReadTransaction,
     ) -> CVItemModel? {
         AssertIsOnMainThread()
@@ -210,7 +209,7 @@ struct CVItemModelBuilder: CVItemBuilding {
             return nil
         }
 
-        let groupNameColors = GroupNameColors.forThread(thread, localAci: localAci)
+        let groupNameColors = GroupNameColors.forThread(thread)
         let displayNameCache = DisplayNameCache()
 
         configureItemViewState(

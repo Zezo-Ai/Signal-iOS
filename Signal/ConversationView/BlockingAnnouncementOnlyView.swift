@@ -145,11 +145,8 @@ class MessageUserSubsetSheet: OWSTableSheetViewController {
         contents.add(section)
 
         var groupNameColors: GroupNameColors?
-        if
-            let groupThread,
-            let localAci = SSKEnvironment.shared.databaseStorageRef.read(block: { tx in DependenciesBridge.shared.tsAccountManager.localIdentifiers(tx: tx)?.aci })
-        {
-            groupNameColors = GroupNameColors.forThread(groupThread, localAci: localAci)
+        if let groupThread {
+            groupNameColors = GroupNameColors.forThread(groupThread)
         }
 
         for address in addresses {

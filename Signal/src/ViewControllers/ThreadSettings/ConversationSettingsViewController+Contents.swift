@@ -741,10 +741,7 @@ extension ConversationSettingsViewController {
             membersToRender = Array(membersToRender.prefix(maxMembersToShow - 1))
         }
 
-        var groupNameColors: GroupNameColors?
-        if let localAci = SSKEnvironment.shared.databaseStorageRef.read(block: { tx in DependenciesBridge.shared.tsAccountManager.localIdentifiers(tx: tx)?.aci }) {
-            groupNameColors = GroupNameColors.forThread(self.thread, localAci: localAci)
-        }
+        let groupNameColors = GroupNameColors.forThread(self.thread)
 
         for memberAddress in membersToRender {
             guard let verificationState = groupMemberStateMap[memberAddress] else {
@@ -791,10 +788,7 @@ extension ConversationSettingsViewController {
                     }
 
                     if BuildFlags.MemberLabel.display, let memberAci = memberAddress.aci {
-                        if
-                            let memberLabel = groupModel.groupMembership.memberLabel(for: memberAci)?.labelForRendering(),
-                            let groupNameColors
-                        {
+                        if let memberLabel = groupModel.groupMembership.memberLabel(for: memberAci)?.labelForRendering() {
                             configuration.memberLabel = MemberLabelForRendering(label: memberLabel, groupNameColor: groupNameColors.color(for: memberAddress.aci))
                         }
                     }

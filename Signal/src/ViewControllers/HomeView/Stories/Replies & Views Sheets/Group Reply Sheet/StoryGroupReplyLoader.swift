@@ -234,7 +234,7 @@ class StoryGroupReplyLoader {
             }
         }
 
-        let groupNameColors = GroupNameColors.forThread(groupThread, localAci: localIdentifiers.aci)
+        let groupNameColors = GroupNameColors.forThread(groupThread)
         let displayNamesByAddress = SSKEnvironment.shared.contactManagerImplRef.displayNamesByAddress(
             for: Array(authorAddresses),
             transaction: transaction,

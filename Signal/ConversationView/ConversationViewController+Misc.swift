@@ -284,10 +284,9 @@ extension ConversationViewController {
         if
             let groupThread = thread as? TSGroupThread,
             let memberAci = address.aci,
-            let memberLabelString = groupThread.groupModel.groupMembership.memberLabel(for: memberAci)?.labelForRendering(),
-            let localAci = DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction?.aci
+            let memberLabelString = groupThread.groupModel.groupMembership.memberLabel(for: memberAci)?.labelForRendering()
         {
-            let groupNameColors = GroupNameColors.forThread(groupThread, localAci: localAci)
+            let groupNameColors = GroupNameColors.forThread(groupThread)
             memberLabel = MemberLabelForRendering(label: memberLabelString, groupNameColor: groupNameColors.color(for: memberAci))
         }
 
