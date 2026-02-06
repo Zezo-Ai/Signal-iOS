@@ -57,7 +57,10 @@ public struct _Upload_AttachmentEncrypterWrapper: Upload.Shims.AttachmentEncrypt
 
 public struct _Upload_FileSystemWrapper: Upload.Shims.FileSystem {
     public func temporaryFileUrl() -> URL {
-        return OWSFileSystem.temporaryFileUrl(isAvailableWhileDeviceLocked: true)
+        return OWSFileSystem.temporaryFileUrl(
+            fileExtension: nil,
+            isAvailableWhileDeviceLocked: true,
+        )
     }
 
     public func fileOrFolderExists(url: URL) -> Bool {

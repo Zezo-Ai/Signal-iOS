@@ -250,7 +250,10 @@ extension OWSURLSessionProtocol {
         ignoreAppExpiry: Bool = false,
         progress: OWSProgressSource? = nil,
     ) async throws -> HTTPResponse {
-        let multipartBodyFileURL = OWSFileSystem.temporaryFileUrl(isAvailableWhileDeviceLocked: true)
+        let multipartBodyFileURL = OWSFileSystem.temporaryFileUrl(
+            fileExtension: nil,
+            isAvailableWhileDeviceLocked: true,
+        )
         defer {
             do {
                 try OWSFileSystem.deleteFileIfExists(url: multipartBodyFileURL)

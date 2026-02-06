@@ -110,7 +110,10 @@ public class GroupLinkQRCodeViewController: OWSViewController {
                 return
             }
 
-            let fileUrl = OWSFileSystem.temporaryFileUrl(fileExtension: "png")
+            let fileUrl = OWSFileSystem.temporaryFileUrl(
+                fileExtension: "png",
+                isAvailableWhileDeviceLocked: false,
+            )
             try imageData.write(to: fileUrl)
 
             AttachmentSharing.showShareUI(for: fileUrl, sender: sender)

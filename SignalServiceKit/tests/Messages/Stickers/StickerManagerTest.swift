@@ -126,7 +126,10 @@ class StickerManagerTest2: SSKBaseTest {
 
         let stickerInfo = StickerInfo.defaultValue
         let stickerData = Randomness.generateRandomBytes(1)
-        let temporaryFile = OWSFileSystem.temporaryFileUrl()
+        let temporaryFile = OWSFileSystem.temporaryFileUrl(
+            fileExtension: nil,
+            isAvailableWhileDeviceLocked: false,
+        )
         try! stickerData.write(to: temporaryFile)
 
         let success = StickerManager.installSticker(

@@ -42,7 +42,10 @@ final class SqliteUtilTest: XCTestCase {
     }
 
     func testCipherProvider() throws {
-        let databasePath = OWSFileSystem.temporaryFilePath(fileExtension: "sqlite")
+        let databasePath = OWSFileSystem.temporaryFilePath(
+            fileExtension: "sqlite",
+            isAvailableWhileDeviceLocked: false,
+        )
 
         let databaseQueue = try DatabaseQueue(path: databasePath)
         defer { try? databaseQueue.close() }
@@ -56,7 +59,10 @@ final class SqliteUtilTest: XCTestCase {
     }
 
     func testCipherIntegrityCheck() throws {
-        let databasePath = OWSFileSystem.temporaryFilePath(fileExtension: "sqlite")
+        let databasePath = OWSFileSystem.temporaryFilePath(
+            fileExtension: "sqlite",
+            isAvailableWhileDeviceLocked: false,
+        )
 
         let databaseQueue = try DatabaseQueue(path: databasePath)
         defer { try? databaseQueue.close() }
@@ -68,7 +74,10 @@ final class SqliteUtilTest: XCTestCase {
     func testQuickCheck() throws {
         guard #available(iOS 16, *) else { throw XCTSkip() }
 
-        let databasePath = OWSFileSystem.temporaryFilePath(fileExtension: "sqlite")
+        let databasePath = OWSFileSystem.temporaryFilePath(
+            fileExtension: "sqlite",
+            isAvailableWhileDeviceLocked: false,
+        )
         let databaseUrl = URL(filePath: databasePath)
 
         let happyResult: SqliteUtil.IntegrityCheckResult = try {

@@ -1641,7 +1641,10 @@ extension OWSProfileManager {
             Logger.info("")
             let urlSession = await SSKEnvironment.shared.signalServiceRef.sharedUrlSessionForCdn(cdnNumber: 0, maxResponseSize: nil)
             let response = try await urlSession.performDownload(avatarUrlPath, method: .get)
-            let decryptedFileUrl = OWSFileSystem.temporaryFileUrl(isAvailableWhileDeviceLocked: true)
+            let decryptedFileUrl = OWSFileSystem.temporaryFileUrl(
+                fileExtension: nil,
+                isAvailableWhileDeviceLocked: true,
+            )
             try Self.decryptAvatar(at: response.downloadUrl, to: decryptedFileUrl, profileKey: profileKey)
             guard (try? DataImageSource.forPath(decryptedFileUrl.path))?.ows_isValidImage ?? false else {
                 throw OWSGenericError("Couldn't validate avatar")

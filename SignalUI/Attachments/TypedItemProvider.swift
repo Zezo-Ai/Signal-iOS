@@ -389,7 +389,10 @@ public struct TypedItemProvider {
             throw OWSAssertionError("Unexpectedly not a file URL: \(fileUrl)")
         }
 
-        let copiedUrl = OWSFileSystem.temporaryFileUrl(fileExtension: fileUrl.pathExtension)
+        let copiedUrl = OWSFileSystem.temporaryFileUrl(
+            fileExtension: fileUrl.pathExtension,
+            isAvailableWhileDeviceLocked: false,
+        )
         try FileManager.default.copyItem(at: fileUrl, to: copiedUrl)
 
         let dataSource = DataSourcePath(fileUrl: copiedUrl, ownership: .owned)

@@ -989,7 +989,10 @@ public class StickerManager: NSObject {
         let stickerKey = try hkdf(outputLength: stickerKeyLength, inputKeyMaterial: packKey, salt: [], info: Data("Sticker Pack".utf8))
         let attachmentKey = try! AttachmentKey(combinedKey: stickerKey)
 
-        let temporaryDecryptedFile = OWSFileSystem.temporaryFileUrl(isAvailableWhileDeviceLocked: true)
+        let temporaryDecryptedFile = OWSFileSystem.temporaryFileUrl(
+            fileExtension: nil,
+            isAvailableWhileDeviceLocked: true,
+        )
         try Cryptography.decryptFile(at: url, metadata: DecryptionMetadata(key: attachmentKey), output: temporaryDecryptedFile)
         return temporaryDecryptedFile
     }

@@ -55,7 +55,10 @@ extension Upload.CDN0 {
             throw AppExpiredError()
         }
 
-        let dataFileUrl = OWSFileSystem.temporaryFileUrl(isAvailableWhileDeviceLocked: true)
+        let dataFileUrl = OWSFileSystem.temporaryFileUrl(
+            fileExtension: nil,
+            isAvailableWhileDeviceLocked: true,
+        )
         try data.write(to: dataFileUrl)
 
         let cdn0UrlSession = await SSKEnvironment.shared.signalServiceRef.sharedUrlSessionForCdn(cdnNumber: 0, maxResponseSize: nil)

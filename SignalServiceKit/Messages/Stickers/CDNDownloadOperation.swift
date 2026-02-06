@@ -31,7 +31,10 @@ enum CDNDownloadOperation {
 
             let downloadUrl = response.downloadUrl
             do {
-                let temporaryFileUrl = OWSFileSystem.temporaryFileUrl(isAvailableWhileDeviceLocked: true)
+                let temporaryFileUrl = OWSFileSystem.temporaryFileUrl(
+                    fileExtension: nil,
+                    isAvailableWhileDeviceLocked: true,
+                )
                 try OWSFileSystem.moveFile(from: downloadUrl, to: temporaryFileUrl)
                 return temporaryFileUrl
             } catch {

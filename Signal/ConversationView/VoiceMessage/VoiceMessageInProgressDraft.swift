@@ -26,7 +26,10 @@ final class VoiceMessageInProgressDraft: VoiceMessageSendableDraft {
 
     init(thread: TSThread, audioSession: AudioSession, sleepManager: any DeviceSleepManager) {
         self.threadUniqueId = thread.uniqueId
-        self.audioFileUrl = OWSFileSystem.temporaryFileUrl(fileExtension: "m4a")
+        self.audioFileUrl = OWSFileSystem.temporaryFileUrl(
+            fileExtension: "m4a",
+            isAvailableWhileDeviceLocked: false,
+        )
         self.audioActivity = AudioActivity(audioDescription: "Voice Message Recording", behavior: .playAndRecord)
         self.audioSession = audioSession
         self.sleepManager = sleepManager

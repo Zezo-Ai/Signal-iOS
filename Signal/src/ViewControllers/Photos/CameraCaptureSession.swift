@@ -1195,7 +1195,10 @@ private class VideoCapture: NSObject, AVCaptureVideoDataOutputSampleBufferDelega
 
     // main thread
     func beginRecording(aspectRatio: CGFloat, includeAudio: Bool) throws {
-        let outputURL = OWSFileSystem.temporaryFileUrl(fileExtension: "mp4")
+        let outputURL = OWSFileSystem.temporaryFileUrl(
+            fileExtension: "mp4",
+            isAvailableWhileDeviceLocked: false,
+        )
         let assetWriter = try AVAssetWriter(outputURL: outputURL, fileType: .mp4)
 
         guard

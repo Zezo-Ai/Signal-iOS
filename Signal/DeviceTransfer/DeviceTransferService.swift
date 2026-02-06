@@ -424,7 +424,11 @@ class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
             throw OWSAssertionError("Unknown db file being copied")
         }
         owsAssertDebug(databaseFile.relativePath.hasSuffix(newFileExtension))
-        return OWSFileSystem.temporaryFileUrl(fileName: newFileName, fileExtension: newFileExtension)
+        return OWSFileSystem.temporaryFileUrl(
+            fileName: newFileName,
+            fileExtension: newFileExtension,
+            isAvailableWhileDeviceLocked: false,
+        )
     }
 
     private static func makeLocalCopy(

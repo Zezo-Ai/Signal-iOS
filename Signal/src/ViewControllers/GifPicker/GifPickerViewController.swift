@@ -539,7 +539,10 @@ class GifPickerViewController: OWSViewController, UISearchBarDelegate, UICollect
         let assetFilePath = asset.filePath
         let assetTypeIdentifier = giphyAsset.type.utiType
 
-        let consumableFilePath = OWSFileSystem.temporaryFilePath(fileExtension: assetFileExtension)
+        let consumableFilePath = OWSFileSystem.temporaryFilePath(
+            fileExtension: assetFileExtension,
+            isAvailableWhileDeviceLocked: false,
+        )
         try FileManager.default.copyItem(atPath: assetFilePath, toPath: consumableFilePath)
         let dataSource = DataSourcePath(filePath: consumableFilePath, ownership: .owned)
 

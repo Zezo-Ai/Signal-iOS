@@ -246,7 +246,10 @@ class ImageEditorModel: NSObject {
     func temporaryFilePath(fileExtension: String) -> String {
         AssertIsOnMainThread()
 
-        let filePath = OWSFileSystem.temporaryFilePath(fileExtension: fileExtension)
+        let filePath = OWSFileSystem.temporaryFilePath(
+            fileExtension: fileExtension,
+            isAvailableWhileDeviceLocked: false,
+        )
         temporaryFilePaths.append(filePath)
         return filePath
     }

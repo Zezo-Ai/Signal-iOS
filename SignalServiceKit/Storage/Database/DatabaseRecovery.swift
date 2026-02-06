@@ -213,7 +213,10 @@ public enum DatabaseRecovery {
 
         private static func temporaryDatabaseFileUrl() -> URL {
             logger.info("Creating temporary database file...")
-            let result = OWSFileSystem.temporaryFileUrl()
+            let result = OWSFileSystem.temporaryFileUrl(
+                fileExtension: nil,
+                isAvailableWhileDeviceLocked: false,
+            )
             logger.info("Created at \(result)")
             return result
         }

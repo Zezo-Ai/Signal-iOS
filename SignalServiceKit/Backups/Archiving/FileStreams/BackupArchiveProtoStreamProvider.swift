@@ -238,7 +238,10 @@ private class GenericStreamProvider {
         transforms: [any StreamTransform],
         exportProgress: BackupArchiveExportProgress?,
     ) -> ProtoStream.OpenOutputStreamResult<URL> {
-        let fileUrl = OWSFileSystem.temporaryFileUrl(isAvailableWhileDeviceLocked: true)
+        let fileUrl = OWSFileSystem.temporaryFileUrl(
+            fileExtension: nil,
+            isAvailableWhileDeviceLocked: true,
+        )
         guard let outputStream = OutputStream(url: fileUrl, append: false) else {
             return .unableToOpenFileStream
         }

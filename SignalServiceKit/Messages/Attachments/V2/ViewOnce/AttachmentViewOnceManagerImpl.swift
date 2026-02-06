@@ -100,7 +100,10 @@ public class AttachmentViewOnceManagerImpl: AttachmentViewOnceManager {
             owsFailDebug("Missing attachment file.")
             return nil
         }
-        let tempFileUrl = OWSFileSystem.temporaryFileUrl()
+        let tempFileUrl = OWSFileSystem.temporaryFileUrl(
+            fileExtension: nil,
+            isAvailableWhileDeviceLocked: false,
+        )
         guard !OWSFileSystem.fileOrFolderExists(url: tempFileUrl) else {
             owsFailDebug("Temp file unexpectedly already exists.")
             return nil

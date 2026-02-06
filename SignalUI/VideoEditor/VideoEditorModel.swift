@@ -155,7 +155,10 @@ class VideoEditorModel: NSObject {
         let startTime = MonotonicDate()
 
         let asset = AVURLAsset(url: URL(fileURLWithPath: self.srcVideoPath))
-        let exportUrl = OWSFileSystem.temporaryFileUrl(fileExtension: "mp4")
+        let exportUrl = OWSFileSystem.temporaryFileUrl(
+            fileExtension: "mp4",
+            isAvailableWhileDeviceLocked: false,
+        )
 
         guard let session = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetPassthrough) else {
             throw OWSAssertionError("couldn't create export session")

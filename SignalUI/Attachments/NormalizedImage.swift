@@ -75,7 +75,10 @@ public struct NormalizedImage {
 
     /// Save an image to disk.
     private static func saveImage(_ image: CGImage, containerType: ContainerType) throws(SignalAttachmentError) -> DataSourcePath {
-        let tempFileUrl = OWSFileSystem.temporaryFileUrl(fileExtension: containerType.fileExtension)
+        let tempFileUrl = OWSFileSystem.temporaryFileUrl(
+            fileExtension: containerType.fileExtension,
+            isAvailableWhileDeviceLocked: false,
+        )
         let destination = CGImageDestinationCreateWithURL(tempFileUrl as CFURL, containerType.dataType.identifier as CFString, 1, nil)
         guard let destination else {
             throw .couldNotConvertImage

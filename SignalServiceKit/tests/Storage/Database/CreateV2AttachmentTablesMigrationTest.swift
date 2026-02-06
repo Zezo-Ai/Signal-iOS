@@ -13,7 +13,10 @@ public class AttachmentV2MigrationTest: XCTestCase {
     private var db: SDSDatabaseStorage!
 
     override public func setUp() async throws {
-        self.dbFileURL = OWSFileSystem.temporaryFileUrl()
+        self.dbFileURL = OWSFileSystem.temporaryFileUrl(
+            fileExtension: nil,
+            isAvailableWhileDeviceLocked: false,
+        )
         self.db = try SDSDatabaseStorage(
             appReadiness: AppReadinessMock(),
             databaseFileUrl: dbFileURL,

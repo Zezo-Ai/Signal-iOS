@@ -341,10 +341,10 @@ public extension OWSFileSystem {
 public extension OWSFileSystem {
 
     static func temporaryFileUrl(
-        fileExtension: String? = nil,
-        isAvailableWhileDeviceLocked: Bool = false,
+        fileExtension: String?,
+        isAvailableWhileDeviceLocked: Bool,
     ) -> URL {
-        return URL(fileURLWithPath: temporaryFilePath(
+        return URL(fileURLWithPath: _temporaryFilePath(
             fileName: nil,
             fileExtension: fileExtension,
             isAvailableWhileDeviceLocked: isAvailableWhileDeviceLocked,
@@ -353,10 +353,10 @@ public extension OWSFileSystem {
 
     static func temporaryFileUrl(
         fileName: String,
-        fileExtension: String? = nil,
-        isAvailableWhileDeviceLocked: Bool = false,
+        fileExtension: String?,
+        isAvailableWhileDeviceLocked: Bool,
     ) -> URL {
-        return URL(fileURLWithPath: temporaryFilePath(
+        return URL(fileURLWithPath: _temporaryFilePath(
             fileName: fileName,
             fileExtension: fileExtension,
             isAvailableWhileDeviceLocked: isAvailableWhileDeviceLocked,
@@ -364,20 +364,32 @@ public extension OWSFileSystem {
     }
 
     static func temporaryFilePath(
-        fileName: String? = nil,
-        fileExtension: String? = nil,
+        fileName: String,
+        fileExtension: String?,
+        isAvailableWhileDeviceLocked: Bool,
     ) -> String {
-        temporaryFilePath(
+        return _temporaryFilePath(
             fileName: fileName,
             fileExtension: fileExtension,
-            isAvailableWhileDeviceLocked: false,
+            isAvailableWhileDeviceLocked: isAvailableWhileDeviceLocked,
         )
     }
 
     static func temporaryFilePath(
-        fileName: String? = nil,
-        fileExtension: String? = nil,
-        isAvailableWhileDeviceLocked: Bool = false,
+        fileExtension: String,
+        isAvailableWhileDeviceLocked: Bool,
+    ) -> String {
+        return _temporaryFilePath(
+            fileName: nil,
+            fileExtension: fileExtension,
+            isAvailableWhileDeviceLocked: isAvailableWhileDeviceLocked,
+        )
+    }
+
+    private static func _temporaryFilePath(
+        fileName: String?,
+        fileExtension: String?,
+        isAvailableWhileDeviceLocked: Bool,
     ) -> String {
         let tempDirPath = tempDirPath(availableWhileDeviceLocked: isAvailableWhileDeviceLocked)
         var fileName = fileName ?? UUID().uuidString

@@ -125,10 +125,14 @@ public class AttachmentStream {
             tmpURL = OWSFileSystem.temporaryFileUrl(
                 fileName: normalizedFilename,
                 fileExtension: pathExtension,
+                isAvailableWhileDeviceLocked: false,
             )
             try OWSFileSystem.deleteFileIfExists(url: tmpURL)
         } else {
-            tmpURL = OWSFileSystem.temporaryFileUrl(fileExtension: pathExtension)
+            tmpURL = OWSFileSystem.temporaryFileUrl(
+                fileExtension: pathExtension,
+                isAvailableWhileDeviceLocked: false,
+            )
         }
         // hmac and digest are validated at download time; no need to revalidate every read.
         try Cryptography.decryptFileWithoutValidating(

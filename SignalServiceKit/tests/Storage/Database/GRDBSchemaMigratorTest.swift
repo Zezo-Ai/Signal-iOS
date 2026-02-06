@@ -14,7 +14,10 @@ class GRDBSchemaMigratorTest: XCTestCase {
         // TODO: Reuse initializeSampleDatabase when it doesn't need globals.
         let databaseStorage = try SDSDatabaseStorage(
             appReadiness: AppReadinessMock(),
-            databaseFileUrl: OWSFileSystem.temporaryFileUrl(),
+            databaseFileUrl: OWSFileSystem.temporaryFileUrl(
+                fileExtension: nil,
+                isAvailableWhileDeviceLocked: false,
+            ),
             keychainStorage: MockKeychainStorage(),
         )
         // Run all schema migrations. This should succeed without globals!

@@ -1734,8 +1734,11 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 guard fileSize <= maxDownloadSizeBytes else {
                     throw OWSGenericError("Attachment download length exceeds max size.")
                 }
-                let tmpFile = OWSFileSystem.temporaryFileUrl()
-                try OWSFileSystem.copyFile(from: downloadUrl, to: tmpFile)
+                let tmpFile = OWSFileSystem.temporaryFileUrl(
+                    fileExtension: nil,
+                    isAvailableWhileDeviceLocked: false,
+                )
+                try OWSFileSystem.moveFile(from: downloadUrl, to: tmpFile)
                 return tmpFile
             } onError: { error, attemptCount in
                 Logger.warn("Error: \(error)")
@@ -1821,7 +1824,10 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             return try await decryptionQueue.run {
                 do {
                     // Transient attachments decrypt to a tmp file.
-                    let outputUrl = OWSFileSystem.temporaryFileUrl()
+                    let outputUrl = OWSFileSystem.temporaryFileUrl(
+                        fileExtension: nil,
+                        isAvailableWhileDeviceLocked: false,
+                    )
 
                     try Cryptography.decryptAttachment(
                         at: encryptedFileUrl,

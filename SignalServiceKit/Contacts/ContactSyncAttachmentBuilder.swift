@@ -18,7 +18,10 @@ enum ContactSyncAttachmentBuilder {
             return nil
         }
 
-        let fileUrl = OWSFileSystem.temporaryFileUrl(isAvailableWhileDeviceLocked: true)
+        let fileUrl = OWSFileSystem.temporaryFileUrl(
+            fileExtension: nil,
+            isAvailableWhileDeviceLocked: true,
+        )
         guard let outputStream = OutputStream(url: fileUrl, append: false) else {
             owsFailDebug("Could not open outputStream.")
             return nil
