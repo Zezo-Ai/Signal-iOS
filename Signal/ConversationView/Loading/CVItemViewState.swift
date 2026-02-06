@@ -190,6 +190,7 @@ struct CVItemModelBuilder: CVItemBuilding {
         threadAssociatedData: ThreadAssociatedData,
         threadViewModel: ThreadViewModel,
         itemBuildingContext: CVItemBuildingContext,
+        groupNameColors: GroupNameColors,
         transaction: DBReadTransaction,
     ) -> CVItemModel? {
         AssertIsOnMainThread()
@@ -209,7 +210,6 @@ struct CVItemModelBuilder: CVItemBuilding {
             return nil
         }
 
-        let groupNameColors = GroupNameColors.forThread(thread)
         let displayNameCache = DisplayNameCache()
 
         configureItemViewState(

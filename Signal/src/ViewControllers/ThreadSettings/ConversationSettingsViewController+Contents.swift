@@ -890,6 +890,8 @@ extension ConversationSettingsViewController {
 
         let db = DependenciesBridge.shared.db
         let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+        let groupNameColors = GroupNameColors.forThread(groupViewHelper.thread)
+
         if
             BuildFlags.MemberLabel.send,
             groupViewHelper.canEditConversationAttributes,
@@ -904,7 +906,11 @@ extension ConversationSettingsViewController {
                     ),
                     actionBlock: { [weak self] in
                         let fullMemberLabel = groupModelV2.groupMembership.memberLabel(for: localAci)
-                        let memberLabelViewController = MemberLabelViewController(memberLabel: fullMemberLabel?.label, emoji: fullMemberLabel?.labelEmoji)
+                        let memberLabelViewController = MemberLabelViewController(
+                            memberLabel: fullMemberLabel?.label,
+                            emoji: fullMemberLabel?.labelEmoji,
+                            groupNameColors: groupNameColors,
+                        )
                         memberLabelViewController.updateDelegate = self
                         self?.present(OWSNavigationController(rootViewController: memberLabelViewController), animated: true)
                     },

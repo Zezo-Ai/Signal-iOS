@@ -236,6 +236,8 @@ class EditHistoryTableSheetViewController: OWSTableSheetViewController {
             isStandaloneRenderItem: true,
         )
 
+        let groupNameColors = GroupNameColors.forThread(thread)
+
         let itemDate = Date(millisecondsSince1970: interaction.timestamp)
         let daysPrior = DateUtil.daysFrom(firstDate: itemDate, toSecondDate: Date())
         if forceDateHeader || daysPrior > currentDaysBefore {
@@ -249,6 +251,7 @@ class EditHistoryTableSheetViewController: OWSTableSheetViewController {
                     threadAssociatedData: threadAssociatedData,
                     conversationStyle: conversationStyle,
                     spoilerState: self.spoilerState,
+                    groupNameColors: groupNameColors,
                     transaction: tx,
                 )
             {
@@ -263,6 +266,7 @@ class EditHistoryTableSheetViewController: OWSTableSheetViewController {
                 threadAssociatedData: threadAssociatedData,
                 conversationStyle: conversationStyle,
                 spoilerState: self.spoilerState,
+                groupNameColors: groupNameColors,
                 transaction: tx,
             )
         {

@@ -304,12 +304,15 @@ public class CVLoader: NSObject {
             conversationStyle: conversationStyle,
             mediaCache: CVMediaCache(),
         )
+        let groupNameColors = GroupNameColors.forThread(thread)
+
         return CVLoader.buildStandaloneRenderItem(
             interaction: interaction,
             thread: thread,
             threadAssociatedData: threadAssociatedData,
             coreState: coreState,
             spoilerState: spoilerState,
+            groupNameColors: groupNameColors,
             transaction: transaction,
         )
     }
@@ -320,6 +323,7 @@ public class CVLoader: NSObject {
         threadAssociatedData: ThreadAssociatedData,
         conversationStyle: ConversationStyle,
         spoilerState: SpoilerRenderState,
+        groupNameColors: GroupNameColors,
         transaction: DBReadTransaction,
     ) -> CVRenderItem? {
         let coreState = CVCoreState(
@@ -332,6 +336,7 @@ public class CVLoader: NSObject {
             threadAssociatedData: threadAssociatedData,
             coreState: coreState,
             spoilerState: spoilerState,
+            groupNameColors: groupNameColors,
             transaction: transaction,
         )
     }
@@ -342,6 +347,7 @@ public class CVLoader: NSObject {
         threadAssociatedData: ThreadAssociatedData,
         coreState: CVCoreState,
         spoilerState: SpoilerRenderState,
+        groupNameColors: GroupNameColors,
         transaction: DBReadTransaction,
     ) -> CVRenderItem? {
         AssertIsOnMainThread()
@@ -376,6 +382,7 @@ public class CVLoader: NSObject {
                 threadAssociatedData: threadAssociatedData,
                 threadViewModel: threadViewModel,
                 itemBuildingContext: itemBuildingContext,
+                groupNameColors: groupNameColors,
                 transaction: transaction,
             )
         else {

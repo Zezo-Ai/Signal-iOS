@@ -167,6 +167,8 @@ class MockConversationView: UIView {
                     interaction = MockIncomingMessage(messageBody: text!, thread: self.thread)
                 }
 
+                let groupNameColors = GroupNameColors.forThread(thread)
+
                 guard
                     let renderItem = CVLoader.buildStandaloneRenderItem(
                         interaction: interaction,
@@ -174,6 +176,7 @@ class MockConversationView: UIView {
                         threadAssociatedData: threadAssociatedData,
                         conversationStyle: conversationStyle,
                         spoilerState: SpoilerRenderState(),
+                        groupNameColors: groupNameColors,
                         transaction: transaction,
                     )
                 else {

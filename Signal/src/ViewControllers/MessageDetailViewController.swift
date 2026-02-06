@@ -236,12 +236,15 @@ class MessageDetailViewController: OWSTableViewController2 {
             ),
         )
 
+        let groupNameColors = GroupNameColors.forThread(thread)
+
         return CVLoader.buildStandaloneRenderItem(
             interaction: interaction,
             thread: thread,
             threadAssociatedData: threadAssociatedData,
             conversationStyle: conversationStyle,
             spoilerState: spoilerState,
+            groupNameColors: groupNameColors,
             transaction: transaction,
         )
     }

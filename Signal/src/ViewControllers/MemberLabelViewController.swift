@@ -22,17 +22,19 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
     private let stackView = UIStackView()
     private let textField = UITextField()
     private var characterCountLabel = UILabel()
+    private var groupNameColors: GroupNameColors
 
     weak var updateDelegate: MemberLabelUpdateDelegate?
 
     private static let maxCharCount = 24
     private static let showCharacterCountMax = 9
 
-    init(memberLabel: String? = nil, emoji: String? = nil) {
+    init(memberLabel: String? = nil, emoji: String? = nil, groupNameColors: GroupNameColors) {
         self.initialMemberLabel = memberLabel
         self.initialEmoji = emoji
         self.updatedMemberLabel = memberLabel
         self.updatedEmoji = emoji
+        self.groupNameColors = groupNameColors
         textField.text = memberLabel
 
         super.init()
@@ -205,6 +207,7 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
                 threadAssociatedData: threadAssociatedData,
                 conversationStyle: conversationStyle,
                 spoilerState: SpoilerRenderState(),
+                groupNameColors: groupNameColors,
                 transaction: tx,
             )
         }

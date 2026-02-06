@@ -206,11 +206,18 @@ class ContactAboutSheet: StackSheetViewController {
             canEditMemberLabel,
             let localAci = db.read(block: { tx in tsAccountManager.localIdentifiers(tx: tx)?.aci }),
             let groupModel = groupViewHelper?.delegate?.currentGroupModel,
+            let groupThread = groupViewHelper?.thread as? TSGroupThread,
             let csvc = fromViewController as? ConversationSettingsViewController
         {
+            let groupNameColors = GroupNameColors.forThread(groupThread)
+
             stackView.addArrangedSubview(ProfileDetailLabel.memberLabel(memberLabel?.label, tapAction: { [weak self] in
                 let fullMemberLabel = groupModel.groupMembership.memberLabel(for: localAci)
-                let memberLabelViewController = MemberLabelViewController(memberLabel: fullMemberLabel?.label, emoji: fullMemberLabel?.labelEmoji)
+                let memberLabelViewController = MemberLabelViewController(
+                    memberLabel: fullMemberLabel?.label,
+                    emoji: fullMemberLabel?.labelEmoji,
+                    groupNameColors: groupNameColors,
+                )
                 memberLabelViewController.updateDelegate = csvc
                 self?.present(OWSNavigationController(rootViewController: memberLabelViewController), animated: true)
             }))
