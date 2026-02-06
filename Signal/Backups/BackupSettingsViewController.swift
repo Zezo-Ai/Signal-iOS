@@ -221,7 +221,7 @@ class BackupSettingsViewController:
 
         externalEventObservationTasks = [
             Task {
-                await manageDeviceSleepForUpdateStream(
+                await deviceSleepManager.manageBlockForUpdateStream(
                     backupExportJobRunner.updates(),
                     label: "BackupExportJob",
                 ) { [weak self] exportJobUpdate in
@@ -256,7 +256,7 @@ class BackupSettingsViewController:
                 }
             },
             Task {
-                await manageDeviceSleepForUpdateStream(
+                await deviceSleepManager.manageBlockForUpdateStream(
                     backupAttachmentDownloadTracker.updates(),
                     label: "Downloads",
                 ) { [weak self] downloadTrackerUpdate in
@@ -293,7 +293,7 @@ class BackupSettingsViewController:
                 }
             },
             Task {
-                await manageDeviceSleepForUpdateStream(
+                await deviceSleepManager.manageBlockForUpdateStream(
                     backupAttachmentUploadTracker.updates(),
                     label: "Uploads",
                 ) { [weak self] uploadUpdate in
@@ -388,38 +388,6 @@ class BackupSettingsViewController:
     private func stopExternalEventObservation() {
         externalEventObservationTasks.forEach { $0.cancel() }
         externalEventObservationTasks = []
-    }
-
-    /// Listens to the given `updateStream`, calling `onUpdate` for each
-    /// element. Blocks sleep for a given update if `onUpdate` returns true.
-    @MainActor
-    private func manageDeviceSleepForUpdateStream<T>(
-        _ updateStream: AsyncStream<T>,
-        label: String,
-        onUpdate: (T) -> Bool,
-    ) async {
-        // Caller-retained as long as sleep-blocking is required.
-        var deviceSleepBlock: DeviceSleepBlockObject?
-
-        for await update in updateStream {
-            let shouldBlockSleep = onUpdate(update)
-
-            if shouldBlockSleep {
-                deviceSleepBlock = deviceSleepBlock ?? {
-                    let newSleepBlock = DeviceSleepBlockObject(blockReason: "BackupSettings: \(label)")
-                    deviceSleepManager.addBlock(blockObject: newSleepBlock)
-                    return newSleepBlock
-                }()
-            } else {
-                deviceSleepBlock
-                    .take()
-                    .map { deviceSleepManager.removeBlock(blockObject: $0) }
-            }
-        }
-
-        if let deviceSleepBlock {
-            deviceSleepManager.removeBlock(blockObject: deviceSleepBlock)
-        }
     }
 
     // MARK: -
