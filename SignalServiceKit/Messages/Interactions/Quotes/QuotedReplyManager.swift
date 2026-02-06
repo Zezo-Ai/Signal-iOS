@@ -43,7 +43,7 @@ public protocol QuotedReplyManager {
 
     func buildProtoForSending(
         _ quote: TSQuotedMessage,
-        parentMessage: TSMessage,
+        outgoingMessage: TSOutgoingMessage,
         tx: DBReadTransaction,
     ) throws -> SSKProtoDataMessageQuote
 }
@@ -167,14 +167,17 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
         {
             let mimeType: String = quotedAttachment.contentType?.nilIfEmpty
                 ?? MimeType.applicationOctetStream.rawValue
+            let renderingFlag: AttachmentReference.RenderingFlag = .fromProto(thumbnailProto)
 
             thumbnailAttachmentInfo = OWSAttachmentInfo(
                 originalAttachmentMimeType: mimeType,
                 originalAttachmentSourceFilename: quotedAttachment.fileName,
+                originalAttachmentRenderingFlag: renderingFlag,
             )
-            thumbnailDataSource = .notFoundLocallyAttachment(.init(
+            thumbnailDataSource = .notFoundLocallyAttachment(QuotedReplyAttachmentDataSource.NotFoundLocallyAttachmentSource(
                 thumbnailPointerProto: thumbnailProto,
                 originalAttachmentMimeType: mimeType,
+                originalAttachmentRenderingFlag: renderingFlag,
             ))
         } else if
             let quotedAttachment = quoteProto.attachments.first,
@@ -183,6 +186,7 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
             thumbnailAttachmentInfo = OWSAttachmentInfo(
                 originalAttachmentMimeType: mimeType,
                 originalAttachmentSourceFilename: quotedAttachment.fileName,
+                originalAttachmentRenderingFlag: nil,
             )
             thumbnailDataSource = nil
         } else {
@@ -301,19 +305,19 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
         }
 
         let thumbnailAttachmentInfo: OWSAttachmentInfo?
-        let thumbnailDataSource: QuotedReplyAttachmentDataSource?
+        let thumbnailOriginalAttachmentSource: QuotedReplyAttachmentDataSource.OriginalAttachmentSource?
         if
-            let (info, dataSource) = quotedReplyAttachmentInfo(
+            let (info, attachmentSource) = quotedReplyAttachmentInfo(
                 originalMessage: originalMessage,
                 quoteProto: quoteProto,
                 tx: tx,
             )
         {
             thumbnailAttachmentInfo = info
-            thumbnailDataSource = dataSource
+            thumbnailOriginalAttachmentSource = attachmentSource
         } else {
             thumbnailAttachmentInfo = nil
-            thumbnailDataSource = nil
+            thumbnailOriginalAttachmentSource = nil
         }
 
         if
@@ -337,7 +341,7 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
                 isTargetMessageViewOnce: false,
                 isPoll: isPoll,
             ),
-            thumbnailDataSource: thumbnailDataSource,
+            thumbnailDataSource: thumbnailOriginalAttachmentSource.map { .originalAttachment($0) },
         )
     }
 
@@ -345,7 +349,7 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
         originalMessage: TSMessage,
         quoteProto: SSKProtoDataMessageQuote,
         tx: DBReadTransaction,
-    ) -> (OWSAttachmentInfo, QuotedReplyAttachmentDataSource)? {
+    ) -> (OWSAttachmentInfo, QuotedReplyAttachmentDataSource.OriginalAttachmentSource?)? {
         if quoteProto.attachments.isEmpty {
             // If the quote we got has no attachments, ignore any attachments
             // on the original message.
@@ -366,9 +370,10 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
             let attachmentInfo = OWSAttachmentInfo(
                 originalAttachmentMimeType: originalAttachment.mimeType,
                 originalAttachmentSourceFilename: originalReference.sourceFilename,
+                originalAttachmentRenderingFlag: originalReference.renderingFlag,
             )
 
-            let dataSource: QuotedReplyAttachmentDataSource = .originalAttachment(.init(
+            let source = QuotedReplyAttachmentDataSource.OriginalAttachmentSource(
                 id: originalAttachment.id,
                 mimeType: originalAttachment.mimeType,
                 renderingFlag: originalReference.renderingFlag,
@@ -376,9 +381,9 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
                 sourceUnencryptedByteCount: originalReference.sourceUnencryptedByteCount,
                 sourceMediaSizePixels: originalReference.sourceMediaSizePixels,
                 thumbnailPointerFromSender: quoteProto.attachments.first?.thumbnail,
-            ))
+            )
 
-            return (attachmentInfo, dataSource)
+            return (attachmentInfo, source)
         } else {
             // This could happen if a sender spoofs their quoted message proto.
             // Our quoted message will include no thumbnails.
@@ -633,12 +638,12 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
             let innerContent: DraftQuotedReplyModel.Content = {
                 let messageBody = quotedReply.body.map { MessageBody(text: $0, ranges: quotedReply.bodyRanges ?? .empty) }
                 if
-                    let quotedAttachmentReference = attachmentStore.quotedAttachmentReference(
-                        parentMessage: quotedReplyMessage,
+                    let quotedMessageAttachmentReference = attachmentStore.quotedAttachmentReference(
+                        owningMessage: quotedReplyMessage,
                         tx: tx,
                     )
                 {
-                    switch quotedAttachmentReference {
+                    switch quotedMessageAttachmentReference {
                     case .thumbnail(let attachmentRef):
                         if let attachment = attachmentStore.fetch(id: attachmentRef.attachmentRowId, tx: tx) {
                             return .attachment(
@@ -846,6 +851,7 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
             let thumbnailAttachmentInfo = OWSAttachmentInfo(
                 originalAttachmentMimeType: stub.mimeType ?? MimeType.applicationOctetStream.rawValue,
                 originalAttachmentSourceFilename: stub.sourceFilename,
+                originalAttachmentRenderingFlag: stub.renderingFlag,
             )
 
             return ValidatedQuotedReply(
@@ -856,6 +862,7 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
             let thumbnailAttachmentInfo = OWSAttachmentInfo(
                 originalAttachmentMimeType: dataSource.originalAttachmentMimeType,
                 originalAttachmentSourceFilename: originalAttachmentSourceFilename,
+                originalAttachmentRenderingFlag: dataSource.originalAttachmentRenderingFlag,
             )
 
             return ValidatedQuotedReply(
@@ -879,7 +886,7 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
 
     func buildProtoForSending(
         _ quote: TSQuotedMessage,
-        parentMessage: TSMessage,
+        outgoingMessage: TSOutgoingMessage,
         tx: DBReadTransaction,
     ) throws -> SSKProtoDataMessageQuote {
         guard let timestamp = quote.timestampValue?.uint64Value else {
@@ -909,7 +916,12 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
             }
         }
 
-        if let attachmentProto = buildAttachmentProtoForSending(for: parentMessage, tx: tx) {
+        if
+            let attachmentProto = buildAttachmentProtoForSending(
+                outgoingMessage: outgoingMessage,
+                tx: tx,
+            )
+        {
             hasQuotedAttachment = true
             quoteBuilder.setAttachments([attachmentProto])
         }
@@ -936,12 +948,12 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
     }
 
     private func buildAttachmentProtoForSending(
-        for parentMessage: TSMessage,
+        outgoingMessage: TSOutgoingMessage,
         tx: DBReadTransaction,
     ) -> SSKProtoDataMessageQuoteQuotedAttachment? {
         guard
-            let reference = attachmentStore.quotedAttachmentReference(
-                parentMessage: parentMessage,
+            let quotedMessageAttachmentReference = attachmentStore.quotedAttachmentReference(
+                owningMessage: outgoingMessage,
                 tx: tx,
             )
         else {
@@ -950,7 +962,7 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
         let builder = SSKProtoDataMessageQuoteQuotedAttachment.builder()
         let mimeType: String?
         let sourceFilename: String?
-        switch reference {
+        switch quotedMessageAttachmentReference {
         case .thumbnail(let attachmentRef):
             sourceFilename = attachmentRef.sourceFilename
 

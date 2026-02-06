@@ -339,12 +339,12 @@ public struct AttachmentStore {
     }
 
     public func quotedAttachmentReference(
-        parentMessage: TSMessage,
+        owningMessage: TSMessage,
         tx: DBReadTransaction,
     ) -> QuotedMessageAttachmentReference? {
         guard
-            let messageRowId = parentMessage.sqliteRowId,
-            let info = parentMessage.quotedMessage?.attachmentInfo()
+            let messageRowId = owningMessage.sqliteRowId,
+            let info = owningMessage.quotedMessage?.attachmentInfo()
         else {
             return nil
         }
@@ -356,8 +356,15 @@ public struct AttachmentStore {
 
         if let reference {
             return .thumbnail(reference)
-        } else if let stub = QuotedMessageAttachmentReference.Stub(info) {
-            return .stub(stub)
+        } else if
+            info.originalAttachmentMimeType != nil
+            || info.originalAttachmentSourceFilename != nil
+        {
+            return .stub(QuotedMessageAttachmentReference.Stub(
+                mimeType: info.originalAttachmentMimeType,
+                sourceFilename: info.originalAttachmentSourceFilename,
+                renderingFlag: info.originalAttachmentRenderingFlag,
+            ))
         } else {
             return nil
         }

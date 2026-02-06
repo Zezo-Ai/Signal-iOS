@@ -379,7 +379,7 @@ class BackupArchiveMessageAttachmentArchiver: BackupArchiveProtoStreamWriter {
 
 extension BackupProto_MessageAttachment.Flag {
 
-    fileprivate var asAttachmentFlag: AttachmentReference.RenderingFlag {
+    var asAttachmentFlag: AttachmentReference.RenderingFlag {
         switch self {
         case .none, .UNRECOGNIZED:
             return .default

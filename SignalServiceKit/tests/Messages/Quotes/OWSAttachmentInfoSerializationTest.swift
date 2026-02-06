@@ -51,16 +51,18 @@ class OWSAttachmentInfoSerializationTest: XCTestCase {
 extension OWSAttachmentInfo {
     static let constants: [(OWSAttachmentInfo, base64NSArchiverData: Data)] = [
         (
-            OWSAttachmentInfo.stub(
-                withNullableOriginalAttachmentMimeType: "jpeg",
+            OWSAttachmentInfo(
+                originalAttachmentMimeType: "jpeg",
                 originalAttachmentSourceFilename: "somefile.jpg",
+                originalAttachmentRenderingFlag: nil,
             ),
             Data(base64Encoded: "YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMSAAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRyb290gAGpCwwbHB0eHyAhVSRudWxs1w0ODxAREhMUFRYXGBkaViRjbGFzc11zY2hlbWFWZXJzaW9uXxAPcmF3QXR0YWNobWVudElkXnNvdXJjZUZpbGVuYW1lXxAPTVRMTW9kZWxWZXJzaW9uW2NvbnRlbnRUeXBlXmF0dGFjaG1lbnRUeXBlgAiABYAEgAOAAoAGgAcQAFxzb21lZmlsZS5qcGdUMTIzNBABVGpwZWcQAtIiIyQlWiRjbGFzc25hbWVYJGNsYXNzZXNfEBFPV1NBdHRhY2htZW50SW5mb6MmJyhfEBFPV1NBdHRhY2htZW50SW5mb1hNVExNb2RlbFhOU09iamVjdAAIABEAGgAkACkAMgA3AEkATABRAFMAXQBjAHIAeQCHAJkAqAC6AMYA1QDXANkA2wDdAN8A4QDjAOUA8gD3APkA/gEAAQUBEAEZAS0BMQFFAU4AAAAAAAACAQAAAAAAAAApAAAAAAAAAAAAAAAAAAABVw==")!,
         ),
         (
-            OWSAttachmentInfo.stub(
-                withNullableOriginalAttachmentMimeType: nil,
+            OWSAttachmentInfo(
+                originalAttachmentMimeType: nil,
                 originalAttachmentSourceFilename: nil,
+                originalAttachmentRenderingFlag: nil,
             ),
             Data(base64Encoded: "YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMSAAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRyb290gAGmCwwXGBkaVSRudWxs1Q0ODxAREhMUEhZdc2NoZW1hVmVyc2lvbl8QD3Jhd0F0dGFjaG1lbnRJZF8QD01UTE1vZGVsVmVyc2lvbl5hdHRhY2htZW50VHlwZVYkY2xhc3OABIADgAKABIAFEABUMTIzNBAB0hscHR5aJGNsYXNzbmFtZVgkY2xhc3Nlc18QEU9XU0F0dGFjaG1lbnRJbmZvox8gIV8QEU9XU0F0dGFjaG1lbnRJbmZvWE1UTE1vZGVsWE5TT2JqZWN0AAgAEQAaACQAKQAyADcASQBMAFEAUwBaAGAAawB5AIsAnQCsALMAtQC3ALkAuwC9AL8AxADGAMsA1gDfAPMA9wELARQAAAAAAAACAQAAAAAAAAAiAAAAAAAAAAAAAAAAAAABHQ==")!,
         ),
@@ -68,13 +70,15 @@ extension OWSAttachmentInfo {
             OWSAttachmentInfo(
                 originalAttachmentMimeType: "mp4",
                 originalAttachmentSourceFilename: "file.mp4",
+                originalAttachmentRenderingFlag: nil,
             ),
             Data(base64Encoded: "YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMSAAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRyb290gAGoCwwZGhscHR5VJG51bGzWDQ4PEBESExQVFhcYXnNvdXJjZUZpbGVuYW1lViRjbGFzc11zY2hlbWFWZXJzaW9uXxAPTVRMTW9kZWxWZXJzaW9uW2NvbnRlbnRUeXBlXmF0dGFjaG1lbnRUeXBlgAOAB4AEgAKABYAGEABYZmlsZS5tcDQQAVNtcDQQBdIfICEiWiRjbGFzc25hbWVYJGNsYXNzZXNfEBFPV1NBdHRhY2htZW50SW5mb6MjJCVfEBFPV1NBdHRhY2htZW50SW5mb1hNVExNb2RlbFhOU09iamVjdAAIABEAGgAkACkAMgA3AEkATABRAFMAXABiAG8AfgCFAJMApQCxAMAAwgDEAMYAyADKAMwAzgDXANkA3QDfAOQA7wD4AQwBEAEkAS0AAAAAAAACAQAAAAAAAAAmAAAAAAAAAAAAAAAAAAABNg==")!,
         ),
         (
-            OWSAttachmentInfo.stub(
-                withNullableOriginalAttachmentMimeType: nil,
+            OWSAttachmentInfo(
+                originalAttachmentMimeType: nil,
                 originalAttachmentSourceFilename: nil,
+                originalAttachmentRenderingFlag: nil,
             ),
             Data(base64Encoded: "YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMSAAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRyb290gAGmCwwVFhcYVSRudWxs1A0ODxAREhMUXXNjaGVtYVZlcnNpb25fEA9NVExNb2RlbFZlcnNpb25eYXR0YWNobWVudFR5cGVWJGNsYXNzgAOAAoAEgAUQABABEAXSGRobHFokY2xhc3NuYW1lWCRjbGFzc2VzXxART1dTQXR0YWNobWVudEluZm+jHR4fXxART1dTQXR0YWNobWVudEluZm9YTVRMTW9kZWxYTlNPYmplY3QACAARABoAJAApADIANwBJAEwAUQBTAFoAYABpAHcAiQCYAJ8AoQCjAKUApwCpAKsArQCyAL0AxgDaAN4A8gD7AAAAAAAAAgEAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAQQ=")!,
         ),
@@ -82,6 +86,7 @@ extension OWSAttachmentInfo {
             OWSAttachmentInfo(
                 originalAttachmentMimeType: "png",
                 originalAttachmentSourceFilename: "image.png",
+                originalAttachmentRenderingFlag: nil,
             ),
             Data(base64Encoded: "YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMSAAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRyb290gAGnCwwZGhscHVUkbnVsbNYNDg8QERITFBUWFxZec291cmNlRmlsZW5hbWVWJGNsYXNzXXNjaGVtYVZlcnNpb25fEA9NVExNb2RlbFZlcnNpb25bY29udGVudFR5cGVeYXR0YWNobWVudFR5cGWAA4AGgASAAoAFgAIQAFlpbWFnZS5wbmcQAVNwbmfSHh8gIVokY2xhc3NuYW1lWCRjbGFzc2VzXxART1dTQXR0YWNobWVudEluZm+jIiMkXxART1dTQXR0YWNobWVudEluZm9YTVRMTW9kZWxYTlNPYmplY3QACAARABoAJAApADIANwBJAEwAUQBTAFsAYQBuAH0AhACSAKQAsAC/AMEAwwDFAMcAyQDLAM0A1wDZAN0A4gDtAPYBCgEOASIBKwAAAAAAAAIBAAAAAAAAACUAAAAAAAAAAAAAAAAAAAE0")!,
         ),

@@ -389,12 +389,12 @@ public class QuotedReplyModel {
             )))
         }
 
-        let attachmentReference = DependenciesBridge.shared.attachmentStore.quotedAttachmentReference(
-            parentMessage: message,
+        let quotedMessageAttachmentReference = DependenciesBridge.shared.attachmentStore.quotedAttachmentReference(
+            owningMessage: message,
             tx: transaction,
         )
 
-        switch attachmentReference {
+        switch quotedMessageAttachmentReference {
         case nil:
             break
         case .stub(let stub):

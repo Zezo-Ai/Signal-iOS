@@ -750,7 +750,7 @@ extension TSOutgoingMessage {
     ) throws -> SSKProtoDataMessageQuote {
         return try DependenciesBridge.shared.quotedReplyManager.buildProtoForSending(
             quote,
-            parentMessage: self,
+            outgoingMessage: self,
             tx: tx,
         )
     }

@@ -1726,21 +1726,23 @@ class BackupArchiveTSMessageContentsArchiver: BackupArchiveProtoStreamWriter {
             isPoll = true
         }
 
-        let quotedAttachmentInfo: OWSAttachmentInfo?
         let quotedAttachmentThumbnail: BackupProto_MessageAttachment?
+        let quotedAttachmentInfo: OWSAttachmentInfo?
         if let quotedAttachmentProto = quote.attachments.first {
-            let mimeType = quotedAttachmentProto.contentType.nilIfEmpty ?? MimeType.applicationOctetStream.rawValue
-            let sourceFilename = quotedAttachmentProto.fileName.nilIfEmpty
-
-            quotedAttachmentInfo = OWSAttachmentInfo(
-                originalAttachmentMimeType: mimeType,
-                originalAttachmentSourceFilename: sourceFilename,
-            )
             if quotedAttachmentProto.hasThumbnail {
                 quotedAttachmentThumbnail = quotedAttachmentProto.thumbnail
             } else {
                 quotedAttachmentThumbnail = nil
             }
+
+            let mimeType = quotedAttachmentProto.contentType.nilIfEmpty ?? MimeType.applicationOctetStream.rawValue
+            let sourceFilename = quotedAttachmentProto.fileName.nilIfEmpty
+            let renderingFlag = quotedAttachmentThumbnail?.flag.asAttachmentFlag
+            quotedAttachmentInfo = OWSAttachmentInfo(
+                originalAttachmentMimeType: mimeType,
+                originalAttachmentSourceFilename: sourceFilename,
+                originalAttachmentRenderingFlag: renderingFlag,
+            )
         } else {
             quotedAttachmentInfo = nil
             quotedAttachmentThumbnail = nil

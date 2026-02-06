@@ -60,7 +60,7 @@ open class QuotedReplyManagerMock: QuotedReplyManager {
 
     open func buildProtoForSending(
         _ quote: TSQuotedMessage,
-        parentMessage: TSMessage,
+        outgoingMessage: TSOutgoingMessage,
         tx: DBReadTransaction,
     ) throws -> SSKProtoDataMessageQuote {
         fatalError("Unimplemented!")

@@ -81,33 +81,6 @@ public class QuotedMessageView: ManualStackViewWithLayer {
         )
     }
 
-    static func stateForPreview(
-        quotedReplyModel: QuotedReplyModel,
-        conversationStyle: ConversationStyle,
-        transaction: DBReadTransaction,
-    ) -> State {
-        var displayableQuotedText: DisplayableText?
-        if let body = quotedReplyModel.originalMessageBody, !body.text.isEmpty {
-            displayableQuotedText = DisplayableText.displayableText(
-                withMessageBody: body,
-                transaction: transaction,
-            )
-        }
-
-        return State(
-            quotedReplyModel: quotedReplyModel,
-            displayableQuotedText: displayableQuotedText,
-            conversationStyle: conversationStyle,
-            isOutgoing: true,
-            isForPreview: true,
-            quotedAuthorName: SSKEnvironment.shared.contactManagerRef.displayName(
-                for: quotedReplyModel.originalMessageAuthorAddress,
-                tx: transaction,
-            ).resolvedValue(),
-            memberLabel: quotedReplyModel.originalMessageMemberLabel,
-        )
-    }
-
     // The Configurator can be used to:
     //
     // * Configure this view for rendering.
@@ -341,8 +314,20 @@ public class QuotedMessageView: ManualStackViewWithLayer {
             case .messageBody(let messageBody):
                 labelText = .messageBody(messageBody)
                 textAlignment = messageBody.naturalTextAlignment
-            case .none:
-                if let fileTypeForSnippet = self.fileTypeForSnippet {
+            case nil:
+                if
+                    case .attachmentStub(_, let stub) = quotedReplyModel.originalContent,
+                    stub.renderingFlag == .voiceMessage
+                {
+                    let iconPrefix = SignalSymbol.audioSquare.attributedString(
+                        dynamicTypeBaseSize: quotedTextFont.pointSize,
+                    )
+                    let voiceMessageText = OWSLocalizedString(
+                        "QUOTED_REPLY_TYPE_VOICE_MESSAGE",
+                        comment: "Indicates this message is a quoted reply to a voice message.",
+                    )
+                    labelText = .attributedText(iconPrefix + " " + voiceMessageText)
+                } else if let fileTypeForSnippet = self.fileTypeForSnippet {
                     labelText = .attributedText(NSAttributedString(
                         string: fileTypeForSnippet,
                         attributes: [

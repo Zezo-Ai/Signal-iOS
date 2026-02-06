@@ -20,30 +20,6 @@ public enum QuotedMessageAttachmentReference {
     public struct Stub: Equatable {
         public let mimeType: String?
         public let sourceFilename: String?
-        public let renderingFlag: AttachmentReference.RenderingFlag
-
-        public init(
-            mimeType: String,
-            sourceFilename: String?,
-            renderingFlag: AttachmentReference.RenderingFlag,
-        ) {
-            self.mimeType = mimeType
-            self.sourceFilename = sourceFilename
-            self.renderingFlag = renderingFlag
-        }
-
-        public init?(_ info: OWSAttachmentInfo) {
-            let mimeType = info.originalAttachmentMimeType
-            let sourceFilename = info.originalAttachmentSourceFilename
-
-            // Need at least one, otherwise there's no point!
-            guard mimeType != nil || sourceFilename != nil else {
-                return nil
-            }
-
-            self.mimeType = mimeType
-            self.sourceFilename = sourceFilename
-            self.renderingFlag = .default
-        }
+        public let renderingFlag: AttachmentReference.RenderingFlag?
     }
 }

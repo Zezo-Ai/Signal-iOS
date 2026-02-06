@@ -27,9 +27,21 @@ public enum QuotedReplyAttachmentDataSource {
         }
     }
 
+    public var originalAttachmentRenderingFlag: AttachmentReference.RenderingFlag {
+        switch self {
+        case .pendingAttachment(let pendingAttachmentSource):
+            return pendingAttachmentSource.originalAttachmentRenderingFlag
+        case .originalAttachment(let originalAttachmentSource):
+            return originalAttachmentSource.renderingFlag
+        case .notFoundLocallyAttachment(let notFoundLocallyAttachmentSource):
+            return notFoundLocallyAttachmentSource.originalAttachmentRenderingFlag
+        }
+    }
+
     public struct PendingAttachmentSource {
         let pendingAttachment: PendingAttachment
         let originalAttachmentMimeType: String
+        let originalAttachmentRenderingFlag: AttachmentReference.RenderingFlag
     }
 
     public struct OriginalAttachmentSource {
@@ -47,5 +59,6 @@ public enum QuotedReplyAttachmentDataSource {
     public struct NotFoundLocallyAttachmentSource {
         public let thumbnailPointerProto: SSKProtoAttachmentPointer
         public let originalAttachmentMimeType: String
+        public let originalAttachmentRenderingFlag: AttachmentReference.RenderingFlag
     }
 }

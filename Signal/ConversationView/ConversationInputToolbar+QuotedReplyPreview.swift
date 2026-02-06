@@ -508,7 +508,7 @@ private class QuotedMessageSnippetView: UIView {
             switch stub.renderingFlag {
             case .voiceMessage:
                 break
-            case .default, .borderless, .shouldLoop:
+            case nil, .default, .borderless, .shouldLoop:
                 thumbnailView = createStubAttachmentView()
             }
 
@@ -616,7 +616,7 @@ private class QuotedMessageSnippetView: UIView {
 
     private func mimeTypeAndRenderingFlag(
         _ content: DraftQuotedReplyModel.Content,
-    ) -> (String, AttachmentReference.RenderingFlag)? {
+    ) -> (String, AttachmentReference.RenderingFlag?)? {
         switch content {
         case .attachmentStub(_, let stub):
             if let mimeType = stub.mimeType {
