@@ -76,7 +76,11 @@ public class CVComponentTypingIndicator: CVComponentBase, CVRootComponent {
         }
 
         let bubbleView = componentView.bubbleView
-        bubbleView.backgroundColor = conversationStyle.bubbleColorIncoming
+        bubbleView.configure(
+            value: conversationStyle.bubbleChatColorIncoming,
+            referenceView: componentDelegate.view,
+            hasPillRounding: true,
+        )
         innerStackView.addSubviewToFillSuperviewEdges(bubbleView)
 
         let typingIndicatorView = componentView.typingIndicatorView
@@ -180,7 +184,7 @@ public class CVComponentTypingIndicator: CVComponentBase, CVRootComponent {
             localUserDisplayMode: .asUser,
             useAutolayout: false,
         )
-        fileprivate let bubbleView = ManualLayoutViewWithLayer.pillView(name: "bubbleView")
+        fileprivate let bubbleView = CVColorOrGradientView()
         fileprivate let typingIndicatorView = TypingIndicatorView()
 
         public var isDedicatedCellView = false
@@ -210,6 +214,5 @@ public class CVComponentTypingIndicator: CVComponentBase, CVRootComponent {
             typingIndicatorView.reset()
             typingIndicatorView.removeFromSuperview()
         }
-
     }
 }

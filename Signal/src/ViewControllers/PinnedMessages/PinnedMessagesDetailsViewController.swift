@@ -220,6 +220,7 @@ class PinnedMessagesDetailsViewController: OWSViewController, DatabaseChangeDele
             thread: threadViewModel.threadRecord,
             viewWidth: view.safeAreaLayoutGuide.layoutFrame.width,
             hasWallpaper: false,
+            shouldDimWallpaperInDarkMode: false,
             isWallpaperPhoto: false,
             chatColor: DependenciesBridge.shared.chatColorSettingStore.resolvedChatColor(
                 for: threadViewModel.threadRecord,
@@ -250,6 +251,7 @@ class PinnedMessagesDetailsViewController: OWSViewController, DatabaseChangeDele
             thread: thread,
             viewWidth: view.safeAreaLayoutGuide.layoutFrame.width - Self.goToMessageButtonSize,
             hasWallpaper: false,
+            shouldDimWallpaperInDarkMode: false,
             isWallpaperPhoto: false,
             chatColor: DependenciesBridge.shared.chatColorSettingStore.resolvedChatColor(
                 for: thread,

@@ -194,6 +194,7 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
                 thread: mockGroupThread,
                 viewWidth: view.width - 44, // stack view padding
                 hasWallpaper: false,
+                shouldDimWallpaperInDarkMode: false,
                 isWallpaperPhoto: false,
                 chatColor: PaletteChatColor.ultramarine.colorSetting,
             )

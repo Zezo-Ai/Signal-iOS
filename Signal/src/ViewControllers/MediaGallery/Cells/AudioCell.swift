@@ -142,6 +142,7 @@ class AudioCell: MediaTileListModeCell {
             thread: audioItem.thread,
             viewWidth: contentView.bounds.width,
             hasWallpaper: false,
+            shouldDimWallpaperInDarkMode: false,
             isWallpaperPhoto: false,
             chatColor: ChatColorSettingStore.Constants.defaultColor.colorSetting,
         )

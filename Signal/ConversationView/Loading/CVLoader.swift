@@ -296,6 +296,7 @@ public class CVLoader: NSObject {
             thread: thread,
             viewWidth: containerView.width,
             hasWallpaper: false,
+            shouldDimWallpaperInDarkMode: false,
             isWallpaperPhoto: false,
             chatColor: chatColor,
         )
@@ -414,6 +415,7 @@ public class CVLoader: NSObject {
             thread: thread,
             viewWidth: mockViewWidth,
             hasWallpaper: false,
+            shouldDimWallpaperInDarkMode: false,
             isWallpaperPhoto: false,
             chatColor: chatColor,
         )

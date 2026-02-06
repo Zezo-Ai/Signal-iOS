@@ -448,6 +448,14 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         CVComponentViewMessage()
     }
 
+    override public func wallpaperBlurView(componentView: CVComponentView) -> CVWallpaperBlurView? {
+        guard let componentView = componentView as? CVComponentViewMessage else {
+            owsFailDebug("Unexpected componentView.")
+            return nil
+        }
+        return componentView.wallpaperBlurView
+    }
+
     override public func updateScrollingContent(componentView: CVComponentView) {
         super.updateScrollingContent(componentView: componentView)
 
@@ -493,38 +501,34 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             return
         }
 
-        var outerBubbleView: CVColorOrGradientView?
-        func configureBubbleView() {
-            let chatColorView = componentView.chatColorView
-            var strokeConfig: CVColorOrGradientView.StrokeConfig?
-            if let bubbleStrokeColor = self.bubbleStrokeColor {
-                strokeConfig = CVColorOrGradientView.StrokeConfig(color: bubbleStrokeColor, width: 1)
-            }
-            let bubbleConfig = CVColorOrGradientView.BubbleConfig(
-                sharpCorners: self.sharpCorners,
-                sharpCornerRadius: Self.bubbleSharpCornerRadius,
-                wideCornerRadius: Self.bubbleWideCornerRadius,
-                strokeConfig: strokeConfig,
-            )
-            chatColorView.configure(
-                value: self.bubbleChatColor,
-                referenceView: componentDelegate.view,
-                bubbleConfig: bubbleConfig,
-            )
-            chatColorView.dimmerDimsBackgroundOnly = true
-            outerBubbleView = chatColorView
-        }
-
         let outerContentView = configureContentStack(
             componentView: componentView,
             cellMeasurement: cellMeasurement,
             componentDelegate: componentDelegate,
         )
 
-        let stickerOverlaySubcomponent = subcomponent(forKey: .sticker)
-        if nil == stickerOverlaySubcomponent {
-            // TODO: We don't always use the bubble view for media.
-            configureBubbleView()
+        // No bubbles for stickers.
+        var outerBubbleView: (CVDimmableView & OWSBubbleViewHost)?
+        if nil == subcomponent(forKey: .sticker) {
+            if case .blur = bubbleChatColor {
+                let wallpaperBlurView = componentView.ensureWallpaperBlurView()
+                configureWallpaperBlurView(
+                    wallpaperBlurView: wallpaperBlurView,
+                    componentDelegate: componentDelegate,
+                    cornerConfig: bubbleCornerConfiguration,
+                    strokeConfig: bubbleStrokeConfiguration,
+                )
+                outerBubbleView = wallpaperBlurView
+            } else {
+                let chatColorView = componentView.chatColorView
+                chatColorView.configure(
+                    value: bubbleChatColor,
+                    referenceView: componentDelegate.view,
+                    cornerConfig: bubbleCornerConfiguration,
+                    strokeConfig: bubbleStrokeConfiguration,
+                )
+                outerBubbleView = chatColorView
+            }
         }
 
         // hInnerStack
@@ -545,7 +549,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
 
         let contentViewSwipeToReplyWrapper = componentView.contentViewSwipeToReplyWrapper
         if let bubbleView = outerBubbleView {
-            bubbleView.addSubview(outerContentView)
+            bubbleView.addSubviewToFillSuperviewEdges(outerContentView)
 
             if let (giftWrapView, bubbleViewPartner) = self.configureGiftWrapIfNeeded(messageView: componentView) {
                 let wrapper = ManualLayoutView(name: "containerForOverlay")
@@ -577,7 +581,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
                             // to reflect the bubble view state.
                             bubbleViewPartner.updateLayers()
                         }
-                        outerBubbleView?.dimmerDimsBackgroundOnly = false
+                        outerBubbleView?.dimsContent = true
                     }
                 } else {
                     owsFailDebug("Invalid component.")
@@ -708,7 +712,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             sendFailureBadge.contentMode = .center
             sendFailureBadge.setTemplateImageName("error-circle", tintColor: badgeConfig.color)
             if conversationStyle.hasWallpaper {
-                sendFailureBadge.backgroundColor = conversationStyle.bubbleColorIncoming
+                sendFailureBadge.backgroundColor = conversationStyle.accessoryColor
                 sendFailureBadge.layer.cornerRadius = sendFailureBadgeSize / 2
                 sendFailureBadge.clipsToBounds = true
             }
@@ -743,7 +747,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         )
 
         let swipeToReplyIconView = componentView.swipeToReplyIconView
-        swipeToReplyIconView.contentMode = .center
+        swipeToReplyIconView.backgroundEffect = conversationStyle.bubbleBackgroundBlurEffect
         swipeToReplyIconView.alpha = 0
         let swipeToReplyIconSwipeToReplyWrapper = componentView.swipeToReplyIconSwipeToReplyWrapper
         // Add the view wrapper, not the view.
@@ -751,27 +755,16 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         hInnerStack.addSubview(swipeToReplyView)
         hInnerStack.sendSubviewToBack(swipeToReplyView)
 
-        let swipeToReplySize: CGFloat
-        if conversationStyle.hasWallpaper {
-            swipeToReplyIconView.backgroundColor = conversationStyle.bubbleColorIncoming
-            swipeToReplyIconView.clipsToBounds = true
-            swipeToReplySize = 34
-            swipeToReplyIconView.setTemplateImageName("reply-20", tintColor: .ows_gray45)
-        } else {
-            swipeToReplyIconView.backgroundColor = .clear
-            swipeToReplyIconView.clipsToBounds = false
-            swipeToReplySize = 24
-            swipeToReplyIconView.setTemplateImageName("reply", tintColor: .ows_gray45)
-        }
         hInnerStack.addLayoutBlock { _ in
             guard let superview = swipeToReplyView.superview else {
                 return
             }
             let contentFrame = superview.convert(contentRootView.bounds, from: contentRootView)
-            var swipeToReplyFrame = CGRect(origin: .zero, size: .square(swipeToReplySize))
+            let swipeToReplySize = swipeToReplyIconView.intrinsicContentSize
+            var swipeToReplyFrame = CGRect(origin: .zero, size: swipeToReplySize)
             // swipeToReplyIconView.autoPinEdge(.leading, to: .leading, of: swipeActionContentView, withOffset: 8)
             if CurrentAppContext().isRTL {
-                swipeToReplyFrame.x = contentFrame.maxX - (swipeToReplySize + 8)
+                swipeToReplyFrame.x = contentFrame.maxX - (swipeToReplySize.width + 8)
             } else {
                 swipeToReplyFrame.x = contentFrame.x + 8
             }
@@ -1524,12 +1517,22 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         return itemModel.conversationStyle.bubbleChatColor(isIncoming: isIncoming)
     }
 
-    private var bubbleStrokeColor: UIColor? {
-        if wasRemotelyDeleted || isBorderlessViewOnceMessage {
-            return conversationStyle.hasWallpaper ? nil : UIColor.Signal.opaqueSeparator
-        } else {
+    private var bubbleStrokeConfiguration: BubbleStrokeConfiguration? {
+        if !conversationStyle.hasWallpaper, wasRemotelyDeleted || isBorderlessViewOnceMessage {
+            return BubbleStrokeConfiguration(color: UIColor.Signal.opaqueSeparator, width: 1)
+        }
+        if isBubbleTransparent {
             return nil
         }
+        return itemModel.conversationStyle.bubbleStrokeConfiguration(isIncoming: isIncoming)
+    }
+
+    private var bubbleCornerConfiguration: BubbleCornerConfiguration {
+        BubbleCornerConfiguration(
+            sharpCorners: sharpCorners,
+            sharpCornerRadius: Self.bubbleSharpCornerRadius,
+            wideCornerRadius: Self.bubbleWideCornerRadius,
+        )
     }
 
     private static let measurementKey_hOuterStack = "CVComponentMessage.measurementKey_hOuterStack"
@@ -2174,7 +2177,20 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             useAutolayout: false,
         )
 
+        // This view provides background for outgoing messages in all scenarios
+        // and for incoming messages when there's no chat wallpaper.
         fileprivate let chatColorView = CVColorOrGradientView()
+        // This view provides background for incoming messages when
+        // there is a chat wallpaper and bubble background is "blur".
+        fileprivate var wallpaperBlurView: CVWallpaperBlurView?
+        fileprivate func ensureWallpaperBlurView() -> CVWallpaperBlurView {
+            if let wallpaperBlurView {
+                return wallpaperBlurView
+            }
+            let wallpaperBlurView = CVWallpaperBlurView()
+            self.wallpaperBlurView = wallpaperBlurView
+            return wallpaperBlurView
+        }
 
         // Contains the actual renderable message content, arranged vertically.
         fileprivate let contentStack = ManualStackView(name: "message.contentStack")
@@ -2198,7 +2214,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         fileprivate lazy var secondarySelectionView = MessageSelectionView()
         fileprivate let selectionWrapper = ManualLayoutView(name: "message.selectionWrapper")
 
-        fileprivate let swipeToReplyIconView = CVImageView.circleView()
+        fileprivate let swipeToReplyIconView = SwipeToReplyIndicatorView()
 
         fileprivate let cellSpacer = UIView()
 
@@ -2442,11 +2458,13 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
 
             chatColorView.removeFromSuperview()
             chatColorView.reset()
+
+            wallpaperBlurView?.removeFromSuperview()
+            wallpaperBlurView?.reset()
+            wallpaperBlurView = nil
+
             avatarView.reset()
 
-            if !isDedicatedCellView {
-                swipeToReplyIconView.image = nil
-            }
             swipeToReplyIconView.alpha = 0
 
             // We use hInnerStack.frame to detect whether or not
@@ -2505,8 +2523,15 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         // MARK: - Flashing Message Bubble
 
         func performMessageBubbleHighlightAnimation() {
-            chatColorView.dimmingColor = Theme.isDarkThemeEnabled ? .ows_whiteAlpha25 : .ows_blackAlpha25
-            chatColorView.performDimmingAnimation(stepDuration: 0.4)
+            var dimmableBubbleView: CVDimmableView?
+            if let wallpaperBlurView, wallpaperBlurView.superview != nil {
+                dimmableBubbleView = wallpaperBlurView
+            } else if chatColorView.superview != nil {
+                dimmableBubbleView = chatColorView
+            }
+            guard let dimmableBubbleView else { return }
+            dimmableBubbleView.dimmerColor = Theme.isDarkThemeEnabled ? .ows_whiteAlpha25 : .ows_blackAlpha25
+            dimmableBubbleView.performDimmingAnimation(animationDuration: 0.4, dimDuration: 0.8)
         }
     }
 
@@ -2775,10 +2800,10 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             let tintColor: UIColor
             if activeDirection == .right {
                 transform = CGAffineTransform(scaleX: 1.16, y: 1.16)
-                tintColor = isDarkThemeEnabled ? .ows_gray25 : .ows_gray75
+                tintColor = conversationStyle.bubbleTextColorIncoming
             } else {
                 transform = .identity
-                tintColor = .ows_gray45
+                tintColor = conversationStyle.bubbleTextColorIncoming.withAlphaComponent(0.5)
             }
             swipeToReplyIconWrapper.layer.removeAllAnimations()
             swipeToReplyIconView.tintColor = tintColor
@@ -3150,5 +3175,78 @@ class SwipeToReplyWrapper: ManualLayoutView {
         subview = nil
         offset = .zero
         addDefaultLayoutBlock()
+    }
+}
+
+private class SwipeToReplyIndicatorView: UIView {
+
+    var backgroundEffect: UIVisualEffect? = nil {
+        didSet {
+            // Show/hide background.
+            let imageName: String
+            if let backgroundEffect {
+                if let backgroundView {
+                    backgroundView.effect = backgroundEffect
+                    backgroundView.isHidden = false
+                } else {
+                    let blurEffectView = UIVisualEffectView(effect: backgroundEffect)
+                    blurEffectView.clipsToBounds = true
+                    if #available(iOS 26, *) {
+                        blurEffectView.cornerConfiguration = .capsule()
+                    }
+                    insertSubview(blurEffectView, at: 0)
+                    self.backgroundView = blurEffectView
+                }
+                backgroundView?.contentView.addSubview(imageView)
+
+                // Smaller icon when we there is a background.
+                imageName = "reply-20"
+            } else {
+                backgroundView?.effect = nil
+                backgroundView?.isHidden = true
+                addSubview(imageView)
+
+                // Larger - 24 dp - icon.
+                imageName = "reply"
+            }
+
+            // Update icon:
+            imageView.image = UIImage(named: imageName)?.withRenderingMode(.alwaysTemplate)
+
+            invalidateIntrinsicContentSize()
+            setNeedsLayout()
+        }
+    }
+
+    private let imageView = UIImageView()
+    private var backgroundView: UIVisualEffectView?
+
+    init() {
+        super.init(frame: .zero)
+
+        imageView.contentMode = .center
+        addSubview(imageView)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override var intrinsicContentSize: CGSize {
+        let size: CGFloat = (backgroundView?.isHidden ?? true) ? 34 : 24
+        return .square(size)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        imageView.frame = bounds
+
+        if let backgroundView {
+            backgroundView.frame = bounds
+            if #unavailable(iOS 26) {
+                backgroundView.layer.cornerRadius = min(bounds.height, bounds.width) / 2
+            }
+        }
     }
 }

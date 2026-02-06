@@ -13,6 +13,7 @@ import UIKit
 /// ColorOrGradientValue is used for rendering.
 public enum ColorOrGradientValue: CustomStringConvertible {
     case transparent
+    case blur(blurEffect: UIVisualEffect)
     case solidColor(color: UIColor)
     /// If angleRadians = 0, gradientColor1 is N.
     /// If angleRadians = PI / 2, gradientColor1 is E.
@@ -27,6 +28,8 @@ public enum ColorOrGradientValue: CustomStringConvertible {
         switch self {
         case .transparent:
             return "[transparent]"
+        case .blur:
+            return "[blur]"
         case .solidColor(let color):
             return "[solidColor: \(color.asOWSColor)]"
         case .gradient(let gradientColor1, let gradientColor2, let angleRadians):

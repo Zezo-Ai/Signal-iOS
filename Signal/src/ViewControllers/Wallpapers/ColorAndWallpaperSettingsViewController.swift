@@ -387,6 +387,7 @@ public class ColorAndWallpaperSettingsViewController: OWSTableViewController2 {
 
 private class MiniPreviewView: UIView {
     private let hasWallpaper: Bool
+    private let shouldDimWallpaperInDarkMode: Bool
     private let chatColor: ColorOrGradientSetting
 
     init(wallpaperViewBuilder: WallpaperViewBuilder?, chatColor: ColorOrGradientSetting) {
@@ -395,10 +396,17 @@ private class MiniPreviewView: UIView {
         if let wallpaperViewBuilder {
             stackViewContainer = wallpaperViewBuilder.build().asPreviewView()
             hasWallpaper = true
+            switch wallpaperViewBuilder {
+            case .colorOrGradient(_, let shouldDimInDarkMode):
+                shouldDimWallpaperInDarkMode = shouldDimInDarkMode
+            case .customPhoto(_, let shouldDimInDarkMode):
+                shouldDimWallpaperInDarkMode = shouldDimInDarkMode
+            }
         } else {
             stackViewContainer = UIView()
             stackViewContainer.backgroundColor = Theme.backgroundColor
             hasWallpaper = false
+            shouldDimWallpaperInDarkMode = false
         }
         self.hasWallpaper = hasWallpaper
         self.chatColor = chatColor
@@ -458,14 +466,24 @@ private class MiniPreviewView: UIView {
     }
 
     func buildIncomingBubble() -> UIView {
-        let containerView = UIView()
+        let chatColorView = CVColorOrGradientView()
+        chatColorView.configure(
+            value: ConversationStyle.bubbleChatColorIncoming(
+                hasWallpaper: hasWallpaper,
+                shouldDimWallpaperInDarkMode: shouldDimWallpaperInDarkMode,
+                isDarkThemeEnabled: Theme.isDarkThemeEnabled,
+            ),
+            referenceView: self,
+        )
+
         let bubbleView = UIView()
         bubbleView.layer.cornerRadius = 10
+        bubbleView.layer.masksToBounds = true
         bubbleView.autoSetDimensions(to: CGSize(width: 100, height: 30))
-        bubbleView.backgroundColor = ConversationStyle.bubbleColorIncoming(
-            hasWallpaper: hasWallpaper,
-            isDarkThemeEnabled: Theme.isDarkThemeEnabled,
-        )
+        bubbleView.addSubview(chatColorView)
+        chatColorView.autoPinEdgesToSuperviewEdges()
+
+        let containerView = UIView()
         containerView.addSubview(bubbleView)
         bubbleView.autoPinEdge(toSuperviewEdge: .leading, withInset: 8)
         bubbleView.autoPinHeightToSuperview()

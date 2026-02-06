@@ -21,6 +21,7 @@ class ConversationViewTest: SignalBaseTest {
             thread: thread,
             viewWidth: 100,
             hasWallpaper: false,
+            shouldDimWallpaperInDarkMode: false,
             isWallpaperPhoto: false,
             chatColor: ChatColorSettingStore.Constants.defaultColor.colorSetting,
         )
@@ -29,6 +30,7 @@ class ConversationViewTest: SignalBaseTest {
             thread: thread,
             viewWidth: 100,
             hasWallpaper: false,
+            shouldDimWallpaperInDarkMode: false,
             isWallpaperPhoto: false,
             chatColor: ChatColorSettingStore.Constants.defaultColor.colorSetting,
         )
@@ -37,6 +39,7 @@ class ConversationViewTest: SignalBaseTest {
             thread: thread,
             viewWidth: 101,
             hasWallpaper: false,
+            shouldDimWallpaperInDarkMode: false,
             isWallpaperPhoto: false,
             chatColor: ChatColorSettingStore.Constants.defaultColor.colorSetting,
         )
@@ -57,6 +60,7 @@ class ConversationViewTest: SignalBaseTest {
             thread: thread,
             viewWidth: 100,
             hasWallpaper: false,
+            shouldDimWallpaperInDarkMode: false,
             isWallpaperPhoto: false,
             chatColor: ChatColorSettingStore.Constants.defaultColor.colorSetting,
         )

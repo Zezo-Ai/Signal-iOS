@@ -37,6 +37,8 @@ public class ColorOrGradientSwatchView: ManualLayoutViewWithLayer {
 
     private let gradientLayer = CAGradientLayer()
 
+    private var backgroundBlurView: UIVisualEffectView?
+
     public init(
         setting: ColorOrGradientSetting,
         shapeMode: ShapeMode,
@@ -65,9 +67,9 @@ public class ColorOrGradientSwatchView: ManualLayoutViewWithLayer {
 
         super.init(name: colorName ?? "ColorOrGradientSwatchView")
 
-        self.shouldDeactivateConstraints = false
+        shouldDeactivateConstraints = false
 
-        self.isAccessibilityElement = true
+        isAccessibilityElement = true
 
         configure()
 
@@ -103,22 +105,38 @@ public class ColorOrGradientSwatchView: ManualLayoutViewWithLayer {
 
         switch shapeMode {
         case .circle:
-            self.layer.cornerRadius = size.smallerAxis * 0.5
-            self.clipsToBounds = true
+            layer.cornerRadius = size.smallerAxis * 0.5
+            clipsToBounds = true
         case .rectangle:
-            self.layer.cornerRadius = 0
-            self.clipsToBounds = false
+            layer.cornerRadius = 0
+            clipsToBounds = false
         }
 
         switch setting.asValue(themeMode: themeMode) {
         case .transparent:
             backgroundColor = nil
+            backgroundBlurView?.effect = nil
             gradientLayer.removeFromSuperlayer()
+
+        case .blur(let blurEffect):
+            backgroundColor = nil
+            if let backgroundBlurView {
+                backgroundBlurView.effect = blurEffect
+            } else {
+                let backgroundBlurView = UIVisualEffectView(effect: blurEffect)
+                addSubviewToFillSuperviewEdges(backgroundBlurView)
+                self.backgroundBlurView = backgroundBlurView
+            }
+            gradientLayer.removeFromSuperlayer()
+
         case .solidColor(let color):
             backgroundColor = color
+            backgroundBlurView?.effect = nil
             gradientLayer.removeFromSuperlayer()
+
         case .gradient(let color1, let color2, let angleRadians):
             backgroundColor = nil
+            backgroundBlurView?.effect = nil
 
             if gradientLayer.superlayer != self.layer {
                 gradientLayer.removeFromSuperlayer()
@@ -170,7 +188,7 @@ public class ColorOrGradientSwatchView: ManualLayoutViewWithLayer {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
 
-            gradientLayer.frame = self.bounds
+            gradientLayer.frame = bounds
 
             gradientLayer.startPoint = startPointLL
             gradientLayer.endPoint = endPointLL

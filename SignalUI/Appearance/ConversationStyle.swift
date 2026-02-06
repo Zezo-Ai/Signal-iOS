@@ -35,7 +35,8 @@ public struct ConversationStyle {
     public let isDarkThemeEnabled: Bool
 
     public let hasWallpaper: Bool
-
+    // Determines blur effect for incoming message bubbles.
+    public let shouldDimWallpaperInDarkMode: Bool
     public let isWallpaperPhoto: Bool
 
     public let isStandaloneRenderItem: Bool
@@ -112,6 +113,7 @@ public struct ConversationStyle {
         thread: TSThread,
         viewWidth: CGFloat,
         hasWallpaper: Bool,
+        shouldDimWallpaperInDarkMode: Bool,
         isWallpaperPhoto: Bool,
         chatColor: ColorOrGradientSetting,
         isStandaloneRenderItem: Bool = false,
@@ -121,6 +123,7 @@ public struct ConversationStyle {
         self.isDarkThemeEnabled = Theme.isDarkThemeEnabled
         self.primaryTextColor = Theme.primaryTextColor
         self.hasWallpaper = hasWallpaper
+        self.shouldDimWallpaperInDarkMode = shouldDimWallpaperInDarkMode
         self.isWallpaperPhoto = isWallpaperPhoto
         self.chatColorSetting = chatColor
         self.chatColorValue = chatColor.asValue
@@ -180,10 +183,7 @@ public struct ConversationStyle {
 
     // MARK: Colors
 
-    public static func bubbleColorIncoming(
-        hasWallpaper: Bool,
-        isDarkThemeEnabled: Bool,
-    ) -> UIColor {
+    public var accessoryColor: UIColor {
         if hasWallpaper {
             return isDarkThemeEnabled ? .ows_gray95 : .white
         } else {
@@ -191,21 +191,58 @@ public struct ConversationStyle {
         }
     }
 
-    public var bubbleColorIncoming: UIColor {
-        Self.bubbleColorIncoming(
+    public func bubbleChatColor(isIncoming: Bool) -> ColorOrGradientValue {
+        if isIncoming {
+            bubbleChatColorIncoming
+        } else {
+            bubbleChatColorOutgoing
+        }
+    }
+
+    private static func bubbleBackgroundBlurEffect(
+        hasWallpaper: Bool,
+        isDarkThemeEnabled: Bool,
+        shouldDimWallpaperInDarkMode: Bool,
+    ) -> UIVisualEffect? {
+        guard hasWallpaper else { return nil }
+        if isDarkThemeEnabled, shouldDimWallpaperInDarkMode {
+            return UIBlurEffect(style: .systemUltraThinMaterial)
+        }
+        return UIBlurEffect(style: .systemThinMaterial)
+    }
+
+    public var bubbleBackgroundBlurEffect: UIVisualEffect? {
+        return Self.bubbleBackgroundBlurEffect(
             hasWallpaper: hasWallpaper,
             isDarkThemeEnabled: isDarkThemeEnabled,
+            shouldDimWallpaperInDarkMode: shouldDimWallpaperInDarkMode,
         )
     }
 
-    public let dateBreakTextColor = UIColor.ows_gray60
-
-    public func bubbleChatColor(isIncoming: Bool) -> ColorOrGradientValue {
-        if isIncoming {
-            return .solidColor(color: bubbleColorIncoming)
-        } else {
-            return bubbleChatColorOutgoing
+    public static func bubbleChatColorIncoming(
+        hasWallpaper: Bool,
+        shouldDimWallpaperInDarkMode: Bool,
+        isDarkThemeEnabled: Bool,
+    ) -> ColorOrGradientValue {
+        if
+            let blurEffect = bubbleBackgroundBlurEffect(
+                hasWallpaper: hasWallpaper,
+                isDarkThemeEnabled: isDarkThemeEnabled,
+                shouldDimWallpaperInDarkMode: shouldDimWallpaperInDarkMode,
+            )
+        {
+            return .blur(blurEffect: blurEffect)
         }
+        let color = isDarkThemeEnabled ? UIColor(rgbHex: 0x2C2C2E) : UIColor(rgbHex: 0xE9E9E9)
+        return .solidColor(color: color)
+    }
+
+    public var bubbleChatColorIncoming: ColorOrGradientValue {
+        Self.bubbleChatColorIncoming(
+            hasWallpaper: hasWallpaper,
+            shouldDimWallpaperInDarkMode: shouldDimWallpaperInDarkMode,
+            isDarkThemeEnabled: isDarkThemeEnabled,
+        )
     }
 
     public var bubbleChatColorOutgoing: ColorOrGradientValue {
@@ -217,7 +254,7 @@ public struct ConversationStyle {
     }
 
     public static var bubbleTextColorIncomingThemed: ThemedColor {
-        ThemedColor(light: UIColor.ows_gray90, dark: UIColor.ows_gray05)
+        ThemedColor(light: Theme.lightThemePrimaryColor, dark: Theme.darkThemePrimaryColor)
     }
 
     public static var bubbleTextColorOutgoing: UIColor {
@@ -233,7 +270,7 @@ public struct ConversationStyle {
     }
 
     public var bubbleSecondaryTextColorIncoming: UIColor {
-        isDarkThemeEnabled ? .ows_gray25 : .ows_gray60
+        isDarkThemeEnabled ? Theme.darkThemeSecondaryTextAndIconColor : Theme.lightThemeSecondaryTextAndIconColor
     }
 
     public var bubbleTextColorOutgoing: UIColor {
@@ -284,6 +321,14 @@ public struct ConversationStyle {
         }
     }
 
+    public func bubbleStrokeConfiguration(isIncoming: Bool) -> BubbleStrokeConfiguration? {
+        guard hasWallpaper, isIncoming else { return nil }
+
+        // Only use stroke for the bubble that should use blur background.
+        let strokeColor = isDarkThemeEnabled ? UIColor(white: 1, alpha: 0.1) : UIColor(white: 0, alpha: 0.1)
+        return BubbleStrokeConfiguration(color: strokeColor, width: 0.5)
+    }
+
     // Same across all themes
     public static var searchMatchHighlightColor: UIColor {
         return UIColor.yellow
@@ -299,6 +344,7 @@ extension ConversationStyle: Equatable {
             lhs.dynamicBodyTypePointSize == rhs.dynamicBodyTypePointSize &&
             lhs.isDarkThemeEnabled == rhs.isDarkThemeEnabled &&
             lhs.hasWallpaper == rhs.hasWallpaper &&
+            lhs.shouldDimWallpaperInDarkMode == rhs.shouldDimWallpaperInDarkMode &&
             lhs.isWallpaperPhoto == rhs.isWallpaperPhoto &&
             lhs.maxMessageWidth == rhs.maxMessageWidth &&
             lhs.maxMediaMessageWidth == rhs.maxMediaMessageWidth &&

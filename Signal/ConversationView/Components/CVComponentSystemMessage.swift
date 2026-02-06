@@ -315,7 +315,6 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
                 let wallpaperBlurView = componentView.ensureWallpaperBlurView()
                 configureWallpaperBlurView(
                     wallpaperBlurView: wallpaperBlurView,
-                    maskCornerRadius: 0,
                     componentDelegate: componentDelegate,
                 )
                 bubbleView = wallpaperBlurView

@@ -707,16 +707,20 @@ extension ConversationViewController: CVLoadCoordinatorDelegate {
         wallpaperViewBuilder: WallpaperViewBuilder?,
     ) -> ConversationStyle {
         let hasWallpaper: Bool
+        let shouldDimWallpaperInDarkMode: Bool
         let isWallpaperPhoto: Bool
         switch wallpaperViewBuilder {
-        case .customPhoto:
+        case .customPhoto(_, let shouldDimInDarkMode):
             hasWallpaper = true
+            shouldDimWallpaperInDarkMode = shouldDimInDarkMode
             isWallpaperPhoto = true
-        case .colorOrGradient:
+        case .colorOrGradient(_, let shouldDimInDarkMode):
             hasWallpaper = true
+            shouldDimWallpaperInDarkMode = shouldDimInDarkMode
             isWallpaperPhoto = false
         case .none:
             hasWallpaper = false
+            shouldDimWallpaperInDarkMode = false
             isWallpaperPhoto = false
         }
         return ConversationStyle(
@@ -724,6 +728,7 @@ extension ConversationViewController: CVLoadCoordinatorDelegate {
             thread: thread,
             viewWidth: viewWidth,
             hasWallpaper: hasWallpaper,
+            shouldDimWallpaperInDarkMode: shouldDimWallpaperInDarkMode,
             isWallpaperPhoto: isWallpaperPhoto,
             chatColor: chatColor,
         )

@@ -3309,7 +3309,7 @@ private extension ColorOrGradientValue {
     func asSendButtonTintColor() -> UIColor {
         let bubbleColor: UIColor = {
             switch self {
-            case .transparent:
+            case .transparent, .blur:
                 return .Signal.accent
 
             case .solidColor(let color):

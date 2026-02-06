@@ -227,6 +227,7 @@ class EditHistoryTableSheetViewController: OWSTableSheetViewController {
             thread: thread,
             viewWidth: viewWidth,
             hasWallpaper: false,
+            shouldDimWallpaperInDarkMode: false,
             isWallpaperPhoto: false,
             chatColor: DependenciesBridge.shared.chatColorSettingStore.resolvedChatColor(
                 for: thread,

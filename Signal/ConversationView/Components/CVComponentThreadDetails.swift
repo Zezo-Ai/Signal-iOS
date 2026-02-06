@@ -159,8 +159,8 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
             let wallpaperBlurView = componentView.ensureWallpaperBlurView()
             configureWallpaperBlurView(
                 wallpaperBlurView: wallpaperBlurView,
-                maskCornerRadius: 24,
                 componentDelegate: componentDelegate,
+                cornerConfig: .init(cornerRadius: 24),
             )
             innerStackView.addSubviewToFillSuperviewEdges(wallpaperBlurView)
         }

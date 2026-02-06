@@ -105,11 +105,11 @@ public class WallpaperView {
 
     public func asPreviewView() -> UIView {
         let previewView = UIView.container()
-        if let contentView = self.contentView {
+        if let contentView {
             previewView.addSubview(contentView)
             contentView.autoPinEdgesToSuperviewEdges()
         }
-        if let dimmingView = self.dimmingView {
+        if let dimmingView {
             previewView.addSubview(dimmingView)
             dimmingView.autoPinEdgesToSuperviewEdges()
         }
@@ -138,12 +138,7 @@ public class WallpaperView {
             }
         }()
         self.contentView = contentView
-
-        addBlurProvider(contentView: contentView)
-    }
-
-    private func addBlurProvider(contentView: UIView) {
-        self.blurProvider = WallpaperBlurProviderImpl(contentView: contentView)
+        self.blurProvider = WallpaperBlurProviderImpl(contentView: contentView, shouldDimInDarkTheme: shouldDimInDarkTheme)
     }
 }
 
@@ -151,6 +146,7 @@ public class WallpaperView {
 
 private struct WallpaperBlurToken: Equatable {
     let contentSize: CGSize
+    let shouldDimInDarkTheme: Bool
     let isDarkThemeEnabled: Bool
 }
 
@@ -184,20 +180,22 @@ public protocol WallpaperBlurProvider: AnyObject {
 // MARK: -
 
 public class WallpaperBlurProviderImpl: NSObject, WallpaperBlurProvider {
+
     private let contentView: UIView
+
+    private let shouldDimInDarkTheme: Bool
 
     private var cachedState: WallpaperBlurState?
 
-    init(contentView: UIView) {
+    init(contentView: UIView, shouldDimInDarkTheme: Bool) {
         self.contentView = contentView
+        self.shouldDimInDarkTheme = shouldDimInDarkTheme
     }
 
     @available(swift, obsoleted: 1.0)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    public static let contentDownscalingFactor: CGFloat = 8
 
     public var wallpaperBlurState: WallpaperBlurState? {
         AssertIsOnMainThread()
@@ -207,35 +205,35 @@ public class WallpaperBlurProviderImpl: NSObject, WallpaperBlurProvider {
         let isDarkThemeEnabled = Theme.isDarkThemeEnabled
         let newToken = WallpaperBlurToken(
             contentSize: bounds.size,
+            shouldDimInDarkTheme: shouldDimInDarkTheme,
             isDarkThemeEnabled: isDarkThemeEnabled,
         )
-        if
-            let cachedState = self.cachedState,
-            cachedState.token == newToken
-        {
+        if let cachedState, cachedState.token == newToken {
             return cachedState
         }
 
         self.cachedState = nil
 
+        guard bounds.size.isNonEmpty else { return nil }
+
+        let blurRadius: CGFloat = 60 / UIScreen.main.scale
+        let colorOverlays: [(UIColor, UIImage.CompositingMode)]
+        // Replicate UIBlurEffect.Style.systemThinMaterialLight and .systemThinMaterialDark.
+        if isDarkThemeEnabled {
+            colorOverlays = [
+                (UIColor(white: 0, alpha: 0.4), .sourceAtop),
+                (UIColor(white: 0.5, alpha: 0.04), .darken),
+            ]
+        } else {
+            colorOverlays = [
+                (UIColor(white: 1, alpha: 0.6), .sourceAtop),
+                (UIColor(white: 0.5, alpha: 0.08), .lighten),
+            ]
+        }
+
         do {
-            guard bounds.width > 0, bounds.height > 0 else {
-                return nil
-            }
-            let contentImage = contentView.renderAsImage()
-            // We approximate the behavior of UIVisualEffectView(effect: UIBlurEffect(style: .regular)).
-            let tintColor: UIColor = (
-                isDarkThemeEnabled
-                    ? UIColor.ows_black.withAlphaComponent(0.9)
-                    : UIColor.white.withAlphaComponent(0.6),
-            )
-            let resizeDimension = contentImage.size.largerAxis / Self.contentDownscalingFactor
-            guard let scaledImage = contentImage.resized(maxDimensionPoints: resizeDimension) else {
-                owsFailDebug("Could not resize contentImage.")
-                return nil
-            }
-            let blurRadius: CGFloat = 32 / Self.contentDownscalingFactor
-            let blurredImage = try scaledImage.withGaussianBlur(radius: blurRadius, tintColor: tintColor)
+            let contentImage = contentView.renderAsImage(opaque: true, scale: 1)
+            let blurredImage = try contentImage.withGaussianBlur(radius: blurRadius, colorOverlays: colorOverlays)
             let state = WallpaperBlurState(
                 image: blurredImage,
                 referenceView: contentView,

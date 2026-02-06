@@ -488,8 +488,8 @@ private class ContentViewNoVisualEffect {
                 let wallpaperBlurView = ensureWallpaperBlurView()
                 CVComponentBase.configureWallpaperBlurView(
                     wallpaperBlurView: wallpaperBlurView,
-                    maskCornerRadius: 8,
                     componentDelegate: componentDelegate,
+                    cornerConfig: .init(cornerRadius: 8),
                 )
                 innerStack.addSubviewToFillSuperviewEdges(wallpaperBlurView)
             }
