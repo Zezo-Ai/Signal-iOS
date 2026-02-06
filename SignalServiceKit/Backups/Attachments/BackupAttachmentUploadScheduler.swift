@@ -382,6 +382,9 @@ public class BackupAttachmentUploadSchedulerImpl: BackupAttachmentUploadSchedule
         _ attachment: Attachment,
         tx: DBReadTransaction,
     ) -> QueuedBackupAttachmentUpload.OwnerType? {
+        var ineligibleOwners = [AttachmentReference.Owner]()
+        var eligibleOwner: AttachmentReference.Owner?
+
         // Backup uploads are prioritized by attachment owner. Find the highest
         // priority owner to use.
         var uploadOwnerType: QueuedBackupAttachmentUpload.OwnerType?
@@ -395,11 +398,27 @@ public class BackupAttachmentUploadSchedulerImpl: BackupAttachmentUploadSchedule
                     tx: tx,
                 )
             else {
+                ineligibleOwners.append(reference.owner)
                 return
             }
             if uploadOwnerType?.isHigherPriority(than: ownerType) != true {
+                eligibleOwner = reference.owner
                 uploadOwnerType = ownerType
             }
+        }
+
+        // If an eligible owner was found, and an ineligible owner also exists,
+        // log this info for debugging
+        if ineligibleOwners.isEmpty == false, let eligibleOwner {
+            func debugString(_ type: AttachmentReference.Owner) -> String {
+                return switch type {
+                case .message: "message"
+                case .thread: "thread"
+                case .storyMessage: "story"
+                }
+            }
+            Logger.info("Attachment \(attachment.id): eligible owner: \(debugString(eligibleOwner)) [\(eligibleOwner.id)]")
+            ineligibleOwners.forEach { Logger.info("Attachment \(attachment.id): inegible owner: \(debugString($0)) [\($0.id)]") }
         }
 
         return uploadOwnerType
