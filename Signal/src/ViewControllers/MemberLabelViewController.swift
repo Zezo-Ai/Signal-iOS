@@ -332,7 +332,8 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
 
     @objc
     func textDidChange(_ textField: UITextField) {
-        updatedMemberLabel = textField.text == "" ? nil : textField.text?.filterStringForDisplay()
+        let filteredText = textField.text?.filterStringForDisplay()
+        updatedMemberLabel = filteredText?.nilIfEmpty
         reloadDoneButtonStatus()
         reloadMessagePreview()
     }

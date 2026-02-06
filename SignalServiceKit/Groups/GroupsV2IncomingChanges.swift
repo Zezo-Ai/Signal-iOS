@@ -264,7 +264,7 @@ public class GroupsV2IncomingChanges {
             }
 
             var memberLabel: MemberLabel?
-            if let decryptedLabelString {
+            if !decryptedLabelString.isEmptyOrNil, let decryptedLabelString {
                 memberLabel = MemberLabel(label: decryptedLabelString, labelEmoji: decryptedLabelEmoji)
             }
             groupMembershipBuilder.setMemberLabel(label: memberLabel, aci: aci)

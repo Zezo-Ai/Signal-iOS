@@ -434,7 +434,7 @@ public class GroupsV2Protos {
             }
 
             var memberLabel: MemberLabel?
-            if let decryptedLabelString {
+            if !decryptedLabelString.isEmptyOrNil, let decryptedLabelString {
                 memberLabel = MemberLabel(label: decryptedLabelString, labelEmoji: decryptedLabelEmoji)
             }
 
