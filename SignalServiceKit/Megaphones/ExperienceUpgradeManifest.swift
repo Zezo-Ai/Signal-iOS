@@ -713,24 +713,24 @@ extension ExperienceUpgradeManifest {
     public static func checkPreconditionsForRecoveryKeyReminder(
         backupSettingsStore: BackupSettingsStore,
         tsAccountManager: TSAccountManager,
-        transaction: DBReadTransaction,
+        transaction tx: DBReadTransaction,
     ) -> Bool {
-        guard tsAccountManager.registrationState(tx: transaction).isRegisteredPrimaryDevice else {
+        guard tsAccountManager.registrationState(tx: tx).isRegisteredPrimaryDevice else {
             return false
         }
 
-        switch backupSettingsStore.backupPlan(tx: transaction) {
+        switch backupSettingsStore.backupPlan(tx: tx) {
         case .disabled, .disabling:
             return false
         case .free, .paid, .paidExpiringSoon, .paidAsTester:
             break
         }
 
-        guard let firstBackupDate = backupSettingsStore.firstBackupDate(tx: transaction) else {
+        guard let firstBackupDate = backupSettingsStore.lastBackupDetails(tx: tx)?.firstBackupDate else {
             return false
         }
 
-        let lastReminderDate = backupSettingsStore.lastRecoveryKeyReminderDate(tx: transaction)
+        let lastReminderDate = backupSettingsStore.lastRecoveryKeyReminderDate(tx: tx)
 
         let fourteenDaysAgo = Date().addingTimeInterval(-14 * .day)
         guard let lastReminderDate else {

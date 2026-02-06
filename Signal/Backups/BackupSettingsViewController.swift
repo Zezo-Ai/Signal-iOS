@@ -3120,6 +3120,7 @@ private extension BackupSettingsViewModel {
                 )
             },
             lastBackupDetails: BackupSettingsStore.LastBackupDetails(
+                firstBackupDate: Date().addingTimeInterval(-1 * .week),
                 date: Date().addingTimeInterval(-1 * .day),
                 backupFileSizeBytes: 40_000_000,
                 backupTotalSizeBytes: 2_400_000_000,

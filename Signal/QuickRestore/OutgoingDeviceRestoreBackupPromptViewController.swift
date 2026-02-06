@@ -110,7 +110,8 @@ struct OutgoingDeviceRestoreBackupPromptView: View {
 #Preview {
     OWSNavigationController(
         rootViewController: OutgoingDeviceRestoreBackupPromptViewController(
-            lastBackupDetails: .init(
+            lastBackupDetails: BackupSettingsStore.LastBackupDetails(
+                firstBackupDate: Date(),
                 date: Date(),
                 backupFileSizeBytes: 1024,
                 backupTotalSizeBytes: 4096,
