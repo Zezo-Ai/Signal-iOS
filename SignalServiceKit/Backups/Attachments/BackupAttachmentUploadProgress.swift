@@ -31,25 +31,31 @@ public class BackupAttachmentUploadProgressObserver {
     }
 }
 
-/// Tracks and reports progress for backup (media tier) attachment uploads.
+/// Tracks and reports the progress of the "initial Backup attachment upload",
+/// or the one-time upload of historical attachments performed when paid-tier
+/// Backups are enabled.
 ///
-/// At observation time, checks the current total scheduled bytes to upload, and uses that
-/// as the fixed total for the lifetime of the observation. Creating a new observation recomputes
-/// the remaining total (which may have gone up if new attachments have been scheduled,
-/// or gone down, including to 0, if uploads completed).
-/// Note this contrasts with BackupAttachmentDownloadProgress, which is a singleton observer
-/// and "remembers" the total bytes to download.
+/// If you have paid-tier Backups enabled, new attachments are backed up to the
+/// media tier CDN as they are sent/received. However, when you first enable
+/// paid-tier Backups you must also back up all of your historical attachments.
 ///
-/// Note: ignores/excludes thumbnail uploads; just deals with fullsize attachments.
+/// While this type tracks the progress of all Backup attachment uploads, it
+/// filters internally to only report the progress of attachments included in
+/// that "initial" upload.
 ///
-/// - SeeAlso `BackupAttachmentUploadTracker`
+/// - Note
+/// Only considers fullsize attachments; ignores thumbnails.
+///
+/// - SeeAlso
+/// `BackupAttachmentUploadTracker`
 public protocol BackupAttachmentUploadProgress: AnyObject {
 
     typealias Observer = BackupAttachmentUploadProgressObserver
 
-    /// Begin observing progress of all backup attachment uploads that are scheduled as of the time this method is called.
-    /// The total count will not change over the lifetime of the observer, even if new attachments are scheduled for upload.
-    /// The returned observer must be retained to continue receiving updates (Careful of retain cycles; the observer retains the block).
+    /// Add an observer, calling the given `block` with progress updates.
+    /// - Warning
+    /// The returned observer must be caller-retained. Be careful of retain
+    /// cycles, as the observer retains the passed block.
     func addObserver(_ block: @escaping (OWSProgress) -> Void) async throws -> Observer
 
     func removeObserver(_ observer: Observer) async
