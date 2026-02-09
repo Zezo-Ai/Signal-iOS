@@ -216,24 +216,28 @@ public class WallpaperBlurProviderImpl: NSObject, WallpaperBlurProvider {
 
         guard bounds.size.isNonEmpty else { return nil }
 
-        let blurRadius: CGFloat = 60 / UIScreen.main.scale
+        let blurRadius: CGFloat = 20
         let colorOverlays: [(UIColor, UIImage.CompositingMode)]
         // Replicate UIBlurEffect.Style.systemThinMaterialLight and .systemThinMaterialDark.
         if isDarkThemeEnabled {
             colorOverlays = [
-                (UIColor(white: 0, alpha: 0.4), .sourceAtop),
+                (UIColor(white: 0, alpha: 0.8), .sourceAtop),
                 (UIColor(white: 0.5, alpha: 0.04), .darken),
             ]
         } else {
             colorOverlays = [
-                (UIColor(white: 1, alpha: 0.6), .sourceAtop),
-                (UIColor(white: 0.5, alpha: 0.08), .lighten),
+                (UIColor(white: 1, alpha: 0.4), .sourceAtop),
+                (UIColor(white: 1, alpha: 0.16), .lighten),
             ]
         }
 
         do {
             let contentImage = contentView.renderAsImage(opaque: true, scale: 1)
-            let blurredImage = try contentImage.withGaussianBlur(radius: blurRadius, colorOverlays: colorOverlays)
+            let blurredImage = try contentImage.withGaussianBlur(
+                radius: blurRadius,
+                colorOverlays: colorOverlays,
+                vibrancy: 0.2,
+            )
             let state = WallpaperBlurState(
                 image: blurredImage,
                 referenceView: contentView,

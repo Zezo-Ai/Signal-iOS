@@ -325,8 +325,8 @@ public struct ConversationStyle {
         guard hasWallpaper, isIncoming else { return nil }
 
         // Only use stroke for the bubble that should use blur background.
-        let strokeColor = isDarkThemeEnabled ? UIColor(white: 1, alpha: 0.1) : UIColor(white: 0, alpha: 0.1)
-        return BubbleStrokeConfiguration(color: strokeColor, width: 0.5)
+        let strokeColor = isDarkThemeEnabled ? UIColor(white: 1, alpha: 0.25) : UIColor(white: 0, alpha: 0.35)
+        return BubbleStrokeConfiguration(color: strokeColor, width: 2 * CGFloat.hairlineWidth)
     }
 
     // Same across all themes

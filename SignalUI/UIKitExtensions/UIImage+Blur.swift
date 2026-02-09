@@ -20,6 +20,7 @@ public extension UIImage {
         case overlay = "CIOverlayBlendMode"
         case darken = "CIDarkenBlendMode"
         case lighten = "CILightenBlendMode"
+        case linearDodge = "CILinearDodgeBlendMode"
     }
 
     @concurrent
@@ -52,6 +53,7 @@ public extension UIImage {
     func withGaussianBlur(
         radius: CGFloat,
         colorOverlays overlays: [(UIColor, CompositingMode)] = [],
+        vibrancy: CGFloat = 0,
     ) throws -> UIImage {
         return UIImage(cgImage: try _cgImageWithGaussianBlur(radius: radius, colorOverlays: overlays))
     }
@@ -59,6 +61,7 @@ public extension UIImage {
     private func _cgImageWithGaussianBlur(
         radius: CGFloat,
         colorOverlays overlays: [(UIColor, CompositingMode)] = [],
+        vibrancy: CGFloat = 0,
     ) throws -> CGImage {
 
         guard let cgImage else {
@@ -133,7 +136,24 @@ public extension UIImage {
             outputImage = tintedImage
         }
 
-        // 4. Convert to CGImage.
+        // 4. Vibrance.
+        if
+            vibrancy != 0,
+            let vibranceFilter = CIFilter(
+                name: "CIVibrance",
+                parameters: [
+                    kCIInputImageKey: outputImage,
+                    kCIInputAmountKey: vibrancy,
+                ],
+            )
+        {
+            guard let vibrantImage = vibranceFilter.outputImage else {
+                throw OWSAssertionError("Could not create vibrantImage.")
+            }
+            outputImage = vibrantImage
+        }
+
+        // 5. Convert to CGImage.
         let context = CIContext(options: nil)
         guard let result = context.createCGImage(outputImage, from: inputImage.extent) else {
             throw OWSAssertionError("Failed to create CGImage from blurred output")
