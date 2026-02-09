@@ -104,10 +104,10 @@ public class CVCapsuleLabel: UILabel {
         }
 
         let needsLeadingPadding = highlightRange.location == 0 && highlightRange.length == (text as NSString).length
-        let glyphRange = layoutManager.glyphRange(forCharacterRange: highlightRange, actualCharacterRange: nil)
+        let highlightGlyphRange = layoutManager.glyphRange(forCharacterRange: highlightRange, actualCharacterRange: nil)
 
         let highlightColor = capsuleColor
-        layoutManager.enumerateEnclosingRects(forGlyphRange: glyphRange, withinSelectedGlyphRange: NSRange(location: NSNotFound, length: 0), in: textContainer) { rect, _ in
+        layoutManager.enumerateEnclosingRects(forGlyphRange: highlightGlyphRange, withinSelectedGlyphRange: NSRange(location: NSNotFound, length: 0), in: textContainer) { rect, _ in
             let hOffset = needsLeadingPadding ? horizontalInset : 0
             let roundedRect = rect.offsetBy(dx: hOffset, dy: -1).insetBy(dx: -Self.horizontalInset, dy: -Self.verticalInset)
             let path = UIBezierPath(roundedRect: roundedRect, cornerRadius: roundedRect.height / 2)
@@ -116,8 +116,8 @@ public class CVCapsuleLabel: UILabel {
         }
 
         let textOrigin = needsLeadingPadding ? CGPoint(x: .zero + horizontalInset, y: .zero) : CGPoint.zero
-        let range = NSRange(location: 0, length: textStorage.length)
-        layoutManager.drawGlyphs(forGlyphRange: range, at: textOrigin)
+        let glyphRange = layoutManager.glyphRange(for: textContainer)
+        layoutManager.drawGlyphs(forGlyphRange: glyphRange, at: textOrigin)
     }
 
     public class func measureLabel(config: CVLabelConfig, maxWidth: CGFloat) -> CGSize {

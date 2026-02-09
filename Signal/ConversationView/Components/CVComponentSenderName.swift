@@ -16,11 +16,7 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
         // The non-breaking spaces make sure the label doesn't get cut off if it starts a new line.
         let padding = " " + String(repeating: SignalSymbol.LeadingCharacter.nonBreakingSpace.rawValue, count: 2)
         if let labelString = state.memberLabel {
-            if CurrentAppContext().isRTL {
-                return NSAttributedString(string: labelString + padding) + state.senderName
-            } else {
-                return state.senderName + padding + labelString
-            }
+            return state.senderName + padding + labelString
         } else {
             return state.senderName
         }
@@ -77,17 +73,14 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
 
         if let memberLabel = state.memberLabel {
             // Finds the first or last occurance of the member label.
-            // Since member label is appended to the end in LTR and beginning in RTL, this
+            // Since member label is appended to the end of the string, this
             // will work even if member label is a substring of sender name or equal to sender name.
-            var options: NSString.CompareOptions = []
-            if !CurrentAppContext().isRTL {
-                options.insert(.backwards)
-            }
+            let range = (senderName.string as NSString).range(of: memberLabel, options: .backwards)
             componentView.label = CVCapsuleLabel(
                 attributedText: senderName,
                 textColor: senderNameColor,
                 font: UIFont.dynamicTypeFootnote.semibold(),
-                highlightRange: (senderName.string as NSString).range(of: memberLabel, options: options),
+                highlightRange: range,
                 highlightFont: .dynamicTypeFootnote,
                 axLabelPrefix: nil, // handled separately in CVItemViewState
                 isQuotedReply: false,
