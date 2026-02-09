@@ -91,6 +91,7 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
                 highlightFont: .dynamicTypeFootnote,
                 axLabelPrefix: nil, // handled separately in CVItemViewState
                 isQuotedReply: false,
+                onTap: nil,
             )
         } else {
             labelConfig.applyForRendering(label: componentView.label)

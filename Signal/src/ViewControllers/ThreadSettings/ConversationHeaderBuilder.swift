@@ -537,6 +537,9 @@ struct ConversationHeaderBuilder {
                 comment: "Accessibility prefix for member labels.",
             ),
             isQuotedReply: false,
+            onTap: { [weak delegate] in
+                delegate?.didTapMemberLabel()
+            },
         )
 
         subviews.append(memberLabelLabel)
@@ -614,6 +617,8 @@ protocol ConversationHeaderDelegate: UIViewController, ConversationAvatarViewDel
 
     var canTapThreadName: Bool { get }
     func didTapThreadName()
+
+    func didTapMemberLabel()
 }
 
 // MARK: -
@@ -754,6 +759,8 @@ extension ConversationSettingsViewController: ConversationHeaderDelegate {
         ContactAboutSheet(thread: contactThread, spoilerState: self.spoilerState)
             .present(from: self)
     }
+
+    func didTapMemberLabel() {}
 }
 
 extension ConversationSettingsViewController: GroupDescriptionViewControllerDelegate {

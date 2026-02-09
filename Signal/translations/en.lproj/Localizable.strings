@@ -5014,6 +5014,9 @@
 /* Accessibility prefix for member labels. */
 "MEMBER_LABEL_AX_PREFIX" = "Member label: ";
 
+/* Text for a button to set a member label */
+"MEMBER_LABEL_EDIT" = "Edit Your Label";
+
 /* Error indicating member label could not save. */
 "MEMBER_LABEL_FAIL_TO_SAVE" = "Couldn't Save Member Label";
 
@@ -5023,8 +5026,17 @@
 /* Title for a sheet shown if a user will show their member label over their About message in a group. */
 "MEMBER_LABEL_HERO_SHEET_ABOUT_OVERRIDE_TITLE" = "Member Label Display";
 
+/* Body for a sheet shown if a user taps on someone else's member label. */
+"MEMBER_LABEL_HERO_SHEET_EDUCATION_BODY" = "Use a member label to describe yourself or your role in this group. Member labels are only visible within this group.";
+
+/* Title for a sheet shown if a user taps on someone else's member label. */
+"MEMBER_LABEL_HERO_SHEET_EDUCATION_TITLE" = "Member Labels";
+
 /* Heading shown above the preview of a message bubble with the edited member label. */
 "MEMBER_LABEL_PREVIEW_HEADING" = "Preview";
+
+/* Text for a button to edit an existing member label */
+"MEMBER_LABEL_SET" = "Set a Member Label";
 
 /* Text shown in the preview message bubble when a user is editing their member label. */
 "MEMBER_LABEL_VIEW_MESSAGE_PREVIEW_TEXT" = "Hello!";

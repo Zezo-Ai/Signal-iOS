@@ -888,14 +888,9 @@ extension ConversationSettingsViewController {
             ),
         )
 
-        let db = DependenciesBridge.shared.db
-        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
-        let groupNameColors = GroupNameColors.forThread(groupViewHelper.thread)
-
         if
             BuildFlags.MemberLabel.send,
-            groupViewHelper.canEditConversationAttributes,
-            let localAci = db.read(block: { tx in tsAccountManager.localIdentifiers(tx: tx)?.aci })
+            groupViewHelper.canEditConversationAttributes
         {
             section.add(
                 OWSTableItem.disclosureItem(
@@ -905,14 +900,9 @@ extension ConversationSettingsViewController {
                         comment: "Label for 'member label' action in conversation settings view.",
                     ),
                     actionBlock: { [weak self] in
-                        let fullMemberLabel = groupModelV2.groupMembership.memberLabel(for: localAci)
-                        let memberLabelViewController = MemberLabelViewController(
-                            memberLabel: fullMemberLabel?.label,
-                            emoji: fullMemberLabel?.labelEmoji,
-                            groupNameColors: groupNameColors,
-                        )
-                        memberLabelViewController.updateDelegate = self
-                        self?.present(OWSNavigationController(rootViewController: memberLabelViewController), animated: true)
+                        guard let self else { return }
+                        memberLabelCoordinator?.presenter = self
+                        memberLabelCoordinator?.present()
                     },
                 ),
             )

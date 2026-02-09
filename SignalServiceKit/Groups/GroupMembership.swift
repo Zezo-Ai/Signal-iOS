@@ -901,6 +901,14 @@ public class GroupMembership: NSObject, NSSecureCoding {
         return isFullMember(localAci)
     }
 
+    public var localUserMemberLabel: MemberLabel? {
+        guard let localAci = DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction?.aci else {
+            return nil
+        }
+
+        return memberLabel(for: localAci)
+    }
+
     /// The ID at which the local user is invited, if at all.
     ///
     /// Checks membership for the local ACI first. If none is available, falls

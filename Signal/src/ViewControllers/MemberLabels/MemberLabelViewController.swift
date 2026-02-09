@@ -8,10 +8,6 @@ import SignalServiceKit
 import SignalUI
 import SwiftUI
 
-protocol MemberLabelUpdateDelegate: AnyObject {
-    func updateLabelForLocalUser(memberLabel: MemberLabel?)
-}
-
 class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
     private let initialEmoji: String?
     private let initialMemberLabel: String?
@@ -24,7 +20,7 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
     private var characterCountLabel = UILabel()
     private var groupNameColors: GroupNameColors
 
-    weak var updateDelegate: MemberLabelUpdateDelegate?
+    weak var updateDelegate: MemberLabelCoordinator?
 
     private static let maxCharCount = 24
     private static let showCharacterCountMax = 9

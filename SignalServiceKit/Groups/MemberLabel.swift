@@ -26,7 +26,7 @@ public struct MemberLabel: Codable, Equatable {
         self.labelEmoji = labelEmoji
     }
 
-    public func labelForRendering() -> String? {
+    public func labelForRendering() -> String {
         if let labelEmoji {
             return labelEmoji + " " + label
         }

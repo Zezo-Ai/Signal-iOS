@@ -197,29 +197,18 @@ class ContactAboutSheet: StackSheetViewController {
             stackView.addArrangedSubview(label)
         }
 
-        let db = DependenciesBridge.shared.db
-        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
         let canEditMemberLabel = groupViewHelper?.canEditConversationAttributes ?? false
         if
             BuildFlags.MemberLabel.send,
             isLocalUser,
             canEditMemberLabel,
-            let localAci = db.read(block: { tx in tsAccountManager.localIdentifiers(tx: tx)?.aci }),
-            let groupModel = groupViewHelper?.delegate?.currentGroupModel,
-            let groupThread = groupViewHelper?.thread as? TSGroupThread,
-            let csvc = fromViewController as? ConversationSettingsViewController
+            let presenter = fromViewController as? MemberLabelViewControllerPresenter
         {
-            let groupNameColors = GroupNameColors.forThread(groupThread)
-
             stackView.addArrangedSubview(ProfileDetailLabel.memberLabel(memberLabel?.label, tapAction: { [weak self] in
-                let fullMemberLabel = groupModel.groupMembership.memberLabel(for: localAci)
-                let memberLabelViewController = MemberLabelViewController(
-                    memberLabel: fullMemberLabel?.label,
-                    emoji: fullMemberLabel?.labelEmoji,
-                    groupNameColors: groupNameColors,
-                )
-                memberLabelViewController.updateDelegate = csvc
-                self?.present(OWSNavigationController(rootViewController: memberLabelViewController), animated: true)
+                self?.groupViewHelper?.memberLabelCoordinator?.presenter = presenter
+                self?.dismiss(animated: true, completion: {
+                    self?.groupViewHelper?.memberLabelCoordinator?.present()
+                })
             }))
         }
 

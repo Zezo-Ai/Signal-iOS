@@ -70,6 +70,7 @@ public class AddToGroupViewController: OWSTableViewController2 {
                                 forChatList: false,
                                 transaction: transaction,
                             ),
+                            memberLabelCoordinator: nil,
                         )
 
                         if groupViewHelper.canEditConversationMembership {

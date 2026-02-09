@@ -228,6 +228,13 @@ extension ConversationViewController: CVLoadCoordinatorDelegate {
             ensureBannerState()
         }
 
+        let db = DependenciesBridge.shared.db
+        if let groupModelV2 = newGroupModel as? TSGroupModelV2 {
+            db.read { tx in
+                self.memberLabelCoordinator?.updateWithNewGroupModel(groupModelV2, tx: tx)
+            }
+        }
+
         // If the message has been deleted / disappeared, we need to dismiss
         dismissMessageContextMenuIfNecessary()
 
@@ -915,4 +922,8 @@ extension ConversationViewController {
     public var showLoadOlderHeader: Bool { loadCoordinator.showLoadOlderHeader }
 
     public var showLoadNewerHeader: Bool { loadCoordinator.showLoadNewerHeader }
+}
+
+extension ConversationViewController: MemberLabelViewControllerPresenter {
+    func reloadMemberLabelIfNeeded() { /* handled in updateWithNewRenderState */ }
 }

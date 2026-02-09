@@ -24,7 +24,7 @@ public protocol ConversationSettingsViewDelegate: AnyObject {
 // MARK: -
 
 // TODO: We should describe which state updates & when it is committed.
-class ConversationSettingsViewController: OWSTableViewController2, BadgeCollectionDataSource, MemberLabelUpdateDelegate {
+class ConversationSettingsViewController: OWSTableViewController2, BadgeCollectionDataSource, MemberLabelViewControllerPresenter {
 
     weak var conversationSettingsViewDelegate: ConversationSettingsViewDelegate?
 
@@ -32,11 +32,7 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
     private(set) var isSystemContact: Bool
     let spoilerState: SpoilerRenderState
     let callRecords: [CallRecord]
-    private let kvStore: NewKeyValueStore
-
-    private enum KVStoreKeys {
-        static let ignoreMemberLabelAboutOverrideKey = "ignoreMemberLabelAboutOverrideKey"
-    }
+    let memberLabelCoordinator: MemberLabelCoordinator?
 
     var thread: TSThread {
         threadViewModel.threadRecord
@@ -68,19 +64,19 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
         isSystemContact: Bool,
         spoilerState: SpoilerRenderState,
         callRecords: [CallRecord] = [],
+        memberLabelCoordinator: MemberLabelCoordinator?,
     ) {
         self.threadViewModel = threadViewModel
         self.isSystemContact = isSystemContact
         self.spoilerState = spoilerState
         self.callRecords = callRecords
-        groupViewHelper = GroupViewHelper(threadViewModel: threadViewModel)
+        self.memberLabelCoordinator = memberLabelCoordinator
+        groupViewHelper = GroupViewHelper(threadViewModel: threadViewModel, memberLabelCoordinator: memberLabelCoordinator)
 
         disappearingMessagesConfiguration = SSKEnvironment.shared.databaseStorageRef.read { tx in
             let dmConfigurationStore = DependenciesBridge.shared.disappearingMessagesConfigurationStore
             return dmConfigurationStore.fetchOrBuildDefault(for: .thread(threadViewModel.threadRecord), tx: tx)
         }
-
-        self.kvStore = NewKeyValueStore(collection: "ConversationSettingsViewController")
 
         super.init()
 
@@ -305,10 +301,14 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
                 let address = contactThread.contactAddress
                 return SSKEnvironment.shared.contactManagerRef.fetchSignalAccount(for: address, transaction: tx) != nil
             }()
-            self.groupViewHelper = GroupViewHelper(threadViewModel: newThreadViewModel)
+            self.groupViewHelper = GroupViewHelper(threadViewModel: newThreadViewModel, memberLabelCoordinator: memberLabelCoordinator)
             self.groupViewHelper.delegate = self
 
             self.updateGroupMembers(transaction: tx)
+
+            if let groupModelV2 = currentGroupModel as? TSGroupModelV2 {
+                self.memberLabelCoordinator?.updateWithNewGroupModel(groupModelV2, tx: tx)
+            }
 
             return true
         }
@@ -1065,100 +1065,10 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
     var availableBadges: [OWSUserProfileBadgeInfo] = []
     var selectedBadgeIndex = 0
 
-    // MARK: - MemberLabelUpdateDelegate
+    // MARK: - MemberLabelViewControllerPresenter
 
-    private func showOverrideAboutWarningIfNeeded(localUserBio: String?) {
-        let db = DependenciesBridge.shared.db
-        let ignoreMemberLabelAboutOverrideKey = db.read { tx in
-            self.kvStore.fetchValue(
-                Bool.self,
-                forKey: KVStoreKeys.ignoreMemberLabelAboutOverrideKey,
-                tx: tx,
-            ) == true
-        }
-
-        if localUserBio != nil, !ignoreMemberLabelAboutOverrideKey {
-            let hero = MemberLabelAboutOverrideHeroSheet(
-                dontShowAgainHandler: { [weak self] in
-                    db.write { tx in
-                        self?.kvStore.writeValue(
-                            true,
-                            forKey: KVStoreKeys.ignoreMemberLabelAboutOverrideKey,
-                            tx: tx,
-                        )
-                    }
-                },
-            )
-            self.present(hero, animated: true)
-        }
-    }
-
-    private func showMemberLabelSaveFailed() {
-        OWSActionSheets.showActionSheet(
-            title: OWSLocalizedString(
-                "MEMBER_LABEL_FAIL_TO_SAVE",
-                comment: "Error indicating member label could not save.",
-            ),
-            message: OWSLocalizedString(
-                "CHECK_YOUR_CONNECTION_TRY_AGAIN_WARNING",
-                comment: "Message indicating a user should check connection and try again.",
-            ),
-        )
-    }
-
-    func updateLabelForLocalUser(memberLabel: MemberLabel?) {
-        let changeLabelBlock: () -> Void = {
-            Task { @MainActor in
-                let db = DependenciesBridge.shared.db
-                let tsAccountManager = DependenciesBridge.shared.tsAccountManager
-                let profileManager = SSKEnvironment.shared.profileManagerRef
-
-                guard
-                    let localUserInfo = db.read(block: { tx -> (Aci, String?)? in
-                        guard let localAci = tsAccountManager.localIdentifiers(tx: tx)?.aci else {
-                            return nil
-                        }
-                        return (localAci, profileManager.userProfile(for: SignalServiceAddress(localAci), tx: tx)?.bioForDisplay)
-                    })
-                else {
-                    owsFailDebug("Missing local aci")
-                    self.showMemberLabelSaveFailed()
-                    return
-                }
-
-                do {
-                    try await ModalActivityIndicatorViewController.presentAndPropagateResult(from: self, wrappedAsyncBlock: {
-                        guard let groupModelV2 = self.currentGroupModel as? TSGroupModelV2 else {
-                            owsFailDebug("Invalid group model")
-                            self.showMemberLabelSaveFailed()
-                            return
-                        }
-
-                        let localAci = localUserInfo.0
-                        try await GroupManager.changeMemberLabel(
-                            groupModel: groupModelV2,
-                            aci: localAci,
-                            label: memberLabel,
-                        )
-                    })
-                    self.reloadThreadAndUpdateContent()
-
-                    if memberLabel != nil {
-                        self.showOverrideAboutWarningIfNeeded(localUserBio: localUserInfo.1)
-                    }
-                } catch {
-                    self.showMemberLabelSaveFailed()
-                }
-            }
-        }
-
-        if let presentedViewController {
-            presentedViewController.dismiss(animated: true, completion: {
-                changeLabelBlock()
-            })
-            return
-        }
-        changeLabelBlock()
+    func reloadMemberLabelIfNeeded() {
+        self.reloadThreadAndUpdateContent()
     }
 }
 

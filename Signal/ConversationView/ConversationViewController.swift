@@ -45,6 +45,7 @@ public final class ConversationViewController: OWSViewController {
     public let collectionView: ConversationCollectionView
     public let searchController: ConversationSearchController
     public var pinnedMessageIndex: Int
+    var memberLabelCoordinator: MemberLabelCoordinator?
 
     var selectionToolbar: MessageActionsToolbar?
 
@@ -194,6 +195,11 @@ public final class ConversationViewController: OWSViewController {
             // Reload all cells if this is a group conversation,
             // since we may need to update the sender names on the messages.
             self?.loadCoordinator.enqueueReload(canReuseInteractionModels: true, canReuseComponentStates: false)
+        }
+
+        if let groupModelV2 = currentGroupModel as? TSGroupModelV2 {
+            let groupNameColors = GroupNameColors.forThread(threadViewModel.threadRecord)
+            self.memberLabelCoordinator = MemberLabelCoordinator(groupModel: groupModelV2, groupNameColors: groupNameColors)
         }
     }
 

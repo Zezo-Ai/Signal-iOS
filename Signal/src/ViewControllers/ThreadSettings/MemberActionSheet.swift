@@ -484,6 +484,26 @@ extension MemberActionSheet: ConversationHeaderDelegate {
             sheet.present(from: fromViewController)
         }
     }
+
+    func didTapMemberLabel() {
+        guard
+            let presenter = self.fromViewController as? MemberLabelViewControllerPresenter,
+            let groupThread = groupViewHelper?.thread as? TSGroupThread,
+            let groupModel = groupThread.groupModel as? TSGroupModelV2,
+            let memberLabelCoordinator = self.groupViewHelper?.memberLabelCoordinator
+        else {
+            return
+        }
+
+        let localUserHasMemberLabel = groupModel.groupMembership.localUserMemberLabel != nil
+        dismiss(animated: true) {
+            let hero = MemberLabelEducationHeroSheet(hasMemberLabel: localUserHasMemberLabel, editMemberLabelHandler: {
+                memberLabelCoordinator.presenter = presenter
+                memberLabelCoordinator.present()
+            })
+            presenter.present(hero, animated: true)
+        }
+    }
 }
 
 extension MemberActionSheet: AvatarViewPresentationContextProvider {

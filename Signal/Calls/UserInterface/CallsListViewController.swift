@@ -2186,6 +2186,7 @@ extension CallsListViewController: CallCellDelegate, NewCallViewControllerDelega
             // Nothing would have been revealed, so this can be a fresh instance
             spoilerState: SpoilerRenderState(),
             callRecords: callRecords,
+            memberLabelCoordinator: nil,
         )
 
         showCallInfo(viewController: callDetailsView)

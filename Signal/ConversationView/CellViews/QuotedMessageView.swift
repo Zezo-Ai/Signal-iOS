@@ -562,6 +562,7 @@ public class QuotedMessageView: ManualStackViewWithLayer {
                 isQuotedReply: true,
                 lineBreakMode: .byTruncatingTail,
                 numberOfLines: 1,
+                onTap: nil,
             )
         } else {
             let quotedAuthorLabelConfig = configurator.quotedAuthorLabelConfig

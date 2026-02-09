@@ -219,6 +219,7 @@ extension ConversationViewController {
             threadViewModel: threadViewModel,
             isSystemContact: conversationViewModel.isSystemContact,
             spoilerState: viewState.spoilerState,
+            memberLabelCoordinator: memberLabelCoordinator,
         )
         settingsView.conversationSettingsViewDelegate = self
         viewControllers.append(settingsView)
@@ -276,7 +277,7 @@ extension ConversationViewController {
 
         var groupViewHelper: GroupViewHelper?
         if threadViewModel.isGroupThread {
-            groupViewHelper = GroupViewHelper(threadViewModel: threadViewModel)
+            groupViewHelper = GroupViewHelper(threadViewModel: threadViewModel, memberLabelCoordinator: memberLabelCoordinator)
             groupViewHelper!.delegate = self
         }
 

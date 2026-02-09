@@ -15,6 +15,7 @@ public class CVCapsuleLabel: UILabel {
     public let highlightFont: UIFont
     public let axLabelPrefix: String?
     public let isQuotedReply: Bool
+    public let onTap: (() -> Void)?
 
     private static let horizontalInset: CGFloat = 6
     private static let verticalInset: CGFloat = 1
@@ -29,11 +30,13 @@ public class CVCapsuleLabel: UILabel {
         isQuotedReply: Bool,
         lineBreakMode: NSLineBreakMode = .byWordWrapping,
         numberOfLines: Int = 0,
+        onTap: (() -> Void)?,
     ) {
         self.highlightRange = highlightRange
         self.highlightFont = highlightFont
         self.axLabelPrefix = axLabelPrefix
         self.isQuotedReply = isQuotedReply
+        self.onTap = onTap
 
         super.init(frame: .zero)
 
@@ -42,6 +45,9 @@ public class CVCapsuleLabel: UILabel {
         self.textColor = textColor
         self.lineBreakMode = lineBreakMode
         self.numberOfLines = numberOfLines
+
+        isUserInteractionEnabled = true
+        addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapMemberLabel)))
     }
 
     required init?(coder: NSCoder) {
@@ -59,6 +65,11 @@ public class CVCapsuleLabel: UILabel {
             return UIColor.white.withAlphaComponent(0.36)
         }
         return textColor.withAlphaComponent(0.1)
+    }
+
+    @objc
+    func didTapMemberLabel() {
+        onTap?()
     }
 
     override public func drawText(in rect: CGRect) {

@@ -346,7 +346,7 @@ class LongTextViewController: OWSViewController {
 
                     var groupViewHelper: GroupViewHelper?
                     if threadViewModel.isGroupThread {
-                        groupViewHelper = GroupViewHelper(threadViewModel: threadViewModel)
+                        groupViewHelper = GroupViewHelper(threadViewModel: threadViewModel, memberLabelCoordinator: nil)
                         groupViewHelper!.delegate = self
                     }
 

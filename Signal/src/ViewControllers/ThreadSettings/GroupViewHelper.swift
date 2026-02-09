@@ -22,6 +22,8 @@ class GroupViewHelper {
 
     let threadViewModel: ThreadViewModel
 
+    let memberLabelCoordinator: MemberLabelCoordinator?
+
     var thread: TSThread {
         return threadViewModel.threadRecord
     }
@@ -30,8 +32,9 @@ class GroupViewHelper {
         return delegate?.fromViewController
     }
 
-    init(threadViewModel: ThreadViewModel) {
+    init(threadViewModel: ThreadViewModel, memberLabelCoordinator: MemberLabelCoordinator?) {
         self.threadViewModel = threadViewModel
+        self.memberLabelCoordinator = memberLabelCoordinator
     }
 
     // MARK: - Accessors

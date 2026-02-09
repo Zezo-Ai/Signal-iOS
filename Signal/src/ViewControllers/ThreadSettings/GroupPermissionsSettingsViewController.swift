@@ -31,7 +31,7 @@ class GroupPermissionsSettingsViewController: OWSTableViewController2 {
     init(threadViewModel: ThreadViewModel, delegate: GroupPermissionsSettingsDelegate) {
         owsAssertDebug(threadViewModel.threadRecord.isGroupV2Thread)
         self.threadViewModel = threadViewModel
-        self.groupViewHelper = GroupViewHelper(threadViewModel: threadViewModel)
+        self.groupViewHelper = GroupViewHelper(threadViewModel: threadViewModel, memberLabelCoordinator: nil)
         self.permissionsDelegate = delegate
 
         super.init()
@@ -248,7 +248,7 @@ class GroupPermissionsSettingsViewController: OWSTableViewController2 {
                 transaction: transaction,
             )
             self.threadViewModel = newThreadViewModel
-            self.groupViewHelper = GroupViewHelper(threadViewModel: newThreadViewModel)
+            self.groupViewHelper = GroupViewHelper(threadViewModel: newThreadViewModel, memberLabelCoordinator: nil)
             self.groupViewHelper.delegate = self
             return true
         }
