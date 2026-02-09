@@ -296,10 +296,7 @@ public extension GroupV2Params {
     func decryptMemberLabel(_ ciphertext: Data) throws -> String? {
         do {
             let decryptedLabel = try decryptString(ciphertext)
-            guard decryptedLabel.lengthOfBytes(using: .utf8) <= 96 else {
-                throw OWSAssertionError("member label is too long.")
-            }
-            return decryptedLabel.filterStringForDisplay()
+            return decryptedLabel.filterStringForDisplay().trimToGlyphCount(24).trimToUtf8ByteCount(96)
         } catch {
             owsFailDebug("Error: \(error)")
             throw error
