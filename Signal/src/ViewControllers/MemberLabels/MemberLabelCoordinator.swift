@@ -11,32 +11,59 @@ protocol MemberLabelViewControllerPresenter: UIViewController {
     func reloadMemberLabelIfNeeded()
 }
 
+/// Responsible for flows related to setting or editing a group member label.
+/// Since users can only set/edit their own member label, this is local-user specific.
+/// See also `MemberLabelViewController` which allows a user to set/edit their own member label.
 public final class MemberLabelCoordinator {
     weak var presenter: MemberLabelViewControllerPresenter?
 
     var groupModel: TSGroupModelV2
-    private var memberLabel: MemberLabel?
+    private let memberLabel: MemberLabel?
     private let kvStore: NewKeyValueStore
     private let groupNameColors: GroupNameColors
+    private let localIdentifiers: LocalIdentifiers
+    private let db: DB
+    private let profileManager: ProfileManager
 
     private enum KVStoreKeys {
         static let ignoreMemberLabelAboutOverrideKey = "ignoreMemberLabelAboutOverrideKeyV2"
     }
 
-    init(groupModel: TSGroupModelV2, groupNameColors: GroupNameColors) {
+    convenience init(
+        groupModel: TSGroupModelV2,
+        groupNameColors: GroupNameColors,
+        localIdentifiers: LocalIdentifiers,
+    ) {
+        self.init(
+            groupModel: groupModel,
+            groupNameColors: groupNameColors,
+            localIdentifiers: localIdentifiers,
+            db: DependenciesBridge.shared.db,
+            profileManager: SSKEnvironment.shared.profileManagerRef,
+        )
+    }
+
+    init(
+        groupModel: TSGroupModelV2,
+        groupNameColors: GroupNameColors,
+        localIdentifiers: LocalIdentifiers,
+        db: DB,
+        profileManager: ProfileManager,
+    ) {
         self.groupModel = groupModel
         self.memberLabel = groupModel.groupMembership.localUserMemberLabel
         self.groupNameColors = groupNameColors
+        self.localIdentifiers = localIdentifiers
+        self.db = db
+        self.profileManager = profileManager
         self.kvStore = NewKeyValueStore(collection: "MemberLabelCoordinator")
     }
 
-    func updateWithNewGroupModel(_ newGroupModel: TSGroupModelV2, tx: DBReadTransaction) {
-        guard let localAci = DependenciesBridge.shared.tsAccountManager.localIdentifiers(tx: tx)?.aci else {
-            return
-        }
-
-        self.groupModel = newGroupModel
-        self.memberLabel = newGroupModel.groupMembership.memberLabel(for: localAci)
+    func presentWithEducationSheet(localUserHasMemberLabel: Bool) {
+        let hero = MemberLabelEducationHeroSheet(hasMemberLabel: localUserHasMemberLabel, editMemberLabelHandler: { [weak self] in
+            self?.present()
+        })
+        presenter?.present(hero, animated: true)
     }
 
     func present() {
@@ -51,7 +78,6 @@ public final class MemberLabelCoordinator {
     }
 
     private func showOverrideAboutWarningIfNeeded(localUserBio: String?) {
-        let db = DependenciesBridge.shared.db
         let ignoreMemberLabelAboutOverrideKey = db.read { tx in
             let value = self.kvStore.fetchValue(
                 Bool.self,
@@ -63,9 +89,9 @@ public final class MemberLabelCoordinator {
 
         if localUserBio != nil, !ignoreMemberLabelAboutOverrideKey {
             let hero = MemberLabelAboutOverrideHeroSheet(
-                dontShowAgainHandler: {
-                    db.write { tx in
-                        self.kvStore.writeValue(
+                dontShowAgainHandler: { [weak self] in
+                    self?.db.write { tx in
+                        self?.kvStore.writeValue(
                             true,
                             forKey: KVStoreKeys.ignoreMemberLabelAboutOverrideKey,
                             tx: tx,
@@ -94,19 +120,12 @@ public final class MemberLabelCoordinator {
         guard let presenter else { return }
         let changeLabelBlock: () -> Void = {
             Task { @MainActor in
-                let db = DependenciesBridge.shared.db
-                let tsAccountManager = DependenciesBridge.shared.tsAccountManager
-                let profileManager = SSKEnvironment.shared.profileManagerRef
-
                 guard
-                    let localUserInfo = db.read(block: { tx -> (Aci, String?)? in
-                        guard let localAci = tsAccountManager.localIdentifiers(tx: tx)?.aci else {
-                            return nil
-                        }
-                        return (localAci, profileManager.userProfile(for: SignalServiceAddress(localAci), tx: tx)?.bioForDisplay)
+                    let localUserBio = self.db.read(block: { tx -> String? in
+                        return self.profileManager.userProfile(for: SignalServiceAddress(self.localIdentifiers.aci), tx: tx)?.bioForDisplay
                     })
                 else {
-                    owsFailDebug("Missing local aci")
+                    owsFailDebug("Missing local user bio")
                     self.showMemberLabelSaveFailed()
                     return
                 }
@@ -114,19 +133,17 @@ public final class MemberLabelCoordinator {
                 do {
                     try await ModalActivityIndicatorViewController.presentAndPropagateResult(from: presenter, wrappedAsyncBlock: {
 
-                        let localAci = localUserInfo.0
                         try await GroupManager.changeMemberLabel(
                             groupModel: self.groupModel,
-                            aci: localAci,
+                            aci: self.localIdentifiers.aci,
                             label: memberLabel,
                         )
                     })
 
-                    presenter.reloadMemberLabelIfNeeded()
-
                     if memberLabel != nil {
-                        self.showOverrideAboutWarningIfNeeded(localUserBio: localUserInfo.1)
+                        self.showOverrideAboutWarningIfNeeded(localUserBio: localUserBio)
                     }
+                    presenter.reloadMemberLabelIfNeeded()
                 } catch {
                     self.showMemberLabelSaveFailed()
                 }

@@ -23,7 +23,6 @@ public protocol ConversationSettingsViewDelegate: AnyObject {
 
 // MARK: -
 
-// TODO: We should describe which state updates & when it is committed.
 class ConversationSettingsViewController: OWSTableViewController2, BadgeCollectionDataSource, MemberLabelViewControllerPresenter {
 
     weak var conversationSettingsViewDelegate: ConversationSettingsViewDelegate?
@@ -32,7 +31,7 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
     private(set) var isSystemContact: Bool
     let spoilerState: SpoilerRenderState
     let callRecords: [CallRecord]
-    let memberLabelCoordinator: MemberLabelCoordinator?
+    var memberLabelCoordinator: MemberLabelCoordinator?
 
     var thread: TSThread {
         threadViewModel.threadRecord
@@ -301,14 +300,24 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
                 let address = contactThread.contactAddress
                 return SSKEnvironment.shared.contactManagerRef.fetchSignalAccount(for: address, transaction: tx) != nil
             }()
+
+            let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+            if
+                let groupModelV2 = currentGroupModel as? TSGroupModelV2,
+                let localIdentifiers = tsAccountManager.localIdentifiers(tx: tx)
+            {
+                let groupNameColors = GroupNameColors.forThread(newThread)
+                self.memberLabelCoordinator = MemberLabelCoordinator(
+                    groupModel: groupModelV2,
+                    groupNameColors: groupNameColors,
+                    localIdentifiers: localIdentifiers,
+                )
+            }
+
             self.groupViewHelper = GroupViewHelper(threadViewModel: newThreadViewModel, memberLabelCoordinator: memberLabelCoordinator)
             self.groupViewHelper.delegate = self
 
             self.updateGroupMembers(transaction: tx)
-
-            if let groupModelV2 = currentGroupModel as? TSGroupModelV2 {
-                self.memberLabelCoordinator?.updateWithNewGroupModel(groupModelV2, tx: tx)
-            }
 
             return true
         }

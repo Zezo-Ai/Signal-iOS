@@ -197,9 +197,17 @@ public final class ConversationViewController: OWSViewController {
             self?.loadCoordinator.enqueueReload(canReuseInteractionModels: true, canReuseComponentStates: false)
         }
 
-        if let groupModelV2 = currentGroupModel as? TSGroupModelV2 {
+        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+        if
+            let groupModelV2 = currentGroupModel as? TSGroupModelV2,
+            let localIdentifiers = tsAccountManager.localIdentifiersWithMaybeSneakyTransaction
+        {
             let groupNameColors = GroupNameColors.forThread(threadViewModel.threadRecord)
-            self.memberLabelCoordinator = MemberLabelCoordinator(groupModel: groupModelV2, groupNameColors: groupNameColors)
+            self.memberLabelCoordinator = MemberLabelCoordinator(
+                groupModel: groupModelV2,
+                groupNameColors: groupNameColors,
+                localIdentifiers: localIdentifiers,
+            )
         }
     }
 

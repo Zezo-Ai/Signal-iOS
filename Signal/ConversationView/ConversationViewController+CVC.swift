@@ -229,9 +229,18 @@ extension ConversationViewController: CVLoadCoordinatorDelegate {
         }
 
         let db = DependenciesBridge.shared.db
+        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+        let groupNameColors = GroupNameColors.forThread(thread)
         if let groupModelV2 = newGroupModel as? TSGroupModelV2 {
             db.read { tx in
-                self.memberLabelCoordinator?.updateWithNewGroupModel(groupModelV2, tx: tx)
+                guard let localIdentifiers = tsAccountManager.localIdentifiers(tx: tx) else {
+                    return
+                }
+                self.memberLabelCoordinator = MemberLabelCoordinator(
+                    groupModel: groupModelV2,
+                    groupNameColors: groupNameColors,
+                    localIdentifiers: localIdentifiers,
+                )
             }
         }
 

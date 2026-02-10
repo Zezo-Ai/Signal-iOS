@@ -170,4 +170,17 @@ public class CVCapsuleLabel: UILabel {
         }
         set { super.accessibilityLabel = newValue }
     }
+
+    override public var accessibilityTraits: UIAccessibilityTraits {
+        get {
+            var axTraits = super.accessibilityTraits
+            if onTap != nil {
+                axTraits.insert(.button)
+            }
+            return axTraits
+        }
+        set {
+            super.accessibilityTraits = newValue
+        }
+    }
 }

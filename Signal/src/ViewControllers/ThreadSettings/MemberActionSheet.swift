@@ -497,11 +497,8 @@ extension MemberActionSheet: ConversationHeaderDelegate {
 
         let localUserHasMemberLabel = groupModel.groupMembership.localUserMemberLabel != nil
         dismiss(animated: true) {
-            let hero = MemberLabelEducationHeroSheet(hasMemberLabel: localUserHasMemberLabel, editMemberLabelHandler: {
-                memberLabelCoordinator.presenter = presenter
-                memberLabelCoordinator.present()
-            })
-            presenter.present(hero, animated: true)
+            memberLabelCoordinator.presenter = presenter
+            memberLabelCoordinator.presentWithEducationSheet(localUserHasMemberLabel: localUserHasMemberLabel)
         }
     }
 }
