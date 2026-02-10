@@ -342,6 +342,13 @@ public class RemoteConfig {
         return isEnabled(.ringrtcVp9Enabled, defaultValue: false)
     }
 
+    public var pinnedThreadLimit: UInt {
+        return getUIntValue(
+            forFlag: .pinnedThreadLimit,
+            defaultValue: 4,
+        )
+    }
+
     public var pinnedMessageLimit: UInt {
         return getUIntValue(
             forFlag: .pinnedMessageLimit,
@@ -626,6 +633,7 @@ private enum ValueFlag: String, FlagType {
     case backupListMediaDefaultRefreshIntervalMs = "ios.backupListMediaDefaultRefreshIntervalMs"
     case backupListMediaOutOfQuotaRefreshIntervalMs = "ios.backupListMediaOutOfQuotaRefreshIntervalMs"
     case pinnedMessageLimit = "global.pinned_message_limit"
+    case pinnedThreadLimit = "global.pinned_chat_limit"
 
 #if TESTABLE_BUILD
     case hotSwappable = "test.hotSwappable.value"
@@ -665,6 +673,7 @@ private enum ValueFlag: String, FlagType {
         case .backupListMediaDefaultRefreshIntervalMs: true
         case .backupListMediaOutOfQuotaRefreshIntervalMs: true
         case .pinnedMessageLimit: true
+        case .pinnedThreadLimit: true
 
 #if TESTABLE_BUILD
         case .hotSwappable: true

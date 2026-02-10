@@ -6,7 +6,9 @@
 import Foundation
 
 public enum PinnedThreads {
-    public static let maxPinnedThreads = 4
+    public static var maxPinnedThreads: UInt {
+        RemoteConfig.current.pinnedThreadLimit
+    }
 }
 
 public protocol PinnedThreadManager {
