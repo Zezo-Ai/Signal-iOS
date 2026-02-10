@@ -17,8 +17,12 @@ public class CVCapsuleLabel: UILabel {
     public let isQuotedReply: Bool
     public let onTap: (() -> Void)?
 
-    private static let horizontalInset: CGFloat = 6
-    private static let verticalInset: CGFloat = 1
+    // *CapsuleInset is how far beyond the text the capsule expands.
+    // *Offset is how shifted BOTH capsule & text are from the edge of the view.
+    private static let horizontalCapsuleInset: CGFloat = 6
+    private static let verticalCapsuleInset: CGFloat = 1
+    private static let verticalOffset: CGFloat = 3
+    private static let horizontalOffset: CGFloat = 6
 
     public init(
         attributedText: NSAttributedString,
@@ -28,7 +32,7 @@ public class CVCapsuleLabel: UILabel {
         highlightFont: UIFont,
         axLabelPrefix: String?,
         isQuotedReply: Bool,
-        lineBreakMode: NSLineBreakMode = .byWordWrapping,
+        lineBreakMode: NSLineBreakMode = .byTruncatingTail,
         numberOfLines: Int = 0,
         onTap: (() -> Void)?,
     ) {
@@ -96,33 +100,43 @@ public class CVCapsuleLabel: UILabel {
 
         textStorage.addLayoutManager(layoutManager)
 
-        let horizontalInset: CGFloat
-        if CurrentAppContext().isRTL {
-            horizontalInset = -Self.horizontalInset
-        } else {
-            horizontalInset = Self.horizontalInset
+        // We only need to offset the capsule & text horizontally if the edge of the view
+        // might cut it off, (location starts at 0).
+        var horizontalOffset: CGFloat = 0
+        let needsHorizontalOffset = highlightRange.location == 0
+        if needsHorizontalOffset {
+            horizontalOffset = CurrentAppContext().isRTL ? -Self.horizontalOffset : Self.horizontalOffset
         }
 
-        let needsLeadingPadding = highlightRange.location == 0 && highlightRange.length == (text as NSString).length
         let highlightGlyphRange = layoutManager.glyphRange(forCharacterRange: highlightRange, actualCharacterRange: nil)
 
         let highlightColor = capsuleColor
         layoutManager.enumerateEnclosingRects(forGlyphRange: highlightGlyphRange, withinSelectedGlyphRange: NSRange(location: NSNotFound, length: 0), in: textContainer) { rect, _ in
-            let hOffset = needsLeadingPadding ? horizontalInset : 0
-            let roundedRect = rect.offsetBy(dx: hOffset, dy: -1).insetBy(dx: -Self.horizontalInset, dy: -Self.verticalInset)
+            let vCapsuleOffset = -Self.verticalCapsuleInset + Self.verticalOffset
+            let roundedRect = rect.offsetBy(
+                dx: horizontalOffset,
+                dy: vCapsuleOffset,
+            ).insetBy(
+                dx: -Self.horizontalCapsuleInset,
+                dy: -Self.verticalCapsuleInset,
+            )
             let path = UIBezierPath(roundedRect: roundedRect, cornerRadius: roundedRect.height / 2)
             highlightColor.setFill()
             path.fill()
         }
 
-        let textOrigin = needsLeadingPadding ? CGPoint(x: .zero + horizontalInset, y: .zero) : CGPoint.zero
+        let textOrigin = CGPoint(x: horizontalOffset, y: Self.verticalOffset)
         let glyphRange = layoutManager.glyphRange(for: textContainer)
         layoutManager.drawGlyphs(forGlyphRange: glyphRange, at: textOrigin)
     }
 
+    // TODO: measureLabel is used in the CVC for message bubbles and quote replies.
+    // its needed before the member label is initialized due to how CVComponents work.
+    // ideally this would be refactored to not be a class func, so we could
+    // share logic between this and highlightLabelSize().
     public class func measureLabel(config: CVLabelConfig, maxWidth: CGFloat) -> CGSize {
-        let capsuleHPadding = horizontalInset * 2
-        let capsuleVPadding = verticalInset * 2
+        let capsuleHPadding = horizontalCapsuleInset * 2
+        let capsuleVPadding = verticalCapsuleInset * 2
         let memberLabelSize = CVText.measureLabel(config: config, maxWidth: maxWidth - capsuleHPadding)
         return CGSize(
             width: memberLabelSize.width + capsuleHPadding,
@@ -138,9 +152,12 @@ public class CVCapsuleLabel: UILabel {
         guard let text = self.text else { return .zero }
         let attributes: [NSAttributedString.Key: Any] = [.font: highlightFont]
         let size = (text as NSString).size(withAttributes: attributes)
+
+        // The size must take into account both the extended size of the capsule, but
+        // also any amount that we've shifted the capsule/text horizontally or vertically.
         return CGSize(
-            width: size.width + Self.horizontalInset * 2,
-            height: size.height + Self.verticalInset * 2,
+            width: size.width + Self.horizontalOffset + Self.horizontalCapsuleInset * 2,
+            height: size.height + Self.verticalOffset + Self.verticalCapsuleInset * 2,
         )
     }
 
