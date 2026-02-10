@@ -315,12 +315,22 @@ public struct ConversationStyle {
         isDarkThemeEnabled ? Theme.darkThemeSecondaryTextAndIconColor : Theme.lightThemeSecondaryTextAndIconColor
     }
 
-    public func bubbleStrokeConfiguration(isIncoming: Bool) -> BubbleStrokeConfiguration? {
-        guard hasWallpaper, isIncoming else { return nil }
-
-        // Only use stroke for the bubble that should use blur background.
+    /// - Returns: Stroke configuration to use on regular bubbles in chat for the theme provided.
+    public static func bubbleStrokeConfiguration(isDarkThemeEnabled: Bool) -> BubbleStrokeConfiguration {
         let strokeColor = isDarkThemeEnabled ? UIColor(white: 1, alpha: 0.25) : UIColor(white: 0, alpha: 0.35)
         return BubbleStrokeConfiguration(color: strokeColor, width: 2 * CGFloat.hairlineWidth)
+    }
+
+    /// - Returns: Stroke configuration to use for incoming or outgoing message bubbles in chat.
+    ///
+    /// Unlike static method above this function will only return stroke configuration if bubbles must have one.
+    public func bubbleStrokeConfiguration(isIncoming: Bool) -> BubbleStrokeConfiguration? {
+        // Only use stroke for incoming messages and if there's a wallpaper.
+        guard hasWallpaper, isIncoming else { return nil }
+
+        return ConversationStyle.bubbleStrokeConfiguration(
+            isDarkThemeEnabled: isDarkThemeEnabled,
+        )
     }
 
     // Same across all themes

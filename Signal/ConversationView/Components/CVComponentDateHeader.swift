@@ -232,7 +232,7 @@ public class CVComponentDateHeader: CVComponentBase, CVRootComponent {
             axis: .vertical,
             alignment: .center,
             spacing: 0,
-            layoutMargins: UIEdgeInsets(hMargin: 10, vMargin: 4),
+            layoutMargins: UIEdgeInsets(hMargin: 12, vMargin: 3),
         )
     }
 
@@ -474,6 +474,9 @@ private class ContentViewNoVisualEffect {
                     wallpaperBlurView: wallpaperBlurView,
                     componentDelegate: componentDelegate,
                     hasPillRounding: true,
+                    strokeConfig: ConversationStyle.bubbleStrokeConfiguration(
+                        isDarkThemeEnabled: Theme.isDarkThemeEnabled,
+                    ),
                 )
                 innerStack.addSubviewToFillSuperviewEdges(wallpaperBlurView)
             }
