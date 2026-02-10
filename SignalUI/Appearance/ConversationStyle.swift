@@ -191,6 +191,7 @@ public struct ConversationStyle {
         }
     }
 
+    /// - Returns: Bubble background color to be used for regular text messages and such.
     public func bubbleChatColor(isIncoming: Bool) -> ColorOrGradientValue {
         if isIncoming {
             bubbleChatColorIncoming
@@ -211,6 +212,11 @@ public struct ConversationStyle {
         return UIBlurEffect(style: .systemThinMaterial)
     }
 
+    /// - Returns: Background effect to be used for bubbles in chat if current chat environment requires one.
+    /// If current chat does not require a blur effect `nil` will be returned.
+    ///
+    /// Defines the visual effect to be used in current theme and with the current chat wallpaper.
+    /// Messages that could use this effect include, but are not limited to, incoming messages and system events.
     public var bubbleBackgroundBlurEffect: UIVisualEffect? {
         return Self.bubbleBackgroundBlurEffect(
             hasWallpaper: hasWallpaper,
@@ -219,6 +225,12 @@ public struct ConversationStyle {
         )
     }
 
+    /// Contains logic for choosing background style to be used for incoming message bubbles.
+    ///
+    /// - Returns: Background style for incoming message bubbles when chat has provided parameters.
+    /// - Parameter hasWallpaper: Pass `true` if chat has a wallpaper. Otherwise, pass `false`.
+    /// - Parameter shouldDimWallpaperInDarkMode: Is only relevant if `hasWallpaper` is `true`.
+    /// - Parameter isDarkThemeEnabled: Pass `true` to return style to be used in dark theme.
     public static func bubbleChatColorIncoming(
         hasWallpaper: Bool,
         shouldDimWallpaperInDarkMode: Bool,
@@ -237,6 +249,7 @@ public struct ConversationStyle {
         return .solidColor(color: color)
     }
 
+    /// - Returns: Background style for incoming message bubble in the current chat.
     public var bubbleChatColorIncoming: ColorOrGradientValue {
         Self.bubbleChatColorIncoming(
             hasWallpaper: hasWallpaper,
@@ -245,6 +258,7 @@ public struct ConversationStyle {
         )
     }
 
+    /// - Returns: Background style for outgoing message bubble in the current chat.
     public var bubbleChatColorOutgoing: ColorOrGradientValue {
         chatColorValue
     }

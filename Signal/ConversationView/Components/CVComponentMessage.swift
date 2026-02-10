@@ -510,6 +510,11 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         // No bubbles for stickers.
         var outerBubbleView: (CVDimmableView & OWSBubbleViewHost)?
         if nil == subcomponent(forKey: .sticker) {
+            let bubbleCornerConfiguration = BubbleCornerConfiguration(
+                sharpCorners: sharpCorners,
+                sharpCornerRadius: Self.bubbleSharpCornerRadius,
+                wideCornerRadius: Self.bubbleWideCornerRadius,
+            )
             if case .blur = bubbleChatColor {
                 let wallpaperBlurView = componentView.ensureWallpaperBlurView()
                 configureWallpaperBlurView(
@@ -1507,6 +1512,11 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         return max(0, reactionsHeight - reactionsVOverlap)
     }
 
+    /// - Returns: Bubble background color for the current message.
+    ///
+    /// This method checks for all the special cases when bubble for the current message should have a non-default background styling.
+    /// Examples: remotely deleted message, sticker message etc.
+    /// For messages that are not a special case value from `ConversationStyle` will be returned.
     private var bubbleChatColor: ColorOrGradientValue {
         if !conversationStyle.hasWallpaper, wasRemotelyDeleted || isBorderlessViewOnceMessage {
             return .solidColor(color: Theme.backgroundColor)
@@ -1517,6 +1527,10 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         return itemModel.conversationStyle.bubbleChatColor(isIncoming: isIncoming)
     }
 
+    /// - Returns: Bubble stroke configuration for the current message.
+    ///
+    /// This method checks for all the special cases when stroke styling for current message's bubble should have non-default styling.
+    /// For messages that are not a special case value from `ConversationStyle` will be returned.
     private var bubbleStrokeConfiguration: BubbleStrokeConfiguration? {
         if !conversationStyle.hasWallpaper, wasRemotelyDeleted || isBorderlessViewOnceMessage {
             return BubbleStrokeConfiguration(color: UIColor.Signal.opaqueSeparator, width: 1)
@@ -1525,14 +1539,6 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             return nil
         }
         return itemModel.conversationStyle.bubbleStrokeConfiguration(isIncoming: isIncoming)
-    }
-
-    private var bubbleCornerConfiguration: BubbleCornerConfiguration {
-        BubbleCornerConfiguration(
-            sharpCorners: sharpCorners,
-            sharpCornerRadius: Self.bubbleSharpCornerRadius,
-            wideCornerRadius: Self.bubbleWideCornerRadius,
-        )
     }
 
     private static let measurementKey_hOuterStack = "CVComponentMessage.measurementKey_hOuterStack"
