@@ -67,7 +67,7 @@ public class CVPollView: ManualStackView {
 
             init(state: CVPollView.State) {
                 self.textColor = state.conversationStyle.bubbleTextColor(isIncoming: state.isIncoming)
-                self.subtitleColor = state.conversationStyle.bubbleSecondaryTextColor(isIncoming: state.isIncoming)
+                self.subtitleColor = state.conversationStyle.bubbleSecondaryTextColor
 
                 if state.isIncoming {
                     self.checkboxOutlineColor = UIColor.Signal.tertiaryLabel

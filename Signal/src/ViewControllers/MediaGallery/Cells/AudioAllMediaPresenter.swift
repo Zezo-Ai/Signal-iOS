@@ -62,7 +62,7 @@ class AudioAllMediaPresenter: AudioPresenter {
     }
 
     func playedDotAnimationColor(conversationStyle: ConversationStyle, isIncoming: Bool) -> ColorValueProvider {
-        return ColorValueProvider(conversationStyle.bubbleSecondaryTextColor(isIncoming: true).lottieColorValue)
+        return ColorValueProvider(conversationStyle.bubbleSecondaryTextColor.lottieColorValue)
     }
 
     var bottomInnerStackSpacing: CGFloat { 0 }
@@ -129,7 +129,7 @@ class AudioAllMediaPresenter: AudioPresenter {
         return CVLabelConfig.unstyledText(
             text,
             font: Constants.bottomLineFont,
-            textColor: conversationStyle.bubbleSecondaryTextColor(isIncoming: true),
+            textColor: conversationStyle.bubbleSecondaryTextColor,
             lineBreakMode: lineBreakMode,
         )
     }

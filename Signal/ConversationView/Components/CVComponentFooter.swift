@@ -162,10 +162,8 @@ public class CVComponentFooter: CVComponentBase, CVComponent {
             textColor = Theme.primaryTextColor
         } else if isOverlayingMedia {
             textColor = .ows_white
-        } else if isOutsideBubble, !conversationStyle.hasWallpaper {
-            textColor = Theme.secondaryTextAndIconColor
         } else {
-            textColor = conversationStyle.bubbleSecondaryTextColor(isIncoming: isIncoming)
+            textColor = conversationStyle.bubbleSecondaryTextColor
         }
 
         if isPinnedMessage {

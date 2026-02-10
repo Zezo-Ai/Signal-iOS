@@ -415,7 +415,7 @@ public class QuotedMessageView: ManualStackViewWithLayer {
             return CVLabelConfig.unstyledText(
                 text,
                 font: UIFont.dynamicTypeFootnote,
-                textColor: conversationStyle.bubbleSecondaryTextColor(isIncoming: isIncoming),
+                textColor: conversationStyle.bubbleSecondaryTextColor,
                 numberOfLines: 0,
             )
         }

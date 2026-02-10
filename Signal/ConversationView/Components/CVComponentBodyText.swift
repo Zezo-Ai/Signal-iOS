@@ -363,8 +363,8 @@ public class CVComponentBodyText: CVComponentBase, CVComponent {
 
     private var textSelectionStyling: [NSAttributedString.Key: Any] {
         var foregroundColor: UIColor = .black
-        if let message = interaction as? TSMessage {
-            foregroundColor = conversationStyle.bubbleSecondaryTextColor(isIncoming: message.isIncoming)
+        if interaction is TSMessage {
+            foregroundColor = conversationStyle.bubbleSecondaryTextColor
         }
 
         return [
