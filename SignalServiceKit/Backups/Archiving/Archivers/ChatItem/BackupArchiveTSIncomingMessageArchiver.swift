@@ -196,7 +196,10 @@ extension BackupArchiveTSIncomingMessageArchiver: BackupArchive.TSMessageEditHis
             ))
         }
 
-        let pinMessageDetails = pinnedMessageManager.pinMessageDetails(interactionId: interactionRowId, tx: context.tx)
+        let pinMessageDetails = pinnedMessageManager.pinMessageDetails(
+            interactionId: interactionRowId,
+            tx: context.tx,
+        )
 
         let detailsResult = Details.validateAndBuild(
             interactionUniqueId: incomingMessage.uniqueInteractionId,

@@ -490,12 +490,23 @@ public class PinnedMessageManager {
 
     // MARK: - Backups
 
-    public func pinMessageDetails(interactionId: Int64, tx: DBReadTransaction) -> PinMessageDetails? {
-        failIfThrows {
-            try PinnedMessageRecord
-                .filter(PinnedMessageRecord.Columns.interactionId == interactionId)
-                .fetchOne(tx.database)
-                .map { PinMessageDetails(pinnedAtTimestamp: $0.receivedTimestamp, expiresAtTimestamp: $0.expiresAt) }
+    public func pinMessageDetails(
+        interactionId: Int64,
+        tx: DBReadTransaction,
+    ) -> PinMessageDetails? {
+        let sql = """
+            SELECT * FROM \(PinnedMessageRecord.databaseTableName)
+            WHERE \(PinnedMessageRecord.CodingKeys.interactionId.rawValue) = ?
+        """
+        return failIfThrows {
+            let statement = try tx.database.cachedStatement(sql: sql)
+            return try PinnedMessageRecord.fetchOne(statement, arguments: [interactionId])
+                .map {
+                    PinMessageDetails(
+                        pinnedAtTimestamp: $0.receivedTimestamp,
+                        expiresAtTimestamp: $0.expiresAt,
+                    )
+                }
         }
     }
 
