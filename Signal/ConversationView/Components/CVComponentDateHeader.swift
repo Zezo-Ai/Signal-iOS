@@ -122,7 +122,7 @@ public class CVComponentDateHeader: CVComponentBase, CVRootComponent {
                 cellMeasurement: cellMeasurement,
                 componentDelegate: componentDelegate,
                 hasWallpaper: hasWallpaper,
-                titleLabelConfig: titleLabelConfigForPlainContentView,
+                titleLabelConfig: titleLabelConfig,
                 innerStackConfig: innerStackConfig,
                 isReusing: true,
             )
@@ -130,7 +130,7 @@ public class CVComponentDateHeader: CVComponentBase, CVRootComponent {
             let contentViewVisualEffect = componentView.visualEffectContentView
             contentViewVisualEffect?.configure(
                 blurBackgroundColor: blurBackgroundColor,
-                titleLabelConfig: titleLabelConfigForVisualEffectContentView,
+                titleLabelConfig: titleLabelConfig,
                 innerStackConfig: innerStackConfig,
             )
         } else {
@@ -145,7 +145,7 @@ public class CVComponentDateHeader: CVComponentBase, CVRootComponent {
                         cellMeasurement: cellMeasurement,
                         componentDelegate: componentDelegate,
                         hasWallpaper: hasWallpaper,
-                        titleLabelConfig: titleLabelConfigForPlainContentView,
+                        titleLabelConfig: titleLabelConfig,
                         innerStackConfig: innerStackConfig,
                         isReusing: false,
                     )
@@ -155,7 +155,7 @@ public class CVComponentDateHeader: CVComponentBase, CVRootComponent {
                     let contentView = componentView.ensureVisualEffectContentView()
                     contentView.configure(
                         blurBackgroundColor: blurBackgroundColor,
-                        titleLabelConfig: titleLabelConfigForVisualEffectContentView,
+                        titleLabelConfig: titleLabelConfig,
                         innerStackConfig: innerStackConfig,
                     )
                     return contentView.rootView
@@ -189,7 +189,7 @@ public class CVComponentDateHeader: CVComponentBase, CVRootComponent {
             )
         }
 
-        componentView.rootView.accessibilityLabel = titleLabelConfigForPlainContentView.text.accessibilityDescription
+        componentView.rootView.accessibilityLabel = titleLabelConfig.text.accessibilityDescription
         componentView.rootView.isAccessibilityElement = true
         componentView.rootView.accessibilityTraits = .header
     }
@@ -200,29 +200,17 @@ public class CVComponentDateHeader: CVComponentBase, CVRootComponent {
         return State(text: text)
     }
 
-    private func titleLabelConfig(textColor: UIColor) -> CVLabelConfig {
+    private var titleLabelConfig: CVLabelConfig {
+        let textColor = conversationStyle.bubbleTextColorIncoming
+        let font = UIFont.dynamicTypeFootnote.medium()
         return CVLabelConfig(
             text: .text(dateHeaderState.text),
-            displayConfig: .forUnstyledText(font: .dynamicTypeFootnote.semibold(), textColor: textColor),
-            font: UIFont.dynamicTypeFootnote.semibold(),
+            displayConfig: .forUnstyledText(font: font, textColor: textColor),
+            font: font,
             textColor: textColor,
             lineBreakMode: .byTruncatingTail,
             textAlignment: .center,
         )
-    }
-
-    private var titleLabelConfigForPlainContentView: CVLabelConfig {
-        return titleLabelConfig(textColor: .Signal.secondaryLabel)
-    }
-
-    private var titleLabelConfigForVisualEffectContentView: CVLabelConfig {
-        let textColor: UIColor
-        if #available(iOS 26.0, *) {
-            textColor = .Signal.label
-        } else {
-            textColor = .Signal.secondaryLabel
-        }
-        return titleLabelConfig(textColor: textColor)
     }
 
     private var outerStackConfig: CVStackViewConfig {
@@ -262,7 +250,7 @@ public class CVComponentDateHeader: CVComponentBase, CVRootComponent {
                         outerStackConfig.layoutMargins.totalWidth
                 ),
         )
-        let labelSize = CVText.measureLabel(config: titleLabelConfigForPlainContentView, maxWidth: availableWidth)
+        let labelSize = CVText.measureLabel(config: titleLabelConfig, maxWidth: availableWidth)
 
         let labelInfo = labelSize.asManualSubviewInfo
         let innerStackMeasurement = ManualStackView.measure(
