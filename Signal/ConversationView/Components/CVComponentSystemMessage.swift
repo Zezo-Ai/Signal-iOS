@@ -303,12 +303,6 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
                 subviews: outerHStackViews,
             )
 
-            componentView.wallpaperBlurView?.removeFromSuperview()
-            componentView.wallpaperBlurView = nil
-
-            componentView.backgroundView?.removeFromSuperview()
-            componentView.backgroundView = nil
-
             let bubbleView: UIView
 
             if hasWallpaper {
@@ -674,12 +668,6 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
                 messageTimerView.prepareForReuse()
                 messageTimerView.removeFromSuperview()
 
-                wallpaperBlurView?.removeFromSuperview()
-                wallpaperBlurView?.resetContentAndConfiguration()
-
-                backgroundView?.removeFromSuperview()
-                backgroundView = nil
-
                 hasWallpaper = false
                 isDarkThemeEnabled = false
                 isFirstInCluster = false
@@ -688,6 +676,12 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
                 wasShowingSelectionUI = false
                 hasActionButton = false
             }
+
+            wallpaperBlurView?.removeFromSuperview()
+            wallpaperBlurView = nil
+
+            backgroundView?.removeFromSuperview()
+            backgroundView = nil
 
             button?.removeFromSuperview()
             button = nil

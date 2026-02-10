@@ -441,10 +441,6 @@ private class ContentViewNoVisualEffect {
             return wallpaperBlurView
         }
         let wallpaperBlurView = CVWallpaperBlurView()
-        if #available(iOS 26.0, *) {
-            // Will override `cornerRadius` set in `configure...`.
-            wallpaperBlurView.cornerConfiguration = .capsule()
-        }
         self.wallpaperBlurView = wallpaperBlurView
         return wallpaperBlurView
     }
@@ -477,7 +473,7 @@ private class ContentViewNoVisualEffect {
                 CVComponentBase.configureWallpaperBlurView(
                     wallpaperBlurView: wallpaperBlurView,
                     componentDelegate: componentDelegate,
-                    cornerConfig: .init(cornerRadius: 8),
+                    hasPillRounding: true,
                 )
                 innerStack.addSubviewToFillSuperviewEdges(wallpaperBlurView)
             }

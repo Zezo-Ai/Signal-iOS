@@ -244,36 +244,39 @@ public class CVComponentBase: NSObject {
         nil
     }
 
+    /// `hasPillRounding` takes precedence over `cornerConfig`.
     public func configureWallpaperBlurView(
         wallpaperBlurView: CVWallpaperBlurView,
         componentDelegate: CVComponentDelegate,
+        hasPillRounding: Bool = false,
         cornerConfig: BubbleCornerConfiguration? = nil,
         strokeConfig: BubbleStrokeConfiguration? = nil,
     ) {
         Self.configureWallpaperBlurView(
             wallpaperBlurView: wallpaperBlurView,
             componentDelegate: componentDelegate,
+            hasPillRounding: hasPillRounding,
             cornerConfig: cornerConfig,
             strokeConfig: strokeConfig,
         )
     }
 
+    /// `hasPillRounding` takes precedence over `cornerConfig`.
     public static func configureWallpaperBlurView(
         wallpaperBlurView: CVWallpaperBlurView,
         componentDelegate: CVComponentDelegate,
+        hasPillRounding: Bool = false,
         cornerConfig: BubbleCornerConfiguration? = nil,
         strokeConfig: BubbleStrokeConfiguration? = nil,
     ) {
-        if let wallpaperBlurProvider = componentDelegate.wallpaperBlurProvider {
-            wallpaperBlurView.configure(
-                provider: wallpaperBlurProvider,
-                cornerConfig: cornerConfig,
-                strokeConfig: strokeConfig,
-            )
-        } else {
-            owsFailDebug("Missing wallpaperBlurProvider.")
-            wallpaperBlurView.configureForPreview(cornerConfig: cornerConfig, strokeConfig: strokeConfig)
-        }
+        let wallpaperBlurProvider = componentDelegate.wallpaperBlurProvider
+        owsAssertDebug(wallpaperBlurProvider != nil)
+        wallpaperBlurView.configure(
+            provider: wallpaperBlurProvider,
+            hasPillRounding: hasPillRounding,
+            cornerConfig: cornerConfig,
+            strokeConfig: strokeConfig,
+        )
     }
 
     public func updateScrollingContent(componentView: CVComponentView) {
