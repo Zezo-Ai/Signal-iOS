@@ -713,13 +713,19 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         }
         if let badgeConfig = componentState.sendFailureBadge {
             // Send failures are rare, so it's cheaper to only build these views when we need them.
-            let sendFailureBadge = CVImageView()
-            sendFailureBadge.contentMode = .center
-            sendFailureBadge.setTemplateImageName("error-circle", tintColor: badgeConfig.color)
-            if conversationStyle.hasWallpaper {
-                sendFailureBadge.backgroundColor = conversationStyle.accessoryColor
-                sendFailureBadge.layer.cornerRadius = sendFailureBadgeSize / 2
-                sendFailureBadge.clipsToBounds = true
+            let badgeImageView = CVImageView()
+            badgeImageView.contentMode = .center
+            badgeImageView.setTemplateImageName("error-circle", tintColor: badgeConfig.color)
+            let sendFailureBadge: UIView
+            if let visualEffect = conversationStyle.bubbleBackgroundBlurEffect {
+                let circleView = ManualLayoutView.circleView(name: "SendFailureBadge")
+                circleView.layer.masksToBounds = true
+                circleView.addSubviewToFillSuperviewEdges(UIVisualEffectView(effect: visualEffect))
+                circleView.addSubviewToFillSuperviewEdges(badgeImageView)
+
+                sendFailureBadge = circleView
+            } else {
+                sendFailureBadge = badgeImageView
             }
 
             let sendFailureWrapper = ManualLayoutView(name: "sendFailureWrapper")
@@ -1627,7 +1633,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             hOuterStackSubviewInfos.append(CGSize.zero.asManualSubviewInfo)
         }
         if !isIncoming, hasSendFailureBadge {
-            let sendFailureBadgeSize = CGSize(square: self.sendFailureBadgeSize)
+            let sendFailureBadgeSize = CGSize(square: sendFailureBadgeSize)
             hOuterStackSubviewInfos.append(sendFailureBadgeSize.asManualSubviewInfo(hasFixedWidth: true))
         }
         let hOuterStackMeasurement = ManualStackView.measure(

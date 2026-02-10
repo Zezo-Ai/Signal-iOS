@@ -183,14 +183,6 @@ public struct ConversationStyle {
 
     // MARK: Colors
 
-    public var accessoryColor: UIColor {
-        if hasWallpaper {
-            return isDarkThemeEnabled ? .ows_gray95 : .white
-        } else {
-            return isDarkThemeEnabled ? UIColor.ows_gray80 : UIColor.ows_gray05
-        }
-    }
-
     /// - Returns: Bubble background color to be used for regular text messages and such.
     public func bubbleChatColor(isIncoming: Bool) -> ColorOrGradientValue {
         if isIncoming {
