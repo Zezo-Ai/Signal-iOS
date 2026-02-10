@@ -2236,11 +2236,11 @@
 /* Header title for the section showing all media in conversation settings */
 "CONVERSATION_SETTINGS_ALL_MEDIA_HEADER" = "All Media";
 
-/* Footer for the 'attributes access' section in conversation settings view. */
-"CONVERSATION_SETTINGS_ATTRIBUTES_ACCESS_SECTION_FOOTER" = "Choose who can edit the group name, photo, description, and disappearing messages timer.";
-
 /* Footer for the 'attributes access' section in conversation settings view with pinned messages added. */
 "CONVERSATION_SETTINGS_ATTRIBUTES_ACCESS_SECTION_FOOTER_V2" = "Choose who can edit the group name, photo, description, disappearing messages timer, and pinned messages.";
+
+/* Footer for the 'attributes access' section in conversation settings view with member labels added. */
+"CONVERSATION_SETTINGS_ATTRIBUTES_ACCESS_SECTION_FOOTER_V3" = "Choose who can edit the group name, photo, description, disappearing messages timer, pinned messages, and add member labels.";
 
 /* Footer string for a contact's badges in conversation settings */
 "CONVERSATION_SETTINGS_BADGES_FOOTER" = "Get badges for your profile by supporting Signal. Tap a badge to learn more.";
@@ -5013,6 +5013,15 @@
 
 /* Accessibility prefix for member labels. */
 "MEMBER_LABEL_AX_PREFIX" = "Member label: ";
+
+/* Button label on action sheet when attempting to change the group attributes access to 'administrator' and then continue */
+"MEMBER_LABEL_CLEAR_CHANGE_PERMISSION_CONTINUE" = "Change Permission";
+
+/* Body for action sheet when attempting to change the group attributes access to 'administrator' */
+"MEMBER_LABEL_CLEAR_WARNING_BODY" = "Changing this permission to “Only Admins” will clear member labels set by non-admins in this group.";
+
+/* Title for action sheet when attempting to change the group attributes access to 'administrator' */
+"MEMBER_LABEL_CLEAR_WARNING_TITLE" = "Member Labels Will be Cleared";
 
 /* Text for a button to set a member label */
 "MEMBER_LABEL_EDIT" = "Edit Your Label";

@@ -519,9 +519,11 @@ public class GroupManager: NSObject {
     public static func changeGroupAttributesAccessV2(groupModel: TSGroupModelV2, access: GroupV2Access) async throws {
         try await updateGroupV2(groupModel: groupModel, description: "Change group attributes access") { groupChangeSet in
             groupChangeSet.setAccessForAttributes(access)
-            let acisToClear = acisToClearMemberLabelsFor(groupModel: groupModel, access: access)
-            for aci in acisToClear {
-                groupChangeSet.changeLabelForMember(aci, label: nil)
+            if BuildFlags.MemberLabel.send {
+                let acisToClear = acisToClearMemberLabelsFor(groupModel: groupModel, access: access)
+                for aci in acisToClear {
+                    groupChangeSet.changeLabelForMember(aci, label: nil)
+                }
             }
         }
     }
