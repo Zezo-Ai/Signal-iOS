@@ -7634,7 +7634,7 @@
 "SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_BUTTON_VERIFYING" = "Verifying Encryption…";
 
 /* Body for a sheet introducing Key Transparency. */
-"SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_EDUCATION_SHEET_BODY" = "For contacts you’re connected to by phone number, Signal can automatically confirm whether the connection is secure using a process called key transparency. For added security, you can still verify connections manually using a QR code or number.";
+"SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_EDUCATION_SHEET_BODY" = "For contacts you’re connected to by phone number, Signal can automatically confirm whether the connection is secure using a process called key transparency. For added security, you can still verify connections manually using a QR code or by comparing safety numbers.";
 
 /* Title for a sheet introducing Key Transparency. */
 "SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_EDUCATION_SHEET_TITLE" = "Signal can now automatically verify encryption";
