@@ -51,4 +51,8 @@ public struct AccountEntropyPool: Codable, Equatable {
     public func getBackupKey() -> BackupKey {
         return try! LibSignalClient.AccountEntropyPool.deriveBackupKey(rawString)
     }
+
+    public func getLoggingKey() -> String {
+        return String(getMasterKey().data(for: .loggingKey).canonicalStringRepresentation.suffix(4))
+    }
 }

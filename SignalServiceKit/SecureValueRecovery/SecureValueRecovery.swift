@@ -50,6 +50,9 @@ public enum SVR {
         /// used to locate and decrypt Storage Service records.
         case storageServiceManifest(version: UInt64)
 
+        /// A key used to hash values used for logging.
+        case loggingKey
+
         /// Today, Storage Service records are encrypted using a key stored in
         /// the manifest. However, in the past they were encrypted using an
         /// SVR-derived key. This case represents the key formerly used to
@@ -101,7 +104,7 @@ public enum SVR {
             switch type {
             case .storageService, .storageServiceManifest, .legacy_storageServiceRecord, .registrationRecoveryPassword:
                 return rawData.base64EncodedString()
-            case .registrationLock:
+            case .registrationLock, .loggingKey:
                 return rawData.hexadecimalString
             }
         }

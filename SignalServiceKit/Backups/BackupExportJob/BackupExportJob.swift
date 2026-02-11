@@ -128,9 +128,6 @@ class BackupExportJobImpl: BackupExportJob {
     private func _exportAndUploadBackup(
         mode: BackupExportJobMode,
     ) async throws {
-        let logger = logger.suffixed(with: "[\(mode)]")
-        logger.info("Starting...")
-
         await db.awaitableWrite {
             self.backupSettingsStore.setIsBackupUploadQueueSuspended(false, tx: $0)
         }
@@ -140,9 +137,11 @@ class BackupExportJobImpl: BackupExportJob {
             backupKey,
             shouldAllowBackupUploadsOnCellular,
             currentBackupPlan,
+            logger,
         ) = try db.read { tx throws in
             guard
                 tsAccountManager.registrationState(tx: tx).isRegisteredPrimaryDevice,
+                let aep = accountKeyStore.getAccountEntropyPool(tx: tx),
                 let localIdentifiers = tsAccountManager.localIdentifiers(tx: tx)
             else {
                 throw NotRegisteredError()
@@ -152,11 +151,15 @@ class BackupExportJobImpl: BackupExportJob {
                 throw OWSAssertionError("Missing or invalid message root backup key.")
             }
 
+            let logger = self.logger.suffixed(with: "[\(mode)][\(aep.getLoggingKey())]")
+            logger.info("Starting...")
+
             return (
                 localIdentifiers,
                 backupKey,
                 backupSettingsStore.shouldAllowBackupUploadsOnCellular(tx: tx),
                 backupSettingsStore.backupPlan(tx: tx),
+                logger,
             )
         }
 

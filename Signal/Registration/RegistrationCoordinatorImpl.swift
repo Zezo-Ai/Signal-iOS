@@ -1526,6 +1526,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         accountIdentity: AccountIdentity,
     ) async throws -> BackupServiceAuth {
         let backupKey = try MessageRootBackupKey(accountEntropyPool: accountEntropyPool, aci: accountIdentity.aci)
+        Logger.info("Fetching backup auth [\(accountEntropyPool.getLoggingKey())]")
 
         func fetchBackupServiceAuth() async throws -> BackupServiceAuth {
             return try await self.deps.backupRequestManager.fetchBackupServiceAuthForRegistration(

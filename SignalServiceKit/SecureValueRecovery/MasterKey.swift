@@ -38,6 +38,8 @@ public struct MasterKey: Codable {
         }
 
         switch key {
+        case .loggingKey:
+            return SVR.DerivedKeyData(keyType: .loggingKey, dataToDeriveFrom: masterKey)
         case .registrationLock:
             return SVR.DerivedKeyData(keyType: .registrationLock, dataToDeriveFrom: masterKey)
         case .registrationRecoveryPassword:
@@ -94,6 +96,8 @@ private extension SVR.DerivedKeyData {
 private extension SVR.DerivedKey {
     private var infoString: String {
         switch self {
+        case .loggingKey:
+            return "Logging Key"
         case .registrationLock:
             return "Registration Lock"
         case .registrationRecoveryPassword:
@@ -111,6 +115,7 @@ private extension SVR.DerivedKey {
         let infoData = Data(infoString.utf8)
         switch self {
         case
+            .loggingKey,
             .registrationLock,
             .registrationRecoveryPassword,
             .storageService,
