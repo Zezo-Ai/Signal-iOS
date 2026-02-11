@@ -107,17 +107,20 @@ public class CVComponentUnreadIndicator: CVComponentBase, CVRootComponent {
             )
 
             if hasWallpaper {
-                strokeView.backgroundColor = .ows_blackAlpha80
+                let topStrokeColor = UIColor(rgbHex: 0x525252, alpha: isDarkThemeEnabled ? 0.32 : 0.24)
+                let bottomStrokeColor = UIColor(white: 1, alpha: 0.12)
+                strokeView.setStrokeColor(top: topStrokeColor, bottom: bottomStrokeColor)
 
                 let wallpaperBlurView = componentView.ensureWallpaperBlurView()
                 configureWallpaperBlurView(
                     wallpaperBlurView: wallpaperBlurView,
                     componentDelegate: componentDelegate,
-                    cornerConfig: .init(cornerRadius: 8),
+                    hasPillRounding: true,
+                    strokeConfig: ConversationStyle.bubbleStrokeConfiguration(isDarkThemeEnabled: isDarkThemeEnabled),
                 )
                 innerStack.addSubviewToFillSuperviewEdges(wallpaperBlurView)
             } else {
-                strokeView.backgroundColor = .ows_gray45
+                strokeView.setStrokeColor(top: .ows_gray45, bottom: .clear)
             }
 
             outerStack.configure(
@@ -138,8 +141,8 @@ public class CVComponentUnreadIndicator: CVComponentBase, CVRootComponent {
                 "MESSAGES_VIEW_UNREAD_INDICATOR",
                 comment: "Indicator that separates read from unread messages.",
             ),
-            font: UIFont.dynamicTypeFootnote.semibold(),
-            textColor: Theme.primaryTextColor,
+            font: UIFont.dynamicTypeFootnote.medium(),
+            textColor: ConversationStyle.bubbleTextColorIncoming,
             numberOfLines: 0,
             lineBreakMode: .byTruncatingTail,
             textAlignment: .center,
@@ -160,7 +163,7 @@ public class CVComponentUnreadIndicator: CVComponentBase, CVRootComponent {
             axis: .vertical,
             alignment: .center,
             spacing: 0,
-            layoutMargins: UIEdgeInsets(hMargin: 10, vMargin: 4),
+            layoutMargins: UIEdgeInsets(hMargin: 12, vMargin: 3),
         )
     }
 
@@ -229,7 +232,7 @@ public class CVComponentUnreadIndicator: CVComponentBase, CVRootComponent {
         fileprivate var hasWallpaper = false
         fileprivate var isDarkThemeEnabled = false
 
-        fileprivate let strokeView = UIView()
+        fileprivate let strokeView = DoubleStrokeView()
 
         public var isDedicatedCellView = false
 
@@ -260,6 +263,45 @@ public class CVComponentUnreadIndicator: CVComponentBase, CVRootComponent {
                 hasWallpaper = false
                 isDarkThemeEnabled = false
             }
+        }
+    }
+
+    fileprivate class DoubleStrokeView: ManualLayoutView {
+
+        private let topStrokeView = UIView()
+        private let bottomStrokeView = UIView()
+
+        init() {
+            super.init(name: "DoubleStrokeView")
+
+            clipsToBounds = true
+
+            addSubview(topStrokeView)
+            addSubview(bottomStrokeView)
+
+            addDefaultLayoutBlock()
+        }
+
+        private func addDefaultLayoutBlock() {
+            addLayoutBlock { [weak self] _ in
+                guard let self else { return }
+
+                let strokeViewSize = CGSize(width: self.bounds.width, height: CGFloat.hairlineWidth)
+
+                self.topStrokeView.frame = CGRect(
+                    origin: CGPoint(x: self.bounds.minX, y: self.bounds.minY),
+                    size: strokeViewSize,
+                )
+                self.bottomStrokeView.frame = CGRect(
+                    origin: CGPoint(x: self.bounds.minX, y: self.topStrokeView.frame.maxY),
+                    size: strokeViewSize,
+                )
+            }
+        }
+
+        func setStrokeColor(top: UIColor, bottom: UIColor) {
+            topStrokeView.backgroundColor = top
+            bottomStrokeView.backgroundColor = bottom
         }
     }
 }
