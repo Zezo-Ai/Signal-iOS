@@ -47,7 +47,7 @@ class MockUsernameApiClient: UsernameApiClient {
 
     func reserveUsernameCandidates(usernameCandidates: Usernames.HashedUsername.GeneratedCandidates) async throws -> Usernames.ApiClientReservationResult { owsFail("Not implemented!") }
     func lookupAci(forHashedUsername hashedUsername: Usernames.HashedUsername) async throws -> Aci? { owsFail("Not implemented!") }
-    func getUsernameLink(handle: UUID) async throws -> Data? { owsFail("Not implemented!") }
+    func getUsernameLink(handle: UUID, entropy: Data) async throws -> LibSignalClient.Username? { owsFail("Not implemented!") }
 }
 
 #endif

@@ -7,9 +7,14 @@ public import LibSignalClient
 
 public class UsernameApiClientImpl: UsernameApiClient {
     private let networkManager: NetworkManager
+    private let chatConnectionManager: ChatConnectionManager
 
-    init(networkManager: NetworkManager) {
+    init(
+        networkManager: NetworkManager,
+        chatConnectionManager: ChatConnectionManager,
+    ) {
         self.networkManager = networkManager
+        self.chatConnectionManager = chatConnectionManager
     }
 
     private func performRequest(
@@ -146,7 +151,7 @@ public class UsernameApiClientImpl: UsernameApiClient {
     public func lookupAci(
         forHashedUsername hashedUsername: Usernames.HashedUsername,
     ) async throws -> Aci? {
-        try await DependenciesBridge.shared.chatConnectionManager.withUnauthService(.usernames) {
+        try await chatConnectionManager.withUnauthService(.usernames) {
             try await $0.lookUpUsernameHash(hashedUsername.rawHash)
         }
     }
@@ -175,39 +180,12 @@ public class UsernameApiClientImpl: UsernameApiClient {
         return try parser.required(key: "usernameLinkHandle")
     }
 
-    public func getUsernameLink(handle: UUID) async throws -> Data? {
-        let request = OWSRequestFactory.lookupUsernameLinkRequest(handle: handle)
-
-        do {
-            let response = try await performRequest(request: request)
-
-            guard response.responseStatusCode == 200 else {
-                throw response.asError()
-            }
-
-            guard let parser = response.responseBodyParamParser else {
-                throw OWSAssertionError("Unexpectedly missing JSON response body!")
-            }
-
-            let encryptedUsernameString: String = try parser.required(
-                key: "usernameLinkEncryptedValue",
-            )
-
-            return try Data.data(fromBase64Url: encryptedUsernameString)
-        } catch {
-            guard let statusCode = error.httpStatusCode else {
-                owsFailDebug("Unexpectedly missing HTTP status code!")
-                throw error
-            }
-
-            switch statusCode {
-            case 404:
-                // If the requested handle does not belong to any username link,
-                // we get a 404.
-                return nil
-            default:
-                throw error
-            }
+    public func getUsernameLink(
+        handle: UUID,
+        entropy: Data,
+    ) async throws -> LibSignalClient.Username? {
+        try await chatConnectionManager.withUnauthService(.usernames) {
+            try await $0.lookUpUsernameLink(handle, entropy: entropy)
         }
     }
 }

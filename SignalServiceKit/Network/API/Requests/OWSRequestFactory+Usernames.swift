@@ -15,9 +15,6 @@ public extension OWSRequestFactory {
         }
 
         static let setUsernameLink = "v1/accounts/username_link"
-        static func usernameLinkLookup(handle: UUID) -> String {
-            "v1/accounts/username_link/\(handle.uuidString)"
-        }
     }
 
     /// Attempt to reserve one of the given username hashes. If successful,
@@ -120,23 +117,6 @@ public extension OWSRequestFactory {
             method: HTTPMethod.put.methodName,
             parameters: params,
         )
-
-        return request
-    }
-
-    /// Look up the encrypted username for the given username link handle.
-    static func lookupUsernameLinkRequest(handle: UUID) -> TSRequest {
-        let url = URL(string: UsernameApiPaths.usernameLinkLookup(
-            handle: handle,
-        ))!
-
-        var request = TSRequest(
-            url: url,
-            method: HTTPMethod.get.methodName,
-            parameters: nil,
-        )
-
-        request.auth = .anonymous
 
         return request
     }

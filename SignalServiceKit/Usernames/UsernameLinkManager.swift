@@ -72,12 +72,6 @@ public final class UsernameLinkManagerImpl: UsernameLinkManager {
     public func decryptEncryptedLink(
         link: Usernames.UsernameLink,
     ) async throws -> String? {
-        return try await self.apiClient.getUsernameLink(handle: link.handle).map {
-            let lscUsername = try LibSignalClient.Username(
-                fromLink: $0,
-                withRandomness: link.entropy,
-            )
-            return lscUsername.value
-        }
+        return try await self.apiClient.getUsernameLink(handle: link.handle, entropy: link.entropy)?.value
     }
 }

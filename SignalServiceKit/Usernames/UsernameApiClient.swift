@@ -63,11 +63,11 @@ public protocol UsernameApiClient {
         keepLinkHandle: Bool,
     ) async throws -> UUID
 
-    /// Gets the encrypted username for the given handle, if any.
+    /// Gets and decrypts the username for the given handle and entropy, if any.
     ///
     /// - SeeAlso
     /// ``Usernames.UsernameLink`` and ``UsernameLinkManager``.
-    func getUsernameLink(handle: UUID) async throws -> Data?
+    func getUsernameLink(handle: UUID, entropy: Data) async throws -> LibSignalClient.Username?
 }
 
 public extension Usernames {

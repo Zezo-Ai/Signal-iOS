@@ -291,12 +291,4 @@ class OWSRequestFactoryTest: XCTestCase {
         XCTAssertEqual(request.parameters["keepLinkHandle"] as! Bool, true)
     }
 
-    func testLookupUsernameLink() {
-        let handle = UUID()
-        let request = OWSRequestFactory.lookupUsernameLinkRequest(handle: handle)
-
-        XCTAssertEqual(request.url.path, "v1/accounts/username_link/\(handle)")
-        XCTAssertEqual(request.method, "GET")
-        XCTAssertEqual(request.parameters as! [String: String], [:])
-    }
 }
