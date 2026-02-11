@@ -175,7 +175,8 @@ class StickerPackViewController: OWSViewController {
             strongSelf.updateContent()
         }
 
-        StickerManager.refreshContents()
+        let stickerManager = SSKEnvironment.shared.stickerManagerRef
+        stickerManager.downloadPendingSickerPacks()
     }
 
     override func viewDidLayoutSubviews() {

@@ -99,33 +99,47 @@ public class StickerManager: NSObject {
         super.init()
 
         // Resume sticker and sticker pack downloads when app is ready.
-        appReadiness.runNowOrWhenMainAppDidBecomeReadyAsync {
-            if DependenciesBridge.shared.tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegistered {
-                Task {
-                    // This will return once all restored sticker packs have been downloaded
-                    try await self.queueLoader.loadAndRunTasks()
-
-                    // Refresh contents after pending downloads complete
-                    StickerManager.refreshContents()
-                }
-            }
+        appReadiness.runNowOrWhenMainAppDidBecomeReadyAsync { [self] in
+            downloadPendingSickerPacks()
         }
+
+        _ = NotificationCenter.default.addObserver(
+            name: .registrationStateDidChange,
+            block: { [weak self] _ in
+                guard let self else { return }
+                downloadPendingSickerPacks()
+            },
+        )
     }
 
-    // Attempt to download any sticker packs restored via backup.
-    public static func downloadPendingSickerPacks() async throws {
-        try await SSKEnvironment.shared.stickerManagerRef.queueLoader.loadAndRunTasks()
-    }
+    // MARK: -
+
+    private let downloadPendingStickerPacksTaskQueue = SerialTaskQueue()
 
     // The sticker manager is responsible for downloading more than one kind
     // of content; those downloads can fail.  Therefore the sticker manager
     // retries those downloads, sometimes in response to user activity.
-    public class func refreshContents() {
-        // Try to download the manifests for "default" sticker packs.
-        tryToDownloadDefaultStickerPacks()
+    public func downloadPendingSickerPacks() {
+        downloadPendingStickerPacksTaskQueue.enqueue { [self] in
+            let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+            guard tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegistered else {
+                return
+            }
 
-        // Try to download the stickers for "installed" sticker packs.
-        ensureAllStickerDownloadsAsync()
+            try? await queueLoader.loadAndRunTasks()
+
+            // Try to download the manifests for "default" sticker packs.
+            let manifestDownloadPromises = StickerManager.tryToDownloadDefaultStickerPacks()
+            for promise in manifestDownloadPromises {
+                try? await promise.awaitable()
+            }
+
+            // Try to download the stickers for "installed" sticker packs.
+            let stickerDownloadPromises = StickerManager.ensureAllStickerDownloadsAsync()
+            for promise in stickerDownloadPromises {
+                try? await promise.awaitable()
+            }
+        }
     }
 
     // MARK: - Paths
@@ -258,14 +272,15 @@ public class StickerManager: NSObject {
         stickerPackInfo: StickerPackInfo,
         installMode: InstallMode,
         wasLocallyInitiated: Bool,
-    ) {
-        tryToDownloadStickerPack(stickerPackInfo: stickerPackInfo).done(on: DispatchQueue.global()) { stickerPack in
-            self.upsertStickerPack(
-                stickerPack: stickerPack,
-                installMode: installMode,
-                wasLocallyInitiated: wasLocallyInitiated,
-            )
-        }.cauterize()
+    ) -> Promise<Void> {
+        return tryToDownloadStickerPack(stickerPackInfo: stickerPackInfo)
+            .done(on: DispatchQueue.global()) { stickerPack in
+                self.upsertStickerPack(
+                    stickerPack: stickerPack,
+                    installMode: installMode,
+                    wasLocallyInitiated: wasLocallyInitiated,
+                )
+            }
     }
 
     private let packOperationQueue = ConcurrentTaskQueue(concurrentLimit: 3)
@@ -442,17 +457,17 @@ public class StickerManager: NSObject {
         }
     }
 
-    private class func tryToDownloadDefaultStickerPacks() {
-        DispatchQueue.global().async {
-            self.tryToDownloadStickerPacks(
-                stickerPacks: DefaultStickerPack.packsToAutoInstall,
-                installMode: .installIfUnsaved,
-            )
-            self.tryToDownloadStickerPacks(
-                stickerPacks: DefaultStickerPack.packsToNotAutoInstall,
-                installMode: .doNotInstall,
-            )
-        }
+    private class func tryToDownloadDefaultStickerPacks() -> [Promise<Void>] {
+        let autoInstallPromises = tryToDownloadStickerPacks(
+            stickerPacks: DefaultStickerPack.packsToAutoInstall,
+            installMode: .installIfUnsaved,
+        )
+        let notAutoInstallPromises = tryToDownloadStickerPacks(
+            stickerPacks: DefaultStickerPack.packsToNotAutoInstall,
+            installMode: .doNotInstall,
+        )
+
+        return autoInstallPromises + notAutoInstallPromises
     }
 
     public class func installedStickers(
@@ -884,7 +899,10 @@ public class StickerManager: NSObject {
         }
     }
 
-    private class func tryToDownloadStickerPacks(stickerPacks: [StickerPackInfo], installMode: InstallMode) {
+    private class func tryToDownloadStickerPacks(
+        stickerPacks: [StickerPackInfo],
+        installMode: InstallMode,
+    ) -> [Promise<Void>] {
         var stickerPacksToDownload = [StickerPackInfo]()
         SSKEnvironment.shared.databaseStorageRef.read { transaction in
             for stickerPackInfo in stickerPacks {
@@ -894,7 +912,7 @@ public class StickerManager: NSObject {
             }
         }
 
-        for stickerPackInfo in stickerPacksToDownload {
+        return stickerPacksToDownload.map { stickerPackInfo -> Promise<Void> in
             StickerManager.tryToDownloadAndSaveStickerPack(
                 stickerPackInfo: stickerPackInfo,
                 installMode: installMode,
@@ -997,12 +1015,11 @@ public class StickerManager: NSObject {
         return temporaryDecryptedFile
     }
 
-    private class func ensureAllStickerDownloadsAsync() {
-        DispatchQueue.global().async {
-            SSKEnvironment.shared.databaseStorageRef.read { transaction in
-                for stickerPack in self.allStickerPacks(transaction: transaction) {
-                    ensureDownloads(forStickerPack: stickerPack, transaction: transaction)
-                }
+    private class func ensureAllStickerDownloadsAsync() -> [Promise<Void>] {
+        let db = DependenciesBridge.shared.db
+        return db.read { tx in
+            return allStickerPacks(transaction: tx).map { stickerPack -> Promise<Void> in
+                ensureDownloads(forStickerPack: stickerPack, transaction: tx)
             }
         }
     }
@@ -1150,7 +1167,7 @@ public class StickerManager: NSObject {
         }
         switch type {
         case .install:
-            tryToDownloadAndSaveStickerPack(
+            _ = tryToDownloadAndSaveStickerPack(
                 stickerPackInfo: stickerPackInfo,
                 installMode: .install,
                 wasLocallyInitiated: false,

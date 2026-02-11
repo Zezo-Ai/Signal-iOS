@@ -1776,17 +1776,19 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         scheduleBgAppRefresh()
 
+        let attachmentDownloadmanager = DependenciesBridge.shared.attachmentDownloadManager
+        let db = DependenciesBridge.shared.db
         let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+
         let registeredState = try? tsAccountManager.registeredStateWithMaybeSneakyTransaction()
         if let registeredState {
             Logger.info("localAci: \(registeredState.localIdentifiers.aci)")
-            SSKEnvironment.shared.databaseStorageRef.write { transaction in
+
+            db.write { transaction in
                 ExperienceUpgradeFinder.markAllCompleteForNewUser(transaction: transaction)
             }
-            DependenciesBridge.shared.attachmentDownloadManager.beginDownloadingIfNecessary()
-            Task {
-                try await StickerManager.downloadPendingSickerPacks()
-            }
+
+            attachmentDownloadmanager.beginDownloadingIfNecessary()
 
             // Schedule a Cron run if we're in the foreground.
             if !self.activeConnectionTokens.isEmpty {

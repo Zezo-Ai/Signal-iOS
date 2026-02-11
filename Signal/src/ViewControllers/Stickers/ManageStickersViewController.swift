@@ -78,7 +78,8 @@ public class ManageStickersViewController: OWSTableViewController2 {
 
         updateState()
 
-        StickerManager.refreshContents()
+        let stickerManager = SSKEnvironment.shared.stickerManagerRef
+        stickerManager.downloadPendingSickerPacks()
     }
 
     private var pendingModalVC: ModalActivityIndicatorViewController?
