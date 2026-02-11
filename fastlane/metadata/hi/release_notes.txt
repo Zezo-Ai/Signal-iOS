@@ -1,1 +1,3 @@
-• पिन किए गए मैसेज की मदद से ज़रूरी जानकारी का आसान ऐक्सेस पाएं। आपके ज़रूरी सवाल, डिनर की बुकिंग, और ट्रिप के प्लान जैसी बातें हमेशा आपके मन में टॉप पर रहती हैं। अब इन्हें चैट में भी टॉप पर देखने की सुविधा आपके पास है।
+• Make privacy stick with five new official sticker packs in the Signal Artist Series: "Chug the Mouse" by Amanda Cotan, "Cozy Season" by Miguel Ángel Camprubí, "Croco's Feelings" by Tiffany Beucher, "My Daily Life 2" by Plastic Thing, and "Rocky Talk" by Lexi Vay.
+• This update includes the next wave of design improvements for iOS 26 and iPadOS 26. Take an optimistic look at the new message bubbles floating in front of your favorite chat wallpaper in a Liquid Glass cup that's more than half-full.
+• We also synchronized the colors of names in group chats to match other platforms, so now you'll see the same hue for the crew as you do on Signal Desktop too.
