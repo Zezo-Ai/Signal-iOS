@@ -120,15 +120,9 @@ public final class MemberLabelCoordinator {
         guard let presenter else { return }
         let changeLabelBlock: () -> Void = {
             Task { @MainActor in
-                guard
-                    let localUserBio = self.db.read(block: { tx -> String? in
-                        return self.profileManager.userProfile(for: SignalServiceAddress(self.localIdentifiers.aci), tx: tx)?.bioForDisplay
-                    })
-                else {
-                    owsFailDebug("Missing local user bio")
-                    self.showMemberLabelSaveFailed()
-                    return
-                }
+                let localUserBio = self.db.read(block: { tx -> String? in
+                    return self.profileManager.userProfile(for: SignalServiceAddress(self.localIdentifiers.aci), tx: tx)?.bioForDisplay
+                })
 
                 do {
                     try await ModalActivityIndicatorViewController.presentAndPropagateResult(from: presenter, wrappedAsyncBlock: {
