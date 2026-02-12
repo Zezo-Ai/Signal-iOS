@@ -149,7 +149,7 @@ struct TransferStatusView: View {
                 .foregroundStyle(Color.Signal.secondaryLabel)
 
                 Spacer()
-                Text("\(progress.formatted(.percent.precision(.fractionLength(0))))")
+                Text("\(progress.formatted(.owsPercent()))")
                     .font(.body.monospacedDigit())
                     .padding(.bottom, 12)
                 LinearProgressView(progress: progress)

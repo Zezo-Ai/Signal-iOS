@@ -228,7 +228,7 @@ class LoadingViewController: UIViewController {
                 "LINK_NEW_DEVICE_SYNC_PROGRESS_PERCENT",
                 comment: "On a progress modal indicating the percent complete the sync process is. Embeds {{ formatted percentage }}",
             ),
-            percentComplete.formatted(.percent.precision(.fractionLength(0))),
+            percentComplete.formatted(.owsPercent()),
         )
         unitCountLabel.text = "\(unitCountCompleted.formatted(.number)) / \(unitCountToComplete.formatted(.number))"
 

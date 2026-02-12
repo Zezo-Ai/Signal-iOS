@@ -215,7 +215,7 @@ struct LinkAndSyncProvisioningProgressView: View {
                 ),
                 downloadProgress.downloadedByteCount.formatted(byteCountFormat),
                 downloadProgress.totalByteCount.formatted(byteCountFormat),
-                progressToShow.formatted(.percent.precision(.fractionLength(0))),
+                progressToShow.formatted(.owsPercent()),
             )
         } else if !viewModel.isFinalizing {
             String(
@@ -223,7 +223,7 @@ struct LinkAndSyncProvisioningProgressView: View {
                     "LINK_NEW_DEVICE_SYNC_PROGRESS_PERCENT",
                     comment: "On a progress modal indicating the percent complete the sync process is. Embeds {{ formatted percentage }}",
                 ),
-                progressToShow.formatted(.percent.precision(.fractionLength(0))),
+                progressToShow.formatted(.owsPercent()),
             )
         } else {
             OWSLocalizedString(

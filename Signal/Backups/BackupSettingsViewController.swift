@@ -2092,7 +2092,7 @@ private struct BackupExportProgressView: View {
                         "BACKUP_SETTINGS_BACKUP_EXPORT_PROGRESS_DESCRIPTION_PREPARING_BACKUP",
                         comment: "Description for a progress bar tracking the preparation of a Backup. Embeds 1:{{ the percentage completed preformatted as a percent, e.g. 10% }}.",
                     ),
-                    percentComplete.formatted(.percent.precision(.fractionLength(0))),
+                    percentComplete.formatted(.owsPercent()),
                 ),
             )
 
@@ -2390,7 +2390,7 @@ private struct BackupAttachmentDownloadProgressView: View {
                     ),
                     latestDownloadUpdate.bytesDownloaded.formatted(.owsByteCount()),
                     latestDownloadUpdate.totalBytesToDownload.formatted(.owsByteCount()),
-                    latestDownloadUpdate.percentageDownloaded.formatted(.percent.precision(.fractionLength(0))),
+                    latestDownloadUpdate.percentageDownloaded.formatted(.owsPercent()),
                 )
             case .pausedLowBattery:
                 OWSLocalizedString(
@@ -2523,7 +2523,7 @@ private struct BackupAttachmentUploadProgressView: View {
                 ),
                 bytesUploaded.formatted(.owsByteCount()),
                 totalBytesToUpload.formatted(.owsByteCount()),
-                percentageUploaded.formatted(.percent.precision(.fractionLength(0))),
+                percentageUploaded.formatted(.owsPercent()),
             )
         case .pausedLowBattery:
             return OWSLocalizedString(

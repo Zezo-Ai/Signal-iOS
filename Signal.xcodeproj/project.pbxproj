@@ -2763,6 +2763,7 @@
 		D9708B5C29E4CCCB004306FA /* OWSDeviceManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9708B5B29E4CCCB004306FA /* OWSDeviceManagerTest.swift */; };
 		D972E2FF2C542BCD001D7337 /* Backup.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = D972E2FE2C542BCD001D7337 /* Backup.pb.swift */; };
 		D97411BB28D277C900BB1865 /* GroupManager+GenericGroupUpdates.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97411BA28D277C900BB1865 /* GroupManager+GenericGroupUpdates.swift */; };
+		D977D2042F3DB151005FEFD8 /* OWSPercentFormatStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D977D2032F3DB151005FEFD8 /* OWSPercentFormatStyle.swift */; };
 		D9791BB92EAA84830016AA5A /* SheetDisplayableError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9791BB82EAA847E0016AA5A /* SheetDisplayableError.swift */; };
 		D9791BC42EAADF010016AA5A /* HTTPResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9791BC32EAADEFD0016AA5A /* HTTPResponse.swift */; };
 		D97992A12D9E55F20080A4F5 /* CurrencyFormatterTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97992A02D9E55E10080A4F5 /* CurrencyFormatterTest.swift */; };
@@ -6935,6 +6936,7 @@
 		D9708B5B29E4CCCB004306FA /* OWSDeviceManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OWSDeviceManagerTest.swift; sourceTree = "<group>"; };
 		D972E2FE2C542BCD001D7337 /* Backup.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Backup.pb.swift; sourceTree = "<group>"; };
 		D97411BA28D277C900BB1865 /* GroupManager+GenericGroupUpdates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupManager+GenericGroupUpdates.swift"; sourceTree = "<group>"; };
+		D977D2032F3DB151005FEFD8 /* OWSPercentFormatStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OWSPercentFormatStyle.swift; sourceTree = "<group>"; };
 		D9791BB82EAA847E0016AA5A /* SheetDisplayableError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetDisplayableError.swift; sourceTree = "<group>"; };
 		D9791BC32EAADEFD0016AA5A /* HTTPResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPResponse.swift; sourceTree = "<group>"; };
 		D97992A02D9E55E10080A4F5 /* CurrencyFormatterTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyFormatterTest.swift; sourceTree = "<group>"; };
@@ -8792,6 +8794,7 @@
 				76E08F3C2AE8761D00032BC9 /* ContactSharing */,
 				34A95521271B510400B05242 /* ConversationView */,
 				34330A581E7875FB00DF2FB9 /* Fonts */,
+				D977D2022F3DB119005FEFD8 /* FormatStyles */,
 				34A95551271B510400B05242 /* ImageEditor */,
 				34A95514271B510400B05242 /* LinkPreview */,
 				D9392DDE2D88AA4900728C01 /* Media */,
@@ -11608,8 +11611,6 @@
 				05104E392C8B540C00F8851F /* AccessibleLayoutMetric.swift */,
 				05104D172C8A151100F8851F /* AsyncViewTask.swift */,
 				05594CCF2C98A00200CCBFF6 /* HostingController.swift */,
-				D9B2E1172E748DFB00A823E4 /* OWSByteCountFormatStyle.swift */,
-				D9C5634D2EB438300001626A /* OWSByteCountFormatStyleTest.swift */,
 				D9DE35002DF0B886005099D7 /* ScrollableContentPinnedFooterView.swift */,
 				05594CCD2C989F1900CCBFF6 /* ScrollableWhenCompact.swift */,
 				0510F69D2C91EB2800FA3FDE /* ScrollBounceBehaviorIfAvailable.swift */,
@@ -13258,6 +13259,16 @@
 				500CC1EA2F15D1E5001A86F7 /* StickerPackSyncMessage.swift */,
 			);
 			path = SyncMessages;
+			sourceTree = "<group>";
+		};
+		D977D2022F3DB119005FEFD8 /* FormatStyles */ = {
+			isa = PBXGroup;
+			children = (
+				D9B2E1172E748DFB00A823E4 /* OWSByteCountFormatStyle.swift */,
+				D9C5634D2EB438300001626A /* OWSByteCountFormatStyleTest.swift */,
+				D977D2032F3DB151005FEFD8 /* OWSPercentFormatStyle.swift */,
+			);
+			path = FormatStyles;
 			sourceTree = "<group>";
 		};
 		D9791BB72EAA84210016AA5A /* ActionSheets */ = {
@@ -17426,6 +17437,7 @@
 				3402AA71271D9E180084CBAE /* OWSLayerView.swift in Sources */,
 				3402AAB1271D9E180084CBAE /* OWSNavigationBar.swift in Sources */,
 				665EF86D290C385B00F490D2 /* OWSNavigationController.swift in Sources */,
+				D977D2042F3DB151005FEFD8 /* OWSPercentFormatStyle.swift in Sources */,
 				3402AA70271D9E180084CBAE /* OWSStackView.swift in Sources */,
 				765283AE2A00D8B4004583A9 /* OWSTableContents.swift in Sources */,
 				765283B22A00D8EC004583A9 /* OWSTableItem.swift in Sources */,
