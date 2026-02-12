@@ -19,19 +19,26 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
     private let textField = UITextField()
     private var characterCountLabel = UILabel()
     private var groupNameColors: GroupNameColors
+    private let groupMemberLabelsWithoutLocalUser: [SignalServiceAddress: MemberLabelForRendering]
 
     weak var updateDelegate: MemberLabelCoordinator?
 
     private static let maxCharCount = 24
     private static let showCharacterCountMax = 9
 
-    init(memberLabel: String? = nil, emoji: String? = nil, groupNameColors: GroupNameColors) {
+    init(
+        memberLabel: String? = nil,
+        emoji: String? = nil,
+        groupNameColors: GroupNameColors,
+        groupMemberLabelsWithoutLocalUser: [SignalServiceAddress: MemberLabelForRendering],
+    ) {
         self.initialMemberLabel = memberLabel
         self.initialEmoji = emoji
         self.updatedMemberLabel = memberLabel
         self.updatedEmoji = emoji
         self.groupNameColors = groupNameColors
         textField.text = memberLabel
+        self.groupMemberLabelsWithoutLocalUser = groupMemberLabelsWithoutLocalUser
 
         super.init()
 
@@ -47,7 +54,29 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        let scrollView = UIScrollView()
+        view.addSubview(scrollView)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+
         createInitialViews()
+
+        scrollView.addSubview(stackView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            stackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            stackView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 16),
+            stackView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -16),
+            stackView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            stackView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor, constant: -32),
+        ])
+
+        buildGroupMembershipSection()
 
         textField.becomeFirstResponder()
     }
@@ -136,14 +165,6 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
         }
 
         stackView.addArrangedSubview(previewContainer)
-
-        view.addSubview(stackView)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 22),
-            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -22),
-        ])
     }
 
     private func buildMockConversationItem() -> CVRenderItem? {
@@ -298,7 +319,7 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
             let mockRenderItem = buildMockConversationItem(),
             let previewContainer = messageBubblePreviewContainer(renderItem: mockRenderItem)
         {
-            stackView.addArrangedSubview(previewContainer)
+            stackView.insertArrangedSubview(previewContainer, at: 2)
         }
         let count = textField.text?.count ?? 0
         let charsRemaining = Self.maxCharCount - count
@@ -351,6 +372,67 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
             maxByteCount: 96,
             maxGlyphCount: Self.maxCharCount,
         )
+    }
+
+    // MARK: - Group member list
+
+    private func buildGroupMembershipSection() {
+        let sectionLabel = UILabel()
+        sectionLabel.text = OWSLocalizedString(
+            "MEMBER_LABEL_GROUP_LABELS_SECTION_TITLE",
+            comment: "Section header for a list of group member labels",
+        )
+        sectionLabel.font = .dynamicTypeBodyClamped.semibold()
+        stackView.addArrangedSubview(sectionLabel)
+        stackView.setCustomSpacing(8, after: sectionLabel)
+
+        let contactListStackView = UIStackView()
+        contactListStackView.spacing = 5
+        contactListStackView.axis = .vertical
+        contactListStackView.backgroundColor = UIColor.Signal.tertiaryBackground
+        contactListStackView.layer.masksToBounds = true
+        contactListStackView.layer.cornerRadius = 26
+        contactListStackView.layoutMargins = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
+        contactListStackView.isLayoutMarginsRelativeArrangement = true
+
+        var cellCount = 0
+        for (memberAddress, memberLabel) in groupMemberLabelsWithoutLocalUser {
+            let cell = ContactCellView()
+            SSKEnvironment.shared.databaseStorageRef.read { tx in
+                let configuration = ContactCellConfiguration(address: memberAddress, localUserDisplayMode: .asLocalUser)
+
+                configuration.memberLabel = memberLabel
+
+                let isSystemContact = SSKEnvironment.shared.contactManagerRef.fetchSignalAccount(
+                    for: memberAddress,
+                    transaction: tx,
+                ) != nil
+
+                configuration.shouldShowContactIcon = isSystemContact
+                cell.configure(configuration: configuration, transaction: tx)
+
+                if cellCount > 0 {
+                    let separator = UIView()
+                    separator.backgroundColor = UIColor.Signal.tertiaryLabel
+                    contactListStackView.addArrangedSubview(separator)
+                    NSLayoutConstraint.activate([
+                        separator.heightAnchor.constraint(equalToConstant: 0.3),
+                    ])
+                    contactListStackView.setCustomSpacing(6, after: separator)
+                }
+
+                contactListStackView.addArrangedSubview(cell)
+                cellCount += 1
+            }
+        }
+
+        contactListStackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.addArrangedSubview(contactListStackView)
+        NSLayoutConstraint.activate([
+            contactListStackView.leadingAnchor.constraint(equalTo: stackView.leadingAnchor),
+            contactListStackView.trailingAnchor.constraint(equalTo: stackView.trailingAnchor),
+        ])
+
     }
 }
 

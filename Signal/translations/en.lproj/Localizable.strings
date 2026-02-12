@@ -5035,6 +5035,9 @@
 /* Error indicating member label could not save. */
 "MEMBER_LABEL_FAIL_TO_SAVE" = "Couldn't Save Member Label";
 
+/* Section header for a list of group member labels */
+"MEMBER_LABEL_GROUP_LABELS_SECTION_TITLE" = "Labels in This Group";
+
 /* Body for a sheet shown if a user will show their member label over their About message in a group. */
 "MEMBER_LABEL_HERO_SHEET_ABOUT_OVERRIDE_BODY" = "In this group, your Member Label will be displayed beside your photo in place of your About.";
 

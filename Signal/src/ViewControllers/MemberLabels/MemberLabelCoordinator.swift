@@ -66,11 +66,33 @@ public final class MemberLabelCoordinator {
         presenter?.present(hero, animated: true)
     }
 
+    private func buildGroupMemberLabelsWithoutLocalUser() -> [SignalServiceAddress: MemberLabelForRendering] {
+        var memberLabels: [SignalServiceAddress: MemberLabelForRendering] = [:]
+        let groupMembership = groupModel.groupMembership
+        for member in groupMembership.fullMembers {
+            guard
+                !localIdentifiers.contains(address: member),
+                let aci = member.aci,
+                let memberLabel = groupMembership.memberLabel(for: aci)
+            else {
+                continue
+            }
+            let groupNameColor = groupNameColors.color(for: aci)
+            let memberLabelForRendering = MemberLabelForRendering(
+                label: memberLabel.labelForRendering(),
+                groupNameColor: groupNameColor,
+            )
+            memberLabels[member] = memberLabelForRendering
+        }
+        return memberLabels
+    }
+
     func present() {
         let memberLabelViewController = MemberLabelViewController(
             memberLabel: memberLabel?.label,
             emoji: memberLabel?.labelEmoji,
             groupNameColors: groupNameColors,
+            groupMemberLabelsWithoutLocalUser: buildGroupMemberLabelsWithoutLocalUser(),
         )
         memberLabelViewController.updateDelegate = self
 
