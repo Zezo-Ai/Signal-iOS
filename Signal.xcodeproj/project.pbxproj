@@ -2615,6 +2615,7 @@
 		D93EDC042AE9E3CD0004BDD9 /* DonationSettingsViewController+MySupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D93EDC032AE9E3CD0004BDD9 /* DonationSettingsViewController+MySupport.swift */; };
 		D93F4D5A2D800DD20042926C /* AvatarDefaultColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D93F4D552D7FAC3C0042926C /* AvatarDefaultColorManager.swift */; };
 		D93F4D5D2D801D750042926C /* AvatarDefaultColorManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D93F4D5C2D801D700042926C /* AvatarDefaultColorManagerTest.swift */; };
+		D940E5C52F3CFFA9008A4120 /* BackupExportJobStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D940E5C42F3CFFA6008A4120 /* BackupExportJobStore.swift */; };
 		D941863C2ACE252D002FE2D3 /* CallRecordLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D941863B2ACE252D002FE2D3 /* CallRecordLogger.swift */; };
 		D943F3EF2892F89B008C0C8B /* NSELogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D943F3EE2892F89B008C0C8B /* NSELogger.swift */; };
 		D94441312D55956B005B2A54 /* UUIDv7.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94441302D559567005B2A54 /* UUIDv7.swift */; };
@@ -6783,6 +6784,7 @@
 		D93F4D552D7FAC3C0042926C /* AvatarDefaultColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarDefaultColorManager.swift; sourceTree = "<group>"; };
 		D93F4D5C2D801D700042926C /* AvatarDefaultColorManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarDefaultColorManagerTest.swift; sourceTree = "<group>"; };
 		D93FA5BE2DE77E440013879E /* BackupEnablingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupEnablingManager.swift; sourceTree = "<group>"; };
+		D940E5C42F3CFFA6008A4120 /* BackupExportJobStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupExportJobStore.swift; sourceTree = "<group>"; };
 		D941863B2ACE252D002FE2D3 /* CallRecordLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallRecordLogger.swift; sourceTree = "<group>"; };
 		D943F3EE2892F89B008C0C8B /* NSELogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSELogger.swift; sourceTree = "<group>"; };
 		D94441302D559567005B2A54 /* UUIDv7.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UUIDv7.swift; sourceTree = "<group>"; };
@@ -10366,6 +10368,7 @@
 			children = (
 				66A1F4E12E035BFE0095DE4B /* BackupExportJob.swift */,
 				D91FBCF52E2EF4B900D0BCDB /* BackupExportJobRunner.swift */,
+				D940E5C42F3CFFA6008A4120 /* BackupExportJobStore.swift */,
 			);
 			path = BackupExportJob;
 			sourceTree = "<group>";
@@ -18617,6 +18620,7 @@
 				D9DF21EB2E21BD2800A962B2 /* BackupDisablingManager.swift in Sources */,
 				66A1F4E22E035C020095DE4B /* BackupExportJob.swift in Sources */,
 				D91FBCF62E2EF4C100D0BCDB /* BackupExportJobRunner.swift in Sources */,
+				D940E5C52F3CFFA9008A4120 /* BackupExportJobStore.swift in Sources */,
 				C1D51D8A2E746FB300685A0C /* BackupFailureStateManager.swift in Sources */,
 				D923DF9C2DC135D200CDAFC3 /* BackupIdService.swift in Sources */,
 				C17586662E2AC52D008B3A13 /* BackupKeyMaterial.swift in Sources */,

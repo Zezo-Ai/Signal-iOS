@@ -23,6 +23,12 @@ public protocol BackupExportJobRunner {
     /// Cooperatively cancel the running export job, if one exists.
     func cancelIfRunning()
 
+    /// Resume an interrupted ``BackupExportJob`` from a previous launch, if
+    /// one exists.
+    ///
+    /// - SeeAlso ``BackupExportJobStore``
+    func resumeIfNecessary()
+
     /// Run a ``BackupExportJob``, if one is not already running.
     ///
     /// Only one export job is allowed to run at once, so calls to this method
@@ -32,8 +38,6 @@ public protocol BackupExportJobRunner {
     /// - Note
     /// Callers should use ``updates()`` for status notifications about the
     /// running job.
-    ///
-    /// - SeeAlso ``BackupExportJob/exportAndUploadBackup(onProgressUpdate:)``
     func startIfNecessary()
 }
 
@@ -60,10 +64,20 @@ class BackupExportJobRunnerImpl: BackupExportJobRunner {
     }
 
     private let backupExportJob: BackupExportJob
+    private let backupExportJobStore: BackupExportJobStore
+    private let db: DB
+
     private let state: AtomicValue<State>
 
-    init(backupExportJob: BackupExportJob) {
+    init(
+        backupExportJob: BackupExportJob,
+        backupExportJobStore: BackupExportJobStore,
+        db: DB,
+    ) {
         self.backupExportJob = backupExportJob
+        self.backupExportJobStore = backupExportJobStore
+        self.db = db
+
         self.state = AtomicValue(State(), lock: .init())
     }
 
@@ -138,7 +152,25 @@ class BackupExportJobRunnerImpl: BackupExportJobRunner {
 
     // MARK: -
 
+    func resumeIfNecessary() {
+        let resumptionPoint: BackupExportJobStore.ResumptionPoint? = db.read { tx in
+            backupExportJobStore.lastReachedResumptionPoint(tx: tx)
+        }
+
+        if let resumptionPoint {
+            _startIfNecessary(resumptionPoint: resumptionPoint)
+        }
+    }
+
+    // MARK: -
+
     func startIfNecessary() {
+        _startIfNecessary(resumptionPoint: nil)
+    }
+
+    private func _startIfNecessary(
+        resumptionPoint: BackupExportJobStore.ResumptionPoint?,
+    ) {
         state.update { [self] _state in
             if _state.currentExportJobTask != nil {
                 return
@@ -146,12 +178,15 @@ class BackupExportJobRunnerImpl: BackupExportJobRunner {
 
             _state.currentExportJobTask = Task { () async -> Void in
                 let result = await Result(catching: {
-                    try await backupExportJob.exportAndUploadBackup(
+                    let progressSink = await OWSSequentialProgress<BackupExportJobStage>
+                        .createSink { [weak self] exportJobProgress in
+                            self?.exportJobDidUpdateProgress(exportJobProgress)
+                        }
+
+                    try await backupExportJob.run(
                         mode: .manual(
-                            OWSSequentialProgress<BackupExportJobStage>
-                                .createSink { [weak self] exportJobProgress in
-                                    self?.exportJobDidUpdateProgress(exportJobProgress)
-                                },
+                            progressSink,
+                            resumptionPoint: resumptionPoint,
                         ),
                     )
                 })

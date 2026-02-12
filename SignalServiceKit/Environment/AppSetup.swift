@@ -1623,6 +1623,7 @@ extension AppSetup.GlobalsContinuation {
             receiptSender: receiptSender,
         )
 
+        let backupExportJobStore = BackupExportJobStore()
         let backupExportJob = BackupExportJobImpl(
             accountKeyStore: accountKeyStore,
             backupArchiveManager: backupArchiveManager,
@@ -1630,6 +1631,7 @@ extension AppSetup.GlobalsContinuation {
             backupAttachmentDownloadQueueStatusManager: backupAttachmentDownloadQueueStatusManager,
             backupAttachmentUploadProgress: backupAttachmentUploadProgress,
             backupAttachmentUploadQueueStatusManager: backupAttachmentUploadQueueStatusManager,
+            backupExportJobStore: backupExportJobStore,
             backupSettingsStore: backupSettingsStore,
             db: db,
             messageProcessor: messageProcessor,
@@ -1638,6 +1640,8 @@ extension AppSetup.GlobalsContinuation {
         )
         let backupExportJobRunner = BackupExportJobRunnerImpl(
             backupExportJob: backupExportJob,
+            backupExportJobStore: backupExportJobStore,
+            db: db,
         )
 
         let backupFailureStateManager = BackupFailureStateManager(

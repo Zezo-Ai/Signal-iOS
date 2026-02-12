@@ -170,6 +170,7 @@ public class AppEnvironment: NSObject {
         appReadiness.runNowOrWhenAppDidBecomeReadyAsync {
             let accountEntropyPoolManager = DependenciesBridge.shared.accountEntropyPoolManager
             let backupDisablingManager = DependenciesBridge.shared.backupDisablingManager
+            let backupExportJobRunner = DependenciesBridge.shared.backupExportJobRunner
             let backupIdService = DependenciesBridge.shared.backupIdService
             let backupSubscriptionManager = DependenciesBridge.shared.backupSubscriptionManager
             let backupTestFlightEntitlementManager = DependenciesBridge.shared.backupTestFlightEntitlementManager
@@ -238,6 +239,9 @@ public class AppEnvironment: NSObject {
                         owsFailDebug("Error registering backup ID \(error)")
                     }
                 }
+
+                // If we had an interrupted BackupExportJob, resume it.
+                backupExportJobRunner.resumeIfNecessary()
 
                 Task {
                     await accountEntropyPoolManager.generateIfMissing()
