@@ -1453,7 +1453,7 @@ private class BackupSettingsViewModel: ObservableObject {
     @Published var backupPlan: BackupPlan
     @Published var failedToDisableBackupsRemotely: Bool
 
-    @Published var latestBackupExportProgressUpdate: OWSSequentialProgress<BackupExportJobStep>?
+    @Published var latestBackupExportProgressUpdate: OWSSequentialProgress<BackupExportJobStage>?
     @Published var latestBackupAttachmentDownloadUpdate: BackupAttachmentDownloadProgressView.DownloadUpdate?
     @Published var latestBackupAttachmentUploadUpdate: BackupAttachmentUploadTracker.UploadUpdate?
 
@@ -1480,7 +1480,7 @@ private class BackupSettingsViewModel: ObservableObject {
         backupSubscriptionAlreadyRedeemed: Bool,
         backupPlan: BackupPlan,
         failedToDisableBackupsRemotely: Bool,
-        latestBackupExportProgressUpdate: OWSSequentialProgress<BackupExportJobStep>?,
+        latestBackupExportProgressUpdate: OWSSequentialProgress<BackupExportJobStage>?,
         latestBackupAttachmentDownloadUpdate: BackupAttachmentDownloadProgressView.DownloadUpdate?,
         latestBackupAttachmentUploadUpdate: BackupAttachmentUploadTracker.UploadUpdate?,
         lastBackupDetails: BackupSettingsStore.LastBackupDetails?,
@@ -2076,14 +2076,14 @@ private struct BackupExportProgressView: View {
         let label: String
     }
 
-    let latestExportProgressUpdate: OWSSequentialProgress<BackupExportJobStep>
+    let latestExportProgressUpdate: OWSSequentialProgress<BackupExportJobStage>
     let latestAttachmentUploadUpdate: BackupAttachmentUploadTracker.UploadUpdate?
 
     private var progressBarState: ProgressBarState {
         switch latestExportProgressUpdate.currentStep {
-        case .backupExport, .backupUpload:
-            let percentExportCompleted = latestExportProgressUpdate.progress(for: .backupExport)?.percentComplete ?? 0
-            let percentUploadCompleted = latestExportProgressUpdate.progress(for: .backupUpload)?.percentComplete ?? 0
+        case .backupFileExport, .backupFileUpload:
+            let percentExportCompleted = latestExportProgressUpdate.progress(for: .backupFileExport)?.percentComplete ?? 0
+            let percentUploadCompleted = latestExportProgressUpdate.progress(for: .backupFileUpload)?.percentComplete ?? 0
             let percentComplete = (0.95 * percentExportCompleted) + (0.05 * percentUploadCompleted)
             return ProgressBarState(
                 style: .determinate(percentComplete: percentComplete),
@@ -2096,33 +2096,20 @@ private struct BackupExportProgressView: View {
                 ),
             )
 
-        case .listMedia, .attachmentOrphaning,
-             .attachmentUpload where latestAttachmentUploadUpdate == nil:
-            return ProgressBarState(
-                style: .indeterminate,
-                label: OWSLocalizedString(
-                    "BACKUP_SETTINGS_BACKUP_EXPORT_PROGRESS_DESCRIPTION_PROCESSING_MEDIA",
-                    comment: "Description for a progress bar tracking the processing of Backup media.",
-                ),
-            )
-
         case .attachmentUpload:
-            // If this is nil, we'll be in the case above.
-            let latestAttachmentUploadUpdate = latestAttachmentUploadUpdate!
-
             return ProgressBarState(
-                style: .determinate(percentComplete: latestAttachmentUploadUpdate.percentageUploaded),
+                style: .determinate(percentComplete: latestAttachmentUploadUpdate?.percentageUploaded ?? 0),
                 label: BackupAttachmentUploadProgressView.subtitleText(
                     uploadUpdate: latestAttachmentUploadUpdate,
                 ),
             )
 
-        case .offloading:
+        case .attachmentProcessing:
             return ProgressBarState(
                 style: .indeterminate,
                 label: OWSLocalizedString(
-                    "BACKUP_SETTINGS_BACKUP_EXPORT_PROGRESS_DESCRIPTION_OPTIMIZING_MEDIA",
-                    comment: "Description for a progress bar tracking the optimizing of Backup media.",
+                    "BACKUP_SETTINGS_BACKUP_EXPORT_PROGRESS_DESCRIPTION_PROCESSING_MEDIA",
+                    comment: "Description for a progress bar tracking the processing of Backup media.",
                 ),
             )
         }
@@ -2508,8 +2495,15 @@ private struct BackupAttachmentUploadProgressView: View {
     }
 
     static func subtitleText(
-        uploadUpdate: BackupAttachmentUploadTracker.UploadUpdate,
+        uploadUpdate: BackupAttachmentUploadTracker.UploadUpdate?,
     ) -> String {
+        guard let uploadUpdate else {
+            return String(OWSLocalizedString(
+                "BACKUP_SETTINGS_UPLOAD_PROGRESS_SUBTITLE_RUNNING_GENERIC",
+                comment: "Subtitle for a progress bar tracking active uploading.",
+            ))
+        }
+
         switch uploadUpdate.state {
         case .running:
             let bytesUploaded = uploadUpdate.bytesUploaded
@@ -3004,23 +2998,22 @@ private struct BackupViewKeyView: View {
 
 #if DEBUG
 
-private extension OWSSequentialProgress<BackupExportJobStep> {
+private extension OWSSequentialProgress<BackupExportJobStage> {
     static func forPreview(
-        _ step: BackupExportJobStep,
-        _ progress: Float,
-    ) -> OWSSequentialProgress<BackupExportJobStep> {
+        _ step: BackupExportJobStage,
+    ) -> OWSSequentialProgress<BackupExportJobStage> {
         return OWSProgress(
-            completedUnitCount: UInt64(progress * 100),
-            totalUnitCount: 100,
+            completedUnitCount: 0,
+            totalUnitCount: 1,
             childProgresses: [
                 step.rawValue: [OWSProgress.ChildProgress(
-                    completedUnitCount: 1,
-                    totalUnitCount: 2,
+                    completedUnitCount: 33,
+                    totalUnitCount: 100,
                     label: step.rawValue,
                     parentLabel: nil,
                 )],
             ],
-        ).sequential(BackupExportJobStep.self)
+        ).sequential(BackupExportJobStage.self)
     }
 }
 
@@ -3030,7 +3023,7 @@ private extension BackupSettingsViewModel {
         backupPlan: BackupPlan,
         backupSubscriptionAlreadyRedeemed: Bool = false,
         failedToDisableBackupsRemotely: Bool = false,
-        latestBackupExportProgressUpdate: OWSSequentialProgress<BackupExportJobStep>? = nil,
+        latestBackupExportProgressUpdate: OWSSequentialProgress<BackupExportJobStage>? = nil,
         latestBackupAttachmentDownloadUpdateState: BackupAttachmentDownloadProgressView.DownloadUpdate.State? = nil,
         latestBackupAttachmentUploadUpdateState: BackupAttachmentUploadTracker.UploadUpdate.State? = nil,
         mediaTierCapacityOverflow: UInt64? = nil,
@@ -3211,19 +3204,28 @@ private extension BackupSettingsViewModel {
     ))
 }
 
-#Preview("Manual Backup: Backup Export") {
+#Preview("Manual Backup: Backup File Export") {
     BackupSettingsView(viewModel: .forPreview(
         backupSubscriptionLoadingState: .loaded(.freeAndEnabled),
         backupPlan: .free,
-        latestBackupExportProgressUpdate: .forPreview(.backupExport, 0.33),
+        latestBackupExportProgressUpdate: .forPreview(.backupFileExport),
     ))
 }
 
-#Preview("Manual Backup: Listing Media") {
+#Preview("Manual Backup: Backup File Upload") {
     BackupSettingsView(viewModel: .forPreview(
         backupSubscriptionLoadingState: .loaded(.freeAndEnabled),
         backupPlan: .free,
-        latestBackupExportProgressUpdate: .forPreview(.listMedia, 0.50),
+        latestBackupExportProgressUpdate: .forPreview(.backupFileUpload),
+    ))
+}
+
+#Preview("Manual Backup: Media Upload w/o progress") {
+    BackupSettingsView(viewModel: .forPreview(
+        backupSubscriptionLoadingState: .loaded(.paidButFreeForTesters),
+        backupPlan: .paidAsTester(optimizeLocalStorage: false),
+        latestBackupExportProgressUpdate: .forPreview(.attachmentUpload),
+        latestBackupAttachmentUploadUpdateState: nil,
     ))
 }
 
@@ -3231,7 +3233,7 @@ private extension BackupSettingsViewModel {
     BackupSettingsView(viewModel: .forPreview(
         backupSubscriptionLoadingState: .loaded(.paidButFreeForTesters),
         backupPlan: .paidAsTester(optimizeLocalStorage: false),
-        latestBackupExportProgressUpdate: .forPreview(.attachmentUpload, 0.80),
+        latestBackupExportProgressUpdate: .forPreview(.attachmentUpload),
         latestBackupAttachmentUploadUpdateState: .running,
     ))
 }
@@ -3240,7 +3242,7 @@ private extension BackupSettingsViewModel {
     BackupSettingsView(viewModel: .forPreview(
         backupSubscriptionLoadingState: .loaded(.paidButFreeForTesters),
         backupPlan: .paidAsTester(optimizeLocalStorage: false),
-        latestBackupExportProgressUpdate: .forPreview(.attachmentUpload, 0.80),
+        latestBackupExportProgressUpdate: .forPreview(.attachmentUpload),
         latestBackupAttachmentUploadUpdateState: .pausedLowBattery,
     ))
 }
@@ -3249,7 +3251,7 @@ private extension BackupSettingsViewModel {
     BackupSettingsView(viewModel: .forPreview(
         backupSubscriptionLoadingState: .loaded(.paidButFreeForTesters),
         backupPlan: .paidAsTester(optimizeLocalStorage: false),
-        latestBackupExportProgressUpdate: .forPreview(.attachmentUpload, 0.80),
+        latestBackupExportProgressUpdate: .forPreview(.attachmentUpload),
         latestBackupAttachmentUploadUpdateState: .pausedLowPowerMode,
     ))
 }
@@ -3258,7 +3260,7 @@ private extension BackupSettingsViewModel {
     BackupSettingsView(viewModel: .forPreview(
         backupSubscriptionLoadingState: .loaded(.paidButFreeForTesters),
         backupPlan: .paidAsTester(optimizeLocalStorage: false),
-        latestBackupExportProgressUpdate: .forPreview(.attachmentUpload, 0.80),
+        latestBackupExportProgressUpdate: .forPreview(.attachmentUpload),
         latestBackupAttachmentUploadUpdateState: .pausedNeedsWifi,
     ))
 }
@@ -3267,16 +3269,16 @@ private extension BackupSettingsViewModel {
     BackupSettingsView(viewModel: .forPreview(
         backupSubscriptionLoadingState: .loaded(.paidButFreeForTesters),
         backupPlan: .paidAsTester(optimizeLocalStorage: false),
-        latestBackupExportProgressUpdate: .forPreview(.attachmentUpload, 0.80),
+        latestBackupExportProgressUpdate: .forPreview(.attachmentUpload),
         latestBackupAttachmentUploadUpdateState: .pausedNeedsInternet,
     ))
 }
 
-#Preview("Manual Backup: Offloading") {
+#Preview("Manual Backup: Processing Media") {
     BackupSettingsView(viewModel: .forPreview(
         backupSubscriptionLoadingState: .loaded(.paidButFreeForTesters),
         backupPlan: .paidAsTester(optimizeLocalStorage: false),
-        latestBackupExportProgressUpdate: .forPreview(.offloading, 0.90),
+        latestBackupExportProgressUpdate: .forPreview(.attachmentProcessing),
     ))
 }
 
