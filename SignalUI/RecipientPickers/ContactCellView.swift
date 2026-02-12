@@ -51,6 +51,15 @@ public class ContactCellConfiguration: NSObject {
         accessoryMessage?.nilIfEmpty != nil
     }
 
+    public var isForLocalUser: Bool {
+        switch dataSource {
+        case .address(let address):
+            return address.isLocalAddress
+        case .groupThread, .static:
+            return false
+        }
+    }
+
     public var avatarSizeClass: ConversationAvatarView.Configuration.SizeClass?
 
     public var memberLabel: MemberLabelForRendering?
@@ -252,6 +261,24 @@ public class ContactCellView: ManualStackView {
                     let memberLabelSize = memberLabelLabel.highlightLabelSize()
 
                     textStackSubviewInfos.append(memberLabelSize.asManualSubviewInfo)
+                } else if BuildFlags.MemberLabel.display, configuration.isForLocalUser {
+                    subtitleLabel.attributedText = NSAttributedString(
+                        string: OWSLocalizedString(
+                            "MEMBER_LABEL_ADD_CSVC",
+                            comment: "Label that shows up under a local user's row in contacts prompting them to add a member label",
+                        ),
+                        attributes: [.font: UIFont.dynamicTypeCaption1Clamped.medium()],
+                    ) + SignalSymbol.chevronRight.attributedString(
+                        dynamicTypeBaseSize: 10,
+                        weight: .bold,
+                        leadingCharacter: .space,
+                        attributes: [.foregroundColor: UIColor.Signal.secondaryLabel],
+                    )
+
+                    textStackSubviews.append(subtitleLabel)
+                    let subtitleSize = subtitleLabel.sizeThatFits(.square(.greatestFiniteMagnitude))
+                    textStackSubviewInfos.append(subtitleSize.asManualSubviewInfo)
+
                 } else if let attributedSubtitle = configuration.attributedSubtitle?.nilIfEmpty {
                     subtitleLabel.attributedText = attributedSubtitle
 

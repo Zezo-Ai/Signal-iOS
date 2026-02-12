@@ -93,6 +93,7 @@ public final class MemberLabelCoordinator {
             emoji: memberLabel?.labelEmoji,
             groupNameColors: groupNameColors,
             groupMemberLabelsWithoutLocalUser: buildGroupMemberLabelsWithoutLocalUser(),
+            groupName: groupModel.groupNameOrDefault,
         )
         memberLabelViewController.updateDelegate = self
 

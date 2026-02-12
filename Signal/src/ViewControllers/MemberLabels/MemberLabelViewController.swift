@@ -18,6 +18,7 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
     private let stackView = UIStackView()
     private let textField = UITextField()
     private var characterCountLabel = UILabel()
+    private var clearButton = UIButton(type: .system)
     private var groupNameColors: GroupNameColors
     private let groupMemberLabelsWithoutLocalUser: [SignalServiceAddress: MemberLabelForRendering]
 
@@ -31,6 +32,7 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
         emoji: String? = nil,
         groupNameColors: GroupNameColors,
         groupMemberLabelsWithoutLocalUser: [SignalServiceAddress: MemberLabelForRendering],
+        groupName: String,
     ) {
         self.initialMemberLabel = memberLabel
         self.initialEmoji = emoji
@@ -43,12 +45,43 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
         super.init()
 
         view.backgroundColor = UIColor.Signal.groupedBackground
-        navigationItem.title = OWSLocalizedString("MEMBER_LABEL_VIEW_TITLE", comment: "Title for a view where users can edit and preview their member label.")
-
+        addNavigationTitleView(groupName: groupName)
         navigationItem.rightBarButtonItem = .init(barButtonSystemItem: .done, target: self, action: #selector(didTapDone))
-        navigationItem.leftBarButtonItem = .init(barButtonSystemItem: .cancel, target: self, action: #selector(didTapCancel))
+
+        navigationItem.leftBarButtonItem = .cancelButton(
+            dismissingFrom: self,
+            hasUnsavedChanges: { [weak self] in
+                guard let self else { return false }
+                return updatedMemberLabel != initialMemberLabel || updatedEmoji != initialEmoji
+            },
+        )
+
         navigationItem.rightBarButtonItem?.tintColor = UIColor.Signal.ultramarine
         navigationItem.rightBarButtonItem?.isEnabled = false
+    }
+
+    func addNavigationTitleView(groupName: String) {
+        let titleLabel = UILabel()
+        titleLabel.text = OWSLocalizedString(
+            "MEMBER_LABEL_VIEW_TITLE",
+            comment: "Title for a view where users can edit and preview their member label.",
+        )
+        titleLabel.font = .dynamicTypeSubheadline.semibold()
+        titleLabel.textColor = UIColor.Signal.label
+        titleLabel.textAlignment = .center
+
+        let subtitleLabel = UILabel()
+        subtitleLabel.text = groupName
+        subtitleLabel.font = .dynamicTypeCaption1.semibold()
+        subtitleLabel.textColor = UIColor.Signal.secondaryLabel
+        subtitleLabel.textAlignment = .center
+
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.spacing = 0
+
+        navigationItem.titleView = stackView
     }
 
     override func viewDidLoad() {
@@ -137,11 +170,13 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
             characterCountLabel.setCompressionResistanceHigh()
         }
 
-        let clearButton = UIButton(type: .system)
         clearButton.setImage(UIImage(named: "x-circle-fill-compact"), for: .normal)
         clearButton.tintColor = UIColor.Signal.tertiaryLabel
         clearButton.addTarget(self, action: #selector(clearButtonTapped), for: .touchUpInside)
         clearButton.autoSetDimensions(to: .square(16))
+        if initialMemberLabel == nil, initialEmoji == nil {
+            clearButton.isHidden = true
+        }
 
         textFieldStack.addArrangedSubview(addEmojiButton)
         textFieldStack.addArrangedSubview(textField)
@@ -289,11 +324,6 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
     }
 
     @objc
-    private func didTapCancel() {
-        dismiss(animated: true)
-    }
-
-    @objc
     private func didTapEmojiPicker() {
         let picker = EmojiPickerSheet(message: nil, allowReactionConfiguration: false) { [weak self] emoji in
             guard let emojiString = emoji?.rawValue else {
@@ -326,6 +356,12 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
         characterCountLabel.text = String(charsRemaining)
         characterCountLabel.isHidden = charsRemaining > Self.showCharacterCountMax
         characterCountLabel.textColor = charsRemaining > 5 ? UIColor.Signal.tertiaryLabel.withAlphaComponent(0.3) : UIColor.Signal.red
+
+        if updatedMemberLabel == nil, updatedEmoji == nil {
+            clearButton.isHidden = true
+        } else {
+            clearButton.isHidden = false
+        }
     }
 
     private func reloadDoneButtonStatus() {

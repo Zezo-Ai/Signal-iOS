@@ -508,8 +508,10 @@ public class GroupManager: NSObject {
     ) async throws {
         try await updateGroupV2(groupModel: groupModel, description: "Change member role") { groupChangeSet in
             groupChangeSet.changeRoleForMember(aci, role: role)
-            if role == .normal, groupModel.access.attributes == .administrator {
-                groupChangeSet.changeLabelForMember(aci, label: nil)
+            if BuildFlags.MemberLabel.send {
+                if role == .normal, groupModel.access.attributes == .administrator {
+                    groupChangeSet.changeLabelForMember(aci, label: nil)
+                }
             }
         }
     }

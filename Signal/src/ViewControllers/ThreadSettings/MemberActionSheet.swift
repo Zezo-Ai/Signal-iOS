@@ -276,7 +276,10 @@ class MemberActionSheet: OWSTableSheetViewController {
                     actionBlock: { [weak self] in
                         guard let self else { return }
                         self.dismiss(animated: true) {
-                            self.groupViewHelper?.memberActionSheetRevokeGroupAdminWasSelected(address: self.address)
+                            self.groupViewHelper?.memberActionSheetRevokeGroupAdminWasSelected(
+                                address: self.address,
+                                hasMemberLabel: self.memberLabel != nil,
+                            )
                         }
                     },
                 ))

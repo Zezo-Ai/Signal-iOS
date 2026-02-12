@@ -100,16 +100,20 @@ public class OWSTableItem {
 
     public static func disclosureItem(
         icon: ThemeIcon? = nil,
+        tintColor: UIColor? = nil,
         withText: String,
         maxNameLines: Int? = nil,
         accessoryText: String? = nil,
         addBetaLabel: Bool = false,
+        textColor: UIColor? = nil,
         actionBlock: (() -> Void)? = nil,
     ) -> OWSTableItem {
         return item(
             icon: icon,
+            tintColor: tintColor,
             name: withText,
             maxNameLines: maxNameLines,
+            textColor: textColor,
             accessoryText: accessoryText,
             accessoryType: .disclosureIndicator,
             addBetaLabel: addBetaLabel,
