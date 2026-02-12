@@ -7,22 +7,14 @@ import SignalServiceKit
 import SignalUI
 
 class BackupKeepKeySafeSheet: HeroSheetViewController {
-    static var seeKeyAgainButtonTitle: String {
-        return OWSLocalizedString(
-            "BACKUP_ONBOARDING_CONFIRM_KEY_SEE_KEY_AGAIN_BUTTON_TITLE",
-            comment: "Title for a button offering to let users see their 'Recovery Key'.",
-        )
-    }
-
     /// - Parameter onContinue
     /// Called after dismissing this sheet when the user taps "Continue",
     /// indicating acknowledgement of the "keep key safe" warning.
-    /// - Parameter onSeeKeyAgain
-    /// Called after dismissing this sheet when the user taps "See Key Again",
-    /// indicating they want another opportunity to record their key.
+    /// - Parameter secondaryButton
+    /// Used as this sheet's secondary button.
     init(
         onContinue: @escaping () -> Void,
-        onSeeKeyAgain: @escaping () -> Void,
+        secondaryButton: Button,
     ) {
         super.init(
             hero: .image(.backupsKey),
@@ -42,15 +34,7 @@ class BackupKeepKeySafeSheet: HeroSheetViewController {
                     }
                 },
             ),
-            secondaryButton: Button(
-                title: Self.seeKeyAgainButtonTitle,
-                style: .secondary,
-                action: .custom({ sheet in
-                    sheet.dismiss(animated: true) {
-                        onSeeKeyAgain()
-                    }
-                }),
-            ),
+            secondaryButton: secondaryButton,
         )
     }
 }

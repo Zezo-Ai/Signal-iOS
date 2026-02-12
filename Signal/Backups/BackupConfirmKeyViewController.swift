@@ -39,6 +39,11 @@ class BackupConfirmKeyViewController: EnterAccountEntropyPoolViewController, OWS
             isModalInPresentation = true
         }
 
+        let seeKeyAgainButtonTitle = OWSLocalizedString(
+            "BACKUP_ONBOARDING_CONFIRM_KEY_SEE_KEY_AGAIN_BUTTON_TITLE",
+            comment: "Title for a button offering to let users see their 'Recovery Key'.",
+        )
+
         configure(
             aepValidationPolicy: .acceptOnly(aep),
             colorConfig: ColorConfig(
@@ -56,7 +61,7 @@ class BackupConfirmKeyViewController: EnterAccountEntropyPoolViewController, OWS
                 ),
             ),
             footerButtonConfig: FooterButtonConfig(
-                title: BackupKeepKeySafeSheet.seeKeyAgainButtonTitle,
+                title: seeKeyAgainButtonTitle,
                 action: {
                     onSeeKeyAgain()
                 },
@@ -67,7 +72,15 @@ class BackupConfirmKeyViewController: EnterAccountEntropyPoolViewController, OWS
                 present(
                     BackupKeepKeySafeSheet(
                         onContinue: { onContinue(self) },
-                        onSeeKeyAgain: onSeeKeyAgain,
+                        secondaryButton: HeroSheetViewController.Button(
+                            title: seeKeyAgainButtonTitle,
+                            style: .secondary,
+                            action: .custom({ sheet in
+                                sheet.dismiss(animated: true) {
+                                    onSeeKeyAgain()
+                                }
+                            }),
+                        ),
                     ),
                     animated: true,
                 )

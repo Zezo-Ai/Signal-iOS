@@ -391,7 +391,10 @@ public class RegistrationNavigationController: OWSNavigationController {
             return Controller(
                 type: RegistrationEnterAccountEntropyPoolViewController.self,
                 make: { presenter in
-                    return RegistrationEnterAccountEntropyPoolViewController(state: state, presenter: presenter)
+                    return RegistrationEnterAccountEntropyPoolViewController(
+                        state: state,
+                        presenter: presenter,
+                    )
                 },
                 // No state to update.
                 update: nil,

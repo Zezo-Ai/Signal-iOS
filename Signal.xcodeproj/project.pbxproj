@@ -87,7 +87,7 @@
 		04BC94D22E061D8300446C52 /* BackupArchiveAttachmentByteCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04BC94D12E061D7500446C52 /* BackupArchiveAttachmentByteCounter.swift */; };
 		04CF4FCE2E724604009D6669 /* PollDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04CF4FCD2E7245FC009D6669 /* PollDetailsViewController.swift */; };
 		04E66D402DFC825B0059DBAC /* RecoveryKeyReminderMegaphone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E66D3E2DFC81BC0059DBAC /* RecoveryKeyReminderMegaphone.swift */; };
-		04E66D422DFF3A4B0059DBAC /* BackupsReminderCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E66D412DFF3A3E0059DBAC /* BackupsReminderCoordinator.swift */; };
+		04E66D422DFF3A4B0059DBAC /* BackupRecoveryKeyReminderCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E66D412DFF3A3E0059DBAC /* BackupRecoveryKeyReminderCoordinator.swift */; };
 		04E66D452E00AB6A0059DBAC /* BackupSettingsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E66D432E00AB3A0059DBAC /* BackupSettingsStoreTests.swift */; };
 		04FAAD0C2E7F067C00E4AAC3 /* NewPollViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04FAAD0B2E7F067300E4AAC3 /* NewPollViewController.swift */; };
 		04FAAD0E2E82EEAE00E4AAC3 /* CVComponentBottomLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04FAAD0D2E82EEA900E4AAC3 /* CVComponentBottomLabel.swift */; };
@@ -4127,7 +4127,7 @@
 		04BC94D12E061D7500446C52 /* BackupArchiveAttachmentByteCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupArchiveAttachmentByteCounter.swift; sourceTree = "<group>"; };
 		04CF4FCD2E7245FC009D6669 /* PollDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PollDetailsViewController.swift; sourceTree = "<group>"; };
 		04E66D3E2DFC81BC0059DBAC /* RecoveryKeyReminderMegaphone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryKeyReminderMegaphone.swift; sourceTree = "<group>"; };
-		04E66D412DFF3A3E0059DBAC /* BackupsReminderCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupsReminderCoordinator.swift; sourceTree = "<group>"; };
+		04E66D412DFF3A3E0059DBAC /* BackupRecoveryKeyReminderCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupRecoveryKeyReminderCoordinator.swift; sourceTree = "<group>"; };
 		04E66D432E00AB3A0059DBAC /* BackupSettingsStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupSettingsStoreTests.swift; sourceTree = "<group>"; };
 		04FAAD0B2E7F067300E4AAC3 /* NewPollViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPollViewController.swift; sourceTree = "<group>"; };
 		04FAAD0D2E82EEA900E4AAC3 /* CVComponentBottomLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CVComponentBottomLabel.swift; sourceTree = "<group>"; };
@@ -13185,9 +13185,9 @@
 				D93FA5BE2DE77E440013879E /* BackupEnablingManager.swift */,
 				D93BDD932E43063B00779BD8 /* BackupKeepKeySafeSheet.swift */,
 				D98CA2B22DF2450E0060370E /* BackupRecordKeyViewController.swift */,
+				04E66D412DFF3A3E0059DBAC /* BackupRecoveryKeyReminderCoordinator.swift */,
 				04B975452E43A4AA00E20364 /* BackupRefreshManager.swift */,
 				D951F5302D9B236100C5EBF3 /* BackupSettingsViewController.swift */,
-				04E66D412DFF3A3E0059DBAC /* BackupsReminderCoordinator.swift */,
 				D92CB5552F030F7A00537EBE /* BackupSubscriptionAlreadyRedeemedSheet.swift */,
 				D9680CF22DBB0B28005DD5BE /* ChooseBackupPlanViewController.swift */,
 				D98CA2BD2DF398DF0060370E /* EnterAccountEntropyPoolViewController.swift */,
@@ -17654,10 +17654,10 @@
 				D98CA2AD2DF14A890060370E /* BackupOnboardingKeyIntroViewController.swift in Sources */,
 				B9A53B912CF507FB0000578B /* BackupProgressModal.swift in Sources */,
 				D98CA2B32DF245140060370E /* BackupRecordKeyViewController.swift in Sources */,
+				04E66D422DFF3A4B0059DBAC /* BackupRecoveryKeyReminderCoordinator.swift in Sources */,
 				50438A8E2ECBBDF600FCB28F /* BackupRefreshManager.swift in Sources */,
 				0480F0002E57C51A006CBB29 /* BackupsEnabledNotificationMegaphone.swift in Sources */,
 				D951F5312D9B236700C5EBF3 /* BackupSettingsViewController.swift in Sources */,
-				04E66D422DFF3A4B0059DBAC /* BackupsReminderCoordinator.swift in Sources */,
 				D92CB5562F030F8300537EBE /* BackupSubscriptionAlreadyRedeemedSheet.swift in Sources */,
 				32E035242739059C0081EE11 /* BadgeCollectionView.swift in Sources */,
 				32E03522273901710081EE11 /* BadgeConfigurationViewController.swift in Sources */,

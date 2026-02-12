@@ -33,20 +33,25 @@ class RecoveryKeyReminderMegaphone: MegaphoneView {
         )
 
         let primaryButton = MegaphoneView.Button(title: primaryButtonTitle) {
-            let backupsReminderCoordinator = BackupsReminderCoordinator(
+            let accountKeyStore = DependenciesBridge.shared.accountKeyStore
+            let backupSettingsStore = BackupSettingsStore()
+            let db = DependenciesBridge.shared.db
+
+            guard let aep = db.read(block: { accountKeyStore.getAccountEntropyPool(tx: $0) }) else {
+                return
+            }
+
+            BackupRecoveryKeyReminderCoordinator(
+                aep: aep,
                 fromViewController: fromViewController,
-                dismissHandler: { success in
+                onSuccess: {
                     self.dismiss()
-                    if success {
-                        self.presentToastForNewRepetitionInterval(fromViewController: fromViewController)
-                    }
-                    DependenciesBridge.shared.db.write { tx in
-                        BackupSettingsStore().setLastRecoveryKeyReminderDate(Date(), tx: tx)
+                    self.presentToastForNewRepetitionInterval(fromViewController: fromViewController)
+                    db.write { tx in
+                        backupSettingsStore.setLastRecoveryKeyReminderDate(Date(), tx: tx)
                     }
                 },
-            )
-
-            backupsReminderCoordinator.presentVerifyFlow()
+            ).presentVerifyFlow()
         }
 
         let secondaryButton = snoozeButton(

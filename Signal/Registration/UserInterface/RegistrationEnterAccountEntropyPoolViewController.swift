@@ -20,17 +20,10 @@ public struct RegistrationEnterAccountEntropyPoolState: Equatable {
 }
 
 class RegistrationEnterAccountEntropyPoolViewController: EnterAccountEntropyPoolViewController, OWSNavigationChildController {
-    private weak var presenter: RegistrationEnterAccountEntropyPoolPresenter?
-    private let state: RegistrationEnterAccountEntropyPoolState
-
     init(
         state: RegistrationEnterAccountEntropyPoolState,
         presenter: RegistrationEnterAccountEntropyPoolPresenter,
-        aepValidationPolicy: AEPValidationPolicy = .acceptAnyWellFormed,
     ) {
-        self.state = state
-        self.presenter = presenter
-
         super.init()
 
         var footerButtonConfig: FooterButtonConfig?
@@ -40,29 +33,15 @@ class RegistrationEnterAccountEntropyPoolViewController: EnterAccountEntropyPool
                     "REGISTRATION_NO_BACKUP_KEY_BUTTON_TITLE",
                     comment: "Title of button to tap if you do not have a recovery key during registration.",
                 ),
-                action: { [weak self] in
-                    self?.didTapNoKeyButton()
-                },
-            )
-        }
-
-        switch aepValidationPolicy {
-        case .acceptAnyWellFormed:
-            break
-        case .acceptOnly:
-            footerButtonConfig = FooterButtonConfig(
-                title: OWSLocalizedString(
-                    "BACKUP_KEY_REMINDER_FORGOT_KEY",
-                    comment: "Title of button to tap if you forgot your recovery key.",
-                ),
-                action: {
-                    presenter.forgotKeyAction()
+                action: { [weak self, weak presenter] in
+                    guard let self, let presenter else { return }
+                    presentNoKeyHeroSheet(presenter: presenter)
                 },
             )
         }
 
         configure(
-            aepValidationPolicy: aepValidationPolicy,
+            aepValidationPolicy: .acceptAnyWellFormed,
             colorConfig: ColorConfig(
                 background: UIColor.Signal.background,
                 aepEntryBackground: UIColor.Signal.quaternaryFill,
@@ -78,17 +57,19 @@ class RegistrationEnterAccountEntropyPoolViewController: EnterAccountEntropyPool
                 ),
             ),
             footerButtonConfig: footerButtonConfig,
-            onEntryConfirmed: { [weak self] aep in
-                self?.presenter?.next(accountEntropyPool: aep)
+            onEntryConfirmed: { [weak presenter] aep in
+                presenter?.next(accountEntropyPool: aep)
             },
         )
 
+        navigationItem.hidesBackButton = true
         if state.canShowBackButton {
-            navigationItem.leftBarButtonItem = .button(title: CommonStrings.backButton, style: .done) { [weak self] in
-                self?.presenter?.cancelKeyEntry()
-            }
-        } else {
-            navigationItem.hidesBackButton = true
+            navigationItem.leftBarButtonItem = UIBarButtonItem(
+                image: UIImage(named: "chevron-left-bold-28"),
+                primaryAction: UIAction { [weak presenter] _ in
+                    presenter?.cancelKeyEntry()
+                },
+            )
         }
     }
 
@@ -100,7 +81,9 @@ class RegistrationEnterAccountEntropyPoolViewController: EnterAccountEntropyPool
 
     // MARK: UI
 
-    private func didTapNoKeyButton() {
+    private func presentNoKeyHeroSheet(
+        presenter: RegistrationEnterAccountEntropyPoolPresenter,
+    ) {
         let sheet = HeroSheetViewController(
             hero: .circleIcon(
                 icon: UIImage(named: "key")!,
@@ -120,8 +103,8 @@ class RegistrationEnterAccountEntropyPoolViewController: EnterAccountEntropyPool
                 "REGISTRATION_NO_BACKUP_KEY_SKIP_RESTORE_BUTTON_TITLE",
                 comment: "Title for button on sheet for when you don't have a recovery key",
             )) { [weak self] _ in
-                self?.dismiss(animated: true) {
-                    self?.presenter?.forgotKeyAction()
+                self?.dismiss(animated: true) { [weak presenter] in
+                    presenter?.forgotKeyAction()
                 }
             },
             secondaryButton: .init(title: CommonStrings.learnMore, style: .secondary, action: .custom({ [weak self] sheet in
@@ -176,6 +159,20 @@ private class PreviewRegistrationEnterAccountEntropyPoolPresenter: RegistrationE
             state: RegistrationEnterAccountEntropyPoolState(
                 canShowBackButton: true,
                 canShowNoKeyHelpButton: false,
+            ),
+            presenter: presenter,
+        ),
+    )
+}
+
+@available(iOS 17, *)
+#Preview("No Back") {
+    let presenter = PreviewRegistrationEnterAccountEntropyPoolPresenter()
+    return UINavigationController(
+        rootViewController: RegistrationEnterAccountEntropyPoolViewController(
+            state: RegistrationEnterAccountEntropyPoolState(
+                canShowBackButton: false,
+                canShowNoKeyHelpButton: true,
             ),
             presenter: presenter,
         ),
