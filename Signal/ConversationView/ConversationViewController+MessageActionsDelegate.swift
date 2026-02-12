@@ -280,9 +280,9 @@ extension ConversationViewController: MessageActionsDelegate {
     }
 
     func messageActionsEndPoll(_ itemViewModel: CVItemViewModelImpl) {
-        if let groupThread = self.thread as? TSGroupThread, let poll = itemViewModel.componentState.poll?.state.poll {
+        if let poll = itemViewModel.componentState.poll?.state.poll {
             do {
-                try DependenciesBridge.shared.pollMessageManager.sendPollTerminateMessage(poll: poll, thread: groupThread)
+                try DependenciesBridge.shared.pollMessageManager.sendPollTerminateMessage(poll: poll, thread: thread)
             } catch {
                 Logger.error("Failed to end poll: \(error)")
             }

@@ -90,6 +90,8 @@ public enum BuildFlags {
         public static let enabled = build <= .dev
         public static let conservativeSelfCheck = build <= .internal
     }
+
+    public static let pollOneOnOneSend = build <= .internal
 }
 
 // MARK: -

@@ -38,7 +38,7 @@ class OutgoingPollTerminateMessage: TransientOutgoingMessage {
     let targetPollTimestamp: UInt64
 
     init(
-        thread: TSGroupThread,
+        thread: TSThread,
         targetPollTimestamp: UInt64,
         expiresInSeconds: UInt32 = 0,
         tx: DBReadTransaction,

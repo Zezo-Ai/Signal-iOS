@@ -520,8 +520,8 @@ public final class MessageReceiver {
                         if let targetMessage {
                             SSKEnvironment.shared.databaseStorageRef.touch(interaction: targetMessage, shouldReindex: false, tx: tx)
 
-                            guard let groupThread = targetMessage.thread(tx: tx) as? TSGroupThread else {
-                                throw OWSAssertionError("Message thread is not a group thread")
+                            guard let thread = targetMessage.thread(tx: tx) else {
+                                throw OWSAssertionError("Invalid message thread")
                             }
 
                             guard let pollQuestion = targetMessage.body?.nilIfEmpty else {
@@ -530,7 +530,7 @@ public final class MessageReceiver {
 
                             DependenciesBridge.shared.pollMessageManager.insertInfoMessageForEndPoll(
                                 timestamp: Date().ows_millisecondsSince1970,
-                                groupThread: groupThread,
+                                thread: thread,
                                 targetPollTimestamp: targetMessage.timestamp,
                                 pollQuestion: pollQuestion,
                                 terminateAuthor: localIdentifiers.aci,
@@ -1316,11 +1316,6 @@ public final class MessageReceiver {
         }
 
         if let pollTerminate = dataMessage.pollTerminate {
-            guard let groupThread = thread as? TSGroupThread else {
-                Logger.error("Poll terminate sent to thread that is not a group thread")
-                return nil
-            }
-
             do {
                 let targetMessage = try DependenciesBridge.shared.pollMessageManager.processIncomingPollTerminate(
                     pollTerminateProto: pollTerminate,
@@ -1338,7 +1333,7 @@ public final class MessageReceiver {
                     if let question = targetMessage.body {
                         DependenciesBridge.shared.pollMessageManager.insertInfoMessageForEndPoll(
                             timestamp: Date().ows_millisecondsSince1970,
-                            groupThread: groupThread,
+                            thread: thread,
                             targetPollTimestamp: pollTerminate.targetSentTimestamp,
                             pollQuestion: question,
                             terminateAuthor: envelope.sourceAci,

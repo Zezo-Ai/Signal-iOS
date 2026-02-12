@@ -822,9 +822,6 @@ extension BackupArchive {
                 /// recipient types are valid for an ad hoc call.
                 case recipientOfAdHocCallWasNotCallLink
 
-                /// The poll terminate message was not in a group chat
-                case pollTerminateNotFromGroupChat
-
                 /// The poll terminate message author had an invalid non-contact Address
                 case pollTerminateAuthorNotContact
 
@@ -1003,7 +1000,6 @@ extension BackupArchive {
                     .callLinkInvalidRootKey,
                     .callLinkUsedAsChatRecipient,
                     .recipientOfAdHocCallWasNotCallLink,
-                    .pollTerminateNotFromGroupChat,
                     .pollTerminateAuthorNotContact,
                     .pollQuestionEmpty,
                     .pollVoteAuthorNotContact,
@@ -1118,7 +1114,6 @@ extension BackupArchive {
                     .callLinkInvalidRootKey,
                     .callLinkUsedAsChatRecipient,
                     .recipientOfAdHocCallWasNotCallLink,
-                    .pollTerminateNotFromGroupChat,
                     .pollTerminateAuthorNotContact,
                     .pollQuestionEmpty,
                     .pollVoteAuthorNotContact,

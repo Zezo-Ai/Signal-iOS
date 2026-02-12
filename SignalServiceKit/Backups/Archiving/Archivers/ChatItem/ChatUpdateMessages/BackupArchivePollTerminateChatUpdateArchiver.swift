@@ -100,10 +100,6 @@ final class BackupArchivePollTerminateChatUpdateArchiver {
             )])
         }
 
-        guard case .groupV2(let groupThread) = chatThread.threadType else {
-            return invalidProtoData(.pollTerminateNotFromGroupChat)
-        }
-
         let recipientId = BackupArchive.RecipientId(value: chatItem.authorID)
         let authorAddress: BackupArchive.InteropAddress
         switch context.recipientContext[recipientId] {
@@ -130,7 +126,7 @@ final class BackupArchivePollTerminateChatUpdateArchiver {
         )
 
         let infoMessage = TSInfoMessage(
-            thread: groupThread,
+            thread: chatThread.tsThread,
             messageType: .typeEndPoll,
             timestamp: chatItem.dateSent,
             infoMessageUserInfo: userInfoForNewMessage,

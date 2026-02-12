@@ -230,7 +230,7 @@ public class PollMessageManager {
         return pollCreateProto
     }
 
-    public func sendPollTerminateMessage(poll: OWSPoll, thread: TSGroupThread) throws {
+    public func sendPollTerminateMessage(poll: OWSPoll, thread: TSThread) throws {
         try db.write { tx in
             guard let targetPoll = interactionStore.fetchInteraction(rowId: poll.interactionId, tx: tx) else {
                 return
@@ -264,7 +264,7 @@ public class PollMessageManager {
             let dmConfig = disappearingMessagesConfigurationStore.fetchOrBuildDefault(for: .thread(thread), tx: tx)
             insertInfoMessageForEndPoll(
                 timestamp: Date().ows_millisecondsSince1970,
-                groupThread: thread,
+                thread: thread,
                 targetPollTimestamp: targetPoll.timestamp,
                 pollQuestion: poll.question,
                 terminateAuthor: localAci,
@@ -277,7 +277,7 @@ public class PollMessageManager {
 
     public func insertInfoMessageForEndPoll(
         timestamp: UInt64,
-        groupThread: TSGroupThread,
+        thread: TSThread,
         targetPollTimestamp: UInt64,
         pollQuestion: String,
         terminateAuthor: Aci,
@@ -298,7 +298,7 @@ public class PollMessageManager {
         }
 
         let infoMessage = TSInfoMessage(
-            thread: groupThread,
+            thread: thread,
             timestamp: timestamp,
             serverGuid: nil,
             messageType: .typeEndPoll,
@@ -359,7 +359,7 @@ public class PollMessageManager {
         pollInteraction: TSInteraction,
         optionIndex: UInt32,
         isUnvote: Bool,
-        thread: TSGroupThread,
+        thread: TSThread,
         tx: DBWriteTransaction,
     ) throws -> OutgoingPollVoteMessage? {
         guard

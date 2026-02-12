@@ -66,7 +66,7 @@ public class OutgoingPollVoteMessage: TransientOutgoingMessage {
     let voteCount: UInt32
 
     public init(
-        thread: TSGroupThread,
+        thread: TSThread,
         targetPollTimestamp: UInt64,
         targetPollAuthorAci: Aci,
         voteOptionIndexes: [UInt32],
