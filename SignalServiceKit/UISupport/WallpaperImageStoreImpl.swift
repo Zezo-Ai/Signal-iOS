@@ -137,7 +137,7 @@ public class WallpaperImageStoreImpl: WallpaperImageStore {
                     dataSource: dataSource,
                     owner: owner,
                 )
-                try self.attachmentManager.createAttachmentStream(from: dataSource, tx: tx)
+                _ = try self.attachmentManager.createAttachmentStream(from: dataSource, tx: tx)
             }
             try onInsert(tx)
         }

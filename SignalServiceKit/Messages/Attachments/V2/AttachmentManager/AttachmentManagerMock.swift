@@ -12,8 +12,9 @@ open class AttachmentManagerMock: AttachmentManager {
     open func createAttachmentPointer(
         from ownedProto: OwnedAttachmentPointerProto,
         tx: DBWriteTransaction,
-    ) throws {
+    ) throws -> Attachment.IDType {
         // Do nothing
+        return 0
     }
 
     open func createAttachmentPointer(
@@ -28,8 +29,9 @@ open class AttachmentManagerMock: AttachmentManager {
     open func createAttachmentStream(
         from ownedDataSource: OwnedAttachmentDataSource,
         tx: DBWriteTransaction,
-    ) throws {
+    ) -> Attachment.IDType {
         // Do nothing
+        return 0
     }
 
     open func updateAttachmentWithOversizeTextFromBackup(
@@ -44,22 +46,9 @@ open class AttachmentManagerMock: AttachmentManager {
         from quotedReplyAttachmentDataSource: QuotedReplyAttachmentDataSource,
         owningMessageAttachmentBuilder: AttachmentReference.OwnerBuilder.MessageAttachmentBuilder,
         tx: DBWriteTransaction,
-    ) throws {
+    ) throws -> Attachment.IDType {
         // Do nothing
-    }
-
-    open func removeAttachment(
-        reference: AttachmentReference,
-        tx: DBWriteTransaction,
-    ) throws {
-        // Do nothing
-    }
-
-    open func removeAllAttachments(
-        from owners: [AttachmentReference.Owner.ID],
-        tx: DBWriteTransaction,
-    ) throws {
-        // Do nothing
+        return 0
     }
 }
 

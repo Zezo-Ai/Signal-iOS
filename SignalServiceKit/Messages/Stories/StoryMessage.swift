@@ -261,17 +261,18 @@ public final class StoryMessage: NSObject, SDSCodableModel, Decodable {
         record.context.associatedData(transaction: transaction)?.update(lastReceivedTimestamp: timestamp, transaction: transaction)
 
         if let linkPreviewImageProto = validatedLinkPreview?.imageProto {
-            try attachmentManager.createAttachmentPointer(
+            let attachmentID = try attachmentManager.createAttachmentPointer(
                 from: OwnedAttachmentPointerProto(
                     proto: linkPreviewImageProto,
                     owner: .storyMessageLinkPreview(storyMessageRowId: record.id!),
                 ),
                 tx: transaction,
             )
+            Logger.info("Created link preview attachment \(attachmentID) for received story \(timestamp)")
         }
 
         if let mediaAttachmentProto {
-            try attachmentManager.createAttachmentPointer(
+            let attachmentID = try attachmentManager.createAttachmentPointer(
                 from: OwnedAttachmentPointerProto(
                     proto: mediaAttachmentProto,
                     owner: .storyMessageMedia(.init(
@@ -281,6 +282,7 @@ public final class StoryMessage: NSObject, SDSCodableModel, Decodable {
                 ),
                 tx: transaction,
             )
+            Logger.info("Created media attachment \(attachmentID) for received story \(timestamp)")
         }
 
         return record
@@ -394,17 +396,18 @@ public final class StoryMessage: NSObject, SDSCodableModel, Decodable {
         }
 
         if let linkPreviewImageProto = validatedLinkPreview?.imageProto {
-            try attachmentManager.createAttachmentPointer(
+            let attachmentID = try attachmentManager.createAttachmentPointer(
                 from: OwnedAttachmentPointerProto(
                     proto: linkPreviewImageProto,
                     owner: .storyMessageLinkPreview(storyMessageRowId: record.id!),
                 ),
                 tx: transaction,
             )
+            Logger.info("Created link preview attachment \(attachmentID) for received story sent-transcript \(proto.timestamp)")
         }
 
         if let mediaAttachmentProto {
-            try attachmentManager.createAttachmentPointer(
+            let attachmentID = try attachmentManager.createAttachmentPointer(
                 from: OwnedAttachmentPointerProto(
                     proto: mediaAttachmentProto,
                     owner: .storyMessageMedia(.init(
@@ -414,6 +417,7 @@ public final class StoryMessage: NSObject, SDSCodableModel, Decodable {
                 ),
                 tx: transaction,
             )
+            Logger.info("Created media attachment \(attachmentID) for received story sent-transcript \(proto.timestamp)")
         }
 
         return record
@@ -458,7 +462,7 @@ public final class StoryMessage: NSObject, SDSCodableModel, Decodable {
         record.anyInsert(transaction: transaction)
 
         let attachmentManager = DependenciesBridge.shared.attachmentManager
-        try attachmentManager.createAttachmentStream(
+        _ = try attachmentManager.createAttachmentStream(
             from: OwnedAttachmentDataSource(
                 dataSource: attachmentSource,
                 owner: .storyMessageMedia(.init(

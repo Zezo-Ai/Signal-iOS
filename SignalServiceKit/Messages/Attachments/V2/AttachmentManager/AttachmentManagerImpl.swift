@@ -44,7 +44,7 @@ public class AttachmentManagerImpl: AttachmentManager {
     public func createAttachmentPointer(
         from ownedProto: OwnedAttachmentPointerProto,
         tx: DBWriteTransaction,
-    ) throws {
+    ) throws -> Attachment.IDType {
         let sanitizedOwnedProto = OwnedAttachmentPointerProto(
             proto: ownedProto.proto,
             owner: sanitizeOversizeTextOwner(
@@ -53,7 +53,7 @@ public class AttachmentManagerImpl: AttachmentManager {
             ),
         )
 
-        try _createAttachmentPointer(
+        return try _createAttachmentPointer(
             from: sanitizedOwnedProto.proto,
             owner: sanitizedOwnedProto.owner,
             tx: tx,
@@ -87,7 +87,7 @@ public class AttachmentManagerImpl: AttachmentManager {
     public func createAttachmentStream(
         from ownedDataSource: OwnedAttachmentDataSource,
         tx: DBWriteTransaction,
-    ) throws {
+    ) throws -> Attachment.IDType {
         let sanitizedOwnedDataSource = OwnedAttachmentDataSource(
             dataSource: ownedDataSource.source,
             owner: sanitizeOversizeTextOwner(
@@ -96,7 +96,7 @@ public class AttachmentManagerImpl: AttachmentManager {
             ),
         )
 
-        try _createAttachmentStream(
+        let attachmentID = try _createAttachmentStream(
             from: sanitizedOwnedDataSource,
             tx: tx,
         )
@@ -106,6 +106,8 @@ public class AttachmentManagerImpl: AttachmentManager {
         tx.addSyncCompletion {
             NotificationCenter.default.post(name: .startBackupAttachmentUploadQueue, object: nil)
         }
+
+        return attachmentID
     }
 
     public func updateAttachmentWithOversizeTextFromBackup(
@@ -136,8 +138,8 @@ public class AttachmentManagerImpl: AttachmentManager {
         from quotedReplyAttachmentDataSource: QuotedReplyAttachmentDataSource,
         owningMessageAttachmentBuilder: AttachmentReference.OwnerBuilder.MessageAttachmentBuilder,
         tx: DBWriteTransaction,
-    ) throws {
-        try _createQuotedReplyMessageThumbnail(
+    ) throws -> Attachment.IDType {
+        return try _createQuotedReplyMessageThumbnail(
             dataSource: quotedReplyAttachmentDataSource,
             referenceOwner: .quotedReplyAttachment(owningMessageAttachmentBuilder),
             tx: tx,
@@ -171,7 +173,7 @@ public class AttachmentManagerImpl: AttachmentManager {
         from proto: SSKProtoAttachmentPointer,
         owner: AttachmentReference.OwnerBuilder,
         tx: DBWriteTransaction,
-    ) throws {
+    ) throws -> Attachment.IDType {
         let transitTierInfo = try self.transitTierInfo(from: proto)
 
         let knownIdFromProto: AttachmentReference.OwnerBuilder.KnownIdInOwner = {
@@ -224,7 +226,7 @@ public class AttachmentManagerImpl: AttachmentManager {
             sourceMediaSizePixels: sourceMediaSizePixels,
         )
 
-        try attachmentStore.insert(
+        let attachment = try attachmentStore.insert(
             attachmentParams,
             reference: referenceParams,
             tx: tx,
@@ -265,6 +267,8 @@ public class AttachmentManagerImpl: AttachmentManager {
         default:
             break
         }
+
+        return attachment.id
     }
 
     private func transitTierInfo(
@@ -568,10 +572,11 @@ public class AttachmentManagerImpl: AttachmentManager {
     private func _createAttachmentStream(
         from ownedDataSource: OwnedAttachmentDataSource,
         tx: DBWriteTransaction,
-    ) throws {
+    ) throws -> Attachment.IDType {
         switch ownedDataSource.source {
         case .existingAttachment(let existingAttachmentMetadata):
-            guard let existingAttachment = attachmentStore.fetch(id: existingAttachmentMetadata.id, tx: tx) else {
+            let existingAttachmentID = existingAttachmentMetadata.id
+            guard let existingAttachment = attachmentStore.fetch(id: existingAttachmentID, tx: tx) else {
                 throw OWSAssertionError("Missing existing attachment!")
             }
 
@@ -591,6 +596,8 @@ public class AttachmentManagerImpl: AttachmentManager {
                 attachmentRowId: existingAttachment.id,
                 tx: tx,
             )
+
+            return existingAttachmentID
         case .pendingAttachment(let pendingAttachment):
             let owner: AttachmentReference.Owner = ownedDataSource.owner.build(
                 knownIdInOwner: .none,
@@ -668,6 +675,7 @@ public class AttachmentManagerImpl: AttachmentManager {
                     reference: referenceParams,
                     tx: tx,
                 )
+
                 if hasOrphanRecord {
                     // Make sure to clear out the pending attachment from the orphan table so it isn't deleted!
                     orphanedAttachmentCleaner.releasePendingAttachment(withId: pendingAttachment.orphanRecordId, tx: tx)
@@ -684,6 +692,8 @@ public class AttachmentManagerImpl: AttachmentManager {
                         tx: tx,
                     )
                 }
+
+                return newAttachment.id
             } catch let error {
                 let existingAttachmentId: Attachment.IDType
                 if let error = error as? AttachmentInsertError {
@@ -713,6 +723,8 @@ public class AttachmentManagerImpl: AttachmentManager {
                     attachmentRowId: existingAttachmentId,
                     tx: tx,
                 )
+
+                return existingAttachmentId
             }
         }
     }
@@ -990,10 +1002,10 @@ public class AttachmentManagerImpl: AttachmentManager {
         dataSource: QuotedReplyAttachmentDataSource,
         referenceOwner: AttachmentReference.OwnerBuilder,
         tx: DBWriteTransaction,
-    ) throws {
+    ) throws -> Attachment.IDType {
         switch dataSource {
         case .pendingAttachment(let pendingAttachmentSource):
-            try createAttachmentStream(
+            return try createAttachmentStream(
                 from: OwnedAttachmentDataSource(
                     dataSource: .pendingAttachment(pendingAttachmentSource.pendingAttachment),
                     owner: referenceOwner,
@@ -1055,7 +1067,7 @@ public class AttachmentManagerImpl: AttachmentManager {
                 sourceMediaSizePixels: originalAttachmentSource.sourceMediaSizePixels,
             )
 
-            try attachmentStore.insert(
+            let attachment = try attachmentStore.insert(
                 attachmentParams,
                 reference: referenceParams,
                 tx: tx,
@@ -1086,8 +1098,10 @@ public class AttachmentManagerImpl: AttachmentManager {
                     tx: tx,
                 )
             }
+
+            return attachment.id
         case .notFoundLocallyAttachment(let notFoundLocallyAttachmentSource):
-            try createAttachmentPointer(
+            return try createAttachmentPointer(
                 from: OwnedAttachmentPointerProto(
                     proto: notFoundLocallyAttachmentSource.thumbnailPointerProto,
                     owner: referenceOwner,

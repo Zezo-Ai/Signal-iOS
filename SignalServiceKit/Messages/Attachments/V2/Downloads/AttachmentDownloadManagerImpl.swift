@@ -520,6 +520,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             record: DownloadTaskRecord,
             loader: TaskQueueLoader<DownloadTaskRunner>,
         ) async -> TaskRecordResult {
+            Logger.info("Starting download of attachment \(record.record.attachmentId) from \(record.record.sourceType)")
             return await self.downloadRecord(record.record)
         }
 
@@ -547,7 +548,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
 
         func didFail(record: DownloadTaskRecord, error: Error, isRetryable: Bool, tx: DBWriteTransaction) {
             let record = record.record
-            Logger.error("Failed download of attachment \(record.attachmentId) from \(record.sourceType)")
+            Logger.warn("Failed download of attachment \(record.attachmentId) from \(record.sourceType). \(error)")
             if isRetryable, let retryTime = self.retryTime(for: record) {
                 // Don't update observers; they'll be updated when the retry succeeds.
                 attachmentDownloadStore.markQueuedDownloadFailed(

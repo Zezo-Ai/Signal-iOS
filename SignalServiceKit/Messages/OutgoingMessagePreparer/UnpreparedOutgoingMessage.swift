@@ -250,7 +250,7 @@ public class UnpreparedOutgoingMessage {
         }
 
         if let oversizeTextDataSource = message.oversizeTextDataSource {
-            try DependenciesBridge.shared.attachmentManager.createAttachmentStream(
+            let attachmentID = try DependenciesBridge.shared.attachmentManager.createAttachmentStream(
                 from: OwnedAttachmentDataSource(
                     dataSource: oversizeTextDataSource,
                     owner: .messageOversizeText(.init(
@@ -262,6 +262,7 @@ public class UnpreparedOutgoingMessage {
                 ),
                 tx: tx,
             )
+            Logger.info("Created oversize-text attachment \(attachmentID) for outgoing message \(message.message.timestamp)")
         }
 
         for (idx, var unsavedBodyMediaAttachment) in message.unsavedBodyMediaAttachments.enumerated() {
@@ -271,7 +272,7 @@ public class UnpreparedOutgoingMessage {
             }
 
             let attachmentManager = DependenciesBridge.shared.attachmentManager
-            try attachmentManager.createAttachmentStream(
+            let attachmentID = try attachmentManager.createAttachmentStream(
                 from: OwnedAttachmentDataSource(
                     dataSource: unsavedBodyMediaAttachment,
                     owner: .messageBodyAttachment(.init(
@@ -285,10 +286,11 @@ public class UnpreparedOutgoingMessage {
                 ),
                 tx: tx,
             )
+            Logger.info("Created body attachment \(attachmentID) (idx \(idx)) for outgoing message \(message.message.timestamp)")
         }
 
         if let linkPreviewImageDataSource = validatedLinkPreview?.imageDataSource {
-            try attachmentManager.createAttachmentStream(
+            let attachmentID = try attachmentManager.createAttachmentStream(
                 from: OwnedAttachmentDataSource(
                     dataSource: linkPreviewImageDataSource,
                     owner: .messageLinkPreview(.init(
@@ -300,10 +302,11 @@ public class UnpreparedOutgoingMessage {
                 ),
                 tx: tx,
             )
+            Logger.info("Created link preview attachment \(attachmentID) for outgoing message \(message.message.timestamp)")
         }
 
         if let thumbnailDataSource = validatedQuotedReply?.thumbnailDataSource {
-            try attachmentManager.createQuotedReplyMessageThumbnail(
+            let attachmentID = try attachmentManager.createQuotedReplyMessageThumbnail(
                 from: thumbnailDataSource,
                 owningMessageAttachmentBuilder: .init(
                     messageRowId: messageRowId,
@@ -313,10 +316,11 @@ public class UnpreparedOutgoingMessage {
                 ),
                 tx: tx,
             )
+            Logger.info("Created quoted-reply thumbnail attachment \(attachmentID) for outgoing message \(message.message.timestamp)")
         }
 
         if let validatedMessageSticker {
-            try attachmentManager.createAttachmentStream(
+            let attachmentID = try attachmentManager.createAttachmentStream(
                 from: OwnedAttachmentDataSource(
                     dataSource: validatedMessageSticker.attachmentDataSource,
                     owner: .messageSticker(.init(
@@ -330,6 +334,7 @@ public class UnpreparedOutgoingMessage {
                 ),
                 tx: tx,
             )
+            Logger.info("Created sticker attachment \(attachmentID) for outgoing message \(message.message.timestamp)")
 
             StickerManager.stickerWasSent(
                 validatedMessageSticker.sticker.info,
@@ -338,7 +343,7 @@ public class UnpreparedOutgoingMessage {
         }
 
         if let avatarDataSource = validatedContactShare?.avatarDataSource {
-            try attachmentManager.createAttachmentStream(
+            let attachmentID = try attachmentManager.createAttachmentStream(
                 from: OwnedAttachmentDataSource(
                     dataSource: avatarDataSource,
                     owner: .messageContactAvatar(.init(
@@ -350,6 +355,7 @@ public class UnpreparedOutgoingMessage {
                 ),
                 tx: tx,
             )
+            Logger.info("Created contact avatar attachment \(attachmentID) for outgoing message \(message.message.timestamp)")
         }
 
         return .persisted(PreparedOutgoingMessage.MessageType.Persisted(

@@ -570,9 +570,11 @@ public class AttachmentMultisend {
                 throw OWSAssertionError("Missing ID for StoryMessage!")
             }
 
+            let attachmentLabel: String?
             let ownedAttachmentDataSource: OwnedAttachmentDataSource?
             switch attachmentType {
             case .media(let attachmentDataSource, let caption):
+                attachmentLabel = "media"
                 ownedAttachmentDataSource = OwnedAttachmentDataSource(
                     dataSource: attachmentDataSource,
                     owner: .storyMessageMedia(.init(
@@ -582,6 +584,7 @@ public class AttachmentMultisend {
                 )
             case .text(_, let linkPreviewImage):
                 if let linkPreviewImage {
+                    attachmentLabel = "link preview"
                     ownedAttachmentDataSource = OwnedAttachmentDataSource(
                         dataSource: linkPreviewImage,
                         owner: .storyMessageLinkPreview(
@@ -589,15 +592,17 @@ public class AttachmentMultisend {
                         ),
                     )
                 } else {
+                    attachmentLabel = nil
                     ownedAttachmentDataSource = nil
                 }
             }
 
-            if let ownedAttachmentDataSource {
-                try attachmentManager.createAttachmentStream(
+            if let attachmentLabel, let ownedAttachmentDataSource {
+                let attachmentID = try attachmentManager.createAttachmentStream(
                     from: ownedAttachmentDataSource,
                     tx: tx,
                 )
+                Logger.info("Created \(attachmentLabel) attachment \(attachmentID) for outgoing story \(storyMessage.timestamp)")
             }
         }
     }

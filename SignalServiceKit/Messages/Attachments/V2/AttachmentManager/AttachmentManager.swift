@@ -18,7 +18,7 @@ public protocol AttachmentManager {
     func createAttachmentPointer(
         from ownedProto: OwnedAttachmentPointerProto,
         tx: DBWriteTransaction,
-    ) throws
+    ) throws -> Attachment.IDType
 
     /// Create attachment pointers from backup protos.
     /// Does no deduplication; once we download the contents of the attachment
@@ -47,7 +47,7 @@ public protocol AttachmentManager {
     func createAttachmentStream(
         from ownedDataSource: OwnedAttachmentDataSource,
         tx: DBWriteTransaction,
-    ) throws
+    ) throws -> Attachment.IDType
 
     /// Update an existing placeholder attachment with the full oversized text attachment file
     /// we restored from a backup.
@@ -66,5 +66,5 @@ public protocol AttachmentManager {
         from quotedReplyAttachmentDataSource: QuotedReplyAttachmentDataSource,
         owningMessageAttachmentBuilder: AttachmentReference.OwnerBuilder.MessageAttachmentBuilder,
         tx: DBWriteTransaction,
-    ) throws
+    ) throws -> Attachment.IDType
 }

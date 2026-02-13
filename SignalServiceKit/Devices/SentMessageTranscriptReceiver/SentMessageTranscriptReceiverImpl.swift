@@ -273,7 +273,7 @@ public class SentMessageTranscriptReceiverImpl: SentMessageTranscriptReceiver {
 
             do {
                 for (idx, proto) in messageParams.attachmentPointerProtos.enumerated() {
-                    try attachmentManager.createAttachmentPointer(
+                    let attachmentID = try attachmentManager.createAttachmentPointer(
                         from: OwnedAttachmentPointerProto(
                             proto: proto,
                             owner: .messageBodyAttachment(.init(
@@ -287,13 +287,14 @@ public class SentMessageTranscriptReceiverImpl: SentMessageTranscriptReceiver {
                         ),
                         tx: tx,
                     )
+                    Logger.info("Created body attachment \(attachmentID) (idx \(idx)) for received sent-transcript \(transcript.timestamp)")
                 }
 
                 if
                     let quotedReplyAttachmentDataSource = messageParams.validatedQuotedReply?.thumbnailDataSource,
                     MimeTypeUtil.isSupportedVisualMediaMimeType(quotedReplyAttachmentDataSource.originalAttachmentMimeType)
                 {
-                    try attachmentManager.createQuotedReplyMessageThumbnail(
+                    let attachmentID = try attachmentManager.createQuotedReplyMessageThumbnail(
                         from: quotedReplyAttachmentDataSource,
                         owningMessageAttachmentBuilder: .init(
                             messageRowId: outgoingMessage.sqliteRowId!,
@@ -303,10 +304,11 @@ public class SentMessageTranscriptReceiverImpl: SentMessageTranscriptReceiver {
                         ),
                         tx: tx,
                     )
+                    Logger.info("Created quoted-reply attachment \(attachmentID) for received sent-transcript \(transcript.timestamp)")
                 }
 
                 if let linkPreviewImageProto = messageParams.validatedLinkPreview?.imageProto {
-                    try attachmentManager.createAttachmentPointer(
+                    let attachmentID = try attachmentManager.createAttachmentPointer(
                         from: OwnedAttachmentPointerProto(
                             proto: linkPreviewImageProto,
                             owner: .messageLinkPreview(.init(
@@ -318,10 +320,11 @@ public class SentMessageTranscriptReceiverImpl: SentMessageTranscriptReceiver {
                         ),
                         tx: tx,
                     )
+                    Logger.info("Created link preview attachment \(attachmentID) for received sent-transcript \(transcript.timestamp)")
                 }
 
                 if let validatedMessageSticker = messageParams.validatedMessageSticker {
-                    try attachmentManager.createAttachmentPointer(
+                    let attachmentID = try attachmentManager.createAttachmentPointer(
                         from: OwnedAttachmentPointerProto(
                             proto: validatedMessageSticker.proto,
                             owner: .messageSticker(.init(
@@ -335,10 +338,11 @@ public class SentMessageTranscriptReceiverImpl: SentMessageTranscriptReceiver {
                         ),
                         tx: tx,
                     )
+                    Logger.info("Created sticker attachment \(attachmentID) for received sent-transcript \(transcript.timestamp)")
                 }
 
                 if let contactAvatarProto = messageParams.validatedContactShare?.avatarProto {
-                    try attachmentManager.createAttachmentPointer(
+                    let attachmentID = try attachmentManager.createAttachmentPointer(
                         from: OwnedAttachmentPointerProto(
                             proto: contactAvatarProto,
                             owner: .messageContactAvatar(.init(
@@ -350,6 +354,7 @@ public class SentMessageTranscriptReceiverImpl: SentMessageTranscriptReceiver {
                         ),
                         tx: tx,
                     )
+                    Logger.info("Created contact avatar attachment \(attachmentID) for received sent-transcript \(transcript.timestamp)")
                 }
             } catch let error {
                 Logger.error("Attachment failure: \(error)")

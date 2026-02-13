@@ -1478,7 +1478,7 @@ public final class MessageReceiver {
             let attachmentManager = DependenciesBridge.shared.attachmentManager
 
             for (idx, proto) in dataMessage.attachments.enumerated() {
-                try attachmentManager.createAttachmentPointer(
+                let attachmentID = try attachmentManager.createAttachmentPointer(
                     from: OwnedAttachmentPointerProto(
                         proto: proto,
                         owner: .messageBodyAttachment(.init(
@@ -1492,13 +1492,14 @@ public final class MessageReceiver {
                     ),
                     tx: tx,
                 )
+                Logger.info("Created body attachment \(attachmentID) (idx \(idx)) for received message \(envelope.timestamp)")
             }
 
             if
                 let quotedReplyAttachmentDataSource = validatedQuotedReply?.thumbnailDataSource,
                 MimeTypeUtil.isSupportedVisualMediaMimeType(quotedReplyAttachmentDataSource.originalAttachmentMimeType)
             {
-                try attachmentManager.createQuotedReplyMessageThumbnail(
+                let attachmentID = try attachmentManager.createQuotedReplyMessageThumbnail(
                     from: quotedReplyAttachmentDataSource,
                     owningMessageAttachmentBuilder: .init(
                         messageRowId: message.sqliteRowId!,
@@ -1508,10 +1509,11 @@ public final class MessageReceiver {
                     ),
                     tx: tx,
                 )
+                Logger.info("Created quoted-reply thumbnail attachment \(attachmentID) for received message \(envelope.timestamp)")
             }
 
             if let linkPreviewImageProto = validatedLinkPreview?.imageProto {
-                try attachmentManager.createAttachmentPointer(
+                let attachmentID = try attachmentManager.createAttachmentPointer(
                     from: OwnedAttachmentPointerProto(
                         proto: linkPreviewImageProto,
                         owner: .messageLinkPreview(.init(
@@ -1523,10 +1525,11 @@ public final class MessageReceiver {
                     ),
                     tx: tx,
                 )
+                Logger.info("Created link preview attachment \(attachmentID) for received message \(envelope.timestamp)")
             }
 
             if let validatedMessageSticker {
-                try attachmentManager.createAttachmentPointer(
+                let attachmentID = try attachmentManager.createAttachmentPointer(
                     from: OwnedAttachmentPointerProto(
                         proto: validatedMessageSticker.proto,
                         owner: .messageSticker(.init(
@@ -1540,10 +1543,11 @@ public final class MessageReceiver {
                     ),
                     tx: tx,
                 )
+                Logger.info("Created sticker attachment \(attachmentID) for received message \(envelope.timestamp)")
             }
 
             if let contactAvatarProto = validatedContactShare?.avatarProto {
-                try attachmentManager.createAttachmentPointer(
+                let attachmentID = try attachmentManager.createAttachmentPointer(
                     from: OwnedAttachmentPointerProto(
                         proto: contactAvatarProto,
                         owner: .messageContactAvatar(.init(
@@ -1555,6 +1559,7 @@ public final class MessageReceiver {
                     ),
                     tx: tx,
                 )
+                Logger.info("Created contact avatar attachment \(attachmentID) for received message \(envelope.timestamp)")
             }
         } catch {
             owsFailDebug("Could not build attachments!")
