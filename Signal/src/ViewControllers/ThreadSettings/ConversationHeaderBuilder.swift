@@ -537,6 +537,7 @@ struct ConversationHeaderBuilder {
                 comment: "Accessibility prefix for member labels.",
             ),
             isQuotedReply: false,
+            numberOfLines: 1,
             onTap: { [weak delegate] in
                 delegate?.didTapMemberLabel()
             },

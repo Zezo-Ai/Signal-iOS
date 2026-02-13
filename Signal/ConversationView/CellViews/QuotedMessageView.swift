@@ -561,7 +561,7 @@ public class QuotedMessageView: ManualStackViewWithLayer {
                 axLabelPrefix: nil,
                 isQuotedReply: true,
                 lineBreakMode: .byTruncatingTail,
-                numberOfLines: 1,
+                numberOfLines: 0,
                 onTap: nil,
             )
         } else {
@@ -866,9 +866,13 @@ public class QuotedMessageView: ManualStackViewWithLayer {
 
         let quotedAuthorLabelConfig = configurator.quotedAuthorLabelConfig
         let quotedAuthorSize: CGSize
-        if state.memberLabel != nil {
+        if let memberLabel = state.memberLabel {
             quotedAuthorSize = CVCapsuleLabel.measureLabel(
-                config: quotedAuthorLabelConfig,
+                attributedText: configurator.quotedAuthorName,
+                font: configurator.quotedAuthorFont,
+                highlightRange: (configurator.quotedAuthorName.string as NSString).range(of: memberLabel, options: .backwards),
+                highlightFont: configurator.quotedAuthorFont,
+                isQuotedReply: true,
                 maxWidth: maxLabelWidth,
             )
         } else {

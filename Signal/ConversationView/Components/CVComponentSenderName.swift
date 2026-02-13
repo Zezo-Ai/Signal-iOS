@@ -12,9 +12,7 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
 
     private let state: CVComponentState.SenderName
     private var senderName: NSAttributedString {
-        // The breaking space ensures the member label can line-break from the sender name.
-        // The non-breaking spaces make sure the label doesn't get cut off if it starts a new line.
-        let padding = " " + String(repeating: SignalSymbol.LeadingCharacter.nonBreakingSpace.rawValue, count: 2)
+        let padding = "   "
         if let labelString = state.memberLabel {
             return state.senderName + padding + labelString
         } else {
@@ -159,9 +157,14 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
 
         var subviewInfos: [ManualStackSubviewInfo] = []
         let labelSize: CGSize
-        if state.memberLabel != nil {
+        if let memberLabel = state.memberLabel {
+            let range = (senderName.string as NSString).range(of: memberLabel, options: .backwards)
             labelSize = CVCapsuleLabel.measureLabel(
-                config: labelConfig,
+                attributedText: senderName,
+                font: UIFont.dynamicTypeFootnote.semibold(),
+                highlightRange: range,
+                highlightFont: .dynamicTypeFootnote,
+                isQuotedReply: false,
                 maxWidth: maxWidth,
             )
         } else {

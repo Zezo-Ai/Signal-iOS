@@ -254,11 +254,12 @@ public class ContactCellView: ManualStackView {
                             comment: "Accessibility prefix for member labels.",
                         ),
                         isQuotedReply: false,
+                        numberOfLines: 1,
                         onTap: nil,
                     )
 
                     textStackSubviews.append(memberLabelLabel)
-                    let memberLabelSize = memberLabelLabel.highlightLabelSize()
+                    let memberLabelSize = memberLabelLabel.labelSize(maxWidth: .greatestFiniteMagnitude)
 
                     textStackSubviewInfos.append(memberLabelSize.asManualSubviewInfo)
                 } else if BuildFlags.MemberLabel.display, configuration.isForLocalUser {
