@@ -15,15 +15,11 @@ public enum BackupExportJobStage: String, OWSSequentialProgressStep {
     /// Steps related to attachments, post-upload.
     case attachmentProcessing
 
-    // Callers are only interested in the progress through a given stage, not
-    // relative to other stages.
     public var progressUnitCount: UInt64 {
-        switch self {
-        case .backupFileExport: 1
-        case .backupFileUpload: 1
-        case .attachmentUpload: 1
-        case .attachmentProcessing: 1
-        }
+        // Callers are only interested in the progress through a given stage,
+        // note relative to other stages. Use a large value here so the progress
+        // through a given stage can be granular.
+        return 1000
     }
 }
 
