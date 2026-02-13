@@ -6,7 +6,23 @@
 import SignalServiceKit
 public import SignalUI
 
-class CLVTableDataSource: NSObject {
+public enum ChatListMode: Int, CaseIterable {
+    case archive
+    case inbox
+}
+
+public enum ChatListSectionType: String, CaseIterable {
+    case reminders
+    case backupDownloadProgressView
+    case pinned
+    case unpinned
+    case archiveButton
+    case inboxFilterFooter
+}
+
+// MARK: -
+
+class CLVTableDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     private var viewState: CLVViewState!
 
     let tableView = CLVTableView()
@@ -229,29 +245,9 @@ class CLVTableDataSource: NSObject {
             preloadCellIfNecessaryAsync(indexPath: indexPath)
         }
     }
-}
 
-// MARK: -
+    // MARK: - UITableViewDelegate
 
-public enum ChatListMode: Int, CaseIterable {
-    case archive
-    case inbox
-}
-
-// MARK: -
-
-public enum ChatListSectionType: String, CaseIterable {
-    case reminders
-    case backupDownloadProgressView
-    case pinned
-    case unpinned
-    case archiveButton
-    case inboxFilterFooter
-}
-
-// MARK: -
-
-extension CLVTableDataSource: UITableViewDelegate {
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
         return UITableViewCell.EditingStyle.none
     }
@@ -527,11 +523,9 @@ extension CLVTableDataSource: UITableViewDelegate {
         }
         viewController?.updateCellVisibility(cell: cell, isCellVisible: false)
     }
-}
 
-// MARK: -
+    // MARK: - UITableViewDataSource
 
-extension CLVTableDataSource: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         renderState.sections.count
     }
@@ -706,11 +700,9 @@ extension CLVTableDataSource: UITableViewDataSource {
             return viewController.leadingSwipeActionsConfiguration(for: threadViewModel)
         }
     }
-}
 
-// MARK: -
+    // MARK: -
 
-extension CLVTableDataSource {
     func updateAndSetRefreshTimer(for cell: ChatListCell?) {
         if let cell, let timestamp = cell.nextUpdateTimestamp {
             if nextUpdateAt == nil || timestamp < nextUpdateAt! {
