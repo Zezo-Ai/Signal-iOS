@@ -1364,9 +1364,7 @@ public class MessageSender {
     private let nonExistentAccountCache = AtomicValue([ServiceId: MonotonicDate](), lock: .init())
 
     private func checkIfAccountExists(serviceId: ServiceId) async throws {
-        do {
-            try await self.accountChecker.checkIfAccountExists(serviceId: serviceId)
-        } catch where error.httpStatusCode == 404 {
+        if !(try await self.accountChecker.checkIfAccountExists(serviceId: serviceId)) {
             nonExistentAccountCache.update { $0[serviceId] = MonotonicDate() }
             throw MessageSenderNoSuchSignalRecipientError()
         }

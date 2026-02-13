@@ -1096,27 +1096,7 @@ extension AppSetup.GlobalsContinuation {
             tsAccountManager: tsAccountManager,
         )
 
-        let accountChecker = AccountChecker(
-            db: db,
-            networkManager: networkManager,
-            recipientFetcher: recipientFetcher,
-            recipientManager: recipientManager,
-            recipientMerger: recipientMerger,
-            recipientStore: recipientDatabaseTable,
-            tsAccountManager: tsAccountManager,
-        )
-
-        let messageSender = testDependencies.messageSender(accountChecker) ?? MessageSender(
-            accountChecker: accountChecker,
-            groupSendEndorsementStore: groupSendEndorsementStore,
-        )
-
-        let pniDistributionParameterBuilder = PniDistributionParameterBuilderImpl(
-            db: db,
-            messageSender: PniDistributionParameterBuilderImpl.Wrappers.MessageSender(messageSender),
-            pniKyberPreKeyStore: pniProtocolStore.kyberPreKeyStore,
-            registrationIdGenerator: RegistrationIdGenerator(),
-        )
+        let inactivePrimaryDeviceStore = InactivePrimaryDeviceStore()
 
         let registrationStateChangeManager = RegistrationStateChangeManagerImpl(
             authCredentialStore: authCredentialStore,
@@ -1142,6 +1122,40 @@ extension AppSetup.GlobalsContinuation {
             versionedProfiles: versionedProfiles,
         )
 
+        let chatConnectionManager = ChatConnectionManagerImpl(
+            accountManager: tsAccountManager,
+            appContext: appContext,
+            appExpiry: appExpiry,
+            appReadiness: appReadiness,
+            db: db,
+            inactivePrimaryDeviceStore: inactivePrimaryDeviceStore,
+            libsignalNet: libsignalNet,
+            registrationStateChangeManager: registrationStateChangeManager,
+        )
+
+        let accountChecker = AccountChecker(
+            db: db,
+            networkManager: networkManager,
+            recipientFetcher: recipientFetcher,
+            recipientManager: recipientManager,
+            recipientMerger: recipientMerger,
+            recipientStore: recipientDatabaseTable,
+            tsAccountManager: tsAccountManager,
+            chatConnectionManager: chatConnectionManager,
+        )
+
+        let messageSender = testDependencies.messageSender(accountChecker) ?? MessageSender(
+            accountChecker: accountChecker,
+            groupSendEndorsementStore: groupSendEndorsementStore,
+        )
+
+        let pniDistributionParameterBuilder = PniDistributionParameterBuilderImpl(
+            db: db,
+            messageSender: PniDistributionParameterBuilderImpl.Wrappers.MessageSender(messageSender),
+            pniKyberPreKeyStore: pniProtocolStore.kyberPreKeyStore,
+            registrationIdGenerator: RegistrationIdGenerator(),
+        )
+
         let identityKeyChecker = IdentityKeyCheckerImpl(
             db: db,
             identityManager: identityManager,
@@ -1154,19 +1168,6 @@ extension AppSetup.GlobalsContinuation {
             registrationStateChangeManager: registrationStateChangeManager,
             tsAccountManager: tsAccountManager,
             whoAmIManager: whoAmIManager,
-        )
-
-        let inactivePrimaryDeviceStore = InactivePrimaryDeviceStore()
-
-        let chatConnectionManager = ChatConnectionManagerImpl(
-            accountManager: tsAccountManager,
-            appContext: appContext,
-            appExpiry: appExpiry,
-            appReadiness: appReadiness,
-            db: db,
-            inactivePrimaryDeviceStore: inactivePrimaryDeviceStore,
-            libsignalNet: libsignalNet,
-            registrationStateChangeManager: registrationStateChangeManager,
         )
 
         let preKeyTaskAPIClient = PreKeyTaskAPIClientImpl(networkManager: networkManager)

@@ -92,7 +92,7 @@ public class ProfileFetcherJob {
                 return recipientDatabaseTable.fetchRecipient(serviceId: serviceId, transaction: tx)?.isRegistered == true
             }
             if isRegistered {
-                try? await accountChecker.checkIfAccountExists(serviceId: serviceId)
+                _ = try? await accountChecker.checkIfAccountExists(serviceId: serviceId)
             }
             throw ProfileRequestError.notFound
         }
