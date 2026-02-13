@@ -175,6 +175,11 @@ public class CVWallpaperBlurView: ManualLayoutViewWithLayer, CVDimmableView {
         resetContent()
     }
 
+    @available(iOS, unavailable)
+    override public func reset() {
+        fatalError("Not supported.")
+    }
+
     // MARK: - CALayerDelegate
 
     override public func action(for layer: CALayer, forKey event: String) -> CAAction? {

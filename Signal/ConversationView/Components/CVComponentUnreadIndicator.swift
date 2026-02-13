@@ -258,7 +258,6 @@ public class CVComponentUnreadIndicator: CVComponentBase, CVRootComponent {
                 innerStack.reset()
 
                 wallpaperBlurView?.removeFromSuperview()
-                wallpaperBlurView?.resetContentAndConfiguration()
 
                 hasWallpaper = false
                 isDarkThemeEnabled = false

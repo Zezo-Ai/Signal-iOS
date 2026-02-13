@@ -948,7 +948,6 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
             avatarView = nil
 
             wallpaperBlurView?.removeFromSuperview()
-            wallpaperBlurView?.resetContentAndConfiguration()
         }
 
     }

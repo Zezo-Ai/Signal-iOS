@@ -496,7 +496,6 @@ private class ContentViewNoVisualEffect {
             titleLabel.removeFromSuperview()
 
             wallpaperBlurView?.removeFromSuperview()
-            wallpaperBlurView?.resetContentAndConfiguration()
         }
 
         titleLabel.text = nil

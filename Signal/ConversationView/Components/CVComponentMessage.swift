@@ -554,6 +554,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
 
         let contentViewSwipeToReplyWrapper = componentView.contentViewSwipeToReplyWrapper
         if let bubbleView = outerBubbleView {
+            outerContentView.removeFromSuperview()
             bubbleView.addSubviewToFillSuperviewEdges(outerContentView)
 
             if let (giftWrapView, bubbleViewPartner) = self.configureGiftWrapIfNeeded(messageView: componentView) {
@@ -2472,8 +2473,6 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             chatColorView.reset()
 
             wallpaperBlurView?.removeFromSuperview()
-            wallpaperBlurView?.reset()
-            wallpaperBlurView = nil
 
             avatarView.reset()
 
