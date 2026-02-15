@@ -56,7 +56,7 @@ class BackupSettingsViewController:
             backupAttachmentDownloadTracker: AppEnvironment.shared.backupAttachmentDownloadTracker,
             backupAttachmentUploadTracker: AppEnvironment.shared.backupAttachmentUploadTracker,
             backupAttachmentUploadStore: DependenciesBridge.shared.backupAttachmentUploadStore,
-            backupDisablingManager: DependenciesBridge.shared.backupDisablingManager,
+            backupDisablingManager: AppEnvironment.shared.backupDisablingManager,
             backupEnablingManager: AppEnvironment.shared.backupEnablingManager,
             backupExportJobRunner: DependenciesBridge.shared.backupExportJobRunner,
             backupFailureStateManager: DependenciesBridge.shared.backupFailureStateManager,

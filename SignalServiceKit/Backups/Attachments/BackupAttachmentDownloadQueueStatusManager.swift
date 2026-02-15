@@ -121,26 +121,26 @@ public protocol BackupAttachmentDownloadQueueStatusManager: BackupAttachmentDown
 // MARK: -
 
 @MainActor
-public class BackupAttachmentDownloadQueueStatusManagerImpl: BackupAttachmentDownloadQueueStatusManager {
+class BackupAttachmentDownloadQueueStatusManagerImpl: BackupAttachmentDownloadQueueStatusManager {
 
     // MARK: - BackupAttachmentDownloadQueueStatusReporter
 
-    public func currentStatus(for mode: BackupAttachmentDownloadQueueMode) -> BackupAttachmentDownloadQueueStatus {
+    func currentStatus(for mode: BackupAttachmentDownloadQueueMode) -> BackupAttachmentDownloadQueueStatus {
         return state.asQueueStatus(mode: mode, dateProvider: dateProvider)
     }
 
-    public func currentStatusAndToken(for mode: BackupAttachmentDownloadQueueMode) -> (BackupAttachmentDownloadQueueStatus, BackupAttachmentDownloadQueueStatusToken) {
+    func currentStatusAndToken(for mode: BackupAttachmentDownloadQueueMode) -> (BackupAttachmentDownloadQueueStatus, BackupAttachmentDownloadQueueStatusToken) {
         return (
             state.asQueueStatus(mode: mode, dateProvider: dateProvider),
             BackupAttachmentDownloadQueueStatusTokenImpl(lastNetworkOr5xxErrorTime: state.lastNetworkOr5xxErrorTime),
         )
     }
 
-    public nonisolated func minimumRequiredDiskSpaceToCompleteDownloads() -> UInt64 {
+    nonisolated func minimumRequiredDiskSpaceToCompleteDownloads() -> UInt64 {
         return getRequiredDiskSpace()
     }
 
-    public func checkAvailableDiskSpace(clearPreviousOutOfSpaceErrors: Bool) {
+    func checkAvailableDiskSpace(clearPreviousOutOfSpaceErrors: Bool) {
         state.availableDiskSpace = getAvailableDiskSpace()
 
         if clearPreviousOutOfSpaceErrors {
@@ -150,12 +150,12 @@ public class BackupAttachmentDownloadQueueStatusManagerImpl: BackupAttachmentDow
 
     // MARK: - BackupAttachmentDownloadQueueStatusManager
 
-    public func beginObservingIfNecessary(for mode: BackupAttachmentDownloadQueueMode) -> BackupAttachmentDownloadQueueStatus {
+    func beginObservingIfNecessary(for mode: BackupAttachmentDownloadQueueMode) -> BackupAttachmentDownloadQueueStatus {
         observeDeviceAndLocalStatesIfNecessary()
         return currentStatus(for: mode)
     }
 
-    public nonisolated func jobDidExperienceError(
+    nonisolated func jobDidExperienceError(
         _ error: Error,
         token: BackupAttachmentDownloadQueueStatusToken,
         mode: BackupAttachmentDownloadQueueMode,
@@ -176,7 +176,7 @@ public class BackupAttachmentDownloadQueueStatusManagerImpl: BackupAttachmentDow
         }
     }
 
-    public nonisolated func jobDidSucceed(
+    nonisolated func jobDidSucceed(
         token: BackupAttachmentDownloadQueueStatusToken,
         mode: BackupAttachmentDownloadQueueMode,
     ) async {
@@ -188,7 +188,7 @@ public class BackupAttachmentDownloadQueueStatusManagerImpl: BackupAttachmentDow
         }
     }
 
-    public func didEmptyQueue(for mode: BackupAttachmentDownloadQueueMode) {
+    func didEmptyQueue(for mode: BackupAttachmentDownloadQueueMode) {
         switch mode {
         case .thumbnail:
             state.isThumbnailQueueEmpty = true
@@ -209,7 +209,7 @@ public class BackupAttachmentDownloadQueueStatusManagerImpl: BackupAttachmentDow
         }
     }
 
-    public func setIsMainAppAndActiveOverride(_ newValue: Bool) {
+    func setIsMainAppAndActiveOverride(_ newValue: Bool) {
         state.isMainAppAndActiveOverride = newValue
     }
 

@@ -3,11 +3,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
+import SignalServiceKit
+
 /// Reponsible for "disabling Backups": making the relevant API calls and
 /// managing state.
-public final class BackupDisablingManager {
+final class BackupDisablingManager {
     /// Side-effects of disabling Backups as relates to the user's AEP.
-    public enum AEPSideEffect {
+    enum AEPSideEffect {
         /// Store the given new AEP once disabling is complete.
         case rotate(newAEP: AccountEntropyPool)
     }
@@ -74,7 +76,7 @@ public final class BackupDisablingManager {
     /// The current status of downloading offloaded media. To learn the result
     /// of disabling remotely, callers should wait for `BackupPlan` to become
     /// `.disabled` and then consult ``disableRemotelyFailed(tx:)``.
-    public func startDisablingBackups(
+    func startDisablingBackups(
         aepSideEffect: AEPSideEffect?,
     ) async -> BackupAttachmentDownloadQueueStatus {
         logger.info("Disabling Backups...")
@@ -116,14 +118,14 @@ public final class BackupDisablingManager {
     /// Attempts to remotely disable Backups, if necessary. For example, a
     /// previous launch may have attempted but failed to remotely disable
     /// Backups.
-    public func disableRemotelyIfNecessary() async {
+    func disableRemotelyIfNecessary() async {
         await taskQueue.runWithoutTaskCancellationHandler {
             await _disableRemotelyIfNecessary()
         }
     }
 
     /// Whether a previous remote-disabling attempt failed terminally.
-    public func disableRemotelyFailed(tx: DBReadTransaction) -> Bool {
+    func disableRemotelyFailed(tx: DBReadTransaction) -> Bool {
         switch backupPlanManager.backupPlan(tx: tx) {
         case .disabled:
             return kvStore.hasValue(StoreKeys.remoteDisablingFailed, transaction: tx)

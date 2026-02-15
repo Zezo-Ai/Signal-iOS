@@ -193,9 +193,13 @@ class BackupAuthCredentialManagerImpl: BackupAuthCredentialManager {
         chatServiceAuth auth: ChatServiceAuth,
         forceRefresh: Bool,
     ) async throws -> LibSignalClient.Auth {
+        let now = dateProvider()
+
         if
             !forceRefresh,
-            let cachedCredential = db.read(block: authCredentialStore.svrBAuthCredential(tx:))
+            let cachedCredential = db.read(block: { tx in
+                authCredentialStore.svrBAuthCredential(now: now, tx: tx)
+            })
         {
             return cachedCredential
         }
@@ -219,7 +223,7 @@ class BackupAuthCredentialManagerImpl: BackupAuthCredentialManager {
         )
 
         await db.awaitableWrite { tx in
-            authCredentialStore.setSVRBAuthCredential(svrBAuth, tx: tx)
+            authCredentialStore.setSVRBAuthCredential(svrBAuth, now: now, tx: tx)
         }
 
         return svrBAuth

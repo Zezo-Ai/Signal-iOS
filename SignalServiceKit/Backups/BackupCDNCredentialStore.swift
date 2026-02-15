@@ -3,20 +3,20 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-struct BackupCDNCredentialStore {
+public struct BackupCDNCredentialStore {
     private enum Constants {
         static let cdnMetadataLifetime: TimeInterval = BackupCDNReadCredential.lifetime
     }
 
     private let kvStore: KeyValueStore
 
-    init() {
+    public init() {
         self.kvStore = KeyValueStore(collection: "BackupCDNCredentialStore")
     }
 
     // MARK: -
 
-    func wipe(tx: DBWriteTransaction) {
+    public func wipe(tx: DBWriteTransaction) {
         kvStore.removeAll(transaction: tx)
     }
 

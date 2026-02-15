@@ -33,6 +33,7 @@ public class AppEnvironment: NSObject {
     private(set) var avatarHistoryManager: AvatarHistoryManager!
     private(set) var backupAttachmentDownloadTracker: BackupAttachmentDownloadTracker!
     private(set) var backupAttachmentUploadTracker: BackupAttachmentUploadTracker!
+    private(set) var backupDisablingManager: BackupDisablingManager!
     private(set) var backupEnablingManager: BackupEnablingManager!
     private(set) var badgeManager: BadgeManager!
     private(set) var callLinkProfileKeySharingManager: CallLinkProfileKeySharingManager!
@@ -54,7 +55,9 @@ public class AppEnvironment: NSObject {
     func setUp(appReadiness: AppReadiness, callService: CallService) {
         let cron = DependenciesBridge.shared.cron
 
+        let authCredentialStore = AuthCredentialStore()
         let backupAttachmentUploadEraStore = BackupAttachmentUploadEraStore()
+        let backupCDNCredentialStore = BackupCDNCredentialStore()
         let backupNonceStore = BackupNonceMetadataStore()
         let backupSettingsStore = BackupSettingsStore()
         let backupSubscriptionIssueStore = BackupSubscriptionIssueStore()
@@ -73,17 +76,29 @@ public class AppEnvironment: NSObject {
             db: DependenciesBridge.shared.db,
         )
         self.backupAttachmentDownloadTracker = BackupAttachmentDownloadTracker(
-            backupAttachmentDownloadQueueStatusReporter: DependenciesBridge.shared.backupAttachmentDownloadQueueStatusReporter,
+            backupAttachmentDownloadQueueStatusReporter: DependenciesBridge.shared.backupAttachmentDownloadQueueStatusManager,
             backupAttachmentDownloadProgress: DependenciesBridge.shared.backupAttachmentDownloadProgress,
         )
         self.backupAttachmentUploadTracker = BackupAttachmentUploadTracker(
-            backupAttachmentUploadQueueStatusReporter: DependenciesBridge.shared.backupAttachmentUploadQueueStatusReporter,
+            backupAttachmentUploadQueueStatusReporter: DependenciesBridge.shared.backupAttachmentUploadQueueStatusManager,
             backupAttachmentUploadProgress: DependenciesBridge.shared.backupAttachmentUploadProgress,
         )
         self.badgeManager = badgeManager
+        self.backupDisablingManager = BackupDisablingManager(
+            accountEntropyPoolManager: DependenciesBridge.shared.accountEntropyPoolManager,
+            authCredentialStore: authCredentialStore,
+            backupAttachmentCoordinator: DependenciesBridge.shared.backupAttachmentCoordinator,
+            backupAttachmentDownloadQueueStatusManager: DependenciesBridge.shared.backupAttachmentDownloadQueueStatusManager,
+            backupCDNCredentialStore: backupCDNCredentialStore,
+            backupKeyService: DependenciesBridge.shared.backupKeyService,
+            backupPlanManager: DependenciesBridge.shared.backupPlanManager,
+            backupSettingsStore: backupSettingsStore,
+            db: DependenciesBridge.shared.db,
+            tsAccountManager: DependenciesBridge.shared.tsAccountManager,
+        )
         self.backupEnablingManager = BackupEnablingManager(
             backupAttachmentUploadEraStore: backupAttachmentUploadEraStore,
-            backupDisablingManager: DependenciesBridge.shared.backupDisablingManager,
+            backupDisablingManager: self.backupDisablingManager,
             backupKeyService: DependenciesBridge.shared.backupKeyService,
             backupPlanManager: DependenciesBridge.shared.backupPlanManager,
             backupSettingsStore: backupSettingsStore,
@@ -169,7 +184,6 @@ public class AppEnvironment: NSObject {
 
         appReadiness.runNowOrWhenAppDidBecomeReadyAsync {
             let accountEntropyPoolManager = DependenciesBridge.shared.accountEntropyPoolManager
-            let backupDisablingManager = DependenciesBridge.shared.backupDisablingManager
             let backupExportJobRunner = DependenciesBridge.shared.backupExportJobRunner
             let backupIdService = DependenciesBridge.shared.backupIdService
             let backupSubscriptionManager = DependenciesBridge.shared.backupSubscriptionManager
@@ -272,7 +286,7 @@ public class AppEnvironment: NSObject {
             }
 
             Task { () async -> Void in
-                await backupDisablingManager.disableRemotelyIfNecessary()
+                await self.backupDisablingManager.disableRemotelyIfNecessary()
             }
 
             Task {

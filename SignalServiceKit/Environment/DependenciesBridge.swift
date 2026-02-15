@@ -67,12 +67,11 @@ public class DependenciesBridge {
     public let backupArchiveManager: BackupArchiveManager
     public let backupAttachmentDownloadProgress: BackupAttachmentDownloadProgress
     public let backupAttachmentDownloadStore: BackupAttachmentDownloadStore
-    public let backupAttachmentDownloadQueueStatusReporter: BackupAttachmentDownloadQueueStatusReporter
+    public let backupAttachmentDownloadQueueStatusManager: BackupAttachmentDownloadQueueStatusManager
     public let backupAttachmentCoordinator: BackupAttachmentCoordinator
     public let backupAttachmentUploadProgress: BackupAttachmentUploadProgress
-    public let backupAttachmentUploadQueueStatusReporter: BackupAttachmentUploadQueueStatusReporter
+    public let backupAttachmentUploadQueueStatusManager: BackupAttachmentUploadQueueStatusManager
     public let backupAttachmentUploadStore: BackupAttachmentUploadStore
-    public let backupDisablingManager: BackupDisablingManager
     public let backupExportJob: BackupExportJob
     public let backupExportJobRunner: BackupExportJobRunner
     public let backupFailureStateManager: BackupFailureStateManager
@@ -209,12 +208,11 @@ public class DependenciesBridge {
         backupArchiveManager: BackupArchiveManager,
         backupAttachmentDownloadProgress: BackupAttachmentDownloadProgress,
         backupAttachmentDownloadStore: BackupAttachmentDownloadStore,
-        backupAttachmentDownloadQueueStatusReporter: BackupAttachmentDownloadQueueStatusReporter,
+        backupAttachmentDownloadQueueStatusManager: BackupAttachmentDownloadQueueStatusManager,
         backupAttachmentCoordinator: BackupAttachmentCoordinator,
         backupAttachmentUploadProgress: BackupAttachmentUploadProgress,
-        backupAttachmentUploadQueueStatusReporter: BackupAttachmentUploadQueueStatusReporter,
+        backupAttachmentUploadQueueStatusManager: BackupAttachmentUploadQueueStatusManager,
         backupAttachmentUploadStore: BackupAttachmentUploadStore,
-        backupDisablingManager: BackupDisablingManager,
         backupExportJob: BackupExportJob,
         backupExportJobRunner: BackupExportJobRunner,
         backupFailureStateManager: BackupFailureStateManager,
@@ -350,12 +348,11 @@ public class DependenciesBridge {
         self.backupArchiveManager = backupArchiveManager
         self.backupAttachmentDownloadProgress = backupAttachmentDownloadProgress
         self.backupAttachmentDownloadStore = backupAttachmentDownloadStore
-        self.backupAttachmentDownloadQueueStatusReporter = backupAttachmentDownloadQueueStatusReporter
+        self.backupAttachmentDownloadQueueStatusManager = backupAttachmentDownloadQueueStatusManager
         self.backupAttachmentCoordinator = backupAttachmentCoordinator
         self.backupAttachmentUploadProgress = backupAttachmentUploadProgress
-        self.backupAttachmentUploadQueueStatusReporter = backupAttachmentUploadQueueStatusReporter
+        self.backupAttachmentUploadQueueStatusManager = backupAttachmentUploadQueueStatusManager
         self.backupAttachmentUploadStore = backupAttachmentUploadStore
-        self.backupDisablingManager = backupDisablingManager
         self.backupExportJob = backupExportJob
         self.backupExportJobRunner = backupExportJobRunner
         self.backupFailureStateManager = backupFailureStateManager

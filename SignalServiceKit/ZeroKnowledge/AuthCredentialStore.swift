@@ -6,17 +6,14 @@
 import Foundation
 import LibSignalClient
 
-class AuthCredentialStore {
-    private let dateProvider: DateProvider
-
+public class AuthCredentialStore {
     private let callLinkAuthCredentialStore: KeyValueStore
     private let groupAuthCredentialStore: KeyValueStore
     private let backupMessagesAuthCredentialStore: KeyValueStore
     private let backupMediaAuthCredentialStore: KeyValueStore
     private let svrBAuthCredentialStore: KeyValueStore
 
-    init(dateProvider: @escaping DateProvider) {
-        self.dateProvider = dateProvider
+    public init() {
         self.callLinkAuthCredentialStore = KeyValueStore(collection: "CallLinkAuthCredential")
         self.groupAuthCredentialStore = KeyValueStore(collection: "GroupsV2Impl.authCredentialStoreStore")
         self.backupMessagesAuthCredentialStore = KeyValueStore(collection: "BackupAuthCredential")
@@ -144,7 +141,10 @@ class AuthCredentialStore {
     static let svrBAuthCredentialUsernameKey = "svr🐝AuthCredentialUsernameKey"
     static let svrBAuthCredentialPasswordKey = "svr🐝AuthCredentialPasswordKey"
 
-    func svrBAuthCredential(tx: DBReadTransaction) -> LibSignalClient.Auth? {
+    func svrBAuthCredential(
+        now: Date,
+        tx: DBReadTransaction,
+    ) -> LibSignalClient.Auth? {
         guard
             let username = svrBAuthCredentialStore.getString(Self.svrBAuthCredentialUsernameKey, transaction: tx),
             let password = svrBAuthCredentialStore.getString(Self.svrBAuthCredentialPasswordKey, transaction: tx),
@@ -152,7 +152,7 @@ class AuthCredentialStore {
         else {
             return nil
         }
-        guard expiryDate > dateProvider() else {
+        guard expiryDate > now else {
             return nil
         }
         return Auth(
@@ -163,6 +163,7 @@ class AuthCredentialStore {
 
     func setSVRBAuthCredential(
         _ credential: LibSignalClient.Auth?,
+        now: Date,
         tx: DBWriteTransaction,
     ) {
         guard let credential else {
@@ -172,7 +173,7 @@ class AuthCredentialStore {
         svrBAuthCredentialStore.setString(credential.username, key: Self.svrBAuthCredentialUsernameKey, transaction: tx)
         svrBAuthCredentialStore.setString(credential.password, key: Self.svrBAuthCredentialPasswordKey, transaction: tx)
         svrBAuthCredentialStore.setDate(
-            dateProvider().addingTimeInterval(Self.svrBAuthCredentialExpirationTime),
+            now.addingTimeInterval(Self.svrBAuthCredentialExpirationTime),
             key: Self.svrBAuthCredentialExpiryDateKey,
             transaction: tx,
         )
@@ -194,7 +195,7 @@ class AuthCredentialStore {
         }
     }
 
-    func removeAllBackupAuthCredentials(tx: DBWriteTransaction) {
+    public func removeAllBackupAuthCredentials(tx: DBWriteTransaction) {
         for credentialType in BackupAuthCredentialType.allCases {
             removeAllBackupAuthCredentials(ofType: credentialType, tx: tx)
         }

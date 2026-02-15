@@ -356,7 +356,7 @@ extension AppSetup.GlobalsContinuation {
             usernameLookupManager: usernameLookupManager,
         )
 
-        let authCredentialStore = AuthCredentialStore(dateProvider: dateProvider)
+        let authCredentialStore = AuthCredentialStore()
 
         let callLinkPublicParams = try! GenericServerPublicParams(contents: tsConstants.callLinkPublicParams)
         let authCredentialManager = AuthCredentialManagerImpl(
@@ -1083,19 +1083,6 @@ extension AppSetup.GlobalsContinuation {
             tsAccountManager: tsAccountManager,
         )
 
-        let backupDisablingManager = BackupDisablingManager(
-            accountEntropyPoolManager: accountEntropyPoolManager,
-            authCredentialStore: authCredentialStore,
-            backupAttachmentCoordinator: backupAttachmentCoordinator,
-            backupAttachmentDownloadQueueStatusManager: backupAttachmentDownloadQueueStatusManager,
-            backupCDNCredentialStore: backupCDNCredentialStore,
-            backupKeyService: backupKeyService,
-            backupPlanManager: backupPlanManager,
-            backupSettingsStore: backupSettingsStore,
-            db: db,
-            tsAccountManager: tsAccountManager,
-        )
-
         let inactivePrimaryDeviceStore = InactivePrimaryDeviceStore()
 
         let registrationStateChangeManager = RegistrationStateChangeManagerImpl(
@@ -1673,12 +1660,11 @@ extension AppSetup.GlobalsContinuation {
             backupArchiveManager: backupArchiveManager,
             backupAttachmentDownloadProgress: backupAttachmentDownloadProgress,
             backupAttachmentDownloadStore: backupAttachmentDownloadStore,
-            backupAttachmentDownloadQueueStatusReporter: backupAttachmentDownloadQueueStatusManager,
+            backupAttachmentDownloadQueueStatusManager: backupAttachmentDownloadQueueStatusManager,
             backupAttachmentCoordinator: backupAttachmentCoordinator,
             backupAttachmentUploadProgress: backupAttachmentUploadProgress,
-            backupAttachmentUploadQueueStatusReporter: backupAttachmentUploadQueueStatusManager,
+            backupAttachmentUploadQueueStatusManager: backupAttachmentUploadQueueStatusManager,
             backupAttachmentUploadStore: backupAttachmentUploadStore,
-            backupDisablingManager: backupDisablingManager,
             backupExportJob: backupExportJob,
             backupExportJobRunner: backupExportJobRunner,
             backupFailureStateManager: backupFailureStateManager,

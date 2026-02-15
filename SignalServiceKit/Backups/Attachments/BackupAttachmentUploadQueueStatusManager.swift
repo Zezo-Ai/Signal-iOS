@@ -72,7 +72,7 @@ extension BackupAttachmentUploadQueueStatusReporter {
 /// API for callers to manage the `StatusReporter` in response to relevant
 /// external events.
 @MainActor
-protocol BackupAttachmentUploadQueueStatusManager: BackupAttachmentUploadQueueStatusReporter {
+public protocol BackupAttachmentUploadQueueStatusManager: BackupAttachmentUploadQueueStatusReporter {
 
     /// Begin observing status updates, if necessary.
     func beginObservingIfNecessary(for mode: BackupAttachmentUploadQueueMode) -> BackupAttachmentUploadQueueStatus
@@ -86,22 +86,22 @@ protocol BackupAttachmentUploadQueueStatusManager: BackupAttachmentUploadQueueSt
 // MARK: -
 
 @MainActor
-public class BackupAttachmentUploadQueueStatusManagerImpl: BackupAttachmentUploadQueueStatusManager {
+class BackupAttachmentUploadQueueStatusManagerImpl: BackupAttachmentUploadQueueStatusManager {
 
     // MARK: - BackupAttachmentUploadQueueStatusReporter
 
-    public func currentStatus(for mode: BackupAttachmentUploadQueueMode) -> BackupAttachmentUploadQueueStatus {
+    func currentStatus(for mode: BackupAttachmentUploadQueueMode) -> BackupAttachmentUploadQueueStatus {
         return state.asQueueStatus(for: mode)
     }
 
     // MARK: - BackupAttachmentUploadQueueStatusManager
 
-    public func beginObservingIfNecessary(for mode: BackupAttachmentUploadQueueMode) -> BackupAttachmentUploadQueueStatus {
+    func beginObservingIfNecessary(for mode: BackupAttachmentUploadQueueMode) -> BackupAttachmentUploadQueueStatus {
         observeDeviceAndLocalStatesIfNecessary()
         return currentStatus(for: mode)
     }
 
-    public func didEmptyQueue(for mode: BackupAttachmentUploadQueueMode) {
+    func didEmptyQueue(for mode: BackupAttachmentUploadQueueMode) {
         switch mode {
         case .fullsize:
             state.isFullsizeQueueEmpty = true
@@ -113,7 +113,7 @@ public class BackupAttachmentUploadQueueStatusManagerImpl: BackupAttachmentUploa
         }
     }
 
-    public func setIsMainAppAndActiveOverride(_ newValue: Bool) {
+    func setIsMainAppAndActiveOverride(_ newValue: Bool) {
         state.isMainAppAndActiveOverride = newValue
     }
 
@@ -456,7 +456,7 @@ public class BackupAttachmentUploadQueueStatusManagerImpl: BackupAttachmentUploa
     }
 
     @objc
-    public func suspensionStatusDidChange() {
+    func suspensionStatusDidChange() {
         self.state.areUploadsSuspended = db.read { tx in
             backupSettingsStore.isBackupAttachmentUploadQueueSuspended(tx: tx)
         }
