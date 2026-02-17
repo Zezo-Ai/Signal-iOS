@@ -170,6 +170,7 @@ extension AppSetup {
 extension AppSetup.GlobalsContinuation {
     @MainActor
     public func initGlobals(
+        appContext: AppContext,
         appReadiness: AppReadiness,
         backupArchiveErrorPresenterFactory: BackupArchiveErrorPresenterFactory,
         deviceBatteryLevelManager: (any DeviceBatteryLevelManager)?,
@@ -478,6 +479,7 @@ extension AppSetup.GlobalsContinuation {
 
         let backupSubscriptionIssueStore = BackupSubscriptionIssueStore()
         let backupSubscriptionManager = BackupSubscriptionManagerImpl(
+            appContext: appContext,
             backupPlanManager: backupPlanManager,
             backupSubscriptionIssueStore: backupSubscriptionIssueStore,
             backupSubscriptionRedeemer: BackupSubscriptionRedeemer(

@@ -397,6 +397,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         )
         let globalsContinuation = await schemaMigrationContinuation.migrateDatabaseSchema()
         let dataMigrationContinuation = globalsContinuation.initGlobals(
+            appContext: launchContext.appContext,
             appReadiness: appReadiness,
             backupArchiveErrorPresenterFactory: BackupArchiveErrorPresenterFactoryInternal(),
             deviceBatteryLevelManager: DeviceBatteryLevelManagerImpl(),

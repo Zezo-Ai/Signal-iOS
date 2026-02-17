@@ -89,6 +89,7 @@ public class ShareViewController: OWSNavigationController, ShareViewDelegate, SA
             )
             .migrateDatabaseSchema()
             .initGlobals(
+                appContext: appContext,
                 appReadiness: appReadiness,
                 backupArchiveErrorPresenterFactory: NoOpBackupArchiveErrorPresenterFactory(),
                 deviceBatteryLevelManager: nil,

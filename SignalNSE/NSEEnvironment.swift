@@ -56,11 +56,12 @@ class NSEEnvironment {
 
         let finalContinuation = await AppSetup()
             .start(
-                appContext: CurrentAppContext(),
+                appContext: appContext,
                 databaseStorage: databaseStorage,
             )
             .migrateDatabaseSchema()
             .initGlobals(
+                appContext: appContext,
                 appReadiness: appReadiness,
                 backupArchiveErrorPresenterFactory: NoOpBackupArchiveErrorPresenterFactory(),
                 deviceBatteryLevelManager: nil,

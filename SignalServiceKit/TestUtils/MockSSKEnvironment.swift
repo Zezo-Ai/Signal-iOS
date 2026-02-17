@@ -71,6 +71,7 @@ public class MockSSKEnvironment {
                 keychainStorage: keychainStorage,
             ),
         ).migrateDatabaseSchema().initGlobals(
+            appContext: testAppContext,
             appReadiness: appReadiness,
             backupArchiveErrorPresenterFactory: NoOpBackupArchiveErrorPresenterFactory(),
             deviceBatteryLevelManager: nil,
