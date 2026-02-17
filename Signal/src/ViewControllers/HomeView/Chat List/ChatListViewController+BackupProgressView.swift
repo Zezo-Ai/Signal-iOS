@@ -512,10 +512,14 @@ private class BackupProgressView: UIView {
 
     // MARK: -
 
-    private static func configure(label: UILabel, color: UIColor) {
+    private static func configure(
+        label: UILabel,
+        font: UIFont = .dynamicTypeSubheadline,
+        color: UIColor,
+    ) {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.adjustsFontForContentSizeCategory = true
-        label.font = .dynamicTypeSubheadline
+        label.font = .monospacedDigitFont(ofSize: font.pointSize)
         label.textColor = color
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
@@ -533,7 +537,6 @@ private class BackupProgressView: UIView {
     /// stack view so we can use `isHidden = true` to make subviews take up zero
     /// space.
     private lazy var trailingAccessoryContainerView = UIStackView()
-    private lazy var trailingAccessorySpacerView = UIView()
     private lazy var trailingAccessoryRunningArcView = ArcView()
     private lazy var trailingAccessoryPausedWifiResumeButton = UIButton()
     private lazy var trailingAccessoryPausedNoInternetLabel = UILabel()
@@ -557,6 +560,8 @@ private class BackupProgressView: UIView {
 
         addSubview(labelStackView)
         labelStackView.translatesAutoresizingMaskIntoConstraints = false
+        labelStackView.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        labelStackView.alignment = .fill
         labelStackView.axis = .vertical
         labelStackView.spacing = 4
 
@@ -564,14 +569,11 @@ private class BackupProgressView: UIView {
         Self.configure(label: titleLabel, color: .Signal.label)
 
         labelStackView.addArrangedSubview(progressLabel)
-        Self.configure(label: progressLabel, color: .Signal.secondaryLabel)
+        Self.configure(label: progressLabel, font: .dynamicTypeFootnote, color: .Signal.secondaryLabel)
 
         addSubview(trailingAccessoryContainerView)
         trailingAccessoryContainerView.alignment = .trailing
         trailingAccessoryContainerView.translatesAutoresizingMaskIntoConstraints = false
-
-        trailingAccessoryContainerView.addArrangedSubview(trailingAccessorySpacerView)
-        trailingAccessorySpacerView.translatesAutoresizingMaskIntoConstraints = false
 
         trailingAccessoryContainerView.addArrangedSubview(trailingAccessoryRunningArcView)
         trailingAccessoryRunningArcView.translatesAutoresizingMaskIntoConstraints = false
@@ -730,7 +732,7 @@ private class BackupProgressView: UIView {
 
         // Hide all but at most one trailingAccessory view.
         for view in trailingAccessoryContainerView.arrangedSubviews {
-            if view == trailingAccessoryView || view == trailingAccessorySpacerView {
+            if view == trailingAccessoryView {
                 view.isHidden = false
             } else {
                 view.isHidden = true
