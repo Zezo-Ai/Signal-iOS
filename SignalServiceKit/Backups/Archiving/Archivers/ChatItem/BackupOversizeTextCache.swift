@@ -438,9 +438,14 @@ class BackupArchiveInlinedOversizeTextArchiver {
             }
             owsAssertDebug(stream.contentType.raw == .file)
             owsAssertDebug(stream.mimeType == MimeType.textXSignalPlain.rawValue)
-            let text = try stream.decryptedLongText()
-            let recordId = try self.insert(attachmentId: stream.id, text: text, tx: tx)
-            maxRecordId = max(maxRecordId, recordId)
+
+            // If the attachment fails to decrypt, skip this record.
+            if let text = try? stream.decryptedLongText() {
+                let recordId = try self.insert(attachmentId: stream.id, text: text, tx: tx)
+                maxRecordId = max(maxRecordId, recordId)
+            } else {
+                logger.error("Failed to decrypt long text! Skipping.")
+            }
             if let progress {
                 progress.incrementCompletedUnitCount(by: 1)
             }
