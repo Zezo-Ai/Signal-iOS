@@ -3289,28 +3289,3 @@ extension ConversationInputToolbar: AttachmentKeyboardDelegate {
 extension ConversationInputToolbar: ConversationBottomBar {
     var shouldAttachToKeyboardLayoutGuide: Bool { true }
 }
-
-@available(iOS 26, *)
-private extension ColorOrGradientValue {
-
-    func asLiquidGlassTintColor() -> UIColor {
-        let bubbleColor: UIColor = {
-            switch self {
-            case .transparent, .blur:
-                return .Signal.accent
-
-            case .solidColor(let color):
-                return color
-
-            case .gradient(let gradientColor1, let gradientColor2, _):
-                return gradientColor1.midPoint(with: gradientColor2)
-            }
-        }()
-        let lightThemeFinalColor = bubbleColor.blendedWithOverlay(.white, opacity: 0.16)
-        let darkThemeFinalColor = bubbleColor.blendedWithOverlay(.black, opacity: 0.1)
-        return UIColor(
-            light: lightThemeFinalColor,
-            dark: darkThemeFinalColor,
-        )
-    }
-}

@@ -109,3 +109,30 @@ public extension UIColor {
         return OWSColor(red: red.clamp01(), green: green.clamp01(), blue: blue.clamp01())
     }
 }
+
+// MARK: -
+
+@available(iOS 26, *)
+public extension ColorOrGradientValue {
+
+    func asLiquidGlassTintColor() -> UIColor {
+        let bubbleColor: UIColor = {
+            switch self {
+            case .transparent, .blur:
+                return .Signal.accent
+
+            case .solidColor(let color):
+                return color
+
+            case .gradient(let gradientColor1, let gradientColor2, _):
+                return gradientColor1.midPoint(with: gradientColor2)
+            }
+        }()
+        let lightThemeFinalColor = bubbleColor.blendedWithOverlay(.white, opacity: 0.16)
+        let darkThemeFinalColor = bubbleColor.blendedWithOverlay(.black, opacity: 0.1)
+        return UIColor(
+            light: lightThemeFinalColor,
+            dark: darkThemeFinalColor,
+        )
+    }
+}

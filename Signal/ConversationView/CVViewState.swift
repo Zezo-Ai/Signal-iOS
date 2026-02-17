@@ -181,7 +181,13 @@ extension ConversationViewController {
 
     var conversationStyle: ConversationStyle {
         get { viewState.conversationStyle }
-        set { viewState.conversationStyle = newValue }
+        set {
+            viewState.conversationStyle = newValue
+            if #available(iOS 26, *) {
+                viewState.scrollDownButton.tintColor = newValue.chatColorValue.asLiquidGlassTintColor()
+                viewState.scrollToNextMentionButton.tintColor = newValue.chatColorValue.asLiquidGlassTintColor()
+            }
+        }
     }
 
     var headerView: ConversationHeaderView { viewState.headerView }

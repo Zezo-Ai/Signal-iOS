@@ -24,7 +24,7 @@ public class ConversationScrollButton: UIButton {
 
         var configuration: UIButton.Configuration?
         if #available(iOS 26, *) {
-            configuration = .glass()
+            configuration = .prominentGlass()
         }
         if configuration == nil {
             configuration = .gray()
