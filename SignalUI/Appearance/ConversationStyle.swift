@@ -255,36 +255,38 @@ public struct ConversationStyle {
         chatColorValue
     }
 
-    public static var bubbleTextColorIncoming: UIColor {
-        return bubbleTextColorIncomingThemed.forCurrentTheme
-    }
+    // MARK: - Primary text color
 
     public static var bubbleTextColorIncomingThemed: ThemedColor {
         ThemedColor(light: Theme.lightThemePrimaryColor, dark: Theme.darkThemePrimaryColor)
-    }
-
-    public static var bubbleTextColorOutgoing: UIColor {
-        return bubbleTextColorOutgoingThemed.forCurrentTheme
     }
 
     public static var bubbleTextColorOutgoingThemed: ThemedColor {
         ThemedColor(light: UIColor.ows_white, dark: UIColor.ows_gray05)
     }
 
-    public var bubbleTextColorIncoming: UIColor {
-        Self.bubbleTextColorIncomingThemed.color(isDarkThemeEnabled: isDarkThemeEnabled)
+    public static var bubbleTextColorIncoming: UIColor {
+        bubbleTextColorIncomingThemed.forCurrentTheme
     }
 
-    public var bubbleSecondaryTextColorIncoming: UIColor {
-        isDarkThemeEnabled ? Theme.darkThemeSecondaryTextAndIconColor : Theme.lightThemeSecondaryTextAndIconColor
+    public static var bubbleTextColorOutgoing: UIColor {
+        bubbleTextColorOutgoingThemed.forCurrentTheme
+    }
+
+    public static func bubbleTextColor(isIncoming: Bool) -> UIColor {
+        isIncoming ? bubbleTextColorIncoming : bubbleTextColorOutgoing
+    }
+
+    public var bubbleTextColorIncoming: UIColor {
+        Self.bubbleTextColorIncomingThemed.color(isDarkThemeEnabled: isDarkThemeEnabled)
     }
 
     public var bubbleTextColorOutgoing: UIColor {
         Self.bubbleTextColorOutgoingThemed.color(isDarkThemeEnabled: isDarkThemeEnabled)
     }
 
-    public var bubbleSecondaryTextColorOutgoing: UIColor {
-        isDarkThemeEnabled ? .ows_whiteAlpha60 : .ows_whiteAlpha80
+    public func bubbleTextColor(isIncoming: Bool) -> UIColor {
+        isIncoming ? bubbleTextColorIncoming : bubbleTextColorOutgoing
     }
 
     public func bubbleTextColor(message: TSMessage) -> UIColor {
@@ -300,13 +302,47 @@ public struct ConversationStyle {
         }
     }
 
-    public func bubbleTextColor(isIncoming: Bool) -> UIColor {
-        if isIncoming {
-            return bubbleTextColorIncoming
-        } else {
-            return bubbleTextColorOutgoing
-        }
+    // MARK: - Secondary text color
+
+    public static var bubbleSecondaryTextColorIncomingThemed: ThemedColor {
+        ThemedColor(
+            light: Theme.lightThemeSecondaryTextAndIconColor,
+            dark: Theme.darkThemeSecondaryTextAndIconColor,
+        )
     }
+
+    public static var bubbleSecondaryTextColorOutgoingThemed: ThemedColor {
+        ThemedColor(
+            light: UIColor.ows_whiteAlpha80,
+            dark: UIColor.ows_whiteAlpha60,
+        )
+    }
+
+    public static var bubbleSecondaryTextColorIncoming: UIColor {
+        bubbleSecondaryTextColorIncomingThemed.forCurrentTheme
+    }
+
+    public static var bubbleSecondaryTextColorOutgoing: UIColor {
+        bubbleSecondaryTextColorOutgoingThemed.forCurrentTheme
+    }
+
+    public static func bubbleSecondaryTextColor(isIncoming: Bool) -> UIColor {
+        isIncoming ? bubbleSecondaryTextColorIncoming : bubbleSecondaryTextColorOutgoing
+    }
+
+    public var bubbleSecondaryTextColorIncoming: UIColor {
+        Self.bubbleSecondaryTextColorIncomingThemed.color(isDarkThemeEnabled: isDarkThemeEnabled)
+    }
+
+    public var bubbleSecondaryTextColorOutgoing: UIColor {
+        Self.bubbleSecondaryTextColorOutgoingThemed.color(isDarkThemeEnabled: isDarkThemeEnabled)
+    }
+
+    public func bubbleSecondaryTextColor(isIncoming: Bool) -> UIColor {
+        isIncoming ? bubbleSecondaryTextColorIncoming : bubbleSecondaryTextColorOutgoing
+    }
+
+    // MARK: - Misc colors
 
     public func bubbleReadMoreTextColor(message: TSMessage) -> UIColor {
         if message is TSIncomingMessage {
@@ -316,14 +352,6 @@ public struct ConversationStyle {
         } else {
             owsFailDebug("Unexpected message type: \(message)")
             return bubbleTextColorOutgoing
-        }
-    }
-
-    public func bubbleSecondaryTextColor(isIncoming: Bool) -> UIColor {
-        if isIncoming {
-            return bubbleSecondaryTextColorIncoming
-        } else {
-            return bubbleSecondaryTextColorOutgoing
         }
     }
 
