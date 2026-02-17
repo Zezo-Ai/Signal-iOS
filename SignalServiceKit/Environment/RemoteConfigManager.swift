@@ -230,9 +230,6 @@ public class RemoteConfig {
     }
 
     public var attachmentMaxEncryptedReceiveBytes: UInt64 {
-        guard BuildFlags.useNewAttachmentLimits else {
-            return self.attachmentMaxEncryptedBytes
-        }
         let maxEncryptedBytes = self.attachmentMaxEncryptedBytes
         return min(Self.attachmentHardLimit, getUInt64Value(
             forFlag: .attachmentMaxEncryptedReceiveBytes,
@@ -248,9 +245,6 @@ public class RemoteConfig {
     }
 
     public var videoAttachmentMaxEncryptedReceiveBytes: UInt64 {
-        guard BuildFlags.useNewAttachmentLimits else {
-            return self.videoAttachmentMaxEncryptedBytes
-        }
         let maxEncryptedBytes = self.videoAttachmentMaxEncryptedBytes
         return min(Self.attachmentHardLimit, getUInt64Value(
             forFlag: .videoAttachmentMaxEncryptedReceiveBytes,
@@ -259,9 +253,6 @@ public class RemoteConfig {
     }
 
     public var backupAttachmentMaxEncryptedBytes: UInt64 {
-        guard BuildFlags.useNewAttachmentLimits else {
-            return 100_000_000
-        }
         return min(Self.attachmentHardLimit, getUInt64Value(
             forFlag: .backupAttachmentMaxEncryptedBytes,
             defaultValue: self.attachmentMaxEncryptedBytes,
