@@ -51,7 +51,7 @@ class BackupArchiveContactAttachmentArchiver: BackupArchiveProtoStreamWriter {
         for email in contact.emails {
             switch archiveContactEmail(email).bubbleUp(resultType, partialErrors: &partialErrors) {
             case .continue(let emailProto):
-                emailProtos.append(emailProto)
+                emailProto.map { emailProtos.append($0) }
             case .bubbleUpError(let errorResult):
                 return errorResult
             }
@@ -148,9 +148,12 @@ class BackupArchiveContactAttachmentArchiver: BackupArchiveProtoStreamWriter {
 
     private func archiveContactEmail(
         _ contactEmail: OWSContactEmail,
-    ) -> BackupArchive.ArchiveInteractionResult<BackupProto_ContactAttachment.Email> {
+    ) -> BackupArchive.ArchiveInteractionResult<BackupProto_ContactAttachment.Email?> {
         var emailProto = BackupProto_ContactAttachment.Email()
-        emailProto.value = contactEmail.email
+        guard let email = contactEmail.email.nilIfEmpty else {
+            return .success(nil)
+        }
+        emailProto.value = email
         if let label = contactEmail.label {
             emailProto.label = label
         }
