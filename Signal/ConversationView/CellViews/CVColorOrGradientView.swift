@@ -22,9 +22,7 @@ public class CVColorOrGradientView: ManualLayoutViewWithLayer, CVDimmableView {
     private weak var referenceView: UIView?
     private var value: ColorOrGradientValue?
 
-    private var cornerConfig: BubbleCornerConfiguration?
-    private var strokeConfig: BubbleStrokeConfiguration?
-    private var hasPillRounding = false
+    private var bubbleConfig: BubbleConfiguration?
 
     private var backgroundBlurView: UIVisualEffectView?
     private let gradientLayer = CAGradientLayer()
@@ -37,6 +35,8 @@ public class CVColorOrGradientView: ManualLayoutViewWithLayer, CVDimmableView {
 
     public init() {
         super.init(name: "CVColorOrGradientView")
+
+        strokeLayer.fillColor = nil
 
         gradientLayer.disableAnimationsWithDelegate()
         strokeLayer.disableAnimationsWithDelegate()
@@ -60,39 +60,15 @@ public class CVColorOrGradientView: ManualLayoutViewWithLayer, CVDimmableView {
     public func configure(
         value: ColorOrGradientValue,
         referenceView: UIView,
-        hasPillRounding: Bool = false,
-        cornerConfig: BubbleCornerConfiguration? = nil,
-        strokeConfig: BubbleStrokeConfiguration? = nil,
+        bubbleConfig: BubbleConfiguration? = nil,
     ) {
-        // At most one of these parameters should be set.
-        owsAssertDebug(hasPillRounding == false || cornerConfig == nil)
-
         self.value = value
         self.referenceView = referenceView
-        self.hasPillRounding = hasPillRounding
-        self.cornerConfig = cornerConfig
-        self.strokeConfig = strokeConfig
+        self.bubbleConfig = bubbleConfig
 
         addDefaultLayoutBlock()
 
         updateAppearance()
-    }
-
-    private var bubblePath: UIBezierPath {
-        guard let cornerConfig else {
-            if hasPillRounding {
-                let cornerRadius = bounds.size.smallerAxis / 2
-                return UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius)
-            }
-            return UIBezierPath(rect: bounds)
-        }
-        let sharpCorners = UIView.uiRectCorner(forOWSDirectionalRectCorner: cornerConfig.sharpCorners)
-        return UIBezierPath.roundedRect(
-            bounds,
-            sharpCorners: sharpCorners,
-            sharpCornerRadius: cornerConfig.sharpCornerRadius,
-            wideCornerRadius: cornerConfig.wideCornerRadius,
-        )
     }
 
     public func updateAppearance() {
@@ -248,46 +224,39 @@ public class CVColorOrGradientView: ManualLayoutViewWithLayer, CVDimmableView {
             gradientLayer.endPoint = endPointLayerUnitsLL
         }
 
-        // Rounded corners.
-        if let cornerConfig {
-            if cornerConfig.sharpCorners == .allCorners || cornerConfig.sharpCorners.isEmpty {
-                // If all of the corners have the same radius, don't
-                // bother using a mask layer.
-                layer.cornerRadius = (
-                    cornerConfig.sharpCorners.isEmpty
-                        ? cornerConfig.wideCornerRadius
-                        : cornerConfig.sharpCornerRadius,
-                )
+        // Bubble shape.
+        if let bubbleConfig {
+            // Rounded corners.
+            if let cornerRadius = bubbleConfig.corners.uniformCornerRadius(for: bounds) {
+                // If all of the corners have the same radius, don't bother using a mask layer.
+                // Set cornerRadius instead - it's more performant.
                 layer.mask = nil
                 layer.masksToBounds = true
+                layer.cornerRadius = cornerRadius
             } else {
-                maskLayer.path = bubblePath.cgPath
+                maskLayer.path = bubbleConfig.bubblePath(for: bounds).cgPath
                 layer.mask = maskLayer
                 layer.masksToBounds = false
                 layer.cornerRadius = 0
             }
-        } else {
-            // If this view isn't being used as a CVC message bubble,
-            // don't bother masking or using shapeLayer to render the stroke.
-            layer.mask = nil
 
-            if hasPillRounding {
-                layer.masksToBounds = true
-                layer.cornerRadius = bounds.size.smallerAxis / 2
+            // Stroke.
+            if
+                let stroke = bubbleConfig.stroke,
+                let strokePath = bubbleConfig.strokePath(for: bounds)
+            {
+                strokeLayer.lineWidth = stroke.width
+                strokeLayer.strokeColor = stroke.color.cgColor
+                strokeLayer.path = strokePath.cgPath
+                layer.addSublayer(strokeLayer)
             } else {
-                layer.masksToBounds = false
-                layer.cornerRadius = 0
+                strokeLayer.removeFromSuperlayer()
             }
-        }
+        } else {
+            layer.mask = nil
+            layer.masksToBounds = false
+            layer.cornerRadius = 0
 
-        // Stroke.
-        if let strokeConfig {
-            strokeLayer.lineWidth = strokeConfig.width
-            strokeLayer.strokeColor = strokeConfig.color.cgColor
-            strokeLayer.fillColor = nil
-            strokeLayer.path = bubblePath.cgPath
-            layer.addSublayer(strokeLayer)
-        } else if strokeLayer.superlayer != nil {
             strokeLayer.removeFromSuperlayer()
         }
 
@@ -300,9 +269,7 @@ public class CVColorOrGradientView: ManualLayoutViewWithLayer, CVDimmableView {
         referenceView = nil
         value = nil
         backgroundColor = nil
-        cornerConfig = nil
-        strokeConfig = nil
-        hasPillRounding = false
+        bubbleConfig = nil
         strokeLayer.removeFromSuperlayer()
         gradientLayer.removeFromSuperlayer()
         dimmerLayer?.removeFromSuperlayer()
@@ -333,7 +300,12 @@ public class CVColorOrGradientView: ManualLayoutViewWithLayer, CVDimmableView {
 
 extension CVColorOrGradientView: OWSBubbleViewHost {
 
-    public var maskPath: UIBezierPath { bubblePath }
+    public var maskPath: UIBezierPath {
+        guard let bubbleConfig else {
+            return UIBezierPath(rect: bounds)
+        }
+        return bubbleConfig.bubblePath(for: bounds)
+    }
 
     public var bubbleReferenceView: UIView { self }
 }

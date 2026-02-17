@@ -160,7 +160,10 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
             configureWallpaperBlurView(
                 wallpaperBlurView: wallpaperBlurView,
                 componentDelegate: componentDelegate,
-                cornerConfig: .init(cornerRadius: 24),
+                bubbleConfig: BubbleConfiguration(
+                    corners: .uniform(24),
+                    stroke: ConversationStyle.bubbleStroke(isDarkThemeEnabled: isDarkThemeEnabled),
+                ),
             )
             innerStackView.addSubviewToFillSuperviewEdges(wallpaperBlurView)
         }

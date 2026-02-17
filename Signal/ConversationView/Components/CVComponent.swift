@@ -244,38 +244,28 @@ public class CVComponentBase: NSObject {
         nil
     }
 
-    /// `hasPillRounding` takes precedence over `cornerConfig`.
     public func configureWallpaperBlurView(
         wallpaperBlurView: CVWallpaperBlurView,
         componentDelegate: CVComponentDelegate,
-        hasPillRounding: Bool = false,
-        cornerConfig: BubbleCornerConfiguration? = nil,
-        strokeConfig: BubbleStrokeConfiguration? = nil,
+        bubbleConfig: BubbleConfiguration,
     ) {
         Self.configureWallpaperBlurView(
             wallpaperBlurView: wallpaperBlurView,
             componentDelegate: componentDelegate,
-            hasPillRounding: hasPillRounding,
-            cornerConfig: cornerConfig,
-            strokeConfig: strokeConfig,
+            bubbleConfig: bubbleConfig,
         )
     }
 
-    /// `hasPillRounding` takes precedence over `cornerConfig`.
     public static func configureWallpaperBlurView(
         wallpaperBlurView: CVWallpaperBlurView,
         componentDelegate: CVComponentDelegate,
-        hasPillRounding: Bool = false,
-        cornerConfig: BubbleCornerConfiguration? = nil,
-        strokeConfig: BubbleStrokeConfiguration? = nil,
+        bubbleConfig: BubbleConfiguration,
     ) {
         let wallpaperBlurProvider = componentDelegate.wallpaperBlurProvider
         owsAssertDebug(wallpaperBlurProvider != nil)
         wallpaperBlurView.configure(
             provider: wallpaperBlurProvider,
-            hasPillRounding: hasPillRounding,
-            cornerConfig: cornerConfig,
-            strokeConfig: strokeConfig,
+            bubbleConfig: bubbleConfig,
         )
     }
 

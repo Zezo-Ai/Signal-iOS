@@ -356,21 +356,21 @@ public struct ConversationStyle {
     }
 
     /// - Returns: Stroke configuration to use on regular bubbles in chat for the theme provided.
-    public static func bubbleStrokeConfiguration(isDarkThemeEnabled: Bool) -> BubbleStrokeConfiguration {
+    ///
+    /// The purpose of this method is to provide stroke configuration to be used with non-message bubbles (eg date headers).
+    public static func bubbleStroke(isDarkThemeEnabled: Bool) -> BubbleConfiguration.Stroke {
         let strokeColor = isDarkThemeEnabled ? UIColor(white: 1, alpha: 0.25) : UIColor(white: 0, alpha: 0.35)
-        return BubbleStrokeConfiguration(color: strokeColor, width: 2 * CGFloat.hairlineWidth)
+        return BubbleConfiguration.Stroke(color: strokeColor, width: 2 * CGFloat.hairlineWidth)
     }
 
     /// - Returns: Stroke configuration to use for incoming or outgoing message bubbles in chat.
     ///
     /// Unlike static method above this function will only return stroke configuration if bubbles must have one.
-    public func bubbleStrokeConfiguration(isIncoming: Bool) -> BubbleStrokeConfiguration? {
+    public func bubbleStroke(isIncoming: Bool) -> BubbleConfiguration.Stroke? {
         // Only use stroke for incoming messages and if there's a wallpaper.
         guard hasWallpaper, isIncoming else { return nil }
 
-        return ConversationStyle.bubbleStrokeConfiguration(
-            isDarkThemeEnabled: isDarkThemeEnabled,
-        )
+        return ConversationStyle.bubbleStroke(isDarkThemeEnabled: isDarkThemeEnabled)
     }
 
     // Same across all themes

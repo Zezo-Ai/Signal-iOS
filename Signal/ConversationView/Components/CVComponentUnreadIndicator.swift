@@ -115,8 +115,10 @@ public class CVComponentUnreadIndicator: CVComponentBase, CVRootComponent {
                 configureWallpaperBlurView(
                     wallpaperBlurView: wallpaperBlurView,
                     componentDelegate: componentDelegate,
-                    hasPillRounding: true,
-                    strokeConfig: ConversationStyle.bubbleStrokeConfiguration(isDarkThemeEnabled: isDarkThemeEnabled),
+                    bubbleConfig: BubbleConfiguration(
+                        corners: .capsule(),
+                        stroke: ConversationStyle.bubbleStroke(isDarkThemeEnabled: isDarkThemeEnabled),
+                    ),
                 )
                 innerStack.addSubviewToFillSuperviewEdges(wallpaperBlurView)
             } else {

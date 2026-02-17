@@ -64,7 +64,10 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
             backgroundView.configure(
                 value: conversationStyle.bubbleChatColorIncoming,
                 referenceView: componentDelegate.view,
-                hasPillRounding: true,
+                bubbleConfig: BubbleConfiguration(
+                    corners: .capsule(),
+                    stroke: conversationStyle.bubbleStroke(isIncoming: isIncoming),
+                ),
             )
             innerStack.addSubviewToFillSuperviewEdges(backgroundView)
         }

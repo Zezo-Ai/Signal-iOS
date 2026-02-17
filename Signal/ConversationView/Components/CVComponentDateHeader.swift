@@ -473,9 +473,11 @@ private class ContentViewNoVisualEffect {
                 CVComponentBase.configureWallpaperBlurView(
                     wallpaperBlurView: wallpaperBlurView,
                     componentDelegate: componentDelegate,
-                    hasPillRounding: true,
-                    strokeConfig: ConversationStyle.bubbleStrokeConfiguration(
-                        isDarkThemeEnabled: Theme.isDarkThemeEnabled,
+                    bubbleConfig: BubbleConfiguration(
+                        corners: .capsule(),
+                        stroke: ConversationStyle.bubbleStroke(
+                            isDarkThemeEnabled: Theme.isDarkThemeEnabled,
+                        ),
                     ),
                 )
                 innerStack.addSubviewToFillSuperviewEdges(wallpaperBlurView)

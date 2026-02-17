@@ -510,18 +510,20 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         // No bubbles for stickers.
         var outerBubbleView: (CVDimmableView & OWSBubbleViewHost)?
         if nil == subcomponent(forKey: .sticker) {
-            let bubbleCornerConfiguration = BubbleCornerConfiguration(
-                sharpCorners: sharpCorners,
-                sharpCornerRadius: Self.bubbleSharpCornerRadius,
-                wideCornerRadius: Self.bubbleWideCornerRadius,
+            let bubbleConfiguration = BubbleConfiguration(
+                corners: .segmented(
+                    sharpCorners: sharpCorners,
+                    sharpCornerRadius: Self.bubbleSharpCornerRadius,
+                    wideCornerRadius: Self.bubbleWideCornerRadius,
+                ),
+                stroke: bubbleStroke,
             )
             if case .blur = bubbleChatColor {
                 let wallpaperBlurView = componentView.ensureWallpaperBlurView()
                 configureWallpaperBlurView(
                     wallpaperBlurView: wallpaperBlurView,
                     componentDelegate: componentDelegate,
-                    cornerConfig: bubbleCornerConfiguration,
-                    strokeConfig: bubbleStrokeConfiguration,
+                    bubbleConfig: bubbleConfiguration,
                 )
                 outerBubbleView = wallpaperBlurView
             } else {
@@ -529,8 +531,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
                 chatColorView.configure(
                     value: bubbleChatColor,
                     referenceView: componentDelegate.view,
-                    cornerConfig: bubbleCornerConfiguration,
-                    strokeConfig: bubbleStrokeConfiguration,
+                    bubbleConfig: bubbleConfiguration,
                 )
                 outerBubbleView = chatColorView
             }
@@ -1538,14 +1539,14 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
     ///
     /// This method checks for all the special cases when stroke styling for current message's bubble should have non-default styling.
     /// For messages that are not a special case value from `ConversationStyle` will be returned.
-    private var bubbleStrokeConfiguration: BubbleStrokeConfiguration? {
+    private var bubbleStroke: BubbleConfiguration.Stroke? {
         if !conversationStyle.hasWallpaper, wasRemotelyDeleted || isBorderlessViewOnceMessage {
-            return BubbleStrokeConfiguration(color: UIColor.Signal.opaqueSeparator, width: 1)
+            return BubbleConfiguration.Stroke(color: UIColor.Signal.opaqueSeparator, width: 1)
         }
         if isBubbleTransparent {
             return nil
         }
-        return itemModel.conversationStyle.bubbleStrokeConfiguration(isIncoming: isIncoming)
+        return itemModel.conversationStyle.bubbleStroke(isIncoming: isIncoming)
     }
 
     private static let measurementKey_hOuterStack = "CVComponentMessage.measurementKey_hOuterStack"

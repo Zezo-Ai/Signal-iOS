@@ -13,12 +13,12 @@ public class CVWallpaperBlurView: ManualLayoutViewWithLayer, CVDimmableView {
     private var state: WallpaperBlurState?
 
     private let imageView = CVImageView()
+    private let imageViewMaskLayer = CAShapeLayer()
+
     private let maskLayer = CAShapeLayer()
     private let strokeLayer = CAShapeLayer()
 
-    private var hasPillRounding: Bool = false
-    private var cornerConfig: BubbleCornerConfiguration?
-    private var strokeConfig: BubbleStrokeConfiguration?
+    private var bubbleConfig: BubbleConfiguration?
 
     init() {
         super.init(name: "CVWallpaperBlurView")
@@ -28,12 +28,13 @@ public class CVWallpaperBlurView: ManualLayoutViewWithLayer, CVDimmableView {
         strokeLayer.fillColor = nil
 
         imageView.contentMode = .scaleAspectFill
-        imageView.layer.mask = maskLayer
+        imageView.layer.mask = imageViewMaskLayer
         imageView.layer.masksToBounds = true
         imageView.layer.addSublayer(strokeLayer)
         addSubview(imageView)
 
-        owsAssertDebug(self.layer.delegate === self)
+        owsAssertDebug(layer.delegate === self)
+        imageViewMaskLayer.disableAnimationsWithDelegate()
         maskLayer.disableAnimationsWithDelegate()
         strokeLayer.disableAnimationsWithDelegate()
 
@@ -42,72 +43,49 @@ public class CVWallpaperBlurView: ManualLayoutViewWithLayer, CVDimmableView {
         }
     }
 
-    /// - Returns: Bezier path for bubble shape if corner rouding is specified.
-    /// Will return `nil` if neither `hasPillRounding` nor `cornerConfig` are set
-    /// so that caller can clear layer's mask for better performace.
-    private func bubblePath(rect: CGRect) -> UIBezierPath? {
-        if hasPillRounding {
-            let cornerRadius = rect.size.smallerAxis / 2.0
-            return UIBezierPath(roundedRect: rect, cornerRadius: cornerRadius)
-        }
-        if let cornerConfig {
-            let sharpCorners = UIView.uiRectCorner(forOWSDirectionalRectCorner: cornerConfig.sharpCorners)
-            return UIBezierPath.roundedRect(
-                rect,
-                sharpCorners: sharpCorners,
-                sharpCornerRadius: cornerConfig.sharpCornerRadius,
-                wideCornerRadius: cornerConfig.wideCornerRadius,
-            )
-        }
-        return nil
-    }
-
     public func applyLayout() {
         UIView.performWithoutAnimation {
             imageView.frame = imageViewFrame
-            maskLayer.frame = imageView.layer.bounds
+            imageViewMaskLayer.frame = imageView.layer.bounds
             strokeLayer.frame = imageView.layer.bounds
 
-            // Corners.
-            if let maskLayerPath = bubblePath(rect: maskFrame) {
-                maskLayer.path = maskLayerPath.cgPath
+            if let bubbleConfig {
+                // Corners.
+                imageViewMaskLayer.path = bubbleConfig.bubblePath(for: maskFrame).cgPath
+                maskLayer.path = bubbleConfig.bubblePath(for: bounds).cgPath
+                layer.mask = maskLayer
 
-                // Need to apply corner rounding to `self` too.
-                let layer = CAShapeLayer()
-                layer.path = bubblePath(rect: bounds)?.cgPath
-                self.layer.mask = layer
+                // Stroke.
+                if
+                    let stroke = bubbleConfig.stroke,
+                    let strokePath = bubbleConfig.strokePath(for: maskFrame)
+                {
+                    strokeLayer.lineWidth = stroke.width
+                    strokeLayer.strokeColor = stroke.color.cgColor
+                    strokeLayer.path = strokePath.cgPath
+                    strokeLayer.isHidden = false
+                } else {
+                    strokeLayer.isHidden = true
+                }
             } else {
-                maskLayer.path = UIBezierPath(rect: maskFrame).cgPath
+                imageViewMaskLayer.path = UIBezierPath(rect: maskFrame).cgPath
                 layer.mask = nil
-            }
 
-            // Stroke.
-            if let strokeConfig {
-                strokeLayer.lineWidth = strokeConfig.width
-                strokeLayer.strokeColor = strokeConfig.color.cgColor
-                strokeLayer.path = maskLayer.path
-                strokeLayer.isHidden = false
-            } else {
                 strokeLayer.isHidden = true
             }
         }
     }
 
-    /// - Parameter hasPillRounding: Set to `true` to ignore `cornerConfig` and make a pill shape.
     public func configure(
         provider: WallpaperBlurProvider?,
-        hasPillRounding: Bool,
-        cornerConfig: BubbleCornerConfiguration?,
-        strokeConfig: BubbleStrokeConfiguration?,
+        bubbleConfig: BubbleConfiguration?,
     ) {
         resetContentAndConfiguration()
 
         self.isPreview = (provider == nil)
         // TODO: Observe provider changes.
         self.provider = provider
-        self.hasPillRounding = hasPillRounding
-        self.cornerConfig = cornerConfig
-        self.strokeConfig = strokeConfig
+        self.bubbleConfig = bubbleConfig
 
         updateIfNecessary()
     }
@@ -169,8 +147,7 @@ public class CVWallpaperBlurView: ManualLayoutViewWithLayer, CVDimmableView {
     public func resetContentAndConfiguration() {
         isPreview = false
         provider = nil
-        cornerConfig = nil
-        strokeConfig = nil
+        bubbleConfig = nil
 
         resetContent()
     }
@@ -201,10 +178,10 @@ public class CVWallpaperBlurView: ManualLayoutViewWithLayer, CVDimmableView {
 extension CVWallpaperBlurView: OWSBubbleViewHost {
 
     public var maskPath: UIBezierPath {
-        guard let bubblePath = bubblePath(rect: bounds) else {
+        guard let bubbleConfig else {
             return UIBezierPath(rect: bounds)
         }
-        return bubblePath
+        return bubbleConfig.bubblePath(for: bounds)
     }
 
     public var bubbleReferenceView: UIView { self }

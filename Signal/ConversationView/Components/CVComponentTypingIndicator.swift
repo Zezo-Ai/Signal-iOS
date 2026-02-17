@@ -89,8 +89,10 @@ public class CVComponentTypingIndicator: CVComponentBase, CVRootComponent {
             configureWallpaperBlurView(
                 wallpaperBlurView: wallpaperBlurView,
                 componentDelegate: componentDelegate,
-                hasPillRounding: true,
-                strokeConfig: ConversationStyle.bubbleStrokeConfiguration(isDarkThemeEnabled: isDarkThemeEnabled),
+                bubbleConfig: BubbleConfiguration(
+                    corners: .capsule(),
+                    stroke: ConversationStyle.bubbleStroke(isDarkThemeEnabled: isDarkThemeEnabled),
+                ),
             )
             bubbleView = wallpaperBlurView
         } else {
@@ -98,7 +100,7 @@ public class CVComponentTypingIndicator: CVComponentBase, CVRootComponent {
             chatColorView.configure(
                 value: conversationStyle.bubbleChatColorIncoming,
                 referenceView: componentDelegate.view,
-                hasPillRounding: true,
+                bubbleConfig: BubbleConfiguration(corners: .capsule()),
             )
             bubbleView = chatColorView
         }

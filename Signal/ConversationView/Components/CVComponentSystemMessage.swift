@@ -304,14 +304,8 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
             )
 
             let bubbleView: UIView
-
             if hasWallpaper {
-                let wallpaperBlurView = componentView.ensureWallpaperBlurView()
-                configureWallpaperBlurView(
-                    wallpaperBlurView: wallpaperBlurView,
-                    componentDelegate: componentDelegate,
-                )
-                bubbleView = wallpaperBlurView
+                bubbleView = componentView.ensureWallpaperBlurView()
             } else {
                 let backgroundView = UIView()
                 backgroundView.backgroundColor = Theme.backgroundColor
@@ -319,26 +313,42 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
                 bubbleView = backgroundView
             }
 
+            let bubbleCorners: BubbleConfiguration.Corners
             if isFirstInCluster, isLastInCluster {
                 innerVStack.addSubviewToFillSuperviewEdges(bubbleView)
                 innerVStack.sendSubviewToBack(bubbleView)
 
-                bubbleView.layer.cornerRadius = 8
-                bubbleView.layer.maskedCorners = .all
-                bubbleView.clipsToBounds = true
+                bubbleCorners = .uniform(8)
             } else {
                 outerVStack.addSubviewToFillSuperviewEdges(bubbleView)
                 outerVStack.sendSubviewToBack(bubbleView)
 
                 if isFirstInCluster {
-                    bubbleView.layer.cornerRadius = 12
-                    bubbleView.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
-                    bubbleView.clipsToBounds = true
+                    bubbleCorners = .segmented(
+                        sharpCorners: [.bottomLeading, .bottomTrailing],
+                        sharpCornerRadius: 0,
+                        wideCornerRadius: 12,
+                    )
                 } else if isLastInCluster {
-                    bubbleView.layer.cornerRadius = 12
-                    bubbleView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner]
-                    bubbleView.clipsToBounds = true
+                    bubbleCorners = .segmented(
+                        sharpCorners: [.topLeading, .topTrailing],
+                        sharpCornerRadius: 0,
+                        wideCornerRadius: 12,
+                    )
+                } else {
+                    bubbleCorners = .uniform(0)
                 }
+            }
+
+            if let wallpaperBlurView = bubbleView as? CVWallpaperBlurView {
+                configureWallpaperBlurView(
+                    wallpaperBlurView: wallpaperBlurView,
+                    componentDelegate: componentDelegate,
+                    bubbleConfig: BubbleConfiguration(
+                        corners: bubbleCorners,
+                        stroke: ConversationStyle.bubbleStroke(isDarkThemeEnabled: isDarkThemeEnabled),
+                    ),
+                )
             }
         }
 
