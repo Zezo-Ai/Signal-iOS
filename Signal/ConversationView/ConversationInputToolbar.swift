@@ -191,7 +191,7 @@ public class ConversationInputToolbar: UIView, QuotedReplyPreviewDelegate {
     func update(conversationStyle: ConversationStyle) {
         self.conversationStyle = conversationStyle
         if #available(iOS 26, *), let sendButton = trailingEdgeControl as? UIButton {
-            sendButton.tintColor = conversationStyle.chatColorValue.asSendButtonTintColor()
+            sendButton.tintColor = conversationStyle.chatColorValue.asLiquidGlassTintColor()
         }
     }
 
@@ -206,21 +206,9 @@ public class ConversationInputToolbar: UIView, QuotedReplyPreviewDelegate {
 
     public enum Style {
         @available(iOS 26, *)
-        static var glassTintColor: UIColor {
-            // This set of colors is copied to elsewhere.
-            // Please update all places if you change color values.
-            UIColor { traitCollection in
-                if traitCollection.userInterfaceStyle == .dark {
-                    return UIColor(white: 0, alpha: 0.2)
-                }
-                return UIColor(white: 1, alpha: 0.12)
-            }
-        }
-
-        @available(iOS 26, *)
         static func glassEffect(isInteractive: Bool = false) -> UIGlassEffect {
             let glassEffect = UIGlassEffect(style: .regular)
-            glassEffect.tintColor = glassTintColor
+            glassEffect.tintColor = .Signal.glassBackgroundTint
             glassEffect.isInteractive = isInteractive
             return glassEffect
         }
@@ -377,7 +365,7 @@ public class ConversationInputToolbar: UIView, QuotedReplyPreviewDelegate {
                 configuration: .glass(),
                 primaryAction: primaryAction,
             )
-            button.tintColor = Style.glassTintColor
+            button.tintColor = .Signal.glassBackgroundTint
             button.configuration?.image = UIImage(imageLiteralResourceName: "plus")
             button.configuration?.baseForegroundColor = Style.buttonTintColor
             button.configuration?.cornerStyle = .capsule
@@ -501,7 +489,7 @@ public class ConversationInputToolbar: UIView, QuotedReplyPreviewDelegate {
                 },
                 accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "sendButton"),
             )
-            button.tintColor = conversationStyle.bubbleChatColorOutgoing.asSendButtonTintColor()
+            button.tintColor = conversationStyle.bubbleChatColorOutgoing.asLiquidGlassTintColor()
             return button
         }
 
@@ -3305,7 +3293,7 @@ extension ConversationInputToolbar: ConversationBottomBar {
 @available(iOS 26, *)
 private extension ColorOrGradientValue {
 
-    func asSendButtonTintColor() -> UIColor {
+    func asLiquidGlassTintColor() -> UIColor {
         let bubbleColor: UIColor = {
             switch self {
             case .transparent, .blur:

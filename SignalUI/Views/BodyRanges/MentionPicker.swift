@@ -180,13 +180,7 @@ class MentionPicker: UIView {
     private func backgroundViewVisualEffect() -> UIVisualEffect? {
         if #available(iOS 26.1, *) {
             let glassEffect = UIGlassEffect(style: .regular)
-            // Copy from ConversationInputToolbar.
-            glassEffect.tintColor = UIColor { traitCollection in
-                if traitCollection.userInterfaceStyle == .dark {
-                    return UIColor(white: 0, alpha: 0.2)
-                }
-                return UIColor(white: 1, alpha: 0.12)
-            }
+            glassEffect.tintColor = .Signal.glassBackgroundTint
             return glassEffect
         }
         // 26.0 would still use a panel with rounded corners, but with blur effect instead of glass.

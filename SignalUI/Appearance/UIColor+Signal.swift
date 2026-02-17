@@ -318,6 +318,44 @@ extension UIColor.Signal {
         )
     }
 
+    // MARK: Material
+
+    public static var materialPrimaryFill: UIColor {
+        UIColor(
+            light: UIColor(white: 0, alpha: 0.24),
+            dark: UIColor(white: 1, alpha: 0.48),
+        )
+    }
+
+    public static var materialSecondaryFill: UIColor {
+        UIColor(
+            light: UIColor(white: 0, alpha: 0.16),
+            dark: UIColor(white: 1, alpha: 0.32),
+        )
+    }
+
+    public static var materialTertiaryFill: UIColor {
+        UIColor(
+            light: UIColor(white: 0, alpha: 0.1),
+            dark: UIColor(white: 1, alpha: 0.16),
+        )
+    }
+
+    public static var materialButton: UIColor {
+        UIColor(
+            light: UIColor(white: 0, alpha: 0.12),
+            dark: UIColor(white: 1, alpha: 0.2),
+        )
+    }
+
+    @available(iOS 26, *)
+    public static var glassBackgroundTint: UIColor {
+        UIColor(
+            light: UIColor(white: 1, alpha: 0.12),
+            dark: UIColor(white: 0, alpha: 0.2),
+        )
+    }
+
     // MARK: Separator
 
     public static var opaqueSeparator: UIColor {

@@ -134,12 +134,6 @@ public class StickerHorizontalListView: UICollectionView {
 
         super.init(frame: .zero, collectionViewLayout: layout)
 
-        let selectedBackgroundColor = UIColor { traitCollection in
-            traitCollection.userInterfaceStyle == .dark
-                ? UIColor(white: 1, alpha: 0.2)
-                : UIColor(white: 0, alpha: 0.12)
-        }
-
         cellRegistration = UICollectionView.CellRegistration<UICollectionViewCell, Item> { cell, indexPath, item in
 
             // Remove previous content.
@@ -161,7 +155,7 @@ public class StickerHorizontalListView: UICollectionView {
                 var background = UIBackgroundConfiguration.clear()
                 background.cornerRadius = cellSize / 2
                 if item.isSelected {
-                    background.backgroundColor = selectedBackgroundColor
+                    background.backgroundColor = .Signal.materialButton
                 } else {
                     background.backgroundColor = .clear
                 }

@@ -630,12 +630,7 @@ private class ConversationBannerView: UIView {
         let backgroundView: UIView
         if #available(iOS 26, *) {
             let glassEffect = UIGlassEffect(style: .regular)
-            glassEffect.tintColor = UIColor { traitCollection in
-                if traitCollection.userInterfaceStyle == .dark {
-                    return UIColor(white: 0, alpha: 0.2)
-                }
-                return UIColor(white: 1, alpha: 0.12)
-            }
+            glassEffect.tintColor = .Signal.glassBackgroundTint
             backgroundView = UIVisualEffectView(effect: glassEffect)
             backgroundView.cornerConfiguration = .capsule()
             backgroundView.clipsToBounds = true
@@ -745,12 +740,7 @@ private class ConversationBannerView: UIView {
     private func backgroundViewVisualEffect() -> UIVisualEffect? {
         if #available(iOS 26, *) {
             let glassEffect = UIGlassEffect(style: .regular)
-            glassEffect.tintColor = UIColor { traitCollection in
-                if traitCollection.userInterfaceStyle == .dark {
-                    return UIColor(white: 0, alpha: 0.2)
-                }
-                return UIColor(white: 1, alpha: 0.12)
-            }
+            glassEffect.tintColor = .Signal.glassBackgroundTint
             return glassEffect
         }
 

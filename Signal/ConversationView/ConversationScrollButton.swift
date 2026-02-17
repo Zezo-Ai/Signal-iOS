@@ -25,22 +25,17 @@ public class ConversationScrollButton: UIButton {
         var configuration: UIButton.Configuration?
         if #available(iOS 26, *) {
             configuration = .glass()
-            configuration?.imageColorTransformer = UIConfigurationColorTransformer { _ in
-                return .Signal.label
-            }
         }
         if configuration == nil {
             configuration = .gray()
-            configuration?.imageColorTransformer = UIConfigurationColorTransformer { _ in
-                return UIColor { traitCollection in
-                    return traitCollection.userInterfaceStyle == .dark ? .ows_gray15 : .ows_gray75
-                }
-            }
-            configuration?.background.backgroundColorTransformer = UIConfigurationColorTransformer { _ in
-                return UIColor { traitCollection in
-                    return traitCollection.userInterfaceStyle == .dark ? .ows_gray65 : .ows_gray02
-                }
-            }
+            configuration?.baseForegroundColor = UIColor(
+                light: .ows_gray75,
+                dark: .ows_gray15,
+            )
+            configuration?.baseBackgroundColor = UIColor(
+                light: .ows_gray02,
+                dark: .ows_gray65,
+            )
             if #available(iOS 18, *) {
                 configuration?.background.shadowProperties.offset = CGSize(width: 0, height: 4)
                 configuration?.background.shadowProperties.color = .black

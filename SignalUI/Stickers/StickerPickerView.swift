@@ -162,13 +162,7 @@ private class StickerPacksToolbar: UIView {
         if #available(iOS 26, *) {
             // Glass capsule-shaped panel on iOS 26+.
             let glassEffect = UIGlassEffect(style: .regular)
-            // Copied from ConversationInputToolbar.
-            glassEffect.tintColor = UIColor { traitCollection in
-                if traitCollection.userInterfaceStyle == .dark {
-                    return UIColor(white: 0, alpha: 0.2)
-                }
-                return UIColor(white: 1, alpha: 0.12)
-            }
+            glassEffect.tintColor = .Signal.glassBackgroundTint
             let glassEffectView = UIVisualEffectView(effect: glassEffect)
             glassEffectView.clipsToBounds = true
             glassEffectView.cornerConfiguration = .capsule()
