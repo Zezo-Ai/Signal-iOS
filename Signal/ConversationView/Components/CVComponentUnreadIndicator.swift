@@ -142,7 +142,7 @@ public class CVComponentUnreadIndicator: CVComponentBase, CVRootComponent {
                 comment: "Indicator that separates read from unread messages.",
             ),
             font: UIFont.dynamicTypeFootnote.medium(),
-            textColor: ConversationStyle.bubbleTextColorIncoming,
+            textColor: Theme.primaryTextColor,
             numberOfLines: 0,
             lineBreakMode: .byTruncatingTail,
             textAlignment: .center,

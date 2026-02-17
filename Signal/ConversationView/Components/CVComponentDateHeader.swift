@@ -201,7 +201,7 @@ public class CVComponentDateHeader: CVComponentBase, CVRootComponent {
     }
 
     private var titleLabelConfig: CVLabelConfig {
-        let textColor = conversationStyle.bubbleTextColorIncoming
+        let textColor = Theme.primaryTextColor
         let font = UIFont.dynamicTypeFootnote.medium()
         return CVLabelConfig(
             text: .text(dateHeaderState.text),

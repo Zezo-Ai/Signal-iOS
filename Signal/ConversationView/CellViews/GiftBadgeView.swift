@@ -151,7 +151,7 @@ class GiftBadgeView: ManualStackView {
     private let redeemButtonLabel = CVLabel()
     private static func redeemButtonLabelConfig(for state: State) -> CVLabelConfig {
         let font: UIFont = .dynamicTypeHeadline
-        let color = self.redeemButtonTextColor(for: state)
+        let color: UIColor = state.isIncoming ? Theme.primaryTextColor : .ows_gray90
         return CVLabelConfig(
             text: .attributedText(Self.redeemButtonText(for: state, font: font)),
             displayConfig: .forUnstyledText(font: font, textColor: color),
@@ -160,14 +160,6 @@ class GiftBadgeView: ManualStackView {
             lineBreakMode: .byTruncatingTail,
             textAlignment: .center,
         )
-    }
-
-    private static func redeemButtonTextColor(for state: State) -> UIColor {
-        if state.isIncoming {
-            return state.conversationStyle.bubbleTextColorIncoming
-        } else {
-            return .ows_gray90
-        }
     }
 
     private static func redeemButtonText(for state: State, font: UIFont) -> NSAttributedString {
