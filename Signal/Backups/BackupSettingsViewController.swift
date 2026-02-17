@@ -328,86 +328,54 @@ class BackupSettingsViewController:
                     return true
                 }
             },
-            Task.detached { [weak self] in
-                for await _ in NotificationCenter.default.notifications(
-                    named: .OWSApplicationDidBecomeActive,
-                ) {
-                    await MainActor.run { [weak self] in
-                        guard let self else { return }
-                        loadBackupSubscription()
-                    }
-                }
-            },
-            Task.detached { [weak self] in
-                for await _ in NotificationCenter.default.notifications(
-                    named: .backupPlanChanged,
-                ) {
-                    await MainActor.run { [weak self] in
-                        guard let self else { return }
-                        _backupPlanDidChange()
-                    }
-                }
-            },
-            Task.detached { [weak self] in
-                for await _ in NotificationCenter.default.notifications(
-                    named: .lastBackupDetailsDidChange,
-                ) {
-                    await MainActor.run { [weak self] in
-                        guard let self else { return }
-                        _lastBackupDetailsDidChange()
-                    }
-                }
-            },
-            Task.detached { [weak self] in
-                for await _ in NotificationCenter.default.notifications(
-                    named: .shouldAllowBackupUploadsOnCellularChanged,
-                ) {
-                    await MainActor.run { [weak self] in
-                        guard let self else { return }
-                        _shouldAllowBackupUploadsOnCellularDidChange()
-                    }
-                }
-            },
-            Task.detached { [weak self] in
-                for await _ in NotificationCenter.default.notifications(
-                    named: .backupSubscriptionAlreadyRedeemedDidChange,
-                ) {
-                    await MainActor.run { [weak self] in
-                        guard let self else { return }
-                        _backupSubscriptionAlreadyRedeemedDidChange()
-                    }
-                }
-            },
-            Task.detached { [weak self] in
-                for await _ in NotificationCenter.default.notifications(
-                    named: .backupIAPNotFoundLocallyDidChange,
-                ) {
-                    await MainActor.run { [weak self] in
-                        guard let self else { return }
-                        _backupIAPNotFoundLocallyDidChange()
-                    }
-                }
-            },
-            Task.detached { [weak self] in
-                for await _ in NotificationCenter.default.notifications(
-                    named: .hasConsumedMediaTierCapacityStatusDidChange,
-                ) {
-                    await MainActor.run { [weak self] in
-                        guard let self else { return }
-                        _hasConsumedMediaTierCapacityDidChange()
-                    }
-                }
-            },
-            Task.detached { [weak self] in
-                for await _ in NotificationCenter.default.notifications(
-                    named: UIApplication.backgroundRefreshStatusDidChangeNotification,
-                ) {
-                    await MainActor.run { [weak self] in
-                        guard let self else { return }
-                        _isBackgroundAppRefreshDisabledDidChange()
-                    }
-                }
-            },
+            NotificationCenter.default.startTaskTrackingNotifications(
+                named: .OWSApplicationDidBecomeActive,
+                onNotification: { [weak self] in
+                    self?.loadBackupSubscription()
+                },
+            ),
+            NotificationCenter.default.startTaskTrackingNotifications(
+                named: .backupPlanChanged,
+                onNotification: { [weak self] in
+                    self?._backupPlanDidChange()
+                },
+            ),
+            NotificationCenter.default.startTaskTrackingNotifications(
+                named: .lastBackupDetailsDidChange,
+                onNotification: { [weak self] in
+                    self?._lastBackupDetailsDidChange()
+                },
+            ),
+            NotificationCenter.default.startTaskTrackingNotifications(
+                named: .shouldAllowBackupUploadsOnCellularChanged,
+                onNotification: { [weak self] in
+                    self?._shouldAllowBackupUploadsOnCellularDidChange()
+                },
+            ),
+            NotificationCenter.default.startTaskTrackingNotifications(
+                named: .backupSubscriptionAlreadyRedeemedDidChange,
+                onNotification: { [weak self] in
+                    self?._backupSubscriptionAlreadyRedeemedDidChange()
+                },
+            ),
+            NotificationCenter.default.startTaskTrackingNotifications(
+                named: .backupIAPNotFoundLocallyDidChange,
+                onNotification: { [weak self] in
+                    self?._backupIAPNotFoundLocallyDidChange()
+                },
+            ),
+            NotificationCenter.default.startTaskTrackingNotifications(
+                named: .hasConsumedMediaTierCapacityStatusDidChange,
+                onNotification: { [weak self] in
+                    self?._hasConsumedMediaTierCapacityDidChange()
+                },
+            ),
+            NotificationCenter.default.startTaskTrackingNotifications(
+                named: UIApplication.backgroundRefreshStatusDidChangeNotification,
+                onNotification: { [weak self] in
+                    self?._isBackgroundAppRefreshDisabledDidChange()
+                },
+            ),
         ]
     }
 
