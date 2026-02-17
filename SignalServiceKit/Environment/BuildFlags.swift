@@ -72,7 +72,7 @@ public enum BuildFlags {
     public static let serviceIdBinaryVariableOverhead = !serviceIdStrings || (build <= .dev)
     public static let serviceIdBinaryOneOf = !serviceIdStrings
 
-    public static let serviceIdStrings = TSConstants.isUsingProductionService
+    public static let serviceIdStrings = false
 
     public enum PinnedMessages {
         public static let send = true

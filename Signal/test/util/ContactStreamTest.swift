@@ -11,7 +11,7 @@ import XCTest
 
 final class ContactStreamTest: XCTestCase {
 
-    let outputContactSyncData = "GwoMKzEzMjMxMTExMTExEgdBbGljZS0xQABgAUUSB0FsaWNlLTJAAEokMzFjZTE0MTItOWEyOC00ZTZmLWI0ZWUtMjIyMjIyMjIyMjIyYAFqEDHOFBKaKE5vtO4iIiIiIiJTCgwrMTMyMTMzMzMzMzMSB0FsaWNlLTNAAEokMWQ0YWIwNDUtODhmYi00YzRlLTlmNmEtMzMzMzMzMzMzMzMzYAFqEB1KsEWI+0xOn2ozMzMzMzM="
+    let outputContactSyncData = "GwoMKzEzMjMxMTExMTExEgdBbGljZS0xQABgAR8SB0FsaWNlLTJAAGABahAxzhQSmihOb7TuIiIiIiIiLQoMKzEzMjEzMzMzMzMzEgdBbGljZS0zQABgAWoQHUqwRYj7TE6fajMzMzMzMw=="
 
     private func makeAccount(phoneNumber: String?, serviceId: String?, fullName: String) -> SignalAccount {
         return SignalAccount(
