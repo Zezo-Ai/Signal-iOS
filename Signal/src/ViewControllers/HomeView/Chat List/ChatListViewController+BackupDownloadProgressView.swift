@@ -45,7 +45,7 @@ public class CLVBackupDownloadProgressView {
         self.deviceSleepManager = deviceSleepManager
 
         backupAttachmentDownloadProgressView = BackupAttachmentDownloadProgressView(
-            backupAttachmentDownloadQueueStatusReporter: DependenciesBridge.shared.backupAttachmentDownloadQueueStatusManager,
+            backupAttachmentDownloadQueueStatusManager: DependenciesBridge.shared.backupAttachmentDownloadQueueStatusManager,
             backupAttachmentDownloadStore: backupAttachmentDownloadStore,
             backupSettingsStore: backupSettingsStore,
             db: db,
@@ -191,7 +191,7 @@ public class CLVBackupDownloadProgressView {
         }
 
         switch latestDownloadUpdate.state {
-        case .suspended, .notRegisteredAndReady, .appBackgrounded:
+        case .suspended, .notRegisteredAndReady:
             return nil
         case .empty:
             if
@@ -341,18 +341,18 @@ private class BackupAttachmentDownloadProgressView: UIView {
         }
     }
 
-    private let backupAttachmentDownloadQueueStatusReporter: BackupAttachmentDownloadQueueStatusReporter!
+    private let backupAttachmentDownloadQueueStatusManager: BackupAttachmentDownloadQueueStatusManager!
     private let backupAttachmentDownloadStore: BackupAttachmentDownloadStore!
     private let backupSettingsStore: BackupSettingsStore!
     private let db: DB!
 
     init(
-        backupAttachmentDownloadQueueStatusReporter: BackupAttachmentDownloadQueueStatusReporter,
+        backupAttachmentDownloadQueueStatusManager: BackupAttachmentDownloadQueueStatusManager,
         backupAttachmentDownloadStore: BackupAttachmentDownloadStore,
         backupSettingsStore: BackupSettingsStore,
         db: DB,
     ) {
-        self.backupAttachmentDownloadQueueStatusReporter = backupAttachmentDownloadQueueStatusReporter
+        self.backupAttachmentDownloadQueueStatusManager = backupAttachmentDownloadQueueStatusManager
         self.backupAttachmentDownloadStore = backupAttachmentDownloadStore
         self.backupSettingsStore = backupSettingsStore
         self.db = db
@@ -369,7 +369,7 @@ private class BackupAttachmentDownloadProgressView: UIView {
     }
 
     fileprivate init(forPreview: (), state: State) {
-        self.backupAttachmentDownloadQueueStatusReporter = nil
+        self.backupAttachmentDownloadQueueStatusManager = nil
         self.backupAttachmentDownloadStore = nil
         self.backupSettingsStore = nil
         self.db = nil
@@ -939,7 +939,7 @@ private class BackupAttachmentDownloadProgressView: UIView {
                     action: { sheet in
                         // Clear previous out of space errors, so they can try
                         // again to download.
-                        self.backupAttachmentDownloadQueueStatusReporter.checkAvailableDiskSpace(
+                        self.backupAttachmentDownloadQueueStatusManager.checkAvailableDiskSpace(
                             clearPreviousOutOfSpaceErrors: true,
                         )
                         sheet.dismiss(animated: true)

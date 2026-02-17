@@ -264,7 +264,7 @@ class BackupSettingsViewController:
 
                     let downloadViewUpdateState: BackupAttachmentDownloadProgressView.DownloadUpdate.State
                     switch downloadTrackerUpdate.state {
-                    case .empty, .appBackgrounded, .notRegisteredAndReady:
+                    case .empty, .notRegisteredAndReady:
                         viewModel.latestBackupAttachmentDownloadUpdate = nil
                         return false
                     case .running:
@@ -296,10 +296,36 @@ class BackupSettingsViewController:
                 await deviceSleepManager.manageBlockForUpdateStream(
                     backupAttachmentUploadTracker.updates(),
                     label: "BackupSettings.BackupUploads",
-                ) { [weak self] uploadUpdate in
+                ) { [weak self] uploadTrackerUpdate in
                     guard let self else { return false }
-                    viewModel.latestBackupAttachmentUploadUpdate = uploadUpdate
-                    return uploadUpdate != nil
+
+                    let uploadViewUpdateState: BackupAttachmentUploadProgressView.UploadUpdate.State
+                    switch uploadTrackerUpdate.state {
+                    case .empty,
+                         .suspended,
+                         .notRegisteredAndReady,
+                         .hasConsumedMediaTierCapacity:
+                        viewModel.latestBackupAttachmentUploadUpdate = nil
+                        return false
+                    case .running:
+                        uploadViewUpdateState = .running
+                    case .pausedLowBattery:
+                        uploadViewUpdateState = .pausedLowBattery
+                    case .pausedLowPowerMode:
+                        uploadViewUpdateState = .pausedLowPowerMode
+                    case .pausedNeedsWifi:
+                        uploadViewUpdateState = .pausedNeedsWifi
+                    case .pausedNeedsInternet:
+                        uploadViewUpdateState = .pausedNeedsInternet
+                    }
+
+                    viewModel.latestBackupAttachmentUploadUpdate = BackupAttachmentUploadProgressView.UploadUpdate(
+                        state: uploadViewUpdateState,
+                        bytesUploaded: uploadTrackerUpdate.bytesUploaded,
+                        totalBytesToUpload: uploadTrackerUpdate.totalBytesToUpload,
+                        percentageUploaded: uploadTrackerUpdate.percentageUploaded,
+                    )
+                    return true
                 }
             },
             Task.detached { [weak self] in
@@ -1455,7 +1481,7 @@ private class BackupSettingsViewModel: ObservableObject {
 
     @Published var latestBackupExportProgressUpdate: OWSSequentialProgress<BackupExportJobStage>?
     @Published var latestBackupAttachmentDownloadUpdate: BackupAttachmentDownloadProgressView.DownloadUpdate?
-    @Published var latestBackupAttachmentUploadUpdate: BackupAttachmentUploadTracker.UploadUpdate?
+    @Published var latestBackupAttachmentUploadUpdate: BackupAttachmentUploadProgressView.UploadUpdate?
 
     @Published var lastBackupDetails: BackupSettingsStore.LastBackupDetails?
     @Published var shouldAllowBackupUploadsOnCellular: Bool
@@ -1482,7 +1508,7 @@ private class BackupSettingsViewModel: ObservableObject {
         failedToDisableBackupsRemotely: Bool,
         latestBackupExportProgressUpdate: OWSSequentialProgress<BackupExportJobStage>?,
         latestBackupAttachmentDownloadUpdate: BackupAttachmentDownloadProgressView.DownloadUpdate?,
-        latestBackupAttachmentUploadUpdate: BackupAttachmentUploadTracker.UploadUpdate?,
+        latestBackupAttachmentUploadUpdate: BackupAttachmentUploadProgressView.UploadUpdate?,
         lastBackupDetails: BackupSettingsStore.LastBackupDetails?,
         shouldAllowBackupUploadsOnCellular: Bool,
         mediaTierCapacityOverflow: UInt64?,
@@ -2077,7 +2103,7 @@ private struct BackupExportProgressView: View {
     }
 
     let latestExportProgressUpdate: OWSSequentialProgress<BackupExportJobStage>
-    let latestAttachmentUploadUpdate: BackupAttachmentUploadTracker.UploadUpdate?
+    let latestAttachmentUploadUpdate: BackupAttachmentUploadProgressView.UploadUpdate?
 
     private var progressBarState: ProgressBarState {
         switch latestExportProgressUpdate.currentStep {
@@ -2317,8 +2343,8 @@ private struct PulsingProgressBar: View {
 // MARK: -
 
 private struct BackupAttachmentDownloadProgressView: View {
-    struct DownloadUpdate {
-        enum State {
+    struct DownloadUpdate: Equatable {
+        enum State: Equatable {
             case running
             case suspended
             case pausedLowBattery
@@ -2477,7 +2503,22 @@ private struct BackupAttachmentDownloadProgressView: View {
 // MARK: -
 
 private struct BackupAttachmentUploadProgressView: View {
-    let latestUploadUpdate: BackupAttachmentUploadTracker.UploadUpdate
+    struct UploadUpdate: Equatable {
+        enum State {
+            case running
+            case pausedLowBattery
+            case pausedLowPowerMode
+            case pausedNeedsWifi
+            case pausedNeedsInternet
+        }
+
+        let state: State
+        let bytesUploaded: UInt64
+        let totalBytesToUpload: UInt64
+        let percentageUploaded: Float
+    }
+
+    let latestUploadUpdate: UploadUpdate
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -2495,7 +2536,7 @@ private struct BackupAttachmentUploadProgressView: View {
     }
 
     static func subtitleText(
-        uploadUpdate: BackupAttachmentUploadTracker.UploadUpdate?,
+        uploadUpdate: BackupAttachmentUploadProgressView.UploadUpdate?,
     ) -> String {
         guard let uploadUpdate else {
             return String(OWSLocalizedString(
@@ -3025,7 +3066,7 @@ private extension BackupSettingsViewModel {
         failedToDisableBackupsRemotely: Bool = false,
         latestBackupExportProgressUpdate: OWSSequentialProgress<BackupExportJobStage>? = nil,
         latestBackupAttachmentDownloadUpdateState: BackupAttachmentDownloadProgressView.DownloadUpdate.State? = nil,
-        latestBackupAttachmentUploadUpdateState: BackupAttachmentUploadTracker.UploadUpdate.State? = nil,
+        latestBackupAttachmentUploadUpdateState: BackupAttachmentUploadProgressView.UploadUpdate.State? = nil,
         mediaTierCapacityOverflow: UInt64? = nil,
         hasBackupFailed: Bool = false,
         isBackgroundAppRefreshDisabled: Bool = false,
@@ -3074,10 +3115,11 @@ private extension BackupSettingsViewModel {
                 )
             },
             latestBackupAttachmentUploadUpdate: latestBackupAttachmentUploadUpdateState.map {
-                BackupAttachmentUploadTracker.UploadUpdate(
+                BackupAttachmentUploadProgressView.UploadUpdate(
                     state: $0,
                     bytesUploaded: 400_000_000,
                     totalBytesToUpload: 1_600_000_000,
+                    percentageUploaded: 0.4 / 1.6,
                 )
             },
             lastBackupDetails: BackupSettingsStore.LastBackupDetails(

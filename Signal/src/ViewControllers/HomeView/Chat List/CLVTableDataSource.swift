@@ -408,47 +408,45 @@ class CLVTableDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
         contextMenuConfigurationForRowAt indexPath: IndexPath,
         point: CGPoint,
     ) -> UIContextMenuConfiguration? {
-        AssertIsOnMainThread()
-
-        guard let viewController = self.viewController else {
-            owsFailDebug("Missing viewController.")
-            return nil
-        }
-        guard viewController.canPresentPreview(fromIndexPath: indexPath) else {
-            return nil
-        }
-        guard let threadUniqueId = renderState.threadUniqueId(forIndexPath: indexPath) else {
-            return nil
-        }
-
-        return UIContextMenuConfiguration(
-            identifier: threadUniqueId as NSString,
-            previewProvider: { [weak viewController] in
-                viewController?.createPreviewController(atIndexPath: indexPath)
-            },
-            actionProvider: { _ in
-                // nil for now. But we may want to add options like "Pin" or "Mute" in the future
+        switch renderState.sections[indexPath.section].type {
+        case .pinned,
+             .unpinned:
+            guard
+                let chatListViewController = viewController,
+                chatListViewController.canPresentPreview(fromIndexPath: indexPath),
+                let threadUniqueId = renderState.threadUniqueId(forIndexPath: indexPath)
+            else {
                 return nil
-            },
-        )
+            }
+
+            return UIContextMenuConfiguration(
+                identifier: threadUniqueId as NSString,
+                previewProvider: {
+                    chatListViewController.createPreviewController(atIndexPath: indexPath)
+                },
+            )
+        case .backupProgressView:
+            let contextMenuActions = viewState.backupProgressView.contextMenuActions()
+
+            return UIContextMenuConfiguration(actionProvider: { _ in
+                return UIMenu(children: contextMenuActions)
+            })
+        case .reminders,
+             .backupDownloadProgressView,
+             .archiveButton,
+             .inboxFilterFooter:
+            return nil
+        }
     }
 
     func tableView(
         _ tableView: UITableView,
         previewForDismissingContextMenuWithConfiguration configuration: UIContextMenuConfiguration,
     ) -> UITargetedPreview? {
-        AssertIsOnMainThread()
-
-        guard let threadId = configuration.identifier as? String else {
-            owsFailDebug("Unexpected context menu configuration identifier")
-            return nil
-        }
-        guard let indexPath = renderState.indexPath(forUniqueId: threadId) else {
-            Logger.warn("No index path for threadId: \(threadId).")
-            return nil
-        }
-        guard tableView.window != nil else {
-            Logger.warn("Dismissing tableView not in view hierarchy")
+        guard
+            let threadId = configuration.identifier as? String,
+            let indexPath = renderState.indexPath(forUniqueId: threadId)
+        else {
             return nil
         }
 

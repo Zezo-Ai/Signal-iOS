@@ -48,3 +48,20 @@ extension NotificationCenter {
         removeObserver(observer.wrapped)
     }
 }
+
+// MARK: -
+
+extension NotificationCenter {
+    public func startTaskTrackingNotifications(
+        named name: Notification.Name,
+        onNotification: @MainActor @escaping () -> Void,
+    ) -> Task<Void, Never> {
+        return Task.detached {
+            for await _ in NotificationCenter.default.notifications(named: name) {
+                await MainActor.run {
+                    onNotification()
+                }
+            }
+        }
+    }
+}

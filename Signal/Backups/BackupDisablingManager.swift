@@ -24,9 +24,11 @@ final class BackupDisablingManager {
     private let backupAttachmentCoordinator: BackupAttachmentCoordinator
     private let backupAttachmentDownloadQueueStatusManager: BackupAttachmentDownloadQueueStatusManager
     private let backupCDNCredentialStore: BackupCDNCredentialStore
+    private let backupExportJobStore: BackupExportJobStore
     private let backupKeyService: BackupKeyService
     private let backupPlanManager: BackupPlanManager
     private let backupSettingsStore: BackupSettingsStore
+    private let clvBackupProgressViewStore: CLVBackupProgressView.Store
     private let db: DB
     private let kvStore: KeyValueStore
     private let logger: PrefixedLogger
@@ -39,9 +41,11 @@ final class BackupDisablingManager {
         backupAttachmentCoordinator: BackupAttachmentCoordinator,
         backupAttachmentDownloadQueueStatusManager: BackupAttachmentDownloadQueueStatusManager,
         backupCDNCredentialStore: BackupCDNCredentialStore,
+        backupExportJobStore: BackupExportJobStore,
         backupKeyService: BackupKeyService,
         backupPlanManager: BackupPlanManager,
         backupSettingsStore: BackupSettingsStore,
+        clvBackupProgressViewStore: CLVBackupProgressView.Store,
         db: DB,
         tsAccountManager: TSAccountManager,
     ) {
@@ -50,9 +54,11 @@ final class BackupDisablingManager {
         self.backupAttachmentCoordinator = backupAttachmentCoordinator
         self.backupAttachmentDownloadQueueStatusManager = backupAttachmentDownloadQueueStatusManager
         self.backupCDNCredentialStore = backupCDNCredentialStore
+        self.backupExportJobStore = backupExportJobStore
         self.backupKeyService = backupKeyService
         self.backupPlanManager = backupPlanManager
         self.backupSettingsStore = backupSettingsStore
+        self.clvBackupProgressViewStore = clvBackupProgressViewStore
         self.db = db
         self.kvStore = KeyValueStore(collection: "BackupDisablingManager")
         self.logger = PrefixedLogger(prefix: "[Backups]")
@@ -212,6 +218,10 @@ final class BackupDisablingManager {
             // Wipe these, which are now outdated.
             backupSettingsStore.resetLastBackupDetails(tx: tx)
             backupSettingsStore.resetShouldAllowBackupUploadsOnCellular(tx: tx)
+            backupExportJobStore.wipe(tx: tx)
+
+            // We want to re-show this if we reenable Backups later.
+            clvBackupProgressViewStore.setIsHidden(false, tx: tx)
 
             // With Backups disabled, these credentials are no longer valid
             // and are no longer safe to use.

@@ -47,32 +47,18 @@ public extension Notification.Name {
 
 // MARK: -
 
-/// Reports whether we are able to upload Backup attachments, via various
-/// consolidated inputs.
+/// Tracks and reports the status of the Backup attachment upload queue.
 ///
 /// `@MainActor`-isolated because most of the inputs are themselves isolated.
 ///
 /// - SeeAlso `BackupAttachmentUploadTracker`
 @MainActor
-public protocol BackupAttachmentUploadQueueStatusReporter {
+public protocol BackupAttachmentUploadQueueStatusManager {
+
+    /// The current status of the upload queue.
+    /// - Important
+    /// Only returns meaningful values once `beginObservingIfNecessary` has been called.
     func currentStatus(for mode: BackupAttachmentUploadQueueMode) -> BackupAttachmentUploadQueueStatus
-}
-
-extension BackupAttachmentUploadQueueStatusReporter {
-    fileprivate func notifyStatusDidChange(for mode: BackupAttachmentUploadQueueMode) {
-        NotificationCenter.default.postOnMainThread(
-            name: .backupAttachmentUploadQueueStatusDidChange(for: mode),
-            object: nil,
-        )
-    }
-}
-
-// MARK: -
-
-/// API for callers to manage the `StatusReporter` in response to relevant
-/// external events.
-@MainActor
-public protocol BackupAttachmentUploadQueueStatusManager: BackupAttachmentUploadQueueStatusReporter {
 
     /// Begin observing status updates, if necessary.
     func beginObservingIfNecessary(for mode: BackupAttachmentUploadQueueMode) -> BackupAttachmentUploadQueueStatus
@@ -88,13 +74,9 @@ public protocol BackupAttachmentUploadQueueStatusManager: BackupAttachmentUpload
 @MainActor
 class BackupAttachmentUploadQueueStatusManagerImpl: BackupAttachmentUploadQueueStatusManager {
 
-    // MARK: - BackupAttachmentUploadQueueStatusReporter
-
     func currentStatus(for mode: BackupAttachmentUploadQueueMode) -> BackupAttachmentUploadQueueStatus {
         return state.asQueueStatus(for: mode)
     }
-
-    // MARK: - BackupAttachmentUploadQueueStatusManager
 
     func beginObservingIfNecessary(for mode: BackupAttachmentUploadQueueMode) -> BackupAttachmentUploadQueueStatus {
         observeDeviceAndLocalStatesIfNecessary()
@@ -298,6 +280,13 @@ class BackupAttachmentUploadQueueStatusManagerImpl: BackupAttachmentUploadQueueS
 
     private var state: State {
         didSet {
+            func notifyStatusDidChange(for mode: BackupAttachmentUploadQueueMode) {
+                NotificationCenter.default.postOnMainThread(
+                    name: .backupAttachmentUploadQueueStatusDidChange(for: mode),
+                    object: nil,
+                )
+            }
+
             if oldValue.asQueueStatus(for: .fullsize) != state.asQueueStatus(for: .fullsize) {
                 notifyStatusDidChange(for: .fullsize)
             }

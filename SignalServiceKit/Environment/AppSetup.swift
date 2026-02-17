@@ -393,6 +393,7 @@ extension AppSetup.GlobalsContinuation {
         )
 
         let backupNonceMetadataStore = BackupNonceMetadataStore()
+        let backupExportJobStore = BackupExportJobStore()
         let backupSettingsStore = BackupSettingsStore()
         let accountKeyStore = AccountKeyStore(
             backupSettingsStore: backupSettingsStore,
@@ -1611,7 +1612,6 @@ extension AppSetup.GlobalsContinuation {
             receiptSender: receiptSender,
         )
 
-        let backupExportJobStore = BackupExportJobStore()
         let backupExportJob = BackupExportJobImpl(
             accountKeyStore: accountKeyStore,
             backupArchiveManager: backupArchiveManager,

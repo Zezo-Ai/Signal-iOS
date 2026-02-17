@@ -5,24 +5,70 @@
 
 import PureLayout
 import SignalServiceKit
+import SignalUI
 import UIKit
 
-class CLVBackupProgressView {
+private extension Notification.Name {
+    static let isHiddenDidChange = Notification.Name("CLVBackupProgressView.isHiddenDidChange")
+}
+
+class CLVBackupProgressView: BackupProgressView.Delegate {
+
+    struct Store {
+        private enum Keys {
+            static let isHidden = "isHidden"
+            static let earliestBackupDateToConsider = "earliestBackupDateToConsider"
+        }
+
+        private let kvStore = NewKeyValueStore(collection: "CLVBackupProgressView")
+
+        func isHidden(tx: DBReadTransaction) -> Bool {
+            return kvStore.fetchValue(Bool.self, forKey: Keys.isHidden, tx: tx) ?? false
+        }
+
+        func setIsHidden(_ value: Bool, tx: DBWriteTransaction) {
+            kvStore.writeValue(value, forKey: Keys.isHidden, tx: tx)
+
+            tx.addSyncCompletion {
+                NotificationCenter.default.postOnMainThread(
+                    name: .isHiddenDidChange,
+                    object: nil,
+                )
+            }
+        }
+
+        fileprivate func earliestBackupDateToConsider(tx: DBReadTransaction) -> Date? {
+            kvStore.fetchValue(Date.self, forKey: Keys.earliestBackupDateToConsider, tx: tx)
+        }
+
+        fileprivate func setEarliestBackupDateToConsider(_ value: Date, tx: DBWriteTransaction) {
+            kvStore.writeValue(value, forKey: Keys.earliestBackupDateToConsider, tx: tx)
+        }
+    }
 
     private struct State {
-        var updateStreamTasks: [Task<Void, Never>] = []
-
         var isVisible: Bool = false
         var deviceSleepBlock: DeviceSleepBlockObject?
 
+        var earliestBackupDateToConsider: Date = .distantFuture
+        var isHidden: Bool = false
+        var lastBackupDetails: BackupSettingsStore.LastBackupDetails?
+
+        // nil if we've never yet gotten an update. .some(nil) if we have gotten
+        // an update, and that update was nil.
+        var lastExportJobProgressUpdate: OWSSequentialProgress<BackupExportJobStage>??
         var lastUploadTrackerUpdate: BackupAttachmentUploadTracker.UploadUpdate?
-        var lastExportJobUpdate: BackupExportJobRunnerUpdate?
+
+        var updateStreamTasks: [Task<Void, Never>] = []
     }
 
     private let backupAttachmentUploadTracker: BackupAttachmentUploadTracker
     private let backupExportJobRunner: BackupExportJobRunner
+    private let backupSettingsStore: BackupSettingsStore
+    private let dateProvider: DateProvider
     private let db: DB
     private let deviceSleepManager: DeviceSleepManager
+    private let store: Store
 
     weak var chatListViewController: ChatListViewController?
     let backupProgressViewCell: UITableViewCell
@@ -33,8 +79,11 @@ class CLVBackupProgressView {
     init() {
         self.backupAttachmentUploadTracker = AppEnvironment.shared.backupAttachmentUploadTracker
         self.backupExportJobRunner = DependenciesBridge.shared.backupExportJobRunner
+        self.backupSettingsStore = BackupSettingsStore()
+        self.dateProvider = { Date() }
         self.db = DependenciesBridge.shared.db
         self.deviceSleepManager = DependenciesBridge.shared.deviceSleepManager.owsFailUnwrap("Missing DeviceSleepManager!")
+        self.store = Store()
 
         self.backupProgressViewCell = UITableViewCell()
         self.backupProgressViewCell.backgroundColor = .Signal.background
@@ -43,6 +92,7 @@ class CLVBackupProgressView {
 
         self.backupProgressViewCell.contentView.addSubview(self.backupProgressView)
         self.backupProgressView.autoPinEdgesToSuperviewEdges(with: UIEdgeInsets(hMargin: 12, vMargin: 12))
+        self.backupProgressView.delegate = self
     }
 
     // MARK: -
@@ -76,8 +126,41 @@ class CLVBackupProgressView {
     // MARK: -
 
     func startTracking() {
+        let storedEarliestBackupDateToConsider: Date?
+        let isHidden: Bool
+        let lastBackupDetails: BackupSettingsStore.LastBackupDetails?
+        (
+            storedEarliestBackupDateToConsider,
+            isHidden,
+            lastBackupDetails,
+        ) = db.read { tx in
+            (
+                store.earliestBackupDateToConsider(tx: tx),
+                store.isHidden(tx: tx),
+                backupSettingsStore.lastBackupDetails(tx: tx),
+            )
+        }
+
+        // As a one-time migration, store "now" as the earliest Backup date to
+        // consider. This avoids us showing the "Complete" state for users who
+        // already had Backups enabled and running when we introduced this view.
+        let earliestBackupDateToConsider: Date
+        if let storedEarliestBackupDateToConsider {
+            earliestBackupDateToConsider = storedEarliestBackupDateToConsider
+        } else {
+            earliestBackupDateToConsider = dateProvider()
+            db.write { tx in
+                store.setEarliestBackupDateToConsider(earliestBackupDateToConsider, tx: tx)
+            }
+        }
+
         state.update { _state in
             guard _state.updateStreamTasks.isEmpty else { return }
+
+            _state.earliestBackupDateToConsider = earliestBackupDateToConsider
+            _state.isHidden = isHidden
+            _state.lastBackupDetails = lastBackupDetails
+
             _state.updateStreamTasks = _startTracking()
         }
     }
@@ -89,7 +172,7 @@ class CLVBackupProgressView {
                     guard let self else { return }
 
                     state.update { _state in
-                        _state.lastUploadTrackerUpdate = uploadTrackerUpdate
+                        _state.lastUploadTrackerUpdate = .some(uploadTrackerUpdate)
                         self.setViewStateForState(state: &_state)
                     }
                 }
@@ -99,11 +182,46 @@ class CLVBackupProgressView {
                     guard let self else { return }
 
                     state.update { _state in
-                        _state.lastExportJobUpdate = exportJobUpdate
+                        switch exportJobUpdate {
+                        case .progress(let progressUpdate):
+                            _state.lastExportJobProgressUpdate = progressUpdate
+                        case nil, .completion:
+                            _state.lastExportJobProgressUpdate = .some(nil)
+                        }
                         self.setViewStateForState(state: &_state)
                     }
                 }
             },
+            NotificationCenter.default.startTaskTrackingNotifications(
+                named: .lastBackupDetailsDidChange,
+                onNotification: { [weak self] in
+                    guard let self else { return }
+
+                    let lastBackupDetails = db.read { tx in
+                        self.backupSettingsStore.lastBackupDetails(tx: tx)
+                    }
+
+                    state.update { _state in
+                        _state.lastBackupDetails = lastBackupDetails
+                        self.setViewStateForState(state: &_state)
+                    }
+                },
+            ),
+            NotificationCenter.default.startTaskTrackingNotifications(
+                named: .isHiddenDidChange,
+                onNotification: { [weak self] in
+                    guard let self else { return }
+
+                    let isHidden = db.read { tx in
+                        self.store.isHidden(tx: tx)
+                    }
+
+                    state.update { _state in
+                        _state.isHidden = isHidden
+                        self.setViewStateForState(state: &_state)
+                    }
+                },
+            ),
         ]
     }
 
@@ -135,37 +253,59 @@ class CLVBackupProgressView {
     }
 
     private func viewStateForState(state: State) -> BackupProgressView.ViewState? {
-        switch state.lastExportJobUpdate {
-        case .progress(let sequentialProgress):
-            switch sequentialProgress.currentStep {
+        guard
+            let lastExportJobProgressUpdate = state.lastExportJobProgressUpdate,
+            let lastUploadTrackerUpdate = state.lastUploadTrackerUpdate
+        else {
+            // Never show the view until we've received our initial updates.
+            return nil
+        }
+
+        if state.isHidden {
+            return nil
+        }
+
+        if let progressUpdate = lastExportJobProgressUpdate {
+            switch progressUpdate.currentStep {
             case .backupFileExport, .backupFileUpload:
-                let percentExportCompleted = sequentialProgress.progress(for: .backupFileExport)?.percentComplete ?? 0
-                let percentUploadCompleted = sequentialProgress.progress(for: .backupFileUpload)?.percentComplete ?? 0
+                let percentExportCompleted = progressUpdate.progress(for: .backupFileExport)?.percentComplete ?? 0
+                let percentUploadCompleted = progressUpdate.progress(for: .backupFileUpload)?.percentComplete ?? 0
                 let percentComplete = (0.95 * percentExportCompleted) + (0.05 * percentUploadCompleted)
                 return .backupFilePreparation(percentComplete: percentComplete)
             case .attachmentUpload, .attachmentProcessing:
                 break
             }
-        case nil, .completion:
-            break
         }
 
-        if let lastUploadTrackerUpdate = state.lastUploadTrackerUpdate {
-            switch lastUploadTrackerUpdate.state {
-            case .running:
-                return .attachmentUploadRunning(
-                    bytesUploaded: lastUploadTrackerUpdate.bytesUploaded,
-                    totalBytesToUpload: lastUploadTrackerUpdate.totalBytesToUpload,
-                )
-            case .pausedLowBattery:
-                return .attachmentUploadPausedLowBattery
-            case .pausedLowPowerMode:
-                return .attachmentUploadPausedLowPowerMode
-            case .pausedNeedsWifi:
-                return .attachmentUploadPausedNoWifi
-            case .pausedNeedsInternet:
-                return .attachmentUploadPausedNoInternet
-            }
+        switch lastUploadTrackerUpdate.state {
+        case .empty:
+            break
+        case .running:
+            return .attachmentUploadRunning(
+                bytesUploaded: lastUploadTrackerUpdate.bytesUploaded,
+                totalBytesToUpload: lastUploadTrackerUpdate.totalBytesToUpload,
+            )
+        case .suspended,
+             .notRegisteredAndReady,
+             .hasConsumedMediaTierCapacity:
+            return nil
+        case .pausedLowBattery:
+            return .attachmentUploadPausedLowBattery
+        case .pausedLowPowerMode:
+            return .attachmentUploadPausedLowPowerMode
+        case .pausedNeedsWifi:
+            return .attachmentUploadPausedNoWifi
+        case .pausedNeedsInternet:
+            return .attachmentUploadPausedNoInternet
+        }
+
+        // Check this after uploads, since we don't want to show "complete"
+        // until uploads are done even if we've made a Backup file.
+        if
+            let lastBackupDetails = state.lastBackupDetails,
+            lastBackupDetails.date > state.earliestBackupDateToConsider
+        {
+            return .complete
         }
 
         return nil
@@ -181,7 +321,6 @@ class CLVBackupProgressView {
         case .attachmentUploadPausedLowBattery: false
         case .attachmentUploadPausedLowPowerMode: false
         case .complete: false
-        case .failed: false
         case nil: false
         }
 
@@ -201,11 +340,101 @@ class CLVBackupProgressView {
             deviceSleepManager.removeBlock(blockObject: deviceSleepBlock)
         }
     }
+
+    // MARK: - ExportProgressView.Delegate
+
+    func didTapDismissButton() {
+        db.write { tx in
+            store.setIsHidden(true, tx: tx)
+        }
+    }
+
+    func didTapPausedWifiResumeButton() {
+        let actionSheet = ActionSheetController(
+            title: "Resume Using Cellular Data?",
+            message: "Backing up your media using cellular data may result in data charges. Your backup may take a long time to upload, keep Signal open to avoid interruptions.",
+        )
+        actionSheet.addAction(ActionSheetAction(
+            title: "Resume",
+            handler: { [self] _ in
+                db.write { tx in
+                    backupSettingsStore.setShouldAllowBackupUploadsOnCellular(true, tx: tx)
+                }
+            },
+        ))
+        actionSheet.addAction(ActionSheetAction(
+            title: "Later on Wi-Fi",
+        ))
+
+        chatListViewController?.presentActionSheet(actionSheet)
+    }
+
+    // MARK: -
+
+    /// Actions to display in a context menu for the owning row in the table
+    /// view.
+    func contextMenuActions() -> [UIAction] {
+        let hideAction = UIAction(title: "Hide", image: .eyeSlash) { [self] _ in
+            db.write { tx in
+                store.setIsHidden(true, tx: tx)
+            }
+            chatListViewController?.presentToast(text: "View backup progress in Backup Settings")
+        }
+
+        let cancelAction = UIAction(title: "Cancel backup", image: .xCircle) { [self] _ in
+            let actionSheet = ActionSheetController(
+                title: "Cancel Backup?",
+                message: "Canceling your backup will not delete your backup. You can resume your backup at any time from Backup Settings.",
+            )
+            actionSheet.addAction(ActionSheetAction(
+                title: "Cancel Backup",
+                handler: { [self] _ in
+                    // Cancel the BackupExportJob, and pause uploads.
+                    backupExportJobRunner.cancelIfRunning()
+                    db.write {
+                        backupSettingsStore.setIsBackupUploadQueueSuspended(true, tx: $0)
+                    }
+                    chatListViewController?.presentToast(text: "Backup canceled")
+                },
+            ))
+            actionSheet.addAction(ActionSheetAction(
+                title: "Continue Backup",
+            ))
+            chatListViewController?.presentActionSheet(actionSheet)
+        }
+
+        switch backupProgressView.viewState {
+        case nil:
+            return []
+        case .complete:
+            return [hideAction]
+        case .backupFilePreparation,
+             .attachmentUploadRunning,
+             .attachmentUploadPausedNoWifi,
+             .attachmentUploadPausedNoInternet,
+             .attachmentUploadPausedLowBattery,
+             .attachmentUploadPausedLowPowerMode:
+            return [hideAction, cancelAction]
+        }
+    }
+}
+
+// MARK: -
+
+extension ChatListViewController {
+    func handleBackupProgressViewTapped() {
+        SignalApp.shared.showAppSettings(mode: .backups())
+    }
 }
 
 // MARK: -
 
 private class BackupProgressView: UIView {
+
+    protocol Delegate: AnyObject {
+        func didTapDismissButton()
+        func didTapPausedWifiResumeButton()
+    }
 
     enum ViewState: Equatable, Identifiable {
         case backupFilePreparation(percentComplete: Float)
@@ -215,7 +444,6 @@ private class BackupProgressView: UIView {
         case attachmentUploadPausedLowBattery
         case attachmentUploadPausedLowPowerMode
         case complete
-        case failed
 
         var id: String {
             return switch self {
@@ -226,7 +454,6 @@ private class BackupProgressView: UIView {
             case .attachmentUploadPausedLowBattery: "attachmentUploadPausedLowBattery"
             case .attachmentUploadPausedLowPowerMode: "attachmentUploadPausedLowPowerMode"
             case .complete: "complete"
-            case .failed: "failed"
             }
         }
     }
@@ -265,7 +492,8 @@ private class BackupProgressView: UIView {
     private let trailingAccessoryPausedLowBatteryLabel = UILabel()
     private let trailingAccessoryPausedLowPowerModeLabel = UILabel()
     private let trailingAccessoryCompleteDismissButton = UIButton()
-    private let trailingAccessoryFailedDetailsButton = UIButton()
+
+    weak var delegate: Delegate?
 
     init(viewState: ViewState?) {
         self.viewState = viewState
@@ -311,7 +539,7 @@ private class BackupProgressView: UIView {
         trailingAccessoryPausedWifiResumeButton.titleLabel?.adjustsFontForContentSizeCategory = true
         trailingAccessoryPausedWifiResumeButton.addAction(
             UIAction { [weak self] _ in
-                self?.didTapPausedWifiResumeButton()
+                self?.delegate?.didTapPausedWifiResumeButton()
             },
             for: .touchUpInside,
         )
@@ -322,7 +550,7 @@ private class BackupProgressView: UIView {
         trailingAccessoryCompleteDismissButton.tintColor = .Signal.secondaryLabel
         trailingAccessoryCompleteDismissButton.addAction(
             UIAction { [weak self] _ in
-                self?.didTapDismissButton()
+                self?.delegate?.didTapDismissButton()
             },
             for: .touchUpInside,
         )
@@ -338,22 +566,6 @@ private class BackupProgressView: UIView {
         trailingAccessoryContainerView.addArrangedSubview(trailingAccessoryPausedLowPowerModeLabel)
         Self.configure(label: trailingAccessoryPausedLowPowerModeLabel, color: .Signal.secondaryLabel)
         trailingAccessoryPausedLowPowerModeLabel.text = "Low Power Mode…"
-
-        trailingAccessoryContainerView.addArrangedSubview(trailingAccessoryFailedDetailsButton)
-        trailingAccessoryFailedDetailsButton.translatesAutoresizingMaskIntoConstraints = false
-        trailingAccessoryFailedDetailsButton.setTitle(
-            "See Details",
-            for: .normal,
-        )
-        trailingAccessoryFailedDetailsButton.setTitleColor(.Signal.label, for: .normal)
-        trailingAccessoryFailedDetailsButton.titleLabel?.font = .dynamicTypeSubheadline.semibold()
-        trailingAccessoryFailedDetailsButton.titleLabel?.adjustsFontForContentSizeCategory = true
-        trailingAccessoryFailedDetailsButton.addAction(
-            UIAction { [weak self] _ in
-                self?.didTapFailedDetailsButton()
-            },
-            for: .touchUpInside,
-        )
 
         initializeConstraints()
         configureSubviewsForCurrentState()
@@ -380,9 +592,6 @@ private class BackupProgressView: UIView {
         case .complete:
             leadingAccessoryImageView.image = .checkCircle
             leadingAccessoryImageView.tintColor = .Signal.ultramarine
-        case .failed:
-            leadingAccessoryImageView.image = .errorCircle
-            leadingAccessoryImageView.tintColor = .Signal.orange
         }
 
         // Labels
@@ -409,8 +618,6 @@ private class BackupProgressView: UIView {
             titleLabelText = "Backup paused"
         case .complete:
             titleLabelText = "Backup complete"
-        case .failed:
-            titleLabelText = "Backup failed"
         case nil:
             titleLabelText = ""
         }
@@ -441,8 +648,6 @@ private class BackupProgressView: UIView {
             trailingAccessoryView = trailingAccessoryPausedLowPowerModeLabel
         case .complete:
             trailingAccessoryView = trailingAccessoryCompleteDismissButton
-        case .failed:
-            trailingAccessoryView = trailingAccessoryFailedDetailsButton
         case nil:
             trailingAccessoryView = nil
         }
@@ -480,32 +685,6 @@ private class BackupProgressView: UIView {
             trailingAccessoryCompleteDismissButton.heightAnchor.constraint(equalToConstant: 24),
             trailingAccessoryCompleteDismissButton.widthAnchor.constraint(equalToConstant: 24),
         ])
-    }
-
-    // MARK: -
-
-    private func didTapDismissButton() {
-        // TODO: Implement
-        print(#function)
-    }
-
-    private func didTapPausedWifiResumeButton() {
-        // TODO: Implement
-        print(#function)
-    }
-
-    private func didTapFailedDetailsButton() {
-        // TODO: Implement
-        print(#function)
-    }
-}
-
-// MARK: -
-
-extension ChatListViewController {
-    func handleBackupProgressViewTapped() {
-        // TODO: Implement
-        print(#function)
     }
 }
 
@@ -571,11 +750,6 @@ private class BackupProgressViewPreviewViewController: UIViewController {
 @available(iOS 17, *)
 #Preview("Complete") {
     return BackupProgressViewPreviewViewController(state: .complete)
-}
-
-@available(iOS 17, *)
-#Preview("Failed") {
-    return BackupProgressViewPreviewViewController(state: .failed)
 }
 
 @available(iOS 17, *)

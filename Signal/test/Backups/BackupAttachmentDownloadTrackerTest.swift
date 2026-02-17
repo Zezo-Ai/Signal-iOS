@@ -19,10 +19,10 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
     @Test
     func testLaunchingWithQueuePopulated() async {
         let downloadProgress = MockAttachmentDownloadProgress(total: 4)
-        let downloadQueueStatusReporter = MockDownloadQueueStatusReporter(.running)
+        let downloadQueueStatusManager = MockDownloadQueueStatusManager(.running)
 
         let downloadTracker = BackupAttachmentDownloadTracker(
-            backupAttachmentDownloadQueueStatusReporter: downloadQueueStatusReporter,
+            backupAttachmentDownloadQueueStatusManager: downloadQueueStatusManager,
             backupAttachmentDownloadProgress: downloadProgress,
         )
 
@@ -42,7 +42,7 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
             ExpectedUpdate(
                 update: DownloadUpdate(.running, downloaded: 4, total: 4),
                 nextSteps: {
-                    downloadQueueStatusReporter.currentStatusMock = .empty
+                    downloadQueueStatusManager.currentStatusMock = .empty
                 },
             ),
             ExpectedUpdate(
@@ -59,10 +59,10 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
     @Test
     func testQueueStartsSuspendedThenStartsRunning() async {
         let downloadProgress = MockAttachmentDownloadProgress(total: 4)
-        let downloadQueueStatusReporter = MockDownloadQueueStatusReporter(.suspended)
+        let downloadQueueStatusManager = MockDownloadQueueStatusManager(.suspended)
 
         let downloadTracker = BackupAttachmentDownloadTracker(
-            backupAttachmentDownloadQueueStatusReporter: downloadQueueStatusReporter,
+            backupAttachmentDownloadQueueStatusManager: downloadQueueStatusManager,
             backupAttachmentDownloadProgress: downloadProgress,
         )
 
@@ -70,7 +70,7 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
             ExpectedUpdate(
                 update: DownloadUpdate(.suspended, downloaded: 0, total: 4),
                 nextSteps: {
-                    downloadQueueStatusReporter.currentStatusMock = .running
+                    downloadQueueStatusManager.currentStatusMock = .running
                 },
             ),
             ExpectedUpdate(
@@ -88,7 +88,7 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
             ExpectedUpdate(
                 update: DownloadUpdate(.running, downloaded: 4, total: 4),
                 nextSteps: {
-                    downloadQueueStatusReporter.currentStatusMock = .empty
+                    downloadQueueStatusManager.currentStatusMock = .empty
                 },
             ),
             ExpectedUpdate(
@@ -107,10 +107,10 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
     @Test
     func testQueueRunsIntoLowStorage_remainingMoreThanMin() async {
         let downloadProgress = MockAttachmentDownloadProgress(precompleted: 50, total: 100)
-        let downloadQueueStatusReporter = MockDownloadQueueStatusReporter(.running, minimumRequiredDiskSpace: 10)
+        let downloadQueueStatusManager = MockDownloadQueueStatusManager(.running, minimumRequiredDiskSpace: 10)
 
         let downloadTracker = BackupAttachmentDownloadTracker(
-            backupAttachmentDownloadQueueStatusReporter: downloadQueueStatusReporter,
+            backupAttachmentDownloadQueueStatusManager: downloadQueueStatusManager,
             backupAttachmentDownloadProgress: downloadProgress,
         )
 
@@ -118,7 +118,7 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
             ExpectedUpdate(
                 update: DownloadUpdate(.running, downloaded: 50, total: 100),
                 nextSteps: {
-                    downloadQueueStatusReporter.currentStatusMock = .lowDiskSpace
+                    downloadQueueStatusManager.currentStatusMock = .lowDiskSpace
                 },
             ),
             ExpectedUpdate(
@@ -137,10 +137,10 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
     @Test
     func testQueueRunsIntoLowStorage_remainingLessThanMin() async {
         let downloadProgress = MockAttachmentDownloadProgress(precompleted: 4, total: 12)
-        let downloadQueueStatusReporter = MockDownloadQueueStatusReporter(.running, minimumRequiredDiskSpace: 10)
+        let downloadQueueStatusManager = MockDownloadQueueStatusManager(.running, minimumRequiredDiskSpace: 10)
 
         let downloadTracker = BackupAttachmentDownloadTracker(
-            backupAttachmentDownloadQueueStatusReporter: downloadQueueStatusReporter,
+            backupAttachmentDownloadQueueStatusManager: downloadQueueStatusManager,
             backupAttachmentDownloadProgress: downloadProgress,
         )
 
@@ -148,7 +148,7 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
             ExpectedUpdate(
                 update: DownloadUpdate(.running, downloaded: 4, total: 12),
                 nextSteps: {
-                    downloadQueueStatusReporter.currentStatusMock = .lowDiskSpace
+                    downloadQueueStatusManager.currentStatusMock = .lowDiskSpace
                 },
             ),
             ExpectedUpdate(
@@ -165,10 +165,10 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
     @Test
     func testTrackingStoppingAndReTracking() async {
         let downloadProgress = MockAttachmentDownloadProgress(total: 4)
-        let downloadQueueStatusReporter = MockDownloadQueueStatusReporter(.empty)
+        let downloadQueueStatusManager = MockDownloadQueueStatusManager(.empty)
 
         let downloadTracker = BackupAttachmentDownloadTracker(
-            backupAttachmentDownloadQueueStatusReporter: downloadQueueStatusReporter,
+            backupAttachmentDownloadQueueStatusManager: downloadQueueStatusManager,
             backupAttachmentDownloadProgress: downloadProgress,
         )
 
@@ -176,7 +176,7 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
             ExpectedUpdate(
                 update: DownloadUpdate(.empty, downloaded: 0, total: 4),
                 nextSteps: {
-                    downloadQueueStatusReporter.currentStatusMock = .running
+                    downloadQueueStatusManager.currentStatusMock = .running
                 },
             ),
             ExpectedUpdate(
@@ -196,7 +196,7 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
             ExpectedUpdate(
                 update: DownloadUpdate(.running, downloaded: 1, total: 1),
                 nextSteps: {
-                    downloadQueueStatusReporter.currentStatusMock = .empty
+                    downloadQueueStatusManager.currentStatusMock = .empty
                 },
             ),
             ExpectedUpdate(
@@ -210,10 +210,10 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
     @Test
     func testTrackingMultipleStreamInstances() async {
         let downloadProgress = MockAttachmentDownloadProgress(total: 1)
-        let downloadQueueStatusReporter = MockDownloadQueueStatusReporter(.empty)
+        let downloadQueueStatusManager = MockDownloadQueueStatusManager(.empty)
 
         let downloadTracker = BackupAttachmentDownloadTracker(
-            backupAttachmentDownloadQueueStatusReporter: downloadQueueStatusReporter,
+            backupAttachmentDownloadQueueStatusManager: downloadQueueStatusManager,
             backupAttachmentDownloadProgress: downloadProgress,
         )
 
@@ -221,7 +221,7 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
             ExpectedUpdate(
                 update: DownloadUpdate(.empty, downloaded: 0, total: 1),
                 nextSteps: {
-                    downloadQueueStatusReporter.currentStatusMock = .running
+                    downloadQueueStatusManager.currentStatusMock = .running
                 },
             ),
             ExpectedUpdate(
@@ -233,7 +233,7 @@ final class BackupAttachmentDownloadTrackerTest: BackupAttachmentTrackerTest<
             ExpectedUpdate(
                 update: DownloadUpdate(.running, downloaded: 1, total: 1),
                 nextSteps: {
-                    downloadQueueStatusReporter.currentStatusMock = .empty
+                    downloadQueueStatusManager.currentStatusMock = .empty
                 },
             ),
             ExpectedUpdate(
@@ -282,7 +282,7 @@ private class MockAttachmentDownloadProgress: BackupAttachmentDownloadProgressMo
 
 // MARK: -
 
-private class MockDownloadQueueStatusReporter: BackupAttachmentDownloadQueueStatusReporter {
+private class MockDownloadQueueStatusManager: BackupAttachmentDownloadQueueStatusManager {
     init(
         _ initialStatus: BackupAttachmentDownloadQueueStatus,
         minimumRequiredDiskSpace: UInt64 = 0,
@@ -310,7 +310,7 @@ private class MockDownloadQueueStatusReporter: BackupAttachmentDownloadQueueStat
         return currentStatusMock
     }
 
-    func currentStatusAndToken(for mode: BackupAttachmentDownloadQueueMode) -> (SignalServiceKit.BackupAttachmentDownloadQueueStatus, any SignalServiceKit.BackupAttachmentDownloadQueueStatusToken) {
+    func currentStatusAndToken(for mode: BackupAttachmentDownloadQueueMode) -> (BackupAttachmentDownloadQueueStatus, BackupAttachmentDownloadQueueStatusToken) {
         switch mode {
         case .fullsize:
             break
@@ -320,12 +320,32 @@ private class MockDownloadQueueStatusReporter: BackupAttachmentDownloadQueueStat
         return (currentStatusMock, MockBackupAttachmentDownloadQueueStatusManager.BackupAttachmentDownloadQueueStatusTokenMock())
     }
 
+    func beginObservingIfNecessary(for mode: BackupAttachmentDownloadQueueMode) -> BackupAttachmentDownloadQueueStatus {
+        return currentStatusMock
+    }
+
+    func jobDidExperienceError(_ error: any Error, token: any BackupAttachmentDownloadQueueStatusToken, mode: BackupAttachmentDownloadQueueMode) async -> BackupAttachmentDownloadQueueStatus? {
+        return nil
+    }
+
+    func jobDidSucceed(token: any BackupAttachmentDownloadQueueStatusToken, mode: BackupAttachmentDownloadQueueMode) async {
+        // Do nothing
+    }
+
+    func didEmptyQueue(for mode: BackupAttachmentDownloadQueueMode) {
+        // Do nothing
+    }
+
+    func setIsMainAppAndActiveOverride(_ newValue: Bool) {
+        // Do nothing
+    }
+
     nonisolated let minimumRequiredDiskSpaceMock: UInt64
     func minimumRequiredDiskSpaceToCompleteDownloads() -> UInt64 {
         minimumRequiredDiskSpaceMock
     }
 
     func checkAvailableDiskSpace(clearPreviousOutOfSpaceErrors: Bool) {
-        // Nothing
+        // Do nothing
     }
 }

@@ -8,7 +8,7 @@ import SignalServiceKit
 /// Manages async streams of `DownloadUpdate`s, which represent the state and
 /// progress of Backup Attachment downloads.
 ///
-/// - SeeAlso `BackupAttachmentDownloadQueueStatusReporter`
+/// - SeeAlso `BackupAttachmentDownloadQueueStatusManager`
 /// - SeeAlso `BackupAttachmentDownloadProgress`
 ///
 /// - SeeAlso ``BackupAttachmentUploadTracker``
@@ -23,7 +23,6 @@ final class BackupAttachmentDownloadTracker {
             case pausedNeedsWifi
             case pausedNeedsInternet
             case outOfDiskSpace(bytesRequired: UInt64)
-            case appBackgrounded
             case notRegisteredAndReady
         }
 
@@ -51,21 +50,21 @@ final class BackupAttachmentDownloadTracker {
         }
     }
 
-    private let backupAttachmentDownloadQueueStatusReporter: BackupAttachmentDownloadQueueStatusReporter
+    private let backupAttachmentDownloadQueueStatusManager: BackupAttachmentDownloadQueueStatusManager
     private let backupAttachmentDownloadProgress: BackupAttachmentDownloadProgress
 
     init(
-        backupAttachmentDownloadQueueStatusReporter: BackupAttachmentDownloadQueueStatusReporter,
+        backupAttachmentDownloadQueueStatusManager: BackupAttachmentDownloadQueueStatusManager,
         backupAttachmentDownloadProgress: BackupAttachmentDownloadProgress,
     ) {
-        self.backupAttachmentDownloadQueueStatusReporter = backupAttachmentDownloadQueueStatusReporter
+        self.backupAttachmentDownloadQueueStatusManager = backupAttachmentDownloadQueueStatusManager
         self.backupAttachmentDownloadProgress = backupAttachmentDownloadProgress
     }
 
     func updates() -> AsyncStream<DownloadUpdate> {
         return AsyncStream { continuation in
             let tracker = Tracker(
-                backupAttachmentDownloadQueueStatusReporter: backupAttachmentDownloadQueueStatusReporter,
+                backupAttachmentDownloadQueueStatusManager: backupAttachmentDownloadQueueStatusManager,
                 backupAttachmentDownloadProgress: backupAttachmentDownloadProgress,
                 continuation: continuation,
             )
@@ -102,16 +101,16 @@ private class Tracker {
         let streamContinuation: AsyncStream<DownloadUpdate>.Continuation
     }
 
-    private let backupAttachmentDownloadQueueStatusReporter: BackupAttachmentDownloadQueueStatusReporter
+    private let backupAttachmentDownloadQueueStatusManager: BackupAttachmentDownloadQueueStatusManager
     private let backupAttachmentDownloadProgress: BackupAttachmentDownloadProgress
     private let state: SeriallyAccessedState<State>
 
     init(
-        backupAttachmentDownloadQueueStatusReporter: BackupAttachmentDownloadQueueStatusReporter,
+        backupAttachmentDownloadQueueStatusManager: BackupAttachmentDownloadQueueStatusManager,
         backupAttachmentDownloadProgress: BackupAttachmentDownloadProgress,
         continuation: AsyncStream<DownloadUpdate>.Continuation,
     ) {
-        self.backupAttachmentDownloadQueueStatusReporter = backupAttachmentDownloadQueueStatusReporter
+        self.backupAttachmentDownloadQueueStatusManager = backupAttachmentDownloadQueueStatusManager
         self.backupAttachmentDownloadProgress = backupAttachmentDownloadProgress
         self.state = SeriallyAccessedState(State(streamContinuation: continuation))
     }
@@ -163,13 +162,13 @@ private class Tracker {
 
         return (
             observer,
-            backupAttachmentDownloadQueueStatusReporter.currentStatus(for: .fullsize),
+            backupAttachmentDownloadQueueStatusManager.beginObservingIfNecessary(for: .fullsize),
         )
     }
 
     @MainActor
     private func handleDownloadQueueStatusUpdate() {
-        let queueStatus = backupAttachmentDownloadQueueStatusReporter.currentStatus(for: .fullsize)
+        let queueStatus = backupAttachmentDownloadQueueStatusManager.currentStatus(for: .fullsize)
 
         state.enqueueUpdate { [self] _state in
             _state.lastReportedDownloadQueueStatus = queueStatus
@@ -204,33 +203,34 @@ private class Tracker {
             return
         }
 
-        let downloadUpdateState: DownloadUpdate.State = {
-            switch lastReportedDownloadQueueStatus {
-            case .empty:
-                return .empty
-            case .running:
-                return .running
-            case .suspended:
-                return .suspended
-            case .noWifiReachability:
-                return .pausedNeedsWifi
-            case .noReachability:
-                return .pausedNeedsInternet
-            case .lowBattery:
-                return .pausedLowBattery
-            case .lowPowerMode:
-                return .pausedLowPowerMode
-            case .lowDiskSpace:
-                return .outOfDiskSpace(bytesRequired: max(
-                    lastReportedDownloadProgress.remainingUnitCount,
-                    backupAttachmentDownloadQueueStatusReporter.minimumRequiredDiskSpaceToCompleteDownloads(),
-                ))
-            case .notRegisteredAndReady:
-                return .notRegisteredAndReady
-            case .appBackgrounded:
-                return .appBackgrounded
-            }
-        }()
+        let downloadUpdateState: DownloadUpdate.State
+        switch lastReportedDownloadQueueStatus {
+        case .appBackgrounded:
+            // Don't emit an update when the app is backgrounded, so callers are
+            // left with the last update before backgrounding.
+            return
+        case .empty:
+            downloadUpdateState = .empty
+        case .running:
+            downloadUpdateState = .running
+        case .suspended:
+            downloadUpdateState = .suspended
+        case .noWifiReachability:
+            downloadUpdateState = .pausedNeedsWifi
+        case .noReachability:
+            downloadUpdateState = .pausedNeedsInternet
+        case .lowBattery:
+            downloadUpdateState = .pausedLowBattery
+        case .lowPowerMode:
+            downloadUpdateState = .pausedLowPowerMode
+        case .lowDiskSpace:
+            downloadUpdateState = .outOfDiskSpace(bytesRequired: max(
+                lastReportedDownloadProgress.remainingUnitCount,
+                backupAttachmentDownloadQueueStatusManager.minimumRequiredDiskSpaceToCompleteDownloads(),
+            ))
+        case .notRegisteredAndReady:
+            downloadUpdateState = .notRegisteredAndReady
+        }
 
         streamContinuation.yield(DownloadUpdate(
             state: downloadUpdateState,

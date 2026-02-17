@@ -58,9 +58,11 @@ public class AppEnvironment: NSObject {
         let authCredentialStore = AuthCredentialStore()
         let backupAttachmentUploadEraStore = BackupAttachmentUploadEraStore()
         let backupCDNCredentialStore = BackupCDNCredentialStore()
-        let backupNonceStore = BackupNonceMetadataStore()
+        let backupExportJobStore = BackupExportJobStore()
         let backupSettingsStore = BackupSettingsStore()
+        let backupNonceStore = BackupNonceMetadataStore()
         let backupSubscriptionIssueStore = BackupSubscriptionIssueStore()
+        let clvBackupProgressViewStore = CLVBackupProgressView.Store()
 
         let badgeManager = BadgeManager(
             badgeCountFetcher: DependenciesBridge.shared.badgeCountFetcher,
@@ -76,11 +78,11 @@ public class AppEnvironment: NSObject {
             db: DependenciesBridge.shared.db,
         )
         self.backupAttachmentDownloadTracker = BackupAttachmentDownloadTracker(
-            backupAttachmentDownloadQueueStatusReporter: DependenciesBridge.shared.backupAttachmentDownloadQueueStatusManager,
+            backupAttachmentDownloadQueueStatusManager: DependenciesBridge.shared.backupAttachmentDownloadQueueStatusManager,
             backupAttachmentDownloadProgress: DependenciesBridge.shared.backupAttachmentDownloadProgress,
         )
         self.backupAttachmentUploadTracker = BackupAttachmentUploadTracker(
-            backupAttachmentUploadQueueStatusReporter: DependenciesBridge.shared.backupAttachmentUploadQueueStatusManager,
+            backupAttachmentUploadQueueStatusManager: DependenciesBridge.shared.backupAttachmentUploadQueueStatusManager,
             backupAttachmentUploadProgress: DependenciesBridge.shared.backupAttachmentUploadProgress,
         )
         self.badgeManager = badgeManager
@@ -90,9 +92,11 @@ public class AppEnvironment: NSObject {
             backupAttachmentCoordinator: DependenciesBridge.shared.backupAttachmentCoordinator,
             backupAttachmentDownloadQueueStatusManager: DependenciesBridge.shared.backupAttachmentDownloadQueueStatusManager,
             backupCDNCredentialStore: backupCDNCredentialStore,
+            backupExportJobStore: backupExportJobStore,
             backupKeyService: DependenciesBridge.shared.backupKeyService,
             backupPlanManager: DependenciesBridge.shared.backupPlanManager,
             backupSettingsStore: backupSettingsStore,
+            clvBackupProgressViewStore: clvBackupProgressViewStore,
             db: DependenciesBridge.shared.db,
             tsAccountManager: DependenciesBridge.shared.tsAccountManager,
         )

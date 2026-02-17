@@ -11,7 +11,7 @@ import Testing
 @MainActor
 @Suite(.serialized)
 final class BackupAttachmentUploadTrackerTest: BackupAttachmentTrackerTest<
-    BackupAttachmentUploadTracker.UploadUpdate?,
+    BackupAttachmentUploadTracker.UploadUpdate,
 > {
     typealias UploadUpdate = BackupAttachmentUploadTracker.UploadUpdate
 
@@ -19,9 +19,9 @@ final class BackupAttachmentUploadTrackerTest: BackupAttachmentTrackerTest<
     @Test
     func testLaunchingWithQueuePopulated() async {
         let uploadProgress = MockAttachmentUploadProgress(total: 4)
-        let uploadQueueStatusReporter = MockUploadQueueStatusReporter(.running)
+        let uploadQueueStatusManager = MockUploadQueueStatusManager(.running)
         let uploadTracker = BackupAttachmentUploadTracker(
-            backupAttachmentUploadQueueStatusReporter: uploadQueueStatusReporter,
+            backupAttachmentUploadQueueStatusManager: uploadQueueStatusManager,
             backupAttachmentUploadProgress: uploadProgress,
         )
 
@@ -41,10 +41,13 @@ final class BackupAttachmentUploadTrackerTest: BackupAttachmentTrackerTest<
             ExpectedUpdate(
                 update: UploadUpdate(.running, uploaded: 4, total: 4),
                 nextSteps: {
-                    uploadQueueStatusReporter.currentStatusMock = .empty
+                    uploadQueueStatusManager.currentStatusMock = .empty
                 },
             ),
-            ExpectedUpdate(update: nil, nextSteps: {}),
+            ExpectedUpdate(
+                update: UploadUpdate(.empty, uploaded: 4, total: 4),
+                nextSteps: {},
+            ),
         ]
 
         await runTest(updateStream: uploadTracker.updates(), expectedUpdates: expectedUpdates)
@@ -55,9 +58,9 @@ final class BackupAttachmentUploadTrackerTest: BackupAttachmentTrackerTest<
     @Test
     func testTrackingStoppingAndReTracking() async {
         let uploadProgress = MockAttachmentUploadProgress(total: 4)
-        let uploadQueueStatusReporter = MockUploadQueueStatusReporter(.running)
+        let uploadQueueStatusManager = MockUploadQueueStatusManager(.running)
         let uploadTracker = BackupAttachmentUploadTracker(
-            backupAttachmentUploadQueueStatusReporter: uploadQueueStatusReporter,
+            backupAttachmentUploadQueueStatusManager: uploadQueueStatusManager,
             backupAttachmentUploadProgress: uploadProgress,
         )
 
@@ -79,11 +82,11 @@ final class BackupAttachmentUploadTrackerTest: BackupAttachmentTrackerTest<
             ExpectedUpdate(
                 update: UploadUpdate(.running, uploaded: 1, total: 1),
                 nextSteps: {
-                    uploadQueueStatusReporter.currentStatusMock = .empty
+                    uploadQueueStatusManager.currentStatusMock = .empty
                 },
             ),
             ExpectedUpdate(
-                update: nil,
+                update: UploadUpdate(.empty, uploaded: 1, total: 1),
                 nextSteps: {},
             ),
         ]
@@ -93,9 +96,9 @@ final class BackupAttachmentUploadTrackerTest: BackupAttachmentTrackerTest<
     @Test
     func testTrackingMultipleStreamInstances() async {
         let uploadProgress = MockAttachmentUploadProgress(total: 1)
-        let uploadQueueStatusReporter = MockUploadQueueStatusReporter(.running)
+        let uploadQueueStatusManager = MockUploadQueueStatusManager(.running)
         let uploadTracker = BackupAttachmentUploadTracker(
-            backupAttachmentUploadQueueStatusReporter: uploadQueueStatusReporter,
+            backupAttachmentUploadQueueStatusManager: uploadQueueStatusManager,
             backupAttachmentUploadProgress: uploadProgress,
         )
 
@@ -109,11 +112,11 @@ final class BackupAttachmentUploadTrackerTest: BackupAttachmentTrackerTest<
             ExpectedUpdate(
                 update: UploadUpdate(.running, uploaded: 1, total: 1),
                 nextSteps: {
-                    uploadQueueStatusReporter.currentStatusMock = .empty
+                    uploadQueueStatusManager.currentStatusMock = .empty
                 },
             ),
             ExpectedUpdate(
-                update: nil,
+                update: UploadUpdate(.empty, uploaded: 1, total: 1),
                 nextSteps: {},
             ),
         ]
@@ -157,7 +160,7 @@ private class MockAttachmentUploadProgress: BackupAttachmentUploadProgressMock {
 
 // MARK: -
 
-private class MockUploadQueueStatusReporter: BackupAttachmentUploadQueueStatusReporter {
+private class MockUploadQueueStatusManager: BackupAttachmentUploadQueueStatusManager {
     var currentStatusMock: BackupAttachmentUploadQueueStatus {
         didSet {
             NotificationCenter.default.postOnMainThread(
@@ -172,12 +175,18 @@ private class MockUploadQueueStatusReporter: BackupAttachmentUploadQueueStatusRe
     }
 
     func currentStatus(for mode: BackupAttachmentUploadQueueMode) -> BackupAttachmentUploadQueueStatus {
-        switch mode {
-        case .fullsize:
-            break
-        case .thumbnail:
-            fatalError("Only use fullsize in these tests")
-        }
         return currentStatusMock
+    }
+
+    func beginObservingIfNecessary(for mode: BackupAttachmentUploadQueueMode) -> BackupAttachmentUploadQueueStatus {
+        return currentStatusMock
+    }
+
+    func didEmptyQueue(for mode: BackupAttachmentUploadQueueMode) {
+        // Nothing
+    }
+
+    func setIsMainAppAndActiveOverride(_ newValue: Bool) {
+        // Nothing
     }
 }
