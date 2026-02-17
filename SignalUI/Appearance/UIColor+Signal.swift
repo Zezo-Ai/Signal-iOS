@@ -162,6 +162,15 @@ extension UIColor.Signal {
         )
     }
 
+    public static var emphasisLabel: UIColor {
+        UIColor(
+            light: UIColor(rgbHex: 0xE81F28),
+            lightHighContrast: UIColor(rgbHex: 0xE30B14),
+            dark: UIColor(rgbHex: 0xFC3040),
+            darkHighContrast: UIColor(rgbHex: 0xFF515E),
+        )
+    }
+
     // MARK: Background
 
     public static var background: UIColor {
@@ -431,6 +440,10 @@ extension Color.Signal {
 
     public static var quaternaryLabel: Color {
         Color(UIColor.Signal.quaternaryLabel)
+    }
+
+    public static var emphasisLabel: Color {
+        Color(UIColor.Signal.emphasisLabel)
     }
 
     // MARK: Background

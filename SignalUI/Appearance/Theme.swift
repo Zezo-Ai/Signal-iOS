@@ -330,14 +330,6 @@ public final class Theme {
         UIColor.Signal.accent.resolvedColor(with: currentThemeTraitCollection)
     }
 
-    public class var conversationButtonBackgroundColor: UIColor {
-        isDarkThemeEnabled ? .ows_gray80 : .ows_gray02
-    }
-
-    public class var conversationButtonTextColor: UIColor {
-        isDarkThemeEnabled ? .ows_gray05 : .ows_accentBlue
-    }
-
     @objc
     public class var launchScreenBackgroundColor: UIColor {
         backgroundColor

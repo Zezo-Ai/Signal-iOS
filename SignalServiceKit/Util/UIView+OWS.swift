@@ -52,6 +52,13 @@ public extension NSDirectionalEdgeInsets {
     init(margin: CGFloat) {
         self.init(top: margin, leading: margin, bottom: margin, trailing: margin)
     }
+
+    var asSize: CGSize {
+        CGSize(
+            width: leading + trailing,
+            height: top + bottom,
+        )
+    }
 }
 
 // MARK: -
