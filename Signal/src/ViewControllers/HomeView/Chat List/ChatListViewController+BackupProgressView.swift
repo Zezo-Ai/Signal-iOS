@@ -102,10 +102,6 @@ class CLVBackupProgressView: BackupProgressView.Delegate {
     // MARK: -
 
     var shouldBeVisible: Bool {
-        guard BuildFlags.Backups.chatListProgress else {
-            return false
-        }
-
         return backupProgressView.viewState != nil
     }
 

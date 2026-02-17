@@ -51,8 +51,6 @@ public enum BuildFlags {
 
         public static let useLowerDefaultListMediaRefreshInterval = build <= .beta
         public static let performListMediaIntegrityChecks = build <= .beta
-
-        public static let chatListProgress = build <= .dev
     }
 
     public static let callQualitySurvey = true
