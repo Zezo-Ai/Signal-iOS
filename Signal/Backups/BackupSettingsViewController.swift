@@ -301,14 +301,14 @@ class BackupSettingsViewController:
 
                     let uploadViewUpdateState: BackupAttachmentUploadProgressView.UploadUpdate.State
                     switch uploadTrackerUpdate.state {
-                    case .empty,
+                    case .noUploadsToReport,
                          .suspended,
                          .notRegisteredAndReady,
                          .hasConsumedMediaTierCapacity:
                         viewModel.latestBackupAttachmentUploadUpdate = nil
                         return false
-                    case .running:
-                        uploadViewUpdateState = .running
+                    case .uploading:
+                        uploadViewUpdateState = .uploading
                     case .pausedLowBattery:
                         uploadViewUpdateState = .pausedLowBattery
                     case .pausedLowPowerMode:
@@ -2473,7 +2473,7 @@ private struct BackupAttachmentDownloadProgressView: View {
 private struct BackupAttachmentUploadProgressView: View {
     struct UploadUpdate: Equatable {
         enum State {
-            case running
+            case uploading
             case pausedLowBattery
             case pausedLowPowerMode
             case pausedNeedsWifi
@@ -2514,7 +2514,7 @@ private struct BackupAttachmentUploadProgressView: View {
         }
 
         switch uploadUpdate.state {
-        case .running:
+        case .uploading:
             let bytesUploaded = uploadUpdate.bytesUploaded
             let totalBytesToUpload = uploadUpdate.totalBytesToUpload
             let percentageUploaded = uploadUpdate.percentageUploaded
@@ -3244,7 +3244,7 @@ private extension BackupSettingsViewModel {
         backupSubscriptionLoadingState: .loaded(.paidButFreeForTesters),
         backupPlan: .paidAsTester(optimizeLocalStorage: false),
         latestBackupExportProgressUpdate: .forPreview(.attachmentUpload),
-        latestBackupAttachmentUploadUpdateState: .running,
+        latestBackupAttachmentUploadUpdateState: .uploading,
     ))
 }
 
@@ -3363,7 +3363,7 @@ private extension BackupSettingsViewModel {
     BackupSettingsView(viewModel: .forPreview(
         backupSubscriptionLoadingState: .loaded(.freeAndEnabled),
         backupPlan: .free,
-        latestBackupAttachmentUploadUpdateState: .running,
+        latestBackupAttachmentUploadUpdateState: .uploading,
     ))
 }
 

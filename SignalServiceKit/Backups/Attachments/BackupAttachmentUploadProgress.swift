@@ -371,18 +371,36 @@ private extension BackupPlan {
 #if TESTABLE_BUILD
 
 open class BackupAttachmentUploadProgressMock: BackupAttachmentUploadProgress {
+    var progressMock: OWSProgress {
+        didSet {
+            mockObserverBlocks.get().forEach { $0(progressMock) }
+        }
+    }
 
-    init() {}
+    private let mockObserverBlocks: AtomicValue<[(OWSProgress) -> Void]>
+
+    init(
+        initialCompleted: UInt64,
+        total: UInt64,
+    ) {
+        self.progressMock = OWSProgress(
+            completedUnitCount: initialCompleted,
+            totalUnitCount: total,
+        )
+        self.mockObserverBlocks = AtomicValue([], lock: .init())
+    }
 
     open func addObserver(
         _ block: @escaping (OWSProgress) -> Void,
     ) async throws -> BackupAttachmentUploadProgressObserver {
+        mockObserverBlocks.update { $0.append(block) }
+
         let sink = OWSProgress.createSink(block)
-        let source = await sink.addSource(withLabel: "", unitCount: 100)
+        let source = await sink.addSource(withLabel: "", unitCount: progressMock.totalUnitCount)
         return BackupAttachmentUploadProgressObserver(
-            queueSnapshot: .init(
-                totalByteCount: 100,
-                completedByteCount: 0,
+            queueSnapshot: BackupAttachmentUploadProgressImpl.UploadQueueSnapshot(
+                totalByteCount: progressMock.totalUnitCount,
+                completedByteCount: progressMock.completedUnitCount,
                 maxAttachmentRowId: 0,
             ),
             sink: sink,

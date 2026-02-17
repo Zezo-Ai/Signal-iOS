@@ -40,7 +40,7 @@ public class BackupListMediaManagerTests {
             ),
             backupAttachmentDownloadProgress: BackupAttachmentDownloadProgressMock(),
             backupAttachmentDownloadStore: backupAttachmentDownloadStore,
-            backupAttachmentUploadProgress: BackupAttachmentUploadProgressMock(),
+            backupAttachmentUploadProgress: BackupAttachmentUploadProgressMock(initialCompleted: 0, total: 100),
             backupAttachmentUploadScheduler: backupAttachmentUploadScheduler,
             backupAttachmentUploadStore: backupAttachmentUploadStore,
             backupAttachmentUploadEraStore: BackupAttachmentUploadEraStore(),

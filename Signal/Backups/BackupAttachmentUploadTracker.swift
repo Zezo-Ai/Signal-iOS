@@ -16,9 +16,15 @@ import SwiftUI
 final class BackupAttachmentUploadTracker {
     struct UploadUpdate: Equatable {
         enum State {
-            case running
+            case uploading
+            /// - Note
+            /// We only include "attachments present locally when Backups was
+            /// enabled" in upload progress. So, we may have a non-empty "upload
+            /// queue" but have no uploads we need to track progress for; hence
+            /// the cagey name.
+            /// - SeeAlso `BackupAttachmentUploadProgress`
+            case noUploadsToReport
             case suspended
-            case empty
             case notRegisteredAndReady
             case pausedLowBattery
             case pausedLowPowerMode
@@ -47,7 +53,9 @@ final class BackupAttachmentUploadTracker {
         }
 
         static func ==(lhs: UploadUpdate, rhs: UploadUpdate) -> Bool {
-            return lhs.state == rhs.state && lhs.percentageUploaded == rhs.percentageUploaded
+            return lhs.state == rhs.state
+                && lhs.bytesUploaded == rhs.bytesUploaded
+                && lhs.totalBytesToUpload == rhs.totalBytesToUpload
         }
     }
 
@@ -93,7 +101,7 @@ private class Tracker {
     typealias UploadUpdate = BackupAttachmentUploadTracker.UploadUpdate
 
     private struct State {
-        var lastReportedUploadProgress: OWSProgress = .zero
+        var lastReportedUploadProgress: OWSProgress?
         var lastReportedUploadQueueStatus: BackupAttachmentUploadQueueStatus?
 
         var uploadQueueStatusObserver: NotificationCenter.Observer?
@@ -211,9 +219,21 @@ private class Tracker {
 
     private func yieldCurrentUploadUpdate(state: State) {
         let streamContinuation = state.streamContinuation
-        let lastReportedUploadProgress = state.lastReportedUploadProgress
 
-        guard let lastReportedUploadQueueStatus = state.lastReportedUploadQueueStatus else {
+        guard
+            let lastReportedUploadProgress = state.lastReportedUploadProgress,
+            let lastReportedUploadQueueStatus = state.lastReportedUploadQueueStatus
+        else {
+            return
+        }
+
+        guard lastReportedUploadProgress.totalUnitCount > 0 else {
+            // If our "total bytes" to upload is zero, then regardless of the
+            // queue status we have nothing to report.
+            streamContinuation.yield(UploadUpdate(
+                state: .noUploadsToReport,
+                progress: lastReportedUploadProgress,
+            ))
             return
         }
 
@@ -224,11 +244,11 @@ private class Tracker {
             // left with the last update before backgrounding.
             return
         case .running:
-            uploadUpdateState = .running
+            uploadUpdateState = .uploading
         case .suspended:
             uploadUpdateState = .suspended
         case .empty:
-            uploadUpdateState = .empty
+            uploadUpdateState = .noUploadsToReport
         case .notRegisteredAndReady:
             uploadUpdateState = .notRegisteredAndReady
         case .noReachability:

@@ -281,9 +281,9 @@ class CLVBackupProgressView: BackupProgressView.Delegate {
         }
 
         switch lastUploadTrackerUpdate.state {
-        case .empty:
+        case .noUploadsToReport:
             break
-        case .running:
+        case .uploading:
             return .attachmentUploadRunning(
                 bytesUploaded: lastUploadTrackerUpdate.bytesUploaded,
                 totalBytesToUpload: lastUploadTrackerUpdate.totalBytesToUpload,
