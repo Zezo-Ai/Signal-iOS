@@ -580,6 +580,7 @@ private class BackupProgressView: UIView {
 
         trailingAccessoryContainerView.addArrangedSubview(trailingAccessoryPausedWifiResumeButton)
         trailingAccessoryPausedWifiResumeButton.translatesAutoresizingMaskIntoConstraints = false
+        trailingAccessoryPausedWifiResumeButton.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         trailingAccessoryPausedWifiResumeButton.setTitle(
             OWSLocalizedString(
                 "CHAT_LIST_BACKUP_PROGRESS_VIEW_RESUME_WIFI_BUTTON",
