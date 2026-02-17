@@ -93,7 +93,10 @@ class CLVBackupProgressView: BackupProgressView.Delegate {
 
     fileprivate static func tableViewCell(wrapping backupProgressView: BackupProgressView) -> UITableViewCell {
         let cell = UITableViewCell()
-        cell.backgroundColor = .Signal.background
+        var backgroundConfiguration = UIBackgroundConfiguration.clear()
+        backgroundConfiguration.backgroundColor = .Signal.background
+        cell.backgroundConfiguration = backgroundConfiguration
+
         cell.contentView.addSubview(backupProgressView)
         backupProgressView.autoPinEdgesToSuperviewEdges(with: UIEdgeInsets(hMargin: 12, vMargin: 12))
         return cell
@@ -500,6 +503,7 @@ private class BackupProgressView: UIView {
         }
     }
 
+    /// If `nil`, this view isn't visible.
     var viewState: ViewState? {
         didSet {
             configureSubviewsForCurrentState()
@@ -519,23 +523,23 @@ private class BackupProgressView: UIView {
 
     // MARK: -
 
-    private let leadingAccessoryImageView = UIImageView()
+    private lazy var leadingAccessoryImageView = UIImageView()
 
-    private let labelStackView = UIStackView()
-    private let titleLabel = UILabel()
-    private let progressLabel = UILabel()
+    private lazy var labelStackView = UIStackView()
+    private lazy var titleLabel = UILabel()
+    private lazy var progressLabel = UILabel()
 
     /// A container for the various trailingAccessory views we might display. A
     /// stack view so we can use `isHidden = true` to make subviews take up zero
     /// space.
-    private let trailingAccessoryContainerView = UIStackView()
-    private let trailingAccessorySpacerView = UIView()
-    private let trailingAccessoryRunningArcView = ArcView()
-    private let trailingAccessoryPausedWifiResumeButton = UIButton()
-    private let trailingAccessoryPausedNoInternetLabel = UILabel()
-    private let trailingAccessoryPausedLowBatteryLabel = UILabel()
-    private let trailingAccessoryPausedLowPowerModeLabel = UILabel()
-    private let trailingAccessoryCompleteDismissButton = UIButton()
+    private lazy var trailingAccessoryContainerView = UIStackView()
+    private lazy var trailingAccessorySpacerView = UIView()
+    private lazy var trailingAccessoryRunningArcView = ArcView()
+    private lazy var trailingAccessoryPausedWifiResumeButton = UIButton()
+    private lazy var trailingAccessoryPausedNoInternetLabel = UILabel()
+    private lazy var trailingAccessoryPausedLowBatteryLabel = UILabel()
+    private lazy var trailingAccessoryPausedLowPowerModeLabel = UILabel()
+    private lazy var trailingAccessoryCompleteDismissButton = UIButton()
 
     weak var delegate: Delegate?
 
