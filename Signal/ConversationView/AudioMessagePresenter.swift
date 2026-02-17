@@ -54,7 +54,7 @@ class AudioMessagePresenter: AudioPresenter {
     }
 
     func unplayedColor(isIncoming: Bool) -> UIColor {
-        return isIncoming ? UIColor.Signal.tertiaryLabel : .ows_whiteAlpha40
+        isIncoming ? .Signal.tertiaryLabel : .ows_whiteAlpha40
     }
 
     func thumbColor(isIncoming: Bool) -> UIColor {
@@ -62,7 +62,7 @@ class AudioMessagePresenter: AudioPresenter {
     }
 
     func playPauseContainerBackgroundColor(isIncoming: Bool) -> UIColor {
-        return isIncoming ? (Theme.isDarkThemeEnabled ? .ows_gray60 : .ows_whiteAlpha80) : .ows_whiteAlpha20
+        isIncoming ? .Signal.materialButton : .ows_whiteAlpha20
     }
 
     func playPauseAnimationColor(isIncoming: Bool) -> ColorValueProvider {
