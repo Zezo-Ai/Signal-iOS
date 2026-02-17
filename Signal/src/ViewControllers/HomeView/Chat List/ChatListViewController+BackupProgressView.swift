@@ -71,7 +71,7 @@ class CLVBackupProgressView: BackupProgressView.Delegate {
     private let store: Store
 
     weak var chatListViewController: ChatListViewController?
-    let backupProgressViewCell: UITableViewCell
+    lazy var backupProgressViewCell: UITableViewCell = Self.tableViewCell(wrapping: backupProgressView)
 
     private let backupProgressView: BackupProgressView
     private let state: AtomicValue<State>
@@ -85,14 +85,18 @@ class CLVBackupProgressView: BackupProgressView.Delegate {
         self.deviceSleepManager = DependenciesBridge.shared.deviceSleepManager.owsFailUnwrap("Missing DeviceSleepManager!")
         self.store = Store()
 
-        self.backupProgressViewCell = UITableViewCell()
-        self.backupProgressViewCell.backgroundColor = .Signal.background
         self.backupProgressView = BackupProgressView(viewState: nil)
         self.state = AtomicValue(State(), lock: .init())
 
-        self.backupProgressViewCell.contentView.addSubview(self.backupProgressView)
-        self.backupProgressView.autoPinEdgesToSuperviewEdges(with: UIEdgeInsets(hMargin: 12, vMargin: 12))
         self.backupProgressView.delegate = self
+    }
+
+    fileprivate static func tableViewCell(wrapping backupProgressView: BackupProgressView) -> UITableViewCell {
+        let cell = UITableViewCell()
+        cell.backgroundColor = .Signal.background
+        cell.contentView.addSubview(backupProgressView)
+        backupProgressView.autoPinEdgesToSuperviewEdges(with: UIEdgeInsets(hMargin: 12, vMargin: 12))
+        return cell
     }
 
     // MARK: -
@@ -692,26 +696,25 @@ private class BackupProgressView: UIView {
 
 #if DEBUG
 
-private class BackupProgressViewPreviewViewController: UIViewController {
-    private let state: BackupProgressView.ViewState?
-
+private class BackupProgressViewPreviewViewController: TablePreviewViewController {
     init(state: BackupProgressView.ViewState?) {
-        self.state = state
-        super.init(nibName: nil, bundle: nil)
+        super.init { _ -> [UITableViewCell] in
+            return [
+                CLVBackupProgressView.tableViewCell(wrapping: BackupProgressView(
+                    viewState: state,
+                )),
+                {
+                    let cell = UITableViewCell()
+                    var content = cell.defaultContentConfiguration()
+                    content.text = "Imagine this is a ChatListCell :)"
+                    cell.contentConfiguration = content
+                    return cell
+                }(),
+            ]
+        }
     }
 
     required init?(coder: NSCoder) { fatalError() }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        let progressView = BackupProgressView(viewState: state)
-        view.addSubview(progressView)
-        progressView.autoPinEdgesToSuperviewSafeArea(
-            with: UIEdgeInsets(margin: 16),
-            excludingEdge: .bottom,
-        )
-    }
 }
 
 @available(iOS 17, *)

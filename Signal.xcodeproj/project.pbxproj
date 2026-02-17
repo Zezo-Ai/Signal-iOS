@@ -246,6 +246,7 @@
 		3406D32E25DD80D600885B14 /* payments_spinner.json in Resources */ = {isa = PBXBuildFile; fileRef = 3406D32A25DD80D600885B14 /* payments_spinner.json */; };
 		3406D33125DD832800885B14 /* payments_spinner_info_dark.json in Resources */ = {isa = PBXBuildFile; fileRef = 3406D32F25DD832700885B14 /* payments_spinner_info_dark.json */; };
 		3406D33225DD832800885B14 /* payments_spinner_dark.json in Resources */ = {isa = PBXBuildFile; fileRef = 3406D33025DD832800885B14 /* payments_spinner_dark.json */; };
+		3407BB4B271D9DCD0084CBAF /* TablePreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3407BB4A271D9DCD0084CBAF /* TablePreviewViewController.swift */; };
 		340D900024FEE6A9007B5504 /* GroupInviteLinksUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 340D8FFF24FEE6A9007B5504 /* GroupInviteLinksUI.swift */; };
 		3414896925C9B6490098E3ED /* CurrencyPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3414896825C9B6490098E3ED /* CurrencyPickerViewController.swift */; };
 		3415217525B0CB31009F177F /* CVAttachmentProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3415217425B0CB30009F177F /* CVAttachmentProgressView.swift */; };
@@ -4231,6 +4232,7 @@
 		3406D32A25DD80D600885B14 /* payments_spinner.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = payments_spinner.json; sourceTree = "<group>"; };
 		3406D32F25DD832700885B14 /* payments_spinner_info_dark.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = payments_spinner_info_dark.json; sourceTree = "<group>"; };
 		3406D33025DD832800885B14 /* payments_spinner_dark.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = payments_spinner_dark.json; sourceTree = "<group>"; };
+		3407BB4A271D9DCD0084CBAF /* TablePreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TablePreviewViewController.swift; sourceTree = "<group>"; };
 		340B02B61F9FD31800F9CFEC /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = translations/he.lproj/Localizable.strings; sourceTree = "<group>"; };
 		340B06C623C8DA2600929588 /* StorageService+GroupsV2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "StorageService+GroupsV2.swift"; sourceTree = "<group>"; };
 		340B870D23DF3E3A00BE0AFC /* GroupV2UpdatesImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroupV2UpdatesImpl.swift; sourceTree = "<group>"; };
@@ -8879,6 +8881,7 @@
 				B95967832D52976A00F9A800 /* NavigationPreviewController.swift */,
 				B9A53B922CF7928A0000578B /* SheetPreviewViewController.swift */,
 				C1D9B1522B7E949500D94595 /* SpamReportingUIUtils.swift */,
+				3407BB4A271D9DCD0084CBAF /* TablePreviewViewController.swift */,
 				D9DD708D2E67BC48003E1A45 /* URL+Support.swift */,
 			);
 			path = Utils;
@@ -17520,6 +17523,7 @@
 				88F5FA9428EBD4CF007AA1BF /* StorySharing.swift in Sources */,
 				3402A9DA271D953B0084CBAE /* SUIEnvironment.swift in Sources */,
 				B9D721762C87B8EB007EDA85 /* SwiftUI+Animations.swift in Sources */,
+				3407BB4B271D9DCD0084CBAF /* TablePreviewViewController.swift in Sources */,
 				3402AA7E271D9E180084CBAE /* TappableStackView.swift in Sources */,
 				3402AA80271D9E180084CBAE /* TappableView.swift in Sources */,
 				B99288002CF124AC000D62C4 /* Text+Links.swift in Sources */,
