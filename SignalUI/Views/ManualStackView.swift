@@ -120,7 +120,6 @@ open class ManualStackView: ManualLayoutView {
             return .zero
         }
         guard let measurement else {
-            owsFailDebug("Missing measurement: \(self.name).")
             return super.sizeThatFits(size)
         }
         return measurement.measuredSize
