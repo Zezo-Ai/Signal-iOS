@@ -355,11 +355,20 @@ class CLVBackupProgressView: BackupProgressView.Delegate {
 
     func didTapPausedWifiResumeButton() {
         let actionSheet = ActionSheetController(
-            title: "Resume Using Cellular Data?",
-            message: "Backing up your media using cellular data may result in data charges. Your backup may take a long time to upload, keep Signal open to avoid interruptions.",
+            title: OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_RESUME_CELLULAR_DATA_TITLE",
+                comment: "Title for the action sheet shown when the user tries to resume backup using cellular data.",
+            ),
+            message: OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_RESUME_CELLULAR_DATA_MESSAGE",
+                comment: "Message shown in an action sheet when the user tries to resume backup using cellular data.",
+            ),
         )
         actionSheet.addAction(ActionSheetAction(
-            title: "Resume",
+            title: OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_RESUME_CELLULAR_DATA_BUTTON",
+                comment: "Button in the action sheet to resume backup using cellular data.",
+            ),
             handler: { [self] _ in
                 db.write { tx in
                     backupSettingsStore.setShouldAllowBackupUploadsOnCellular(true, tx: tx)
@@ -367,7 +376,10 @@ class CLVBackupProgressView: BackupProgressView.Delegate {
             },
         ))
         actionSheet.addAction(ActionSheetAction(
-            title: "Later on Wi-Fi",
+            title: OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_LATER_ON_WIFI_BUTTON",
+                comment: "Button in the action sheet to dismiss and resume backup later on Wi-Fi.",
+            ),
         ))
 
         chatListViewController?.presentActionSheet(actionSheet)
@@ -378,31 +390,61 @@ class CLVBackupProgressView: BackupProgressView.Delegate {
     /// Actions to display in a context menu for the owning row in the table
     /// view.
     func contextMenuActions() -> [UIAction] {
-        let hideAction = UIAction(title: "Hide", image: .eyeSlash) { [self] _ in
+        let hideAction = UIAction(
+            title: OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_HIDE_CONTEXT_MENU_ACTION",
+                comment: "Title for the context menu action that hides the backup progress view.",
+            ),
+            image: .eyeSlash,
+        ) { [self] _ in
             db.write { tx in
                 store.setIsHidden(true, tx: tx)
             }
-            chatListViewController?.presentToast(text: "View backup progress in Backup Settings")
+            chatListViewController?.presentToast(text: OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_HIDE_TOAST",
+                comment: "Toast shown after the user hides the backup progress view.",
+            ))
         }
 
-        let cancelAction = UIAction(title: "Cancel backup", image: .xCircle) { [self] _ in
+        let cancelAction = UIAction(
+            title: OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_CANCEL_BACKUP_CONTEXT_MENU_ACTION",
+                comment: "Title for the context menu action that cancels the backup.",
+            ),
+            image: .xCircle,
+        ) { [self] _ in
             let actionSheet = ActionSheetController(
-                title: "Cancel Backup?",
-                message: "Canceling your backup will not delete your backup. You can resume your backup at any time from Backup Settings.",
+                title: OWSLocalizedString(
+                    "CHAT_LIST_BACKUP_PROGRESS_VIEW_BACKUP_CANCEL_CONFIRMATION_TITLE",
+                    comment: "Title for the action sheet shown when the user tries to cancel a backup.",
+                ),
+                message: OWSLocalizedString(
+                    "CHAT_LIST_BACKUP_PROGRESS_VIEW_BACKUP_CANCEL_CONFIRMATION_MESSAGE",
+                    comment: "Message shown in an action sheet when the user tries to cancel a backup.",
+                ),
             )
             actionSheet.addAction(ActionSheetAction(
-                title: "Cancel Backup",
+                title: OWSLocalizedString(
+                    "CHAT_LIST_BACKUP_PROGRESS_VIEW_CANCEL_BACKUP_BUTTON",
+                    comment: "Button in the cancel backup action sheet that confirms cancellation.",
+                ),
                 handler: { [self] _ in
                     // Cancel the BackupExportJob, and pause uploads.
                     backupExportJobRunner.cancelIfRunning()
                     db.write {
                         backupSettingsStore.setIsBackupUploadQueueSuspended(true, tx: $0)
                     }
-                    chatListViewController?.presentToast(text: "Backup canceled")
+                    chatListViewController?.presentToast(text: OWSLocalizedString(
+                        "CHAT_LIST_BACKUP_PROGRESS_VIEW_BACKUP_CANCELED_TOAST",
+                        comment: "Toast shown after the user cancels the backup.",
+                    ))
                 },
             ))
             actionSheet.addAction(ActionSheetAction(
-                title: "Continue Backup",
+                title: OWSLocalizedString(
+                    "CHAT_LIST_BACKUP_PROGRESS_VIEW_CONTINUE_BACKUP_BUTTON",
+                    comment: "Button in the cancel backup action sheet that dismisses the sheet and continues the backup.",
+                ),
             ))
             chatListViewController?.presentActionSheet(actionSheet)
         }
@@ -479,6 +521,8 @@ private class BackupProgressView: UIView {
         label.lineBreakMode = .byWordWrapping
     }
 
+    // MARK: -
+
     private let leadingAccessoryImageView = UIImageView()
 
     private let labelStackView = UIStackView()
@@ -535,7 +579,10 @@ private class BackupProgressView: UIView {
         trailingAccessoryContainerView.addArrangedSubview(trailingAccessoryPausedWifiResumeButton)
         trailingAccessoryPausedWifiResumeButton.translatesAutoresizingMaskIntoConstraints = false
         trailingAccessoryPausedWifiResumeButton.setTitle(
-            "Resume",
+            OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_RESUME_WIFI_BUTTON",
+                comment: "Button shown in the backup progress view trailing accessory to resume uploading over Wi-Fi.",
+            ),
             for: .normal,
         )
         trailingAccessoryPausedWifiResumeButton.setTitleColor(.Signal.label, for: .normal)
@@ -561,15 +608,24 @@ private class BackupProgressView: UIView {
 
         trailingAccessoryContainerView.addArrangedSubview(trailingAccessoryPausedNoInternetLabel)
         Self.configure(label: trailingAccessoryPausedNoInternetLabel, color: .Signal.secondaryLabel)
-        trailingAccessoryPausedNoInternetLabel.text = "No Internet…"
+        trailingAccessoryPausedNoInternetLabel.text = OWSLocalizedString(
+            "CHAT_LIST_BACKUP_PROGRESS_VIEW_NO_INTERNET_LABEL",
+            comment: "Trailing accessory label shown when backup is paused due to no internet connection.",
+        )
 
         trailingAccessoryContainerView.addArrangedSubview(trailingAccessoryPausedLowBatteryLabel)
         Self.configure(label: trailingAccessoryPausedLowBatteryLabel, color: .Signal.secondaryLabel)
-        trailingAccessoryPausedLowBatteryLabel.text = "Low Battery…"
+        trailingAccessoryPausedLowBatteryLabel.text = OWSLocalizedString(
+            "CHAT_LIST_BACKUP_PROGRESS_VIEW_LOW_BATTERY_LABEL",
+            comment: "Trailing accessory label shown when backup is paused due to low battery.",
+        )
 
         trailingAccessoryContainerView.addArrangedSubview(trailingAccessoryPausedLowPowerModeLabel)
         Self.configure(label: trailingAccessoryPausedLowPowerModeLabel, color: .Signal.secondaryLabel)
-        trailingAccessoryPausedLowPowerModeLabel.text = "Low Power Mode…"
+        trailingAccessoryPausedLowPowerModeLabel.text = OWSLocalizedString(
+            "CHAT_LIST_BACKUP_PROGRESS_VIEW_LOW_POWER_MODE_LABEL",
+            comment: "Trailing accessory label shown when backup is paused due to Low Power Mode.",
+        )
 
         initializeConstraints()
         configureSubviewsForCurrentState()
@@ -603,25 +659,41 @@ private class BackupProgressView: UIView {
         var progressLabelText: String?
         switch viewState {
         case .backupFilePreparation(let percentComplete):
-            titleLabelText = "Preparing backup"
+            titleLabelText = OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_PREPARING_BACKUP_TITLE",
+                comment: "Title label shown in the chat list backup progress view while the backup file is being prepared.",
+            )
             progressLabelText = percentComplete.formatted(.owsPercent())
         case .attachmentUploadRunning(let bytesUploaded, let totalBytesToUpload):
-            titleLabelText = "Uploading backup"
+            titleLabelText = OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_UPLOADING_BACKUP_TITLE",
+                comment: "Title label shown in the chat list backup progress view while backup attachments are being uploaded.",
+            )
             progressLabelText = String(
-                format: "%1$@ of %2$@",
+                format: OWSLocalizedString(
+                    "CHAT_LIST_BACKUP_PROGRESS_VIEW_UPLOAD_PROGRESS_FORMAT",
+                    comment: "Progress label showing the amount uploaded out of the total. Embeds {{ %1$@ bytes uploaded, %2$@ total bytes to upload }}.",
+                ),
                 bytesUploaded.formatted(.owsByteCount()),
                 totalBytesToUpload.formatted(.owsByteCount()),
             )
         case .attachmentUploadPausedNoWifi:
-            titleLabelText = "Waiting for Wi-Fi"
-        case .attachmentUploadPausedNoInternet:
-            titleLabelText = "Backup paused"
-        case .attachmentUploadPausedLowBattery:
-            titleLabelText = "Backup paused"
-        case .attachmentUploadPausedLowPowerMode:
-            titleLabelText = "Backup paused"
+            titleLabelText = OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_WAITING_FOR_WIFI_TITLE",
+                comment: "Title label shown in the chat list backup progress view when waiting for Wi-Fi.",
+            )
+        case .attachmentUploadPausedNoInternet,
+             .attachmentUploadPausedLowBattery,
+             .attachmentUploadPausedLowPowerMode:
+            titleLabelText = OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_BACKUP_PAUSED_TITLE",
+                comment: "Title label shown in the chat list backup progress view when the backup is paused.",
+            )
         case .complete:
-            titleLabelText = "Backup complete"
+            titleLabelText = OWSLocalizedString(
+                "CHAT_LIST_BACKUP_PROGRESS_VIEW_BACKUP_COMPLETE_TITLE",
+                comment: "Title label shown in the chat list backup progress view when the backup is complete.",
+            )
         case nil:
             titleLabelText = ""
         }
