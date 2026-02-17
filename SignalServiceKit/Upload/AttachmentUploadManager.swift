@@ -444,7 +444,7 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
             )
         } catch let error as BackupArchive.Response.CopyToMediaTierError {
             switch error {
-            case .sourceObjectNotFound:
+            case .sourceObjectNotFound, .badArgument:
                 let attachmentFileUrl = AttachmentStream.absoluteAttachmentFileURL(
                     relativeFilePath: attachmentStream.localRelativeFilePath,
                 )

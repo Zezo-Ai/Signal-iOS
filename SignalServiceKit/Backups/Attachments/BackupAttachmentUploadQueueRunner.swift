@@ -515,7 +515,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                 }
 
                 switch error as? BackupArchive.Response.CopyToMediaTierError {
-                case .sourceObjectNotFound:
+                case .sourceObjectNotFound, .badArgument:
                     // Any time we find this error, retry. It means the upload
                     // expired, and so the copy failed. This is always transient
                     // and can always be fixed by reuploading, don't even increment
