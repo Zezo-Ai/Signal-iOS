@@ -298,7 +298,7 @@ class HomeTabBarController: UITabBarController {
 extension HomeTabBarController: BadgeObserver {
     func didUpdateBadgeCount(_ badgeManager: BadgeManager, badgeCount: BadgeCount) {
         func stringify(_ badgeValue: UInt) -> String? {
-            return badgeValue > 0 ? "\(badgeValue)" : nil
+            return badgeValue > 0 ? badgeValue.formatted() : nil
         }
 
         if #available(iOS 18, *), UIDevice.current.isIPad {
