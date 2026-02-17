@@ -237,11 +237,10 @@ public class ConversationInputToolbar: UIView, QuotedReplyPreviewDelegate {
             if #available(iOS 26, *) {
                 return .Signal.label
             }
-            return UIColor { traitCollection in
-                traitCollection.userInterfaceStyle == .dark
-                    ? Theme.darkThemeLegacyPrimaryIconColor
-                    : Theme.lightThemeLegacyPrimaryIconColor
-            }
+            return UIColor(
+                light: Theme.lightThemeLegacyPrimaryIconColor,
+                dark: Theme.darkThemeLegacyPrimaryIconColor,
+            )
         }
     }
 
@@ -3321,12 +3320,9 @@ private extension ColorOrGradientValue {
         }()
         let lightThemeFinalColor = bubbleColor.blendedWithOverlay(.white, opacity: 0.16)
         let darkThemeFinalColor = bubbleColor.blendedWithOverlay(.black, opacity: 0.1)
-        return UIColor { traitCollection in
-            if traitCollection.userInterfaceStyle == .dark {
-                return darkThemeFinalColor
-            } else {
-                return lightThemeFinalColor
-            }
-        }
+        return UIColor(
+            light: lightThemeFinalColor,
+            dark: darkThemeFinalColor,
+        )
     }
 }

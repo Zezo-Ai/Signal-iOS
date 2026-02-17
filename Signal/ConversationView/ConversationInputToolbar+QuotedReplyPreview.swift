@@ -458,11 +458,10 @@ private class QuotedMessageSnippetView: UIView {
             },
         )
         cancelButton.configuration?.image = UIImage(imageLiteralResourceName: "x-compact-bold")
-        cancelButton.configuration?.baseBackgroundColor = .init(dynamicProvider: { traitCollection in
-            traitCollection.userInterfaceStyle == .dark
-                ? UIColor(rgbHex: 0x787880, alpha: 0.4)
-                : UIColor(rgbHex: 0xF5F5F5, alpha: 0.9)
-        })
+        cancelButton.configuration?.baseBackgroundColor = UIColor(
+            light: UIColor(rgbHex: 0xF5F5F5, alpha: 0.9),
+            dark: UIColor(rgbHex: 0x787880, alpha: 0.4),
+        )
         cancelButton.configuration?.background.visualEffect = UIBlurEffect(style: .systemUltraThinMaterial)
         cancelButton.tintColor = ConversationInputToolbar.Style.primaryTextColor
         cancelButton.configuration?.cornerStyle = .capsule

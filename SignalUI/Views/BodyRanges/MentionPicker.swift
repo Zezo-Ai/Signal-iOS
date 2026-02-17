@@ -97,9 +97,7 @@ class MentionPicker: UIView {
             // Blur background.
             if backgroundView == nil {
                 if UIAccessibility.isReduceTransparencyEnabled {
-                    tableView.backgroundColor = overrideUserInterfaceStyle == .dark
-                        ? Theme.darkThemeBackgroundColor
-                        : Theme.backgroundColor
+                    tableView.backgroundColor = .Signal.background
                 } else {
                     backgroundView = UIVisualEffectView(effect: backgroundViewVisualEffect())
                 }
@@ -138,9 +136,10 @@ class MentionPicker: UIView {
                 hairlineView.backgroundColor = .ows_gray65
 
             case .groupReply, .default:
-                hairlineView.backgroundColor = UIColor { traitCollection in
-                    traitCollection.userInterfaceStyle == .dark ? UIColor.ows_gray75 : UIColor.ows_gray05
-                }
+                hairlineView.backgroundColor = UIColor(
+                    light: UIColor.ows_gray05,
+                    dark: UIColor.ows_gray75,
+                )
             }
             hairlineView.translatesAutoresizingMaskIntoConstraints = false
             addSubview(hairlineView)

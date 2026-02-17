@@ -655,24 +655,19 @@ private extension UIImage.Configuration {
 }
 
 private extension UIColor {
+
     static var filterIconActiveForeground: UIColor {
-        UIColor { traitCollection in
-            if traitCollection.userInterfaceStyle == .dark {
-                .Signal.label
-            } else {
-                .Signal.ultramarine
-            }
-        }
+        UIColor(
+            light: .Signal.ultramarine,
+            dark: .Signal.label,
+        )
     }
 
     static var filterIconActiveBackground: UIColor {
-        UIColor { traitCollection in
-            if traitCollection.userInterfaceStyle == .dark {
-                .Signal.ultramarine
-            } else {
-                .Signal.secondaryUltramarineBackground
-            }
-        }
+        UIColor(
+            light: .Signal.secondaryUltramarineBackground,
+            dark: .Signal.ultramarine,
+        )
     }
 }
 

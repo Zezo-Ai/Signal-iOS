@@ -488,13 +488,10 @@ class ContextMenuController: OWSViewController, ContextMenuViewDelegate, UIGestu
             if self.renderBackgroundBlur {
                 if !UIDevice.current.isIPad {
                     self.blurView.effect = UIBlurEffect(style: UIBlurEffect.Style.regular)
-                    self.blurView.backgroundColor = UIColor { traitCollection in
-                        if traitCollection.userInterfaceStyle == .dark {
-                            UIColor.white.withAlphaComponent(0.2)
-                        } else {
-                            UIColor.black.withAlphaComponent(0.2)
-                        }
-                    }
+                    self.blurView.backgroundColor = UIColor(
+                        light: UIColor(white: 0, alpha: 0.2),
+                        dark: UIColor(white: 1, alpha: 0.2),
+                    )
                 } else {
                     self.blurView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
                 }

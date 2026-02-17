@@ -34,14 +34,10 @@ private struct GetStartedCard: Hashable {
             comment: "'Get Started' button directing users to create a group",
         ),
         image: UIImage(named: "group-resizable"),
-        tintColor: UIColor { traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                UIColor(rgbHex: 0xD7BFA9, alpha: 0.4)
-            default:
-                UIColor(rgbHex: 0xF6EDE0, alpha: 0.6)
-            }
-        },
+        tintColor: UIColor(
+            light: UIColor(rgbHex: 0xF6EDE0, alpha: 0.6),
+            dark: UIColor(rgbHex: 0xD7BFA9, alpha: 0.4),
+        ),
     )
     static let inviteFriends = GetStartedCard(
         identifier: "inviteFriends",
@@ -50,14 +46,10 @@ private struct GetStartedCard: Hashable {
             comment: "'Get Started' button directing users to invite friends",
         ),
         image: UIImage(named: "invite-resizable"),
-        tintColor: UIColor { traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                UIColor(rgbHex: 0x95B373, alpha: 0.4)
-            default:
-                UIColor(rgbHex: 0xDEE5D6, alpha: 0.6)
-            }
-        },
+        tintColor: UIColor(
+            light: UIColor(rgbHex: 0xDEE5D6, alpha: 0.6),
+            dark: UIColor(rgbHex: 0x95B373, alpha: 0.4),
+        ),
     )
     static let avatarBuilder = GetStartedCard(
         identifier: "avatarBuilder",
@@ -66,14 +58,10 @@ private struct GetStartedCard: Hashable {
             comment: "'Get Started' button direction users to avatar builder",
         ),
         image: UIImage(named: "person-resizable"),
-        tintColor: UIColor { traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                UIColor(rgbHex: 0xCE85DD, alpha: 0.4)
-            default:
-                UIColor(rgbHex: 0xE5DBE7, alpha: 0.6)
-            }
-        },
+        tintColor: UIColor(
+            light: UIColor(rgbHex: 0xE5DBE7, alpha: 0.6),
+            dark: UIColor(rgbHex: 0xCE85DD, alpha: 0.4),
+        ),
     )
     static let appearance = GetStartedCard(
         identifier: "appearance",
@@ -82,14 +70,10 @@ private struct GetStartedCard: Hashable {
             comment: "'Get Started' button directing users to Chat Color settings",
         ),
         image: UIImage(named: "color-resizable"),
-        tintColor: UIColor { traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                UIColor(rgbHex: 0x8ACECE, alpha: 0.4)
-            default:
-                UIColor(rgbHex: 0xD6E5E5, alpha: 0.6)
-            }
-        },
+        tintColor: UIColor(
+            light: UIColor(rgbHex: 0xD6E5E5, alpha: 0.6),
+            dark: UIColor(rgbHex: 0x8ACECE, alpha: 0.4),
+        ),
     )
 
     static let all: [GetStartedCard] = [

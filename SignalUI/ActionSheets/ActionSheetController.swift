@@ -434,12 +434,10 @@ public class ActionSheetAction: NSObject {
         self.handler = handler
     }
 
-    public static let buttonBackgroundColor = UIColor { traitCollection in
-        switch traitCollection.userInterfaceStyle {
-        case .dark: .black
-        default: .white
-        }
-    }
+    public static let buttonBackgroundColor = UIColor(
+        light: .white,
+        dark: .black,
+    )
 
     public class Button: UIButton {
         let style: Style

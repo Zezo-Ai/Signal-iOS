@@ -25,32 +25,32 @@ extension UIColor {
 
     public static func byRGBHex(
         light: UInt32,
-        lightHighContrast: UInt32,
+        lightHighContrast: UInt32? = nil,
         dark: UInt32,
-        darkHighContrast: UInt32,
+        darkHighContrast: UInt32? = nil,
     ) -> UIColor {
         UIColor(
             light: UIColor(rgbHex: light),
-            lightHighContrast: UIColor(rgbHex: lightHighContrast),
+            lightHighContrast: lightHighContrast != nil ? UIColor(rgbHex: lightHighContrast!) : nil,
             dark: UIColor(rgbHex: dark),
-            darkHighContrast: UIColor(rgbHex: darkHighContrast),
+            darkHighContrast: darkHighContrast != nil ? UIColor(rgbHex: darkHighContrast!) : nil,
         )
     }
 
     public convenience init(
         light: UIColor,
-        lightHighContrast: UIColor,
+        lightHighContrast: UIColor? = nil,
         dark: UIColor,
-        darkHighContrast: UIColor,
+        darkHighContrast: UIColor? = nil,
     ) {
         self.init { traitCollection in
             switch (traitCollection.userInterfaceStyle, traitCollection.accessibilityContrast) {
-            case (.dark, .high):
-                darkHighContrast
+            case (.dark, .high) where darkHighContrast != nil:
+                darkHighContrast!
             case (.dark, _):
                 dark
-            case (_, .high):
-                lightHighContrast
+            case (_, .high) where lightHighContrast != nil:
+                lightHighContrast!
             case (_, _):
                 light
             }
@@ -131,9 +131,7 @@ extension UIColor.Signal {
     public static var label: UIColor {
         UIColor(
             light: UIColor(rgbHex: 0x000000),
-            lightHighContrast: UIColor(rgbHex: 0x000000),
             dark: UIColor(rgbHex: 0xFFFFFF),
-            darkHighContrast: UIColor(rgbHex: 0xFFFFFF),
         )
     }
 
@@ -170,13 +168,10 @@ extension UIColor.Signal {
         UIColor.byUserInterfaceLevel(
             base: UIColor.byRGBHex(
                 light: 0xFFFFFF,
-                lightHighContrast: 0xFFFFFF,
                 dark: 0x000000,
-                darkHighContrast: 0x000000,
             ),
             elevated: UIColor.byRGBHex(
                 light: 0xFFFFFF,
-                lightHighContrast: 0xFFFFFF,
                 dark: 0x1C1C1E,
                 darkHighContrast: 0x343438,
             ),
@@ -207,13 +202,11 @@ extension UIColor.Signal {
         UIColor.byUserInterfaceLevel(
             base: UIColor.byRGBHex(
                 light: 0xFFFFFF,
-                lightHighContrast: 0xFFFFFF,
                 dark: 0x2C2C2E,
                 darkHighContrast: 0x444447,
             ),
             elevated: UIColor.byRGBHex(
                 light: 0xFFFFFF,
-                lightHighContrast: 0xFFFFFF,
                 dark: 0x3A3A3C,
                 darkHighContrast: 0x545457,
             ),
@@ -225,13 +218,10 @@ extension UIColor.Signal {
     }
 
     public static var backdrop: UIColor {
-        UIColor { traitCollection in
-            if traitCollection.userInterfaceStyle == .dark {
-                UIColor(white: 0, alpha: 0.48)
-            } else {
-                UIColor(white: 0, alpha: 0.2)
-            }
-        }
+        UIColor(
+            light: UIColor(white: 0, alpha: 0.2),
+            dark: UIColor(white: 0, alpha: 0.48),
+        )
     }
 
     // MARK: Grouped Background
@@ -245,7 +235,6 @@ extension UIColor.Signal {
                 light: 0xEFEFF0,
                 lightHighContrast: 0xE4E4E7,
                 dark: 0x000000,
-                darkHighContrast: 0x000000,
             ),
             elevated: UIColor.byRGBHex(
                 light: 0xEFEFF0,
@@ -260,13 +249,11 @@ extension UIColor.Signal {
         UIColor.byUserInterfaceLevel(
             base: UIColor.byRGBHex(
                 light: 0xFFFFFF,
-                lightHighContrast: 0xFFFFFF,
                 dark: 0x1C1C1E,
                 darkHighContrast: 0x343438,
             ),
             elevated: UIColor.byRGBHex(
                 light: 0xFFFFFF,
-                lightHighContrast: 0xFFFFFF,
                 dark: 0x2C2C2E,
                 darkHighContrast: 0x444447,
             ),
