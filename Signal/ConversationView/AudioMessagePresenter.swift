@@ -45,17 +45,20 @@ class AudioMessagePresenter: AudioPresenter {
         }
     }
 
+    func primaryElementColor(isIncoming: Bool) -> UIColor {
+        return ConversationStyle.bubbleTextColor(isIncoming: isIncoming)
+    }
+
     func playedColor(isIncoming: Bool) -> UIColor {
-        return isIncoming ? (Theme.isDarkThemeEnabled ? .ows_gray15 : .ows_gray60)
-            : .ows_white
+        primaryElementColor(isIncoming: isIncoming)
     }
 
     func unplayedColor(isIncoming: Bool) -> UIColor {
-        return isIncoming ? (Theme.isDarkThemeEnabled ? .ows_gray60 : .ows_gray25) : .ows_whiteAlpha40
+        return isIncoming ? UIColor.Signal.tertiaryLabel : .ows_whiteAlpha40
     }
 
     func thumbColor(isIncoming: Bool) -> UIColor {
-        return playedColor(isIncoming: isIncoming)
+        primaryElementColor(isIncoming: isIncoming)
     }
 
     func playPauseContainerBackgroundColor(isIncoming: Bool) -> UIColor {
@@ -63,7 +66,7 @@ class AudioMessagePresenter: AudioPresenter {
     }
 
     func playPauseAnimationColor(isIncoming: Bool) -> ColorValueProvider {
-        ColorValueProvider(thumbColor(isIncoming: isIncoming).lottieColorValue)
+        ColorValueProvider(primaryElementColor(isIncoming: isIncoming).lottieColorValue)
     }
 
     func playedDotAnimationColor(
@@ -74,7 +77,7 @@ class AudioMessagePresenter: AudioPresenter {
     }
 
     func configureForRendering(conversationStyle: ConversationStyle) {
-        let playbackTimeLabelConfig = Self.playbackTimeLabelConfig(isIncoming: isIncoming, conversationStyle: conversationStyle)
+        let playbackTimeLabelConfig = Self.playbackTimeLabelConfig(isIncoming: isIncoming)
         playbackTimeLabelConfig.applyForRendering(label: playbackTimeLabel)
         playbackTimeLabel.setContentHuggingHigh()
     }
@@ -141,8 +144,7 @@ class AudioMessagePresenter: AudioPresenter {
         ]
     }
 
-    func topLabelConfig(audioAttachment: AudioAttachment, isIncoming: Bool, conversationStyle: ConversationStyle?) -> CVLabelConfig? {
-
+    var topLabelConfig: CVLabelConfig? {
         guard !audioAttachment.isVoiceMessage else {
             return nil
         }
@@ -157,7 +159,7 @@ class AudioMessagePresenter: AudioPresenter {
         return CVLabelConfig.unstyledText(
             text,
             font: Constants.labelFont,
-            textColor: conversationStyle?.bubbleTextColor(isIncoming: isIncoming) ?? .label,
+            textColor: ConversationStyle.bubbleTextColor(isIncoming: isIncoming),
         )
     }
 

@@ -79,13 +79,7 @@ class AudioMessageView: ManualStackView {
     func configureForRendering(cellMeasurement: CVCellMeasurement, conversationStyle: ConversationStyle) {
         var outerSubviews = [UIView]()
 
-        if
-            let topLabelConfig = presentation.topLabelConfig(
-                audioAttachment: presentation.audioAttachment,
-                isIncoming: isIncoming,
-                conversationStyle: conversationStyle,
-            )
-        {
+        if let topLabelConfig = presentation.topLabelConfig {
             let topLabel = CVLabel()
             topLabelConfig.applyForRendering(label: topLabel)
             outerSubviews.append(topLabel)
@@ -212,13 +206,7 @@ class AudioMessageView: ManualStackView {
         owsAssertDebug(maxWidth > 0)
 
         var outerSubviewInfos = [ManualStackSubviewInfo]()
-        if
-            let topLabelConfig = presentation.topLabelConfig(
-                audioAttachment: presentation.audioAttachment,
-                isIncoming: presentation.isIncoming,
-                conversationStyle: nil,
-            )
-        {
+        if let topLabelConfig = presentation.topLabelConfig {
             let topLabelSize = CGSize(width: 0, height: topLabelConfig.font.lineHeight)
             outerSubviewInfos.append(topLabelSize.asManualSubviewInfo)
         }

@@ -92,7 +92,7 @@ class AudioAllMediaPresenter: AudioPresenter {
     }
 
     func configureForRendering(conversationStyle: ConversationStyle) {
-        let playbackTimeLabelConfig = Self.playbackTimeLabelConfig(isIncoming: true, conversationStyle: conversationStyle)
+        let playbackTimeLabelConfig = Self.playbackTimeLabelConfig(isIncoming: true)
         playbackTimeLabelConfig.applyForRendering(label: playbackTimeLabel)
         playbackTimeLabel.setContentHuggingHigh()
 
@@ -321,7 +321,7 @@ class AudioAllMediaPresenter: AudioPresenter {
     }
 
     private func labelConfig_forMeasurement(text: String) -> CVLabelConfig {
-        return CVLabelConfig.unstyledText(text, font: Constants.bottomLineFont, textColor: .label)
+        return CVLabelConfig.unstyledText(text, font: Constants.bottomLineFont, textColor: .Signal.label)
     }
 
     static func hasAttachmentLabel(attachment: Attachment, isVoiceMessage: Bool) -> Bool {
@@ -332,10 +332,13 @@ class AudioAllMediaPresenter: AudioPresenter {
         return Self.hasAttachmentLabel(attachment: attachment, isVoiceMessage: isVoiceMessage)
     }
 
-    func topLabelConfig(audioAttachment: AudioAttachment, isIncoming: Bool, conversationStyle: ConversationStyle?) -> CVLabelConfig? {
-
-        let attachment = audioAttachment.attachment
-        guard hasAttachmentLabel(attachment: attachment, isVoiceMessage: audioAttachment.isVoiceMessage) else {
+    var topLabelConfig: CVLabelConfig? {
+        guard
+            hasAttachmentLabel(
+                attachment: audioAttachment.attachment,
+                isVoiceMessage: audioAttachment.isVoiceMessage,
+            )
+        else {
             return nil
         }
 
@@ -349,7 +352,7 @@ class AudioAllMediaPresenter: AudioPresenter {
         return CVLabelConfig.unstyledText(
             text,
             font: Constants.filenameFont,
-            textColor: .label,
+            textColor: .Signal.label,
         )
     }
 

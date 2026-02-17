@@ -72,7 +72,7 @@ protocol AudioPresenter {
 
     // If you want to show a label at the top of the view, return its configuration here.
     // For example, you could choose to show a filename when one exists.
-    func topLabelConfig(audioAttachment: AudioAttachment, isIncoming: Bool, conversationStyle: ConversationStyle?) -> CVLabelConfig?
+    var topLabelConfig: CVLabelConfig? { get }
 
     // The sampled waveform used to display the visual preview of the audio message.
     func audioWaveform(attachmentStream: AttachmentStream?) -> Task<AudioWaveform, Error>?
@@ -95,15 +95,11 @@ extension AudioPresenter {
         }
     }
 
-    static func playbackTimeLabelConfig(
-        text: String = " ",
-        isIncoming: Bool = true,
-        conversationStyle: ConversationStyle? = nil,
-    ) -> CVLabelConfig {
+    static func playbackTimeLabelConfig(text: String = " ", isIncoming: Bool = true) -> CVLabelConfig {
         return CVLabelConfig.unstyledText(
             text,
             font: UIFont.dynamicTypeCaption1Clamped,
-            textColor: conversationStyle?.bubbleSecondaryTextColor(isIncoming: isIncoming) ?? .label,
+            textColor: ConversationStyle.bubbleSecondaryTextColor(isIncoming: isIncoming),
         )
     }
 }
