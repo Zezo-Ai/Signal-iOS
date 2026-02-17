@@ -787,13 +787,42 @@ extension ConversationSettingsViewController {
                         cell.selectionStyle = .default
                     }
 
-                    if BuildFlags.MemberLabel.display, let memberAci = memberAddress.aci {
-                        if let memberLabel = groupModel.groupMembership.memberLabel(for: memberAci)?.labelForRendering() {
-                            configuration.memberLabel = MemberLabelForRendering(label: memberLabel, groupNameColor: groupNameColors.color(for: memberAddress.aci))
-                        }
+                    var memberLabel: MemberLabelForRendering?
+                    if
+                        let memberAci = memberAddress.aci,
+                        let memberLabelString = groupModel.groupMembership.memberLabel(for: memberAci)?.labelForRendering()
+                    {
+                        memberLabel = MemberLabelForRendering(
+                            label: memberLabelString,
+                            groupNameColor: groupNameColors.color(
+                                for: memberAddress.aci,
+                            ),
+                        )
                     }
 
-                    if isVerified {
+                    if BuildFlags.MemberLabel.display, let memberLabel {
+                        configuration.memberLabel = memberLabel
+                    }
+
+                    if
+                        BuildFlags.MemberLabel.send,
+                        isLocalUser,
+                        memberLabel == nil,
+                        self.groupViewHelper.canEditConversationAttributes
+                    {
+                        configuration.attributedSubtitle = NSAttributedString(
+                            string: OWSLocalizedString(
+                                "MEMBER_LABEL_ADD_CSVC",
+                                comment: "Label that shows up under a local user's row in contacts prompting them to add a member label",
+                            ),
+                            attributes: [.font: UIFont.dynamicTypeCaption1Clamped.medium()],
+                        ) + SignalSymbol.chevronRight.attributedString(
+                            dynamicTypeBaseSize: 10,
+                            weight: .bold,
+                            leadingCharacter: .space,
+                            attributes: [.foregroundColor: UIColor.Signal.secondaryLabel],
+                        )
+                    } else if isVerified {
                         configuration.useVerifiedSubtitle()
                     } else if
                         !memberAddress.isLocalAddress,

@@ -492,9 +492,11 @@ extension MemberActionSheet: ConversationHeaderDelegate {
         guard
             BuildFlags.MemberLabel.send,
             let presenter = self.fromViewController as? MemberLabelViewControllerPresenter,
-            let groupThread = groupViewHelper?.thread as? TSGroupThread,
+            let groupViewHelper,
+            let groupThread = groupViewHelper.thread as? TSGroupThread,
             let groupModel = groupThread.groupModel as? TSGroupModelV2,
-            let memberLabelCoordinator = self.groupViewHelper?.memberLabelCoordinator
+            let memberLabelCoordinator = groupViewHelper.memberLabelCoordinator,
+            groupViewHelper.canEditConversationAttributes
         else {
             return
         }
