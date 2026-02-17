@@ -76,15 +76,19 @@ struct CLVRenderState {
 
         case .reminders where hasVisibleReminders,
              .backupDownloadProgressView where shouldBackupDownloadProgressViewBeVisible,
+             .backupProgressView where shouldBackupProgressViewBeVisible,
              .archiveButton where hasArchivedThreadsRow:
             return Section(type: sectionType)
+
+        case .reminders,
+             .backupDownloadProgressView,
+             .backupProgressView,
+             .archiveButton:
+            return nil
 
         case .inboxFilterFooter:
             guard let inboxFilterSection else { return nil }
             return Section(type: sectionType, value: inboxFilterSection)
-
-        case .reminders, .backupDownloadProgressView, .archiveButton:
-            return nil
         }
     }
 
@@ -108,11 +112,19 @@ struct CLVRenderState {
         viewInfo.shouldBackupDownloadProgressViewBeVisible
     }
 
+    var shouldBackupProgressViewBeVisible: Bool {
+        viewInfo.shouldBackupProgressViewBeVisible
+    }
+
     // MARK: UITableViewDataSource
 
     func numberOfRows(in section: Section) -> Int {
         switch section.type {
-        case .reminders, .backupDownloadProgressView, .archiveButton, .inboxFilterFooter:
+        case .reminders,
+             .backupDownloadProgressView,
+             .backupProgressView,
+             .archiveButton,
+             .inboxFilterFooter:
             return 1
         case .pinned:
             return pinnedThreadUniqueIds.count
@@ -130,7 +142,12 @@ struct CLVRenderState {
             let oldValue = renderState.items(in: section) ?? []
             return items.difference(from: oldValue)
 
-        case .pinned, .unpinned, .reminders, .backupDownloadProgressView, .archiveButton:
+        case .pinned,
+             .unpinned,
+             .reminders,
+             .backupDownloadProgressView,
+             .backupProgressView,
+             .archiveButton:
             return nil
         }
     }
@@ -144,7 +161,12 @@ struct CLVRenderState {
                 return nil
             }
 
-        case .pinned, .unpinned, .reminders, .backupDownloadProgressView, .archiveButton:
+        case .pinned,
+             .unpinned,
+             .reminders,
+             .backupDownloadProgressView,
+             .backupProgressView,
+             .archiveButton:
             owsFailDebug("Section diffing not yet supported in section '\(section.type)'")
             return nil
         }

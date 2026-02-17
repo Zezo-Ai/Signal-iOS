@@ -1770,7 +1770,7 @@
 		B99CD9452DB066740035C77B /* AttachmentSaving.swift in Sources */ = {isa = PBXBuildFile; fileRef = D954A5AC2D7BA7DA00F61C36 /* AttachmentSaving.swift */; };
 		B9A0807A2B07D76A000FDB5B /* HomeTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A080792B07D76A000FDB5B /* HomeTabViewController.swift */; };
 		B9A47ACE2D36DA6B0024DD9C /* circular_indeterminate.json in Resources */ = {isa = PBXBuildFile; fileRef = B9A47ACD2D36DA6B0024DD9C /* circular_indeterminate.json */; };
-		B9A53B912CF507FB0000578B /* BackupProgressModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A53B902CF507FB0000578B /* BackupProgressModal.swift */; };
+		B9A53B912CF507FB0000578B /* BackupRestoreProgressModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A53B902CF507FB0000578B /* BackupRestoreProgressModal.swift */; };
 		B9A53B932CF7928A0000578B /* SheetPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A53B922CF7928A0000578B /* SheetPreviewViewController.swift */; };
 		B9A53B952CF799590000578B /* LinkOrSyncPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A53B942CF799590000578B /* LinkOrSyncPickerSheet.swift */; };
 		B9A53B992D0250FC0000578B /* EditCallLinkNameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A53B982D0250FC0000578B /* EditCallLinkNameViewController.swift */; };
@@ -2685,6 +2685,7 @@
 		D953427B2D8B71190087AD93 /* recipient_self_08.binproto in Resources */ = {isa = PBXBuildFile; fileRef = D95342422D8B71190087AD93 /* recipient_self_08.binproto */; };
 		D953427C2D8B71190087AD93 /* recipient_self_08.txtproto in Resources */ = {isa = PBXBuildFile; fileRef = D95342432D8B71190087AD93 /* recipient_self_08.txtproto */; };
 		D953427D2D8B71190087AD93 /* recipient_groups_11.txtproto in Resources */ = {isa = PBXBuildFile; fileRef = D95342312D8B71190087AD93 /* recipient_groups_11.txtproto */; };
+		D9538E412F3FF7FC002C887E /* UITableView+RowHeights.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9538E402F3FF7F3002C887E /* UITableView+RowHeights.swift */; };
 		D954A5AE2D7BA9B200F61C36 /* AttachmentSharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762EBBCF2A2FB759002FD28F /* AttachmentSharing.swift */; };
 		D95787772C6D2A080051AC74 /* TSInfoMessage+GroupUpdates.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95787762C6D2A080051AC74 /* TSInfoMessage+GroupUpdates.swift */; };
 		D95787792C6D2ADE0051AC74 /* TSInfoMessage+Payments.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95787782C6D2ADE0051AC74 /* TSInfoMessage+Payments.swift */; };
@@ -3086,6 +3087,8 @@
 		D9CAFAE62A538CA200B32BDE /* UsernameLinkQRCodeContentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CAFAE52A538CA200B32BDE /* UsernameLinkQRCodeContentController.swift */; };
 		D9CAFAEA2A53CB1F00B32BDE /* UsernameLinkTooltipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CAFAE92A53CB1F00B32BDE /* UsernameLinkTooltipView.swift */; };
 		D9CD40622A155C4800545803 /* TSInfoMessage+PersistableGroupUpdateItemTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CD40612A155C4800545803 /* TSInfoMessage+PersistableGroupUpdateItemTest.swift */; };
+		D9CFB0102F1FF87F00DFB14A /* ChatListViewController+BackupProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CFB00F2F1FF87800DFB14A /* ChatListViewController+BackupProgressView.swift */; };
+		D9CFB0142F20466300DFB14A /* ArcView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CFB0132F20466100DFB14A /* ArcView.swift */; };
 		D9D1A6EB2DD69D0800050A85 /* DonationReceiptCredentialRedemptionJobFinderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9D1A6EA2DD69CFE00050A85 /* DonationReceiptCredentialRedemptionJobFinderTest.swift */; };
 		D9D3216A2A8AC9B0004FC110 /* OutgoingGroupCallUpdateMessageTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9D321692A8AC9B0004FC110 /* OutgoingGroupCallUpdateMessageTest.swift */; };
 		D9D5018A2F2B16820068EEA5 /* KeyTransparencyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9D501892F2B16820068EEA5 /* KeyTransparencyManager.swift */; };
@@ -5933,7 +5936,7 @@
 		B99CD9432DA9AB530035C77B /* TypedItemProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypedItemProvider.swift; sourceTree = "<group>"; };
 		B9A080792B07D76A000FDB5B /* HomeTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTabViewController.swift; sourceTree = "<group>"; };
 		B9A47ACD2D36DA6B0024DD9C /* circular_indeterminate.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = circular_indeterminate.json; sourceTree = "<group>"; };
-		B9A53B902CF507FB0000578B /* BackupProgressModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupProgressModal.swift; sourceTree = "<group>"; };
+		B9A53B902CF507FB0000578B /* BackupRestoreProgressModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupRestoreProgressModal.swift; sourceTree = "<group>"; };
 		B9A53B922CF7928A0000578B /* SheetPreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetPreviewViewController.swift; sourceTree = "<group>"; };
 		B9A53B942CF799590000578B /* LinkOrSyncPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkOrSyncPickerSheet.swift; sourceTree = "<group>"; };
 		B9A53B982D0250FC0000578B /* EditCallLinkNameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditCallLinkNameViewController.swift; sourceTree = "<group>"; };
@@ -6855,6 +6858,7 @@
 		D95342472D8B71190087AD93 /* recipient_self_10.txtproto */ = {isa = PBXFileReference; lastKnownFileType = text; path = recipient_self_10.txtproto; sourceTree = "<group>"; };
 		D95342482D8B71190087AD93 /* recipient_self_11.binproto */ = {isa = PBXFileReference; lastKnownFileType = file; path = recipient_self_11.binproto; sourceTree = "<group>"; };
 		D95342492D8B71190087AD93 /* recipient_self_11.txtproto */ = {isa = PBXFileReference; lastKnownFileType = text; path = recipient_self_11.txtproto; sourceTree = "<group>"; };
+		D9538E402F3FF7F3002C887E /* UITableView+RowHeights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+RowHeights.swift"; sourceTree = "<group>"; };
 		D954A5AC2D7BA7DA00F61C36 /* AttachmentSaving.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentSaving.swift; sourceTree = "<group>"; };
 		D95777B92B46411300CFE3AE /* GroupCallPeekClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupCallPeekClient.swift; sourceTree = "<group>"; };
 		D95787762C6D2A080051AC74 /* TSInfoMessage+GroupUpdates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TSInfoMessage+GroupUpdates.swift"; sourceTree = "<group>"; };
@@ -7263,6 +7267,8 @@
 		D9CAFAE52A538CA200B32BDE /* UsernameLinkQRCodeContentController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameLinkQRCodeContentController.swift; sourceTree = "<group>"; };
 		D9CAFAE92A53CB1F00B32BDE /* UsernameLinkTooltipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameLinkTooltipView.swift; sourceTree = "<group>"; };
 		D9CD40612A155C4800545803 /* TSInfoMessage+PersistableGroupUpdateItemTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TSInfoMessage+PersistableGroupUpdateItemTest.swift"; sourceTree = "<group>"; };
+		D9CFB00F2F1FF87800DFB14A /* ChatListViewController+BackupProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatListViewController+BackupProgressView.swift"; sourceTree = "<group>"; };
+		D9CFB0132F20466100DFB14A /* ArcView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcView.swift; sourceTree = "<group>"; };
 		D9D1A6EA2DD69CFE00050A85 /* DonationReceiptCredentialRedemptionJobFinderTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonationReceiptCredentialRedemptionJobFinderTest.swift; sourceTree = "<group>"; };
 		D9D321692A8AC9B0004FC110 /* OutgoingGroupCallUpdateMessageTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingGroupCallUpdateMessageTest.swift; sourceTree = "<group>"; };
 		D9D3217B2A8FEA9B004FC110 /* Groups.proto */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.protobuf; path = Groups.proto; sourceTree = "<group>"; };
@@ -8852,6 +8858,7 @@
 				766CE0D92A32E52300AD609D /* UIStackView+SignalUI.swift */,
 				F9C45D9329CB93E200B2CD2D /* UIStackView+SignalUITest.swift */,
 				500FB6172915B86D00257951 /* UITableView+ReusableCell.swift */,
+				D9538E402F3FF7F3002C887E /* UITableView+RowHeights.swift */,
 				766CE0D72A32968600AD609D /* UIView+AutoLayout.swift */,
 				3402A9E5271D97090084CBAE /* UIView+SignalUI.swift */,
 				762A41682A37D71600057955 /* UIViewController+SignalUI.swift */,
@@ -10932,6 +10939,7 @@
 			children = (
 				B97802FF2DD65AFD00E9FC82 /* SwiftUI */,
 				32E958A925C12B3800BF12AD /* AnimatedProgressView.swift */,
+				D9CFB0132F20466100DFB14A /* ArcView.swift */,
 				4C2F454E214C00E1004871FF /* AvatarTableViewCell.swift */,
 				14E4A33F278EE999008408FD /* BlurredToolbarContainer.swift */,
 				32A9E22524C11B3F00C43518 /* EmojiMoodPickerView.swift */,
@@ -11068,6 +11076,7 @@
 				50101FB12B083C8100C648E4 /* ChatListSettingsButtonState.swift */,
 				34E95C26269F6095004807EC /* ChatListViewController+Actions.swift */,
 				66F98DE92DC5314E009F1A86 /* ChatListViewController+BackupDownloadProgressView.swift */,
+				D9CFB00F2F1FF87800DFB14A /* ChatListViewController+BackupProgressView.swift */,
 				76847C932A13416A008E2EAB /* ChatListViewController+Camera.swift */,
 				34E95C28269F6109004807EC /* ChatListViewController+Helpers.swift */,
 				34E95C2C26A0673F004807EC /* ChatListViewController+Loading.swift */,
@@ -11185,7 +11194,7 @@
 		887B6DCD25F6C44800E677D4 /* Linked Devices */ = {
 			isa = PBXGroup;
 			children = (
-				B9A53B902CF507FB0000578B /* BackupProgressModal.swift */,
+				B9A53B902CF507FB0000578B /* BackupRestoreProgressModal.swift */,
 				505C2ED32997015800C23FB2 /* LinkDeviceViewController.swift */,
 				B99287FA2CF0FE8D000D62C4 /* LinkedDevicesEducationSheet.swift */,
 				B9E322E82CD191CF006DAF3B /* LinkedDevicesView.swift */,
@@ -17540,6 +17549,7 @@
 				762A416B2A38397500057955 /* UIKit+Text.swift in Sources */,
 				766CE0DA2A32E52300AD609D /* UIStackView+SignalUI.swift in Sources */,
 				500FB6182915B86D00257951 /* UITableView+ReusableCell.swift in Sources */,
+				D9538E412F3FF7FC002C887E /* UITableView+RowHeights.swift in Sources */,
 				766CE0D82A32968600AD609D /* UIView+AutoLayout.swift in Sources */,
 				3402A9E8271D97090084CBAE /* UIView+SignalUI.swift in Sources */,
 				764FE03F2A2EC2E2004D2804 /* UIViewController+Permissions.swift in Sources */,
@@ -17617,6 +17627,7 @@
 				F9BC0A2527FB8E730085B23D /* AppSettingsViewsUtil.swift in Sources */,
 				1489ED0227A3D70200C7043A /* ArchivedConversationsCell.swift in Sources */,
 				C1661A1A2C3D939300AB887F /* ArchivedPaymentHistoryItem.swift in Sources */,
+				D9CFB0142F20466300DFB14A /* ArcView.swift in Sources */,
 				F9B3A92D293553930071EB95 /* ASWebAuthenticationSession+Util.swift in Sources */,
 				661AEE482C2088FD0046B1D8 /* AttachmentDownloadRetryRunner.swift in Sources */,
 				88A9729222FA5D4B004B4FBF /* AttachmentFormatPickerView.swift in Sources */,
@@ -17653,10 +17664,10 @@
 				D999345A2DE97BBC002C9196 /* BackupOnboardingCoordinator.swift in Sources */,
 				D9DE34FD2DEE7765005099D7 /* BackupOnboardingIntroViewController.swift in Sources */,
 				D98CA2AD2DF14A890060370E /* BackupOnboardingKeyIntroViewController.swift in Sources */,
-				B9A53B912CF507FB0000578B /* BackupProgressModal.swift in Sources */,
 				D98CA2B32DF245140060370E /* BackupRecordKeyViewController.swift in Sources */,
 				04E66D422DFF3A4B0059DBAC /* BackupRecoveryKeyReminderCoordinator.swift in Sources */,
 				50438A8E2ECBBDF600FCB28F /* BackupRefreshManager.swift in Sources */,
+				B9A53B912CF507FB0000578B /* BackupRestoreProgressModal.swift in Sources */,
 				0480F0002E57C51A006CBB29 /* BackupsEnabledNotificationMegaphone.swift in Sources */,
 				D951F5312D9B236700C5EBF3 /* BackupSettingsViewController.swift in Sources */,
 				D92CB5562F030F8300537EBE /* BackupSubscriptionAlreadyRedeemedSheet.swift in Sources */,
@@ -17750,6 +17761,7 @@
 				50101FB22B083C8100C648E4 /* ChatListSettingsButtonState.swift in Sources */,
 				34E95C27269F6096004807EC /* ChatListViewController+Actions.swift in Sources */,
 				66F98DEA2DC53155009F1A86 /* ChatListViewController+BackupDownloadProgressView.swift in Sources */,
+				D9CFB0102F1FF87F00DFB14A /* ChatListViewController+BackupProgressView.swift in Sources */,
 				76847C942A13416A008E2EAB /* ChatListViewController+Camera.swift in Sources */,
 				34E95C29269F6109004807EC /* ChatListViewController+Helpers.swift in Sources */,
 				34E95C2D26A06740004807EC /* ChatListViewController+Loading.swift in Sources */,

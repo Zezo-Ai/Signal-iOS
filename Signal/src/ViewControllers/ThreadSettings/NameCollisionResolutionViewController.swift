@@ -60,8 +60,7 @@ class NameCollisionResolutionViewController: OWSTableViewController2 {
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate { _ in
             // Force tableview to recalculate self-sized cell height
-            self.tableView.beginUpdates()
-            self.tableView.endUpdates()
+            self.tableView.recomputeRowHeights()
         }
     }
 

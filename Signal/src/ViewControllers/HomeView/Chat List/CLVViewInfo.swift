@@ -14,6 +14,7 @@ struct CLVViewInfo: Equatable {
     let isMultiselectActive: Bool
     let hasVisibleReminders: Bool
     let shouldBackupDownloadProgressViewBeVisible: Bool
+    let shouldBackupProgressViewBeVisible: Bool
     let lastSelectedThreadId: String?
     let requiredVisibleThreadIds: Set<String>
 
@@ -30,6 +31,7 @@ struct CLVViewInfo: Equatable {
             isMultiselectActive: false,
             hasVisibleReminders: false,
             shouldBackupDownloadProgressViewBeVisible: false,
+            shouldBackupProgressViewBeVisible: false,
             lastSelectedThreadId: nil,
             requiredVisibleThreadIds: [],
         )
@@ -42,6 +44,7 @@ struct CLVViewInfo: Equatable {
         lastSelectedThreadId: String?,
         hasVisibleReminders: Bool,
         shouldBackupDownloadProgressViewBeVisible: Bool,
+        shouldBackupProgressViewBeVisible: Bool,
         transaction: DBReadTransaction,
     ) -> CLVViewInfo {
         do {
@@ -61,6 +64,7 @@ struct CLVViewInfo: Equatable {
                 isMultiselectActive: isMultiselectActive,
                 hasVisibleReminders: hasVisibleReminders,
                 shouldBackupDownloadProgressViewBeVisible: shouldBackupDownloadProgressViewBeVisible,
+                shouldBackupProgressViewBeVisible: shouldBackupProgressViewBeVisible,
                 lastSelectedThreadId: lastSelectedThreadId,
                 requiredVisibleThreadIds: requiredThreadIds,
             )

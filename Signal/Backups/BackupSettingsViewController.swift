@@ -223,7 +223,7 @@ class BackupSettingsViewController:
             Task {
                 await deviceSleepManager.manageBlockForUpdateStream(
                     backupExportJobRunner.updates(),
-                    label: "BackupExportJob",
+                    label: "BackupSettings.BackupExportJob",
                 ) { [weak self] exportJobUpdate in
                     guard let self else { return false }
 
@@ -258,7 +258,7 @@ class BackupSettingsViewController:
             Task {
                 await deviceSleepManager.manageBlockForUpdateStream(
                     backupAttachmentDownloadTracker.updates(),
-                    label: "Downloads",
+                    label: "BackupSettings.BackupDownloads",
                 ) { [weak self] downloadTrackerUpdate in
                     guard let self else { return false }
 
@@ -295,7 +295,7 @@ class BackupSettingsViewController:
             Task {
                 await deviceSleepManager.manageBlockForUpdateStream(
                     backupAttachmentUploadTracker.updates(),
-                    label: "Uploads",
+                    label: "BackupSettings.BackupUploads",
                 ) { [weak self] uploadUpdate in
                     guard let self else { return false }
                     viewModel.latestBackupAttachmentUploadUpdate = uploadUpdate

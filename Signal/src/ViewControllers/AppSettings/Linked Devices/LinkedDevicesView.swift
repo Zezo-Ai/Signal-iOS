@@ -267,7 +267,7 @@ extension LinkedDevicesViewModel: LinkDeviceViewControllerDelegate {
         }
 
         // Don't wait for the view pop to start the linking process
-        let linkAndSyncProgressModal = BackupProgressModal(style: .linkAndSync)
+        let linkAndSyncProgressModal = BackupRestoreProgressModal(style: .linkAndSync)
         linkDeviceViewController.popToLinkedDeviceList { [weak self] in
             self?.present.send(.activityIndicator(linkAndSyncProgressModal))
         }

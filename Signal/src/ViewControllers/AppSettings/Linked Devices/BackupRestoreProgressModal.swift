@@ -10,7 +10,7 @@ import SwiftUI
 
 // MARK: View Model
 
-class BackupProgressViewModel: ObservableObject {
+class BackupRestoreProgressViewModel: ObservableObject {
 
     @Published var didTapCancel: Bool = false
     @Published var taskProgress: Float = 0
@@ -128,19 +128,19 @@ class BackupProgressViewModel: ObservableObject {
 
 // MARK: Hosting Controller
 
-class BackupProgressModal: HostingController<BackupProgressView>, LinkAndSyncProgressUI {
+class BackupRestoreProgressModal: HostingController<BackupRestoreProgressView>, LinkAndSyncProgressUI {
 
     var shouldSuppressNotifications: Bool { true }
 
-    let viewModel = BackupProgressViewModel()
+    let viewModel = BackupRestoreProgressViewModel()
 
     var backupTask: Task<Void, Never>? {
         get { viewModel.backupTask }
         set { viewModel.backupTask = newValue }
     }
 
-    init(style: BackupProgressView.Style) {
-        super.init(wrappedView: BackupProgressView(
+    init(style: BackupRestoreProgressView.Style) {
+        super.init(wrappedView: BackupRestoreProgressView(
             style: style,
             viewModel: viewModel,
         ))
@@ -191,7 +191,7 @@ class BackupProgressModal: HostingController<BackupProgressView>, LinkAndSyncPro
 
 // MARK: SwiftUI View
 
-struct BackupProgressView: View {
+struct BackupRestoreProgressView: View {
     @Environment(\.appearanceTransitionState) private var appearanceTransitionState
 
     enum Style {
@@ -200,7 +200,7 @@ struct BackupProgressView: View {
     }
 
     fileprivate var style: Style
-    @ObservedObject fileprivate var viewModel: BackupProgressViewModel
+    @ObservedObject fileprivate var viewModel: BackupRestoreProgressViewModel
 
     @State private var indeterminateProgressIsPlaying = false
     private var loopMode: LottieLoopMode {
@@ -430,7 +430,7 @@ func simulateProgress(for source: OWSProgressSource) async throws {
 @MainActor
 @available(iOS 17, *)
 private func setupDemoProgressBackupRestore(
-    modal: BackupProgressModal,
+    modal: BackupRestoreProgressModal,
     instantComplete: Bool,
 ) async throws {
     let progress = await OWSSequentialProgress<BackupRestoreProgressPhase>.createSink { progress in
@@ -475,7 +475,7 @@ private func setupDemoProgressBackupRestore(
 @MainActor
 @available(iOS 17, *)
 private func setupDemoProgress(
-    modal: BackupProgressModal,
+    modal: BackupRestoreProgressModal,
     slowLinking: Bool,
 ) async throws {
     let progress = await OWSSequentialProgress<PrimaryLinkNSyncProgressPhase>.createSink { progress in
@@ -527,7 +527,7 @@ private func setupDemoProgress(
 @MainActor
 @available(iOS 17, *)
 func demoTask(
-    modal: BackupProgressModal,
+    modal: BackupRestoreProgressModal,
     slowLinking: Bool,
 ) -> Task<Void, Never> {
     Task {
@@ -548,7 +548,7 @@ func demoTask(
 @available(iOS 17, *)
 #Preview("Slow linking") {
     SheetPreviewViewController(animateFirstAppearance: true) {
-        let modal = BackupProgressModal(style: .linkAndSync)
+        let modal = BackupRestoreProgressModal(style: .linkAndSync)
         modal.backupTask = demoTask(modal: modal, slowLinking: true)
         return modal
     }
@@ -557,7 +557,7 @@ func demoTask(
 @available(iOS 17, *)
 #Preview("Fast linking") {
     SheetPreviewViewController(animateFirstAppearance: true) {
-        let modal = BackupProgressModal(style: .linkAndSync)
+        let modal = BackupRestoreProgressModal(style: .linkAndSync)
         modal.backupTask = demoTask(modal: modal, slowLinking: false)
         return modal
     }
@@ -566,7 +566,7 @@ func demoTask(
 @available(iOS 17, *)
 #Preview("Backup restore") {
     SheetPreviewViewController(animateFirstAppearance: true) {
-        let modal = BackupProgressModal(style: .backupRestore)
+        let modal = BackupRestoreProgressModal(style: .backupRestore)
         modal.backupTask = Task {
             try? await setupDemoProgressBackupRestore(modal: modal, instantComplete: false)
         }
@@ -577,7 +577,7 @@ func demoTask(
 @available(iOS 17, *)
 #Preview("Backup restore - instant complete") {
     SheetPreviewViewController(animateFirstAppearance: true) {
-        let modal = BackupProgressModal(style: .backupRestore)
+        let modal = BackupRestoreProgressModal(style: .backupRestore)
         modal.backupTask = Task {
             try? await setupDemoProgressBackupRestore(modal: modal, instantComplete: true)
         }

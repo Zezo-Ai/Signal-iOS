@@ -66,7 +66,7 @@ public class CLVBackupDownloadProgressView {
     // MARK: -
 
     @MainActor
-    func trackDownloads() {
+    func startTracking() {
         Task { [weak self, backupAttachmentDownloadTracker] in
             for await downloadUpdate in backupAttachmentDownloadTracker.updates() {
                 guard let self else { return }
@@ -167,7 +167,7 @@ public class CLVBackupDownloadProgressView {
             }
         case .restoring, .wifiNotReachable, .paused, .outOfDiskSpace:
             if state.deviceSleepBlock == nil {
-                let deviceSleepBlock = DeviceSleepBlockObject(blockReason: "BackupAttachmentDownloadProgressView")
+                let deviceSleepBlock = DeviceSleepBlockObject(blockReason: "CLVBackupDownloadProgressView")
                 state.deviceSleepBlock = deviceSleepBlock
                 deviceSleepManager.addBlock(blockObject: deviceSleepBlock)
             }
@@ -1041,68 +1041,6 @@ private class BackupAttachmentDownloadProgressView: UIView {
             comment: "Button title shown on chat list banner for restoring media from a backup when paused because the device needs WiFi to continue, to resume downloads without WiFi.",
         )
         static var resumeButtonFont: UIFont { .dynamicTypeSubheadlineClamped.bold() }
-    }
-
-    // MARK: ArcView
-
-    private class ArcView: UIView {
-
-        var percentComplete: Float = 0 {
-            didSet {
-                setNeedsDisplay()
-            }
-        }
-
-        init() {
-            super.init(frame: .zero)
-            self.isOpaque = false
-        }
-
-        @available(*, unavailable)
-        required init?(coder: NSCoder) {
-            fatalError("Unimplemented")
-        }
-
-        override func draw(_ rect: CGRect) {
-            guard let context = UIGraphicsGetCurrentContext() else { return }
-
-            let center = CGPoint(x: rect.midX, y: rect.midY)
-            let lineWidth: CGFloat = 3
-            let radius = min(rect.width, rect.height) / 2 - lineWidth / 2
-
-            context.setStrokeColor(UIColor.Signal.secondaryLabel.cgColor)
-            context.setLineWidth(lineWidth)
-            context.setLineCap(.round)
-
-            context.addArc(
-                center: center,
-                radius: radius,
-                startAngle: 0,
-                endAngle: 2 * .pi,
-                clockwise: false,
-            )
-
-            context.strokePath()
-
-            let startAngle: CGFloat = -.pi / 2
-            let endAngle = 2 * .pi * CGFloat(percentComplete)
-            context.setStrokeColor(UIColor.Signal.ultramarine.cgColor)
-
-            context.addArc(
-                center: center,
-                radius: radius,
-                startAngle: startAngle,
-                endAngle: endAngle + startAngle,
-                clockwise: false,
-            )
-
-            context.strokePath()
-        }
-
-        override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-            super.traitCollectionDidChange(previousTraitCollection)
-            setNeedsDisplay()
-        }
     }
 }
 

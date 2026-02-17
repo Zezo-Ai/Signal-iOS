@@ -11,7 +11,7 @@ class RegistrationLoadingViewController: OWSViewController, OWSNavigationChildCo
         case generic
         case submittingPhoneNumber(e164: String)
         case submittingVerificationCode
-        case restoringBackup(BackupProgressModal)
+        case restoringBackup(BackupRestoreProgressModal)
     }
 
     init(mode: RegistrationLoadingMode) {

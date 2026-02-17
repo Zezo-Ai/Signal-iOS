@@ -286,6 +286,7 @@ public class CLVLoadCoordinator {
             lastSelectedThreadId: String?,
             hasVisibleReminders: Bool,
             shouldBackupDownloadProgressViewBeVisible: Bool,
+            shouldBackupProgressViewBeVisible: Bool,
             lastViewInfo: CLVViewInfo,
             transaction: DBReadTransaction,
         ) -> CLVLoadInfo {
@@ -298,6 +299,7 @@ public class CLVLoadCoordinator {
                 lastSelectedThreadId: lastSelectedThreadId,
                 hasVisibleReminders: hasVisibleReminders,
                 shouldBackupDownloadProgressViewBeVisible: shouldBackupDownloadProgressViewBeVisible,
+                shouldBackupProgressViewBeVisible: shouldBackupProgressViewBeVisible,
                 transaction: transaction,
             )
 
@@ -388,9 +390,6 @@ public class CLVLoadCoordinator {
 
         // Copy the "current" load info, reset "next" load info.
 
-        let hasVisibleReminders = viewController.viewState.reminderViews.hasVisibleReminders
-        let shouldBackupDownloadProgressViewBeVisible = viewController.viewState.backupDownloadProgressView.shouldBeVisible
-
         let loadResult: CLVLoadResult = SSKEnvironment.shared.databaseStorageRef.read { transaction in
             // Decide what kind of load we prefer.
             let loadInfo = loadInfoBuilder.build(
@@ -399,8 +398,9 @@ public class CLVLoadCoordinator {
                 inboxFilter: viewController.viewState.inboxFilter,
                 isMultiselectActive: viewController.viewState.multiSelectState.isActive,
                 lastSelectedThreadId: viewController.viewState.lastSelectedThreadId,
-                hasVisibleReminders: hasVisibleReminders,
-                shouldBackupDownloadProgressViewBeVisible: shouldBackupDownloadProgressViewBeVisible,
+                hasVisibleReminders: viewController.viewState.reminderViews.hasVisibleReminders,
+                shouldBackupDownloadProgressViewBeVisible: viewController.viewState.backupDownloadProgressView.shouldBeVisible,
+                shouldBackupProgressViewBeVisible: viewController.viewState.backupProgressView.shouldBeVisible,
                 lastViewInfo: viewController.renderState.viewInfo,
                 transaction: transaction,
             )

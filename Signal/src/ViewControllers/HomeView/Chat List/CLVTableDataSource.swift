@@ -14,6 +14,7 @@ public enum ChatListMode: Int, CaseIterable {
 public enum ChatListSectionType: String, CaseIterable {
     case reminders
     case backupDownloadProgressView
+    case backupProgressView
     case pinned
     case unpinned
     case archiveButton
@@ -185,7 +186,11 @@ class CLVTableDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
         }
         let conversationIndexPaths = visibleIndexPaths.compactMap { indexPath -> IndexPath? in
             switch renderState.sections[indexPath.section].type {
-            case .reminders, .backupDownloadProgressView, .archiveButton, .inboxFilterFooter:
+            case .reminders,
+                 .backupDownloadProgressView,
+                 .backupProgressView,
+                 .archiveButton,
+                 .inboxFilterFooter:
                 return nil
             case .pinned, .unpinned:
                 return indexPath
@@ -324,7 +329,7 @@ class CLVTableDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
         case .reminders, .inboxFilterFooter:
             return nil
 
-        case .backupDownloadProgressView, .archiveButton:
+        case .backupDownloadProgressView, .backupProgressView, .archiveButton:
             return indexPath
 
         case .pinned, .unpinned:
@@ -372,6 +377,10 @@ class CLVTableDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
         case .backupDownloadProgressView:
             tableView.deselectRow(at: indexPath, animated: false)
             viewController.handleBackupDownloadProgressViewTapped()
+
+        case .backupProgressView:
+            tableView.deselectRow(at: indexPath, animated: false)
+            viewController.handleBackupProgressViewTapped()
 
         case .pinned, .unpinned:
             guard let threadUniqueId = renderState.threadUniqueId(forIndexPath: indexPath) else {
@@ -536,7 +545,7 @@ class CLVTableDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch renderState.sections[indexPath.section].type {
-        case .reminders, .archiveButton, .inboxFilterFooter:
+        case .reminders, .archiveButton, .inboxFilterFooter, .backupProgressView:
             return UITableView.automaticDimension
         case .backupDownloadProgressView:
             guard let viewState = viewController?.viewState else {
@@ -562,6 +571,8 @@ class CLVTableDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
             cell = viewController.viewState.reminderViews.reminderViewCell
         case .backupDownloadProgressView:
             cell = viewController.viewState.backupDownloadProgressView.backupDownloadProgressViewCell
+        case .backupProgressView:
+            cell = viewController.viewState.backupProgressView.backupProgressViewCell
         case .pinned, .unpinned:
             cell = buildConversationCell(tableView: tableView, indexPath: indexPath)
         case .archiveButton:
@@ -650,7 +661,11 @@ class CLVTableDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         switch renderState.sections[indexPath.section].type {
-        case .reminders, .backupDownloadProgressView, .archiveButton, .inboxFilterFooter:
+        case .reminders,
+             .backupDownloadProgressView,
+             .backupProgressView,
+             .archiveButton,
+             .inboxFilterFooter:
             return nil
 
         case .pinned, .unpinned:
@@ -675,7 +690,11 @@ class CLVTableDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         switch renderState.sections[indexPath.section].type {
-        case .reminders, .backupDownloadProgressView, .archiveButton, .inboxFilterFooter:
+        case .reminders,
+             .backupDownloadProgressView,
+             .backupProgressView,
+             .archiveButton,
+             .inboxFilterFooter:
             return false
         case .pinned, .unpinned:
             return true
@@ -684,7 +703,11 @@ class CLVTableDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         switch renderState.sections[indexPath.section].type {
-        case .reminders, .backupDownloadProgressView, .archiveButton, .inboxFilterFooter:
+        case .reminders,
+             .backupDownloadProgressView,
+             .backupProgressView,
+             .archiveButton,
+             .inboxFilterFooter:
             return nil
 
         case .pinned, .unpinned:
