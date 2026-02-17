@@ -481,7 +481,9 @@ public class CVComponentFooter: CVComponentBase, CVComponent {
             }
 
             if outgoingMessage.wasRemotelyDeleted {
-                statusIndicator = nil
+                if messageStatus != .uploading, messageStatus != .sending {
+                    statusIndicator = nil
+                }
             }
         }
 
