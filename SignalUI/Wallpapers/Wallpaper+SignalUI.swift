@@ -220,8 +220,9 @@ public class WallpaperBlurProviderImpl: NSObject, WallpaperBlurProvider {
         let colorOverlays: [(UIColor, UIImage.CompositingMode)]
         // Replicate UIBlurEffect.Style.systemThinMaterialLight and .systemThinMaterialDark.
         if isDarkThemeEnabled {
+            let mainOverlayAlpha = shouldDimInDarkTheme ? 0.8 : 0.9
             colorOverlays = [
-                (UIColor(white: 0, alpha: 0.8), .sourceAtop),
+                (UIColor(white: 0, alpha: mainOverlayAlpha), .sourceAtop),
                 (UIColor(white: 0.5, alpha: 0.04), .darken),
             ]
         } else {
