@@ -438,6 +438,10 @@ public final class Theme {
 
     public class var darkThemeTableView2PresentedSeparatorColor: UIColor { .ows_gray65 }
 
+    public class var darkThemeMaterialButton: UIColor {
+        UIColor.Signal.materialButton.resolvedColor(with: darkTraitCollection)
+    }
+
     // MARK: - Blur Effect
 
     public class var barBlurEffect: UIBlurEffect {
