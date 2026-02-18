@@ -11,6 +11,7 @@ struct BackupMediaErrorNotificationPresenter {
     private let dateProvider: DateProvider
     private let db: DB
     private let kvStore: NewKeyValueStore
+    private let logger: PrefixedLogger
     private let notificationPresenter: NotificationPresenter
 
     init(
@@ -21,6 +22,7 @@ struct BackupMediaErrorNotificationPresenter {
         self.dateProvider = dateProvider
         self.db = db
         self.kvStore = NewKeyValueStore(collection: "BackupErrorNotificationPresenter")
+        self.logger = PrefixedLogger(prefix: "[Backups]")
         self.notificationPresenter = notificationPresenter
     }
 
@@ -44,6 +46,7 @@ struct BackupMediaErrorNotificationPresenter {
             kvStore.writeValue(now, forKey: Keys.lastNotified, tx: tx)
         }
 
+        logger.warn("Presenting BackupsMediaError notification.")
         notificationPresenter.notifyUserOfBackupsMediaError()
     }
 }
