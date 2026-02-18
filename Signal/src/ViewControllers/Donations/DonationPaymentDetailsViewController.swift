@@ -717,6 +717,7 @@ class DonationPaymentDetailsViewController: OWSTableViewController2 {
         let view = UIView()
         view.preservesSuperviewLayoutMargins = true
         view.addSubview(stackView)
+        view.backgroundColor = .Signal.groupedBackground
         stackView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: view.topAnchor),
