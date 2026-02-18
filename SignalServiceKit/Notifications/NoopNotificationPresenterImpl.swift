@@ -124,7 +124,7 @@ public class NoopNotificationPresenterImpl: NotificationPresenter {
         Logger.warn("")
     }
 
-    public func notifyUserOfListMediaIntegrityCheckFailure() {
+    public func notifyUserOfBackupsMediaError() {
         Logger.warn("")
     }
 

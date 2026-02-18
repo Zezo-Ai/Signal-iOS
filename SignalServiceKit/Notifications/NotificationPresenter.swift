@@ -60,7 +60,7 @@ public protocol NotificationPresenter {
 
     func notifyUserOfMediaTierQuotaConsumed()
 
-    func notifyUserOfListMediaIntegrityCheckFailure()
+    func notifyUserOfBackupsMediaError()
 
     /// Notify user to relaunch the app after we deliberately terminate when an incoming device transfer completes.
     func notifyUserToRelaunchAfterTransfer(completion: @escaping () -> Void)

@@ -587,6 +587,12 @@ extension AppSetup.GlobalsContinuation {
             tsAccountManager: tsAccountManager,
         )
 
+        let backupMediaErrorNotificationPresenter = BackupMediaErrorNotificationPresenter(
+            dateProvider: dateProvider,
+            db: db,
+            notificationPresenter: notificationPresenter,
+        )
+
         let backupAttachmentDownloadProgress = BackupAttachmentDownloadProgressImpl(
             appContext: appContext,
             appReadiness: appReadiness,
@@ -618,6 +624,7 @@ extension AppSetup.GlobalsContinuation {
             backupAttachmentUploadStore: backupAttachmentUploadStore,
             backupAttachmentUploadEraStore: backupAttachmentUploadEraStore,
             backupListMediaStore: backupListMediaStore,
+            backupMediaErrorNotificationPresenter: backupMediaErrorNotificationPresenter,
             backupRequestManager: backupRequestManager,
             backupSettingsStore: backupSettingsStore,
             dateProvider: dateProvider,
@@ -670,6 +677,7 @@ extension AppSetup.GlobalsContinuation {
                 attachmentUploadStore: attachmentUploadStore,
                 backupAttachmentDownloadStore: backupAttachmentDownloadStore,
                 backupAttachmentUploadScheduler: backupAttachmentUploadScheduler,
+                backupMediaErrorNotificationPresenter: backupMediaErrorNotificationPresenter,
                 backupListMediaManager: backupListMediaManager,
                 backupSettingsStore: backupSettingsStore,
                 dateProvider: dateProvider,
@@ -716,6 +724,7 @@ extension AppSetup.GlobalsContinuation {
                 backupAttachmentUploadStore: backupAttachmentUploadStore,
                 backupAttachmentUploadEraStore: backupAttachmentUploadEraStore,
                 backupListMediaManager: backupListMediaManager,
+                backupMediaErrorNotificationPresenter: backupMediaErrorNotificationPresenter,
                 backupRequestManager: backupRequestManager,
                 backupSettingsStore: backupSettingsStore,
                 dateProvider: dateProvider,

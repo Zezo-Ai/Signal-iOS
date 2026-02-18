@@ -48,7 +48,7 @@ class BackupArchiveErrorPresenterInternal: BackupArchiveErrorPresenter {
         didFail: Bool,
         tx outerTx: DBWriteTransaction,
     ) {
-        guard BuildFlags.Backups.errorDisplay else {
+        guard BuildFlags.Backups.archiveErrorDisplay else {
             return
         }
 
@@ -96,7 +96,7 @@ class BackupArchiveErrorPresenterInternal: BackupArchiveErrorPresenter {
     }
 
     func presentOverTopmostViewController(completion: @escaping () -> Void) {
-        guard BuildFlags.Backups.errorDisplay else {
+        guard BuildFlags.Backups.archiveErrorDisplay else {
             completion()
             return
         }

@@ -36,6 +36,8 @@ public class NotificationActionHandler {
                 showCallLobby(userInfo: userInfo)
             case .submitDebugLogs:
                 await submitDebugLogs(supportTag: nil)
+            case .submitDebugLogsForBackupsMediaError:
+                await submitDebugLogs(supportTag: "BackupsMedia")
             case .reregister:
                 await reregister(appReadiness: appReadiness)
             case .showChatList:
@@ -45,8 +47,6 @@ public class NotificationActionHandler {
                 showLinkedDevices()
             case .showBackupsSettings:
                 showBackupsSettings()
-            case .listMediaIntegrityCheck:
-                await submitDebugLogs(supportTag: "BackupsMedia")
             }
         case UNNotificationDismissActionIdentifier:
             // TODO - mark as read?

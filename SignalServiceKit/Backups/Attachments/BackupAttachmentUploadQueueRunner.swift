@@ -30,6 +30,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
     private let attachmentStore: AttachmentStore
     private let backupAttachmentUploadScheduler: BackupAttachmentUploadScheduler
     private let backupAttachmentUploadStore: BackupAttachmentUploadStore
+    private let backupMediaErrorNotificationPresenter: BackupMediaErrorNotificationPresenter
     private let backupRequestManager: BackupRequestManager
     private let backupSettingsStore: BackupSettingsStore
     private let db: any DB
@@ -52,6 +53,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
         backupAttachmentUploadStore: BackupAttachmentUploadStore,
         backupAttachmentUploadEraStore: BackupAttachmentUploadEraStore,
         backupListMediaManager: BackupListMediaManager,
+        backupMediaErrorNotificationPresenter: BackupMediaErrorNotificationPresenter,
         backupRequestManager: BackupRequestManager,
         backupSettingsStore: BackupSettingsStore,
         dateProvider: @escaping DateProvider,
@@ -66,6 +68,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
         self.attachmentStore = attachmentStore
         self.backupAttachmentUploadScheduler = backupAttachmentUploadScheduler
         self.backupAttachmentUploadStore = backupAttachmentUploadStore
+        self.backupMediaErrorNotificationPresenter = backupMediaErrorNotificationPresenter
         self.backupRequestManager = backupRequestManager
         self.backupSettingsStore = backupSettingsStore
         self.db = db
@@ -84,6 +87,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                 backupAttachmentUploadScheduler: backupAttachmentUploadScheduler,
                 backupAttachmentUploadStore: backupAttachmentUploadStore,
                 backupAttachmentUploadEraStore: backupAttachmentUploadEraStore,
+                backupMediaErrorNotificationPresenter: backupMediaErrorNotificationPresenter,
                 backupRequestManager: backupRequestManager,
                 backupSettingsStore: backupSettingsStore,
                 dateProvider: dateProvider,
@@ -178,8 +182,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
         switch backupAuth.backupLevel {
         case .free:
             Logger.warn("Local backupPlan is paid but credential is free")
-            // If our force refreshed credential is free tier, we definitely
-            // aren't uploading anything, so may as well stop the queues.
+            backupMediaErrorNotificationPresenter.notifyIfNecessary()
             try? await taskQueue.stop()
             return
         case .paid:
@@ -248,6 +251,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
         private let backupSettingsStore: BackupSettingsStore
         private let dateProvider: DateProvider
         private let db: any DB
+        private let backupMediaErrorNotificationPresenter: BackupMediaErrorNotificationPresenter
         private let listMediaManager: BackupListMediaManager
         private let logger: PrefixedLogger
         private let notificationPresenter: NotificationPresenter
@@ -267,6 +271,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
             backupAttachmentUploadScheduler: BackupAttachmentUploadScheduler,
             backupAttachmentUploadStore: BackupAttachmentUploadStore,
             backupAttachmentUploadEraStore: BackupAttachmentUploadEraStore,
+            backupMediaErrorNotificationPresenter: BackupMediaErrorNotificationPresenter,
             backupRequestManager: BackupRequestManager,
             backupSettingsStore: BackupSettingsStore,
             dateProvider: @escaping DateProvider,
@@ -285,6 +290,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
             self.backupAttachmentUploadScheduler = backupAttachmentUploadScheduler
             self.backupAttachmentUploadStore = backupAttachmentUploadStore
             self.backupAttachmentUploadEraStore = backupAttachmentUploadEraStore
+            self.backupMediaErrorNotificationPresenter = backupMediaErrorNotificationPresenter
             self.backupRequestManager = backupRequestManager
             self.backupSettingsStore = backupSettingsStore
             self.dateProvider = dateProvider
@@ -457,6 +463,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                 // If we find ourselves with a free tier credential,
                 // all uploads will fail. Just quit.
                 try? await loader.stop()
+                backupMediaErrorNotificationPresenter.notifyIfNecessary()
                 return .retryableError(IsFreeTierError())
             }
 
@@ -534,12 +541,12 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                     )
                     switch credential?.backupLevel {
                     case .free, nil:
+                        backupMediaErrorNotificationPresenter.notifyIfNecessary()
                         try? await loader.stop()
                         return .retryableError(IsFreeTierError())
                     case .paid:
-                        break
+                        return .retryableError(OWSGenericError("Refreshed credential is paid: should retry upload."))
                     }
-                    fallthrough
                 case .outOfCapacity:
                     let didSetConsumeMediaTierCapacity = await db.awaitableWrite { tx in
                         if !backupSettingsStore.hasConsumedMediaTierCapacity(tx: tx) {
@@ -628,6 +635,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                                 }
                             case .noMoreRetries:
                                 logger.error("No more upload retries; stopping the queue")
+                                backupMediaErrorNotificationPresenter.notifyIfNecessary()
                                 try? await loader.stop()
                                 return .retryableError(error)
                             }
@@ -635,6 +643,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                             // For other errors stop the queue to prevent thundering herd;
                             // when it starts up again (e.g. on app launch) we will retry.
                             logger.error("Unknown error occurred; stopping the queue. \(error)")
+                            backupMediaErrorNotificationPresenter.notifyIfNecessary()
                             try? await loader.stop()
                             return .retryableError(error)
                         }
@@ -642,6 +651,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                         // For other errors stop the queue to prevent thundering herd;
                         // when it starts up again (e.g. on app launch) we will retry.
                         logger.error("Unknown error occurred; stopping the queue")
+                        backupMediaErrorNotificationPresenter.notifyIfNecessary()
                         try? await loader.stop()
                         return .retryableError(error)
                     } else {

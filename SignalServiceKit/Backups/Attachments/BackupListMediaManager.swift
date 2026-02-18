@@ -81,7 +81,7 @@ public protocol BackupListMediaManager {
     func queryListMediaIfNeeded() async throws
 }
 
-public class BackupListMediaManagerImpl: BackupListMediaManager {
+class BackupListMediaManagerImpl: BackupListMediaManager {
 
     private let accountKeyStore: AccountKeyStore
     private let attachmentStore: AttachmentStore
@@ -93,6 +93,7 @@ public class BackupListMediaManagerImpl: BackupListMediaManager {
     private let backupAttachmentUploadStore: BackupAttachmentUploadStore
     private let backupAttachmentUploadEraStore: BackupAttachmentUploadEraStore
     private let backupListMediaStore: BackupListMediaStore
+    private let backupMediaErrorNotificationPresenter: BackupMediaErrorNotificationPresenter
     private let backupRequestManager: BackupRequestManager
     private let backupSettingsStore: BackupSettingsStore
     private let dateProvider: DateProvider
@@ -105,7 +106,7 @@ public class BackupListMediaManagerImpl: BackupListMediaManager {
     private let serialTaskQueue: SerialTaskQueue
     private let tsAccountManager: TSAccountManager
 
-    public init(
+    init(
         accountKeyStore: AccountKeyStore,
         attachmentStore: AttachmentStore,
         attachmentUploadStore: AttachmentUploadStore,
@@ -116,6 +117,7 @@ public class BackupListMediaManagerImpl: BackupListMediaManager {
         backupAttachmentUploadStore: BackupAttachmentUploadStore,
         backupAttachmentUploadEraStore: BackupAttachmentUploadEraStore,
         backupListMediaStore: BackupListMediaStore,
+        backupMediaErrorNotificationPresenter: BackupMediaErrorNotificationPresenter,
         backupRequestManager: BackupRequestManager,
         backupSettingsStore: BackupSettingsStore,
         dateProvider: @escaping DateProvider,
@@ -135,6 +137,7 @@ public class BackupListMediaManagerImpl: BackupListMediaManager {
         self.backupAttachmentUploadStore = backupAttachmentUploadStore
         self.backupAttachmentUploadEraStore = backupAttachmentUploadEraStore
         self.backupListMediaStore = backupListMediaStore
+        self.backupMediaErrorNotificationPresenter = backupMediaErrorNotificationPresenter
         self.backupRequestManager = backupRequestManager
         self.backupSettingsStore = backupSettingsStore
         self.dateProvider = dateProvider
@@ -155,11 +158,11 @@ public class BackupListMediaManagerImpl: BackupListMediaManager {
         )
     }
 
-    public func getNeedsQueryListMedia(tx: DBReadTransaction) -> Bool {
+    func getNeedsQueryListMedia(tx: DBReadTransaction) -> Bool {
         return needsToQueryListMedia(tx: tx)
     }
 
-    public func queryListMediaIfNeeded() async throws {
+    func queryListMediaIfNeeded() async throws {
         let task = serialTaskQueue.enqueue { [self] in
             try await _queryListMediaIfNeeded()
         }
@@ -270,10 +273,8 @@ public class BackupListMediaManagerImpl: BackupListMediaManager {
         } catch {
             logger.error("Unretryable failure in list media! \(error)")
 
-            if BuildFlags.Backups.performListMediaIntegrityChecks {
-                // Post a notification so we hear about this quickly.
-                notificationPresenter.notifyUserOfListMediaIntegrityCheckFailure()
-            }
+            // Post a notification so we hear about this quickly.
+            backupMediaErrorNotificationPresenter.notifyIfNecessary()
 
             // We failed for a non-retryable reason: "complete" this attempt
             // so we don't make a doomed attempt for each of our callers.
@@ -322,7 +323,7 @@ public class BackupListMediaManagerImpl: BackupListMediaManager {
 
         let integrityChecker: ListMediaIntegrityChecker
         if
-            BuildFlags.Backups.performListMediaIntegrityChecks,
+            BuildFlags.Backups.mediaErrorDisplay,
             // Skip integrity checks if we're in a new upload era, since we
             // expect media to not yet be uploaded.
             currentUploadEra == uploadEraOfLastListMedia
@@ -1538,7 +1539,7 @@ private class ListMediaIntegrityCheckerImpl: ListMediaIntegrityChecker {
         }
 
         if shouldNotify {
-            notificationPresenter.notifyUserOfListMediaIntegrityCheckFailure()
+            notificationPresenter.notifyUserOfBackupsMediaError()
         }
     }
 

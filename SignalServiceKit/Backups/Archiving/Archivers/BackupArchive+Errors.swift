@@ -1197,7 +1197,7 @@ extension BackupArchive {
             self.error = error
             self.wasFrameDropped = wasFrameDropped
             // Don't serialize proto frames if we aren't displaying errors.
-            if let protoFrame, BuildFlags.Backups.errorDisplay {
+            if let protoFrame, BuildFlags.Backups.archiveErrorDisplay {
                 do {
                     self.protoJson = try String(
                         data: JSONSerialization.data(

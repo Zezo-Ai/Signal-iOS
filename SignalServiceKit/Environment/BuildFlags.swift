@@ -44,13 +44,13 @@ public enum BuildFlags {
 
         public static let restoreFailOnAnyError = build <= .beta
         public static let detailedBenchLogging = build <= .internal
-        public static let errorDisplay = build <= .internal
+        public static let archiveErrorDisplay = build <= .internal
 
         public static let avoidAppAttestForDevs = build <= .dev
         public static let avoidStoreKitForTesters = build <= .beta
 
+        public static let mediaErrorDisplay = build <= .beta
         public static let useLowerDefaultListMediaRefreshInterval = build <= .beta
-        public static let performListMediaIntegrityChecks = build <= .beta
     }
 
     public static let callQualitySurvey = true

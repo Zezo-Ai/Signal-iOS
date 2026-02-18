@@ -41,11 +41,11 @@ public enum AppNotificationDefaultAction: String {
     case showMyStories
     case showCallLobby
     case submitDebugLogs
+    case submitDebugLogsForBackupsMediaError
     case reregister
     case showChatList
     case showLinkedDevices
     case showBackupsSettings
-    case listMediaIntegrityCheck
 }
 
 public struct AppNotificationUserInfo {
@@ -1231,19 +1231,19 @@ public class NotificationPresenterImpl: NotificationPresenter {
         }
     }
 
-    public func notifyUserOfListMediaIntegrityCheckFailure() {
+    public func notifyUserOfBackupsMediaError() {
         var userInfo = AppNotificationUserInfo()
-        userInfo.defaultAction = .listMediaIntegrityCheck
+        userInfo.defaultAction = .submitDebugLogsForBackupsMediaError
         enqueueNotificationAction {
             await self.notifyViaPresenter(
                 category: .listMediaIntegrityCheckFailure,
                 title: ResolvableValue(resolvedValue: OWSLocalizedString(
-                    "BACKUPS_MEDIA_UPLOAD_FAILURE_NOTIFICATION_TITLE",
-                    comment: "Title for system notification when we detect paid backup media uploads have encountered a problem",
+                    "BACKUPS_MEDIA_ERROR_NOTIFICATION_TITLE",
+                    comment: "Title for system notification when we detect an issue with Backup media.",
                 )),
                 body: OWSLocalizedString(
-                    "BACKUPS_MEDIA_UPLOAD_FAILURE_NOTIFICATION_BODY",
-                    comment: "Body for system notification when we detect paid backup media uploads have encountered a problem",
+                    "BACKUPS_MEDIA_ERROR_NOTIFICATION_BODY",
+                    comment: "Body for system notification when we detect an issue with Backup media.",
                 ),
                 threadIdentifier: nil,
                 userInfo: userInfo,

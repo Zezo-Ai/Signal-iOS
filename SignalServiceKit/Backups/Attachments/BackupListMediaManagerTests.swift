@@ -45,6 +45,11 @@ public class BackupListMediaManagerTests {
             backupAttachmentUploadStore: backupAttachmentUploadStore,
             backupAttachmentUploadEraStore: BackupAttachmentUploadEraStore(),
             backupListMediaStore: BackupListMediaStore(),
+            backupMediaErrorNotificationPresenter: BackupMediaErrorNotificationPresenter(
+                dateProvider: { Date() },
+                db: db,
+                notificationPresenter: NoopNotificationPresenterImpl(),
+            ),
             backupRequestManager: backupRequestManager,
             backupSettingsStore: backupSettingsStore,
             dateProvider: dateProvider,

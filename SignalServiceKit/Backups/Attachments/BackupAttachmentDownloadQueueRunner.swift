@@ -21,11 +21,12 @@ public protocol BackupAttachmentDownloadQueueRunner {
     func restoreAttachmentsIfNeeded(mode: BackupAttachmentDownloadQueueMode) async throws
 }
 
-public class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQueueRunner {
+class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQueueRunner {
 
     private let appContext: AppContext
     private let attachmentStore: AttachmentStore
     private let backupAttachmentDownloadStore: BackupAttachmentDownloadStore
+    private let backupMediaErrorNotificationPresenter: BackupMediaErrorNotificationPresenter
     private let backupSettingsStore: BackupSettingsStore
     private let dateProvider: DateProvider
     private let db: any DB
@@ -39,13 +40,14 @@ public class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQu
     private let fullsizeTaskQueue: TaskQueueLoader<TaskRunner>
     private let thumbnailTaskQueue: TaskQueueLoader<TaskRunner>
 
-    public init(
+    init(
         appContext: AppContext,
         attachmentStore: AttachmentStore,
         attachmentDownloadManager: AttachmentDownloadManager,
         attachmentUploadStore: AttachmentUploadStore,
         backupAttachmentDownloadStore: BackupAttachmentDownloadStore,
         backupAttachmentUploadScheduler: BackupAttachmentUploadScheduler,
+        backupMediaErrorNotificationPresenter: BackupMediaErrorNotificationPresenter,
         backupListMediaManager: BackupListMediaManager,
         backupSettingsStore: BackupSettingsStore,
         dateProvider: @escaping DateProvider,
@@ -56,10 +58,12 @@ public class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQu
         statusManager: BackupAttachmentDownloadQueueStatusManager,
         tsAccountManager: TSAccountManager,
     ) {
+        let logger = PrefixedLogger(prefix: "[Backups]")
+
         self.appContext = appContext
         self.attachmentStore = attachmentStore
         self.backupAttachmentDownloadStore = backupAttachmentDownloadStore
-        let logger = PrefixedLogger(prefix: "[Backups]")
+        self.backupMediaErrorNotificationPresenter = backupMediaErrorNotificationPresenter
         self.logger = logger
         self.backupSettingsStore = backupSettingsStore
         self.dateProvider = dateProvider
@@ -78,6 +82,7 @@ public class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQu
                 attachmentUploadStore: attachmentUploadStore,
                 backupAttachmentDownloadStore: backupAttachmentDownloadStore,
                 backupAttachmentUploadScheduler: backupAttachmentUploadScheduler,
+                backupMediaErrorNotificationPresenter: backupMediaErrorNotificationPresenter,
                 backupSettingsStore: backupSettingsStore,
                 dateProvider: dateProvider,
                 db: db,
@@ -106,7 +111,7 @@ public class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQu
         self.thumbnailTaskQueue = taskQueue(mode: .thumbnail)
     }
 
-    public func restoreAttachmentsIfNeeded(mode: BackupAttachmentDownloadQueueMode) async throws {
+    func restoreAttachmentsIfNeeded(mode: BackupAttachmentDownloadQueueMode) async throws {
         guard appContext.isMainApp else { return }
 
         let taskQueue: TaskQueueLoader<TaskRunner>
@@ -194,6 +199,7 @@ public class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQu
         private let attachmentUploadStore: AttachmentUploadStore
         private let backupAttachmentDownloadStore: BackupAttachmentDownloadStore
         private let backupAttachmentUploadScheduler: BackupAttachmentUploadScheduler
+        private let backupMediaErrorNotificationPresenter: BackupMediaErrorNotificationPresenter
         private let backupSettingsStore: BackupSettingsStore
         private let dateProvider: DateProvider
         private let db: any DB
@@ -227,6 +233,7 @@ public class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQu
             attachmentUploadStore: AttachmentUploadStore,
             backupAttachmentDownloadStore: BackupAttachmentDownloadStore,
             backupAttachmentUploadScheduler: BackupAttachmentUploadScheduler,
+            backupMediaErrorNotificationPresenter: BackupMediaErrorNotificationPresenter,
             backupSettingsStore: BackupSettingsStore,
             dateProvider: @escaping DateProvider,
             db: any DB,
@@ -244,6 +251,7 @@ public class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQu
             self.attachmentUploadStore = attachmentUploadStore
             self.backupAttachmentDownloadStore = backupAttachmentDownloadStore
             self.backupAttachmentUploadScheduler = backupAttachmentUploadScheduler
+            self.backupMediaErrorNotificationPresenter = backupMediaErrorNotificationPresenter
             self.backupSettingsStore = backupSettingsStore
             self.dateProvider = dateProvider
             self.db = db
@@ -454,14 +462,16 @@ public class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQu
                 case nil, .expiredCredentials:
                     break
                 case .blockedByAutoDownloadSettings:
-                    owsFailDebug("Backup downloads should never by blocked by auto download settings!")
+                    owsFailDebug("Backup downloads should never be blocked by auto download settings!")
                     // This should be impossible. Stop the queue, it can start up again later
                     // on whatever the next trigger is.
+                    backupMediaErrorNotificationPresenter.notifyIfNecessary()
                     try? await loader.stop()
                     return .retryableError(error)
                 case .blockedByActiveCall:
                     // TODO: [Backups] suspend downloads during calls and resume after
-                    owsFailDebug("Backup downloads are currently not blocked by active calls!")
+                    owsFailDebug("Backup downloads should never be blocked by active calls!")
+                    backupMediaErrorNotificationPresenter.notifyIfNecessary()
                     try? await loader.stop()
                     return .retryableError(error)
                 case .blockedByPendingMessageRequest:
@@ -474,7 +484,8 @@ public class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQu
                         // should not auto-download stuff in message request state.
                         return .unretryableError(error)
                     case .mediaTierFullsize, .mediaTierThumbnail:
-                        owsFailDebug("Media tier downloads should never by blocked by message request state!")
+                        owsFailDebug("Media tier downloads should never be blocked by message request state!")
+                        backupMediaErrorNotificationPresenter.notifyIfNecessary()
                         // This should be impossible. Stop the queue, it can start up again later
                         // on whatever the next trigger is.
                         try? await loader.stop()
