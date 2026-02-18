@@ -550,9 +550,6 @@
 /* Text used as placeholder in recovery key text view. */
 "BACKUP_KEY_PLACEHOLDER" = "'रिकवरी की'";
 
-/* Title of button to tap if you forgot your recovery key. */
-"BACKUP_KEY_REMINDER_FORGOT_KEY" = "की भूल गए?";
-
 /* Action text for Recovery Key reminder megaphone */
 "BACKUP_KEY_REMINDER_MEGAPHONE_ACTION" = "वेरिफ़ाय करें";
 
@@ -649,6 +646,15 @@
 /* Title for a view allowing users to record their 'Recovery Key'. */
 "BACKUP_RECORD_KEY_TITLE" = "अपनी 'रिकवरी की' सेव करें";
 
+/* Title for a button offering help if the user has forgotten their recovery key. */
+"BACKUP_RECOVERY_KEY_REMINDER_FORGOT_KEY_BUTTON" = "Forgot Key?";
+
+/* Subtitle for a screen asking users to enter their recovery key, for reminder purposes. */
+"BACKUP_RECOVERY_KEY_REMINDER_SUBTITLE" = "Your recovery key is a 64-character code required to recover your account and data.";
+
+/* Title for a screen asking users to enter their recovery key, for reminder purposes. */
+"BACKUP_RECOVERY_KEY_REMINDER_TITLE" = "Enter Your Recovery Key";
+
 /* Subtitle for a progress spinner on a modal tracking active downloading. Embeds 1:{{ the amount downloaded as a file size, e.g. 100 MB }}; 2:{{ the total amount to download as a file size, e.g. 1 GB }}; 3:{{ the amount downloaded as a percentage, e.g. 10% }}. */
 "BACKUP_RESTORE_MODAL_DOWNLOAD_PROGRESS_SUBTITLE" = "%2$@ में से %1$@ (%3$@)";
 
@@ -690,9 +696,6 @@
 
 /* Message for an action sheet explaining that you must be registered to make a Backup. */
 "BACKUP_SETTINGS_BACKUP_EXPORT_ERROR_SHEET_NOT_REGISTERED" = "बैकअप बनाने के लिए आपको रजिस्टर करना होगा।";
-
-/* Description for a progress bar tracking the optimizing of Backup media. */
-"BACKUP_SETTINGS_BACKUP_EXPORT_PROGRESS_DESCRIPTION_OPTIMIZING_MEDIA" = "मीडिया ऑप्टिमाइज़ किया जा रहा है...";
 
 /* Description for a progress bar tracking the preparation of a Backup. Embeds 1:{{ the percentage completed preformatted as a percent, e.g. 10% }}. */
 "BACKUP_SETTINGS_BACKUP_EXPORT_PROGRESS_DESCRIPTION_PREPARING_BACKUP" = "बैकअप तैयार किया जा रहा है (%1$@)";
@@ -1018,6 +1021,9 @@
 /* Subtitle for a progress bar tracking active uploading. Embeds 1:{{ the amount uploaded as a file size, e.g. 100 MB }}; 2:{{ the total amount to upload as a file size, e.g. 1 GB }}; 3:{{ the percentage uploaded as a percent, e.g. 40% }}. */
 "BACKUP_SETTINGS_UPLOAD_PROGRESS_SUBTITLE_RUNNING" = "%2$@ में से %1$@ अपलोड किया जा रहा है (%3$@)";
 
+/* Subtitle for a progress bar tracking active uploading. */
+"BACKUP_SETTINGS_UPLOAD_PROGRESS_SUBTITLE_RUNNING_GENERIC" = "Uploading…";
+
 /* Message for a sheet shown after the user enables backups. */
 "BACKUP_SETTINGS_WELCOME_TO_BACKUPS_SHEET_MESSAGE" = "इसमें थोड़ा समय लग सकता है। यह इस पर निर्भर करता है कि आपके बैकअप का साइज़ कितना है। बैकअप के दौरान भी, Signal का पहले की तरह इस्तेमाल किया जा सकता है।";
 
@@ -1033,11 +1039,11 @@
 /* Title for a sheet shown when your Backup subscription fails to renew. */
 "BACKUP_SUBSCRIPTION_FAILED_TO_RENEW_SHEET_TITLE" = "आपके बैकअप का सब्सक्रिप्शन रिन्यू नहीं हो पाया";
 
-/* Body for system notification when we detect paid backup media uploads have encountered a problem */
-"BACKUPS_MEDIA_UPLOAD_FAILURE_NOTIFICATION_BODY" = "कृपया हमें डीबग लॉग भेजें, ताकि हम इस समस्या को हल कर सकें!";
+/* Body for system notification when we detect an issue with Backup media. */
+"BACKUPS_MEDIA_ERROR_NOTIFICATION_BODY" = "Something unexpected happened related to your media backup. Please submit debug logs to help us resolve the issue.";
 
-/* Title for system notification when we detect paid backup media uploads have encountered a problem */
-"BACKUPS_MEDIA_UPLOAD_FAILURE_NOTIFICATION_TITLE" = "आपके मीडिया का बैकअप लेने में कोई गड़बड़ी हुई है";
+/* Title for system notification when we detect an issue with Backup media. */
+"BACKUPS_MEDIA_ERROR_NOTIFICATION_TITLE" = "Backups Media Error";
 
 /* Title for the 'Backup' settings menu. */
 "BACKUPS_SETTINGS_TITLE" = "सिक्योर बैकअप";
@@ -1789,6 +1795,72 @@
 /* Tooltip highlighting the auto chat color option. */
 "CHAT_COLORS_AUTO_TOOLTIP" = "यह अपने-आप वॉलपेपर के रंग जैसा हो जाता है";
 
+/* Message shown in an action sheet when the user tries to cancel a backup. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_BACKUP_CANCEL_CONFIRMATION_MESSAGE" = "Canceling your backup will not delete your backup. You can resume your backup at any time from Backup Settings.";
+
+/* Title for the action sheet shown when the user tries to cancel a backup. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_BACKUP_CANCEL_CONFIRMATION_TITLE" = "Cancel Backup?";
+
+/* Toast shown after the user cancels the backup. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_BACKUP_CANCELED_TOAST" = "Backup canceled";
+
+/* Title label shown in the chat list backup progress view when the backup is complete. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_BACKUP_COMPLETE_TITLE" = "Backup complete";
+
+/* Title label shown in the chat list backup progress view when the backup is paused. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_BACKUP_PAUSED_TITLE" = "Backup paused";
+
+/* Button in the cancel backup action sheet that confirms cancellation. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_CANCEL_BACKUP_BUTTON" = "Cancel Backup";
+
+/* Title for the context menu action that cancels the backup. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_CANCEL_BACKUP_CONTEXT_MENU_ACTION" = "Cancel backup";
+
+/* Button in the cancel backup action sheet that dismisses the sheet and continues the backup. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_CONTINUE_BACKUP_BUTTON" = "Continue Backup";
+
+/* Title for the context menu action that hides the backup progress view. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_HIDE_CONTEXT_MENU_ACTION" = "Hide";
+
+/* Toast shown after the user hides the backup progress view. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_HIDE_TOAST" = "View backup progress in Backup Settings";
+
+/* Button in the action sheet to dismiss and resume backup later on Wi-Fi. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_LATER_ON_WIFI_BUTTON" = "Later on Wi-Fi";
+
+/* Trailing accessory label shown when backup is paused due to low battery. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_LOW_BATTERY_LABEL" = "Low Battery…";
+
+/* Trailing accessory label shown when backup is paused due to Low Power Mode. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_LOW_POWER_MODE_LABEL" = "Low Power Mode…";
+
+/* Trailing accessory label shown when backup is paused due to no internet connection. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_NO_INTERNET_LABEL" = "No Internet…";
+
+/* Title label shown in the chat list backup progress view while the backup file is being prepared. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_PREPARING_BACKUP_TITLE" = "Preparing backup";
+
+/* Button in the action sheet to resume backup using cellular data. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_RESUME_CELLULAR_DATA_BUTTON" = "Resume";
+
+/* Message shown in an action sheet when the user tries to resume backup using cellular data. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_RESUME_CELLULAR_DATA_MESSAGE" = "Backing up your media using cellular data may result in data charges. Your backup may take a long time to upload, keep Signal open to avoid interruptions.";
+
+/* Title for the action sheet shown when the user tries to resume backup using cellular data. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_RESUME_CELLULAR_DATA_TITLE" = "Resume Using Cellular Data?";
+
+/* Button shown in the backup progress view trailing accessory to resume uploading over Wi-Fi. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_RESUME_WIFI_BUTTON" = "Resume";
+
+/* Progress label showing the amount uploaded out of the total. Embeds {{ %1$@ bytes uploaded, %2$@ total bytes to upload }}. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_UPLOAD_PROGRESS_FORMAT" = "%1$@ of %2$@";
+
+/* Title label shown in the chat list backup progress view while backup attachments are being uploaded. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_UPLOADING_BACKUP_TITLE" = "Uploading backup";
+
+/* Title label shown in the chat list backup progress view when waiting for Wi-Fi. */
+"CHAT_LIST_BACKUP_PROGRESS_VIEW_WAITING_FOR_WIFI_TITLE" = "Waiting for Wi-Fi";
+
 /* Title for context menu action to disable chat list filter (e.g., Filter by Unread) */
 "CHAT_LIST_CLEAR_FILTER_MENU_ACTION" = "अपठित फिल्टर साफ करें";
 
@@ -1808,7 +1880,7 @@
 "CHAT_LIST_UNREAD_FILTER_NO_CHATS" = "कोई भी अपठित चैट नहीं";
 
 /* Message indicating a user should check connection and try again. */
-"CHECK_YOUR_CONNECTION_TRY_AGAIN_WARNING" = "Check your internet connection and try again.";
+"CHECK_YOUR_CONNECTION_TRY_AGAIN_WARNING" = "अपना इंटरनेट कनेक्शन देखें और फिर से कोशिश करें।";
 
 /* Text for a bullet point in a list of Backup features, describing that all media is included. */
 "CHOOSE_BACKUP_PLAN_BULLET_FULL_MEDIA_BACKUP" = "पूरे मीडिया का बैकअप";
@@ -2240,7 +2312,7 @@
 "CONVERSATION_SETTINGS_ATTRIBUTES_ACCESS_SECTION_FOOTER_V2" = "यह चुनें कि ग्रुप का नाम, फ़ोटो, ग्रुप के बारे में जानकारी, गायब होने वाले मैसेज का टाइमर, और पिन किए गए मैसेज कौन एडिट कर सकता है।";
 
 /* Footer for the 'attributes access' section in conversation settings view with member labels added. */
-"CONVERSATION_SETTINGS_ATTRIBUTES_ACCESS_SECTION_FOOTER_V3" = "Choose who can edit the group name, photo, description, disappearing messages timer, pinned messages, and add member labels.";
+"CONVERSATION_SETTINGS_ATTRIBUTES_ACCESS_SECTION_FOOTER_V3" = "चुनें कि ग्रुप का नाम, फ़ोटो, विवरण, गायब होने वाले मैसेज का टाइमर, पिन किए गए मैसेज कौन एडिट कर सकता है और मेंबर लेबल कौन जोड़ सकता है।";
 
 /* Footer string for a contact's badges in conversation settings */
 "CONVERSATION_SETTINGS_BADGES_FOOTER" = "Signal को सहयोग करके अपनी प्रोफ़ाइल के लिए बैज पाएं. ज़्यादा जानने के लिए किसी बैज पर टैप करें.";
@@ -2379,6 +2451,9 @@
 
 /* Label for 'revoke group admin' button in conversation settings view. */
 "CONVERSATION_SETTINGS_REVOKE_GROUP_ADMIN_BUTTON" = "एडमिन के रूप से हटाएँ";
+
+/* Message for 'revoke group admin' confirmation alert. */
+"CONVERSATION_SETTINGS_REVOKE_GROUP_ADMIN_MESSAGE" = "This will also clear their member label.";
 
 /* Format for title for 'revoke group admin' confirmation alert. Embeds {user to revoke admin status from}. */
 "CONVERSATION_SETTINGS_REVOKE_GROUP_ADMIN_TITLE_FORMAT" = "%1$@ को ग्रुप ऐडमिन के रूप से हटाएँ?";
@@ -4694,16 +4769,16 @@
 "KEY_COMMAND_UNARCHIVE" = "चैट को असंग्रहीत करें";
 
 /* Body for a sheet shown when a Key Transparency self-check fails. */
-"KEY_TRANSPARENCY_SELF_CHECK_FAILED_SHEET_BODY" = "Debug logs helps us diagnose and fix the issue and do not contain identifying information.";
+"KEY_TRANSPARENCY_SELF_CHECK_FAILED_SHEET_BODY" = "डीबग लॉग से हमें समस्या किसी को समझने और उसे ठीक करने में मदद मिलती है और इनमें आपकी पहचान से जुड़ी कोई जानकारी नहीं होती।";
 
 /* Title for the primary button in a sheet shown when a Key Transparency self-check fails. */
-"KEY_TRANSPARENCY_SELF_CHECK_FAILED_SHEET_PRIMARY_BUTTON_TITLE" = "Submit";
+"KEY_TRANSPARENCY_SELF_CHECK_FAILED_SHEET_PRIMARY_BUTTON_TITLE" = "सबमिट करें";
 
 /* Title for the secondary button in a sheet shown when a Key Transparency self-check fails. */
-"KEY_TRANSPARENCY_SELF_CHECK_FAILED_SHEET_SECONDARY_BUTTON_TITLE" = "No Thanks";
+"KEY_TRANSPARENCY_SELF_CHECK_FAILED_SHEET_SECONDARY_BUTTON_TITLE" = "नहीं, रहने दें";
 
 /* Title for a sheet shown when a Key Transparency self-check fails. */
-"KEY_TRANSPARENCY_SELF_CHECK_FAILED_SHEET_TITLE" = "Automatic Key Verification is currently unavailable for your device. Submit debug log?";
+"KEY_TRANSPARENCY_SELF_CHECK_FAILED_SHEET_TITLE" = "फ़िलहाल आपके डिवाइस पर 'ऑटोमैटिक की वेरिफ़िकेशन' की सुविधा उपलब्ध नहीं है। डीबग लॉग सबमिट करना है?";
 
 /* Label for the 'learn more' button. */
 "LEARN_MORE" = "और जानें";
@@ -5011,41 +5086,50 @@
 /* Label for an action to add a member label */
 "MEMBER_LABEL_ADD" = "कोई मेंबर लेबल जोड़ें";
 
+/* Label that shows up under a local user's row in contacts prompting them to add a member label */
+"MEMBER_LABEL_ADD_CSVC" = "Add Member Label";
+
+/* Toast indicating that only admins can set a member label. */
+"MEMBER_LABEL_ADMIN_ONLY_WARNING_TOAST" = "Only admins can set member labels in this group";
+
 /* Accessibility prefix for member labels. */
 "MEMBER_LABEL_AX_PREFIX" = "मेंबर लेबल: ";
 
 /* Button label on action sheet when attempting to change the group attributes access to 'administrator' and then continue */
-"MEMBER_LABEL_CLEAR_CHANGE_PERMISSION_CONTINUE" = "Change Permission";
+"MEMBER_LABEL_CLEAR_CHANGE_PERMISSION_CONTINUE" = "अनुमति बदलें";
 
 /* Body for action sheet when attempting to change the group attributes access to 'administrator' */
-"MEMBER_LABEL_CLEAR_WARNING_BODY" = "Changing this permission to “Only Admins” will clear member labels set by non-admins in this group.";
+"MEMBER_LABEL_CLEAR_WARNING_BODY" = "इस अनुमति को 'सिर्फ़ ऐडमिन' में बदलने पर, वे मेंबर लेबल हट जाएंगे जिन्हें नॉन-ऐडमिन ने सेट किया है।";
 
 /* Title for action sheet when attempting to change the group attributes access to 'administrator' */
-"MEMBER_LABEL_CLEAR_WARNING_TITLE" = "Member Labels Will be Cleared";
+"MEMBER_LABEL_CLEAR_WARNING_TITLE" = "मेंबर लेबल हटा दिए जाएंगे";
 
 /* Text for a button to set a member label */
-"MEMBER_LABEL_EDIT" = "Edit Your Label";
+"MEMBER_LABEL_EDIT" = "अपना लेबल एडिट करें";
 
 /* Error indicating member label could not save. */
-"MEMBER_LABEL_FAIL_TO_SAVE" = "Couldn't Save Member Label";
+"MEMBER_LABEL_FAIL_TO_SAVE" = "मेंबर लेबल सेव नहीं हो पाया";
+
+/* Section header for a list of group member labels */
+"MEMBER_LABEL_GROUP_LABELS_SECTION_TITLE" = "Labels in This Group";
 
 /* Body for a sheet shown if a user will show their member label over their About message in a group. */
-"MEMBER_LABEL_HERO_SHEET_ABOUT_OVERRIDE_BODY" = "In this group, your Member Label will be displayed beside your photo in place of your About.";
+"MEMBER_LABEL_HERO_SHEET_ABOUT_OVERRIDE_BODY" = "इस ग्रुप में, आपका मेंबर लेबल आपकी फ़ोटो के बगल में 'मेरे बारे में' की जगह दिखेगा।";
 
 /* Title for a sheet shown if a user will show their member label over their About message in a group. */
-"MEMBER_LABEL_HERO_SHEET_ABOUT_OVERRIDE_TITLE" = "Member Label Display";
+"MEMBER_LABEL_HERO_SHEET_ABOUT_OVERRIDE_TITLE" = "मेंबर लेबल डिसप्ले";
 
 /* Body for a sheet shown if a user taps on someone else's member label. */
-"MEMBER_LABEL_HERO_SHEET_EDUCATION_BODY" = "Use a member label to describe yourself or your role in this group. Member labels are only visible within this group.";
+"MEMBER_LABEL_HERO_SHEET_EDUCATION_BODY" = "इस ग्रुप में अपने बारे में या अपने रोल के बारे में बताने के लिए किसी मेंबर लेबल का इस्तेमाल करें। मेंबर लेबल सिर्फ़ इसी ग्रुप में दिखाई देंगे।";
 
 /* Title for a sheet shown if a user taps on someone else's member label. */
-"MEMBER_LABEL_HERO_SHEET_EDUCATION_TITLE" = "Member Labels";
+"MEMBER_LABEL_HERO_SHEET_EDUCATION_TITLE" = "मेंबर लेबल";
 
 /* Heading shown above the preview of a message bubble with the edited member label. */
 "MEMBER_LABEL_PREVIEW_HEADING" = "प्रीव्यू";
 
 /* Text for a button to edit an existing member label */
-"MEMBER_LABEL_SET" = "Set a Member Label";
+"MEMBER_LABEL_SET" = "Set Your Member Label";
 
 /* Text shown in the preview message bubble when a user is editing their member label. */
 "MEMBER_LABEL_VIEW_MESSAGE_PREVIEW_TEXT" = "हैलो!";
@@ -7643,10 +7727,10 @@
 "SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_BUTTON_VERIFYING" = "एनक्रिप्शन वेरिफ़ाई किया जा रहा है…";
 
 /* Body for a sheet introducing Key Transparency. */
-"SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_EDUCATION_SHEET_BODY" = "For contacts you’re connected to by phone number, Signal can automatically confirm whether the connection is secure using a process called key transparency. For added security, you can still verify connections manually using a QR code or by comparing safety numbers.";
+"SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_EDUCATION_SHEET_BODY" = "जिन कॉन्टैक्ट से आप फ़ोन नंबर के ज़रिए कनेक्ट हैं उनके लिए Signal, 'की ट्रांसपेरेंसी' प्रोसेस के ज़रिए अपने-आप यह पुष्टि कर लेता है कि कोई कनेक्शन सुरक्षित है या नहीं। अतिरिक्त सुरक्षा के लिए, आपके पास भी QR कोड या सेफ़्टी नंबर के ज़रिए कनेक्शन को वेरिफ़ाई करने का विकल्प मौजूद है।";
 
 /* Title for a sheet introducing Key Transparency. */
-"SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_EDUCATION_SHEET_TITLE" = "Signal can now automatically verify encryption";
+"SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_EDUCATION_SHEET_TITLE" = "Signal अब एनक्रिप्शन को ऑटोमैटिक तरीके से वेरिफ़ाई कर सकता है";
 
 /* Body for a sheet explaining that encryption auto-verification did not succeed. Embeds {{ 1: the contact's name }}. */
 "SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_FAILURE_SHEET_BODY_FORMAT" = "Signal अब इस चैट के लिए एनक्रिप्शन को ऑटोमैटिक तरीके से वेरिफ़ाई नहीं कर सकता। ऐसा इसलिए हुआ होगा, क्योंकि %1$@ ने अपना फ़ोन नंबर बदल दिया है। पिछली स्क्रीन पर दिख रहे नंबरों की तुलना करके या उनके डिवाइस पर मौजूद कोड को स्कैन करके, एंड-टू-एंड एनक्रिप्शन को मैन्युअल तरीके से वेरिफ़ाई करें।";
@@ -8192,10 +8276,10 @@
 "SETTINGS_KEEP_MUTED_ARCHIVED_LABEL" = "म्यूट की गई चैट को आर्काइव में रखें";
 
 /* Footer for settings section describing Key Transparency. */
-"SETTINGS_KEY_TRANSPARENCY_OPT_OUT_FOOTER" = "When enabled, Signal will attempt to automatically verify the encryption of 1:1 chats.";
+"SETTINGS_KEY_TRANSPARENCY_OPT_OUT_FOOTER" = "यह विकल्प चालू रहने पर, Signal वन-टू-वन चैट के एनक्रिप्शन को ऑटोमैटिक तरीके से वेरिफ़ाई करने की कोशिश करेगा।";
 
 /* Title for for a settings option describing that Key Transparency is enabled. */
-"SETTINGS_KEY_TRANSPARENCY_OPT_OUT_SWITCH_TITLE" = "Automatic Key Verification";
+"SETTINGS_KEY_TRANSPARENCY_OPT_OUT_SWITCH_TITLE" = "ऑटोमैटिक 'की' वेरिफ़िकेशन";
 
 /* No comment provided by engineer. */
 "SETTINGS_LEGAL_TERMS_CELL" = "नियम और गोपनीयता नीति";
