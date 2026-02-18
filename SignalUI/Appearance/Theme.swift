@@ -410,6 +410,10 @@ public final class Theme {
         UIColor.Signal.secondaryLabel.resolvedColor(with: darkTraitCollection)
     }
 
+    public class var darkThemeTertiaryLabel: UIColor {
+        UIColor.Signal.tertiaryLabel.resolvedColor(with: darkTraitCollection)
+    }
+
     public class var darkThemeWashColor: UIColor { .ows_gray75 }
 
     public class var darkThemeNavbarBackgroundColor: UIColor {

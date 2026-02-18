@@ -28,7 +28,7 @@ public class CVContactShareView: ManualStackView {
         transaction: DBReadTransaction,
     ) -> State {
         let avatar = contactShare.getAvatarImage(
-            diameter: Self.avatarSize,
+            diameter: avatarSize,
             transaction: transaction,
         )
         owsAssertDebug(avatar != nil)
@@ -44,19 +44,18 @@ public class CVContactShareView: ManualStackView {
     private static let disclosureIconSize = CGSize.square(20)
 
     func configureForRendering(state: State, cellMeasurement: CVCellMeasurement) {
-
         let labelConfig = Self.contactNameLabelConfig(state: state)
         labelConfig.applyForRendering(label: contactNameLabel)
 
         avatarView.image = state.avatar
 
-        let disclosureColor = state.isIncoming ? UIColor.ows_gray25 : UIColor.ows_whiteAlpha80
+        let disclosureColor = state.isIncoming ? UIColor.Signal.tertiaryLabel : Theme.darkThemeTertiaryLabel
         disclosureImageView.setTemplateImage(
             UIImage(imageLiteralResourceName: "chevron-right-20"),
             tintColor: disclosureColor,
         )
 
-        self.configure(
+        configure(
             config: Self.outerStackConfig,
             cellMeasurement: cellMeasurement,
             measurementKey: Self.measurementKey_outerStack,
@@ -81,7 +80,7 @@ public class CVContactShareView: ManualStackView {
         let textColor = state.conversationStyle.bubbleTextColor(isIncoming: state.isIncoming)
         return CVLabelConfig.unstyledText(
             state.contactShare.displayName,
-            font: .dynamicTypeBody,
+            font: .dynamicTypeHeadline,
             textColor: textColor,
             lineBreakMode: .byTruncatingTail,
         )
@@ -99,19 +98,19 @@ public class CVContactShareView: ManualStackView {
         var maxContentWidth = (
             maxWidth -
                 (
-                    Self.avatarSize +
+                    avatarSize +
                         disclosureIconSize.width +
                         outerStackConfig.spacing * 2
                 ),
         )
         maxContentWidth = max(0, maxContentWidth)
 
-        let labelConfig = self.contactNameLabelConfig(state: state)
+        let labelConfig = contactNameLabelConfig(state: state)
         let labelSize = CVText.measureLabel(config: labelConfig, maxWidth: maxContentWidth)
 
         var outerSubviewInfos = [ManualStackSubviewInfo]()
 
-        let avatarSize = CGSize(square: Self.avatarSize)
+        let avatarSize = CGSize(square: avatarSize)
         outerSubviewInfos.append(avatarSize.asManualSubviewInfo(hasFixedSize: true))
 
         outerSubviewInfos.append(labelSize.asManualSubviewInfo)
@@ -121,7 +120,7 @@ public class CVContactShareView: ManualStackView {
         let outerStackMeasurement = ManualStackView.measure(
             config: outerStackConfig,
             measurementBuilder: measurementBuilder,
-            measurementKey: Self.measurementKey_outerStack,
+            measurementKey: measurementKey_outerStack,
             subviewInfos: outerSubviewInfos,
             maxWidth: maxWidth,
         )
