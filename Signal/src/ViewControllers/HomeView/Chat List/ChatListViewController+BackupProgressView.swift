@@ -306,7 +306,7 @@ class CLVBackupProgressView: BackupProgressView.Delegate {
         // until uploads are done even if we've made a Backup file.
         if
             let lastBackupDetails = state.lastBackupDetails,
-            lastBackupDetails.date > state.earliestBackupDateToConsider
+            lastBackupDetails.firstBackupDate > state.earliestBackupDateToConsider
         {
             return .complete
         }
