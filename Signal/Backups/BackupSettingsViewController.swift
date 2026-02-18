@@ -38,6 +38,7 @@ class BackupSettingsViewController:
     private let tsAccountManager: TSAccountManager
 
     private var onAppearAction: OnAppearAction?
+    private var onBackupComplete: ((UIViewController) -> Void)?
     private let viewModel: BackupSettingsViewModel
 
     private var externalEventObservationTasks: [Task<Void, Never>] = []
@@ -118,6 +119,13 @@ class BackupSettingsViewController:
         self.tsAccountManager = tsAccountManager
 
         self.onAppearAction = onAppearAction
+        switch onAppearAction {
+        case .presentWelcomeToBackupsSheet, nil:
+            break
+        case .automaticallyStartBackup(let completion):
+            self.onBackupComplete = completion
+        }
+
         self.viewModel = db.read { tx in
             let viewModel = BackupSettingsViewModel(
                 backupSubscriptionConfiguration: subscriptionConfigManager.backupConfigurationOrDefault(tx: tx),
@@ -164,7 +172,7 @@ class BackupSettingsViewController:
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        switch onAppearAction {
+        switch onAppearAction.take() {
         case nil:
             break
         case .presentWelcomeToBackupsSheet:
@@ -237,12 +245,7 @@ class BackupSettingsViewController:
 
                         switch result {
                         case .success:
-                            switch onAppearAction {
-                            case .presentWelcomeToBackupsSheet, nil:
-                                break
-                            case .automaticallyStartBackup(let completion):
-                                completion?(self)
-                            }
+                            onBackupComplete.take()?(self)
                         case .failure(let error):
                             showSheetForBackupExportJobError(error)
                         }

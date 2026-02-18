@@ -136,17 +136,19 @@ class BackupExportJobImpl: BackupExportJob {
             resumptionPoint = nil
         }
 
-        let localIdentifiers: LocalIdentifiers
-        let backupKey: MessageRootBackupKey
         let aep: AccountEntropyPool
-        let shouldAllowBackupUploadsOnCellular: Bool
+        let backupKey: MessageRootBackupKey
+        let backupPlan: BackupPlan
         let hasConsumedMediaTierCapacity: Bool
+        let localIdentifiers: LocalIdentifiers
+        let shouldAllowBackupUploadsOnCellular: Bool
         (
-            localIdentifiers,
-            backupKey,
             aep,
-            shouldAllowBackupUploadsOnCellular,
+            backupPlan,
+            backupKey,
             hasConsumedMediaTierCapacity,
+            localIdentifiers,
+            shouldAllowBackupUploadsOnCellular,
         ) = try await db.awaitableWrite { tx throws in
             backupSettingsStore.setIsBackupUploadQueueSuspended(false, tx: tx)
 
@@ -168,16 +170,24 @@ class BackupExportJobImpl: BackupExportJob {
             }
 
             return (
-                localIdentifiers,
-                backupKey,
                 aep,
-                backupSettingsStore.shouldAllowBackupUploadsOnCellular(tx: tx),
+                backupSettingsStore.backupPlan(tx: tx),
+                backupKey,
                 backupSettingsStore.hasConsumedMediaTierCapacity(tx: tx),
+                localIdentifiers,
+                backupSettingsStore.shouldAllowBackupUploadsOnCellular(tx: tx),
             )
         }
 
         let logger = logger.suffixed(with: "[\(mode)][\(aep.getLoggingKey())]")
         logger.info("Starting. Resumption point: \(resumptionPoint as Optional)")
+
+        switch backupPlan {
+        case .disabling, .disabled:
+            throw OWSAssertionError("Running, but Backups are disabled!", logger: logger)
+        case .free, .paid, .paidExpiringSoon, .paidAsTester:
+            break
+        }
 
         if !shouldAllowBackupUploadsOnCellular {
             // The job requires uploading the backup; if we're not on wifi
