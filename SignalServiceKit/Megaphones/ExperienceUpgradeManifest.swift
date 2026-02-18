@@ -6,7 +6,7 @@
 import Contacts
 import Foundation
 
-public enum ExperienceUpgradeManifest {
+public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
     /// Informs the user that a new device was linked if they have
     /// notifications disabled.
     /// See ``NotificationPresenterImpl/scheduleNotifyForNewLinkedDevice(deviceLinkTimestamp:)``
@@ -63,11 +63,8 @@ public enum ExperienceUpgradeManifest {
     /// This may represent a persisted ``ExperienceUpgrade`` record which refers
     /// to an upgrade that has since been removed.
     case unrecognized(uniqueId: String)
-}
 
-// MARK: - Codable
-
-extension ExperienceUpgradeManifest: Codable {
+    // MARK: - Codable
 
     public enum CodingKeys: String, CodingKey {
         /// Keys to the unique ID identifying a manifest.
@@ -97,11 +94,9 @@ extension ExperienceUpgradeManifest: Codable {
             try container.encode(megaphone, forKey: .remoteMegaphone)
         }
     }
-}
 
-// MARK: - From persisted unique IDs
+    // MARK: - From persisted unique IDs
 
-extension ExperienceUpgradeManifest {
     /// Instantiate an ``ExperienceUpgradeManifest`` from the unique ID of a
     /// persisted ``ExperienceUpgrade`` which does not have a manifest.
     ///
@@ -145,11 +140,9 @@ extension ExperienceUpgradeManifest {
             return .unrecognized(uniqueId: uniqueId)
         }()
     }
-}
 
-// MARK: - Well-known, local manifests
+    // MARK: - Well-known, local manifests
 
-extension ExperienceUpgradeManifest {
     /// Contains upgrade manifests that are well-known to the app.
     ///
     /// Examples of manifests _not_ listed here include upgrades that were once
@@ -167,11 +160,9 @@ extension ExperienceUpgradeManifest {
         .enableBackupsReminder,
         .haveEnabledBackupsNotification,
     ]
-}
 
-// MARK: - Unique IDs
+    // MARK: - Unique IDs
 
-extension ExperienceUpgradeManifest {
     /// The "unique ID" of this upgrade. Stable, and may be used for persistence.
     var uniqueId: String {
         switch self {
@@ -205,23 +196,21 @@ extension ExperienceUpgradeManifest {
             return uniqueId
         }
     }
-}
 
-extension ExperienceUpgradeManifest: Equatable {
+    // MARK: - Equatable
+
     public static func ==(lhs: ExperienceUpgradeManifest, rhs: ExperienceUpgradeManifest) -> Bool {
         lhs.uniqueId == rhs.uniqueId
     }
-}
 
-extension ExperienceUpgradeManifest: Hashable {
+    // MARK: - Hashable
+
     public func hash(into hasher: inout Hasher) {
         uniqueId.hash(into: &hasher)
     }
-}
 
-// MARK: - Importance order
+    // MARK: - Importance order
 
-protocol ExperienceUpgradeSortable {
     /// The relative "importance" of this upgrade - i.e., whether this or
     /// another which of multiple upgrade should be preferred for presentation.
     ///
@@ -230,25 +219,6 @@ protocol ExperienceUpgradeSortable {
     /// secondary indicies indicates equal importance.
     ///
     /// These values are not expected to remain stable.
-    var importanceIndex: (primary: Int, secondary: Int) { get }
-}
-
-extension Sequence where Element: ExperienceUpgradeSortable {
-    /// Returns the elements sorted by importance order - i.e., each
-    /// element in the returned array should be preferred for presention over
-    /// its subsequent elements.
-    func sortedByImportance() -> [Element] {
-        sorted { lhs, rhs in
-            if lhs.importanceIndex.primary == rhs.importanceIndex.primary {
-                return lhs.importanceIndex.secondary < rhs.importanceIndex.secondary
-            }
-
-            return lhs.importanceIndex.primary < rhs.importanceIndex.primary
-        }
-    }
-}
-
-extension ExperienceUpgradeManifest: ExperienceUpgradeSortable {
     var importanceIndex: (primary: Int, secondary: Int) {
         switch self {
         case .newLinkedDeviceNotification:
@@ -281,17 +251,25 @@ extension ExperienceUpgradeManifest: ExperienceUpgradeSortable {
             return (Int.max, Int.max)
         }
     }
-}
 
-extension ExperienceUpgrade: ExperienceUpgradeSortable {
-    var importanceIndex: (primary: Int, secondary: Int) {
-        manifest.importanceIndex
+    /// Returns the elements sorted by importance order - i.e., each
+    /// element in the returned array should be preferred for presention over
+    /// its subsequent elements.
+    static func sortedByImportance(_ upgrades: [ExperienceUpgrade]) -> [ExperienceUpgrade] {
+        return upgrades.sorted { lhs, rhs in
+            let lhs = lhs.manifest
+            let rhs = rhs.manifest
+
+            if lhs.importanceIndex.primary == rhs.importanceIndex.primary {
+                return lhs.importanceIndex.secondary < rhs.importanceIndex.secondary
+            }
+
+            return lhs.importanceIndex.primary < rhs.importanceIndex.primary
+        }
     }
-}
 
-// MARK: - Metadata
+    // MARK: - Metadata
 
-extension ExperienceUpgradeManifest {
     /// Whether this upgrade should not be shown to brand-new users.
     var skipForNewUsers: Bool {
         switch self {
@@ -386,6 +364,7 @@ extension ExperienceUpgradeManifest {
             return 7 * .day
         case
             .newLinkedDeviceNotification,
+            .contactPermissionReminder,
             .haveEnabledBackupsNotification,
             .createUsernameReminder:
             // On snooze, never show again.
@@ -425,8 +404,6 @@ extension ExperienceUpgradeManifest {
             }()
 
             return Double(daysToSnooze) * .day
-        case .contactPermissionReminder:
-            return 30 * .day
         case .enableBackupsReminder:
             return snoozeCount == 1 ? 30 * .day : 90 * .day
         case .unrecognized:
@@ -547,11 +524,9 @@ extension ExperienceUpgradeManifest {
             return true
         }
     }
-}
 
-// MARK: - Should we show this upgrade
+    // MARK: - Preconditions
 
-extension ExperienceUpgradeManifest {
     public func shouldCheckPreconditions(
         timeIntervalSinceRegistration: TimeInterval,
         isRegisteredPrimaryDevice: Bool,
@@ -879,6 +854,8 @@ extension ExperienceUpgradeManifest {
     }
 }
 
+// MARK: -
+
 private extension RemoteMegaphoneModel.Manifest.Action {
     var isRecognized: Bool {
         if case .unrecognized = self {
@@ -888,6 +865,8 @@ private extension RemoteMegaphoneModel.Manifest.Action {
         return true
     }
 }
+
+// MARK: -
 
 private extension DonationReceiptCredentialResultStore {
     /// Do we have any payments that have been initiated, but are still

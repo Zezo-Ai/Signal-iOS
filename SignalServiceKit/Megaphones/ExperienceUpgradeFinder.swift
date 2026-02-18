@@ -78,7 +78,7 @@ public class ExperienceUpgradeFinder {
             experienceUpgrades.append(ExperienceUpgrade.makeNew(withManifest: localManifest))
         }
 
-        return experienceUpgrades.sortedByImportance()
+        return ExperienceUpgradeManifest.sortedByImportance(experienceUpgrades)
     }
 }
 
