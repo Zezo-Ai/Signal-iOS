@@ -345,8 +345,7 @@ public class CVCapsuleLabel: UILabel {
         }
 
         totalHeight += Self.verticalOffset + Self.verticalCapsuleInset * 2
-        let finalWidth = min(maxWidth, maxWidthMinusInsets + Self.horizontalCapsuleInset * 2 + horizontalOffset)
-
+        let finalWidth = layoutManager.usedRect(for: textContainer).size.ceil.width + Self.horizontalCapsuleInset * 2 + horizontalOffset
         return CGSize(width: finalWidth, height: totalHeight)
     }
 
