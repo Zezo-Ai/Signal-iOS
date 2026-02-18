@@ -301,29 +301,6 @@ public class ThreadFinder {
             .hasUserInitiatedInteraction(transaction: tx)
     }
 
-    public func threads(withThreadIds threadIds: Set<String>, transaction: DBReadTransaction) throws -> Set<TSThread> {
-        guard !threadIds.isEmpty else {
-            return []
-        }
-
-        let sql = """
-            SELECT * FROM \(ThreadRecord.databaseTableName)
-            WHERE \(threadColumn: .uniqueId) IN (\(threadIds.map { "\'\($0)'" }.joined(separator: ",")))
-        """
-        let cursor = TSThread.grdbFetchCursor(
-            sql: sql,
-            arguments: [],
-            transaction: transaction,
-        )
-
-        var threads = Set<TSThread>()
-        while let thread = try cursor.next() {
-            threads.insert(thread)
-        }
-
-        return threads
-    }
-
     public func existsGroupThread(transaction: DBReadTransaction) -> Bool {
         let sql = """
             SELECT EXISTS(
