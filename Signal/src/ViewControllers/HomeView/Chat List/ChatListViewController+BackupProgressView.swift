@@ -560,7 +560,6 @@ private class BackupProgressView: UIView {
 
         addSubview(labelStackView)
         labelStackView.translatesAutoresizingMaskIntoConstraints = false
-        labelStackView.setContentHuggingPriority(.defaultLow, for: .horizontal)
         labelStackView.alignment = .fill
         labelStackView.axis = .vertical
         labelStackView.spacing = 4
@@ -580,7 +579,6 @@ private class BackupProgressView: UIView {
 
         trailingAccessoryContainerView.addArrangedSubview(trailingAccessoryPausedWifiResumeButton)
         trailingAccessoryPausedWifiResumeButton.translatesAutoresizingMaskIntoConstraints = false
-        trailingAccessoryPausedWifiResumeButton.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         trailingAccessoryPausedWifiResumeButton.setTitle(
             OWSLocalizedString(
                 "CHAT_LIST_BACKUP_PROGRESS_VIEW_RESUME_WIFI_BUTTON",
@@ -744,6 +742,11 @@ private class BackupProgressView: UIView {
     // MARK: -
 
     private func initializeConstraints() {
+        labelStackView.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        for view in trailingAccessoryContainerView.arrangedSubviews {
+            view.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        }
+
         NSLayoutConstraint.activate([
             leadingAccessoryImageView.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
             leadingAccessoryImageView.centerYAnchor.constraint(equalTo: labelStackView.centerYAnchor),
