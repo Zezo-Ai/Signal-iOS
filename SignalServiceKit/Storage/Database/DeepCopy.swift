@@ -124,16 +124,6 @@ extension Data: DeepCopyable {
 // MARK: -
 
 @objc
-extension StickerInfo: DeepCopyable {
-    public func deepCopy() throws -> AnyObject {
-        // This class can use shallow copies.
-        return try DeepCopies.shallowCopy(self)
-    }
-}
-
-// MARK: -
-
-@objc
 extension OWSGiftBadge: DeepCopyable {
     public func deepCopy() throws -> AnyObject {
         // This class can use shallow copies.

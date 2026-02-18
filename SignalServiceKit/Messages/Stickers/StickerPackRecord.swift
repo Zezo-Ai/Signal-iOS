@@ -146,7 +146,7 @@ public final class StickerPackRecord: SDSCodableModel, Decodable, Equatable, NSC
     public var coverInfo: StickerInfo {
         let packId = self.info.packId
         let packKey = self.info.packKey
-        return StickerInfo(packId: packId, packKey: packKey, stickerId: self.cover.stickerId)
+        return StickerInfo(packId: packId ?? Data(), packKey: packKey ?? Data(), stickerId: self.cover.stickerId)
     }
 
     public func stickerInfos() -> [StickerInfo] {

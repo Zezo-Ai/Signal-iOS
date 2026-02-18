@@ -665,7 +665,7 @@ public class StickerManager: NSObject {
         transaction: DBReadTransaction,
     ) -> InstalledStickerRecord? {
         let installedStickerCache = SSKEnvironment.shared.modelReadCachesRef.installedStickerCache
-        let uniqueId = StickerInfo.key(withPackId: packId, stickerId: stickerId)
+        let uniqueId = StickerInfo.key(packId: packId, stickerId: stickerId)
         return installedStickerCache.getInstalledSticker(uniqueId: uniqueId, transaction: transaction)
     }
 

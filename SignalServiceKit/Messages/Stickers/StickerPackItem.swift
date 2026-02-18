@@ -60,6 +60,6 @@ public final class StickerPackItem: NSObject, NSSecureCoding, NSCopying {
     func stickerInfoWith(stickerPack: StickerPackRecord) -> StickerInfo {
         let packId = stickerPack.info.packId
         let packKey = stickerPack.info.packKey
-        return StickerInfo(packId: packId, packKey: packKey, stickerId: self.stickerId)
+        return StickerInfo(packId: packId ?? Data(), packKey: packKey ?? Data(), stickerId: self.stickerId)
     }
 }
