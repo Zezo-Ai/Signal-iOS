@@ -1656,23 +1656,6 @@ struct BackupSettingsView: View {
 
     var body: some View {
         SignalList {
-            SignalSection {
-                Label {
-                    Text(
-                        OWSLocalizedString(
-                            "BACKUP_SETTINGS_BETA_NOTICE_HEADER",
-                            comment: "Notice that backups is a beta feature",
-                        ),
-                    )
-                    .font(.subheadline)
-                } icon: {
-                    Image(uiImage: Theme.iconImage(.info))
-                        .frame(width: 24, height: 24)
-                }
-                .padding(.vertical, 2)
-                .foregroundColor(Color.Signal.label)
-            }
-
             if viewModel.backupSubscriptionAlreadyRedeemed {
                 SignalSection {
                     HStack(alignment: .center, spacing: 16) {

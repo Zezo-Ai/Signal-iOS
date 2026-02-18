@@ -249,7 +249,7 @@ class AppSettingsViewController: OWSTableViewController2 {
                     "SETTINGS_BACKUPS",
                     comment: "Label for the 'backups' section of app settings.",
                 ),
-                addBetaLabel: true,
+                addBetaLabel: false,
                 actionBlock: { [weak self] in
                     guard
                         let self,
