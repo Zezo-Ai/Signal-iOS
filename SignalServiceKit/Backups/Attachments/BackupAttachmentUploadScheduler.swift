@@ -26,6 +26,7 @@ public class BackupAttachmentUploadScheduler {
     private let dateProvider: DateProvider
     private let interactionStore: InteractionStore
     private let remoteConfigProvider: any RemoteConfigProvider
+    private let tsAccountManager: TSAccountManager
 
     public init(
         attachmentStore: AttachmentStore,
@@ -34,6 +35,7 @@ public class BackupAttachmentUploadScheduler {
         dateProvider: @escaping DateProvider,
         interactionStore: InteractionStore,
         remoteConfigProvider: any RemoteConfigProvider,
+        tsAccountManager: TSAccountManager,
     ) {
         self.attachmentStore = attachmentStore
         self.backupAttachmentUploadStore = backupAttachmentUploadStore
@@ -41,6 +43,7 @@ public class BackupAttachmentUploadScheduler {
         self.dateProvider = dateProvider
         self.interactionStore = interactionStore
         self.remoteConfigProvider = remoteConfigProvider
+        self.tsAccountManager = tsAccountManager
     }
 
     /// Returns true if the provided attachment is eligible to be uploaded
@@ -53,9 +56,13 @@ public class BackupAttachmentUploadScheduler {
         currentUploadEra: String,
         tx: DBReadTransaction,
     ) -> Bool {
-        guard let stream = attachment.asStream() else {
+        guard
+            tsAccountManager.registrationState(tx: tx).isRegisteredPrimaryDevice,
+            let stream = attachment.asStream()
+        else {
             return false
         }
+
         let eligibility = Eligibility.forAttachment(
             stream,
             currentUploadEra: currentUploadEra,
@@ -89,6 +96,10 @@ public class BackupAttachmentUploadScheduler {
         function: StaticString? = #function,
         line: UInt? = #line,
     ) {
+        guard tsAccountManager.registrationState(tx: tx).isRegisteredPrimaryDevice else {
+            return
+        }
+
         // Before we fetch references, check if the attachment is
         // eligible to begin with.
         guard let stream = attachment.asStream() else {
@@ -169,6 +180,10 @@ public class BackupAttachmentUploadScheduler {
         function: StaticString? = #function,
         line: UInt? = #line,
     ) {
+        guard tsAccountManager.registrationState(tx: tx).isRegisteredPrimaryDevice else {
+            return
+        }
+
         guard let stream = attachment.asStream() else {
             if let file, let function, let line {
                 Logger.info("Skipping enqueue of non-stream \(attachment.id) from \(file) \(line): \(function)")
@@ -225,6 +240,8 @@ public class BackupAttachmentUploadScheduler {
             Logger.info("Skipping enqueue of thumbnail \(attachment.id) from \(file) \(line): \(function)")
         }
     }
+
+    // MARK: - Eligibility
 
     private struct Eligibility {
         let needsUploadFullsize: Bool
@@ -363,6 +380,8 @@ public class BackupAttachmentUploadScheduler {
         return uploadOwnerType
     }
 }
+
+// MARK: -
 
 extension Attachment.MediaTierInfo {
 

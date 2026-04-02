@@ -11,62 +11,60 @@ import Testing
 
 public class BackupListMediaManagerTests {
 
-    let accountKeyStore: AccountKeyStore
-    let attachmentStore = AttachmentStore()
-    let backupAttachmentDownloadStore = BackupAttachmentDownloadStore()
-    let backupAttachmentUploadStore = BackupAttachmentUploadStore()
+    private lazy var accountKeyStore = AccountKeyStore(backupSettingsStore: backupSettingsStore)
+    private let attachmentStore = AttachmentStore()
+    private let attachmentUploadStore = AttachmentUploadStore()
+    private let backupAttachmentDownloadProgress = BackupAttachmentDownloadProgressMock()
+    private let backupAttachmentDownloadStore = BackupAttachmentDownloadStore()
+    private let backupAttachmentUploadProgress = BackupAttachmentUploadProgressMock(initialCompleted: 0, total: 100)
+    private let backupAttachmentUploadStore = BackupAttachmentUploadStore()
+    private let backupAttachmentUploadEraStore = BackupAttachmentUploadEraStore()
+    private let backupListMediaStore = BackupListMediaStore()
+    private lazy var backupMediaErrorNotificationPresenter = BackupMediaErrorNotificationPresenter(
+        dateProvider: dateProvider,
+        db: db,
+        notificationPresenter: notificationPresenter,
+    )
     private let backupRequestManager = BackupRequestManagerMock()
-    let backupSettingsStore = BackupSettingsStore()
-    let db = InMemoryDB()
-    let orphanedBackupAttachmentStore = OrphanedBackupAttachmentStore()
-    let remoteConfigManager = StubbableRemoteConfigManager()
-    let tsAccountManager = MockTSAccountManager()
-    let backupAttachmentUploadScheduler: BackupAttachmentUploadScheduler
+    private let backupSettingsStore = BackupSettingsStore()
+    private let dateProvider: DateProvider = { Date() }
+    private let db = InMemoryDB()
+    private let interactionStore = InteractionStoreImpl()
+    private let notificationPresenter = NoopNotificationPresenterImpl()
+    private let orphanedBackupAttachmentStore = OrphanedBackupAttachmentStore()
+    private let remoteConfigManager = StubbableRemoteConfigManager()
+    private let tsAccountManager = MockTSAccountManager()
+    private lazy var backupAttachmentUploadScheduler = BackupAttachmentUploadScheduler(
+        attachmentStore: attachmentStore,
+        backupAttachmentUploadStore: backupAttachmentUploadStore,
+        backupAttachmentUploadEraStore: backupAttachmentUploadEraStore,
+        dateProvider: dateProvider,
+        interactionStore: interactionStore,
+        remoteConfigProvider: remoteConfigManager,
+        tsAccountManager: tsAccountManager,
+    )
 
-    let listMediaManager: BackupListMediaManager
-
-    init() {
-        let dateProvider: DateProvider = {
-            Date()
-        }
-        self.accountKeyStore = AccountKeyStore(
-            backupSettingsStore: backupSettingsStore,
-        )
-        self.backupAttachmentUploadScheduler = BackupAttachmentUploadScheduler(
-            attachmentStore: attachmentStore,
-            backupAttachmentUploadStore: backupAttachmentUploadStore,
-            backupAttachmentUploadEraStore: BackupAttachmentUploadEraStore(),
-            dateProvider: { Date() },
-            interactionStore: InteractionStoreImpl(),
-            remoteConfigProvider: StubbableRemoteConfigManager(),
-        )
-
-        self.listMediaManager = BackupListMediaManagerImpl(
-            accountKeyStore: accountKeyStore,
-            attachmentStore: attachmentStore,
-            attachmentUploadStore: AttachmentUploadStore(),
-            backupAttachmentDownloadProgress: BackupAttachmentDownloadProgressMock(),
-            backupAttachmentDownloadStore: backupAttachmentDownloadStore,
-            backupAttachmentUploadProgress: BackupAttachmentUploadProgressMock(initialCompleted: 0, total: 100),
-            backupAttachmentUploadScheduler: backupAttachmentUploadScheduler,
-            backupAttachmentUploadStore: backupAttachmentUploadStore,
-            backupAttachmentUploadEraStore: BackupAttachmentUploadEraStore(),
-            backupListMediaStore: BackupListMediaStore(),
-            backupMediaErrorNotificationPresenter: BackupMediaErrorNotificationPresenter(
-                dateProvider: { Date() },
-                db: db,
-                notificationPresenter: NoopNotificationPresenterImpl(),
-            ),
-            backupRequestManager: backupRequestManager,
-            backupSettingsStore: backupSettingsStore,
-            dateProvider: dateProvider,
-            db: db,
-            notificationPresenter: NoopNotificationPresenterImpl(),
-            orphanedBackupAttachmentStore: orphanedBackupAttachmentStore,
-            remoteConfigManager: remoteConfigManager,
-            tsAccountManager: tsAccountManager,
-        )
-    }
+    private lazy var listMediaManager = BackupListMediaManagerImpl(
+        accountKeyStore: accountKeyStore,
+        attachmentStore: attachmentStore,
+        attachmentUploadStore: attachmentUploadStore,
+        backupAttachmentDownloadProgress: backupAttachmentDownloadProgress,
+        backupAttachmentDownloadStore: backupAttachmentDownloadStore,
+        backupAttachmentUploadProgress: backupAttachmentUploadProgress,
+        backupAttachmentUploadScheduler: backupAttachmentUploadScheduler,
+        backupAttachmentUploadStore: backupAttachmentUploadStore,
+        backupAttachmentUploadEraStore: backupAttachmentUploadEraStore,
+        backupListMediaStore: backupListMediaStore,
+        backupMediaErrorNotificationPresenter: backupMediaErrorNotificationPresenter,
+        backupRequestManager: backupRequestManager,
+        backupSettingsStore: backupSettingsStore,
+        dateProvider: dateProvider,
+        db: db,
+        notificationPresenter: notificationPresenter,
+        orphanedBackupAttachmentStore: orphanedBackupAttachmentStore,
+        remoteConfigManager: remoteConfigManager,
+        tsAccountManager: tsAccountManager,
+    )
 
     @Test
     func testListMedia() async throws {

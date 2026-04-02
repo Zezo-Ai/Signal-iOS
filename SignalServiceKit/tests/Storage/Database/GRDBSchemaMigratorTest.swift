@@ -1502,4 +1502,83 @@ struct GRDBSchemaMigratorTest2 {
             #expect(devices[3]["lastSeenAt"] as Double == 1772794800.5)
         }
     }
+
+    @Test
+    func testWipeBackupAttachmentUploadQueueForLinkedDevices() throws {
+        func setupDatabase(
+            primary: Bool,
+            db: Database,
+        ) throws {
+            try db.execute(sql: """
+            CREATE TABLE keyvalue ( 
+              KEY TEXT NOT NULL, 
+              collection TEXT NOT NULL, 
+              VALUE BLOB NOT NULL, 
+              PRIMARY KEY ( 
+                KEY, 
+                collection
+              )
+            );
+
+            INSERT INTO keyvalue VALUES ('TSAccountManager_DeviceId', 'TSStorageUserAccountCollection', \(primary ? 1 : 2));
+
+            CREATE TABLE Attachment (
+              id INTEGER PRIMARY KEY AUTOINCREMENT
+            );
+
+            CREATE TABLE BackupAttachmentUploadQueue ( 
+              id INTEGER PRIMARY KEY AUTOINCREMENT, 
+              attachmentRowId INTEGER NOT NULL REFERENCES Attachment ( 
+                id
+              ) ON DELETE CASCADE, 
+              maxOwnerTimestamp INTEGER, 
+              estimatedByteCount INTEGER NOT NULL, 
+              isFullsize BOOLEAN NOT NULL, 
+              numRetries INTEGER NOT NULL DEFAULT 0, 
+              minRetryTimestamp INTEGER NOT NULL DEFAULT 0, 
+              state INTEGER DEFAULT 0
+            );
+
+            CREATE TRIGGER __BackupAttachmentUploadQueue_au AFTER UPDATE OF state ON BackupAttachmentUploadQueue BEGIN 
+              DELETE FROM BackupAttachmentUploadQueue WHERE state = 1 AND NOT EXISTS ( 
+                SELECT id FROM BackupAttachmentUploadQueue WHERE state = 0
+              );
+            END;
+
+            INSERT INTO Attachment VALUES (1), (2);
+            INSERT INTO BackupAttachmentUploadQueue VALUES (1, 1, null, 1337, true, 0, 0, 0);
+            INSERT INTO BackupAttachmentUploadQueue VALUES (2, 2, null, 1337, true, 0, 0, 1);
+            """)
+        }
+
+        try DatabaseQueue().write { db in
+            let tx = DBWriteTransaction(database: db)
+            defer { tx.finalizeTransaction() }
+
+            try setupDatabase(primary: true, db: db)
+            try GRDBSchemaMigrator.wipeBackupAttachmentUploadQueueForLinkedDevices(tx: tx)
+
+            try #require(
+                try Int64.fetchOne(
+                    db,
+                    sql: "SELECT COUNT(*) FROM BackupAttachmentUploadQueue",
+                ) == 2,
+            )
+        }
+
+        try DatabaseQueue().write { db in
+            let tx = DBWriteTransaction(database: db)
+            defer { tx.finalizeTransaction() }
+
+            try setupDatabase(primary: false, db: db)
+            try GRDBSchemaMigrator.wipeBackupAttachmentUploadQueueForLinkedDevices(tx: tx)
+
+            try #require(
+                try Int64.fetchOne(
+                    db,
+                    sql: "SELECT COUNT(*) FROM BackupAttachmentUploadQueue",
+                ) == 0,
+            )
+        }
+    }
 }

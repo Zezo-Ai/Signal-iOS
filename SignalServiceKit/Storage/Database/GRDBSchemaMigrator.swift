@@ -323,6 +323,7 @@ public class GRDBSchemaMigrator {
         case modifyCallLinkRootKeyConstraint
         case addDevice
         case addAttachmentBackfillRequestTable
+        case wipeBackupAttachmentUploadQueueForLinkedDevices
 
         // NOTE: Every time we add a migration id, consider
         // incrementing grdbSchemaVersionLatest.
@@ -5066,6 +5067,14 @@ public class GRDBSchemaMigrator {
             return .success(())
         }
 
+        migrator.registerMigration(.wipeBackupAttachmentUploadQueueForLinkedDevices) { tx in
+            // We used to save Backup attachment upload records on iPads, but
+            // iPads won't ever do uploads. We no longer save those records, so
+            // we can wipe out any existing records.
+            try wipeBackupAttachmentUploadQueueForLinkedDevices(tx: tx)
+            return .success(())
+        }
+
         // MARK: - Schema Migration Insertion Point
     }
 
@@ -7641,11 +7650,27 @@ public class GRDBSchemaMigrator {
         """)
         try tx.database.drop(table: "OWSDevice")
     }
-}
 
-// MARK: -
+    static func wipeBackupAttachmentUploadQueueForLinkedDevices(tx: DBWriteTransaction) throws {
+        let localDeviceId = try Int64.fetchOne(
+            tx.database,
+            sql: """
+            SELECT value FROM keyvalue WHERE
+            collection = 'TSStorageUserAccountCollection' AND key = 'TSAccountManager_DeviceId'
+            """,
+        )
 
-extension GRDBSchemaMigrator {
+        guard let localDeviceId, localDeviceId != DeviceId.primary.rawValue else {
+            return
+        }
+
+        try tx.database.execute(
+            sql: """
+            DELETE FROM BackupAttachmentUploadQueue
+            """,
+        )
+    }
+
     static func dedupeSignalRecipients(tx: DBWriteTransaction) throws {
         struct Recipient: FetchableRecord, Decodable {
             var id: Int64
@@ -7691,6 +7716,8 @@ extension GRDBSchemaMigrator {
         }
     }
 }
+
+// MARK: -
 
 private func hasRunMigration(_ identifier: String, transaction: DBReadTransaction) -> Bool {
     do {

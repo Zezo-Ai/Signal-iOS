@@ -622,6 +622,7 @@ extension AppSetup.GlobalsContinuation {
             dateProvider: dateProvider,
             interactionStore: interactionStore,
             remoteConfigProvider: remoteConfigProvider,
+            tsAccountManager: tsAccountManager,
         )
 
         let backupListMediaStore = BackupListMediaStore()
