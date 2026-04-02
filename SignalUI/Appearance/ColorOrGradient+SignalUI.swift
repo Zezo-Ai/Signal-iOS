@@ -99,13 +99,7 @@ public extension ColorOrGradientSetting {
 
 public extension UIColor {
     var asOWSColor: OWSColor {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-
-        self.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-
+        let (red, green, blue, _) = self.components() ?? (0, 0, 0, 0)
         return OWSColor(red: red.clamp01(), green: green.clamp01(), blue: blue.clamp01())
     }
 }

@@ -14,10 +14,7 @@ extension UIColor {
     }
 
     public var rgbHex: UInt32 {
-        var red = CGFloat.zero
-        var green = CGFloat.zero
-        var blue = CGFloat.zero
-        getRed(&red, green: &green, blue: &blue, alpha: nil)
+        let (red, green, blue, _) = components() ?? (0, 0, 0, 0)
         return UInt32(red * 255) << 16 | UInt32(green * 255) << 8 | UInt32(blue * 255) << 0
     }
 
@@ -30,30 +27,26 @@ extension UIColor {
     }
 
     public var argbHex: UInt32 {
-        var alpha = CGFloat.zero
-        var red = CGFloat.zero
-        var green = CGFloat.zero
-        var blue = CGFloat.zero
-        getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        let (red, green, blue, alpha) = components() ?? (0, 0, 0, 0)
         return UInt32(alpha * 255) << 24 | UInt32(red * 255) << 16 | UInt32(green * 255) << 8 | UInt32(blue * 255) << 0
     }
 
     public func isEqualToColor(_ color: UIColor, tolerance: CGFloat = 0) -> Bool {
-        var r1: CGFloat = 0
-        var g1: CGFloat = 0
-        var b1: CGFloat = 0
-        var a1: CGFloat = 0
-        self.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
-
-        var r2: CGFloat = 0
-        var g2: CGFloat = 0
-        var b2: CGFloat = 0
-        var a2: CGFloat = 0
-        color.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
+        let (r1, g1, b1, a1) = self.components() ?? (0, 0, 0, 0)
+        let (r2, g2, b2, a2) = color.components() ?? (0, 0, 0, 0)
 
         return abs(r1 - r2) <= tolerance &&
             abs(g1 - g2) <= tolerance &&
             abs(b1 - b2) <= tolerance &&
             abs(a1 - a2) <= tolerance
+    }
+
+    public func components() -> (red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat)? {
+        var red = CGFloat.zero
+        var green = CGFloat.zero
+        var blue = CGFloat.zero
+        var alpha = CGFloat.zero
+        let result = unsafe getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        return result ? (red, green, blue, alpha) : nil
     }
 }

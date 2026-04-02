@@ -39,10 +39,7 @@ public class SpoilerRenderer {
 
         // Values from 0 to 255.
         var colorRGB: SIMD3<UInt8> {
-            var r: CGFloat = 0
-            var g: CGFloat = 0
-            var b: CGFloat = 0
-            color.forCurrentTheme.getRed(&r, green: &g, blue: &b, alpha: nil)
+            let (r, g, b, _) = color.forCurrentTheme.components() ?? (0, 0, 0, 0)
             return .init(
                 UInt8(clamping: Int(r * 255)),
                 UInt8(clamping: Int(g * 255)),

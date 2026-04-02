@@ -11,19 +11,8 @@ public import UIKit
 public extension UIColor {
 
     func blended(with otherColor: UIColor, alpha alphaParam: CGFloat) -> UIColor {
-        var r0: CGFloat = 0
-        var g0: CGFloat = 0
-        var b0: CGFloat = 0
-        var a0: CGFloat = 0
-        let result0 = self.getRed(&r0, green: &g0, blue: &b0, alpha: &a0)
-        assert(result0)
-
-        var r1: CGFloat = 0
-        var g1: CGFloat = 0
-        var b1: CGFloat = 0
-        var a1: CGFloat = 0
-        let result1 = otherColor.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
-        assert(result1)
+        let (r0, g0, b0, a0) = self.components() ?? (0, 0, 0, 0)
+        let (r1, g1, b1, a1) = otherColor.components() ?? (0, 0, 0, 0)
 
         let alpha = CGFloat.clamp01(alphaParam)
         return UIColor(
@@ -43,19 +32,8 @@ public extension UIColor {
     func blendedWithOverlay(_ overlayColor: UIColor, opacity: CGFloat = 1.0) -> UIColor {
         let alpha = opacity.clamp01()
 
-        // Base
-        var baseR: CGFloat = 0
-        var baseG: CGFloat = 0
-        var baseB: CGFloat = 0
-        var baseA: CGFloat = 0
-        self.getRed(&baseR, green: &baseG, blue: &baseB, alpha: &baseA)
-
-        // Overlay
-        var overlayR: CGFloat = 0
-        var overlayG: CGFloat = 0
-        var overlayB: CGFloat = 0
-        var overlayA: CGFloat = 0
-        overlayColor.getRed(&overlayR, green: &overlayG, blue: &overlayB, alpha: &overlayA)
+        let (baseR, baseG, baseB, baseA) = self.components() ?? (0, 0, 0, 0)
+        let (overlayR, overlayG, overlayB, _) = overlayColor.components() ?? (0, 0, 0, 0)
 
         // Apply overlay blend mode formula for each channel
         func overlayBlend(_ base: CGFloat, _ overlay: CGFloat) -> CGFloat {
@@ -121,17 +99,9 @@ public extension UIColor {
     }
 
     func overlaidOpaque(on backgroundColor: UIColor) -> UIColor {
-        var fgRed: CGFloat = 0
-        var fgGreen: CGFloat = 0
-        var fgBlue: CGFloat = 0
-        var fgAlpha: CGFloat = 0
-        var bgRed: CGFloat = 0
-        var bgGreen: CGFloat = 0
-        var bgBlue: CGFloat = 0
-
         guard
-            self.getRed(&fgRed, green: &fgGreen, blue: &fgBlue, alpha: &fgAlpha),
-            backgroundColor.getRed(&bgRed, green: &bgGreen, blue: &bgBlue, alpha: nil)
+            let (fgRed, fgGreen, fgBlue, fgAlpha) = self.components(),
+            let (bgRed, bgGreen, bgBlue, _) = backgroundColor.components()
         else {
             return self
         }
@@ -144,17 +114,8 @@ public extension UIColor {
     }
 
     private func midPointRGB(with otherColor: UIColor) -> UIColor {
-        var r1: CGFloat = 0
-        var g1: CGFloat = 0
-        var b1: CGFloat = 0
-        var a1: CGFloat = 0
-        var r2: CGFloat = 0
-        var g2: CGFloat = 0
-        var b2: CGFloat = 0
-        var a2: CGFloat = 0
-
-        self.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
-        otherColor.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
+        let (r1, g1, b1, a1) = self.components() ?? (0, 0, 0, 0)
+        let (r2, g2, b2, a2) = otherColor.components() ?? (0, 0, 0, 0)
 
         return UIColor(
             red: (r1 + r2) / 2.0,
