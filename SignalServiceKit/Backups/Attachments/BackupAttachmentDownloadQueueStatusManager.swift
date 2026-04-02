@@ -491,7 +491,7 @@ class BackupAttachmentDownloadQueueStatusManagerImpl: BackupAttachmentDownloadQu
 
         let notificationsToObserve: [(Notification.Name, Selector)] = [
             (.registrationStateDidChange, #selector(registrationStateDidChange)),
-            (.reachabilityChanged, #selector(reachabilityDidChange)),
+            (SSKReachability.owsReachabilityDidChange, #selector(reachabilityDidChange)),
             (.batteryLevelChanged, #selector(batteryLevelDidChange)),
             (.batteryLowPowerModeChanged, #selector(lowPowerModeDidChange)),
             (.OWSApplicationWillEnterForeground, #selector(willEnterForeground)),

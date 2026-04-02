@@ -3209,6 +3209,7 @@
 		D9CAFAE42A538BDF00B32BDE /* UsernameLinkScanQRCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CAFAE32A538BDF00B32BDE /* UsernameLinkScanQRCodeViewController.swift */; };
 		D9CAFAE62A538CA200B32BDE /* UsernameLinkQRCodeContentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CAFAE52A538CA200B32BDE /* UsernameLinkQRCodeContentController.swift */; };
 		D9CAFAEA2A53CB1F00B32BDE /* UsernameLinkTooltipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CAFAE92A53CB1F00B32BDE /* UsernameLinkTooltipView.swift */; };
+		D9CB73C02F7F181500F7FD83 /* DebugUIReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CB73BF2F7F181500F7FD83 /* DebugUIReachability.swift */; };
 		D9CD40622A155C4800545803 /* TSInfoMessage+PersistableGroupUpdateItemTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CD40612A155C4800545803 /* TSInfoMessage+PersistableGroupUpdateItemTest.swift */; };
 		D9CFB0102F1FF87F00DFB14A /* ChatListViewController+BackupExportProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CFB00F2F1FF87800DFB14A /* ChatListViewController+BackupExportProgressView.swift */; };
 		D9CFB0142F20466300DFB14A /* ArcView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CFB0132F20466100DFB14A /* ArcView.swift */; };
@@ -7495,6 +7496,7 @@
 		D9CAFAE32A538BDF00B32BDE /* UsernameLinkScanQRCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameLinkScanQRCodeViewController.swift; sourceTree = "<group>"; };
 		D9CAFAE52A538CA200B32BDE /* UsernameLinkQRCodeContentController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameLinkQRCodeContentController.swift; sourceTree = "<group>"; };
 		D9CAFAE92A53CB1F00B32BDE /* UsernameLinkTooltipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameLinkTooltipView.swift; sourceTree = "<group>"; };
+		D9CB73BF2F7F181500F7FD83 /* DebugUIReachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugUIReachability.swift; sourceTree = "<group>"; };
 		D9CD40612A155C4800545803 /* TSInfoMessage+PersistableGroupUpdateItemTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TSInfoMessage+PersistableGroupUpdateItemTest.swift"; sourceTree = "<group>"; };
 		D9CFB00F2F1FF87800DFB14A /* ChatListViewController+BackupExportProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatListViewController+BackupExportProgressView.swift"; sourceTree = "<group>"; };
 		D9CFB0132F20466100DFB14A /* ArcView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcView.swift; sourceTree = "<group>"; };
@@ -9499,6 +9501,7 @@
 				34429B3C273440420050D3EA /* DebugUIMisc.swift */,
 				76E02C1D2A0A1ADD008BC372 /* DebugUIPage.swift */,
 				D92A1CD92E314BD000C91E21 /* DebugUIPrompts.swift */,
+				D9CB73BF2F7F181500F7FD83 /* DebugUIReachability.swift */,
 				76E02C192A0A1931008BC372 /* DebugUISessionState.swift */,
 				76E7A2102A01B6A500A8F538 /* DebugUITableViewController.swift */,
 				66F98DE72DBBF24F009F1A86 /* LineWrappingStackViewTestController.swift */,
@@ -18366,6 +18369,7 @@
 				34429B3D273440420050D3EA /* DebugUIMisc.swift in Sources */,
 				76E02C1E2A0A1ADD008BC372 /* DebugUIPage.swift in Sources */,
 				D92A1CDA2E314BD400C91E21 /* DebugUIPrompts.swift in Sources */,
+				D9CB73C02F7F181500F7FD83 /* DebugUIReachability.swift in Sources */,
 				76E02C1A2A0A1931008BC372 /* DebugUISessionState.swift in Sources */,
 				76E7A2112A01B6A500A8F538 /* DebugUITableViewController.swift in Sources */,
 				88DBDFB9263731C800C2101C /* DefaultDisappearingMessageTimerInteraction.swift in Sources */,

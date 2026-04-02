@@ -349,7 +349,7 @@ class BackupAttachmentUploadQueueStatusManagerImpl: BackupAttachmentUploadQueueS
             (.backupPlanChanged, #selector(backupPlanDidChange)),
             (.hasConsumedMediaTierCapacityStatusDidChange, #selector(hasConsumedMediaTierCapacityDidChange)),
             (.shouldAllowBackupUploadsOnCellularChanged, #selector(shouldAllowBackupUploadsOnCellularDidChange)),
-            (.reachabilityChanged, #selector(reachabilityDidChange)),
+            (SSKReachability.owsReachabilityDidChange, #selector(reachabilityDidChange)),
             (.backupAttachmentUploadQueueSuspensionStatusDidChange, #selector(suspensionStatusDidChange)),
             (.batteryLevelChanged, #selector(batteryLevelDidChange)),
             (.batteryLowPowerModeChanged, #selector(lowPowerModeDidChange)),

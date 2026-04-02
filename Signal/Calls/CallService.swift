@@ -151,9 +151,7 @@ final class CallService: CallServiceStateObserver, CallServiceStateDelegate {
             MainActor.assumeIsolated { self?.configureDataMode() }
         })
 
-        // Note that we're not using the usual .owsReachabilityChanged
-        // We want to update our data mode if the app has been backgrounded
-        notificationObservers.append(NotificationCenter.default.addObserver(forName: .reachabilityChanged, object: nil, queue: .main) { [weak self] _ in
+        notificationObservers.append(NotificationCenter.default.addObserver(forName: SSKReachability.owsReachabilityDidChange, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.configureDataMode() }
         })
 
