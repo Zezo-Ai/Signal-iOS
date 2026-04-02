@@ -16,6 +16,7 @@ class AttachmentBackfillManagerTest: SSKBaseTest {
     private var interactionStore: InteractionStoreImpl!
     private var mockSyncMessageSender: MockSyncMessageSender!
     private var mockUploadManager: MockAttachmentUploadManager!
+    private var mockNotificationPresenter: NoopNotificationPresenterImpl!
     private var recipientDatabaseTable: RecipientDatabaseTable!
     private var threadStore: ThreadStoreImpl!
 
@@ -34,6 +35,7 @@ class AttachmentBackfillManagerTest: SSKBaseTest {
         interactionStore = InteractionStoreImpl()
         mockSyncMessageSender = MockSyncMessageSender()
         mockUploadManager = MockAttachmentUploadManager()
+        mockNotificationPresenter = NoopNotificationPresenterImpl()
         recipientDatabaseTable = RecipientDatabaseTable()
         threadStore = ThreadStoreImpl()
 
@@ -42,6 +44,7 @@ class AttachmentBackfillManagerTest: SSKBaseTest {
             attachmentUploadManager: mockUploadManager,
             db: db,
             interactionStore: interactionStore,
+            notificationPresenter: mockNotificationPresenter,
             recipientDatabaseTable: recipientDatabaseTable,
             syncMessageSender: mockSyncMessageSender,
             threadStore: threadStore,
@@ -231,6 +234,56 @@ class AttachmentBackfillManagerTest: SSKBaseTest {
         db.read { tx in
             XCTAssertEqual(try! AttachmentBackfillInboundRequestRecord.fetchCount(tx.database), 0)
         }
+    }
+
+    // MARK: - awaitProcessingEnqueuedInboundRequests
+
+    func testAwaitEnqueued_cooperativelyCancels() async throws {
+        let (requestRecord, message) = insertMessageAndRequestRecord(thread: otherAciThread)
+        let messageRowId = message.sqliteRowId!
+        let threadRowId = otherAciThread.sqliteRowId!
+
+        _ = insertAttachmentWithReference(messageRowId: messageRowId, threadRowId: threadRowId, orderInMessage: 0)
+
+        // Use a continuation to keep track, in the test, of when the upload
+        // attempt starts.
+        let (uploadStream, uploadContinuation) = AsyncStream.makeStream(of: Void.self)
+
+        mockUploadManager.uploadBlock = { _ in
+            // Signal that the upload has started, then suspend indefinitely.
+            // The suspension will be interrupted when the upload is cancelled.
+            uploadContinuation.yield()
+            try await Task.sleep(nanoseconds: .max)
+        }
+
+        // Kick off processing.
+        let processingTask = manager.processInboundRequest(
+            requestRecordId: requestRecord.id,
+            localIdentifiers: localIdentifiers,
+        )
+
+        // Wait for the upload to start.
+        var uploadStreamIterator = uploadStream.makeAsyncIterator()
+        await uploadStreamIterator.next()
+
+        // Now, await and immediately cancel processing. This should cause us to
+        // cancel all in-flight processing.
+        let awaitTask = Task {
+            try await manager.awaitProcessingEnqueuedInboundRequests()
+        }
+        awaitTask.cancel()
+
+        for task in [processingTask, awaitTask] {
+            do {
+                try await task.value
+                XCTFail("Should have thrown!")
+            } catch is CancellationError {
+                // Excellent.
+            }
+        }
+
+        // The processing was cancelled, so no response should have been sent.
+        XCTAssertTrue(mockSyncMessageSender.sentResponses.isEmpty)
     }
 
     // MARK: -

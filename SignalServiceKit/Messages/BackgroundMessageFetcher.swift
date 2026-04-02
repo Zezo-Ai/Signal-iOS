@@ -6,6 +6,7 @@
 import Foundation
 
 public struct BackgroundMessageFetcherFactory {
+    private let attachmentBackfillManager: AttachmentBackfillManager
     private let chatConnectionManager: any ChatConnectionManager
     private let groupMessageProcessorManager: GroupMessageProcessorManager
     private let messageProcessor: MessageProcessor
@@ -14,6 +15,7 @@ public struct BackgroundMessageFetcherFactory {
     private let storageServiceManager: any StorageServiceManager
 
     public init(
+        attachmentBackfillManager: AttachmentBackfillManager,
         chatConnectionManager: any ChatConnectionManager,
         groupMessageProcessorManager: GroupMessageProcessorManager,
         messageProcessor: MessageProcessor,
@@ -21,6 +23,7 @@ public struct BackgroundMessageFetcherFactory {
         receiptSender: ReceiptSender,
         storageServiceManager: any StorageServiceManager,
     ) {
+        self.attachmentBackfillManager = attachmentBackfillManager
         self.chatConnectionManager = chatConnectionManager
         self.groupMessageProcessorManager = groupMessageProcessorManager
         self.messageProcessor = messageProcessor
@@ -31,6 +34,7 @@ public struct BackgroundMessageFetcherFactory {
 
     public func buildFetcher() -> BackgroundMessageFetcher {
         return BackgroundMessageFetcher(
+            attachmentBackfillManager: self.attachmentBackfillManager,
             chatConnectionManager: self.chatConnectionManager,
             groupMessageProcessorManager: self.groupMessageProcessorManager,
             messageProcessor: self.messageProcessor,
@@ -42,6 +46,7 @@ public struct BackgroundMessageFetcherFactory {
 }
 
 public actor BackgroundMessageFetcher {
+    private let attachmentBackfillManager: AttachmentBackfillManager
     private let chatConnectionManager: any ChatConnectionManager
     private let groupMessageProcessorManager: GroupMessageProcessorManager
     private let messageProcessor: MessageProcessor
@@ -50,6 +55,7 @@ public actor BackgroundMessageFetcher {
     private let storageServiceManager: any StorageServiceManager
 
     fileprivate init(
+        attachmentBackfillManager: AttachmentBackfillManager,
         chatConnectionManager: any ChatConnectionManager,
         groupMessageProcessorManager: GroupMessageProcessorManager,
         messageProcessor: MessageProcessor,
@@ -57,6 +63,7 @@ public actor BackgroundMessageFetcher {
         receiptSender: ReceiptSender,
         storageServiceManager: any StorageServiceManager,
     ) {
+        self.attachmentBackfillManager = attachmentBackfillManager
         self.chatConnectionManager = chatConnectionManager
         self.groupMessageProcessorManager = groupMessageProcessorManager
         self.messageProcessor = messageProcessor
@@ -121,11 +128,14 @@ public actor BackgroundMessageFetcher {
             async let pendingOps: Void = MessageReceiver.waitForPendingTasks()
             // Wait until Storage Service has settled.
             async let pendingStorageService: Void = self.storageServiceManager.waitForSteadyState()
+            // Wait until attachment backfills are done.
+            async let pendingAttachmentBackfills: Void = self.attachmentBackfillManager.awaitProcessingEnqueuedInboundRequests()
 
             try await pendingReceipts
             try await pendingMessages
             try await pendingOps
             try await pendingStorageService
+            try await pendingAttachmentBackfills
         }
 
         // Finally, wait for any notifications to finish posting

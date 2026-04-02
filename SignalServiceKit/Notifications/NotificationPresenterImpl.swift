@@ -46,6 +46,7 @@ public enum AppNotificationDefaultAction: String {
     case showChatList
     case showLinkedDevices
     case showBackupsSettings
+    case showMessage
 }
 
 public struct AppNotificationUserInfo {
@@ -167,6 +168,7 @@ public enum AppNotificationCategory: String, CaseIterable {
     case listMediaIntegrityCheckFailure = "Signal.AppNotificationCategory.listMediaIntegrityCheckFailure"
     case pollEndNotification = "Signal.AppNotificationCategory.pollEndNotification"
     case pollVoteNotification = "Signal.AppNotificationCategory.pollVoteNotification"
+    case attachmentBackfill = "Signal.AppNotificationCategory.attachmentBackfill"
 
     var shouldClearOnAppActivate: Bool {
         switch self {
@@ -186,7 +188,8 @@ public enum AppNotificationCategory: String, CaseIterable {
             .transferRelaunch,
             .deregistration,
             .pollEndNotification,
-            .pollVoteNotification:
+            .pollVoteNotification,
+            .attachmentBackfill:
             return true
         case
             .newDeviceLinked,
@@ -240,6 +243,8 @@ public enum AppNotificationCategory: String, CaseIterable {
         case .pollEndNotification:
             return []
         case .pollVoteNotification:
+            return []
+        case .attachmentBackfill:
             return []
         }
     }
@@ -1206,6 +1211,28 @@ public class NotificationPresenterImpl: NotificationPresenter {
                 threadIdentifier: nil,
                 userInfo: userInfo,
                 soundQuery: .global,
+            )
+        }
+    }
+
+    public func notifyUserOfAttachmentBackfill(
+        threadUniqueId: String,
+        messageUniqueId: String,
+        body: String,
+    ) {
+        var userInfo = AppNotificationUserInfo()
+        userInfo.threadId = threadUniqueId
+        userInfo.messageId = messageUniqueId
+        userInfo.defaultAction = .showMessage
+        enqueueNotificationAction {
+            await self.notifyViaPresenter(
+                category: .attachmentBackfill,
+                title: nil,
+                body: body,
+                threadIdentifier: nil,
+                userInfo: userInfo,
+                soundQuery: .none,
+                replacingIdentifier: "attachmentBackfill-\(messageUniqueId)",
             )
         }
     }

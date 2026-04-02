@@ -225,7 +225,8 @@ public class UserNotificationPresenter {
              .deregistration,
              .newDeviceLinked,
              .backupsEnabled,
-             .backupsMediaTierQuotaConsumed:
+             .backupsMediaTierQuotaConsumed,
+             .attachmentBackfill:
             // Always show these notifications
             return true
 

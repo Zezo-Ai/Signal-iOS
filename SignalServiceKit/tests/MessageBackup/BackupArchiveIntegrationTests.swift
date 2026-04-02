@@ -474,6 +474,7 @@ private enum CrashyMocks {
         func cancelNotifications(reactionId: String) { failTest(Self.self) }
         func cancelNotificationsForMissedCalls(threadUniqueId: String) { failTest(Self.self) }
         func cancelNotifications(for storyMessage: StoryMessage) { failTest(Self.self) }
+        func notifyUserOfAttachmentBackfill(threadUniqueId: String, messageUniqueId: String, body: String) { failTest(Self.self) }
         func notifyUserOfMediaTierQuotaConsumed() { failTest(Self.self) }
     }
 }

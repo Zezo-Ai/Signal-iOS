@@ -27,6 +27,7 @@ public class AttachmentBackfillManager {
     private let db: DB
     private let interactionStore: InteractionStore
     private let logger: PrefixedLogger
+    private let notificationPresenter: NotificationPresenter
     private let recipientDatabaseTable: RecipientDatabaseTable
     private let syncMessageSender: AttachmentBackfillSyncMessageSender
     private let taskQueue: SerialTaskQueue
@@ -37,6 +38,7 @@ public class AttachmentBackfillManager {
         attachmentUploadManager: AttachmentUploadManager,
         db: DB,
         interactionStore: InteractionStore,
+        notificationPresenter: NotificationPresenter,
         recipientDatabaseTable: RecipientDatabaseTable,
         syncMessageSender: AttachmentBackfillSyncMessageSender,
         threadStore: ThreadStore,
@@ -46,6 +48,7 @@ public class AttachmentBackfillManager {
         self.db = db
         self.interactionStore = interactionStore
         self.logger = PrefixedLogger(prefix: "[Backfill]")
+        self.notificationPresenter = notificationPresenter
         self.recipientDatabaseTable = recipientDatabaseTable
         self.syncMessageSender = syncMessageSender
         self.taskQueue = SerialTaskQueue()
@@ -127,6 +130,34 @@ public class AttachmentBackfillManager {
         }
     }
 
+    /// Await the processing of any currently-enqueued inbound requests,
+    /// cooperatively cancelling and waiting for teardown of said processing if
+    /// cancelled.
+    func awaitProcessingEnqueuedInboundRequests() async throws(CancellationError) {
+        let flushTask = taskQueue.enqueue {
+            // No-op: wait for the queue to flush.
+        }
+        let cancelledQueueFlushTask = AtomicValue<Task<Void, Error>?>(nil, lock: .init())
+
+        await withTaskCancellationHandler(
+            operation: {
+                try? await flushTask.value
+            },
+            onCancel: {
+                cancelledQueueFlushTask.set(taskQueue.enqueueCancellingPrevious {
+                    // No-op: wait for the queue to flush.
+                })
+            },
+        )
+
+        // If we were cancelled while waiting, as a best effort wait for the
+        // cancelled tasks in the queue to complete.
+        if let task = cancelledQueueFlushTask.get() {
+            try? await task.value
+            throw CancellationError()
+        }
+    }
+
     /// Enqueues and kicks off an `AttachmentBackfillInboundRequestRecord` for
     /// the given inbound backfill request sync message.
     func enqueueInboundRequest(
@@ -192,12 +223,16 @@ public class AttachmentBackfillManager {
         requestRecordId: AttachmentBackfillInboundRequestRecord.IDType,
         localIdentifiers: LocalIdentifiers,
     ) -> Task<Void, Error> {
-        return taskQueue.enqueue { [self] () async -> Void in
+        return taskQueue.enqueue { [self] in
             let requestRecord: AttachmentBackfillInboundRequestRecord?
             let backfillTarget: AttachmentBackfillTarget?
+            let threadUniqueId: String?
+            let messageUniqueId: String?
             (
                 requestRecord,
                 backfillTarget,
+                threadUniqueId,
+                messageUniqueId,
             ) = db.read { tx in
                 guard
                     let record = failIfThrows(block: {
@@ -216,20 +251,46 @@ public class AttachmentBackfillManager {
                         tx: tx,
                     )
                 else {
-                    return (nil, nil)
+                    return (nil, nil, nil, nil)
                 }
 
-                return (record, backfillTarget)
+                return (record, backfillTarget, message.uniqueThreadId, message.uniqueId)
             }
 
-            guard let requestRecord, let backfillTarget else {
+            guard
+                let requestRecord,
+                let backfillTarget,
+                let threadUniqueId,
+                let messageUniqueId
+            else {
                 logger.warn("Missing request record or backfill target: no response will be sent.")
                 return
             }
 
+            notificationPresenter.notifyUserOfAttachmentBackfill(
+                threadUniqueId: threadUniqueId,
+                messageUniqueId: messageUniqueId,
+                body: OWSLocalizedString(
+                    "ATTACHMENT_BACKFILL_SYNCING_NOTIFICATION",
+                    comment: "Notification body shown while syncing media to a linked device.",
+                ),
+            )
+
             let backfillAttemptResults = await attemptBackfill(
                 interactionId: requestRecord.interactionId,
             )
+
+            if Task.isCancelled {
+                notificationPresenter.notifyUserOfAttachmentBackfill(
+                    threadUniqueId: threadUniqueId,
+                    messageUniqueId: messageUniqueId,
+                    body: OWSLocalizedString(
+                        "ATTACHMENT_BACKFILL_INTERRUPTED_NOTIFICATION",
+                        comment: "Notification body shown when media sync to a linked device was interrupted.",
+                    ),
+                )
+                throw CancellationError()
+            }
 
             await db.awaitableWrite { tx in
                 self.sendBackfillAttemptResponse(
@@ -249,6 +310,15 @@ public class AttachmentBackfillManager {
                     db.touch(interaction: backfillTargetMessage, shouldReindex: false, tx: tx)
                 }
             }
+
+            notificationPresenter.notifyUserOfAttachmentBackfill(
+                threadUniqueId: threadUniqueId,
+                messageUniqueId: messageUniqueId,
+                body: OWSLocalizedString(
+                    "ATTACHMENT_BACKFILL_FINISHED_NOTIFICATION",
+                    comment: "Notification body shown when media sync to a linked device is complete.",
+                ),
+            )
         }
     }
 

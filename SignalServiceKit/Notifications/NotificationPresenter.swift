@@ -58,6 +58,12 @@ public protocol NotificationPresenter {
 
     func scheduleNotifyForBackupsEnabled(backupsTimestamp: Date)
 
+    func notifyUserOfAttachmentBackfill(
+        threadUniqueId: String,
+        messageUniqueId: String,
+        body: String,
+    )
+
     func notifyUserOfMediaTierQuotaConsumed()
 
     func notifyUserOfBackupsMediaError()

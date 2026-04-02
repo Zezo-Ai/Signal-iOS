@@ -120,6 +120,14 @@ public class NoopNotificationPresenterImpl: NotificationPresenter {
         Logger.warn("")
     }
 
+    public func notifyUserOfAttachmentBackfill(
+        threadUniqueId: String,
+        messageUniqueId: String,
+        body: String,
+    ) {
+        Logger.warn("")
+    }
+
     public func notifyUserOfMediaTierQuotaConsumed() {
         Logger.warn("")
     }

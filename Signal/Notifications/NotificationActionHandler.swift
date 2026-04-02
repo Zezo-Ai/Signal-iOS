@@ -32,6 +32,8 @@ public class NotificationActionHandler {
                 try await showThread(userInfo: userInfo)
             case .showMyStories:
                 await showMyStories(appReadiness: appReadiness)
+            case .showMessage:
+                showMessage(userInfo: userInfo)
             case .showCallLobby:
                 showCallLobby(userInfo: userInfo)
             case .submitDebugLogs:
@@ -202,6 +204,19 @@ public class NotificationActionHandler {
             }
         }
         SignalApp.shared.showMyStories(animated: UIApplication.shared.applicationState == .active)
+    }
+
+    @MainActor
+    private class func showMessage(userInfo: AppNotificationUserInfo) {
+        guard let threadId = userInfo.threadId else {
+            owsFailDebug("Missing threadId for showMessage action.")
+            return
+        }
+        SignalApp.shared.presentConversationForThread(
+            threadUniqueId: threadId,
+            focusMessageId: userInfo.messageId,
+            animated: UIApplication.shared.applicationState == .active,
+        )
     }
 
     @MainActor
