@@ -1996,15 +1996,25 @@ struct BackupSettingsView: View {
 }
 
 private struct YellowBadgeView: View {
+    @ViewBuilder
     var body: some View {
-        VStack {
-            Spacer().frame(height: 6)
+        // Label is used so the horizontal position of the text aligns with
+        // other rows. On iOS 18, using an Image in the label aligns it to the
+        // top, but iOS 26 centers it. On iOS 26, using a Circle with a top
+        // alignment works, but it is glitchy and stretches too much on iOS 18,
+        // so just fork the behavior here.
+        if #available(iOS 26, *) {
             Circle()
                 .frame(width: 10, height: 10)
                 .foregroundStyle(Color.Signal.yellow)
-            Spacer()
+                .padding(.top, 6)
+                .frame(maxHeight: .infinity, alignment: .top)
+        } else {
+            Image(systemName: "circle.fill")
+                .resizable()
+                .frame(width: 10, height: 10)
+                .foregroundStyle(Color.Signal.yellow)
         }
-        .frame(maxHeight: .infinity)
     }
 }
 
