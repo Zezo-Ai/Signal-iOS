@@ -92,7 +92,7 @@ public enum BuildFlags {
     }
 
     public enum AttachmentBackfill {
-        public static let handleRequests = build <= .internal
+        public static let handleRequests = true
     }
 }
 
