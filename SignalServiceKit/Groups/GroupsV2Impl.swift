@@ -909,27 +909,46 @@ public class GroupsV2Impl: GroupsV2 {
         knownAvatarStates: GroupAvatarStateMap,
         groupV2Params: GroupV2Params,
     ) async throws -> GroupAvatarStateMap {
-        let shouldBlurAvatars = try DependenciesBridge.shared.db.read { tx in
+        enum AvatarBlurRequirement {
+            case blurNotRequired
+            case blurRequired
+            case unknown
+        }
+
+        let avatarBlurRequirement: AvatarBlurRequirement = try DependenciesBridge.shared.db.read { tx in
             let groupThread = TSGroupThread.fetch(
                 forGroupId: try groupV2Params.groupPublicParams.getGroupIdentifier(),
                 tx: tx,
             )
 
             guard let groupThread else {
-                return true
+                // Don't download until we can confirm the group is trusted.
+                // Skip for now and try again after the thread is created.
+                return .unknown
             }
 
-            return SSKEnvironment.shared.contactManagerImplRef.shouldBlockAvatarDownload(groupThread: groupThread, tx: tx)
+            let contactManager = SSKEnvironment.shared.contactManagerImplRef
+            let shouldBlockDownload = contactManager.shouldBlockAvatarDownload(
+                groupThread: groupThread,
+                tx: tx,
+            )
+            return shouldBlockDownload ? .blurRequired : .blurNotRequired
         }
 
         var downloadedAvatars = knownAvatarStates
 
-        if shouldBlurAvatars {
+        switch avatarBlurRequirement {
+        case .blurNotRequired:
+            break
+        case .blurRequired:
             let undownloadedAvatarUrlPaths = Set(avatarUrlPaths).subtracting(downloadedAvatars.avatarUrlPaths)
             undownloadedAvatarUrlPaths.forEach { urlPath in
                 downloadedAvatars.set(avatarDataState: .lowTrustDownloadWasBlocked, avatarUrlPath: urlPath)
             }
             return downloadedAvatars
+        case .unknown:
+            // Don't download anything new and check again later
+            return knownAvatarStates
         }
 
         downloadedAvatars.removeBlockedAvatars()
@@ -1539,6 +1558,58 @@ public class GroupsV2Impl: GroupsV2 {
         )
 
         return downloadedAvatars.avatarDataState(for: avatarUrlPath)!
+    }
+
+    public func downloadAndApplyGroupAvatarIfSkipped(
+        _ secretParams: GroupSecretParams,
+    ) async throws {
+        let db = SSKEnvironment.shared.databaseStorageRef
+
+        let groupId = try GroupV2Params(groupSecretParams: secretParams)
+            .groupPublicParams
+            .getGroupIdentifier()
+
+        let avatarUrlPath: String? = db.read { tx in
+            guard
+                let groupThread = TSGroupThread.fetch(forGroupId: groupId, tx: tx),
+                let groupModel = groupThread.groupModel as? TSGroupModelV2,
+                case .missing = groupModel.avatarDataState
+            else { return nil }
+            return groupModel.avatarUrlPath
+        }
+
+        guard let avatarUrlPath else { return }
+
+        let downloadedAvatars = try await fetchAvatarDataIfNotBlurred(
+            avatarUrlPaths: [avatarUrlPath],
+            knownAvatarStates: GroupAvatarStateMap(),
+            groupV2Params: try GroupV2Params(groupSecretParams: secretParams),
+        )
+
+        guard let newAvatarDataState = downloadedAvatars.avatarDataState(for: avatarUrlPath) else {
+            return
+        }
+
+        // Re-fetch the current thread state and save the new avatar
+        try await db.awaitableWrite { tx in
+            guard
+                let groupThread = TSGroupThread.fetch(forGroupId: groupId, tx: tx),
+                let groupModel = groupThread.groupModel as? TSGroupModelV2
+            else { return }
+
+            switch newAvatarDataState {
+            case .available(let avatarData):
+                try groupModel.persistAvatarData(avatarData)
+            case .failedToFetchFromCDN:
+                groupModel.avatarDataFailedToFetchFromCDN = true
+            case .lowTrustDownloadWasBlocked:
+                groupModel.lowTrustAvatarDownloadWasBlocked = true
+            case .missing:
+                return
+            }
+
+            groupThread.update(with: groupModel, transaction: tx)
+        }
     }
 
     public func joinGroupViaInviteLink(

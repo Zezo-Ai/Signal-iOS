@@ -407,6 +407,10 @@ private extension GroupV2UpdatesImpl {
                 break
             }
         }
+
+        // Retry avatar downloads that were skipped because of the thread not
+        // yet existing at the time of the snapshot being applied.
+        try await SSKEnvironment.shared.groupsV2Ref.downloadAndApplyGroupAvatarIfSkipped(secretParams)
     }
 
     private func tryToApplyGroupChangesFromService(
@@ -716,7 +720,8 @@ private extension GroupV2UpdatesImpl {
         spamReportingMetadata: GroupUpdateSpamReportingMetadata,
         options: TSGroupModelOptions,
     ) async throws {
-        let snapshotResponse = try await SSKEnvironment.shared.groupsV2Ref.fetchLatestSnapshot(
+        let groupsV2 = SSKEnvironment.shared.groupsV2Ref
+        let snapshotResponse = try await groupsV2.fetchLatestSnapshot(
             secretParams: secretParams,
             justUploadedAvatars: nil,
         )
@@ -774,11 +779,11 @@ private extension GroupV2UpdatesImpl {
             // If the group state includes a stale profile key for the
             // local user, schedule an update to fix that.
             if let localProfileKey, let profileKey = groupV2Snapshot.profileKeys[localAci], profileKey != localProfileKey.keyData {
-                SSKEnvironment.shared.groupsV2Ref.updateLocalProfileKeyInGroup(groupId: newGroupModel.groupId, transaction: transaction)
+                groupsV2.updateLocalProfileKeyInGroup(groupId: newGroupModel.groupId, transaction: transaction)
             }
 
             if let groupSendEndorsementsResponse = snapshotResponse.groupSendEndorsementsResponse {
-                SSKEnvironment.shared.groupsV2Ref.handleGroupSendEndorsementsResponse(
+                groupsV2.handleGroupSendEndorsementsResponse(
                     groupSendEndorsementsResponse,
                     groupThreadId: groupThread.sqliteRowId!,
                     secretParams: secretParams,
@@ -788,6 +793,10 @@ private extension GroupV2UpdatesImpl {
                 )
             }
         }
+
+        // Retry avatar downloads that were skipped because of the thread not
+        // yet existing at the time of the snapshot being applied.
+        try await groupsV2.downloadAndApplyGroupAvatarIfSkipped(secretParams)
     }
 
     private func didAddLocalUserToV2Group(

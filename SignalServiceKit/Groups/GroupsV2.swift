@@ -128,6 +128,8 @@ public protocol GroupsV2 {
         avatarUrlPath: String,
     ) async throws -> TSGroupModel.AvatarDataState
 
+    func downloadAndApplyGroupAvatarIfSkipped(_ secretParams: GroupSecretParams) async throws
+
     func joinGroupViaInviteLink(
         secretParams: GroupSecretParams,
         inviteLinkPassword: Data,
@@ -579,6 +581,10 @@ public class MockGroupsV2: GroupsV2 {
         groupModel: TSGroupModelV2,
         avatarUrlPath: String,
     ) async throws -> TSGroupModel.AvatarDataState {
+        owsFail("Not implemented")
+    }
+
+    public func downloadAndApplyGroupAvatarIfSkipped(_ secretParams: GroupSecretParams) async throws {
         owsFail("Not implemented")
     }
 
