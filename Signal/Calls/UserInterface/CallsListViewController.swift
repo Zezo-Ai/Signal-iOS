@@ -2328,12 +2328,14 @@ private extension CallsListViewController {
 
             config.image = Theme.iconImage(icon)
 
-            return UIButton(
+            let button = UIButton(
                 configuration: config,
                 primaryAction: UIAction { [weak self] _ in
                     self?.detailsTapped(viewModel: viewModel)
                 },
             )
+            button.setCompressionResistanceHorizontalHigh()
+            return button
         }
 
         private func makeJoinButton(viewModel: CallViewModel) -> UIButton {
