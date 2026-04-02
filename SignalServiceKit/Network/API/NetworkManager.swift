@@ -5,7 +5,6 @@
 
 import Foundation
 public import LibSignalClient
-import Reachability
 
 public protocol NetworkManagerProtocol {
     func asyncRequestImpl(

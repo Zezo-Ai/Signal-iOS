@@ -41,8 +41,6 @@ pod 'libwebp'
 # third party pods
 ####
 
-pod 'Reachability', :inhibit_warnings => true
-
 def ui_pods
   pod 'BonMot', inhibit_warnings: true
   pod 'PureLayout', :inhibit_warnings => true
