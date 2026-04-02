@@ -66,6 +66,13 @@ public class CLVBackupDownloadProgressView: BackupDownloadProgressView.Delegate 
         return cell
     }
 
+    fileprivate var isDownloadComplete: Bool {
+        return switch state.get().currentViewState {
+        case .complete: true
+        default: false
+        }
+    }
+
     var shouldBeVisible: Bool {
         return state.get().currentViewState != nil
     }
@@ -356,7 +363,9 @@ public class CLVBackupDownloadProgressView: BackupDownloadProgressView.Delegate 
 // MARK: -
 
 extension ChatListViewController {
-    func handleBackupDownloadProgressViewTapped() {
+    func handleBackupDownloadProgressViewTapped(
+        _ downloadProgressView: CLVBackupDownloadProgressView,
+    ) {
         let db = DependenciesBridge.shared.db
         let tsAccountManager = DependenciesBridge.shared.tsAccountManager
 
@@ -366,6 +375,8 @@ extension ChatListViewController {
 
         if isPrimaryDevice {
             showAppSettings(mode: .backups())
+        } else if downloadProgressView.isDownloadComplete {
+            // Do nothing
         } else {
             showCancelBackupDownloadsHeroSheet()
         }

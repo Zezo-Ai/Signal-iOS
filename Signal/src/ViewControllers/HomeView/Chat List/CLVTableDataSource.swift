@@ -376,7 +376,9 @@ class CLVTableDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
 
         case .backupDownloadProgressView:
             tableView.deselectRow(at: indexPath, animated: false)
-            viewController.handleBackupDownloadProgressViewTapped()
+            viewController.handleBackupDownloadProgressViewTapped(
+                viewState.backupDownloadProgressView,
+            )
 
         case .backupExportProgressView:
             tableView.deselectRow(at: indexPath, animated: false)
