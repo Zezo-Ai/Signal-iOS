@@ -245,12 +245,23 @@ public extension GroupsV2Impl {
             return true
         }
 
+        let isGroupBlocked = SSKEnvironment.shared.databaseStorageRef.read { tx in
+            return SSKEnvironment.shared.blockingManagerRef.isGroupIdBlocked(groupContextInfo.groupId, transaction: tx)
+        }
+        if isGroupBlocked {
+            Logger.warn("Failing because group is blocked")
+            await markAsFailed()
+            return true
+        }
+
         // This will try to update the group using incremental "changes" but
         // failover to using a "snapshot".
         do {
-            try await SSKEnvironment.shared.groupV2UpdatesRef.refreshGroup(
+            try await SSKEnvironment.shared.groupV2UpdatesRef.fetchAndApplyCurrentGroupV2SnapshotFromService(
                 secretParams: groupContextInfo.groupSecretParams,
+                spamReportingMetadata: .learnedByLocallyInitatedRefresh,
                 options: [.throttle],
+                skipTerminatedGroup: true,
             )
             await markAsComplete()
             return true
@@ -259,6 +270,10 @@ public extension GroupsV2Impl {
             return false
         } catch GroupsV2Error.localUserNotInGroup {
             Logger.warn("Failing because we're not a group member")
+            await markAsFailed()
+            return true
+        } catch GroupsV2Error.skipRestoringTerminatedGroup {
+            Logger.warn("Failing because group has terminated")
             await markAsFailed()
             return true
         } catch {

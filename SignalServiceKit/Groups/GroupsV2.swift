@@ -31,6 +31,9 @@ public enum GroupsV2Error: Error {
     /// We hit a 400 while making a service request, but believe it may be
     /// recoverable.
     case serviceRequestHitRecoverable400
+
+    /// When restoring from storage service, we want to skip terminated groups.
+    case skipRestoringTerminatedGroup
 }
 
 // MARK: -
@@ -222,6 +225,13 @@ public protocol GroupV2Updates {
         downloadedAvatars: GroupAvatarStateMap,
         transaction: DBWriteTransaction,
     ) throws -> TSGroupThread
+
+    func fetchAndApplyCurrentGroupV2SnapshotFromService(
+        secretParams: GroupSecretParams,
+        spamReportingMetadata: GroupUpdateSpamReportingMetadata,
+        options: TSGroupModelOptions,
+        skipTerminatedGroup: Bool,
+    ) async throws
 }
 
 extension GroupV2Updates where Self: Sendable {
@@ -623,6 +633,15 @@ public class MockGroupsV2: GroupsV2 {
 // MARK: -
 
 public class MockGroupV2Updates: GroupV2Updates {
+    public func fetchAndApplyCurrentGroupV2SnapshotFromService(
+        secretParams: LibSignalClient.GroupSecretParams,
+        spamReportingMetadata: GroupUpdateSpamReportingMetadata,
+        options: TSGroupModelOptions,
+        skipTerminatedGroup: Bool,
+    ) async throws {
+        owsFail("Not implemented.")
+    }
+
     public func autoRefreshGroup() async throws(CancellationError) {
         owsFail("Not implemented.")
     }
