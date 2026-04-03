@@ -709,6 +709,12 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             switch self.downloadabilityChecker.downloadability(record, attachment: attachment) {
             case .downloadable:
                 break
+            case nil:
+                // Because of the foreign key relationship and cascading deletes, this should
+                // only happen if all the references got deleted between when we fetched the
+                // download queue record and now. Regardless, the record should now be deleted.
+                owsFailDebug("Attempting to download an attachment with no references \(record.attachmentId)")
+                return .cancelled
             case .blockedByActiveCall:
                 // This is a temporary setback; retry in a bit if the source allows it.
                 Logger.info("Skipping attachment download due to active call \(record.attachmentId)")
@@ -1108,7 +1114,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         func downloadability(
             _ record: QueuedAttachmentDownloadRecord,
             attachment: Attachment,
-        ) -> Downloadability {
+        ) -> Downloadability? {
             // Check priority before opening a read.
             switch record.priority {
             case .userInitiated, .localClone:
@@ -1119,7 +1125,6 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             }
             return db.read { tx in
                 var downloadability: Downloadability?
-
                 self.attachmentStore.enumerateAllReferences(
                     toAttachmentId: record.attachmentId,
                     tx: tx,
@@ -1135,10 +1140,6 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     if downloadability == .downloadable {
                         stop = true
                     }
-                }
-                guard let downloadability else {
-                    owsFailDebug("Downloading attachment with no references")
-                    return .downloadable
                 }
                 return downloadability
             }
