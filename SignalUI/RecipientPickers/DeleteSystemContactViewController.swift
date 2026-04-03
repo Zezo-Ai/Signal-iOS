@@ -392,8 +392,8 @@ class DeleteSystemContactViewController: OWSTableViewController2 {
     /// Displays a toast confirming that a contact was
     /// successfully deleted.
     private func displayDeletedContactToast(displayNameForToast: String) {
-        let toastMessage = String(
-            format: OWSLocalizedString(
+        let toastMessage = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "DELETE_CONTACT_CONFIRMATION_TOAST",
                 comment: "Toast message confirming the system contact was deleted. Embeds {{The name of the user who was deleted.}}.",
             ),

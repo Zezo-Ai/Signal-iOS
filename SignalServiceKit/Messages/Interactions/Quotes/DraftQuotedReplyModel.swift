@@ -228,8 +228,8 @@ public class DraftQuotedReplyModel {
                     comment: "quote text for a reaction to a story by some other user (the header on the bubble says their name, e.g. \"Bob\"). Embeds {{reaction emoji}}",
                 )
             }
-            let text = String(
-                format: formatString,
+            let text = String.nonPluralLocalizedStringWithFormat(
+                formatString,
                 emoji,
             )
             return MessageBody(text: text, ranges: .empty)

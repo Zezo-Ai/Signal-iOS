@@ -60,7 +60,7 @@ public extension PaymentsFormat {
             "PAYMENTS_IN_CHAT_FAILURE_MESSAGE_TOP",
             comment: "Payments in-chat message shown if a payment fails to send, top part. Embeds {{ number, amount of MOB coin not sent }}",
         )
-        let topPart = String(format: template, amount)
+        let topPart = String.nonPluralLocalizedStringWithFormat(template, amount)
 
         let bottomPart = OWSLocalizedString(
             "PAYMENTS_IN_CHAT_FAILURE_MESSAGE_BOTTOM",
@@ -227,6 +227,6 @@ public extension PaymentsFormat {
             comment: "Payments Preview Text shown in quoted replies, for payments. Embeds {{ Amount sent (number), Currency (e.g. 'MOB') }}",
         )
         let currencyName = TokenId.MOB.name
-        return String(format: template, formattedAmount, currencyName)
+        return String.nonPluralLocalizedStringWithFormat(template, formattedAmount, currencyName)
     }
 }

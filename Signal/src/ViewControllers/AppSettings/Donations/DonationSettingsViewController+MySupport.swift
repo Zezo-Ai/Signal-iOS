@@ -258,7 +258,7 @@ extension DonationSettingsViewController {
 
             let currencyString = CurrencyFormatter.format(money: amount)
 
-            return String(format: pricingFormat, currencyString)
+            return String.nonPluralLocalizedStringWithFormat(pricingFormat, currencyString)
         }()
 
         let statusSubtitle: String = {
@@ -277,7 +277,7 @@ extension DonationSettingsViewController {
                 dateFormatter.dateStyle = .medium
                 let dateArg = dateFormatter.string(from: subscription.endOfCurrentPeriod)
 
-                return String(format: renewalFormat, dateArg)
+                return String.nonPluralLocalizedStringWithFormat(renewalFormat, dateArg)
             case .pendingAuthorization:
                 owsFailDebug("Should not be displaying a subscription message for a donation pending authorization.")
                 return OWSLocalizedString(
@@ -375,8 +375,8 @@ extension DonationSettingsViewController {
                         comment: "A string describing the amount and currency of a one-time payment. Embeds {{ the amount, formatted as a currency }}.",
                     )
 
-                    return String(
-                        format: pricingFormat,
+                    return String.nonPluralLocalizedStringWithFormat(
+                        pricingFormat,
                         CurrencyFormatter.format(money: amount),
                     )
                 }()
@@ -496,7 +496,7 @@ extension DonationSettingsViewController {
                 paymentMethod: paymentMethod,
             )
 
-            return String(format: messageFormat, chargeFailureString)
+            return String.nonPluralLocalizedStringWithFormat(messageFormat, chargeFailureString)
         }()
 
         let actionSheet = ActionSheetController(
@@ -533,7 +533,7 @@ extension DonationSettingsViewController {
                 paymentMethod: paymentMethod,
             )
 
-            return String(format: messageFormat, chargeFailureString)
+            return String.nonPluralLocalizedStringWithFormat(messageFormat, chargeFailureString)
         }()
 
         let actionSheet = ActionSheetController(

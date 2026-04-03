@@ -566,7 +566,7 @@ public class CVComponentBodyText: CVComponentBase, CVComponent {
                 )
                 text.append(
                     NSAttributedString(
-                        string: String(format: format, displayName),
+                        string: String.nonPluralLocalizedStringWithFormat(format, displayName),
                     ),
                 )
 

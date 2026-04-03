@@ -147,8 +147,8 @@ private extension String {
     }
 
     static func appExpires(on date: Date) -> String {
-        return String(
-            format: OWSLocalizedString(
+        return String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "EXPIRATION_WARNING_SOON",
                 comment: "Label warning the user that the app will expire soon. Embeds {{date}}.",
             ),
@@ -164,8 +164,8 @@ private extension String {
     }
 
     static func osSoonToExpireAndDeviceWillBeStuck(on expirationDate: Date) -> String {
-        return String(
-            format: OWSLocalizedString(
+        return String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "OS_SOON_TO_EXPIRE_AND_DEVICE_WILL_BE_STUCK_FORMAT",
                 comment: "Signal doesn't support old versions of iOS and shows a warning if you're on an old version that will soon lose support. This is the text on that warning when users can't upgrade iOS without getting a new device. Embeds {{expiration date}}.",
             ),
@@ -174,8 +174,8 @@ private extension String {
     }
 
     static func osSoonToExpireAndCanUpgradeOs(expirationDate: Date) -> String {
-        return String(
-            format: OWSLocalizedString(
+        return String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "OS_SOON_TO_EXPIRE_AND_CAN_UPGRADE_OS_FORMAT",
                 comment: "Signal doesn't support old versions of iOS and shows a warning if you're an old version that will soon lose support. Some users can upgrade their device to a newer version of iOS to continue using Signal. If that's the case, they'll be shown this text. Embeds {{expiration date}}.",
             ),

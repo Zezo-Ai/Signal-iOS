@@ -1433,15 +1433,15 @@ extension PhotoCaptureViewController: QRCodeSampleBufferScannerDelegate {
         // check after the username is queried before showing the sheet.
         guard isViewVisible else { return }
         OWSActionSheets.showConfirmationAlert(
-            title: String(
-                format: OWSLocalizedString(
+            title: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "PHOTO_CAPTURE_USERNAME_QR_CODE_FOUND_TITLE_FORMAT",
                     comment: "Title for sheet presented from photo capture view indicating that a username QR code was found. Embeds {{username}}.",
                 ),
                 username,
             ),
-            message: String(
-                format: OWSLocalizedString(
+            message: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "PHOTO_CAPTURE_USERNAME_QR_CODE_FOUND_MESSAGE_FORMAT",
                     comment: "Message for a sheet presented from photo capture view indicating that a username QR code was found. Embeds {{username}}.",
                 ),

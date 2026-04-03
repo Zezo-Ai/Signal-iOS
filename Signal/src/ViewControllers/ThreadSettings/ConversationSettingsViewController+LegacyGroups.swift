@@ -24,7 +24,7 @@ class LegacyGroupView: UIView {
     private let label = UILabel()
 
     private func configureLabel(format: String, highlightedSubstring: String) {
-        let text = String(format: format, highlightedSubstring)
+        let text = String.nonPluralLocalizedStringWithFormat(format, highlightedSubstring)
 
         let attributedString = NSMutableAttributedString(string: text)
         attributedString.setAttributes(

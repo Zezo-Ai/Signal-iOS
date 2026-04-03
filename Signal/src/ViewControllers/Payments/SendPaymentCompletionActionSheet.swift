@@ -433,7 +433,7 @@ public class SendPaymentCompletionActionSheet: ActionSheetController {
 
                 let row = addRow(
                     to: &topGroup,
-                    title: String(format: fiatFormat, currencyConversion.currencyCode),
+                    title: String.nonPluralLocalizedStringWithFormat(fiatFormat, currencyConversion.currencyCode),
                     value: fiatAmountString,
                     titleIconView: currencyConversionInfoView,
                     addSeparator: true,
@@ -497,7 +497,7 @@ public class SendPaymentCompletionActionSheet: ActionSheetController {
             "PAYMENTS_NEW_PAYMENT_RECIPIENT_AMOUNT_FORMAT",
             comment: "Format for the 'payment recipient amount' indicator. Embeds {{ the name of the recipient of the payment }}.",
         )
-        return String(format: userFormat, otherUserName)
+        return String.nonPluralLocalizedStringWithFormat(userFormat, otherUserName)
     }
 
     public static func formatPaymentFailure(_ error: Error, withErrorPrefix: Bool) -> String {
@@ -515,7 +515,7 @@ public class SendPaymentCompletionActionSheet: ActionSheetController {
                             "PAYMENTS_NEW_PAYMENT_ERROR_INSUFFICIENT_FUNDS_FORMAT",
                             comment: "Indicates that a payment failed due to insufficient funds. Embeds {{ current balance }}.",
                         )
-                        return String(format: format, formattedBalance)
+                        return String.nonPluralLocalizedStringWithFormat(format, formattedBalance)
                     } else {
                         return OWSLocalizedString(
                             "PAYMENTS_NEW_PAYMENT_ERROR_INSUFFICIENT_FUNDS",

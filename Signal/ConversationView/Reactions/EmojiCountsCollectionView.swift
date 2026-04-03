@@ -139,8 +139,8 @@ class EmojiCountCell: UICollectionViewCell {
         if item.emoji != nil {
             count.text = item.count.abbreviatedString
         } else {
-            count.text = String(
-                format: OWSLocalizedString(
+            count.text = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "REACTION_DETAIL_ALL_FORMAT",
                     comment: "The header used to indicate All reactions to a given message. Embeds {{number of reactions}}",
                 ),

@@ -349,7 +349,7 @@ public class NewGroupConfirmViewController: OWSTableViewController2 {
                 "GROUP_INVITES_SENT_ALERT_MESSAGE_1_FORMAT",
                 comment: "Format for the message for an alert indicating that a member was invited to a group. Embeds: {{ the name of the member. }}",
             )
-            alertMessage = String(format: alertMessageFormat, inviteeName)
+            alertMessage = String.nonPluralLocalizedStringWithFormat(alertMessageFormat, inviteeName)
         }
 
         let actionSheet = ActionSheetController(title: alertTitle, message: alertMessage)

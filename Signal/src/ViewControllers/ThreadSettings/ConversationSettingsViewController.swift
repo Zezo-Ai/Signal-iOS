@@ -627,8 +627,8 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
             return
         }
 
-        let confirmationTitle = String(
-            format: OWSLocalizedString(
+        let confirmationTitle = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "END_GROUP_LABEL_SPECIFIC",
                 comment: "End group confirmation title for a specific group. Embeds {{ group name }}",
             ),
@@ -772,7 +772,7 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
             "CONVERSATION_SETTINGS_MUTED_UNTIL_UNMUTE_FORMAT",
             comment: "Indicates that this thread is muted until a given date or time. Embeds {{The date or time which the thread is muted until}}.",
         )
-        return String(format: formatString, dateFormatter.string(from: mutedUntilDate))
+        return String.nonPluralLocalizedStringWithFormat(formatString, dateFormatter.string(from: mutedUntilDate))
     }
 
     private class func muteUnmuteActions(

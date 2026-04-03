@@ -55,15 +55,15 @@ class RemoteMuteToast: UIView {
         let toastText: String
         let localAci = self.deps.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction!.aci
         if muteSource == localAci {
-            toastText = String(
-                format: OWSLocalizedString(
+            toastText = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "REMOTE_MUTE_TOAST_YOU_MUTED_YOURSELF",
                     comment: "A message that displays when you joined a call on two devices and mute one from the other.",
                 ),
             )
         } else {
-            toastText = String(
-                format: OWSLocalizedString(
+            toastText = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "REMOTE_MUTE_TOAST_SOMEONE_MUTED_YOU",
                     comment:
                     "A message that displays when your microphone is remotely muted by another call participant. Embeds {{name}}",
@@ -91,8 +91,8 @@ class RemoteMuteToast: UIView {
                 ).resolvedValue(useShortNameIfAvailable: true)
             }
 
-            toastText = String(
-                format: OWSLocalizedString(
+            toastText = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "REMOTE_MUTE_TOAST_YOU_MUTED_SOMEONE",
                     comment:
                     "A message that displays when you remotely muted another call participant's microphone. Embeds {{name}}",
@@ -117,8 +117,8 @@ class RemoteMuteToast: UIView {
                 )
             }
 
-            toastText = String(
-                format: OWSLocalizedString(
+            toastText = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "REMOTE_MUTE_TOAST_A_MUTED_B",
                     comment:
                     "A message that displays when one person in a call remotely muted another participant. Embeds {{name}} {{name}}",

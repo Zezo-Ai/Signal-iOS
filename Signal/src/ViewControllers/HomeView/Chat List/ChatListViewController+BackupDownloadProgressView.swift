@@ -223,15 +223,15 @@ public class CLVBackupDownloadProgressView: BackupDownloadProgressView.Delegate 
                 tintColor: UIColor.Signal.orange,
                 backgroundColor: UIColor(rgbHex: 0xF9E4B6),
             ),
-            title: String(
-                format: OWSLocalizedString(
+            title: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "RESTORING_MEDIA_DISK_SPACE_SHEET_TITLE_FORMAT",
                     comment: "Title shown on a bottom sheet for restoring media from a backup when paused because the device has insufficient disk space. Embeds {{ %@ formatted number of bytes downloaded, e.g. '100 MB' }}",
                 ),
                 spaceRequiredString,
             ),
-            body: String(
-                format: OWSLocalizedString(
+            body: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "RESTORING_MEDIA_DISK_SPACE_SHEET_SUBTITLE_FORMAT",
                     comment: "Subtitle shown on a bottom sheet for restoring media from a backup when paused because the device has insufficient disk space. Embeds {{ %@ formatted number of bytes downloaded, e.g. '100 MB' }}",
                 ),
@@ -648,8 +648,8 @@ private class BackupDownloadProgressView: ChatListBackupProgressView {
                 "RESTORING_MEDIA_BANNER_TITLE",
                 comment: "Title shown on chat list banner for restoring media from a backup",
             )
-            progressLabelText = String(
-                format: OWSLocalizedString(
+            progressLabelText = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "RESTORING_MEDIA_BANNER_PROGRESS_FORMAT",
                     comment: "Download progress for media from a backup. Embeds {{ %1$@ formatted number of bytes downloaded, e.g. '100 MB', %2$@ formatted total number of bytes to download, e.g. '3 GB' }}",
                 ),
@@ -667,8 +667,8 @@ private class BackupDownloadProgressView: ChatListBackupProgressView {
                 comment: "Title shown on chat list banner for restoring media from a backup when paused for some reason",
             )
         case .outOfDiskSpace(let spaceRequired):
-            titleLabelText = String(
-                format: OWSLocalizedString(
+            titleLabelText = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "RESTORING_MEDIA_BANNER_DISK_SPACE_TITLE_FORMAT",
                     comment: "Title shown on chat list banner for restoring media from a backup when paused because the device has insufficient disk space. Embeds {{ %@ formatted number of bytes downloaded, e.g. '100 MB' }}",
                 ),

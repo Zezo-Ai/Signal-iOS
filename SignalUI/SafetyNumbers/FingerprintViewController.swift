@@ -218,8 +218,8 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
     )
 
     private lazy var instructionsTextView: UITextView = {
-        let instructions = String(
-            format: OWSLocalizedString(
+        let instructions = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "VERIFY_SAFETY_NUMBER_INSTRUCTIONS",
                 comment: "Instructions for verifying your safety number. Embeds {{contact's name}}",
             ),
@@ -713,7 +713,7 @@ public class FingerprintViewController: OWSViewController, OWSNavigationChildCon
             "SAFETY_NUMBER_SHARE_FORMAT",
             comment: "Snippet to share {{safety number}} with a friend. sent e.g. via SMS",
         )
-        let shareString = String(format: shareFormat, fingerprint.displayableText)
+        let shareString = String.nonPluralLocalizedStringWithFormat(shareFormat, fingerprint.displayableText)
 
         let activityController = UIActivityViewController(
             activityItems: [shareString],
@@ -849,8 +849,8 @@ private final class KeyTransparencyFailureHeroSheet: HeroSheetViewController {
                 "SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_FAILURE_SHEET_TITLE",
                 comment: "Title for a sheet explaining that encryption auto-verification did not succeed.",
             ),
-            body: String(
-                format: OWSLocalizedString(
+            body: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "SAFETY_NUMBERS_AUTOMATIC_VERIFICATION_FAILURE_SHEET_BODY_FORMAT",
                     comment: "Body for a sheet explaining that encryption auto-verification did not succeed. Embeds {{ 1: the contact's name }}.",
                 ),

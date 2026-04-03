@@ -24,7 +24,7 @@ class RegistrationLoadingViewController: OWSViewController, OWSNavigationChildCo
                     "REGISTRATION_VIEW_PHONE_NUMBER_SPINNER_LABEL_FORMAT",
                     comment: "Label for the progress spinner shown during phone number registration. Embeds {{phone number}}.",
                 )
-                return String(format: format, e164.e164FormattedAsPhoneNumberWithoutBreaks)
+                return String.nonPluralLocalizedStringWithFormat(format, e164.e164FormattedAsPhoneNumberWithoutBreaks)
             case .submittingVerificationCode:
                 return OWSLocalizedString(
                     "ONBOARDING_VERIFICATION_CODE_VALIDATION_PROGRESS_LABEL",

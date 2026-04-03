@@ -173,8 +173,8 @@ class ContactAboutSheet: StackSheetViewController {
                 let nameLabel = self.nameLabel
             else { return }
             Tooltip(
-                message: String(
-                    format: OWSLocalizedString(
+                message: String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "CONTACT_ABOUT_SHEET_SECONDARY_NAME_TOOLTIP_MESSAGE",
                         comment: "Message for a tooltip that appears above a parenthesized name for another user, indicating that that name is the name the other user set for themself. Embeds {{name}}",
                     ),

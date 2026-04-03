@@ -1378,8 +1378,8 @@ private class PermissionErrorView: UIView {
         }
 
         let needPermissionLabel = UILabel()
-        needPermissionLabel.text = String(
-            format: OWSLocalizedString(
+        needPermissionLabel.text = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "CALL_VIEW_NEED_PERMISSION_ERROR_FORMAT",
                 comment: "Error displayed on the 'call' view when the callee needs to grant permission before we can call them. Embeds {callee short name}.",
             ),

@@ -222,8 +222,8 @@ class RecipientContextMenuHelper {
             owsFailDebug("Remove recipient option should not have been shown in context menu for Note to Self, so we shouldn't be able to get here.")
             return
         }
-        let actionSheetTitle = String(
-            format: OWSLocalizedString(
+        let actionSheetTitle = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "HIDE_RECIPIENT_ACTION_SHEET_TITLE_FORMAT",
                 comment: "A format for the 'remove user' action sheet title. Embeds {{the removed user's name or phone number}}.",
             ),
@@ -317,8 +317,8 @@ class RecipientContextMenuHelper {
             owsFailDebug("Remove recipient option should not have been shown in context menu for Note to Self, so we shouldn't be able to get here.")
             return
         }
-        let actionSheetTitle = String(
-            format: OWSLocalizedString(
+        let actionSheetTitle = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "HIDE_RECIPIENT_IMPASS_BECAUSE_SYSTEM_CONTACT_ACTION_SHEET_TITLE",
                 comment: "A format for the 'unable to remove user' action sheet title. Embeds {{the removed user's name or phone number}}.",
             ),
@@ -403,8 +403,8 @@ class RecipientContextMenuHelper {
         fromViewController: UIViewController,
         displayName: String,
     ) {
-        let toastMessage = String(
-            format: OWSLocalizedString(
+        let toastMessage = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "HIDE_RECIPIENT_CONFIRMATION_TOAST",
                 comment: "Toast message confirming the recipient was removed. Embeds {{The name of the user who was removed.}}..",
             ),
@@ -431,8 +431,8 @@ class RecipientContextMenuHelper {
         fromViewController: UIViewController,
         displayName: String,
     ) {
-        let errorActionSheetTitle = String(
-            format: OWSLocalizedString(
+        let errorActionSheetTitle = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "HIDE_RECIPIENT_ERROR_ACTION_SHEET_TITLE_FORMAT",
                 comment: "Title for an action sheet indicating that the user was not successfully removed. Embeds {{name of user we attempted to hide}}.",
             ),

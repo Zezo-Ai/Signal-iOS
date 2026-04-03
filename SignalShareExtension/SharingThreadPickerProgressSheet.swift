@@ -106,8 +106,8 @@ public class SharingThreadPickerProgressSheet: ActionSheetController {
         // reach 100%.
         let totalCompleted = progressValues.filter { $0 == 1 }.count
 
-        progressLabel.text = String(
-            format: Self.progressFormat,
+        progressLabel.text = String.nonPluralLocalizedStringWithFormat(
+            Self.progressFormat,
             OWSFormat.formatInt(min(totalCompleted + 1, attachmentIds.count)),
             OWSFormat.formatInt(attachmentIds.count),
         )

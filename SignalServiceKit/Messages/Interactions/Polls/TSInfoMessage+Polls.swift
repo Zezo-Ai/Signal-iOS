@@ -104,7 +104,7 @@ extension TSInfoMessage {
                 "POLL_ENDED_BY_YOU_CHAT_LIST_UPDATE",
                 comment: "Shown when the local user ends a poll. Embeds {{ poll question }}.",
             )
-            return String(format: formatString, question)
+            return String.nonPluralLocalizedStringWithFormat(formatString, question)
         }
 
         let displayName = SSKEnvironment.shared.contactManagerRef.displayName(
@@ -117,6 +117,6 @@ extension TSInfoMessage {
             comment: "Shown when another user ends a poll. Embeds {{ another user }} and {{ poll question }}.",
         )
 
-        return String(format: formatString, displayName.resolvedValue(), question)
+        return String.nonPluralLocalizedStringWithFormat(formatString, displayName.resolvedValue(), question)
     }
 }

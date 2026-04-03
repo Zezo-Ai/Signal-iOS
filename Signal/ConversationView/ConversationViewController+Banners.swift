@@ -1115,7 +1115,7 @@ private extension ConversationViewController {
                     "MESSAGES_VIEW_CONTACT_NO_LONGER_VERIFIED_FORMAT",
                     comment: "Indicates that this 1:1 conversation is no longer verified. Embeds {{user's name or phone number}}.",
                 )
-            title = String(format: format, displayName)
+            title = String.nonPluralLocalizedStringWithFormat(format, displayName)
 
         default:
             title = OWSLocalizedString(

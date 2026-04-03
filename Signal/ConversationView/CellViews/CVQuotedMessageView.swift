@@ -262,7 +262,7 @@ public class CVQuotedMessageView: ManualStackViewWithLayer {
                     "QUOTED_REPLY_STORY_AUTHOR_INDICATOR_FORMAT",
                     comment: "Message header when you are quoting a story. Embeds {{ story author name }}",
                 )
-                text = String(format: format, authorName)
+                text = String.nonPluralLocalizedStringWithFormat(format, authorName)
             } else {
                 text = authorName
             }
@@ -415,7 +415,7 @@ public class CVQuotedMessageView: ManualStackViewWithLayer {
                     "QUOTED_REPLY_REACTION_TO_STORY_FORMAT_SECOND_PERSON",
                     comment: "Label explaining that the content of a quoted message includes you reacting to someone's story. Embeds {{ %1$@ the story author }}.",
                 )
-                text = String(format: formatText, quotedAuthorName.string)
+                text = String.nonPluralLocalizedStringWithFormat(formatText, quotedAuthorName.string)
             }
 
             return CVLabelConfig.unstyledText(

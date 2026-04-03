@@ -116,7 +116,7 @@ public class PaymentsRestoreWalletWordViewController: OWSViewController {
             "SETTINGS_PAYMENTS_RESTORE_WALLET_WORD_INSTRUCTIONS_FORMAT",
             comment: "Format for the instructions for the 'enter word' step of the 'restore payments wallet' views. Embeds {{ the index of the current word }}.",
         )
-        let instructions = String(format: instructionsFormat, OWSFormat.formatInt(wordIndex + 1))
+        let instructions = String.nonPluralLocalizedStringWithFormat(instructionsFormat, OWSFormat.formatInt(wordIndex + 1))
 
         let instructionsLabel = UILabel()
         instructionsLabel.text = instructions
@@ -152,8 +152,8 @@ public class PaymentsRestoreWalletWordViewController: OWSViewController {
             comment: "Format for the placeholder text in the 'confirm payments passphrase' view of the app settings. Embeds: {{ the index of the word }}.",
         )
         let placeholder = NSAttributedString(
-            string: String(
-                format: placeholderFormat,
+            string: String.nonPluralLocalizedStringWithFormat(
+                placeholderFormat,
                 OWSFormat.formatInt(wordIndex + 1),
             ),
             attributes: [

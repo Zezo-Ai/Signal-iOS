@@ -113,7 +113,7 @@ class GroupDescriptionViewController: OWSTableViewController2 {
                 "GROUP_DESCRIPTION_VIEW_TITLE_FORMAT",
                 comment: "Title for the group description view. Embeds {{ the number of characters that can be added to the description without hitting the length limit }}.",
             )
-            title = String(format: titleFormat, OWSFormat.formatInt(remainingGlyphCount))
+            title = String.nonPluralLocalizedStringWithFormat(titleFormat, OWSFormat.formatInt(remainingGlyphCount))
         } else {
             title = OWSLocalizedString(
                 "GROUP_DESCRIPTION_VIEW_TITLE",

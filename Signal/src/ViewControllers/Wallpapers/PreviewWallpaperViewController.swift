@@ -197,7 +197,7 @@ class PreviewWallpaperViewController: UIViewController {
                 comment: "The outgoing bubble text when setting a wallpaper for specific chat. Embeds {{chat name}}",
             )
             let displayName = SSKEnvironment.shared.databaseStorageRef.read { tx in SSKEnvironment.shared.contactManagerRef.displayName(for: thread, transaction: tx) }
-            return String(format: formatString, displayName)
+            return String.nonPluralLocalizedStringWithFormat(formatString, displayName)
         }()
 
         let incomingText: String

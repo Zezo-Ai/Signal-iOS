@@ -273,8 +273,8 @@ struct ChooseBackupPlanView: View {
                     title: {
                         switch viewModel.storeKitAvailability {
                         case .available(let paidPlanDisplayPrice):
-                            String(
-                                format: OWSLocalizedString(
+                            String.nonPluralLocalizedStringWithFormat(
+                                OWSLocalizedString(
                                     "CHOOSE_BACKUP_PLAN_PAID_PLAN_TITLE",
                                     comment: "Title for the paid plan option, when choosing a Backup plan. Embeds {{ the formatted monthly cost, as currency, of the paid plan }}.",
                                 ),
@@ -300,8 +300,8 @@ struct ChooseBackupPlanView: View {
                             "CHOOSE_BACKUP_PLAN_BULLET_FULL_MEDIA_BACKUP",
                             comment: "Text for a bullet point in a list of Backup features, describing that all media is included.",
                         )),
-                        PlanOptionView.BulletPoint(iconKey: "data", text: String(
-                            format: OWSLocalizedString(
+                        PlanOptionView.BulletPoint(iconKey: "data", text: String.nonPluralLocalizedStringWithFormat(
+                            OWSLocalizedString(
                                 "CHOOSE_BACKUP_PLAN_BULLET_STORAGE_AMOUNT",
                                 comment: "Text for a bullet point in a list of Backup features, describing the amount of included storage. Embeds {{ the amount of storage preformatted as a localized byte count, e.g. '100 GB' }}.",
                             ),
@@ -339,8 +339,8 @@ struct ChooseBackupPlanView: View {
                 case .paid:
                     switch viewModel.storeKitAvailability {
                     case .available(let paidPlanDisplayPrice):
-                        String(
-                            format: OWSLocalizedString(
+                        String.nonPluralLocalizedStringWithFormat(
+                            OWSLocalizedString(
                                 "CHOOSE_BACKUP_PLAN_SUBSCRIBE_PAID_BUTTON_TEXT",
                                 comment: "Text for a button that will subscribe the user to the paid Backup plan. Embeds {{ the formatted monthly cost, as currency, of the paid plan }}.",
                             ),

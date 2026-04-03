@@ -660,7 +660,7 @@ class DonationPaymentDetailsViewController: OWSTableViewController2 {
                     comment: "Users can donate to Signal with a credit or debit card. This is the heading on that screen, telling them how much they'll donate every month. Embeds {{formatted amount of money}}, such as \"$20\".",
                 )
             }
-            return String(format: format, amountString)
+            return String.nonPluralLocalizedStringWithFormat(format, amountString)
         }()
 
         return UIButton(
@@ -690,7 +690,7 @@ class DonationPaymentDetailsViewController: OWSTableViewController2 {
                         let oneEuroCentString = CurrencyFormatter.format(
                             money: FiatMoney(currencyCode: "EUR", value: 0.01),
                         )
-                        let message = String(format: messageFormat, oneEuroCentString, amountString)
+                        let message = String.nonPluralLocalizedStringWithFormat(messageFormat, oneEuroCentString, amountString)
 
                         let actionSheet = ActionSheetController(title: title, message: message)
                         actionSheet.addAction(.init(

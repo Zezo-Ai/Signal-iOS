@@ -112,7 +112,7 @@ class NotificationService: UNNotificationServiceExtension {
                     "NOTIFICATION_BODY_PHONE_LOCKED_FORMAT",
                     comment: "Lock screen notification text presented after user powers on their device without unlocking. Embeds {{device model}} (either 'iPad' or 'iPhone')",
                 )
-                content.body = String(format: notificationFormat, UIDevice.current.localizedModel)
+                content.body = String.nonPluralLocalizedStringWithFormat(notificationFormat, UIDevice.current.localizedModel)
                 return content
             } else {
                 // Only show a single error if we receive multiple pushes

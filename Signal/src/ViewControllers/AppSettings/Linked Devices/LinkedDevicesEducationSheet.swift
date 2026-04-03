@@ -56,8 +56,8 @@ class LinkedDevicesEducationSheet: StackSheetViewController {
         let desktopDownloadLinkString = "signal.org/download"
         let desktopDownloadURL = URL(string: "https://signal.org/download/")!
 
-        let downloadsString = String(
-            format: OWSLocalizedString(
+        let downloadsString = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "LINKED_DEVICES_EDUCATION_POINT_DOWNLOADS",
                 comment: "Bullet point about downloads on the linked devices education sheet. Embeds {{ %1$@ iPad download link, %2$@ desktop download link }}",
             ),

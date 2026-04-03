@@ -247,13 +247,13 @@ public final class ProfileChanges: NSObject, NSSecureCoding, NSCopying {
                 "PROFILE_NAME_CHANGE_SYSTEM_CONTACT_FORMAT",
                 comment: "The copy rendered in a conversation when someone in your address book changes their profile name. Embeds {contact name}, {old profile name}, {new profile name}",
             )
-            return String(format: formatString, systemContactName.resolvedValue(), oldFullName, newFullName)
+            return String.nonPluralLocalizedStringWithFormat(formatString, systemContactName.resolvedValue(), oldFullName, newFullName)
         } else {
             let formatString = OWSLocalizedString(
                 "PROFILE_NAME_CHANGE_SYSTEM_NONCONTACT_FORMAT",
                 comment: "The copy rendered in a conversation when someone not in your address book changes their profile name. Embeds {old profile name}, {new profile name}",
             )
-            return String(format: formatString, oldFullName, newFullName)
+            return String.nonPluralLocalizedStringWithFormat(formatString, oldFullName, newFullName)
         }
     }
 }

@@ -768,7 +768,7 @@ class ChatListCell: UITableViewCell, ReusableTableViewCell {
                 )
                 return .attributedText(
                     NSAttributedString(
-                        string: String(format: addedToGroupFormat, addedToGroupByName),
+                        string: String.nonPluralLocalizedStringWithFormat(addedToGroupFormat, addedToGroupByName),
                         attributes: [
                             .font: snippetFont,
                             .foregroundColor: snippetColor,

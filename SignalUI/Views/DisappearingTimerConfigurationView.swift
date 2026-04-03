@@ -62,7 +62,7 @@ public class DisappearingTimerConfigurationView: UIView {
         self.accessibilityLabel = OWSLocalizedString("DISAPPEARING_MESSAGES_LABEL", comment: "Accessibility label for disappearing messages")
         let hintFormatString = OWSLocalizedString("DISAPPEARING_MESSAGES_HINT", comment: "Accessibility hint that contains current timeout information")
         let durationString = String.formatDurationLossless(durationSeconds: durationSeconds)
-        self.accessibilityHint = String(format: hintFormatString, durationString)
+        self.accessibilityHint = String.nonPluralLocalizedStringWithFormat(hintFormatString, durationString)
 
         // Layout
         self.addSubview(imageView)

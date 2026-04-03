@@ -92,8 +92,8 @@ struct OutgoingDeviceRestoreBackupPromptView: View {
 
     private func lastBackupDetailsString() -> String {
         let date = lastBackupDetails.date
-        return String(
-            format: OWSLocalizedString(
+        return String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "OUTGOING_DEVICE_RESTORE_BACKUP_RESTORE_DESCRIPTION",
                 comment: "Description for form confirming restore from backup without size detail.",
             ),

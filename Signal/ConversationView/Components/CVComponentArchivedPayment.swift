@@ -200,26 +200,26 @@ public class CVComponentArchivedPayment: CVComponentBase, CVComponent {
                 "PAYMENTS_PAYMENT_STATUS_IN_CHAT_SENT_YOU",
                 comment: "Payment status context with contact name, incoming. Embeds {{ Name of sending contact }}",
             )
-            text = String(format: format, archivedPaymentAttachment.otherUserShortName)
+            text = String.nonPluralLocalizedStringWithFormat(format, archivedPaymentAttachment.otherUserShortName)
         case (.outgoingMessage, .failed):
             let format = OWSLocalizedString(
                 "PAYMENTS_PAYMENT_STATUS_IN_CHAT_PAYMENT_TO",
                 comment: "Payment status context with contact name, failed. Embeds {{ Name of receiving contact }}",
             )
-            text = String(format: format, archivedPaymentAttachment.otherUserShortName)
+            text = String.nonPluralLocalizedStringWithFormat(format, archivedPaymentAttachment.otherUserShortName)
         case (.outgoingMessage, _):
             let format = OWSLocalizedString(
                 "PAYMENTS_PAYMENT_STATUS_IN_CHAT_YOU_SENT",
                 comment: "Payment status context with contact name, sent. Embeds {{ Name of receiving contact }}",
             )
-            text = String(format: format, archivedPaymentAttachment.otherUserShortName)
+            text = String.nonPluralLocalizedStringWithFormat(format, archivedPaymentAttachment.otherUserShortName)
         default:
             // default to failed text because it doesn't imply success
             let format = OWSLocalizedString(
                 "PAYMENTS_PAYMENT_STATUS_IN_CHAT_PAYMENT_TO",
                 comment: "Payment status context with contact name, failed. Embeds {{ Name of receiving contact }}",
             )
-            text = String(format: format, archivedPaymentAttachment.otherUserShortName)
+            text = String.nonPluralLocalizedStringWithFormat(format, archivedPaymentAttachment.otherUserShortName)
         }
 
         return CVLabelConfig(

@@ -182,8 +182,8 @@ enum GroupCallVideoContextMenuConfiguration {
         ringRtcGroupCall: SignalRingRTC.GroupCall,
     ) {
         let actionSheet = ActionSheetController(
-            title: String(
-                format: OWSLocalizedString(
+            title: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "GROUP_CALL_REMOVE_MEMBER_CONFIRMATION_ACTION_SHEET_TITLE",
                     comment: "Title for action sheet confirming removal of a member from a group call. embeds {{ name }}",
                 ),

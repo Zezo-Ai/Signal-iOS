@@ -143,8 +143,8 @@ public class SendPaymentMemoViewController: OWSViewController {
             "PAYMENTS_NEW_PAYMENT_MESSAGE_COUNT_FORMAT",
             comment: "Format for the 'message character count indicator' for the 'new payment or payment request' view. Embeds {{ %1$@ the number of characters in the message, %2$@ the maximum number of characters in the message }}.",
         )
-        memoCharacterCountLabel.text = String(
-            format: format,
+        memoCharacterCountLabel.text = String.nonPluralLocalizedStringWithFormat(
+            format,
             OWSFormat.formatInt(strippedMemoMessage.count),
             OWSFormat.formatInt(PaymentsImpl.maxPaymentMemoMessageLength),
         )

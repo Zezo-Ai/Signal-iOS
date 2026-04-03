@@ -164,7 +164,7 @@ extension TSInfoMessage {
         }
 
         let displayName = SSKEnvironment.shared.contactManagerRef.displayName(for: SignalServiceAddress(aci), tx: transaction)
-        return String(format: formatString, displayName.resolvedValue())
+        return String.nonPluralLocalizedStringWithFormat(formatString, displayName.resolvedValue())
     }
 
     func paymentsActivatedDescription(tx transaction: DBReadTransaction) -> String? {
@@ -182,7 +182,7 @@ extension TSInfoMessage {
                 "INFO_MESSAGE_PAYMENTS_ACTIVATION_REQUEST_FINISHED",
                 comment: "Shown when a user activates payments from a chat. Embeds: {{ the user's name}}",
             )
-            return String(format: format, displayName.resolvedValue())
+            return String.nonPluralLocalizedStringWithFormat(format, displayName.resolvedValue())
         }
     }
 }

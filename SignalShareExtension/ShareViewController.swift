@@ -419,7 +419,7 @@ public class ShareViewController: OWSNavigationController, ShareViewDelegate, SA
                 comment: "Momentarily shown to the user when attempting to select more images than is allowed. Embeds {{max number of items}} that can be shared.",
             )
 
-            let alertTitle = String(format: format, OWSFormat.formatInt(SignalAttachment.maxAttachmentsAllowed))
+            let alertTitle = String.nonPluralLocalizedStringWithFormat(format, OWSFormat.formatInt(SignalAttachment.maxAttachmentsAllowed))
 
             OWSActionSheets.showActionSheet(
                 title: alertTitle,

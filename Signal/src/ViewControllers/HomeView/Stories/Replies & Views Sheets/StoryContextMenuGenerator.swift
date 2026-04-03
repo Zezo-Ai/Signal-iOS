@@ -263,8 +263,8 @@ extension StoryContextMenuGenerator {
                 comment: "Title asking the user if they are sure they want to hide stories from another user",
             ),
             message: loadThreadDisplayNameWithSneakyTransaction(context: context).map {
-                String(
-                    format: OWSLocalizedString(
+                String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "STORIES_HIDE_STORY_ACTION_SHEET_MESSAGE",
                         comment: "Message asking the user if they are sure they want to hide stories from {{other user's name}}",
                     ),

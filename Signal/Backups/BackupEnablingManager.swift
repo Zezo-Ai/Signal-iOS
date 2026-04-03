@@ -134,7 +134,7 @@ final class BackupEnablingManager {
                 )
                 throw ActionSheetDisplayableError(
                     localizedTitle: title,
-                    localizedMessage: String(format: message, nextRetryString),
+                    localizedMessage: String.nonPluralLocalizedStringWithFormat(message, nextRetryString),
                 )
             } else {
                 throw .genericError

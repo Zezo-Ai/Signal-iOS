@@ -379,8 +379,8 @@ public class DateUtil {
             formatReplacement = seconds / secondsPerWeek
         }
 
-        return String(
-            format: formatString,
+        return String.nonPluralLocalizedStringWithFormat(
+            formatString,
             NumberFormatter.localizedString(from: NSNumber(value: formatReplacement), number: .none),
         )
     }

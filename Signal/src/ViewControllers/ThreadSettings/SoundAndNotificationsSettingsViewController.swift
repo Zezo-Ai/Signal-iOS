@@ -95,8 +95,8 @@ class SoundAndNotificationsSettingsViewController: OWSTableViewController2 {
                     "CONVERSATION_SETTINGS_MUTED_UNTIL_FORMAT",
                     comment: "Indicates that this thread is muted until a given date or time. Embeds {{The date or time which the thread is muted until}}.",
                 )
-                muteStatus = String(
-                    format: formatString,
+                muteStatus = String.nonPluralLocalizedStringWithFormat(
+                    formatString,
                     dateFormatter.string(from: mutedUntilDate),
                 )
             }

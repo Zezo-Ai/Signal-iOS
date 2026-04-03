@@ -240,8 +240,8 @@ struct BackupRestoreProgressView: View {
                     comment: "Subtitle for a progress spinner on a modal when waiting for a backup restore to start",
                 )
             } else if let downloadProgress = viewModel.downloadProgress {
-                String(
-                    format: OWSLocalizedString(
+                String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "BACKUP_RESTORE_MODAL_DOWNLOAD_PROGRESS_SUBTITLE",
                         comment: "Subtitle for a progress spinner on a modal tracking active downloading. Embeds 1:{{ the amount downloaded as a file size, e.g. 100 MB }}; 2:{{ the total amount to download as a file size, e.g. 1 GB }}; 3:{{ the amount downloaded as a percentage, e.g. 10% }}.",
                     ),
@@ -256,8 +256,8 @@ struct BackupRestoreProgressView: View {
     }
 
     private var percentCompleteString: String {
-        String(
-            format: OWSLocalizedString(
+        String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "LINK_NEW_DEVICE_SYNC_PROGRESS_PERCENT",
                 comment: "On a progress modal indicating the percent complete the sync process is. Embeds {{ formatted percentage }}",
             ),

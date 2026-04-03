@@ -510,7 +510,7 @@ extension TSThread {
                     "QUOTED_REPLY_STORY_AUTHOR_INDICATOR_FORMAT",
                     comment: "Message header when you are quoting a story. Embeds {{ story author name }}",
                 )
-                return String(format: format, $0)
+                return String.nonPluralLocalizedStringWithFormat(format, $0)
             }
             return $0
         }

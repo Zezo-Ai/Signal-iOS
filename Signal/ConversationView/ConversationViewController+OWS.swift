@@ -190,7 +190,7 @@ extension ConversationViewController {
             alertMessageFormat = OWSLocalizedString("ALERT_DELIVERY_ISSUE_UNKNOWN_THREAD_MESSAGE_FORMAT", comment: "Format string for delivery issue sheet message where the original thread is unknown. Embeds {{ sender name }}.")
         }
 
-        let alertMessage = String(format: alertMessageFormat, senderName)
+        let alertMessage = String.nonPluralLocalizedStringWithFormat(alertMessageFormat, senderName)
 
         let headerImageView = UIImageView(image: .init(named: "delivery-issue"))
         headerImageView.autoSetDimension(.height, toSize: 110)

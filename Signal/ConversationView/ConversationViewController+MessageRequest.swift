@@ -70,8 +70,8 @@ extension ConversationViewController: MessageRequestDelegate {
             return
         }
 
-        let title = String(
-            format: OWSLocalizedString(
+        let title = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "BLOCK_LIST_UNBLOCK_TITLE_FORMAT",
                 comment: "A format for the 'unblock conversation' action sheet title. Embeds the {{conversation title}}.",
             ),
@@ -375,8 +375,8 @@ extension ConversationViewController {
             }
 
             actionSheet.addAction(ActionSheetAction(
-                title: String(
-                    format: OWSLocalizedString(
+                title: String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "GROUPS_INVITE_BLOCK_INVITER_FORMAT",
                         comment: "Label for 'block inviter' button in group invite view. Embeds {{name of user who invited you}}.",
                     ),
@@ -388,8 +388,8 @@ extension ConversationViewController {
             })
 
             actionSheet.addAction(ActionSheetAction(
-                title: String(
-                    format: OWSLocalizedString(
+                title: String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "GROUPS_INVITE_BLOCK_GROUP_AND_INVITER_FORMAT",
                         comment: "Label for 'block group and inviter' button in group invite view. Embeds {{name of user who invited you}}.",
                     ),
@@ -437,7 +437,7 @@ extension ConversationViewController {
             let hasReportedSpam = finder.hasUserReportedSpam(transaction: tx)
             return (threadName, hasReportedSpam)
         }
-        let actionSheetTitle = String(format: actionSheetTitleFormat, threadName)
+        let actionSheetTitle = String.nonPluralLocalizedStringWithFormat(actionSheetTitleFormat, threadName)
         let actionSheet = ActionSheetController(title: actionSheetTitle, message: actionSheetMessage)
 
         let blockActionTitle = OWSLocalizedString(

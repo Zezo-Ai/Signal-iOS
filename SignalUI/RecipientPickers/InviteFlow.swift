@@ -170,7 +170,7 @@ public class InviteFlow: NSObject {
 
         let subject = OWSLocalizedString("EMAIL_INVITE_SUBJECT", comment: "subject of email sent to contacts when inviting to install Signal")
         let bodyFormat = OWSLocalizedString("EMAIL_INVITE_BODY", comment: "body of email sent to contacts when inviting to install Signal. Embeds {{link to install Signal}} and {{link to the Signal home page}}")
-        let body = String(format: bodyFormat, installUrl, homepageUrl)
+        let body = String.nonPluralLocalizedStringWithFormat(bodyFormat, installUrl, homepageUrl)
         mailComposeViewController.setSubject(subject)
         mailComposeViewController.setMessageBody(body, isHTML: false)
 

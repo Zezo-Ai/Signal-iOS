@@ -250,7 +250,7 @@ public class QuotedReplyModel {
                 "POLL_ACCESSIBILITY_LABEL",
                 comment: "Accessibility label for poll message. Embeds {{ poll question }}.",
             )
-            return String(format: formatQuestion, pollQuestion)
+            return String.nonPluralLocalizedStringWithFormat(formatQuestion, pollQuestion)
         }
     }
 

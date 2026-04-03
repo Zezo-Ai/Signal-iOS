@@ -894,13 +894,13 @@ extension ImageEditorCropViewController {
             case .square:
                 return OWSLocalizedString("ASPECT_RATIO_SQUARE", comment: "One of the choices for pre-defined aspect ratio of a photo in media editor.")
             case .fourByThree:
-                return String(format: AspectRatio.aspectRatioXByYFormatString(), OWSFormat.formatInt(4), OWSFormat.formatInt(3))
+                return String.nonPluralLocalizedStringWithFormat(AspectRatio.aspectRatioXByYFormatString(), OWSFormat.formatInt(4), OWSFormat.formatInt(3))
             case .threeByFour:
-                return String(format: AspectRatio.aspectRatioXByYFormatString(), OWSFormat.formatInt(3), OWSFormat.formatInt(4))
+                return String.nonPluralLocalizedStringWithFormat(AspectRatio.aspectRatioXByYFormatString(), OWSFormat.formatInt(3), OWSFormat.formatInt(4))
             case .sixteenByNine:
-                return String(format: AspectRatio.aspectRatioXByYFormatString(), OWSFormat.formatInt(16), OWSFormat.formatInt(9))
+                return String.nonPluralLocalizedStringWithFormat(AspectRatio.aspectRatioXByYFormatString(), OWSFormat.formatInt(16), OWSFormat.formatInt(9))
             case .nineBySixteen:
-                return String(format: AspectRatio.aspectRatioXByYFormatString(), OWSFormat.formatInt(9), OWSFormat.formatInt(16))
+                return String.nonPluralLocalizedStringWithFormat(AspectRatio.aspectRatioXByYFormatString(), OWSFormat.formatInt(9), OWSFormat.formatInt(16))
             }
         }
     }

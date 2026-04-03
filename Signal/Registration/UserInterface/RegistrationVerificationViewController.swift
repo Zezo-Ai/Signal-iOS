@@ -136,7 +136,7 @@ class RegistrationVerificationViewController: OWSViewController {
             "ONBOARDING_VERIFICATION_TITLE_DEFAULT_FORMAT",
             comment: "Format for the title of the 'onboarding verification' view. Embeds {{the user's phone number}}.",
         )
-        return String(format: format, state.e164.stringValue.e164FormattedAsPhoneNumberWithoutBreaks)
+        return String.nonPluralLocalizedStringWithFormat(format, state.e164.stringValue.e164FormattedAsPhoneNumberWithoutBreaks)
     }
 
     private lazy var explanationLabel: UILabel = {
@@ -385,7 +385,7 @@ class RegistrationVerificationViewController: OWSViewController {
                 button.configuration?.title = {
                     let timeRemaining = max(date.timeIntervalSince(now), 0)
                     let durationString = retryAfterFormatter.string(from: Date(timeIntervalSinceReferenceDate: timeRemaining))
-                    return String(format: countdownFormat, durationString)
+                    return String.nonPluralLocalizedStringWithFormat(countdownFormat, durationString)
                 }()
             }
         }
@@ -513,7 +513,7 @@ class RegistrationVerificationViewController: OWSViewController {
 
             let timeRemaining = max(nextVerificationAttemptDate.timeIntervalSince(now), 0)
             let durationString = formatter.string(from: Date(timeIntervalSinceReferenceDate: timeRemaining))
-            let message = String(format: format, durationString)
+            let message = String.nonPluralLocalizedStringWithFormat(format, durationString)
             OWSActionSheets.showActionSheet(title: nil, message: message)
         }
     }

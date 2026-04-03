@@ -294,7 +294,7 @@ public class SendPaymentViewController: OWSViewController {
         let recipientName: String = SSKEnvironment.shared.databaseStorageRef.read { tx in
             SSKEnvironment.shared.contactManagerRef.displayName(for: recipientAddress, tx: tx).resolvedValue()
         }
-        let title = String(format: titleFormat, recipientName)
+        let title = String.nonPluralLocalizedStringWithFormat(titleFormat, recipientName)
         let actionSheet = ActionSheetController(
             title: title,
             message: OWSLocalizedString(
@@ -849,7 +849,7 @@ public class SendPaymentViewController: OWSViewController {
             "PAYMENTS_CURRENCY_CONVERSION_FRESHNESS_FORMAT",
             comment: "Format for indicator of a payment amount converted to fiat currency with the freshness of the conversion rate. Embeds: {{ %1$@ the payment amount, %2$@ the freshness of the currency conversion rate }}.",
         )
-        return String(format: conversionFormat, formattedAmount, formattedFreshness)
+        return String.nonPluralLocalizedStringWithFormat(conversionFormat, formattedAmount, formattedFreshness)
     }
 
     private func updateBalanceLabel() {
@@ -1068,7 +1068,7 @@ public class SendPaymentViewController: OWSViewController {
             "SETTINGS_PAYMENTS_PAYMENT_INSUFFICIENT_BALANCE_ALERT_MESSAGE_FORMAT",
             comment: "Message for the 'insufficient balance for payment' alert. Embeds: {{ The current payments balance }}.",
         )
-        let message = String(format: messageFormat, PaymentsFormat.format(
+        let message = String.nonPluralLocalizedStringWithFormat(messageFormat, PaymentsFormat.format(
             paymentAmount: paymentBalance.amount,
             isShortForm: false,
             withCurrencyCode: true,

@@ -191,7 +191,7 @@ public class TextFieldFormatting {
             "PHONE_NUMBER_EXAMPLE_FORMAT",
             comment: "A format for a label showing an example phone number. Embeds {{the example phone number}}.",
         )
-        return String(format: formatString, nationalNumber)
+        return String.nonPluralLocalizedStringWithFormat(formatString, nationalNumber)
     }
 }
 

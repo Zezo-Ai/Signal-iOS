@@ -265,8 +265,8 @@ class NewPollViewController2: OWSViewController, UITableViewDelegate, OWSNavigat
 
         cell.configure(
             text: optionRows[rowIndex].text,
-            placeholder: String(
-                format: OWSLocalizedString(
+            placeholder: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "POLL_OPTION_PLACEHOLDER_FORMAT",
                     comment: #"Format text for the placeholder of an option row when creating a poll. Embeds {{ the number of this option in a list, as a pre-localized string }}, so it should look like "Option 1", "Option 2"."#,
                 ),

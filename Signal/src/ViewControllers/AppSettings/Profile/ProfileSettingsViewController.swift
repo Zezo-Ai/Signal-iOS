@@ -551,8 +551,8 @@ class ProfileSettingsViewController: OWSTableViewController2 {
 
     private func offerToDeleteUsername(currentUsername: String) {
         OWSActionSheets.showConfirmationAlert(
-            message: String(
-                format: OWSLocalizedString(
+            message: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "PROFILE_SETTINGS_USERNAME_DELETION_CONFIRMATION_ALERT_MESSAGE_FORMAT",
                     comment: "A message asking the user if they are sure they want to remove their username and explaining what will happen. Embeds {{ the user's current username }}.",
                 ),

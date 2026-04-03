@@ -117,7 +117,7 @@ public class BadgeIssueSheetState {
             )
 
             return Body(
-                String(format: formatText, chargeFailureString),
+                String.nonPluralLocalizedStringWithFormat(formatText, chargeFailureString),
                 learnMoreLink: URL.Support.Donations.badgeExpiration,
             )
         case let .boostExpired(hasCurrentSubscription):
@@ -145,7 +145,7 @@ public class BadgeIssueSheetState {
                 "DONATION_FROM_A_FRIEND_BADGE_NOT_REDEEMED_BODY_FORMAT",
                 comment: "Someone donated on your behalf and you got a badge, which expired before you could redeem it. A sheet appears to tell you about this. This is the text on that sheet. Embeds {{contact name}}.",
             )
-            return Body(String(format: formatText, fullName))
+            return Body(String.nonPluralLocalizedStringWithFormat(formatText, fullName))
         case let .bankPaymentFailed(chargeFailureCode):
             let formatText = OWSLocalizedString(
                 "DONATION_BADGE_ISSUE_SHEET_BANK_PAYMENT_FAILED_MESSAGE",
@@ -157,7 +157,7 @@ public class BadgeIssueSheetState {
                 paymentMethod: .sepa,
             )
 
-            return Body(String(format: formatText, chargeFailureString))
+            return Body(String.nonPluralLocalizedStringWithFormat(formatText, chargeFailureString))
         case .boostBankPaymentProcessing:
             let bodyFormat = OWSLocalizedString(
                 "DONATION_BADGE_ISSUE_SHEET_ONE_TIME_BANK_PAYMENT_PROCESSING_MESSAGE",
@@ -165,7 +165,7 @@ public class BadgeIssueSheetState {
             )
 
             return Body(
-                String(format: bodyFormat, badge.localizedName),
+                String.nonPluralLocalizedStringWithFormat(bodyFormat, badge.localizedName),
                 learnMoreLink: URL.Support.Donations.donationPending,
             )
         case .subscriptionBankPaymentProcessing:
@@ -175,7 +175,7 @@ public class BadgeIssueSheetState {
             )
 
             return Body(
-                String(format: bodyFormat, badge.localizedName),
+                String.nonPluralLocalizedStringWithFormat(bodyFormat, badge.localizedName),
                 learnMoreLink: URL.Support.Donations.donationPending,
             )
         }

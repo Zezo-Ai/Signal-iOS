@@ -77,9 +77,9 @@ public extension TSInfoMessage {
 
         switch displayNameBeforeLearningProfileName {
         case .phoneNumber(let phoneNumber):
-            return String(format: format, phoneNumber)
+            return String.nonPluralLocalizedStringWithFormat(format, phoneNumber)
         case .username(let username):
-            return String(format: format, username)
+            return String.nonPluralLocalizedStringWithFormat(format, username)
         }
     }
 }

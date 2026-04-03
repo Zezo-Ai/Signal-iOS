@@ -39,13 +39,13 @@ public extension TSInfoMessage {
                 comment: "A system event shown in a conversation when multiple conversations for the same person have been merged into one. The parameters are replaced with the contact's name (eg John Doe) and their phone number (eg +1 650 555 0100).",
             )
             let formattedPhoneNumber = PhoneNumber.bestEffortLocalizedPhoneNumber(e164: phoneNumber)
-            return String(format: formatString, displayName, formattedPhoneNumber)
+            return String.nonPluralLocalizedStringWithFormat(formatString, displayName, formattedPhoneNumber)
         } else {
             let formatString = OWSLocalizedString(
                 "THREAD_MERGE_NO_PHONE_NUMBER",
                 comment: "A system event shown in a conversation when multiple conversations for the same person have been merged into one. The parameter is replaced with the contact's name (eg John Doe).",
             )
-            return String(format: formatString, displayName)
+            return String.nonPluralLocalizedStringWithFormat(formatString, displayName)
         }
     }
 

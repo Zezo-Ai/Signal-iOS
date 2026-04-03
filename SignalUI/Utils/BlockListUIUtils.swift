@@ -65,8 +65,8 @@ public class BlockListUIUtils {
             return
         }
 
-        let actionSheetTitle = String(
-            format: OWSLocalizedString(
+        let actionSheetTitle = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "BLOCK_LIST_BLOCK_USER_TITLE_FORMAT",
                 comment: "A format for the 'block user' action sheet title. Embeds {{the blocked user's name or phone number}}.",
             ),
@@ -103,8 +103,8 @@ public class BlockListUIUtils {
         from viewController: UIViewController,
         completion: Completion?,
     ) {
-        let actionSheetTitle = String(
-            format: OWSLocalizedString(
+        let actionSheetTitle = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "BLOCK_LIST_BLOCK_GROUP_TITLE_FORMAT",
                 comment: "A format for the 'block group' action sheet title. Embeds the {{group name}}.",
             ),
@@ -154,8 +154,8 @@ public class BlockListUIUtils {
                 "BLOCK_LIST_VIEW_BLOCKED_ALERT_TITLE",
                 comment: "The title of the 'user blocked' alert.",
             ),
-            message: String(
-                format: OWSLocalizedString(
+            message: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "BLOCK_LIST_VIEW_BLOCKED_ALERT_MESSAGE_FORMAT",
                     comment: "The message format of the 'conversation blocked' alert. Embeds the {{conversation title}}.",
                 ),
@@ -209,7 +209,7 @@ public class BlockListUIUtils {
             "BLOCK_LIST_VIEW_BLOCKED_ALERT_MESSAGE_FORMAT",
             comment: "The message format of the 'conversation blocked' alert. Embeds the {{conversation title}}.",
         )
-        let actionSheetMessage = String(format: actionSheetMessageFormat, groupThread.groupNameOrDefault.formattedForActionSheetMessage())
+        let actionSheetMessage = String.nonPluralLocalizedStringWithFormat(actionSheetMessageFormat, groupThread.groupNameOrDefault.formattedForActionSheetMessage())
 
         showOkActionSheet(title: actionSheetTitle, message: actionSheetMessage, from: viewController, completion: completion)
     }
@@ -245,8 +245,8 @@ public class BlockListUIUtils {
         let displayName = SSKEnvironment.shared.databaseStorageRef.read { tx in SSKEnvironment.shared.contactManagerRef.displayName(for: address, tx: tx).resolvedValue() }
         owsAssertDebug(!displayName.isEmpty)
 
-        let actionSheetTitle = String(
-            format: OWSLocalizedString(
+        let actionSheetTitle = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "BLOCK_LIST_UNBLOCK_TITLE_FORMAT",
                 comment: "A format for the 'unblock conversation' action sheet title. Embeds the {{conversation title}}.",
             ),
@@ -323,7 +323,7 @@ public class BlockListUIUtils {
             "BLOCK_LIST_VIEW_UNBLOCKED_ALERT_TITLE_FORMAT",
             comment: "Alert title after unblocking a group or 1:1 chat. Embeds the {{conversation title}}.",
         )
-        let actionSheetTitle = String(format: actionSheetTitleFormat, displayName.formattedForActionSheetTitle())
+        let actionSheetTitle = String.nonPluralLocalizedStringWithFormat(actionSheetTitleFormat, displayName.formattedForActionSheetTitle())
         showOkActionSheet(title: actionSheetTitle, message: nil, from: viewController, completion: completion)
     }
 
@@ -341,7 +341,7 @@ public class BlockListUIUtils {
             "BLOCK_LIST_VIEW_UNBLOCKED_ALERT_TITLE_FORMAT",
             comment: "Alert title after unblocking a group or 1:1 chat. Embeds the {{conversation title}}.",
         )
-        let actionSheetTitle = String(format: actionSheetTitleFormat, groupNameOrDefault.formattedForActionSheetMessage())
+        let actionSheetTitle = String.nonPluralLocalizedStringWithFormat(actionSheetTitleFormat, groupNameOrDefault.formattedForActionSheetMessage())
         let actionSheetMessage = OWSLocalizedString(
             "BLOCK_LIST_VIEW_UNBLOCKED_GROUP_ALERT_BODY",
             comment: "Alert body after unblocking a group.",

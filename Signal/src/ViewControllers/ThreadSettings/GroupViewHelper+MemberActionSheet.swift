@@ -43,7 +43,7 @@ extension GroupViewHelper {
                 },
             )
         }
-        let title = String(format: titleFormat, SSKEnvironment.shared.databaseStorageRef.read { tx in
+        let title = String.nonPluralLocalizedStringWithFormat(titleFormat, SSKEnvironment.shared.databaseStorageRef.read { tx in
             return SSKEnvironment.shared.contactManagerRef.displayName(for: address, tx: tx).resolvedValue()
         })
         let actionSheet = ActionSheetController(title: title, message: message)

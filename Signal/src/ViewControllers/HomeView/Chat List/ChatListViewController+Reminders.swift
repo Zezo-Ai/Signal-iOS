@@ -387,8 +387,8 @@ extension ChatListViewController {
 extension ChatListViewController: UsernameSelectionDelegate {
     func usernameSelectionDidDismissAfterConfirmation(username: String) {
         self.presentToast(
-            text: String(
-                format: OWSLocalizedString(
+            text: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "USERNAME_RESET_SUCCESSFUL_TOAST",
                     comment: "A message in a toast informing the user their username, link, and QR code have successfully been reset. Embeds {{ the user's new username }}.",
                 ),

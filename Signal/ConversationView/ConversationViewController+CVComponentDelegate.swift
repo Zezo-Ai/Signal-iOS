@@ -774,7 +774,7 @@ extension ConversationViewController: CVComponentDelegate {
 
         let actionSheet = ActionSheetController(
             title: nil,
-            message: String(format: messageFormat, displayName),
+            message: String.nonPluralLocalizedStringWithFormat(messageFormat, displayName),
         )
         actionSheet.customHeader = headerView
 
@@ -802,8 +802,8 @@ extension ConversationViewController: CVComponentDelegate {
         let threadName = SSKEnvironment.shared.databaseStorageRef.read { transaction in
             SSKEnvironment.shared.contactManagerRef.displayName(for: self.thread, transaction: transaction)
         }
-        let alertMessage = String(
-            format: OWSLocalizedString(
+        let alertMessage = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "CORRUPTED_SESSION_DESCRIPTION",
                 comment: "ActionSheet title",
             ),
@@ -895,8 +895,8 @@ extension ConversationViewController: CVComponentDelegate {
 
         let alert = ActionSheetController(
             title: CallStrings.callBackAlertTitle,
-            message: String(
-                format: CallStrings.callBackAlertMessageFormat,
+            message: String.nonPluralLocalizedStringWithFormat(
+                CallStrings.callBackAlertMessageFormat,
                 displayName,
             ),
         )
@@ -931,8 +931,8 @@ extension ConversationViewController: CVComponentDelegate {
         let displayName = SSKEnvironment.shared.databaseStorageRef.read { tx in SSKEnvironment.shared.contactManagerRef.displayName(for: address, tx: tx).resolvedValue() }
 
         let alert = ActionSheetController(
-            title: String(
-                format: OWSLocalizedString(
+            title: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "MISSED_CALL_BLOCKED_SYSTEM_SETTINGS_SHEET_TITLE",
                     comment: "Title for sheet shown when the user taps a missed call from a contact blocked in iOS settings. Embeds {{ Contact's name }}",
                 ),
@@ -1069,8 +1069,8 @@ extension ConversationViewController: CVComponentDelegate {
                 "GROUPS_BLOCK_REQUEST_SHEET_TITLE",
                 comment: "Title for sheet asking if the user wants to block a request to join the group.",
             ),
-            message: String(
-                format: OWSLocalizedString(
+            message: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "GROUPS_BLOCK_REQUEST_SHEET_MESSAGE",
                     comment: "Message for sheet offering to let the user block a request to join the group. Embeds {{ the requester's name }}.",
                 ),
@@ -1230,7 +1230,7 @@ extension ConversationViewController: CVComponentDelegate {
             let shortDisplayName = SSKEnvironment.shared.databaseStorageRef.read { tx in
                 return SSKEnvironment.shared.contactManagerRef.displayName(for: contactAddress, tx: tx).resolvedValue(useShortNameIfAvailable: true)
             }
-            return String(format: formatString, formattedPhoneNumber, shortDisplayName)
+            return String.nonPluralLocalizedStringWithFormat(formatString, formattedPhoneNumber, shortDisplayName)
         }()
         let customHeader: UIView = {
             let imageView = UIImageView(image: UIImage(named: "merged-chat")!)
@@ -1276,8 +1276,8 @@ extension ConversationViewController: CVComponentDelegate {
 
         let message: String
         if thread is TSContactThread {
-            message = String(
-                format: OWSLocalizedString(
+            message = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_OPTIONS_ACTION_SHEET_HEADER_CONTACT",
                     comment: "Header for an action sheet providing options in response to an accepted 1:1 message request. Embeds {{ the name of your chat partner }}.",
                 ),
@@ -1296,8 +1296,8 @@ extension ConversationViewController: CVComponentDelegate {
             message: message,
         )
         alert.addAction(ActionSheetAction(
-            title: String(
-                format: OWSLocalizedString(
+            title: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "MESSAGE_REQUEST_ACCEPTED_INFO_MESSAGE_SHEET_OPTION_BLOCK",
                     comment: "Sheet option for blocking a chat. In this case, the sheet appears when the user taps a button attached to a 'message request accepted' info message in-chat.",
                 ),
@@ -1311,8 +1311,8 @@ extension ConversationViewController: CVComponentDelegate {
             },
         ))
         alert.addAction(ActionSheetAction(
-            title: String(
-                format: OWSLocalizedString(
+            title: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "MESSAGE_REQUEST_ACCEPTED_INFO_MESSAGE_SHEET_OPTION_SPAM",
                     comment: "Sheet option for reporting a chat as spam. In this case, the sheet appears when the user taps a button attached to a 'message request accepted' info message in-chat.",
                 ),
@@ -1326,8 +1326,8 @@ extension ConversationViewController: CVComponentDelegate {
             },
         ))
         alert.addAction(ActionSheetAction(
-            title: String(
-                format: OWSLocalizedString(
+            title: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "MESSAGE_REQUEST_ACCEPTED_INFO_MESSAGE_SHEET_OPTION_DELETE",
                     comment: "Sheet option for deleting a chat. In this case, the sheet appears when the user taps a button attached to a 'message request accepted' info message in-chat.",
                 ),

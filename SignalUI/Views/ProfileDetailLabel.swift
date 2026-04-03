@@ -249,8 +249,8 @@ public extension ProfileDetailLabel {
         font: UIFont = .dynamicTypeBody,
     ) -> ProfileDetailLabel {
         .init(
-            title: String(
-                format: OWSLocalizedString(
+            title: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "CONTACT_ABOUT_SHEET_NO_DIRECT_MESSAGES",
                     comment: "Indicates that the user has no messages with the other account. Embeds {{name}}",
                 ),
@@ -266,8 +266,8 @@ public extension ProfileDetailLabel {
         font: UIFont = .dynamicTypeBody,
     ) -> ProfileDetailLabel {
         .init(
-            title: String(
-                format: OWSLocalizedString(
+            title: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "CONTACT_ABOUT_SHEET_BLOCKED_USER_FORMAT",
                     comment: "Indicates that the user has blocked the other account. Embeds {{name}}",
                 ),
@@ -297,8 +297,8 @@ public extension ProfileDetailLabel {
         font: UIFont = .dynamicTypeBody,
     ) -> ProfileDetailLabel {
         .init(
-            title: String(
-                format: OWSLocalizedString(
+            title: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "CONTACT_ABOUT_SHEET_CONNECTION_IN_SYSTEM_CONTACTS",
                     comment: "Indicates that another account is in the user's system contacts. Embeds {{name}}",
                 ),
@@ -383,7 +383,7 @@ public extension ProfileDetailLabel {
                 "THREAD_DETAILS_ONE_MUTUAL_GROUP",
                 comment: "A string indicating a mutual group the user shares with this contact. Embeds {{mutual group name}}",
             )
-            return String(format: formatString, mutualGroups[0].groupNameOrDefault)
+            return String.nonPluralLocalizedStringWithFormat(formatString, mutualGroups[0].groupNameOrDefault)
 
         case (true, 1):
             return OWSLocalizedString(

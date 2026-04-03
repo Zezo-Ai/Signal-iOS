@@ -1916,7 +1916,7 @@ extension CameraZoomSelectionControl {
                 "CAMERA_VO_ZOOM_LEVEL",
                 comment: "VoiceOver description of current camera zoom level.",
             )
-            return String(format: formatString, zoomValueString)
+            return String.nonPluralLocalizedStringWithFormat(formatString, zoomValueString)
         }
         set { super.accessibilityValue = newValue }
     }

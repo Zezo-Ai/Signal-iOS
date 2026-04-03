@@ -136,6 +136,6 @@ extension RegistrationPhoneNumberViewState.ValidationError.RateLimited {
         }()
 
         let durationString = retryAfterFormatter.string(from: Date(timeIntervalSinceReferenceDate: timeRemaining))
-        return String(format: rateLimitFormat, durationString)
+        return String.nonPluralLocalizedStringWithFormat(rateLimitFormat, durationString)
     }
 }

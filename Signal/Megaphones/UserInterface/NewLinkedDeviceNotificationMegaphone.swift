@@ -26,8 +26,8 @@ final class NewLinkedDeviceNotificationMegaphone: MegaphoneView {
             comment: "Title for system notification when a new device is linked.",
         )
 
-        let bodyText = String(
-            format: OWSLocalizedString(
+        let bodyText = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "LINKED_DEVICE_NOTIFICATION_MEGAPHONE_BODY",
                 comment: "Body for megaphone notification when a new device is linked. Embeds {{ time the device was linked }}",
             ),

@@ -239,12 +239,12 @@ class RaisedHandsToast: UIView {
         }
 
         self.collapsedText = if self.yourHandIsRaised, raisedHands.count > 1 {
-            String(
-                format: OWSLocalizedString(
+            String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "RAISED_HANDS_TOAST_YOU_PLUS_OTHERS_COUNT",
                     comment: "A compact member count on the call view's raised hands toast indicating that you and a number of other users raised a hand. Embeds {{number of other users}}",
                 ),
-                raisedHands.count - 1,
+                String(raisedHands.count - 1),
             )
         } else if self.yourHandIsRaised {
             CommonStrings.you
@@ -285,8 +285,8 @@ class RaisedHandsToast: UIView {
                 return String.localizedStringWithFormat(format, otherMembersCount, firstRaisedHandMemberName)
             }
 
-            return String(
-                format: OWSLocalizedString(
+            return String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "RAISED_HANDS_TOAST_SINGLE_HAND_MESSAGE",
                     comment: "A message appearing on the call view's raised hands toast indicating that another named member has raised their hand.",
                 ),

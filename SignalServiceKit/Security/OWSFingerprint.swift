@@ -98,7 +98,7 @@ public class OWSFingerprint {
                 "PRIVACY_VERIFICATION_FAILED_I_HAVE_WRONG_KEY_FOR_THEM",
                 comment: "Alert body when verifying with {{contact name}}",
             )
-            let description = String(format: descriptionFormat, self.theirName)
+            let description = String.nonPluralLocalizedStringWithFormat(descriptionFormat, self.theirName)
             return .noMatch(localizedErrorDescription: description)
         }
         if localFingerprint.identityData != Self.scannableData(from: self.myFingerprintData) {
@@ -107,7 +107,7 @@ public class OWSFingerprint {
                 "PRIVACY_VERIFICATION_FAILED_THEY_HAVE_WRONG_KEY_FOR_ME",
                 comment: "Alert body when verifying with {{contact name}}",
             )
-            let description = String(format: descriptionFormat, self.theirName)
+            let description = String.nonPluralLocalizedStringWithFormat(descriptionFormat, self.theirName)
             return .noMatch(localizedErrorDescription: description)
         }
 

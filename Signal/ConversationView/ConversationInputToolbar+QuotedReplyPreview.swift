@@ -191,8 +191,8 @@ private class QuotedMessageSnippetView: UIView {
                     tx: tx,
                 ).resolvedValue()
             }
-            quotedAuthor = String(
-                format: NSLocalizedString(
+            quotedAuthor = String.nonPluralLocalizedStringWithFormat(
+                NSLocalizedString(
                     "QUOTED_REPLY_AUTHOR_INDICATOR_FORMAT",
                     comment: "Indicates the author of a quoted message. Embeds {{the author's name or phone number}}.",
                 ),

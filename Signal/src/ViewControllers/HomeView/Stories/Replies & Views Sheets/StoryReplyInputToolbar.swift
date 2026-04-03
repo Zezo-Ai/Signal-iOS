@@ -231,7 +231,7 @@ class StoryReplyInputToolbar: UIView {
                 let authorName = SSKEnvironment.shared.databaseStorageRef.read { tx in
                     return SSKEnvironment.shared.contactManagerRef.displayName(for: quotedReplyModel.originalMessageAuthorAddress, tx: tx).resolvedValue()
                 }
-                return String(format: format, authorName)
+                return String.nonPluralLocalizedStringWithFormat(format, authorName)
             } else {
                 return OWSLocalizedString(
                     "STORY_REPLY_TEXT_FIELD_PLACEHOLDER",

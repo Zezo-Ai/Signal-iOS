@@ -159,7 +159,7 @@ public class GroupMemberRequestsAndInvitesViewController: OWSTableViewController
             comment: "Footer for the 'pending member requests' section of the 'member requests and invites' view. Embeds {{ the name of the group }}.",
         )
         let groupName = SSKEnvironment.shared.databaseStorageRef.read { tx in SSKEnvironment.shared.contactManagerRef.displayName(for: oldGroupThread, transaction: tx) }
-        section.footerTitle = String(format: footerFormat, groupName)
+        section.footerTitle = String.nonPluralLocalizedStringWithFormat(footerFormat, groupName)
 
         if !requestingMembersSorted.isEmpty {
             for address in requestingMembersSorted {
@@ -450,7 +450,7 @@ public class GroupMemberRequestsAndInvitesViewController: OWSTableViewController
             "PENDING_GROUP_MEMBERS_REVOKE_LOCAL_INVITE_CONFIRMATION_TITLE_1_FORMAT",
             comment: "Format for title of 'revoke invite' confirmation alert. Embeds {{ the name of the invited group member. }}.",
         )
-        let alertTitle = String(format: format, invitedName)
+        let alertTitle = String.nonPluralLocalizedStringWithFormat(format, invitedName)
         let actionSheet = ActionSheetController(title: alertTitle)
         actionSheet.addAction(ActionSheetAction(
             title: OWSLocalizedString(
@@ -530,7 +530,7 @@ public class GroupMemberRequestsAndInvitesViewController: OWSTableViewController
             comment: "Message indicating that a request to join the group was successfully approved. Embeds {{ the name of the approved user }}.",
         )
         let userName = SSKEnvironment.shared.databaseStorageRef.read { tx in SSKEnvironment.shared.contactManagerRef.displayName(for: address, tx: tx).resolvedValue() }
-        let text = String(format: format, userName)
+        let text = String.nonPluralLocalizedStringWithFormat(format, userName)
         presentToast(text: text)
     }
 
@@ -540,7 +540,7 @@ public class GroupMemberRequestsAndInvitesViewController: OWSTableViewController
             comment: "Message indicating that a request to join the group was successfully denied. Embeds {{ the name of the denied user }}.",
         )
         let userName = SSKEnvironment.shared.databaseStorageRef.read { tx in SSKEnvironment.shared.contactManagerRef.displayName(for: address, tx: tx).resolvedValue() }
-        let text = String(format: format, userName)
+        let text = String.nonPluralLocalizedStringWithFormat(format, userName)
         presentToast(text: text)
     }
 }
@@ -596,7 +596,7 @@ private extension GroupMemberRequestsAndInvitesViewController {
             "PENDING_GROUP_MEMBERS_ACCEPT_REQUEST_CONFIRMATION_TITLE_FORMAT",
             comment: "Title of 'accept member request to join group' confirmation alert. Embeds {{ the name of the requesting group member. }}.",
         )
-        let alertTitle = String(format: format, username)
+        let alertTitle = String.nonPluralLocalizedStringWithFormat(format, username)
         let actionSheet = ActionSheetController(title: alertTitle)
 
         let actionTitle = OWSLocalizedString(
@@ -618,7 +618,7 @@ private extension GroupMemberRequestsAndInvitesViewController {
             "PENDING_GROUP_MEMBERS_DENY_REQUEST_CONFIRMATION_TITLE_FORMAT",
             comment: "Title of 'deny member request to join group' confirmation alert. Embeds {{ the name of the requesting group member. }}.",
         )
-        let alertTitle = String(format: format, username)
+        let alertTitle = String.nonPluralLocalizedStringWithFormat(format, username)
         let actionSheet = ActionSheetController(title: alertTitle)
 
         let actionTitle = OWSLocalizedString(

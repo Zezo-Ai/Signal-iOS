@@ -103,7 +103,7 @@ class ProfileBioViewController: OWSTableViewController2 {
                 "PROFILE_BIO_VIEW_TITLE_FORMAT",
                 comment: "Title for the profile bio view. Embeds {{ the number of characters that can be added to the profile bio without hitting the length limit }}.",
             )
-            title = String(format: titleFormat, OWSFormat.formatInt(remainingGlyphCount))
+            title = String.nonPluralLocalizedStringWithFormat(titleFormat, OWSFormat.formatInt(remainingGlyphCount))
         } else {
             title = OWSLocalizedString("PROFILE_BIO_VIEW_TITLE", comment: "Title for the profile bio view.")
         }

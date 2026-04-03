@@ -184,16 +184,16 @@ public class GiftBadgeCellView: UIStackView {
 
                 return formattedDuration
             }()
-            let formattedDurationText = String(
-                format: OWSLocalizedString(
+            let formattedDurationText = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "DONATION_FOR_A_FRIEND_ROW_DURATION",
                     comment: "When donating on behalf of a friend, a badge will be sent. This shows how long the badge lasts. Embeds {{formatted duration}}.",
                 ),
                 formattedDuration,
             )
 
-            return String(
-                format: OWSLocalizedString(
+            return String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "JOINED_WITH_DOT",
                     comment: "Two strings, joined by a dot. Embeds {first} and {second}, which are on opposite sides of the dot",
                 ),

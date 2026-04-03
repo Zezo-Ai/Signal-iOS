@@ -623,7 +623,7 @@ public class PaymentsSettingsViewController: OWSTableViewController2 {
             "SETTINGS_PAYMENTS_BALANCE_CONVERSION_FORMAT",
             comment: "Format string for the 'local balance converted into local currency' indicator. Embeds: {{ %1$@ the local balance in the local currency, %2$@ the local currency code, %3$@ the date the currency conversion rate was obtained. }}..",
         )
-        return String(format: formatString, fiatAmountString, localCurrencyCode, conversionFreshnessString)
+        return String.nonPluralLocalizedStringWithFormat(formatString, fiatAmountString, localCurrencyCode, conversionFreshnessString)
     }
 
     private func configureHistorySection(

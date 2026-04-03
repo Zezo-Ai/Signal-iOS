@@ -37,7 +37,7 @@ class BlockingAnnouncementOnlyView: ConversationBottomPanelView {
             "GROUPS_ANNOUNCEMENT_ONLY_ADMINISTRATORS",
             comment: "Label for group administrators in the 'announcement-only' group UI.",
         )
-        let text = String(format: format, adminsText)
+        let text = String.nonPluralLocalizedStringWithFormat(format, adminsText)
         let attributedString = NSMutableAttributedString(string: text)
         attributedString.setAttributes([.foregroundColor: UIColor.Signal.link], forSubstring: adminsText)
 

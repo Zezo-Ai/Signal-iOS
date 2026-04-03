@@ -30,24 +30,24 @@ class DonateChoosePaymentMethodSheet: StackSheetViewController {
                 "DONATE_CHOOSE_PAYMENT_METHOD_SHEET_TITLE_FOR_ONE_TIME_DONATION",
                 comment: "When users make one-time donations, they see a sheet that lets them pick a payment method. This is the title on that sheet. Embeds {{amount of money}}, such as \"$5\".",
             )
-            return String(format: format, currencyString)
+            return String.nonPluralLocalizedStringWithFormat(format, currencyString)
         case .monthly:
             let moneyPerMonthFormat = OWSLocalizedString(
                 "SUSTAINER_VIEW_PRICING",
                 comment: "Pricing text for sustainer view badges, embeds {{price}}",
             )
-            let moneyPerMonthString = String(format: moneyPerMonthFormat, currencyString)
+            let moneyPerMonthString = String.nonPluralLocalizedStringWithFormat(moneyPerMonthFormat, currencyString)
             let format = OWSLocalizedString(
                 "DONATE_CHOOSE_PAYMENT_METHOD_SHEET_TITLE_FOR_MONTHLY_DONATION",
                 comment: "When users make monthly donations, they see a sheet that lets them pick a payment method. This is the title on that sheet. Embeds {{amount of money per month}}, such as \"$5/month\".",
             )
-            return String(format: format, moneyPerMonthString)
+            return String.nonPluralLocalizedStringWithFormat(format, moneyPerMonthString)
         case .gift:
             let format = OWSLocalizedString(
                 "DONATE_CHOOSE_PAYMENT_METHOD_SHEET_TITLE_FOR_DONATION_ON_BEHALF_OF_A_FRIEND",
                 comment: "When users make donations on a friend's behalf, they see a sheet that lets them pick a payment method. This is the title on that sheet. Embeds {{amount of money}}, such as \"$5\".",
             )
-            return String(format: format, currencyString)
+            return String.nonPluralLocalizedStringWithFormat(format, currencyString)
         }
     }
 
@@ -58,21 +58,21 @@ class DonateChoosePaymentMethodSheet: StackSheetViewController {
                 "DONATE_CHOOSE_PAYMENT_METHOD_SHEET_SUBTITLE_FOR_ONE_TIME_DONATION",
                 comment: "When users make one-time donations, they see a sheet that lets them pick a payment method. It also tells them what they'll be doing when they pay: receive a badge for a month. This is the subtitle on that sheet. Embeds {{localized badge name}}, such as \"Boost\".",
             )
-            return String(format: format, badge.localizedName)
+            return String.nonPluralLocalizedStringWithFormat(format, badge.localizedName)
 
         case .monthly:
             let format = OWSLocalizedString(
                 "DONATE_CHOOSE_PAYMENT_METHOD_SHEET_SUBTITLE_FOR_MONTHLY_DONATION",
                 comment: "When users make monthly donations, they see a sheet that lets them pick a payment method. It also tells them what they'll be doing when they pay: receive a badge. This is the subtitle on that sheet. Embeds {{localized badge name}}, such as \"Planet\".",
             )
-            return String(format: format, badge.localizedName)
+            return String.nonPluralLocalizedStringWithFormat(format, badge.localizedName)
 
         case let .gift(recipientFullName):
             let format = OWSLocalizedString(
                 "DONATE_CHOOSE_PAYMENT_METHOD_SHEET_SUBTITLE_FOR_DONATION_ON_BEHALF_OF_A_FRIEND",
                 comment: "When users make donations on a friend's behalf, they see a sheet that lets them pick a payment method. This is the subtitle on that sheet. Embeds {{recipient's name}}.",
             )
-            return String(format: format, recipientFullName)
+            return String.nonPluralLocalizedStringWithFormat(format, recipientFullName)
         }
     }
 

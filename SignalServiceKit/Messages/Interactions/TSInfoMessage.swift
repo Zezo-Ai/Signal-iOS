@@ -41,8 +41,8 @@ extension TSInfoMessage {
         case .userNotRegistered:
             if let unregisteredAddress, unregisteredAddress.isValid {
                 let recipientName = SSKEnvironment.shared.contactManagerRef.displayNameString(for: unregisteredAddress, transaction: tx)
-                return String(
-                    format: OWSLocalizedString(
+                return String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "ERROR_UNREGISTERED_USER_FORMAT",
                         comment: "Format string for 'unregistered user' error. Embeds {{the unregistered user's name or signal id}}.",
                     ),
@@ -71,7 +71,7 @@ extension TSInfoMessage {
             let address = TSContactThread.contactAddress(fromThreadId: self.uniqueThreadId, transaction: tx)
             let recipientName = SSKEnvironment.shared.contactManagerRef.displayNameString(for: address!, transaction: tx)
             let format = OWSLocalizedString("INFO_MESSAGE_USER_JOINED_SIGNAL_BODY_FORMAT", comment: "Shown in inbox and conversation when a user joins Signal, embeds the new user's {{contact name}}")
-            return String(format: format, recipientName)
+            return String.nonPluralLocalizedStringWithFormat(format, recipientName)
         case .syncedThread:
             return ""
         case .profileUpdate:
@@ -87,7 +87,7 @@ extension TSInfoMessage {
                 "INFO_MESSAGE_USER_CHANGED_PHONE_NUMBER_FORMAT",
                 comment: "Indicates that another user has changed their phone number. Embeds: {{ the user's name}}",
             )
-            return String(format: format, userName)
+            return String.nonPluralLocalizedStringWithFormat(format, userName)
         case .recipientHidden:
             /// This does not control whether to show the info message in the chat
             /// preview. To control that, see ``TSInteraction.shouldAppearInInbox``.

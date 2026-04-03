@@ -263,7 +263,7 @@ class BadgeGiftingConfirmationViewController: OWSTableViewController2 {
                 let durationString = String.formatDurationLossless(
                     durationSeconds: disappearingMessagesDuration,
                 )
-                disappearingMessagesInfoLabel.text = String(format: format, durationString)
+                disappearingMessagesInfoLabel.text = String.nonPluralLocalizedStringWithFormat(format, durationString)
 
                 cell.contentView.addSubview(disappearingMessagesInfoLabel)
                 disappearingMessagesInfoLabel.autoPinEdgesToSuperviewMargins()

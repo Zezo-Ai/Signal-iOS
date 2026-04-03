@@ -54,8 +54,8 @@ class RegistrationChangePhoneNumberConfirmationViewController: OWSViewController
         )
         let oldPhoneNumberFormatted = PhoneNumber.bestEffortLocalizedPhoneNumber(e164: state.oldE164.stringValue)
         let newPhoneNumberFormatted = PhoneNumber.bestEffortLocalizedPhoneNumber(e164: state.newE164.stringValue)
-        let descriptionText = String(
-            format: descriptionFormat,
+        let descriptionText = String.nonPluralLocalizedStringWithFormat(
+            descriptionFormat,
             oldPhoneNumberFormatted,
             newPhoneNumberFormatted,
         )

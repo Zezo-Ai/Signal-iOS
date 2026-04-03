@@ -208,8 +208,8 @@ struct LinkAndSyncProvisioningProgressView: View {
                 comment: "Progress label when the message loading has not yet started during the device linking process",
             )
         } else if let downloadProgress = viewModel.downloadProgress {
-            String(
-                format: OWSLocalizedString(
+            String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "LINK_NEW_DEVICE_SYNC_DOWNLOAD_PROGRESS",
                     comment: "Progress label showing the download progress of a linked device sync. Embeds {{ formatted downloaded size (such as megabytes), formatted total download size, formatted percentage }}",
                 ),
@@ -218,8 +218,8 @@ struct LinkAndSyncProvisioningProgressView: View {
                 progressToShow.formatted(.owsPercent()),
             )
         } else if !viewModel.isFinalizing {
-            String(
-                format: OWSLocalizedString(
+            String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "LINK_NEW_DEVICE_SYNC_PROGRESS_PERCENT",
                     comment: "On a progress modal indicating the percent complete the sync process is. Embeds {{ formatted percentage }}",
                 ),

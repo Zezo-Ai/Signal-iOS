@@ -1317,8 +1317,8 @@ extension RecipientPickerViewController {
                 "RECIPIENT_PICKER_INVITE_TITLE",
                 comment: "Alert title. Shown after selecting a phone number that isn't a Signal user.",
             ),
-            message: String(
-                format: OWSLocalizedString(
+            message: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "RECIPIENT_PICKER_INVITE_MESSAGE",
                     comment: "Alert text. Shown after selecting a phone number that isn't a Signal user.",
                 ),
@@ -1352,8 +1352,8 @@ extension RecipientPickerViewController {
                 "RECIPIENT_PICKER_INVALID_NUMBER_TITLE",
                 comment: "Alert title. Shown after selecting a phone number that isn't valid.",
             ),
-            message: String(
-                format: OWSLocalizedString(
+            message: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "RECIPIENT_PICKER_INVALID_NUMBER_MESSAGE",
                     comment: "Alert text. Shown after selecting a phone number that isn't valid.",
                 ),

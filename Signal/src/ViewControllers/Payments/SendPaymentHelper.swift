@@ -154,8 +154,8 @@ class SendPaymentHelper {
             "PAYMENTS_NEW_PAYMENT_BALANCE_FORMAT",
             comment: "Format for the 'balance' indicator. Embeds {{ the current payments balance }}.",
         )
-        balanceLabel.text = String(
-            format: format,
+        balanceLabel.text = String.nonPluralLocalizedStringWithFormat(
+            format,
             Self.formatMobileCoinAmount(maximumPaymentAmount),
         )
     }
@@ -218,8 +218,8 @@ class SendPaymentHelper {
             "PAYMENTS_NEW_PAYMENT_CURRENCY_FORMAT",
             comment: "Format for currency amounts in the 'send payment' UI. Embeds {{ %1$@ the current payments balance, %2$@ the currency indicator }}.",
         )
-        return String(
-            format: format,
+        return String.nonPluralLocalizedStringWithFormat(
+            format,
             formattedAmount,
             PaymentsConstants.mobileCoinCurrencyIdentifier,
         )

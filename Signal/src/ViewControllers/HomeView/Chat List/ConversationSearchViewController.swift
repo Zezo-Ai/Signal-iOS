@@ -720,7 +720,7 @@ class EmptySearchResultCell: UITableViewCell {
                 "HOME_VIEW_SEARCH_NO_RESULTS_FORMAT",
                 comment: "Format string when search returns no results. Embeds {{search term}}",
             )
-            messageLabel.text = String(format: format, searchText)
+            messageLabel.text = String.nonPluralLocalizedStringWithFormat(format, searchText)
 
             messageLabel.textColor = .Signal.label
             messageLabel.font = UIFont.dynamicTypeBody

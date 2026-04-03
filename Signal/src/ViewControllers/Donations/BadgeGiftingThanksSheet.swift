@@ -77,7 +77,7 @@ class BadgeGiftingThanksSheet: OWSTableViewController2 {
                 "DONATION_ON_BEHALF_OF_A_FRIEND_THANKS_BODY_FORMAT",
                 comment: "When you donate on behalf of a friend, a thank-you sheet will appear. This is the text on that sheet. Embeds {{recipient name}}.",
             )
-            let infoLabel = UILabel.explanationTextLabel(text: String(format: infoLabelFormat, recipientName))
+            let infoLabel = UILabel.explanationTextLabel(text: String.nonPluralLocalizedStringWithFormat(infoLabelFormat, recipientName))
 
             cell.contentView.addSubview(infoLabel)
             infoLabel.autoPinEdgesToSuperviewMargins()

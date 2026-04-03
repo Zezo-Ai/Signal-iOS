@@ -129,8 +129,8 @@ class CVMediaAlbumView: ManualStackViewWithLayer {
 
                 let moreCount = max(1, items.count - Constants.maxItemCount)
                 let moreCountText = OWSFormat.formatInt(moreCount)
-                let moreText = String(
-                    format: OWSLocalizedString(
+                let moreText = String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "MEDIA_GALLERY_MORE_ITEMS_FORMAT",
                         comment: "Format for the 'more items' indicator for media galleries. Embeds {{the number of additional items}}.",
                     ),

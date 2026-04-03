@@ -21,20 +21,20 @@ public extension OWSDisappearingConfigurationUpdateInfoMessage {
                 "DISAPPEARING_MESSAGES_CONFIGURATION_GROUP_EXISTING_FORMAT",
                 comment: "Info Message when added to a group which has enabled disappearing messages. Embeds {{time amount}} before messages disappear. See the *_TIME_AMOUNT strings for context.",
             )
-            return String(format: format, durationString)
+            return String.nonPluralLocalizedStringWithFormat(format, durationString)
         } else if let updaterName {
             if newToken.isEnabled {
                 let format = OWSLocalizedString(
                     "OTHER_UPDATED_DISAPPEARING_MESSAGES_CONFIGURATION",
                     comment: "Info Message when another user enabled disappearing messages. Embeds {{name of other user}} and {{time amount}} before messages disappear. See the *_TIME_AMOUNT strings for context.",
                 )
-                return String(format: format, updaterName, durationString)
+                return String.nonPluralLocalizedStringWithFormat(format, updaterName, durationString)
             } else {
                 let format = OWSLocalizedString(
                     "OTHER_DISABLED_DISAPPEARING_MESSAGES_CONFIGURATION",
                     comment: "Info Message when another user disabled disappearing messages. Embeds {{name of other user}}.",
                 )
-                return String(format: format, updaterName)
+                return String.nonPluralLocalizedStringWithFormat(format, updaterName)
             }
         } else {
             // Changed by localNumber on this device or via synced transcript
@@ -43,7 +43,7 @@ public extension OWSDisappearingConfigurationUpdateInfoMessage {
                     "YOU_UPDATED_DISAPPEARING_MESSAGES_CONFIGURATION",
                     comment: "Info Message when you update disappearing messages duration. Embeds a {{time amount}} before messages disappear. see the *_TIME_AMOUNT strings for context.",
                 )
-                return String(format: format, durationString)
+                return String.nonPluralLocalizedStringWithFormat(format, durationString)
             } else {
                 return OWSLocalizedString(
                     "YOU_DISABLED_DISAPPEARING_MESSAGES_CONFIGURATION",

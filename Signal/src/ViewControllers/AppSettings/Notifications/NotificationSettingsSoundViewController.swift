@@ -70,8 +70,8 @@ class NotificationSettingsSoundViewController: OWSTableViewController2 {
         for sound in Sounds.allNotificationSounds {
             let soundName: String
             if sound == .standard(.note) {
-                soundName = String(
-                    format: OWSLocalizedString(
+                soundName = String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "SETTINGS_AUDIO_DEFAULT_TONE_LABEL_FORMAT",
                         comment: "Format string for the default 'Note' sound. Embeds the system {{sound name}}.",
                     ),

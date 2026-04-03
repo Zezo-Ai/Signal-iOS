@@ -84,7 +84,7 @@ extension OWSGroupCallMessage {
         if sortedAddresses.count == 2 {
             let firstName = self.participantName(for: sortedAddresses[0], tx: tx)
             let secondName = self.participantName(for: sortedAddresses[1], tx: tx)
-            return String(format: twoFormat, firstName, secondName)
+            return String.nonPluralLocalizedStringWithFormat(twoFormat, firstName, secondName)
         }
         if sortedAddresses.count == 0 {
             return someoneString
@@ -94,14 +94,14 @@ extension OWSGroupCallMessage {
                 return self.groupCallStartedByYou
             } else {
                 let name = self.participantName(for: sortedAddresses[0], tx: tx)
-                return String(format: onlyCreatorFormat, name)
+                return String.nonPluralLocalizedStringWithFormat(onlyCreatorFormat, name)
             }
         } else {
             if sortedAddresses[0].isLocalAddress {
                 return onlyYouString
             } else {
                 let name = self.participantName(for: sortedAddresses[0], tx: tx)
-                return String(format: onlyOneFormat, name)
+                return String.nonPluralLocalizedStringWithFormat(onlyOneFormat, name)
             }
         }
     }
@@ -123,7 +123,7 @@ extension OWSGroupCallMessage: OWSPreviewText {
                 "GROUP_CALL_STARTED_MESSAGE_FORMAT",
                 comment: "Text explaining that someone started a group call. Embeds {{call creator display name}}",
             )
-            return String(format: formatString, creatorDisplayName)
+            return String.nonPluralLocalizedStringWithFormat(formatString, creatorDisplayName)
         }
         return OWSLocalizedString(
             "GROUP_CALL_SOMEONE_STARTED_MESSAGE",

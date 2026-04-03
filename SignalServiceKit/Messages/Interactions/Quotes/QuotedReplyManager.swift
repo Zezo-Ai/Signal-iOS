@@ -293,7 +293,7 @@ class QuotedReplyManagerImpl: QuotedReplyManager {
                     )
                 }
             }()
-            body = String(format: formatString, storyReactionEmoji)
+            body = String.nonPluralLocalizedStringWithFormat(formatString, storyReactionEmoji)
             bodyRanges = nil
             isGiftBadge = false
             isPoll = false

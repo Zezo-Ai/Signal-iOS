@@ -264,7 +264,7 @@ class BadgeThanksSheet: OWSTableSheetViewController {
                 "DONATION_ON_BEHALF_OF_A_FRIEND_REDEEM_BADGE_TITLE_FORMAT",
                 comment: "A friend has donated on your behalf and you received a badge. A sheet opens for you to redeem this badge. Embeds {{contact's short name, such as a first name}}.",
             )
-            return String(format: formatText, shortName)
+            return String.nonPluralLocalizedStringWithFormat(formatText, shortName)
         }
     }
 
@@ -280,13 +280,13 @@ class BadgeThanksSheet: OWSTableSheetViewController {
                 "BADGE_THANKS_BODY",
                 comment: "When you make a donation to Signal, you will receive a badge. A thank-you sheet appears when this happens. This is the body text on that sheet.",
             )
-            return String(format: formatText, self.badge.localizedName)
+            return String.nonPluralLocalizedStringWithFormat(formatText, self.badge.localizedName)
         case let .giftReceived(shortName, _, _):
             let formatText = OWSLocalizedString(
                 "DONATION_ON_BEHALF_OF_A_FRIEND_YOU_RECEIVED_A_BADGE_FORMAT",
                 comment: "A friend has donated on your behalf and you received a badge. This text says that you received a badge, and from whom. Embeds {{contact's short name, such as a first name}}.",
             )
-            return String(format: formatText, shortName)
+            return String.nonPluralLocalizedStringWithFormat(formatText, shortName)
         }
     }
 

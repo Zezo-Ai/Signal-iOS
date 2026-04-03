@@ -246,7 +246,7 @@ public extension ConversationViewController {
         )
         let learnMoreText = CommonStrings.learnMore
 
-        let attributedString = NSMutableAttributedString(string: String(format: format, learnMoreText))
+        let attributedString = NSMutableAttributedString(string: String.nonPluralLocalizedStringWithFormat(format, learnMoreText))
         attributedString.setAttributes(
             [.foregroundColor: UIColor.Signal.link],
             forSubstring: learnMoreText,
@@ -263,7 +263,7 @@ public extension ConversationViewController {
             "APP_EXPIRED_BOTTOM_UPDATE",
             comment: "Shown in place of the text input box in a conversation when the app has expired and the user is no longer allowed to send messages. This value is a tappable link embedded in a larger sentence.",
         )
-        let attributedString = NSMutableAttributedString(string: String(format: format, updateNowText))
+        let attributedString = NSMutableAttributedString(string: String.nonPluralLocalizedStringWithFormat(format, updateNowText))
         attributedString.setAttributes(
             [.foregroundColor: UIColor.Signal.link],
             forSubstring: updateNowText,
@@ -280,7 +280,7 @@ public extension ConversationViewController {
             "NOT_REGISTERED_BOTTOM_REREGISTER",
             comment: "Shown in place of the text input box in a conversation when the user is no longer registered can't send messages. This value is a tappable link embedded in a larger sentence.",
         )
-        let attributedString = NSMutableAttributedString(string: String(format: format, updateNowText))
+        let attributedString = NSMutableAttributedString(string: String.nonPluralLocalizedStringWithFormat(format, updateNowText))
         attributedString.setAttributes(
             [.foregroundColor: UIColor.Signal.link],
             forSubstring: updateNowText,
@@ -297,7 +297,7 @@ public extension ConversationViewController {
             "NOT_LINKED_BOTTOM_RELINK",
             comment: "Shown in place of the text input box in a conversation when the user is no longer registered can't send messages. This value is a tappable link embedded in a larger sentence.",
         )
-        let attributedString = NSMutableAttributedString(string: String(format: format, updateNowText))
+        let attributedString = NSMutableAttributedString(string: String.nonPluralLocalizedStringWithFormat(format, updateNowText))
         attributedString.setAttributes(
             [.foregroundColor: UIColor.Signal.link],
             forSubstring: updateNowText,

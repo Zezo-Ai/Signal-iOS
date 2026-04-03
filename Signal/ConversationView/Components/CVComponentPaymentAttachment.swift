@@ -222,26 +222,26 @@ public class CVComponentPaymentAttachment: CVComponentBase, CVComponent {
                 "PAYMENTS_PAYMENT_STATUS_IN_CHAT_SENT_YOU",
                 comment: "Payment status context with contact name, incoming. Embeds {{ Name of sending contact }}",
             )
-            text = String(format: format, contactName)
+            text = String.nonPluralLocalizedStringWithFormat(format, contactName)
         case (_, .outgoingMessage, .failed):
             let format = OWSLocalizedString(
                 "PAYMENTS_PAYMENT_STATUS_IN_CHAT_PAYMENT_TO",
                 comment: "Payment status context with contact name, failed. Embeds {{ Name of receiving contact }}",
             )
-            text = String(format: format, contactName)
+            text = String.nonPluralLocalizedStringWithFormat(format, contactName)
         case (_, .outgoingMessage, _):
             let format = OWSLocalizedString(
                 "PAYMENTS_PAYMENT_STATUS_IN_CHAT_YOU_SENT",
                 comment: "Payment status context with contact name, sent. Embeds {{ Name of receiving contact }}",
             )
-            text = String(format: format, contactName)
+            text = String.nonPluralLocalizedStringWithFormat(format, contactName)
         default:
             // default to failed text because it doesn't imply success
             let format = OWSLocalizedString(
                 "PAYMENTS_PAYMENT_STATUS_IN_CHAT_PAYMENT_TO",
                 comment: "Payment status context with contact name, failed. Embeds {{ Name of receiving contact }}",
             )
-            text = String(format: format, contactName)
+            text = String.nonPluralLocalizedStringWithFormat(format, contactName)
         }
 
         return CVLabelConfig(

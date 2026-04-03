@@ -225,8 +225,8 @@ final class ComposeSupportEmailOperation: NSObject {
                 "SUPPORT_EMAIL_INFO_DIVIDER",
                 comment: "Localized divider for support request emails internal information",
             ),
-            String(
-                format: OWSLocalizedString(
+            String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "SUPPORT_EMAIL_FILTER_LABEL_FORMAT",
                     comment: "Localized label for support request email filter string. Embeds {{filter text}}.",
                 ),
@@ -236,22 +236,22 @@ final class ComposeSupportEmailOperation: NSObject {
                 format: "Challenge Received: %@",
                 model.hasRecentChallenge ? "yes" : "no",
             ),
-            String(
-                format: OWSLocalizedString(
+            String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "SUPPORT_EMAIL_HARDWARE_LABEL_FORMAT",
                     comment: "Localized label for support request email hardware string (e.g. iPhone or iPad). Embeds {{hardware text}}.",
                 ),
                 model.deviceType,
             ),
-            String(
-                format: OWSLocalizedString(
+            String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "SUPPORT_EMAIL_HID_LABEL_FORMAT",
                     comment: "Localized label for support request email HID string (e.g. 12,1). Embeds {{hid text}}.",
                 ),
                 model.deviceIdentifier,
             ),
-            String(
-                format: OWSLocalizedString(
+            String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "SUPPORT_EMAIL_IOS_VERSION_LABEL_FORMAT",
                     comment: "Localized label for support request email iOS Version string (e.g. 13.4). Embeds {{ios version}}.",
                 ),
@@ -260,8 +260,8 @@ final class ComposeSupportEmailOperation: NSObject {
             "Signal Version: \(model.signalAppVersion)",
             {
                 if let debugURLString = model.resolvedDebugString {
-                    return String(
-                        format: OWSLocalizedString(
+                    return String.nonPluralLocalizedStringWithFormat(
+                        OWSLocalizedString(
                             "SUPPORT_EMAIL_LOG_URL_LABEL_FORMAT",
                             comment: "Localized label for support request email debug log URL. Embeds {{debug log url}}.",
                         ),
@@ -269,8 +269,8 @@ final class ComposeSupportEmailOperation: NSObject {
                     )
                 } else { return nil }
             }(),
-            String(
-                format: OWSLocalizedString(
+            String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "SUPPORT_EMAIL_LOCALE_LABEL_FORMAT",
                     comment: "Localized label for support request email locale string. Embeds {{locale}}.",
                 ),

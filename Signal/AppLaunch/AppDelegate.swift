@@ -862,8 +862,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         Logger.warn("Exiting because we are in the background and the database password is not accessible.")
 
         let notificationContent = UNMutableNotificationContent()
-        notificationContent.body = String(
-            format: OWSLocalizedString(
+        notificationContent.body = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "NOTIFICATION_BODY_PHONE_LOCKED_FORMAT",
                 comment: "Lock screen notification text presented after user powers on their device without unlocking. Embeds {{device model}} (either 'iPad' or 'iPhone')",
             ),

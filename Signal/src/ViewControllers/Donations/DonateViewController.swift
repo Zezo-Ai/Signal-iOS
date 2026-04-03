@@ -334,8 +334,8 @@ class DonateViewController: OWSViewController, OWSNavigationChildController {
                 "DONATE_SCREEN_ERROR_TITLE_BANK_TRANSFER_AMOUNT_TOO_LARGE",
                 comment: "Title for an alert shown when the user tries to donate via bank transfer, but the amount they want to donate is too large.",
             ),
-            message: String(
-                format: messageFormat,
+            message: String.nonPluralLocalizedStringWithFormat(
+                messageFormat,
                 CurrencyFormatter.format(money: maximumAmount),
             ),
         )
@@ -474,7 +474,7 @@ class DonateViewController: OWSViewController, OWSNavigationChildController {
                 comment: "If the user tries to donate to Signal but they've entered an amount that's too small, this error message is shown. Embeds {{currency string}}, such as \"$5\".",
             )
             let currencyString = CurrencyFormatter.format(money: minimumAmount)
-            showError(String(format: format, currencyString))
+            showError(String.nonPluralLocalizedStringWithFormat(format, currencyString))
         case .awaitingIDEALAuthorization:
             // Not pending, but awaiting approval
             let title = OWSLocalizedString(
@@ -584,8 +584,8 @@ class DonateViewController: OWSViewController, OWSNavigationChildController {
             "SUSTAINER_VIEW_UPDATE_SUBSCRIPTION_CONFIRMATION_TITLE",
             comment: "Update Subscription? Action sheet title",
         )
-        let message = String(
-            format: OWSLocalizedString(
+        let message = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "SUSTAINER_VIEW_UPDATE_SUBSCRIPTION_CONFIRMATION_MESSAGE",
                 comment: "Update Subscription? Action sheet message, embeds {{Price}}",
             ),

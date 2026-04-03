@@ -273,12 +273,12 @@ class CallDrawerSheet: InteractiveSheetViewController, UITableViewDelegate, Call
             label.attributedText = .composed(of: [
                 titleText.styled(with: .font(.dynamicTypeHeadline)),
                 " ",
-                String(
-                    format: OWSLocalizedString(
+                String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "GROUP_CALL_MEMBER_LIST_SECTION_HEADER_MEMBER_COUNT",
                         comment: "A count of members in a given group call member list section, displayed after the header.",
                     ),
-                    self.memberCount,
+                    String(self.memberCount),
                 ),
             ]).styled(
                 with: .font(.dynamicTypeBody),

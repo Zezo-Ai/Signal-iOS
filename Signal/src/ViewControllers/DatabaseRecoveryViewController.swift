@@ -468,7 +468,7 @@ class DatabaseRecoveryViewController<SetupResult>: OWSViewController {
                 owsFailDebug("Could not format the database size for some reason")
                 return String(currentDatabaseSize)
             }()
-            return String(format: labelFormat, formattedBytes)
+            return String.nonPluralLocalizedStringWithFormat(labelFormat, formattedBytes)
         }()
 
         let continueButton = button(

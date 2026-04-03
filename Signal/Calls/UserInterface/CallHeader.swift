@@ -194,9 +194,9 @@ class CallHeader: UIView {
         case 0:
             return zeroMemberString()
         case 1:
-            return String(format: oneMemberFormat(), names[0])
+            return String.nonPluralLocalizedStringWithFormat(oneMemberFormat(), names[0])
         case 2:
-            return String(format: twoMemberFormat(), names[0], names[1])
+            return String.nonPluralLocalizedStringWithFormat(twoMemberFormat(), names[0], names[1])
         default:
             return String.localizedStringWithFormat(manyMemberFormat(), count - 2, names[0], names[1])
         }
@@ -289,7 +289,7 @@ class CallHeader: UIView {
             "GROUP_CALL_INCOMING_RING_FORMAT",
             comment: "Text explaining that someone has sent a ring to the group. Embeds {ring sender name}",
         )
-        return String(format: formatString, callerName)
+        return String.nonPluralLocalizedStringWithFormat(formatString, callerName)
     }
 
     private func whoIsHereText(joinedMembers: [UUID?]) -> String {
@@ -316,14 +316,14 @@ class CallHeader: UIView {
                 "GROUP_CALL_ONE_PERSON_HERE_FORMAT",
                 comment: "Text explaining that there is one person in the group call. Embeds {member name}",
             )
-            return String(format: format, someMember)
+            return String.nonPluralLocalizedStringWithFormat(format, someMember)
         case ((let someMember, let someOtherMember?)?, 0):
             // exactly two members, both known
             let format = OWSLocalizedString(
                 "GROUP_CALL_TWO_PEOPLE_HERE_FORMAT",
                 comment: "Text explaining that there are two people in the group call. Embeds {{ %1$@ participant1, %2$@ participant2 }}",
             )
-            return String(format: format, someMember, someOtherMember)
+            return String.nonPluralLocalizedStringWithFormat(format, someMember, someOtherMember)
         case ((let someMember, let someOtherMember?)?, let otherCount):
             // two or more members, at least two known
             let format = OWSLocalizedString(
@@ -459,7 +459,7 @@ class CallHeader: UIView {
                 "GROUP_CALL_PRESENTING_FORMAT",
                 comment: "Text explaining that a member is presenting. Embeds {member name}",
             )
-            return String(format: formatString, presentingName)
+            return String.nonPluralLocalizedStringWithFormat(formatString, presentingName)
         }
         switch groupCall.concreteType {
         case .groupThread(let groupThreadCall):

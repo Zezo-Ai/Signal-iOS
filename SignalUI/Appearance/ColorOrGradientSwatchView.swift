@@ -55,8 +55,8 @@ public class ColorOrGradientSwatchView: ManualLayoutViewWithLayer {
             colorName = color.asUIColor.accessibilityName
         case .gradient(let gradientColor1, let gradientColor2, _),
              .themedGradient(let gradientColor1, let gradientColor2, _, _, _):
-            colorName = String(
-                format: OWSLocalizedString(
+            colorName = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "WALLPAPER_GRADIENT_COLORS_ACCESSIBILITY_LABEL",
                     comment: "Accessibility label for gradient wallpaper swatch, naming the two colors in the gradient. {{ Embeds the names of the two colors in the gradient }}",
                 ),

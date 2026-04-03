@@ -138,7 +138,7 @@ public class UntrustedIdentityError: CustomNSError, UserErrorDescriptionProvider
             "FAILED_SENDING_BECAUSE_UNTRUSTED_IDENTITY_KEY",
             comment: "action sheet header when re-sending message which failed because of untrusted identity keys",
         )
-        return String(format: format, SSKEnvironment.shared.databaseStorageRef.read { tx in
+        return String.nonPluralLocalizedStringWithFormat(format, SSKEnvironment.shared.databaseStorageRef.read { tx in
             return SSKEnvironment.shared.contactManagerRef.displayName(for: SignalServiceAddress(serviceId), tx: tx).resolvedValue()
         })
     }
@@ -171,7 +171,7 @@ public class InvalidKeySignatureError: CustomNSError, IsRetryableProvider, UserE
             "FAILED_SENDING_BECAUSE_INVALID_KEY_SIGNATURE",
             comment: "action sheet header when re-sending message which failed because of an invalid key signature",
         )
-        return String(format: format, SSKEnvironment.shared.databaseStorageRef.read { tx in
+        return String.nonPluralLocalizedStringWithFormat(format, SSKEnvironment.shared.databaseStorageRef.read { tx in
             return SSKEnvironment.shared.contactManagerRef.displayName(for: SignalServiceAddress(serviceId), tx: tx).resolvedValue()
         })
     }

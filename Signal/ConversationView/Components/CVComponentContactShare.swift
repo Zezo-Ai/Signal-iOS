@@ -97,7 +97,7 @@ extension CVComponentContactShare: CVAccessibilityComponent {
                 "ACCESSIBILITY_LABEL_CONTACT_FORMAT",
                 comment: "Accessibility label for contact. Embeds: {{ the contact name }}.",
             )
-            return String(format: format, contactName)
+            return String.nonPluralLocalizedStringWithFormat(format, contactName)
         } else {
             return OWSLocalizedString(
                 "ACCESSIBILITY_LABEL_CONTACT",

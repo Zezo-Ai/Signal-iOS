@@ -94,7 +94,7 @@ class RegistrationPhoneNumberDiscoverabilityViewController: OWSViewController {
             comment: "Explanation of the 'onboarding phone number discoverability' view. Embeds {user phone number}",
         )
         let subtitleLabel = UILabel.explanationLabelForRegistration(
-            text: String(format: explanationTextFormat, formattedPhoneNumber),
+            text: String.nonPluralLocalizedStringWithFormat(explanationTextFormat, formattedPhoneNumber),
         )
         subtitleLabel.accessibilityIdentifier = "registration.phoneNumberDiscoverability.explanationLabel"
 

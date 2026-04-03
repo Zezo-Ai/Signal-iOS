@@ -136,7 +136,7 @@ class CallMemberWaitingAndErrorView: UIView, CallMemberComposableView {
                 comment: "String displayed in group call grid cell when a user is blocked. Embeds {user's name}",
             )
             let displayName = displayName(address: addr)
-            label = String(format: blockFormat, arguments: [displayName])
+            label = String.nonPluralLocalizedStringWithFormat(blockFormat, displayName)
             image = UIImage(named: "block")
         case .noMediaKeys(let addr):
             let missingKeyFormat = OWSLocalizedString(
@@ -144,7 +144,7 @@ class CallMemberWaitingAndErrorView: UIView, CallMemberComposableView {
                 comment: "String displayed in cell when media from a user can't be displayed in group call grid. Embeds {user's name}",
             )
             let displayName = displayName(address: addr)
-            label = String(format: missingKeyFormat, arguments: [displayName])
+            label = String.nonPluralLocalizedStringWithFormat(missingKeyFormat, displayName)
             image = UIImage(named: "error-circle-fill")
         }
 
@@ -177,7 +177,7 @@ class CallMemberWaitingAndErrorView: UIView, CallMemberComposableView {
                 comment: "Title for alert explaining that a group call participant is blocked. Embeds {{ user's name }}",
             )
             let displayName = SSKEnvironment.shared.databaseStorageRef.read { tx in SSKEnvironment.shared.contactManagerRef.displayName(for: address, tx: tx).resolvedValue() }
-            title = String(format: titleFormat, displayName)
+            title = String.nonPluralLocalizedStringWithFormat(titleFormat, displayName)
 
         case let .noMediaKeys(address):
             message = OWSLocalizedString(
@@ -190,7 +190,7 @@ class CallMemberWaitingAndErrorView: UIView, CallMemberComposableView {
                 comment: "Title for alert explaining that a group call participant cannot be displayed because of missing keys. Embeds {{ user's name }}",
             )
             let displayName = SSKEnvironment.shared.databaseStorageRef.read { tx in SSKEnvironment.shared.contactManagerRef.displayName(for: address, tx: tx).resolvedValue() }
-            title = String(format: titleFormat, displayName)
+            title = String.nonPluralLocalizedStringWithFormat(titleFormat, displayName)
         }
 
         return (title, message)

@@ -510,7 +510,7 @@ public extension TSMessage {
                 "DONATION_ON_BEHALF_OF_A_FRIEND_PREVIEW_INCOMING",
                 comment: "A friend has donated on your behalf. This text is shown in the list of chats, when the most recent message is one of these donations. Embeds {friend's short display name}.",
             )
-            return String(format: format, senderShortName)
+            return String.nonPluralLocalizedStringWithFormat(format, senderShortName)
         } else if let outgoingMessage = self as? TSOutgoingMessage {
             let recipientShortName: String
             let recipients = outgoingMessage.recipientAddresses()
@@ -527,7 +527,7 @@ public extension TSMessage {
                 "DONATION_ON_BEHALF_OF_A_FRIEND_PREVIEW_OUTGOING",
                 comment: "You have a made a donation on a friend's behalf. This text is shown in the list of chats, when the most recent message is one of these donations. Embeds {friend's short display name}.",
             )
-            return String(format: format, recipientShortName)
+            return String.nonPluralLocalizedStringWithFormat(format, recipientShortName)
         } else {
             owsFail("Could not generate preview text because message wasn't incoming or outgoing")
         }
@@ -636,13 +636,13 @@ public extension TSMessage {
             switch deleteAuthor {
             case .admin(_, let displayName):
                 let format = OWSLocalizedString("DELETED_BY_ADMIN", comment: "Text indicating the message was remotely deleted by an admin. Embeds {{admin display name}}")
-                remoteDeleteString = String(format: format, displayName)
+                remoteDeleteString = String.nonPluralLocalizedStringWithFormat(format, displayName)
             case .regular(let displayName):
                 let format = OWSLocalizedString(
                     "DELETED_THIS_MESSAGE",
                     comment: "Text indicating the message was remotely deleted by its author. Embeds {{ author name }}",
                 )
-                remoteDeleteString = String(format: format, displayName)
+                remoteDeleteString = String.nonPluralLocalizedStringWithFormat(format, displayName)
             case .localUser:
                 remoteDeleteString = OWSLocalizedString("YOU_DELETED_THIS_MESSAGE", comment: "text indicating the message was remotely deleted by you")
             }
@@ -662,8 +662,8 @@ public extension TSMessage {
                 let localIdentifiers = tsAccountManager.localIdentifiers(tx: tx),
                 localIdentifiers.contains(serviceId: storyAuthorAci)
             {
-                return .storyReactionEmoji(String(
-                    format: OWSLocalizedString(
+                return .storyReactionEmoji(String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "STORY_REACTION_PREVIEW_FORMAT_THIRD_PERSON",
                         comment: "Text explaining that someone reacted to your story. Embeds {{ %1$@ reaction emoji }}.",
                     ),
@@ -671,8 +671,8 @@ public extension TSMessage {
                 ))
             } else {
                 let storyAuthorName = contactManager.displayName(for: SignalServiceAddress(storyAuthorAci), tx: tx)
-                return .storyReactionEmoji(String(
-                    format: OWSLocalizedString(
+                return .storyReactionEmoji(String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "STORY_REACTION_PREVIEW_FORMAT_SECOND_PERSON",
                         comment: "Text explaining that you reacted to someone else's story. Embeds {{ %1$@ reaction emoji, %2$@ story author name }}.",
                     ),

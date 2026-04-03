@@ -75,7 +75,7 @@ class GiftBadgeView: ManualStackView {
                 comment: "You sent a donation to a friend. This is the title of that message in the chat. Embeds {{short contact name}}.",
             )
         }
-        let text = String(format: textFormat, state.otherUserShortName)
+        let text = String.nonPluralLocalizedStringWithFormat(textFormat, state.otherUserShortName)
 
         let textColor = state.conversationStyle.bubbleTextColor(isIncoming: state.isIncoming)
 

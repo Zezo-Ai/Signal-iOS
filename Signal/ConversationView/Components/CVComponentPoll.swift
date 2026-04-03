@@ -64,7 +64,7 @@ public class CVComponentPoll: CVComponentBase, CVComponent {
                     "CONVERSATION_VIEW_CELL_ACCESSIBILITY_SENDER_FORMAT",
                     comment: "Format for sender info for accessibility label for message. Embeds {{ the sender name }}.",
                 )
-                elements.append(String(format: senderFormat, accessibilityAuthorName))
+                elements.append(String.nonPluralLocalizedStringWithFormat(senderFormat, accessibilityAuthorName))
             } else {
                 owsFailDebug("Missing accessibilityAuthorName.")
             }
@@ -79,7 +79,7 @@ public class CVComponentPoll: CVComponentBase, CVComponent {
             "POLL_ACCESSIBILITY_LABEL",
             comment: "Accessibility label for poll message. Embeds {{ poll question }}.",
         )
-        elements.append(String(format: formatQuestion, poll.state.poll.question))
+        elements.append(String.nonPluralLocalizedStringWithFormat(formatQuestion, poll.state.poll.question))
 
         let result = elements.joined(separator: " ")
         return result

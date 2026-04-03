@@ -462,7 +462,7 @@ class SharingThreadPickerViewController: ConversationPickerViewController {
             let displayName = SSKEnvironment.shared.databaseStorageRef.read { tx in
                 return SSKEnvironment.shared.contactManagerRef.displayName(for: SignalServiceAddress(untrustedServiceId), tx: tx).resolvedValue()
             }
-            let failureMessage = String(format: failureFormat, displayName)
+            let failureMessage = String.nonPluralLocalizedStringWithFormat(failureFormat, displayName)
 
             let actionSheet = ActionSheetController(title: failureTitle, message: failureMessage)
             actionSheet.addAction(cancelAction)

@@ -150,8 +150,8 @@ final class NameCollisionCell: UITableViewCell {
                 "NAME_COLLISION_RECENT_CHANGE_FORMAT_STRING",
                 comment: "Format string describing a recent profile name change that led to a name collision. Embeds {{ %1$@ current name, which may be a profile name or an address book name }}, {{ %2$@ old profile name }}, and {{ %3$@ current profile name }}",
             )
-            let string = String(
-                format: formatString,
+            let string = String.nonPluralLocalizedStringWithFormat(
+                formatString,
                 model.shortName,
                 profileNameChange.oldestProfileName,
                 profileNameChange.newestProfileName,

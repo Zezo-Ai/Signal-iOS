@@ -556,7 +556,7 @@ class DonationSettingsViewController: OWSTableViewController2 {
                     "DONATION_SETTINGS_MY_SUPPORT_IDEAL_ONE_TIME_DONATION_NOT_CONFIRMED_MESSAGE_FORMAT",
                     comment: "Title for a sheet explaining that a payment needs confirmation.",
                 )
-                let message = String(format: messageFormat, CurrencyFormatter.format(money: pendingOneTime.amount))
+                let message = String.nonPluralLocalizedStringWithFormat(messageFormat, CurrencyFormatter.format(money: pendingOneTime.amount))
                 showError(title: title, message: message, donationMode: .oneTime)
             }
             return true
@@ -583,7 +583,7 @@ class DonationSettingsViewController: OWSTableViewController2 {
                     "DONATION_SETTINGS_MY_SUPPORT_IDEAL_RECURRING_SUBSCRIPTION_NOT_CONFIRMED_MESSAGE_FORMAT",
                     comment: "Message shown in a sheet explaining that the user's iDEAL recurring monthly donation hasn't been confirmed. Embeds {{ formatted current amount }}.",
                 )
-                let message = String(format: messageFormat, CurrencyFormatter.format(money: pendingSubscription.amount))
+                let message = String.nonPluralLocalizedStringWithFormat(messageFormat, CurrencyFormatter.format(money: pendingSubscription.amount))
                 showError(title: title, message: message, donationMode: .monthly)
             }
             return true

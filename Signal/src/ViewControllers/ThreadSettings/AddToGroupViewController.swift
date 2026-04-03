@@ -126,7 +126,7 @@ public class AddToGroupViewController: OWSTableViewController2 {
                 "ADD_TO_GROUP_ACTION_SHEET_TITLE",
                 comment: "The title on the 'add to group' confirmation action sheet.",
             ),
-            message: String(format: messageFormat, shortName, groupThread.groupNameOrDefault),
+            message: String.nonPluralLocalizedStringWithFormat(messageFormat, shortName, groupThread.groupNameOrDefault),
             proceedTitle: OWSLocalizedString(
                 "ADD_TO_GROUP_ACTION_PROCEED_BUTTON",
                 comment: "The button on the 'add to group' confirmation to add the user to the group.",
@@ -168,7 +168,7 @@ public class AddToGroupViewController: OWSTableViewController2 {
                 "ADD_TO_GROUP_SUCCESS_TOAST_FORMAT",
                 comment: "A toast on the 'add to group' view indicating the user was added. Embeds {contact name} and {group name}",
             )
-            let toastText = String(format: toastFormat, shortName, groupThread.groupNameOrDefault)
+            let toastText = String.nonPluralLocalizedStringWithFormat(toastFormat, shortName, groupThread.groupNameOrDefault)
             presentingViewController?.presentToast(text: toastText)
         }
     }

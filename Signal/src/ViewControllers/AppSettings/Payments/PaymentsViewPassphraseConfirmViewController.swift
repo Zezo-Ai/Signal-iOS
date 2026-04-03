@@ -156,7 +156,7 @@ public class PaymentsViewPassphraseConfirmViewController: OWSTableViewController
                 "SETTINGS_PAYMENTS_VIEW_PASSPHRASE_CONFIRM_PLACEHOLDER_FORMAT",
                 comment: "Format for the placeholder text in the 'confirm payments passphrase' view of the app settings. Embeds: {{ the index of the word }}.",
             )
-            textfield.placeholder = String(format: placeholderFormat, OWSFormat.formatInt(wordIndex + 1))
+            textfield.placeholder = String.nonPluralLocalizedStringWithFormat(placeholderFormat, OWSFormat.formatInt(wordIndex + 1))
         }
         configureTextfield(wordTextfield0, wordIndex: wordIndex0)
         configureTextfield(wordTextfield1, wordIndex: wordIndex1)
@@ -306,8 +306,8 @@ public class PaymentsViewPassphraseConfirmViewController: OWSTableViewController
             "SETTINGS_PAYMENTS_VIEW_PASSPHRASE_CONFIRM_EXPLANATION_FORMAT",
             comment: "Format for the explanation of the 'confirm payments passphrase word' step in the 'view payments passphrase' settings, indicating that the user needs to enter two words from their payments passphrase. Embeds: {{ %1$@ the index of the first word, %2$@ the index of the second word }}.",
         )
-        let explanation = String(
-            format: explanationForm,
+        let explanation = String.nonPluralLocalizedStringWithFormat(
+            explanationForm,
             OWSFormat.formatInt(wordIndex0 + 1),
             OWSFormat.formatInt(wordIndex1 + 1),
         )

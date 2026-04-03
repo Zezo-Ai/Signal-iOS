@@ -133,8 +133,8 @@ class RegistrationReglockTimeoutViewController: OWSViewController {
             return UInt32(result <= oneMinute ? oneMinute : result)
         }()
 
-        return String(
-            format: format,
+        return String.nonPluralLocalizedStringWithFormat(
+            format,
             DateUtil.formatDuration(seconds: remainingSeconds, useShortFormat: false),
         )
     }

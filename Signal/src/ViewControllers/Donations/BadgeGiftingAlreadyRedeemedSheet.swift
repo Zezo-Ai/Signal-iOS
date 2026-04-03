@@ -58,7 +58,7 @@ class BadgeGiftingAlreadyRedeemedSheet: OWSTableSheetViewController {
             titleLabel.textColor = .Signal.label
             titleLabel.textAlignment = .center
             titleLabel.numberOfLines = 0
-            titleLabel.text = String(format: titleFormat, self.shortName)
+            titleLabel.text = String.nonPluralLocalizedStringWithFormat(titleFormat, self.shortName)
             stackView.addArrangedSubview(titleLabel)
             stackView.setCustomSpacing(12, after: titleLabel)
 
@@ -70,7 +70,7 @@ class BadgeGiftingAlreadyRedeemedSheet: OWSTableSheetViewController {
             label.font = .dynamicTypeBody
             label.textColor = .Signal.label
             label.numberOfLines = 0
-            label.text = String(format: labelFormat, self.shortName)
+            label.text = String.nonPluralLocalizedStringWithFormat(labelFormat, self.shortName)
             label.textAlignment = .center
             stackView.addArrangedSubview(label)
 

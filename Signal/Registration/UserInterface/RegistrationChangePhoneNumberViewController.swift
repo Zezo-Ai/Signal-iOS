@@ -115,7 +115,7 @@ class RegistrationChangePhoneNumberViewController: OWSTableViewController2 {
             "SETTINGS_CHANGE_PHONE_NUMBER_COUNTRY_CODE_FORMAT",
             comment: "Format for the 'country code' in the 'change phone number' settings. Embeds: {{ %1$@ the numeric country code prefix, %2$@ the country code abbreviation }}.",
         )
-        let countryCodeFormatted = String(format: countryCodeFormat, valueViews.plusPrefixedCallingCode, valueViews.countryCode)
+        let countryCodeFormatted = String.nonPluralLocalizedStringWithFormat(countryCodeFormat, valueViews.plusPrefixedCallingCode, valueViews.countryCode)
         section.add(.item(
             name: OWSLocalizedString(
                 "SETTINGS_CHANGE_PHONE_NUMBER_COUNTRY_CODE_FIELD",

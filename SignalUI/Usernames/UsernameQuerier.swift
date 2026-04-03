@@ -287,8 +287,8 @@ private extension SheetDisplayableError {
                 "USERNAME_LOOKUP_INVALID_USERNAME_TITLE",
                 comment: "Title for an action sheet indicating that a user-entered username value is not a valid username.",
             ),
-            localizedMessage: String(
-                format: OWSLocalizedString(
+            localizedMessage: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "USERNAME_LOOKUP_INVALID_USERNAME_MESSAGE_FORMAT",
                     comment: "A message indicating that a user-entered username value is not a valid username. Embeds {{ a username }}.",
                 ),
@@ -303,8 +303,8 @@ private extension SheetDisplayableError {
                 "USERNAME_LOOKUP_NOT_FOUND_TITLE",
                 comment: "Title for an action sheet indicating that the given username is not associated with a registered Signal account.",
             ),
-            localizedMessage: String(
-                format: OWSLocalizedString(
+            localizedMessage: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "USERNAME_LOOKUP_NOT_FOUND_MESSAGE_FORMAT",
                     comment: "A message indicating that the given username is not associated with a registered Signal account. Embeds {{ a username }}.",
                 ),

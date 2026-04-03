@@ -1026,7 +1026,7 @@ open class ConversationPickerViewController: OWSTableViewController2 {
             comment: "Message indicating that only administrators can send message to an announcement-only group.",
         )
 
-        let toastText = String(format: toastFormat, NSNumber(value: kMaxPickerSelection))
+        let toastText = String.nonPluralLocalizedStringWithFormat(toastFormat, String(kMaxPickerSelection))
         showToast(message: toastText)
     }
 

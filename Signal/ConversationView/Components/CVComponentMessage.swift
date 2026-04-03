@@ -1420,7 +1420,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
                     "CONVERSATION_VIEW_CELL_ACCESSIBILITY_SENDER_FORMAT",
                     comment: "Format for sender info for accessibility label for message. Embeds {{ the sender name }}.",
                 )
-                elements.append(String(format: format, accessibilityAuthorName))
+                elements.append(String.nonPluralLocalizedStringWithFormat(format, accessibilityAuthorName))
             } else {
                 owsFailDebug("Missing accessibilityAuthorName.")
             }

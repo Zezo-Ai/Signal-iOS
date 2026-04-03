@@ -861,6 +861,7 @@
 		50EA40912E3A899F009CB839 /* RegistrationWebSocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EA40902E3A899F009CB839 /* RegistrationWebSocketManager.swift */; };
 		50EA76E52EEA1C6000DA8CD0 /* PasteboardAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EA76E42EEA1C6000DA8CD0 /* PasteboardAttachment.swift */; };
 		50ED28022F0EDB0B00E57C54 /* ImageQualityTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50ED28012F0EDB0B00E57C54 /* ImageQualityTest.swift */; };
+		50EED2DC2F61E69100D76131 /* OWSLocalizedStringTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EED2DB2F61E69100D76131 /* OWSLocalizedStringTest.swift */; };
 		50EF8DCA2A1885C000A00935 /* AppIconBadgeUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EF8DC92A1885C000A00935 /* AppIconBadgeUpdater.swift */; };
 		50EF8DCC2A189B3000A00935 /* ConversationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EF8DCB2A189B3000A00935 /* ConversationViewModel.swift */; };
 		50EF8DD52A1FE55D00A00935 /* SignalAccountMergeObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EF8DD42A1FE55D00A00935 /* SignalAccountMergeObserver.swift */; };
@@ -5124,6 +5125,7 @@
 		50EA40902E3A899F009CB839 /* RegistrationWebSocketManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationWebSocketManager.swift; sourceTree = "<group>"; };
 		50EA76E42EEA1C6000DA8CD0 /* PasteboardAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardAttachment.swift; sourceTree = "<group>"; };
 		50ED28012F0EDB0B00E57C54 /* ImageQualityTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageQualityTest.swift; sourceTree = "<group>"; };
+		50EED2DB2F61E69100D76131 /* OWSLocalizedStringTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OWSLocalizedStringTest.swift; sourceTree = "<group>"; };
 		50EF8DC42A1860EF00A00935 /* BadgeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeManager.swift; sourceTree = "<group>"; };
 		50EF8DC92A1885C000A00935 /* AppIconBadgeUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconBadgeUpdater.swift; sourceTree = "<group>"; };
 		50EF8DCB2A189B3000A00935 /* ConversationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationViewModel.swift; sourceTree = "<group>"; };
@@ -14362,6 +14364,7 @@
 				F94261E6289B1B5400460798 /* OWSErrorTest.swift */,
 				F97217F528DC9A5000113D9F /* OWSFileSystemTest.swift */,
 				F94261EE289B1B5400460798 /* OWSFormatTest.swift */,
+				50EED2DB2F61E69100D76131 /* OWSLocalizedStringTest.swift */,
 				663F94072CED62E5002C9063 /* OWSProgressTest.swift */,
 				4C3EF7FC2107DDEE0007EBF7 /* ParamParserTest.swift */,
 				F9CAC7842919B5A400EEC1DE /* PhoneNumberRegionsTest.swift */,
@@ -20251,6 +20254,7 @@
 				F9426248289B1B5500460798 /* OWSIdentityManagerTests.swift in Sources */,
 				669FAE1B2B7AC919009EE2FE /* OWSLinkPreviewSerializationTest.swift in Sources */,
 				F9426290289B1B5600460798 /* OWSLinkPreviewTest.swift in Sources */,
+				50EED2DC2F61E69100D76131 /* OWSLocalizedStringTest.swift in Sources */,
 				508C72242C2DFCB2000811F3 /* OWSOutgoingResendResponseTest.swift in Sources */,
 				0436E4B02E5E2DC20011E125 /* OWSPollTest.swift in Sources */,
 				663F94082CED62EC002C9063 /* OWSProgressTest.swift in Sources */,

@@ -436,7 +436,7 @@ public class NotificationPresenterImpl: NotificationPresenter {
                 comment: "notification body for a missed call from more than a week ago. Embeds {{short date}}, e.g. '6/28'.",
             )
         }
-        let notificationBody = String(format: notificationBodyFormat, timestampArgument)
+        let notificationBody = String.nonPluralLocalizedStringWithFormat(notificationBodyFormat, timestampArgument)
 
         let userInfo = userInfoForMissedCall(thread: thread, remoteAci: notificationInfo.caller)
 
@@ -661,7 +661,7 @@ public class NotificationPresenterImpl: NotificationPresenter {
             transaction: transaction,
         )
 
-        let notificationBody: String = "\u{1F4CA}" + String(format: pollEndedFormat, pollAuthorName.string, pollQuestion)
+        let notificationBody: String = "\u{1F4CA}" + String.nonPluralLocalizedStringWithFormat(pollEndedFormat, pollAuthorName.string, pollQuestion)
 
         let intent = thread.generateSendMessageIntent(context: .senderAddress(message.authorAddress), transaction: transaction)
 
@@ -725,7 +725,7 @@ public class NotificationPresenterImpl: NotificationPresenter {
             transaction: transaction,
         )
 
-        let notificationBody: String = "\u{1F4CA}" + String(format: pollVotedFormat, voteAuthorName.string, pollQuestion)
+        let notificationBody: String = "\u{1F4CA}" + String.nonPluralLocalizedStringWithFormat(pollVotedFormat, voteAuthorName.string, pollQuestion)
 
         var userInfo = AppNotificationUserInfo()
         let threadUniqueId = thread.uniqueId
@@ -806,7 +806,7 @@ public class NotificationPresenterImpl: NotificationPresenter {
                     )
                     return resolvableValue(
                         withDisplayNameForAddress: senderAddress,
-                        transformedBy: { displayName in String(format: format, displayName.resolvedValue(), groupName) },
+                        transformedBy: { displayName in String.nonPluralLocalizedStringWithFormat(format, displayName.resolvedValue(), groupName) },
                         tx: tx,
                     )
                 } else {
@@ -974,13 +974,13 @@ public class NotificationPresenterImpl: NotificationPresenter {
                 return nil
             }
         }() {
-            notificationBody = String(format: NotificationStrings.incomingReactionTextMessageFormat, reaction.emoji, bodyDescription)
+            notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionTextMessageFormat, reaction.emoji, bodyDescription)
         } else if message.isViewOnceMessage {
-            notificationBody = String(format: NotificationStrings.incomingReactionViewOnceMessageFormat, reaction.emoji)
+            notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionViewOnceMessageFormat, reaction.emoji)
         } else if message.messageSticker != nil {
-            notificationBody = String(format: NotificationStrings.incomingReactionStickerMessageFormat, reaction.emoji)
+            notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionStickerMessageFormat, reaction.emoji)
         } else if message.contactShare != nil {
-            notificationBody = String(format: NotificationStrings.incomingReactionContactShareMessageFormat, reaction.emoji)
+            notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionContactShareMessageFormat, reaction.emoji)
         } else if
             let messageRowId = message.sqliteRowId,
             let mediaAttachments = DependenciesBridge.shared.attachmentStore
@@ -997,27 +997,27 @@ public class NotificationPresenterImpl: NotificationPresenter {
             let firstMimeType = firstAttachment.attachment.mimeType
 
             if mediaAttachments.count > 1 {
-                notificationBody = String(format: NotificationStrings.incomingReactionAlbumMessageFormat, reaction.emoji)
+                notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionAlbumMessageFormat, reaction.emoji)
             } else if MimeTypeUtil.isSupportedDefinitelyAnimatedMimeType(firstMimeType) {
-                notificationBody = String(format: NotificationStrings.incomingReactionGifMessageFormat, reaction.emoji)
+                notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionGifMessageFormat, reaction.emoji)
             } else if MimeTypeUtil.isSupportedImageMimeType(firstMimeType) {
-                notificationBody = String(format: NotificationStrings.incomingReactionPhotoMessageFormat, reaction.emoji)
+                notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionPhotoMessageFormat, reaction.emoji)
             } else if
                 MimeTypeUtil.isSupportedVideoMimeType(firstMimeType),
                 firstRenderingFlag == .shouldLoop
             {
-                notificationBody = String(format: NotificationStrings.incomingReactionGifMessageFormat, reaction.emoji)
+                notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionGifMessageFormat, reaction.emoji)
             } else if MimeTypeUtil.isSupportedVideoMimeType(firstMimeType) {
-                notificationBody = String(format: NotificationStrings.incomingReactionVideoMessageFormat, reaction.emoji)
+                notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionVideoMessageFormat, reaction.emoji)
             } else if firstRenderingFlag == .voiceMessage {
-                notificationBody = String(format: NotificationStrings.incomingReactionVoiceMessageFormat, reaction.emoji)
+                notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionVoiceMessageFormat, reaction.emoji)
             } else if MimeTypeUtil.isSupportedAudioMimeType(firstMimeType) {
-                notificationBody = String(format: NotificationStrings.incomingReactionAudioMessageFormat, reaction.emoji)
+                notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionAudioMessageFormat, reaction.emoji)
             } else {
-                notificationBody = String(format: NotificationStrings.incomingReactionFileMessageFormat, reaction.emoji)
+                notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionFileMessageFormat, reaction.emoji)
             }
         } else {
-            notificationBody = String(format: NotificationStrings.incomingReactionFormat, reaction.emoji)
+            notificationBody = String.nonPluralLocalizedStringWithFormat(NotificationStrings.incomingReactionFormat, reaction.emoji)
         }
 
         // Don't reply from lockscreen if anyone in this conversation is
@@ -1109,7 +1109,7 @@ public class NotificationPresenterImpl: NotificationPresenter {
             "ERROR_NOTIFICATION_MESSAGE_FORMAT",
             comment: "Format string for an error alert notification message. Embeds {{ error string }}",
         )
-        let message = String(format: messageFormat, errorString)
+        let message = String.nonPluralLocalizedStringWithFormat(messageFormat, errorString)
 
         var userInfo = AppNotificationUserInfo()
         userInfo.defaultAction = .submitDebugLogs
@@ -1175,8 +1175,8 @@ public class NotificationPresenterImpl: NotificationPresenter {
                     "LINKED_DEVICE_NOTIFICATION_TITLE",
                     comment: "Title for system notification when a new device is linked.",
                 )),
-                body: String(
-                    format: OWSLocalizedString(
+                body: String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "LINKED_DEVICE_NOTIFICATION_BODY",
                         comment: "Body for system notification when a new device is linked. Embeds {{ time the device was linked }}",
                     ),
@@ -1201,8 +1201,8 @@ public class NotificationPresenterImpl: NotificationPresenter {
                     "BACKUPS_TURNED_ON_TITLE",
                     comment: "Title for system notification or megaphone when backups is enabled",
                 )),
-                body: String(
-                    format: OWSLocalizedString(
+                body: String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "BACKUPS_TURNED_ON_NOTIFICATION_BODY_FORMAT",
                         comment: "Body for system notification or megaphone when backups is enabled. Embeds {{ time backups was enabled }}",
                     ),

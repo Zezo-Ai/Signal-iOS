@@ -113,7 +113,7 @@ extension DonateViewController {
                     owsFail("[Donations] No price for this currency code. This should be impossible in the UI")
                 }
                 let currencyString = CurrencyFormatter.format(money: price)
-                return String(format: format, currencyString)
+                return String.nonPluralLocalizedStringWithFormat(format, currencyString)
             }()
             headingStackView.removeAllSubviews()
             headingStackView.addArrangedSubview(headingLabel)
@@ -144,13 +144,13 @@ extension DonateViewController {
                     dateFormatter.dateStyle = .medium
                     let dateString = dateFormatter.string(from: currentSubscription.endOfCurrentPeriod)
 
-                    return String(format: format, dateString)
+                    return String.nonPluralLocalizedStringWithFormat(format, dateString)
                 } else {
                     let format = OWSLocalizedString(
                         "DONATE_SCREEN_MONTHLY_SUBSCRIPTION_SUBTITLE",
                         comment: "On the donation screen, you can see a list of monthly subscription levels. This text will be shown in the subtitle of each level, telling you which badge you'll get. Embeds {{localized badge name}}, such as \"Planet\".",
                     )
-                    return String(format: format, subscriptionLevel.badge.localizedName)
+                    return String.nonPluralLocalizedStringWithFormat(format, subscriptionLevel.badge.localizedName)
                 }
             }()
         }

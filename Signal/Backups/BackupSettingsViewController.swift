@@ -1173,8 +1173,8 @@ class BackupSettingsViewController:
             let limits = try? await backupIdService.fetchBackupIDLimits(auth: .implicit(), logger: PrefixedLogger(prefix: "[Settings]")),
             !limits.hasPermitsRemaining
         {
-            let bodyText = String(
-                format: OWSLocalizedString(
+            let bodyText = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "BACKUP_SETTINGS_CREATE_NEW_KEY_LIMIT_REACHED_WARNING_SHEET_BODY",
                     comment: "Explanation text for a sheet warning users they've reached a rate limit for creating Recovery Key. {{ Embeds 1: the preformatted time they must wait before enabling backups, such as \"1 week\" or \"6 hours\". }}",
                 ),
@@ -1785,8 +1785,8 @@ struct BackupSettingsView: View {
                         VStack(alignment: .leading) {
                             Label {
                                 Text(
-                                    String(
-                                        format: OWSLocalizedString(
+                                    String.nonPluralLocalizedStringWithFormat(
+                                        OWSLocalizedString(
                                             "BACKUP_SETTINGS_UPLOAD_PROGRESS_SUBTITLE_PAUSED_OUT_OF_STORAGE_SPACE_FORMAT",
                                             comment: "Subtitle for a progress bar tracking uploads that are paused because the user is out of remote storage space. Embeds 1:{{ total storage space provided, e.g. 100 GB }}; 2:{{ space the user needs to free up by deleting media, e.g. 1 GB }}.",
                                         ),
@@ -2079,8 +2079,8 @@ private struct BackupExportProgressView: View {
             let percentComplete = (0.95 * percentExportCompleted) + (0.05 * percentUploadCompleted)
             return ProgressBarState(
                 style: .determinate(percentComplete: percentComplete),
-                label: String(
-                    format: OWSLocalizedString(
+                label: String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "BACKUP_SETTINGS_BACKUP_EXPORT_PROGRESS_DESCRIPTION_PREPARING_BACKUP",
                         comment: "Description for a progress bar tracking the preparation of a Backup. Embeds 1:{{ the percentage completed preformatted as a percent, e.g. 10% }}.",
                     ),
@@ -2353,16 +2353,16 @@ private struct BackupAttachmentDownloadProgressView: View {
             case .suspended:
                 switch backupPlan {
                 case .disabled, .free, .paid, .paidAsTester:
-                    String(
-                        format: OWSLocalizedString(
+                    String.nonPluralLocalizedStringWithFormat(
+                        OWSLocalizedString(
                             "BACKUP_SETTINGS_DOWNLOAD_PROGRESS_SUBTITLE_SUSPENDED",
                             comment: "Subtitle for a view explaining that downloads are available but not running. Embeds {{ the amount available to download as a file size, e.g. 100 MB }}.",
                         ),
                         latestDownloadUpdate.bytesRemaining.formatted(.owsByteCount()),
                     )
                 case .disabling, .paidExpiringSoon:
-                    String(
-                        format: OWSLocalizedString(
+                    String.nonPluralLocalizedStringWithFormat(
+                        OWSLocalizedString(
                             "BACKUP_SETTINGS_DOWNLOAD_PROGRESS_SUBTITLE_SUSPENDED_PAID_SUBSCRIPTION_EXPIRING",
                             comment: "Subtitle for a view explaining that downloads are available but not running, and the user's paid subscription is expiring. Embeds {{ the amount available to download as a file size, e.g. 100 MB }}.",
                         ),
@@ -2370,8 +2370,8 @@ private struct BackupAttachmentDownloadProgressView: View {
                     )
                 }
             case .running:
-                String(
-                    format: OWSLocalizedString(
+                String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "BACKUP_SETTINGS_DOWNLOAD_PROGRESS_SUBTITLE_RUNNING",
                         comment: "Subtitle for a progress bar tracking active downloading. Embeds 1:{{ the amount downloaded as a file size, e.g. 100 MB }}; 2:{{ the total amount to download as a file size, e.g. 1 GB }}; 3:{{ the amount downloaded as a percentage, e.g. 10% }}.",
                     ),
@@ -2400,8 +2400,8 @@ private struct BackupAttachmentDownloadProgressView: View {
                     comment: "Subtitle for a progress bar tracking downloads that are paused because they need internet.",
                 )
             case .outOfDiskSpace(let bytesRequired):
-                String(
-                    format: OWSLocalizedString(
+                String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
                         "BACKUP_SETTINGS_DOWNLOAD_PROGRESS_SUBTITLE_PAUSED_NEEDS_DISK_SPACE",
                         comment: "Subtitle for a progress bar tracking downloads that are paused because they need more disk space available. Embeds {{ the amount of space needed as a file size, e.g. 100 MB }}.",
                     ),
@@ -2525,8 +2525,8 @@ private struct BackupAttachmentUploadProgressView: View {
             let totalBytesToUpload = uploadUpdate.totalBytesToUpload
             let percentageUploaded = uploadUpdate.percentageUploaded
 
-            return String(
-                format: OWSLocalizedString(
+            return String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "BACKUP_SETTINGS_UPLOAD_PROGRESS_SUBTITLE_RUNNING",
                     comment: "Subtitle for a progress bar tracking active uploading. Embeds 1:{{ the amount uploaded as a file size, e.g. 100 MB }}; 2:{{ the total amount to upload as a file size, e.g. 1 GB }}; 3:{{ the percentage uploaded as a percent, e.g. 40% }}.",
                 ),
@@ -2733,8 +2733,8 @@ private struct BackupSubscriptionLoadedView: View {
                 "BACKUP_SETTINGS_BACKUP_PLAN_PAID_PRICE_FORMAT",
                 comment: "Text explaining the price of the user's paid backup plan. Embeds {{ the formatted price }}.",
             )
-            Text(String(
-                format: priceStringFormat,
+            Text(String.nonPluralLocalizedStringWithFormat(
+                priceStringFormat,
                 CurrencyFormatter.format(money: price),
             ))
 
@@ -2742,8 +2742,8 @@ private struct BackupSubscriptionLoadedView: View {
                 "BACKUP_SETTINGS_BACKUP_PLAN_PAID_RENEWAL_FORMAT",
                 comment: "Text explaining when the user's paid backup plan renews. Embeds {{ the formatted renewal date }}.",
             )
-            Text(String(
-                format: renewalStringFormat,
+            Text(String.nonPluralLocalizedStringWithFormat(
+                renewalStringFormat,
                 DateFormatter.localizedString(from: renewalDate, dateStyle: .medium, timeStyle: .none),
             ))
         case .paidButExpiring(let expirationDate), .paidButExpired(let expirationDate):
@@ -2770,8 +2770,8 @@ private struct BackupSubscriptionLoadedView: View {
             .fontWeight(.semibold)
             .foregroundStyle(Color.Signal.red)
 
-            Text(String(
-                format: expirationDateFormatString,
+            Text(String.nonPluralLocalizedStringWithFormat(
+                expirationDateFormatString,
                 DateFormatter.localizedString(from: expirationDate, dateStyle: .medium, timeStyle: .none),
             ))
         case .paidButFailedToRenew:
@@ -2930,21 +2930,21 @@ private struct BackupDetailsView: View {
                         comment: "Text explaining that the user's last backup was today. Embeds {{ the time of the backup }}.",
                     )
 
-                    return String(format: todayFormatString, lastBackupTimeString)
+                    return String.nonPluralLocalizedStringWithFormat(todayFormatString, lastBackupTimeString)
                 } else if Calendar.current.isDateInYesterday(lastBackupDate) {
                     let yesterdayFormatString = OWSLocalizedString(
                         "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_YESTERDAY_FORMAT",
                         comment: "Text explaining that the user's last backup was yesterday. Embeds {{ the time of the backup }}.",
                     )
 
-                    return String(format: yesterdayFormatString, lastBackupTimeString)
+                    return String.nonPluralLocalizedStringWithFormat(yesterdayFormatString, lastBackupTimeString)
                 } else {
                     let pastFormatString = OWSLocalizedString(
                         "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_PAST_FORMAT",
                         comment: "Text explaining that the user's last backup was in the past. Embeds 1:{{ the date of the backup }} and 2:{{ the time of the backup }}.",
                     )
 
-                    return String(format: pastFormatString, lastBackupDateString, lastBackupTimeString)
+                    return String.nonPluralLocalizedStringWithFormat(pastFormatString, lastBackupDateString, lastBackupTimeString)
                 }
             }()
 

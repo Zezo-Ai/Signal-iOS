@@ -115,6 +115,6 @@ extension TSInfoMessage {
             comment: "Shown when another user pins a message. Embeds {{ another user }}.",
         )
 
-        return String(format: formatString, displayName.resolvedValue())
+        return String.nonPluralLocalizedStringWithFormat(formatString, displayName.resolvedValue())
     }
 }

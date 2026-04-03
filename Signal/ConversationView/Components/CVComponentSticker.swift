@@ -238,8 +238,8 @@ public class CVComponentSticker: CVComponentBase, CVComponent {
 extension CVComponentSticker: CVAccessibilityComponent {
     public var accessibilityDescription: String {
         if let approximateEmoji = stickerMetadata?.firstEmoji {
-            return String(
-                format: OWSLocalizedString(
+            return String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "ACCESSIBILITY_LABEL_STICKER_FORMAT",
                     comment: "Accessibility label for stickers. Embeds {{ name of top emoji the sticker resembles }}",
                 ),

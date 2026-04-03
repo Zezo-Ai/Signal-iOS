@@ -27,8 +27,8 @@ class BackupsEnabledNotificationMegaphone: MegaphoneView {
             comment: "Title for system notification or megaphone when backups is enabled",
         )
 
-        bodyText = String(
-            format: OWSLocalizedString(
+        bodyText = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "BACKUPS_TURNED_ON_NOTIFICATION_BODY_FORMAT",
                 comment: "Body for system notification or megaphone when backups is enabled. Embeds {{ time backups was enabled }}",
             ),

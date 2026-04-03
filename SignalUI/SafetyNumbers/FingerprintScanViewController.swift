@@ -129,7 +129,7 @@ class FingerprintScanViewController: OWSViewController, OWSNavigationChildContro
             "SUCCESSFUL_VERIFICATION_DESCRIPTION",
             comment: "Alert body after verifying privacy with {{other user's name}}",
         )
-        let successDescription = String(format: descriptionFormat, contactName)
+        let successDescription = String.nonPluralLocalizedStringWithFormat(descriptionFormat, contactName)
         let actionSheet = ActionSheetController(title: successTitle, message: successDescription)
         actionSheet.addAction(ActionSheetAction(
             title: NSLocalizedString(

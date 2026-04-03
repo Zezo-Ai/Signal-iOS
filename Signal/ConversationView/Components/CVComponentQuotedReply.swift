@@ -121,10 +121,10 @@ extension CVComponentQuotedReply: CVAccessibilityComponent {
         let originalMessage = self.quotedReply.viewState.quotedReplyModel.originalMessageAccessibilityLabel ?? ""
 
         if quotedReply.quotedReplyModel.isOriginalMessageAuthorLocalUser {
-            return String(format: format, CommonStrings.you, originalMessage)
+            return String.nonPluralLocalizedStringWithFormat(format, CommonStrings.you, originalMessage)
         } else {
-            return String(
-                format: format,
+            return String.nonPluralLocalizedStringWithFormat(
+                format,
                 self.quotedReply.viewState.quotedAuthorName,
                 originalMessage,
             )

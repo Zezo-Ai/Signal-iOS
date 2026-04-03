@@ -637,8 +637,8 @@ private class BackupExportProgressView: ChatListBackupProgressView {
                 "CHAT_LIST_BACKUP_PROGRESS_VIEW_UPLOADING_BACKUP_TITLE",
                 comment: "Title label shown in the chat list backup progress view while backup attachments are being uploaded.",
             )
-            progressLabelText = String(
-                format: OWSLocalizedString(
+            progressLabelText = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "CHAT_LIST_BACKUP_PROGRESS_VIEW_UPLOAD_PROGRESS_FORMAT",
                     comment: "Progress label showing the amount uploaded out of the total. Embeds {{ %1$@ bytes uploaded, %2$@ total bytes to upload }}.",
                 ),

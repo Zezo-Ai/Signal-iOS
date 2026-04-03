@@ -463,7 +463,7 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
             )
         }
 
-        let formattedString = String(format: predicate, subject)
+        let formattedString = String.nonPluralLocalizedStringWithFormat(predicate, subject)
         let subjectRange = NSString(string: formattedString).range(of: subject)
         let attributedString = NSMutableAttributedString(string: formattedString)
         attributedString.addAttributes(
@@ -987,7 +987,7 @@ extension CVComponentThreadDetails {
 
         let formatString: String
         var underlinedPortion: String?
-        var arguments: [CVarArg] = sortedMemberNames
+        var arguments: [String] = sortedMemberNames
         switch (sortedMemberNames.count, localUserIsAMember) {
         case (0, _):
             formatString = OWSLocalizedString(
@@ -1050,8 +1050,8 @@ extension CVComponentThreadDetails {
             arguments = firstThreeMembers + [otherMembersString]
         }
 
-        let membersString = String(
-            format: formatString,
+        let membersString = String.nonPluralLocalizedStringWithFormat(
+            formatString,
             arguments: arguments,
         )
         let membersAttributedString: NSAttributedString
@@ -1136,41 +1136,40 @@ extension CVComponentThreadDetails {
             tx: tx,
         )
 
-        // We need these to be CVarArgs for them to format appropriately.
-        let groupNamesFormatArg: [CVarArg] = mutualGroupNames
+        let groupNamesFormatArg: [String] = mutualGroupNames
         let formattedString: String
         switch mutualGroupNames.count {
         case 0:
-            formattedString = String(
-                format: OWSLocalizedString(
+            formattedString = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "THREAD_DETAILS_ZERO_MUTUAL_GROUPS",
                     comment: "A string indicating there are no mutual groups the user shares with this contact",
                 ),
-                groupNamesFormatArg,
+                arguments: groupNamesFormatArg,
             )
         case 1:
-            formattedString = String(
-                format: OWSLocalizedString(
+            formattedString = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "THREAD_DETAILS_ONE_MUTUAL_GROUP",
                     comment: "A string indicating a mutual group the user shares with this contact. Embeds {{mutual group name}}",
                 ),
-                groupNamesFormatArg,
+                arguments: groupNamesFormatArg,
             )
         case 2:
-            formattedString = String(
-                format: OWSLocalizedString(
+            formattedString = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "THREAD_DETAILS_TWO_MUTUAL_GROUP",
                     comment: "A string indicating two mutual groups the user shares with this contact. Embeds {{mutual group name}}",
                 ),
-                groupNamesFormatArg,
+                arguments: groupNamesFormatArg,
             )
         case 3:
-            formattedString = String(
-                format: OWSLocalizedString(
+            formattedString = String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "THREAD_DETAILS_THREE_MUTUAL_GROUP",
                     comment: "A string indicating three mutual groups the user shares with this contact. Embeds {{mutual group name}}",
                 ),
-                groupNamesFormatArg,
+                arguments: groupNamesFormatArg,
             )
         default:
             // For this string, we want to use the first two groups' names

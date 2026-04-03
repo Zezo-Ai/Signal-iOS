@@ -261,7 +261,7 @@ class PaymentsDetailViewController: OWSTableViewController2 {
                         )
                     }
                 }()
-                title = String(format: titleFormat, username)
+                title = String.nonPluralLocalizedStringWithFormat(titleFormat, username)
             } else {
                 if paymentItem.isIncoming {
                     title = OWSLocalizedString(
@@ -328,8 +328,8 @@ class PaymentsDetailViewController: OWSTableViewController2 {
                     "SETTINGS_PAYMENTS_PAYMENT_DETAILS_SENDER_FORMAT",
                     comment: "Format for the sender info in the payment details view in the app settings. Embeds {{ %1$@ the name of the sender of the payment, %2$@ the date the transaction was sent }}.",
                 )
-                value = String(
-                    format: senderFormat,
+                value = String.nonPluralLocalizedStringWithFormat(
+                    senderFormat,
                     sender,
                     TSPaymentModel.formatDate(mcLedgerBlockDate, isLongForm: true),
                 )
@@ -470,7 +470,7 @@ class PaymentsDetailViewController: OWSTableViewController2 {
                         comment: "Format string for the recipient of an outgoing payment. Embeds: {{ the name of the recipient of the payment}}.",
                     ),
             )
-            usernameLabel.text = String(format: displayNameFormat, displayName)
+            usernameLabel.text = String.nonPluralLocalizedStringWithFormat(displayNameFormat, displayName)
         }
 
         let headerStack = UIStackView(arrangedSubviews: stackViews)

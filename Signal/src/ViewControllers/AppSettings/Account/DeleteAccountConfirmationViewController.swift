@@ -230,7 +230,7 @@ class DeleteAccountConfirmationViewController: OWSTableViewController2 {
             "SETTINGS_DELETE_ACCOUNT_PAYMENTS_BALANCE_ALERT_MESSAGE_FORMAT",
             comment: "Body for the alert confirming whether the user wants transfer their payments balance before deleting their account. Embeds: {{ the current payment balance }}.",
         )
-        let message = String(format: messageFormat, formattedBalance)
+        let message = String.nonPluralLocalizedStringWithFormat(messageFormat, formattedBalance)
 
         let actionSheet = ActionSheetController(title: title, message: message)
 

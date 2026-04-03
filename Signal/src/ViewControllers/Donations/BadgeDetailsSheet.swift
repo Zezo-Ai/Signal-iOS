@@ -92,7 +92,7 @@ class BadgeDetailsSheet: OWSTableSheetViewController {
                         "BADGE_DETAILS_TITLE_FOR_SUPPORTER",
                         comment: "When viewing someone else's donor badge, you'll see a sheet. This is the title on that sheet. Embeds {badge owner's short name}",
                     )
-                    return String(format: format, remoteSupporterName)
+                    return String.nonPluralLocalizedStringWithFormat(format, remoteSupporterName)
                 } else {
                     return self.focusedBadge.localizedName
                 }

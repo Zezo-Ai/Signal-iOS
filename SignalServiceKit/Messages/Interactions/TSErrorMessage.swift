@@ -92,6 +92,6 @@ extension TSErrorMessage {
             comment: "Shown when signal users safety numbers changed, embeds the user's {{name or phone number}}",
         )
         let recipientDisplayName = SSKEnvironment.shared.contactManagerRef.displayName(for: address, tx: tx).resolvedValue()
-        return String(format: messageFormat, recipientDisplayName)
+        return String.nonPluralLocalizedStringWithFormat(messageFormat, recipientDisplayName)
     }
 }

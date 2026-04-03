@@ -993,7 +993,7 @@ public class ChatListViewController: OWSViewController, HomeTabViewController {
             "PAYMENTS_NOTIFICATION_BANNER_1_WITH_DETAILS_FORMAT",
             comment: "Format for the payments notification banner for a single payment notification with details. Embeds: {{ %1$@ the name of the user who sent you the payment, %2$@ the amount of the payment }}.",
         )
-        let title = String(format: format, shortName, formattedAmount)
+        let title = String.nonPluralLocalizedStringWithFormat(format, shortName, formattedAmount)
 
         let avatarView = ConversationAvatarView(sizeClass: .customDiameter(Self.paymentsBannerAvatarSize), localUserDisplayMode: .asUser)
         avatarView.update(transaction) { config in
@@ -1029,7 +1029,7 @@ public class ChatListViewController: OWSViewController, HomeTabViewController {
                 "PAYMENTS_NOTIFICATION_BANNER_N_FORMAT",
                 comment: "Format for the payments notification banner for multiple payment notifications. Embeds: {{ the number of unread payment notifications }}.",
             )
-            title = String(format: format, OWSFormat.formatUInt(unreadCount))
+            title = String.nonPluralLocalizedStringWithFormat(format, OWSFormat.formatUInt(unreadCount))
         }
 
         let iconView = UIImageView.withTemplateImageName(
@@ -1273,8 +1273,8 @@ public class ChatListViewController: OWSViewController, HomeTabViewController {
                 "NOTIFICATIONS_ERROR_TITLE",
                 comment: "Shown as the title of an alert when notifications can't be shown due to an error.",
             ),
-            message: String(
-                format: OWSLocalizedString(
+            message: String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
                     "NOTIFICATIONS_ERROR_MESSAGE",
                     comment: "Shown as the body of an alert when notifications can't be shown due to an error.",
                 ),

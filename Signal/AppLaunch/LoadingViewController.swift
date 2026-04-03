@@ -223,8 +223,8 @@ class LoadingViewController: UIViewController {
         let unitCountCompleted = Int(Float(unitCountToComplete) * progress.percentComplete)
 
         progressView.setProgress(percentComplete, animated: true)
-        percentCompleteLabel.text = String(
-            format: OWSLocalizedString(
+        percentCompleteLabel.text = String.nonPluralLocalizedStringWithFormat(
+            OWSLocalizedString(
                 "LINK_NEW_DEVICE_SYNC_PROGRESS_PERCENT",
                 comment: "On a progress modal indicating the percent complete the sync process is. Embeds {{ formatted percentage }}",
             ),

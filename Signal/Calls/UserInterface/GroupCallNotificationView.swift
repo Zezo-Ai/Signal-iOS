@@ -200,7 +200,7 @@ private class BannerView: UIView {
                     "GROUP_CALL_NOTIFICATION_TWO_LEFT_FORMAT",
                     comment: "Copy explaining that two users have left the group call. Embeds {first member name}, {second member name}",
                 )
-            actionText = String(format: formatText, displayNames[0], displayNames[1])
+            actionText = String.nonPluralLocalizedStringWithFormat(formatText, displayNames[0], displayNames[1])
         } else {
             let formatText = action == .join
                 ? OWSLocalizedString(
@@ -211,7 +211,7 @@ private class BannerView: UIView {
                     "GROUP_CALL_NOTIFICATION_ONE_LEFT_FORMAT",
                     comment: "Copy explaining that a user has left the group call. Embeds {member name}",
                 )
-            actionText = String(format: formatText, displayNames[0])
+            actionText = String.nonPluralLocalizedStringWithFormat(formatText, displayNames[0])
         }
 
         let hStack = UIStackView()
