@@ -372,25 +372,25 @@ struct AttachmentUploadManagerTests {
         // 1. Upload location request
         let attempt = helper.addUploadFormAndLocationRequestMock(cdn: cdn) { auth, _, location in
             // 2. Fail the upload with a server error
-            helper.addUploadRequestMock(auth: auth, location: location, type: .failure(code: 500), completedCount: 20)
+            helper.addUploadRequestMock(auth: auth, location: location, type: .failure(code: 500), completedCount: (20, 20))
 
             // 3. Fetch the remote progress, but find none
             helper.addResumeProgressMock(cdn: cdn, auth: auth, location: location, type: .missingRange)
 
             // 4. Fail the upload with a server error
-            helper.addUploadRequestMock(auth: auth, location: location, type: .failure(code: 500), completedCount: 20)
+            helper.addUploadRequestMock(auth: auth, location: location, type: .failure(code: 500), completedCount: (20, 20))
 
             // 5. Fetch the remote progress, but find none
             helper.addResumeProgressMock(cdn: cdn, auth: auth, location: location, type: .missingRange)
 
             // 6. Fail the upload with a server error
-            helper.addUploadRequestMock(auth: auth, location: location, type: .failure(code: 500), completedCount: 20)
+            helper.addUploadRequestMock(auth: auth, location: location, type: .failure(code: 500), completedCount: (20, 20))
 
             // 7. Fetch the remote progress, but find none
             helper.addResumeProgressMock(cdn: cdn, auth: auth, location: location, type: .missingRange)
 
             // 8. Succeed the upload
-            helper.addUploadRequestMock(auth: auth, location: location, type: .success(200), completedCount: 20)
+            helper.addUploadRequestMock(auth: auth, location: location, type: .success(200), completedCount: (20, 20))
         }
 
         try await uploadManager.uploadTransitTierAttachment(attachmentId: attachmentID, progress: nil)
@@ -435,7 +435,7 @@ struct AttachmentUploadManagerTests {
             helper.addResumeProgressMock(cdn: cdn, auth: auth, location: location, type: .progress(count: 15))
 
             // 8. Succeed the upload
-            helper.addUploadRequestMock(auth: auth, location: location, type: .success(200), completedCount: 20)
+            helper.addUploadRequestMock(auth: auth, location: location, type: .success(200), completedCount: (20, 20))
         }
 
         try await uploadManager.uploadTransitTierAttachment(attachmentId: attachmentID, progress: nil)

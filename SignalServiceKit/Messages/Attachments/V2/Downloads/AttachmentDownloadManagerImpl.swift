@@ -1731,7 +1731,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                         return try await urlSession.performDownload(
                             requestUrl: requestUrl,
                             resumeData: resumeData,
-                            progress: wrappedProgressSource,
+                            progressBlock: wrappedProgressSource.asProgressBlock(),
                         )
                     }
                     downloadResponse = try await downloadTask!.value
@@ -1741,7 +1741,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                             urlPath,
                             method: .get,
                             headers: headers,
-                            progress: wrappedProgressSource,
+                            progressBlock: wrappedProgressSource.asProgressBlock(),
                         )
                     }
                     downloadResponse = try await downloadTask!.value

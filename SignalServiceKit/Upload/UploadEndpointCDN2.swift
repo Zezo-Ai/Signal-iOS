@@ -181,7 +181,7 @@ struct UploadEndpointCDN2: UploadEndpoint {
                 method: .put,
                 headers: headers,
                 requestData: uploadData,
-                progress: progress,
+                progressBlock: progress?.asProgressBlock() ?? { _, _ in },
             )
             switch response.responseStatusCode {
             case 200, 201:

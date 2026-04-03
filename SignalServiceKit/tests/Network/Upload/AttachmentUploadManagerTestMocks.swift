@@ -71,14 +71,14 @@ class _AttachmentUploadManager_NetworkManagerMock: NetworkManager {
 
 public class _AttachmentUploadManager_OWSURLSessionMock: BaseOWSURLSessionMock {
 
-    public var performUploadDataBlock: ((URLRequest, Data, OWSProgressSource?) async throws -> HTTPResponse)?
-    override public func performUpload(request: URLRequest, requestData: Data, progress: OWSProgressSource?) async throws -> HTTPResponse {
-        return try await performUploadDataBlock!(request, requestData, progress)
+    public var performUploadDataBlock: ((URLRequest, Data, OWSURLSession.ProgressBlock) async throws -> HTTPResponse)?
+    override public func performUpload(request: URLRequest, requestData: Data, progressBlock: OWSURLSession.ProgressBlock) async throws -> HTTPResponse {
+        return try await performUploadDataBlock!(request, requestData, progressBlock)
     }
 
-    public var performUploadFileBlock: ((URLRequest, URL, Bool, OWSProgressSource?) async throws -> HTTPResponse)?
-    override public func performUpload(request: URLRequest, fileUrl: URL, ignoreAppExpiry: Bool, progress: OWSProgressSource?) async throws -> HTTPResponse {
-        return try await performUploadFileBlock!(request, fileUrl, ignoreAppExpiry, progress)
+    public var performUploadFileBlock: ((URLRequest, URL, Bool, OWSURLSession.ProgressBlock) async throws -> HTTPResponse)?
+    override public func performUpload(request: URLRequest, fileUrl: URL, ignoreAppExpiry: Bool, progressBlock: OWSURLSession.ProgressBlock) async throws -> HTTPResponse {
+        return try await performUploadFileBlock!(request, fileUrl, ignoreAppExpiry, progressBlock)
     }
 
     public var performRequestBlock: ((URLRequest) async throws -> HTTPResponse)?

@@ -127,14 +127,14 @@ public protocol OWSURLSessionProtocol: AnyObject {
     func performUpload(
         request: URLRequest,
         requestData: Data,
-        progress: OWSProgressSource?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> HTTPResponse
 
     func performUpload(
         request: URLRequest,
         fileUrl: URL,
         ignoreAppExpiry: Bool,
-        progress: OWSProgressSource?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> HTTPResponse
 
     func performRequest(
@@ -145,12 +145,12 @@ public protocol OWSURLSessionProtocol: AnyObject {
     func performDownload(
         requestUrl: URL,
         resumeData: Data,
-        progress: OWSProgressSource?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> OWSUrlDownloadResponse
 
     func performDownload(
         request: URLRequest,
-        progress: OWSProgressSource?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> OWSUrlDownloadResponse
 
     func webSocketTask(
@@ -188,10 +188,10 @@ public extension OWSURLSessionProtocol {
         method: HTTPMethod,
         headers: HttpHeaders = HttpHeaders(),
         requestData: Data,
-        progress: OWSProgressSource? = nil,
+        progressBlock: OWSURLSession.ProgressBlock = { _, _ in },
     ) async throws -> HTTPResponse {
         let request = try self.endpoint.buildRequest(urlString, method: method, headers: headers, body: requestData)
-        return try await self.performUpload(request: request, requestData: requestData, progress: progress)
+        return try await self.performUpload(request: request, requestData: requestData, progressBlock: progressBlock)
     }
 
     func performUpload(
@@ -199,14 +199,14 @@ public extension OWSURLSessionProtocol {
         method: HTTPMethod,
         headers: HttpHeaders = HttpHeaders(),
         fileUrl: URL,
-        progress: OWSProgressSource? = nil,
+        progressBlock: OWSURLSession.ProgressBlock = { _, _ in },
     ) async throws -> HTTPResponse {
         let request = try self.endpoint.buildRequest(urlString, method: method, headers: headers)
         return try await self.performUpload(
             request: request,
             fileUrl: fileUrl,
             ignoreAppExpiry: false,
-            progress: progress,
+            progressBlock: progressBlock,
         )
     }
 
@@ -230,10 +230,10 @@ public extension OWSURLSessionProtocol {
         method: HTTPMethod,
         headers: HttpHeaders = HttpHeaders(),
         body: Data? = nil,
-        progress: OWSProgressSource? = nil,
+        progressBlock: OWSURLSession.ProgressBlock = { _, _ in },
     ) async throws -> OWSUrlDownloadResponse {
         let request = try self.endpoint.buildRequest(urlString, method: method, headers: headers, body: body)
-        return try await self.performDownload(request: request, progress: progress)
+        return try await self.performDownload(request: request, progressBlock: progressBlock)
     }
 }
 
@@ -249,7 +249,7 @@ extension OWSURLSessionProtocol {
         mimeType: String,
         textParts textPartsDictionary: OrderedDictionary<String, String>,
         ignoreAppExpiry: Bool = false,
-        progress: OWSProgressSource? = nil,
+        progressBlock: OWSURLSession.ProgressBlock = { _, _ in },
     ) async throws -> HTTPResponse {
         let multipartBodyFileURL = OWSFileSystem.temporaryFileUrl(
             fileExtension: nil,
@@ -289,7 +289,7 @@ extension OWSURLSessionProtocol {
             request: request,
             fileUrl: multipartBodyFileURL,
             ignoreAppExpiry: ignoreAppExpiry,
-            progress: progress,
+            progressBlock: progressBlock,
         )
     }
 }

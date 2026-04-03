@@ -130,7 +130,7 @@ struct UploadEndpointCDN3: UploadEndpoint {
                 method: method,
                 headers: headers,
                 requestData: uploadData,
-                progress: progress,
+                progressBlock: progress?.asProgressBlock() ?? { _, _ in },
             )
 
             switch response.responseStatusCode {

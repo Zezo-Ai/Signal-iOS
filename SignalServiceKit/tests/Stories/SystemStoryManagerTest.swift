@@ -439,7 +439,7 @@ private class MockDownloadSession: BaseOWSURLSessionMock {
 
     var performDownloadSource: ((URL) async throws -> OWSUrlDownloadResponse)?
 
-    override func performDownload(request: URLRequest, progress: OWSProgressSource?) async throws -> OWSUrlDownloadResponse {
+    override func performDownload(request: URLRequest, progressBlock: OWSURLSession.ProgressBlock) async throws -> OWSUrlDownloadResponse {
         return try await performDownloadSource!(request.url!)
     }
 }

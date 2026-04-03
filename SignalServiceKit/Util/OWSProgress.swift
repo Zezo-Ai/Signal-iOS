@@ -339,6 +339,14 @@ extension OWSProgressSource {
 
 extension OWSProgressSource where Self: Sendable {
 
+    func asProgressBlock() -> OWSURLSession.ProgressBlock {
+        return { completedByteCount, totalByteCount in
+            if self.completedUnitCount < completedByteCount {
+                self.incrementCompletedUnitCount(by: UInt64(completedByteCount) - self.completedUnitCount)
+            }
+        }
+    }
+
     /// Given some block of asynchronous work, update progress
     /// on the current source periodically (every ``timeInterval`` seconds)
     /// until the work block completes.

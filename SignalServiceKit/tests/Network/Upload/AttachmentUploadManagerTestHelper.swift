@@ -8,7 +8,7 @@ import Foundation
 
 typealias PerformTSRequestBlock = (TSRequest) async throws -> HTTPResponse
 typealias PerformRequestBlock = (URLRequest) async throws -> HTTPResponse
-typealias PerformUploadBlock = (URLRequest, Data, OWSProgressSource?) async throws -> HTTPResponse
+typealias PerformUploadBlock = (URLRequest, Data, OWSURLSession.ProgressBlock) async throws -> HTTPResponse
 
 enum MockRequestType {
     case uploadForm(PerformTSRequestBlock)
@@ -162,12 +162,12 @@ class AttachmentUploadManagerMockHelper {
             }
         }
 
-        mockURLSession.performUploadDataBlock = { request, data, progress in
+        mockURLSession.performUploadDataBlock = { request, data, progressBlock in
             guard case let .uploadTask(requestBlock) = self.activeUploadRequestMocks.removeFirst() else {
                 throw OWSAssertionError("Mock request missing")
             }
             self.capturedRequests.append(.uploadTask(request))
-            return try await requestBlock(request, data, progress)
+            return try await requestBlock(request, data, progressBlock)
         }
 
         return insertMockAttachment(mockAttachment)
@@ -342,10 +342,15 @@ class AttachmentUploadManagerMockHelper {
         case networkTimeout
     }
 
-    func addUploadRequestMock(auth: String, location: String, type: UploadResultType, completedCount: UInt64? = nil) {
-        enqueue(auth: auth, request: .uploadTask({ request, url, progress in
+    func addUploadRequestMock(
+        auth: String,
+        location: String,
+        type: UploadResultType,
+        completedCount: (completedByteCount: Int64, totalByteCount: Int64)? = nil,
+    ) {
+        enqueue(auth: auth, request: .uploadTask({ request, url, progressBlock in
             if let completedCount {
-                progress?.incrementCompletedUnitCount(by: completedCount)
+                await progressBlock(completedCount.completedByteCount, completedCount.totalByteCount)
             }
             switch type {
             case .networkTimeout:
