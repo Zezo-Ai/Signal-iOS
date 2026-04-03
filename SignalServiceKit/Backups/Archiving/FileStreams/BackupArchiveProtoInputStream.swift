@@ -23,11 +23,11 @@ extension BackupArchive {
  * the individual proto objects that we read one at a time.
  */
 class BackupArchiveProtoInputStream {
-    private let inputStream: InputStreamable
+    private let inputStream: TransformingInputStream
     private let inputStreamDelegate: StreamDelegate
 
     init(
-        inputStream: InputStreamable,
+        inputStream: TransformingInputStream,
         inputStreamDelegate: StreamDelegate,
     ) {
         self.inputStream = inputStream
@@ -51,7 +51,7 @@ class BackupArchiveProtoInputStream {
 
     /// Close the stream. Attempting to read after closing will result in failures.
     func closeFileStream() {
-        try? inputStream.close()
+        inputStream.close()
     }
 
     private func readProto<T>(

@@ -8,16 +8,16 @@ import Foundation
 /// Simple wrapper around an `InputStream` that allows passing data through an
 /// array of `StreamTransform` objects to alter the data before being passed
 /// back to the caller.
-public final class TransformingInputStream: InputStreamable {
+public final class TransformingInputStream {
 
     private let transforms: [any StreamTransform]
-    private let inputStream: InputStreamable
+    private let inputStream: InputStream
 
     private var hasInitialized: Bool = false
 
     public init(
         transforms: [any StreamTransform],
-        inputStream: InputStreamable,
+        inputStream: InputStream,
     ) {
         self.transforms = transforms
         self.inputStream = inputStream
@@ -97,7 +97,7 @@ public final class TransformingInputStream: InputStreamable {
         inputStream.schedule(in: runloop, forMode: mode)
     }
 
-    public func close() throws {
-        try inputStream.close()
+    public func close() {
+        inputStream.close()
     }
 }

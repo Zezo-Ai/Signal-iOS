@@ -5,17 +5,7 @@
 
 import Foundation
 
-public protocol InputStreamable: Streamable {
-
-    // Read up to maxLength bytes from the inpu stream
-    func read(maxLength len: Int) throws -> Data
-
-    // Return false if all bytes have been returned and no further
-    // data should be expected.
-    var hasBytesAvailable: Bool { get }
-}
-
-extension InputStream: InputStreamable {
+extension InputStream {
     public func read(maxLength len: Int) throws -> Data {
         if len == 0 {
             return Data()

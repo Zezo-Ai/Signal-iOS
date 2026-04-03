@@ -29,7 +29,8 @@ final class TransformingInputStreamTests: XCTestCase {
         try transformingOutputStream.close()
 
         let inputData = outputStream.accumulation
-        let inputStream = TextBackedInputStream(data: inputData)
+        let inputStream = InputStream(data: inputData)
+        inputStream.open()
 
         let transformingIntputStream = TransformingInputStream(
             transforms: [
@@ -44,7 +45,7 @@ final class TransformingInputStreamTests: XCTestCase {
         while transformingIntputStream.hasBytesAvailable {
             results.append(try transformingIntputStream.read(maxLength: 1024))
         }
-        try transformingIntputStream.close()
+        transformingIntputStream.close()
 
         XCTAssertEqual(results.filter({ $0.count > 0 }).count, 3)
     }

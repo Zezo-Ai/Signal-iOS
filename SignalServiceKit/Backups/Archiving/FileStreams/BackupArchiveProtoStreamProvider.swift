@@ -216,7 +216,7 @@ public class BackupArchiveEncryptedProtoStreamProvider {
                 // Once the end of the stream is reached, the transform will compare the
                 // HMACs and throw an exception if they differ.
                 while try rawInputStream.read(maxLength: 32 * 1024).count > 0 {}
-                try rawInputStream.close()
+                rawInputStream.close()
                 return true
             case .fileNotFound, .unableToOpenFileStream, .hmacValidationFailedOnEncryptedFile:
                 return false

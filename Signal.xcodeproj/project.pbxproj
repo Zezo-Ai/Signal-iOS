@@ -1904,7 +1904,7 @@
 		C1DAA7582C13C1E00078AE84 /* ArchivedPayment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DAA7572C13C1E00078AE84 /* ArchivedPayment.swift */; };
 		C1DAA75A2C1742680078AE84 /* ArchivedPaymentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DAA7592C1742680078AE84 /* ArchivedPaymentStore.swift */; };
 		C1DB22C329C9F95500757380 /* EditManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DB22C229C9F95500757380 /* EditManager.swift */; };
-		C1DD78AB2BB1CEF80020F064 /* InputStreamable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DD78AA2BB1CEF80020F064 /* InputStreamable.swift */; };
+		C1DD78AB2BB1CEF80020F064 /* InputStream+SSK.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DD78AA2BB1CEF80020F064 /* InputStream+SSK.swift */; };
 		C1DD78AD2BB1CF110020F064 /* Streamable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DD78AC2BB1CF110020F064 /* Streamable.swift */; };
 		C1DF3F432B0283C5004B6986 /* UploadEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DF3F3C2B0283C5004B6986 /* UploadEndpoint.swift */; };
 		C1DF3F452B0283C5004B6986 /* UploadV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DF3F3E2B0283C5004B6986 /* UploadV2.swift */; };
@@ -6181,7 +6181,7 @@
 		C1DAA7572C13C1E00078AE84 /* ArchivedPayment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchivedPayment.swift; sourceTree = "<group>"; };
 		C1DAA7592C1742680078AE84 /* ArchivedPaymentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchivedPaymentStore.swift; sourceTree = "<group>"; };
 		C1DB22C229C9F95500757380 /* EditManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditManager.swift; sourceTree = "<group>"; };
-		C1DD78AA2BB1CEF80020F064 /* InputStreamable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputStreamable.swift; sourceTree = "<group>"; };
+		C1DD78AA2BB1CEF80020F064 /* InputStream+SSK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InputStream+SSK.swift"; sourceTree = "<group>"; };
 		C1DD78AC2BB1CF110020F064 /* Streamable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Streamable.swift; sourceTree = "<group>"; };
 		C1DF3F3C2B0283C5004B6986 /* UploadEndpoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadEndpoint.swift; sourceTree = "<group>"; };
 		C1DF3F3E2B0283C5004B6986 /* UploadV2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadV2.swift; sourceTree = "<group>"; };
@@ -11924,7 +11924,7 @@
 			children = (
 				C1EB623B2BADEE56006D99CB /* ChunkedInputStreamTransform.swift */,
 				C14EC1AA2BAB57B900A4D064 /* DecryptingStreamTransform.swift */,
-				C1DD78AA2BB1CEF80020F064 /* InputStreamable.swift */,
+				C1DD78AA2BB1CEF80020F064 /* InputStream+SSK.swift */,
 				66B127FF2E3D83E0006FE598 /* NonceHeaderInputStreamTransform.swift */,
 				C14EC1A12BA891D200A4D064 /* TransformingInputStream.swift */,
 			);
@@ -19384,7 +19384,7 @@
 				D979CC262AD3933B006AAC49 /* IndividualCallRecordManager.swift in Sources */,
 				D9F6554429D798CC002A330A /* InheritableRecord.swift in Sources */,
 				D9B95A9B29E8923B00D7CB95 /* InMemoryDB.swift in Sources */,
-				C1DD78AB2BB1CEF80020F064 /* InputStreamable.swift in Sources */,
+				C1DD78AB2BB1CEF80020F064 /* InputStream+SSK.swift in Sources */,
 				50FA1B822F2D2935000DDCF9 /* InstalledStickerRecord.swift in Sources */,
 				F9C5CE0F289453B400548EEE /* Int+SSK.swift in Sources */,
 				D9247EAA2BFD424800DFEF6F /* InteractionDeleteManager.swift in Sources */,

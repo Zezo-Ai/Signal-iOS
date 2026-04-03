@@ -116,28 +116,6 @@ final class TransformingOutputStreamTests: XCTestCase {
     }
 }
 
-class TextBackedInputStream: InputStreamable {
-    var hasBytesAvailable: Bool { data.count > 0 }
-
-    private var data: Data
-    init(data: Data) {
-        self.data = data
-    }
-
-    func read(maxLength len: Int) throws -> Data {
-        let readCount = min(len, data.count)
-        let returnData = data.subdata(in: 0..<readCount)
-        data = data.subdata(in: readCount..<data.count)
-        return returnData
-    }
-
-    func close() throws { }
-
-    func remove(from: RunLoop, forMode: RunLoop.Mode) { }
-
-    func schedule(in: RunLoop, forMode: RunLoop.Mode) { }
-}
-
 class TextBackedOutputStream: OutputStreamable {
 
     var accumulation = Data()
