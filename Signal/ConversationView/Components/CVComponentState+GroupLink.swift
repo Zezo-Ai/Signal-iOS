@@ -9,24 +9,24 @@ import SignalUI
 private extension CVComponentState {
     private struct GroupLinkState {
         var groupInviteLinkAvatarCache = [String: GroupInviteLinkCachedAvatar]()
-        var expiredGroupInviteLinks = Set<URL>()
+        var expiredGroupInviteLinks = Set<GroupInviteLinkInfo>()
     }
 
     private static let groupLinkState = AtomicValue(GroupLinkState(), lock: .init())
 
-    private static func updateExpirationList(url: URL, isExpired: Bool) -> Bool {
+    private static func updateExpirationList(groupInviteLinkInfo: GroupInviteLinkInfo, isExpired: Bool) -> Bool {
         return groupLinkState.update {
             if isExpired {
-                return $0.expiredGroupInviteLinks.insert(url).inserted
+                return $0.expiredGroupInviteLinks.insert(groupInviteLinkInfo).inserted
             } else {
-                return $0.expiredGroupInviteLinks.remove(url) != nil
+                return $0.expiredGroupInviteLinks.remove(groupInviteLinkInfo) != nil
             }
         }
     }
 
-    private static func isGroupInviteLinkExpired(_ url: URL) -> Bool {
+    private static func isGroupInviteLinkExpired(groupInviteLinkInfo: GroupInviteLinkInfo) -> Bool {
         return groupLinkState.update {
-            return $0.expiredGroupInviteLinks.contains(url)
+            return $0.expiredGroupInviteLinks.contains(groupInviteLinkInfo)
         }
     }
 
@@ -106,13 +106,13 @@ extension CVComponentState {
                         inviteLinkPassword: groupInviteLinkInfo.inviteLinkPassword,
                         groupSecretParams: groupContextInfo.groupSecretParams,
                     )
-                    _ = Self.updateExpirationList(url: url, isExpired: false)
+                    _ = Self.updateExpirationList(groupInviteLinkInfo: groupInviteLinkInfo, isExpired: false)
                     await touchMessage()
                 } catch {
                     switch error {
                     case GroupsV2Error.expiredGroupInviteLink, GroupsV2Error.localUserBlockedFromJoining, GroupsV2Error.terminatedGroupInviteLink:
                         Logger.warn("Failed to fetch group link content: \(error)")
-                        if Self.updateExpirationList(url: url, isExpired: true) {
+                        if Self.updateExpirationList(groupInviteLinkInfo: groupInviteLinkInfo, isExpired: true) {
                             await touchMessage()
                         }
                     default:
@@ -125,7 +125,7 @@ extension CVComponentState {
                 url: url,
                 groupInviteLinkPreview: nil,
                 avatar: nil,
-                isExpired: Self.isGroupInviteLinkExpired(url),
+                isExpired: Self.isGroupInviteLinkExpired(groupInviteLinkInfo: groupInviteLinkInfo),
             )
         }
 

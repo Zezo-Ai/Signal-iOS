@@ -343,7 +343,7 @@ public struct GroupV2ContextInfo {
 
 // MARK: -
 
-public struct GroupInviteLinkInfo {
+public struct GroupInviteLinkInfo: Hashable {
     public let masterKey: Data
     public let inviteLinkPassword: Data
 
