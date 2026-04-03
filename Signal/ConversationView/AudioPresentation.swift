@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Lottie
 import SignalServiceKit
 import SignalUI
 
@@ -32,13 +31,10 @@ protocol AudioPresenter {
     var audioPlaybackRate: AudioPlaybackRate { get }
 
     // Color for play/pause button.
-    func playPauseAnimationColor(isIncoming: Bool) -> ColorValueProvider
+    func playPauseAnimationColor(isIncoming: Bool) -> UIColor
 
     // Color for dot indicating listened/unlistened status.
-    func playedDotAnimationColor(
-        conversationStyle: ConversationStyle,
-        isIncoming: Bool,
-    ) -> ColorValueProvider
+    func playedDotAnimationColor(conversationStyle: ConversationStyle, isIncoming: Bool) -> UIColor
 
     // Color for scrubbing thumb.
     func thumbColor(isIncoming: Bool) -> UIColor

@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Lottie
 import SignalServiceKit
 import SignalUI
 
@@ -72,15 +71,12 @@ class AudioMessagePresenter: AudioPresenter {
         }
     }
 
-    func playPauseAnimationColor(isIncoming: Bool) -> ColorValueProvider {
-        ColorValueProvider(primaryElementColor(isIncoming: isIncoming).lottieColorValue)
+    func playPauseAnimationColor(isIncoming: Bool) -> UIColor {
+        primaryElementColor(isIncoming: isIncoming)
     }
 
-    func playedDotAnimationColor(
-        conversationStyle: ConversationStyle,
-        isIncoming: Bool,
-    ) -> ColorValueProvider {
-        return ColorValueProvider(conversationStyle.bubbleSecondaryTextColor(isIncoming: isIncoming).lottieColorValue)
+    func playedDotAnimationColor(conversationStyle: ConversationStyle, isIncoming: Bool) -> UIColor {
+        conversationStyle.bubbleSecondaryTextColor(isIncoming: isIncoming)
     }
 
     func configureForRendering(conversationStyle: ConversationStyle) {
