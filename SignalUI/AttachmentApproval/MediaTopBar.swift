@@ -13,7 +13,13 @@ open class MediaTopBar: UIView {
     // since `preservesSuperviewLayoutMargins` is set to `true`.
     public let controlsLayoutGuide = UILayoutGuide()
     private lazy var controlsLayoutGuideTop: NSLayoutConstraint = {
-        controlsLayoutGuide.topAnchor.constraint(equalTo: topAnchor)
+        if #available(iOS 26, *) {
+            // Avoid stoplight buttons in windowed mode on iPad
+            let guide = layoutGuide(for: .margins(cornerAdaptation: .vertical))
+            return controlsLayoutGuide.topAnchor.constraint(equalTo: guide.topAnchor)
+        } else {
+            return controlsLayoutGuide.topAnchor.constraint(equalTo: topAnchor)
+        }
     }()
 
     private lazy var controlsLayoutGuideLeading: NSLayoutConstraint = {
