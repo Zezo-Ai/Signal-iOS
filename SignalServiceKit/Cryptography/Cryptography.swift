@@ -1156,7 +1156,7 @@ public extension Cryptography {
                     break
                 }
             }
-            return outputBuffer
+            return outputBuffer.prefix(bytesWrittenToOutput)
         }
     }
 }
