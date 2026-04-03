@@ -167,7 +167,7 @@ public final class TSGroupModelV2: TSGroupModel {
         switch avatarDataState {
         case .available(let _avatarData):
             avatarData = _avatarData
-        case .missing:
+        case .missing, .skipped:
             avatarData = nil
         case .failedToFetchFromCDN:
             avatarData = nil
@@ -454,6 +454,7 @@ extension TSGroupModel {
         case missing
         case failedToFetchFromCDN
         case lowTrustDownloadWasBlocked
+        case skipped
 
         init(avatarData: Data?) {
             if let avatarData {

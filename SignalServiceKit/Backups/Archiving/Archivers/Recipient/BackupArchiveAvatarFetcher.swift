@@ -264,6 +264,10 @@ public class BackupArchiveAvatarFetcher {
                         avatarHash = nil
                         avatarDataFailedToFetchFromCDN = false
                         shouldNotDownloadAvatar = true
+                    case .skipped:
+                        avatarHash = nil
+                        avatarDataFailedToFetchFromCDN = false
+                        shouldNotDownloadAvatar = false
                     }
 
                     await db.awaitableWrite { tx in

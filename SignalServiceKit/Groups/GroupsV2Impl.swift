@@ -948,7 +948,11 @@ public class GroupsV2Impl: GroupsV2 {
             return downloadedAvatars
         case .unknown:
             // Don't download anything new and check again later
-            return knownAvatarStates
+            let undownloadedAvatarUrlPaths = Set(avatarUrlPaths).subtracting(downloadedAvatars.avatarUrlPaths)
+            undownloadedAvatarUrlPaths.forEach { urlPath in
+                downloadedAvatars.set(avatarDataState: .skipped, avatarUrlPath: urlPath)
+            }
+            return downloadedAvatars
         }
 
         downloadedAvatars.removeBlockedAvatars()
@@ -1604,7 +1608,7 @@ public class GroupsV2Impl: GroupsV2 {
                 groupModel.avatarDataFailedToFetchFromCDN = true
             case .lowTrustDownloadWasBlocked:
                 groupModel.lowTrustAvatarDownloadWasBlocked = true
-            case .missing:
+            case .missing, .skipped:
                 return
             }
 

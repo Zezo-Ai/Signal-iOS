@@ -550,7 +550,7 @@ extension OWSContactsManager: ContactManager {
         switch groupThread.groupModel.avatarDataState {
         case .lowTrustDownloadWasBlocked:
             return true
-        case .available, .missing, .failedToFetchFromCDN:
+        case .available, .missing, .failedToFetchFromCDN, .skipped:
             break
         }
 

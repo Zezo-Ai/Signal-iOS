@@ -423,7 +423,7 @@ public struct GroupAvatarStateMap {
             switch value {
             case .available, .failedToFetchFromCDN, .missing:
                 true
-            case .lowTrustDownloadWasBlocked:
+            case .lowTrustDownloadWasBlocked, .skipped:
                 false
             }
         }
