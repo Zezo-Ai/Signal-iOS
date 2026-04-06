@@ -41,19 +41,10 @@ public class ChunkedInputStreamTransform: StreamTransform, BufferedStreamTransfo
 
         // If the entire buffer has been consumed, reset to a new buffer
         if consumedBytes > initialBufferSize {
+            var newBuffer = Data(capacity: initialBufferSize)
             // If there's any data in the current buffer, copy it into the new buffer
-            let remainingData: Data? = {
-                if consumedBytes < buffer.count {
-                    return Data(buffer[consumedBytes..<buffer.count])
-                }
-                return nil
-            }()
-
-            buffer = Data(capacity: initialBufferSize)
-
-            if let remainingData {
-                buffer.append(remainingData)
-            }
+            newBuffer.append(buffer.dropFirst(consumedBytes))
+            buffer = newBuffer
             consumedBytes = 0
         }
         if data.count > 0 {
