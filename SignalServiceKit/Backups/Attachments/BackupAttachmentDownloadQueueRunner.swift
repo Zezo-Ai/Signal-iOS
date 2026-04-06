@@ -327,7 +327,7 @@ class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQueueRunn
             }
 
             guard let attachment else {
-                return .cancelled
+                return .obsolete
             }
 
             let progressSink: OWSProgressSink?
@@ -370,7 +370,7 @@ class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQueueRunn
                         byteCount: UInt64(record.record.estimatedByteCount),
                     )
                 }
-                return .cancelled
+                return .obsolete
             case .ineligible:
                 // Current state prevents running this row; unclear how we
                 // got here but mark it ineligible in the queue now and return
@@ -717,8 +717,8 @@ class BackupAttachmentDownloadQueueRunnerImpl: BackupAttachmentDownloadQueueRunn
             }
         }
 
-        func didCancel(record: Store.Record, tx: DBWriteTransaction) {
-            logger.warn("Cancelled restoring attachment \(record.record.attachmentRowId), download \(record.id), isThumbnail: \(record.record.isThumbnail)")
+        func didObsolete(record: Store.Record, tx: DBWriteTransaction) {
+            logger.warn("Obsoleted restoring attachment \(record.record.attachmentRowId), download \(record.id), isThumbnail: \(record.record.isThumbnail)")
             backupAttachmentDownloadStore.remove(
                 attachmentId: record.record.attachmentRowId,
                 thumbnail: record.record.isThumbnail,

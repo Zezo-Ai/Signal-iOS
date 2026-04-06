@@ -65,7 +65,7 @@ public enum TaskRecordResult {
     /// perhaps the user deleted the owning thread, or whatever.
     /// Like a success, the row is removed and no error is assumed, but it's not
     /// _strictly_ a success so the result type and callback are differentiated.
-    case cancelled
+    case obsolete
 }
 
 /// Used with a ``TaskQueueLoader``; this actually runs the task for each record
@@ -114,12 +114,12 @@ public protocol TaskRecordRunner {
         tx: DBWriteTransaction,
     ) throws
 
-    /// Called by ``TaskQueueLoader`` when the task is cancelled,
+    /// Called by ``TaskQueueLoader`` when the task is obsoleted,
     /// with the same write transaction used to delete the task's database record.
     ///
     /// Thrown errors WILL interrupt task processing; it's assumed anything that goes
     /// wrong here is a severe error affecting the queue itself.
-    func didCancel(
+    func didObsolete(
         record: Store.Record,
         tx: DBWriteTransaction,
     ) throws
@@ -427,8 +427,8 @@ public actor TaskQueueLoader<Runner: TaskRecordRunner & Sendable> {
                         try await self.didFail(record: record, error: error, isRetryable: true)
                     case .unretryableError(let error):
                         try await self.didFail(record: record, error: error, isRetryable: false)
-                    case .cancelled:
-                        try await self.didCancel(record: record)
+                    case .obsolete:
+                        try await self.didObsolete(record: record)
                     }
                     // As soon as we finish any task, start loading more tasks to run.
                     try await self._loadAndRunTasks(taskId: taskId)
@@ -457,10 +457,10 @@ public actor TaskQueueLoader<Runner: TaskRecordRunner & Sendable> {
         self.currentTaskIds.remove(record.id)
     }
 
-    private func didCancel(record: Store.Record) async throws {
+    private func didObsolete(record: Store.Record) async throws {
         try await db.awaitableWrite { tx in
             try self.store.removeRecord(record, tx: tx)
-            try self.runner.didCancel(record: record, tx: tx)
+            try self.runner.didObsolete(record: record, tx: tx)
         }
         self.currentTaskIds.remove(record.id)
     }

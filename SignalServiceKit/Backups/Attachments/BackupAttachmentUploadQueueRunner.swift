@@ -368,17 +368,17 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
 
             guard let attachment else {
                 // Attachment got deleted; early exit.
-                return .cancelled
+                return .obsolete
             }
 
             guard attachment.asStream() != nil, let mediaName = attachment.mediaName else {
                 // We only back up attachments we've downloaded (streams)
-                return .cancelled
+                return .obsolete
             }
 
             guard let backupKey else {
                 owsFailDebug("Missing media backup key.  Unable to upload attachments.", logger: logger)
-                return .cancelled
+                return .obsolete
             }
 
             // We're about to upload; ensure we aren't also enqueuing a media tier delete.
@@ -721,8 +721,8 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
             try record.update(tx.database)
         }
 
-        func didCancel(record: Store.Record, tx: DBWriteTransaction) throws {
-            logger.warn("Cancelled backing up attachment \(record.record.attachmentRowId), upload \(record.id), fullsize? \(record.record.isFullsize)")
+        func didObsolete(record: Store.Record, tx: DBWriteTransaction) throws {
+            logger.warn("Obsoleted backing up attachment \(record.record.attachmentRowId), upload \(record.id), fullsize? \(record.record.isFullsize)")
         }
 
         func didDrainQueue() async {

@@ -175,7 +175,7 @@ public class BackupArchiveAvatarFetcher {
         ) async -> TaskRecordResult {
             guard let registeredState = try? tsAccountManager.registeredStateWithMaybeSneakyTransaction() else {
                 try? await loader.stop()
-                return .cancelled
+                return .obsolete
             }
 
             if let serviceId = record.serviceId {
@@ -188,7 +188,7 @@ public class BackupArchiveAvatarFetcher {
                     if profile?.avatarFileName != nil {
                         // We already have an avatar for this profile;
                         // no need to fetch anything.
-                        return .cancelled
+                        return .obsolete
                     }
                 } catch {
                     return .unretryableError(error)
@@ -229,12 +229,12 @@ public class BackupArchiveAvatarFetcher {
                     let groupModel = groupThread.groupModel as? TSGroupModelV2,
                     let avatarUrlPath = groupModel.avatarUrlPath
                 else {
-                    return .cancelled
+                    return .obsolete
                 }
 
                 // Ensure we haven't since updated the group pointing to a new avatar.
                 guard avatarUrlPath == record.groupAvatarUrl else {
-                    return .cancelled
+                    return .obsolete
                 }
 
                 do {
@@ -303,7 +303,7 @@ public class BackupArchiveAvatarFetcher {
                     }
                 }
             } else {
-                return .cancelled
+                return .obsolete
             }
         }
 
@@ -319,7 +319,7 @@ public class BackupArchiveAvatarFetcher {
             try record.update(tx.database)
         }
 
-        func didCancel(record: Record, tx: DBWriteTransaction) throws {}
+        func didObsolete(record: Record, tx: DBWriteTransaction) throws {}
     }
 
     // MARK: - TaskStore

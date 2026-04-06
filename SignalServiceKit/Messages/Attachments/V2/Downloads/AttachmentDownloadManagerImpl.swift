@@ -535,11 +535,11 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             }
         }
 
-        func didCancel(
+        func didObsolete(
             record: DownloadTaskRecord,
             tx: DBWriteTransaction,
         ) throws {
-            Logger.info("Cancelled download of attachment \(record.record.attachmentId) from \(record.record.sourceType)")
+            Logger.info("Obsoleted download of attachment \(record.record.attachmentId) from \(record.record.sourceType)")
             let downloadKey = DownloadQueue.downloadKey(record: record.record)
             Task {
                 await downloadQueue.updateObservers(downloadKey: downloadKey, error: nil)
@@ -698,12 +698,12 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 // only happen if the attachment got deleted between when we fetched the
                 // download queue record and now. Regardless, the record should now be deleted.
                 owsFailDebug("Attempting to download an attachment that doesn't exist!")
-                return .cancelled
+                return .obsolete
             }
 
             guard attachment.asStream() == nil else {
                 // Already a stream! No need to download.
-                return .cancelled
+                return .obsolete
             }
 
             switch self.downloadabilityChecker.downloadability(record, attachment: attachment) {
@@ -714,7 +714,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 // only happen if all the references got deleted between when we fetched the
                 // download queue record and now. Regardless, the record should now be deleted.
                 owsFailDebug("Attempting to download an attachment with no references \(record.attachmentId)")
-                return .cancelled
+                return .obsolete
             case .blockedByActiveCall:
                 // This is a temporary setback; retry in a bit if the source allows it.
                 Logger.info("Skipping attachment download due to active call \(record.attachmentId)")

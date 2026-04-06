@@ -1241,7 +1241,7 @@ public class StickerManager: NSObject {
 
         func didFail(record: Record, error: any Error, isRetryable: Bool, tx: DBWriteTransaction) throws { }
 
-        func didCancel(record: Record, tx: DBWriteTransaction) throws { }
+        func didObsolete(record: Record, tx: DBWriteTransaction) throws { }
     }
 }
 

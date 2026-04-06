@@ -164,7 +164,7 @@ public class TaskQueueLoaderTest: XCTestCase {
         runner.taskRunner = { id in
             if id == 1 {
                 // Make the first task cancel.
-                return .cancelled
+                return .obsolete
             } else {
                 return .success
             }
@@ -526,7 +526,7 @@ public class TaskQueueLoaderTest: XCTestCase {
                     try Task.checkCancellation()
                     await Task.yield()
                 } catch {
-                    return .cancelled
+                    return .obsolete
                 }
             }
         }
@@ -576,7 +576,7 @@ public class TaskQueueLoaderTest: XCTestCase {
                         try Task.checkCancellation()
                         await Task.yield()
                     } catch {
-                        return .cancelled
+                        return .obsolete
                     }
                 }
             }
@@ -717,7 +717,7 @@ public class TaskQueueLoaderTest: XCTestCase {
             failedTasks.append(record.id)
         }
 
-        func didCancel(record: MockTaskRecord, tx: DBWriteTransaction) throws {
+        func didObsolete(record: MockTaskRecord, tx: DBWriteTransaction) throws {
             cancelledTasks.append(record.id)
         }
 

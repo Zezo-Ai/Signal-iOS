@@ -145,7 +145,7 @@ public class OrphanedBackupAttachmentQueueRunnerImpl: OrphanedBackupAttachmentQu
                 .provisioned:
                 // Linked devices never issue these delete requests.
                 // Cancel the task so we never run it again.
-                return .cancelled
+                return .obsolete
             case .registered:
                 break
             }
@@ -246,8 +246,8 @@ public class OrphanedBackupAttachmentQueueRunnerImpl: OrphanedBackupAttachmentQu
             Logger.warn("Failed deleting backup attachment \(record.id), isRetryable: \(isRetryable), error: \(error)")
         }
 
-        func didCancel(record: Store.Record, tx: DBWriteTransaction) throws {
-            Logger.info("Cancelled deleting backup attachment \(record.id)")
+        func didObsolete(record: Store.Record, tx: DBWriteTransaction) throws {
+            Logger.info("Obsoleted deleting backup attachment \(record.id)")
         }
     }
 
