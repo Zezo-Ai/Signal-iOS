@@ -205,6 +205,9 @@ public class AttachmentBackfillManager {
             tx: tx,
         )
 
+        let logger = logger.suffixed(inboundRequestRecordId: backfillRecord.id)
+        logger.info("Enqueued inbound request.")
+
         // Touch the target message so we reload it in the ConversationView, to
         // display that it's being backfilled.
         db.touch(interaction: backfillTargetMessage, shouldReindex: false, tx: tx)
@@ -224,6 +227,8 @@ public class AttachmentBackfillManager {
         localIdentifiers: LocalIdentifiers,
     ) -> Task<Void, Error> {
         return taskQueue.enqueue { [self] in
+            let logger = logger.suffixed(inboundRequestRecordId: requestRecordId)
+
             let requestRecord: AttachmentBackfillInboundRequestRecord?
             let backfillTarget: AttachmentBackfillTarget?
             let threadUniqueId: String?
@@ -233,14 +238,20 @@ public class AttachmentBackfillManager {
                 backfillTarget,
                 threadUniqueId,
                 messageUniqueId,
-            ) = db.read { tx in
+            ) = await db.awaitableWrite { tx in
                 guard
                     let record = failIfThrows(block: {
                         try AttachmentBackfillInboundRequestRecord.fetchOne(
                             tx.database,
                             key: requestRecordId,
                         )
-                    }),
+                    })
+                else {
+                    logger.warn("Missing request record: no response will be sent.")
+                    return (nil, nil, nil, nil)
+                }
+
+                guard
                     let message = interactionStore.fetchInteraction(
                         rowId: record.interactionId,
                         tx: tx,
@@ -251,6 +262,10 @@ public class AttachmentBackfillManager {
                         tx: tx,
                     )
                 else {
+                    logger.warn("Missing backfill target: no response will be sent.")
+                    failIfThrows {
+                        try record.delete(tx.database)
+                    }
                     return (nil, nil, nil, nil)
                 }
 
@@ -263,7 +278,6 @@ public class AttachmentBackfillManager {
                 let threadUniqueId,
                 let messageUniqueId
             else {
-                logger.warn("Missing request record or backfill target: no response will be sent.")
                 return
             }
 
@@ -281,6 +295,8 @@ public class AttachmentBackfillManager {
             )
 
             if Task.isCancelled {
+                logger.warn("Backfill attempt cancelled.")
+
                 notificationPresenter.notifyUserOfAttachmentBackfill(
                     threadUniqueId: threadUniqueId,
                     messageUniqueId: messageUniqueId,
@@ -293,6 +309,17 @@ public class AttachmentBackfillManager {
             }
 
             await db.awaitableWrite { tx in
+                let backfillAttemptDescription = backfillAttemptResults
+                    .map { result in
+                        switch result {
+                        case .success: "success"
+                        case .failure(let error) where error.isRetryable: "retry"
+                        case .failure: "failure"
+                        }
+                    }
+                    .joined(separator: ";")
+                logger.info("Sending backfill response: \(backfillAttemptDescription)")
+
                 self.sendBackfillAttemptResponse(
                     backfillTarget: backfillTarget,
                     backfillAttemptResults: backfillAttemptResults,
@@ -653,5 +680,13 @@ extension MessageSenderJobQueue: AttachmentBackfillManager.AttachmentBackfillSyn
             message: .preprepared(transientMessageWithoutAttachments: attachmentBackfillResponseSyncMessage),
             transaction: tx,
         )
+    }
+}
+
+// MARK: -
+
+private extension PrefixedLogger {
+    func suffixed(inboundRequestRecordId: AttachmentBackfillInboundRequestRecord.IDType) -> PrefixedLogger {
+        return suffixed(with: "[ID:\(inboundRequestRecordId)]")
     }
 }
