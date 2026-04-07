@@ -1537,16 +1537,19 @@ public class GroupsV2Impl: GroupsV2 {
         groupSecretParams: GroupSecretParams,
     ) async throws -> Data {
         let groupV2Params = try GroupV2Params(groupSecretParams: groupSecretParams)
-        let downloadedAvatars = try await fetchAvatarDataIfNotBlurred(
-            avatarUrlPaths: [avatarUrlPath],
-            knownAvatarStates: GroupAvatarStateMap(),
+        // Group invite previews are either user-initiated, or shown in already-
+        // accepted conversations, so skip the `IfNotBlurred` check.
+        let encryptedData = try await fetchAvatarData(
+            avatarUrlPath: avatarUrlPath,
             groupV2Params: groupV2Params,
         )
-
-        if let avatarData = downloadedAvatars.avatarDataState(for: avatarUrlPath)!.dataIfPresent {
+        if
+            let avatarData = try? groupV2Params.decryptGroupAvatar(encryptedData),
+            !avatarData.isEmpty
+        {
             return avatarData
         } else {
-            throw OWSAssertionError("Unexpectedly missing downloaded avatar data!")
+            throw OWSAssertionError("Failed to decrypt group avatar.")
         }
     }
 
