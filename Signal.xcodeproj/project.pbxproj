@@ -1485,6 +1485,7 @@
 		7647A33C2A270348002EAC93 /* FingerprintScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7647A33B2A270348002EAC93 /* FingerprintScanViewController.swift */; };
 		764981452A23194F00EC1287 /* CVItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764981442A23194F00EC1287 /* CVItemViewModel.swift */; };
 		764B479B2F4FB07E008C6337 /* CVLinkPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764B479A2F4FB076008C6337 /* CVLinkPreviewView.swift */; };
+		764D8C242F72029F00DA82B8 /* CircularProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764D8C232F72029100DA82B8 /* CircularProgressView.swift */; };
 		764FE03F2A2EC2E2004D2804 /* UIViewController+Permissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764FE03E2A2EC2E2004D2804 /* UIViewController+Permissions.swift */; };
 		764FE0412A2EF3A7004D2804 /* TextFieldFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764FE0402A2EF3A7004D2804 /* TextFieldFormatting.swift */; };
 		764FE0452A2F0C0F004D2804 /* QuotedReplyModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764FE0442A2F0C0F004D2804 /* QuotedReplyModel.swift */; };
@@ -5681,6 +5682,7 @@
 		7647A33B2A270348002EAC93 /* FingerprintScanViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerprintScanViewController.swift; sourceTree = "<group>"; };
 		764981442A23194F00EC1287 /* CVItemViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CVItemViewModel.swift; sourceTree = "<group>"; };
 		764B479A2F4FB076008C6337 /* CVLinkPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CVLinkPreviewView.swift; sourceTree = "<group>"; };
+		764D8C232F72029100DA82B8 /* CircularProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressView.swift; sourceTree = "<group>"; };
 		764FE03E2A2EC2E2004D2804 /* UIViewController+Permissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Permissions.swift"; sourceTree = "<group>"; };
 		764FE0402A2EF3A7004D2804 /* TextFieldFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldFormatting.swift; sourceTree = "<group>"; };
 		764FE0442A2F0C0F004D2804 /* QuotedReplyModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotedReplyModel.swift; sourceTree = "<group>"; };
@@ -11174,6 +11176,7 @@
 				D9CFB0132F20466100DFB14A /* ArcView.swift */,
 				4C2F454E214C00E1004871FF /* AvatarTableViewCell.swift */,
 				14E4A33F278EE999008408FD /* BlurredToolbarContainer.swift */,
+				764D8C232F72029100DA82B8 /* CircularProgressView.swift */,
 				32A9E22524C11B3F00C43518 /* EmojiMoodPickerView.swift */,
 				88905E9D229CCA96004E4234 /* ExpirationNagView.swift */,
 				8845B0C8264F12F800FA694C /* GroupDescriptionPreviewView.swift */,
@@ -18225,6 +18228,7 @@
 				3406D32625DD5EAF00885B14 /* ChatListViewController.swift in Sources */,
 				887B380825F0355700685845 /* ChatsSettingsViewController.swift in Sources */,
 				D9680CF32DBB0B2D005DD5BE /* ChooseBackupPlanViewController.swift in Sources */,
+				764D8C242F72029F00DA82B8 /* CircularProgressView.swift in Sources */,
 				34E95C1B269F4F1B004807EC /* CLVLoader.swift in Sources */,
 				34E95C22269F4F4F004807EC /* CLVRenderState.swift in Sources */,
 				34E95C25269F4F4F004807EC /* CLVTableDataSource.swift in Sources */,
