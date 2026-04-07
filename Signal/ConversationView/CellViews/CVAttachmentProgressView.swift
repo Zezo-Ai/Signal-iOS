@@ -3,10 +3,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Lottie
 import SignalServiceKit
 import SignalUI
-import UIKit
 
 // A view for presenting attachment upload/download/failure/pending state.
 class CVAttachmentProgressView: ManualLayoutView {
@@ -50,47 +48,65 @@ class CVAttachmentProgressView: ManualLayoutView {
         }
 
         /// Creates a configuration with fixed colors to be displayed on top of media thumbnail.
-        static func forMediaOverlay(forceDarkMode: Bool = false) -> ColorConfiguration {
-            // If `overrideUserInterfaceStyle` is set on a parent view,
-            // Lottie view would capture dynamic color's value before
-            // UIKit has a chance to to apply proper traits to the view.
-            // That results in invalid color used for the lottie progress view.
-            var foregroundColor = UIColor.Signal.label
-            if forceDarkMode {
-                foregroundColor = foregroundColor.resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark))
-            }
+        static func forMediaOverlay() -> ColorConfiguration {
             return ColorConfiguration(
-                foregroundColor: foregroundColor,
+                foregroundColor: .Signal.label,
                 backgroundStyle: .blur(.init(style: .systemThinMaterial)),
             )
         }
     }
 
-    private let direction: Direction
-    private let diameter: CGFloat
+    enum State: Equatable {
+        case none
 
-    private let stateView: StateView
+        case tapToDownload
+        case unknownProgress
+        case progress(progress: Float)
+        case downloadFailed
+
+        var debugDescription: String {
+            switch self {
+            case .none:
+                "none"
+            case .tapToDownload:
+                "tapToDownload"
+            case .unknownProgress:
+                "unknownProgress"
+            case .progress(let progress):
+                "progress: \(progress)"
+            case .downloadFailed:
+                "downloadFailed"
+            }
+        }
+    }
+
+    private let direction: Direction
+
+    private var _state: State = .none
+
+    var state: State {
+        get {
+            _state
+        }
+        set {
+            applyState(newValue, animated: false)
+        }
+    }
 
     private var attachmentId: Attachment.IDType { direction.attachmentId }
 
     init(
         direction: Direction,
-        diameter: CGFloat = 44,
         colorConfiguration: ColorConfiguration,
-        mediaCache: CVMediaCache,
     ) {
         self.direction = direction
-        self.diameter = diameter
-        self.stateView = StateView(
-            diameter: diameter,
-            direction: direction,
-            mediaCache: mediaCache,
-        )
 
         super.init(name: "CVAttachmentProgressView")
 
-        stateView.tintColor = colorConfiguration.foregroundColor
+        tintColor = colorConfiguration.foregroundColor
+        layoutMargins = .init(margin: 4)
 
+        // Circular background.
         let circleView = ManualLayoutView.circleView(name: "circleView")
         switch colorConfiguration.backgroundStyle {
         case .solidColor(let backgroundColor):
@@ -100,214 +116,33 @@ class CVAttachmentProgressView: ManualLayoutView {
             let blurView = UIVisualEffectView(effect: blurEffect)
             circleView.addSubviewToFillSuperviewEdges(blurView)
         }
-        circleView.addSubviewToCenterOnSuperview(stateView, size: .square(diameter))
         addSubviewToFillSuperviewEdges(circleView)
 
-        configureState()
-    }
+        addSubviewToFillSuperviewMargins(contentView)
 
-    private class StateView: ManualLayoutView {
-        enum State: Equatable {
-            case none
-            case tapToDownload
-            case downloadFailed
-            case downloadUnknownProgress
-            case uploadUnknownProgress
-            case downloadProgress(progress: CGFloat)
-            case uploadProgress(progress: CGFloat)
-
-            var debugDescription: String {
-                switch self {
-                case .none:
-                    return "none"
-                case .tapToDownload:
-                    return "tapToDownload"
-                case .downloadFailed:
-                    return "downloadFailed"
-                case .downloadUnknownProgress:
-                    return "downloadUnknownProgress"
-                case .uploadUnknownProgress:
-                    return "uploadUnknownProgress"
-                case .downloadProgress(let progress):
-                    return "downloadProgress: \(progress)"
-                case .uploadProgress(let progress):
-                    return "uploadProgress: \(progress)"
-                }
+        addLayoutBlock { view in
+            guard let view = view as? CVAttachmentProgressView else { return }
+            DispatchQueue.main.async {
+                view.loadInitialStateIfNeeded()
             }
-        }
-
-        private let diameter: CGFloat
-        private let direction: Direction
-        private lazy var imageView = CVImageView()
-        private var unknownProgressView: LottieAnimationView?
-        private var progressView: LottieAnimationView?
-        private let mediaCache: CVMediaCache
-
-        var state: State = .none {
-            didSet {
-                if oldValue != state {
-                    applyState(oldState: oldValue, newState: state)
-                }
-            }
-        }
-
-        init(
-            diameter: CGFloat,
-            direction: Direction,
-            mediaCache: CVMediaCache,
-        ) {
-            self.diameter = diameter
-            self.direction = direction
-            self.mediaCache = mediaCache
-
-            super.init(name: "CVAttachmentProgressView.StateView")
-
-            applyState(oldState: .none, newState: .none)
-        }
-
-        private func applyState(oldState: State, newState: State) {
-            switch newState {
-            case .none:
-                reset()
-
-            case .tapToDownload:
-                presentIcon(templateName: Theme.iconName(.arrowDown), isInsideProgress: false)
-
-            case .downloadFailed:
-                presentIcon(templateName: Theme.iconName(.refresh), isInsideProgress: false)
-
-            case .downloadProgress(let progress):
-                switch oldState {
-                case .downloadProgress:
-                    updateProgress(progress: progress)
-                default:
-                    presentProgress(progress: progress)
-                    presentIcon(templateName: Theme.iconName(.buttonX), isInsideProgress: true)
-                }
-
-            case .uploadProgress(let progress):
-                switch oldState {
-                case .uploadProgress:
-                    updateProgress(progress: progress)
-                default:
-                    presentProgress(progress: progress)
-                }
-
-            case .downloadUnknownProgress:
-                presentUnknownProgress()
-                presentIcon(templateName: Theme.iconName(.buttonX), isInsideProgress: true)
-
-            case .uploadUnknownProgress:
-                presentUnknownProgress()
-            }
-        }
-
-        private func presentIcon(
-            templateName: String,
-            isInsideProgress: Bool,
-        ) {
-            if !isInsideProgress {
-                reset()
-            }
-
-            imageView.setTemplateImageName(templateName, tintColor: tintColor)
-            addSubviewToCenterOnSuperview(imageView, size: .square(floor(0.44 * diameter)))
-        }
-
-        private func presentProgress(progress: CGFloat) {
-            reset()
-
-            let animationName: String
-            if diameter <= 44 {
-                animationName = "determinate_spinner_44"
-            } else {
-                animationName = "determinate_spinner_56"
-            }
-            let animationView = ensureAnimationView(progressView, animationName: animationName)
-            owsAssertDebug(animationView.animation != nil)
-            progressView = animationView
-            animationView.backgroundBehavior = .pause
-            animationView.loopMode = .playOnce
-            animationView.contentMode = .scaleAspectFit
-            animationView.setValueProvider(
-                ColorValueProvider(tintColor.lottieColorValue),
-                keypath: AnimationKeypath(keypath: "**.Stroke 1.Color"),
-            )
-            // We DO NOT play this animation; we "scrub" it to reflect
-            // attachment upload/download progress.
-            updateProgress(progress: progress)
-            addSubviewToFillSuperviewEdges(animationView)
-        }
-
-        private func presentUnknownProgress() {
-            reset()
-
-            let animationName: String
-            if diameter <= 44 {
-                animationName = "indeterminate_spinner_44"
-            } else {
-                animationName = "indeterminate_spinner_56"
-            }
-            let animationView = ensureAnimationView(unknownProgressView, animationName: animationName)
-            owsAssertDebug(animationView.animation != nil)
-            unknownProgressView = animationView
-            animationView.backgroundBehavior = .pauseAndRestore
-            animationView.loopMode = .loop
-            animationView.contentMode = .scaleAspectFit
-            animationView.setValueProvider(
-                ColorValueProvider(tintColor.lottieColorValue),
-                keypath: AnimationKeypath(keypath: "**.Stroke 1.Color"),
-            )
-            animationView.play()
-
-            addSubviewToFillSuperviewEdges(animationView)
-        }
-
-        private func ensureAnimationView(
-            _ animationView: LottieAnimationView?,
-            animationName: String,
-        ) -> LottieAnimationView {
-            if let animationView {
-                return animationView
-            }
-            return mediaCache.buildLottieAnimationView(name: animationName)
-        }
-
-        private func updateProgress(progress: CGFloat) {
-            guard let progressView else {
-                owsFailDebug("Missing progressView.")
-                return
-            }
-            guard let animation = progressView.animation else {
-                owsFailDebug("Missing animation.")
-                return
-            }
-
-            // We DO NOT play this animation; we "scrub" it to reflect
-            // attachment upload/download progress.
-            progressView.currentFrame = progress.lerp(
-                animation.startFrame,
-                animation.endFrame,
-            )
-        }
-
-        override func reset() {
-            super.reset()
-
-            progressView?.stop()
-            unknownProgressView?.stop()
-            imageView.image = nil
         }
     }
 
-    var layoutSize: CGSize {
-        .square(diameter)
-    }
+    // MARK: State
 
-    private func configureState() {
+    private let contentView = ManualLayoutViewWithLayer(name: "contentView")
+    private var progressView: CircularProgressView?
+    private var iconImageView: CVImageView?
+
+    // Set initial state and update UI accordingly without animations.
+    private func loadInitialStateIfNeeded() {
+        guard state == .none, window != nil, contentView.bounds.size.isNonEmpty else { return }
+
+        let animateStateChange = window != nil
+
         switch direction {
         case .upload:
-            stateView.state = .uploadUnknownProgress
+            applyState(.unknownProgress, animated: animateStateChange)
 
             NotificationCenter.default.addObserver(
                 self,
@@ -318,12 +153,12 @@ class CVAttachmentProgressView: ManualLayoutView {
 
         case .download(_, let downloadState):
             switch downloadState {
-            case .failed:
-                stateView.state = .downloadFailed
             case .none:
-                stateView.state = .tapToDownload
+                applyState(.tapToDownload, animated: animateStateChange)
+            case .failed:
+                applyState(.downloadFailed, animated: animateStateChange)
             case .enqueuedOrDownloading:
-                updateDownloadProgress(nil)
+                applyState(.unknownProgress, animated: animateStateChange)
 
                 NotificationCenter.default.addObserver(
                     self,
@@ -335,8 +170,143 @@ class CVAttachmentProgressView: ManualLayoutView {
         }
     }
 
+    private func applyState(_ state: State, animated: Bool = false) {
+        let oldState = _state
+
+        guard state != oldState else { return }
+
+        _state = state
+
+        switch state {
+        case .none:
+            hideProgressView()
+
+        case .tapToDownload:
+            hideProgressView()
+            presentIcon(Theme.iconImage(.arrowDown))
+
+        case .downloadFailed:
+            hideProgressView()
+            presentIcon(Theme.iconImage(.refresh))
+
+        case .progress(let progress):
+            switch oldState {
+            case .progress, .unknownProgress:
+                updateProgressView(progress: progress, animated: animated)
+            default:
+                presentProgressView(progress: progress, animated: animated)
+                if case .download = direction {
+                    presentIcon(Theme.iconImage(.buttonX))
+                } else {
+                    hideIcon()
+                }
+            }
+
+        case .unknownProgress:
+            presentIndeterminateProgressView(animated: animated)
+            if case .download = direction {
+                presentIcon(Theme.iconImage(.buttonX))
+            } else {
+                hideIcon()
+            }
+        }
+    }
+
+    private func presentIcon(_ image: UIImage) {
+        let imageView = ensureIconImageView()
+        imageView.image = image
+    }
+
+    private func hideIcon() {
+        iconImageView?.image = nil
+    }
+
+    private func ensureIconImageView() -> CVImageView {
+        if let iconImageView {
+            return iconImageView
+        }
+        let imageView = CVImageView(frame: contentView.bounds)
+        imageView.contentMode = .center
+        contentView.addSubviewToFillSuperviewEdges(imageView)
+        self.iconImageView = imageView
+        return imageView
+    }
+
+    private func presentIndeterminateProgressView(animated: Bool) {
+        let progressView = ensureProgressView()
+
+        guard animated else {
+            progressView.isHidden = false
+            progressView.startAnimating()
+            return
+        }
+
+        UIView.performWithoutAnimation {
+            progressView.isHidden = false
+            contentView.transform = .scale(0.8)
+        }
+
+        let animator = UIViewPropertyAnimator(duration: 0.25, springDamping: 1, springResponse: 0.25)
+        animator.addAnimations {
+            self.contentView.transform = .identity
+        }
+        animator.addCompletion { [weak self] animationPosition in
+            guard let self, self.state == .unknownProgress else { return }
+            self.progressView?.startAnimating()
+        }
+        animator.startAnimation()
+    }
+
+    private func presentProgressView(progress: Float, animated: Bool) {
+        let progressView = ensureProgressView()
+
+        guard animated else {
+            progressView.isHidden = false
+            progressView.progress = progress
+            return
+        }
+        UIView.performWithoutAnimation {
+            progressView.isHidden = false
+            progressView.progress = progress
+            self.contentView.transform = .scale(0.8)
+        }
+
+        let animator = UIViewPropertyAnimator(duration: 0.25, springDamping: 1, springResponse: 0.25)
+        animator.addAnimations {
+            self.contentView.transform = .identity
+        }
+        animator.startAnimation()
+    }
+
+    private func updateProgressView(progress: Float, animated: Bool) {
+        guard let progressView else {
+            owsFailDebug("Missing progressView.")
+            return
+        }
+        progressView.setProgress(progress, animated: animated)
+    }
+
+    // Create CircularProgressView, add it to view hierarchy and make it visible.
+    private func ensureProgressView() -> CircularProgressView {
+        if let progressView {
+            progressView.isHidden = false
+            return progressView
+        }
+        let progressView = CircularProgressView(frame: contentView.bounds)
+        contentView.addSubviewToFillSuperviewEdges(progressView)
+        self.progressView = progressView
+        return progressView
+    }
+
+    private func hideProgressView() {
+        progressView?.stopAnimating()
+        progressView?.isHidden = true
+    }
+
     @objc
     private func processDownloadNotification(notification: Notification) {
+        AssertIsOnMainThread()
+
         guard
             let attachmentId = notification.userInfo?[AttachmentDownloads.attachmentDownloadAttachmentIDKey] as? Attachment.IDType
         else {
@@ -346,41 +316,23 @@ class CVAttachmentProgressView: ManualLayoutView {
         guard attachmentId == self.attachmentId else {
             return
         }
-        let progress = notification.userInfo?[AttachmentDownloads.attachmentDownloadProgressKey] as? CGFloat
-        if progress == nil {
-            Logger.warn("No progress for attachment progress notification.")
-        }
-        updateDownloadProgress(progress)
-    }
-
-    private func updateDownloadProgress(_ progress: CGFloat?) {
-        AssertIsOnMainThread()
-
-        guard let progress else {
-            stateView.state = .downloadUnknownProgress
+        guard let progress = notification.userInfo?[AttachmentDownloads.attachmentDownloadProgressKey] as? Float else {
+            owsFailDebug("No progress in attachment download progress notification.")
+            state = .unknownProgress
             return
         }
-
-        updateState(downloadProgress: progress)
-    }
-
-    private func updateState(downloadProgress progress: CGFloat?) {
-        guard let progress else {
-            stateView.state = .downloadUnknownProgress
+        guard progress.isNaN == false, progress >= 0 else {
+            owsFailDebug("Invalid download progress value. [\(progress)]")
+            state = .unknownProgress
             return
         }
-        if progress.isNaN {
-            owsFailDebug("Progress is nan.")
-            stateView.state = .downloadUnknownProgress
-        } else if progress > 0 {
-            stateView.state = .downloadProgress(progress: CGFloat(progress))
-        } else {
-            stateView.state = .downloadUnknownProgress
-        }
+        applyState(.progress(progress: progress), animated: window != nil)
     }
 
     @objc
     private func processUploadNotification(notification: Notification) {
+        AssertIsOnMainThread()
+
         guard let notificationAttachmentId = notification.userInfo?[Upload.Constants.uploadAttachmentIDKey] as? Attachment.IDType else {
             owsFailDebug("Missing notificationAttachmentId.")
             return
@@ -388,35 +340,18 @@ class CVAttachmentProgressView: ManualLayoutView {
         guard notificationAttachmentId == attachmentId else {
             return
         }
-        guard let progress = notification.userInfo?[Upload.Constants.uploadProgressKey] as? NSNumber else {
-            owsFailDebug("Missing progress.")
-            stateView.state = .uploadUnknownProgress
+        guard let progress = notification.userInfo?[Upload.Constants.uploadProgressKey] as? Float else {
+            owsFailDebug("No progress in attachment upload progress notification.")
+            state = .unknownProgress
+            return
+        }
+        guard progress.isNaN == false, progress >= 0 else {
+            owsFailDebug("Invalid upload progress value. [\(progress)]")
+            state = .unknownProgress
             return
         }
 
-        switch direction {
-        case .upload:
-            updateState(uploadProgress: progress)
-        case .download:
-            owsFailDebug("Invalid attachment.")
-            stateView.state = .uploadUnknownProgress
-            return
-        }
-    }
-
-    private func updateState(uploadProgress progress: NSNumber?) {
-        guard let progress = progress?.floatValue else {
-            stateView.state = .uploadUnknownProgress
-            return
-        }
-        if progress.isNaN {
-            owsFailDebug("Progress is nan.")
-            stateView.state = .uploadUnknownProgress
-        } else if progress > 0 {
-            stateView.state = .uploadProgress(progress: CGFloat(progress))
-        } else {
-            stateView.state = .uploadUnknownProgress
-        }
+        applyState(.progress(progress: progress), animated: window != nil)
     }
 
     enum ProgressType {

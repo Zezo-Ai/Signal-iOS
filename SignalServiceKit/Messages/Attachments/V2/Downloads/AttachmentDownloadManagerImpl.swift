@@ -1789,11 +1789,11 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
 
             // Use a slightly non-zero value to ensure that the progress
             // indicator shows up as quickly as possible.
-            let progressTheta: Double = 0.001
+            let progressTheta: Float = 0.001
 
-            let fractionCompleted: Double
+            let fractionCompleted: Float
             if progress.completedUnitCount > 0 {
-                fractionCompleted = max(progressTheta, Double(progress.percentComplete))
+                fractionCompleted = max(progressTheta, progress.percentComplete)
             } else if expectedDownloadSizeBytes != nil {
                 fractionCompleted = progressTheta
             } else {
@@ -1810,7 +1810,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     name: AttachmentDownloads.attachmentDownloadProgressNotification,
                     object: nil,
                     userInfo: [
-                        AttachmentDownloads.attachmentDownloadProgressKey: NSNumber(value: fractionCompleted),
+                        AttachmentDownloads.attachmentDownloadProgressKey: fractionCompleted,
                         AttachmentDownloads.attachmentDownloadAttachmentIDKey: attachmentId,
                     ],
                 )

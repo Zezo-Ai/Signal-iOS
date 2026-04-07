@@ -160,9 +160,7 @@ class AudioMessageView: ManualStackView {
                     attachmentPointer: attachmentPointer.attachmentPointer,
                     downloadState: downloadState,
                 ),
-                diameter: Constants.animationSize,
                 colorConfiguration: .init(conversationStyle: conversationStyle, isIncoming: isIncoming),
-                mediaCache: mediaCache,
             )
         }
 

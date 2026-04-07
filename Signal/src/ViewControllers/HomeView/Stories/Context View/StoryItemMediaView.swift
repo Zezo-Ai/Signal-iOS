@@ -1023,7 +1023,6 @@ class StoryItemMediaView: UIView {
         return imageView
     }
 
-    private static let mediaCache = CVMediaCache()
     private func buildDownloadStateView(
         for pointer: AttachmentPointer,
         downloadState: AttachmentDownloadState,
@@ -1033,13 +1032,11 @@ class StoryItemMediaView: UIView {
                 attachmentPointer: pointer,
                 downloadState: downloadState,
             ),
-            diameter: 56,
-            colorConfiguration: .forMediaOverlay(forceDarkMode: true),
-            mediaCache: Self.mediaCache,
+            colorConfiguration: .forMediaOverlay(),
         )
 
         let manualLayoutView = OWSLayerView(frame: .zero) { layerView in
-            progressView.frame.size = progressView.layoutSize
+            progressView.frame.size = .square(56)
             progressView.center = layerView.center
         }
         manualLayoutView.addSubview(progressView)

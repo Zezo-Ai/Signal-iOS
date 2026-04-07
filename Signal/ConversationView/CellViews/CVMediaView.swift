@@ -20,6 +20,7 @@ class CVMediaView: ManualLayoutViewWithLayer {
     private let thumbnailQuality: AttachmentThumbnailQuality
     private let isBroken: Bool
     private var reusableMediaView: ReusableMediaView?
+    private var progressView: CVAttachmentProgressView?
 
     // Circular Play / Pause / Download progress etc
     private static let centerButtonSize: CGFloat = 44
@@ -94,11 +95,14 @@ class CVMediaView: ManualLayoutViewWithLayer {
 
         switch attachment {
         case .undownloadable(let attachment):
-            return configureForError(attachment: attachment.attachment)
+            configureForError(attachment: attachment.attachment)
+
         case .backupThumbnail(let thumbnail):
             configureForBackupThumbnailMedia(thumbnail.attachmentBackupThumbnail)
+
         case .pointer(let pointer, _):
-            return configureForUndownloadedMedia(pointer.attachment)
+            configureForUndownloadedMedia(pointer.attachment)
+
         case .stream(let attachmentStream, isUploading: _):
             let attachmentStream = attachmentStream.attachmentStream
             switch attachmentStream.contentType {
@@ -140,31 +144,51 @@ class CVMediaView: ManualLayoutViewWithLayer {
             cvAttachment: attachment,
         ) {
         case .none:
+            removeProgressView()
             return false
-        case .uploading(let attachmentStream):
-            direction = .upload(attachmentStream: attachmentStream)
+
         case .pendingDownload:
             // We don't need to add a download indicator for pending
             // attachments; CVComponentBodyMedia will add a download
             // button if any media in the gallery is pending.
+            removeProgressView()
             return false
-        case .downloading(let attachmentPointer, let downloadState):
-            backgroundColor = (Theme.isDarkThemeEnabled ? .ows_gray90 : .ows_gray05)
 
+        case .uploading(let attachmentStream):
+            direction = .upload(attachmentStream: attachmentStream)
+
+        case .downloading(let attachmentPointer, let downloadState):
             direction = .download(
                 attachmentPointer: attachmentPointer,
                 downloadState: downloadState,
             )
         }
 
+        let progressView = ensureProgressView(direction: direction)
+        if progressView.superview == nil {
+            addSubviewToCenterOnSuperview(progressView, size: .square(44))
+        }
+
+        return true
+    }
+
+    private func ensureProgressView(direction: CVAttachmentProgressView.Direction) -> CVAttachmentProgressView {
+        if let progressView {
+            return progressView
+        }
         let progressView = CVAttachmentProgressView(
             direction: direction,
             colorConfiguration: .forMediaOverlay(),
-            mediaCache: mediaCache,
         )
-        addSubviewToCenterOnSuperview(progressView, size: progressView.layoutSize)
+        self.progressView = progressView
+        return progressView
+    }
 
-        return true
+    private func removeProgressView() {
+        guard let progressView else { return }
+
+        progressView.removeFromSuperview()
+        self.progressView = nil
     }
 
     private func configureImageView(_ imageView: UIImageView) {

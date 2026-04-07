@@ -1555,7 +1555,6 @@
 		880D902E2480A23E003D2B14 /* EmojiPickerSectionToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880D902D2480A23E003D2B14 /* EmojiPickerSectionToolbar.swift */; };
 		880D90302481E617003D2B14 /* SignalApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880D902F2481E617003D2B14 /* SignalApp.swift */; };
 		880FB3EE28CA53D400FA1C10 /* determinate_spinner_44.json in Resources */ = {isa = PBXBuildFile; fileRef = 880FB3EA28CA53D200FA1C10 /* determinate_spinner_44.json */; };
-		880FB3EF28CA53D400FA1C10 /* indeterminate_spinner_56.json in Resources */ = {isa = PBXBuildFile; fileRef = 880FB3EB28CA53D300FA1C10 /* indeterminate_spinner_56.json */; };
 		880FB3F028CA53D400FA1C10 /* determinate_spinner_56.json in Resources */ = {isa = PBXBuildFile; fileRef = 880FB3EC28CA53D300FA1C10 /* determinate_spinner_56.json */; };
 		880FB3F128CA53D400FA1C10 /* indeterminate_spinner_44.json in Resources */ = {isa = PBXBuildFile; fileRef = 880FB3ED28CA53D300FA1C10 /* indeterminate_spinner_44.json */; };
 		880FB3F328CC161800FA1C10 /* NewStoryHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880FB3F228CC161800FA1C10 /* NewStoryHeaderView.swift */; };
@@ -5755,7 +5754,6 @@
 		880D902D2480A23E003D2B14 /* EmojiPickerSectionToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPickerSectionToolbar.swift; sourceTree = "<group>"; };
 		880D902F2481E617003D2B14 /* SignalApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalApp.swift; sourceTree = "<group>"; };
 		880FB3EA28CA53D200FA1C10 /* determinate_spinner_44.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = determinate_spinner_44.json; sourceTree = "<group>"; };
-		880FB3EB28CA53D300FA1C10 /* indeterminate_spinner_56.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = indeterminate_spinner_56.json; sourceTree = "<group>"; };
 		880FB3EC28CA53D300FA1C10 /* determinate_spinner_56.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = determinate_spinner_56.json; sourceTree = "<group>"; };
 		880FB3ED28CA53D300FA1C10 /* indeterminate_spinner_44.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = indeterminate_spinner_44.json; sourceTree = "<group>"; };
 		880FB3F228CC161800FA1C10 /* NewStoryHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewStoryHeaderView.swift; sourceTree = "<group>"; };
@@ -11578,7 +11576,6 @@
 				880FB3EC28CA53D300FA1C10 /* determinate_spinner_56.json */,
 				88E8BEEF28D53C3700509CE2 /* indeterminate_spinner_20.json */,
 				880FB3ED28CA53D300FA1C10 /* indeterminate_spinner_44.json */,
-				880FB3EB28CA53D300FA1C10 /* indeterminate_spinner_56.json */,
 				6605D5002A86D2B6004DC345 /* indeterminate_spinner_blue.json */,
 				6605D5022A86D305004DC345 /* indeterminate_spinner_white.json */,
 				887CD48924735D4200FDD265 /* launchApp-iPad.json */,
@@ -16147,7 +16144,6 @@
 				B66DBF4A19D5BBC8006EA940 /* Images.xcassets in Resources */,
 				88E8BEF028D53C3700509CE2 /* indeterminate_spinner_20.json in Resources */,
 				880FB3F128CA53D400FA1C10 /* indeterminate_spinner_44.json in Resources */,
-				880FB3EF28CA53D400FA1C10 /* indeterminate_spinner_56.json in Resources */,
 				6605D5012A86D2B6004DC345 /* indeterminate_spinner_blue.json in Resources */,
 				6605D5032A86D305004DC345 /* indeterminate_spinner_white.json in Resources */,
 				A5E7C675248C5443007C949A /* InfoPlist.strings in Resources */,

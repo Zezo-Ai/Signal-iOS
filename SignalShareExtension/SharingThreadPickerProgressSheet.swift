@@ -128,12 +128,12 @@ public class SharingThreadPickerProgressSheet: ActionSheetController {
             owsFailDebug("Missing notificationAttachmentId.")
             return
         }
-        guard let progress = notification.userInfo?[Upload.Constants.uploadProgressKey] as? NSNumber else {
+        guard let progress = notification.userInfo?[Upload.Constants.uploadProgressKey] as? Float else {
             owsFailDebug("Missing progress.")
             return
         }
 
-        progressPerAttachment[notificationAttachmentId] = progress.floatValue
+        progressPerAttachment[notificationAttachmentId] = progress
 
         renderProgress()
     }

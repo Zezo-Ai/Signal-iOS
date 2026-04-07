@@ -138,9 +138,7 @@ public class CVComponentViewOnce: CVComponentBase, CVComponent {
                     attachmentPointer: attachmentPointer,
                     downloadState: .enqueuedOrDownloading,
                 ),
-                diameter: iconSize,
                 colorConfiguration: .init(conversationStyle: conversationStyle, isIncoming: isIncoming),
-                mediaCache: mediaCache,
             )
             subviews.append(progressView)
         default:
@@ -166,10 +164,6 @@ public class CVComponentViewOnce: CVComponentBase, CVComponent {
     }
 
     private let iconSize: CGFloat = 24
-
-    private var downloadProgressRadius: CGFloat {
-        iconSize * 0.5
-    }
 
     private var stackViewConfig: CVStackViewConfig {
         CVStackViewConfig(

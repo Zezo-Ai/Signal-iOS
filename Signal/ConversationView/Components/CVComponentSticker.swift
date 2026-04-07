@@ -34,6 +34,7 @@ public class CVComponentSticker: CVComponentBase, CVComponent {
     }
 
     public static let stickerSize: CGFloat = 175
+    private static let progressViewSize = CGSize.square(44)
 
     public func configureForRendering(
         componentView componentViewParam: CVComponentView,
@@ -82,10 +83,9 @@ public class CVComponentSticker: CVComponentBase, CVComponent {
                 let progressView = CVAttachmentProgressView(
                     direction: .upload(attachmentStream: attachmentStream.attachmentStream),
                     colorConfiguration: .init(conversationStyle: conversationStyle, isIncoming: isIncoming),
-                    mediaCache: mediaCache,
                 )
                 stackView.addSubview(progressView)
-                stackView.centerSubviewOnSuperview(progressView, size: progressView.layoutSize)
+                stackView.centerSubviewOnSuperview(progressView, size: Self.progressViewSize)
             case .pendingDownload:
                 break
             case .downloading:
@@ -132,10 +132,9 @@ public class CVComponentSticker: CVComponentBase, CVComponent {
                 downloadState: downloadState,
             ),
             colorConfiguration: .init(conversationStyle: conversationStyle, isIncoming: isIncoming),
-            mediaCache: mediaCache,
         )
         stackView.addSubview(progressView)
-        stackView.centerSubviewOnSuperview(progressView, size: progressView.layoutSize)
+        stackView.centerSubviewOnSuperview(progressView, size: Self.progressViewSize)
     }
 
     private var stackViewConfig: CVStackViewConfig {
