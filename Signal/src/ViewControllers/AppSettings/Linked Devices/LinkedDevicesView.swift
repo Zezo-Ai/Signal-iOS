@@ -946,15 +946,6 @@ struct LinkedDevicesView: View {
                     Button {
                         guard let device else { return }
                         viewModel.present.send(
-                            .unlinkDeviceConfirmation(displayableDevice: device),
-                        )
-                    } label: {
-                        Label(LinkedDevicesView.unlinkString, image: "link-slash")
-                    }
-
-                    Button {
-                        guard let device else { return }
-                        viewModel.present.send(
                             .renameDevice(displayableDevice: device),
                         )
                     } label: {
@@ -965,6 +956,15 @@ struct LinkedDevicesView: View {
                             ),
                             image: "edit",
                         )
+                    }
+
+                    Button(role: .destructive) {
+                        guard let device else { return }
+                        viewModel.present.send(
+                            .unlinkDeviceConfirmation(displayableDevice: device),
+                        )
+                    } label: {
+                        Label(LinkedDevicesView.unlinkString, image: "link-slash")
                     }
                 } label: {
                     VStack(spacing: 0) {
