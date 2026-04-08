@@ -367,6 +367,15 @@
 /* Title for the attachment approval media quality sheet */
 "ATTACHMENT_APPROVAL_MEDIA_QUALITY_TITLE" = "मीडिया की क्वालिटी";
 
+/* Notification body shown when media sync to a linked device is complete. */
+"ATTACHMENT_BACKFILL_FINISHED_NOTIFICATION" = "Finished syncing with Signal on your linked device.";
+
+/* Notification body shown when media sync to a linked device was interrupted. */
+"ATTACHMENT_BACKFILL_INTERRUPTED_NOTIFICATION" = "Open Signal to continue syncing with your linked device";
+
+/* Notification body shown while syncing media to a linked device. */
+"ATTACHMENT_BACKFILL_SYNCING_NOTIFICATION" = "Syncing with Signal on your linked device";
+
 /* Generic filename for an attachment with no known name */
 "ATTACHMENT_DEFAULT_FILENAME" = "अटैचमेंट";
 
@@ -3434,13 +3443,13 @@
 "END_CALL_UNCATEGORIZED_FAILURE" = "कॉल नहीं हो सकी";
 
 /* Description for error sheet that says the user can no longer take this action because the group has ended. */
-"END_GROUP_ACTION_ERROR" = "This action is unavailable because the group has ended.";
+"END_GROUP_ACTION_ERROR" = "ऐसा नहीं किया जा सकता, क्योंकि यह ग्रुप बंद कर दिया गया है।";
 
 /* Label for a banner in group settings indicating that the group has been ended */
-"END_GROUP_BANNER_LABEL" = "This group has ended.";
+"END_GROUP_BANNER_LABEL" = "यह ग्रुप बंद कर दिया गया है।";
 
 /* Label for group chats that have been ended */
-"END_GROUP_BOTTOM_PANEL_LABEL" = "You can’t send messages because this group has ended.";
+"END_GROUP_BOTTOM_PANEL_LABEL" = "मैसेज भेज पाना संभव नहीं है, क्योंकि यह ग्रुप बंद किया जा चुका है।";
 
 /* End group confirmation description */
 "END_GROUP_DESCRIPTION" = "इसके बाद, मेंबर के पास इस ग्रुप में मैसेज भेजने या पाने की सुविधा मौजूद नहीं रहेगी। उन्हें यह नोटिफ़िकेशन मिल जाएगा कि आपने यह ग्रुप बंद कर दिया है। हालांकि, इसके बावजूद वे पुराने मैसेज देख पाएंगे।";
@@ -3449,7 +3458,7 @@
 "END_GROUP_DESCRIPTION_FINAL_CONFIRMATION" = "इससे यह ग्रुप हमेशा के लिए बंद हो जाएगा। क्या आपको अब भी इसे बंद करना है?";
 
 /* Body for error sheet shown if the group failed to end */
-"END_GROUP_ERROR_DESCRIPTION" = "Couldn't end the group. Check your connection and try again.";
+"END_GROUP_ERROR_DESCRIPTION" = "ग्रुप बंद नहीं हो पाया। अपना इंटरनेट कनेक्शन देखें और दोबारा कोशिश करें।";
 
 /* Label in conversation settings to end a group */
 "END_GROUP_LABEL" = "ग्रुप बंद करें";
@@ -4064,7 +4073,7 @@
 "GROUP_LINK_ACTION_SHEET_VIEW_CANNOT_JOIN_GROUP_TITLE" = "इसकी मदद से ग्रुप से नहीं जुड़ा जा सकता";
 
 /* Error message the attempt to request to join the group failed due to the group being ended. */
-"GROUP_LINK_ACTION_SHEET_VIEW_END_GROUP_MESSAGE" = "Unable to join this group";
+"GROUP_LINK_ACTION_SHEET_VIEW_END_GROUP_MESSAGE" = "यह ग्रुप जॉइन नहीं किया जा सकता";
 
 /* Subtitle indicating that the group invite link has expired in the 'group invite link' action sheet. */
 "GROUP_LINK_ACTION_SHEET_VIEW_EXPIRED_LINK_SUBTITLE" = "यह ग्रुप लिंक अब मान्य नहीं है।";
@@ -4391,7 +4400,7 @@
 "GROUP_TERMINATED_BY_UNKNOWN_USER" = "यह ग्रुप बंद किया जा चुका है";
 
 /* Error indicating a send failure due to the group being terminated. */
-"GROUP_TERMINATED_MESSAGE_SEND_ERROR" = "You can't send messages because the group has ended.";
+"GROUP_TERMINATED_MESSAGE_SEND_ERROR" = "मैसेज भेज पाना संभव नहीं है, क्योंकि यह ग्रुप बंद किया जा चुका है।";
 
 /* Info message indicating that the group was updated by an unknown user. */
 "GROUP_UPDATED" = "ग्रुप अपडेट हो गया है।";
@@ -9254,7 +9263,7 @@
 "STORIES_DELETE_STORY_ACTION_SHEET_TITLE" = "यह स्टोरी डिलीट करनी है? यह उन सभी के लिए भी डिलीट हो जाएगी जिन्हें यह मिली है।";
 
 /* Title asking the user if they are sure they want to delete their story for themselves only. */
-"STORIES_DELETE_STORY_FOR_ME_ACTION_SHEET_TITLE" = "Delete this story? It will only be deleted for you because the group has ended";
+"STORIES_DELETE_STORY_FOR_ME_ACTION_SHEET_TITLE" = "यह स्टोरी डिलीट करनी है? इसे सिर्फ़ आपके लिए डिलीट किया जाएगा, क्योंकि यह ग्रुप बंद किया जा चुका है";
 
 /* Context menu action to forward the selected story */
 "STORIES_FORWARD_STORY_ACTION" = "फ़ॉरवर्ड करें";
@@ -10061,7 +10070,7 @@
 "VIEW_ONCE_MESSAGES_TOOLTIP" = "देखे जाने के बाद इस मैसेज को गायब करने के लिए यहां टैप करें।";
 
 /* Toast alert text shown when tapping on a view-once message that you have sent. */
-"VIEW_ONCE_OUTGOING_TOAST" = "आउटगोइंग व्यू-एक बार मीडिया फ़ाइलों को उनके भेजे जाने के बाद स्वचालित रूप से हटा दिया जाता है।";
+"VIEW_ONCE_OUTGOING_TOAST" = "View-once media is deleted after sending";
 
 /* View the photo of a group or user */
 "VIEW_PHOTO" = "फ़ोटो देखें";
