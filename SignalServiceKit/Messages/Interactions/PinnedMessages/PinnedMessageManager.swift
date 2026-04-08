@@ -106,6 +106,7 @@ public class PinnedMessageManager {
             let targetMessage = try interactionStore.fetchMessage(
                 timestamp: pinMessageProto.targetSentTimestamp,
                 incomingMessageAuthor: targetAuthorAci == localAci ? nil : targetAuthorAci,
+                threadUniqueId: thread.uniqueId,
                 transaction: transaction,
             ), let interactionId = targetMessage.grdbId?.int64Value,
             targetMessage.giftBadge == nil,
@@ -184,6 +185,7 @@ public class PinnedMessageManager {
 
     public func unpinMessage(
         unpinMessageProto: SSKProtoDataMessageUnpinMessage,
+        threadUniqueId: String,
         transaction: DBWriteTransaction,
     ) throws -> TSInteraction {
         guard SDS.fitsInInt64(unpinMessageProto.targetSentTimestamp) else {
@@ -206,6 +208,7 @@ public class PinnedMessageManager {
             let targetMessage = try interactionStore.fetchMessage(
                 timestamp: unpinMessageProto.targetSentTimestamp,
                 incomingMessageAuthor: targetAuthorAci == localAci ? nil : targetAuthorAci,
+                threadUniqueId: threadUniqueId,
                 transaction: transaction,
             ), let interactionId = targetMessage.grdbId?.int64Value
         else {
@@ -303,6 +306,7 @@ public class PinnedMessageManager {
         expiresAt: UInt64?,
         isPin: Bool,
         sentTimestamp: UInt64,
+        threadUniqueId: String,
         tx: DBWriteTransaction,
     ) {
         let pinnedAtTimestamp = NSDate.ows_millisecondTimeStamp()
@@ -316,6 +320,7 @@ public class PinnedMessageManager {
             let targetMessage = try? interactionStore.fetchMessage(
                 timestamp: targetTimestamp,
                 incomingMessageAuthor: targetAuthorAci == localAci ? nil : targetAuthorAci,
+                threadUniqueId: threadUniqueId,
                 transaction: tx,
             ), let thread = threadStore.fetchThread(
                 uniqueId: targetMessage.uniqueThreadId,

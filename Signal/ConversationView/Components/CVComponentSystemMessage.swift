@@ -1442,7 +1442,10 @@ extension CVComponentSystemMessage {
         case .unblockedGroup:
             return nil
         case .typePinnedMessage:
-            guard let pinnedMessageUniqueId = infoMessage.pinnedMessageUniqueId(transaction: transaction) else {
+            guard
+                let thread = infoMessage.thread(tx: transaction),
+                let pinnedMessageUniqueId = infoMessage.pinnedMessageUniqueId(threadUniqueId: thread.uniqueId, transaction: transaction)
+            else {
                 return nil
             }
             return CVMessageAction(
@@ -1451,7 +1454,10 @@ extension CVComponentSystemMessage {
                 action: .didTapViewPinnedMessage(pinnedMessageUniqueId: pinnedMessageUniqueId),
             )
         case .typeEndPoll:
-            guard let pollInteractionUniqueId = infoMessage.pollInteractionUniqueId(transaction: transaction) else {
+            guard
+                let thread = infoMessage.thread(tx: transaction),
+                let pollInteractionUniqueId = infoMessage.pollInteractionUniqueId(threadUniqueId: thread.uniqueId, transaction: transaction)
+            else {
                 return nil
             }
             return CVMessageAction(

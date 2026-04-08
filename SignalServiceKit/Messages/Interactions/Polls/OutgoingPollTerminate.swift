@@ -108,6 +108,7 @@ class OutgoingPollTerminateMessage: TransientOutgoingMessage {
                 let targetMessage = try DependenciesBridge.shared.interactionStore.fetchMessage(
                     timestamp: targetPollTimestamp,
                     incomingMessageAuthor: nil,
+                    threadUniqueId: threadUniqueId,
                     transaction: tx,
                 ),
                 let interactionId = targetMessage.grdbId?.int64Value

@@ -126,6 +126,7 @@ public class OutgoingPollVoteMessage: TransientOutgoingMessage {
                 targetPollAuthorAci: targetPollAuthorAci,
                 optionIndexes: voteOptionIndexes,
                 voteCount: voteCount,
+                threadUniqueId: threadUniqueId,
                 tx: tx,
             )
         } catch {
@@ -168,6 +169,7 @@ public class OutgoingPollVoteMessage: TransientOutgoingMessage {
                 let targetMessage = try DependenciesBridge.shared.interactionStore.fetchMessage(
                     timestamp: targetPollTimestamp,
                     incomingMessageAuthor: targetPollAuthorAci == localAci ? nil : targetPollAuthorAci,
+                    threadUniqueId: threadUniqueId,
                     transaction: tx,
                 ),
                 let interactionId = targetMessage.grdbId?.int64Value

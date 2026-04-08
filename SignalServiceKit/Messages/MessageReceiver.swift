@@ -548,9 +548,14 @@ public final class MessageReceiver {
                     }
                 } else if let pollTerminate = dataMessage.pollTerminate {
                     do {
+                        guard let uniqueId = transcript.threadForDataMessage?.uniqueId else {
+                            throw OWSAssertionError("Invalid thread unique ID")
+                        }
+
                         let targetMessage = try DependenciesBridge.shared.pollMessageManager.processIncomingPollTerminate(
                             pollTerminateProto: pollTerminate,
                             terminateAuthor: localIdentifiers.aci,
+                            threadUniqueId: uniqueId,
                             transaction: tx,
                         )
 
@@ -583,9 +588,10 @@ public final class MessageReceiver {
                 } else if let pollVote = dataMessage.pollVote {
                     do {
                         guard
-                            let (targetMessage, _) = try DependenciesBridge.shared.pollMessageManager.processIncomingPollVote(
+                            let uniqueId = transcript.threadForDataMessage?.uniqueId, let (targetMessage, _) = try DependenciesBridge.shared.pollMessageManager.processIncomingPollVote(
                                 voteAuthor: localIdentifiers.aci,
                                 pollVoteProto: pollVote,
+                                threadUniqueId: uniqueId,
                                 transaction: tx,
                             )
                         else {
@@ -620,14 +626,20 @@ public final class MessageReceiver {
                     }
                 } else if let unpinMessage = dataMessage.unpinMessage {
                     do {
+                        guard let uniqueId = transcript.threadForDataMessage?.uniqueId else {
+                            throw OWSAssertionError("Invalid thread uniqueId")
+                        }
+
                         let targetMessage = try DependenciesBridge.shared.pinnedMessageManager.unpinMessage(
                             unpinMessageProto: unpinMessage,
+                            threadUniqueId: uniqueId,
                             transaction: tx,
                         )
 
                         SSKEnvironment.shared.databaseStorageRef.touch(interaction: targetMessage, shouldReindex: false, tx: tx)
                     } catch {
                         owsFailDebug("Could not unpin message \(error)")
+                        return
                     }
                 } else {
                     DependenciesBridge.shared.sentMessageTranscriptReceiver.process(
@@ -1211,6 +1223,7 @@ public final class MessageReceiver {
                     let (targetMessage, shouldNotifyAuthorOfVote) = try DependenciesBridge.shared.pollMessageManager.processIncomingPollVote(
                         voteAuthor: envelope.sourceAci,
                         pollVoteProto: pollVote,
+                        threadUniqueId: thread.uniqueId,
                         transaction: tx,
                     )
                 else {
@@ -1418,6 +1431,7 @@ public final class MessageReceiver {
                 let targetMessage = try DependenciesBridge.shared.pollMessageManager.processIncomingPollTerminate(
                     pollTerminateProto: pollTerminate,
                     terminateAuthor: envelope.sourceAci,
+                    threadUniqueId: thread.uniqueId,
                     transaction: tx,
                 )
 
@@ -1488,6 +1502,7 @@ public final class MessageReceiver {
                 do {
                     let targetMessage = try DependenciesBridge.shared.pinnedMessageManager.unpinMessage(
                         unpinMessageProto: unpinMessage,
+                        threadUniqueId: thread.uniqueId,
                         transaction: tx,
                     )
 

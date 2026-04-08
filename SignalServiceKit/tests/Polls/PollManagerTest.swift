@@ -196,6 +196,7 @@ struct PollManagerTest {
             _ = try pollMessageManager.processIncomingPollTerminate(
                 pollTerminateProto: terminateProto,
                 terminateAuthor: pollAuthorAci,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -253,6 +254,7 @@ struct PollManagerTest {
             _ = try pollMessageManager.processIncomingPollTerminate(
                 pollTerminateProto: terminateProto,
                 terminateAuthor: pollAuthorAci,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -311,6 +313,7 @@ struct PollManagerTest {
             try pollMessageManager.processIncomingPollVote(
                 voteAuthor: voterAci,
                 pollVoteProto: pollWaffleVoteProto,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -340,6 +343,7 @@ struct PollManagerTest {
             try pollMessageManager.processIncomingPollVote(
                 voteAuthor: voterAci,
                 pollVoteProto: pollVoteProtoRevoke,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -409,6 +413,7 @@ struct PollManagerTest {
             try pollMessageManager.processIncomingPollVote(
                 voteAuthor: waffleVoterAci,
                 pollVoteProto: pollWaffleVoteProto,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -424,6 +429,7 @@ struct PollManagerTest {
             try pollMessageManager.processIncomingPollVote(
                 voteAuthor: pancakeVoterAci,
                 pollVoteProto: pollPancakesVoteProto,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -456,6 +462,7 @@ struct PollManagerTest {
             try pollMessageManager.processIncomingPollVote(
                 voteAuthor: pancakeVoterAci,
                 pollVoteProto: pollVoteProtoRevoke,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -521,6 +528,7 @@ struct PollManagerTest {
             try pollMessageManager.processIncomingPollVote(
                 voteAuthor: voterAci,
                 pollVoteProto: pollVoteProto,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -553,6 +561,7 @@ struct PollManagerTest {
             try pollMessageManager.processIncomingPollVote(
                 voteAuthor: voterAci,
                 pollVoteProto: pollVoteProtoRevoke,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -609,6 +618,7 @@ struct PollManagerTest {
             try pollMessageManager.processIncomingPollVote(
                 voteAuthor: voterAci,
                 pollVoteProto: pollVoteProto,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -625,6 +635,7 @@ struct PollManagerTest {
             try pollMessageManager.processIncomingPollVote(
                 voteAuthor: voterAci,
                 pollVoteProto: oldPollVoteProto,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -681,6 +692,7 @@ struct PollManagerTest {
             try pollMessageManager.processIncomingPollVote(
                 voteAuthor: voterAci,
                 pollVoteProto: pollVoteProto,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -697,6 +709,7 @@ struct PollManagerTest {
             try pollMessageManager.processIncomingPollVote(
                 voteAuthor: voterAci,
                 pollVoteProto: pollUnVoteProto,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -724,6 +737,7 @@ struct PollManagerTest {
             try pollMessageManager.processIncomingPollVote(
                 voteAuthor: voterAci,
                 pollVoteProto: oldPollVoteProto,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -810,12 +824,14 @@ struct PollManagerTest {
             _ = try pollMessageManager.processIncomingPollVote(
                 voteAuthor: user1Aci,
                 pollVoteProto: user1VoteProto1,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
 
             _ = try pollMessageManager.processIncomingPollVote(
                 voteAuthor: user1Aci,
                 pollVoteProto: user1VoteProto2,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -839,12 +855,14 @@ struct PollManagerTest {
             _ = try pollMessageManager.processIncomingPollVote(
                 voteAuthor: user2Aci,
                 pollVoteProto: user2VoteProto1,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
 
             _ = try pollMessageManager.processIncomingPollVote(
                 voteAuthor: user2Aci,
                 pollVoteProto: user2VoteProto2,
+                threadUniqueId: groupThread.uniqueId,
                 transaction: tx,
             )
         }
@@ -921,6 +939,7 @@ struct PollManagerTest {
                 try pollMessageManager.processIncomingPollVote(
                     voteAuthor: aci,
                     pollVoteProto: proto,
+                    threadUniqueId: groupThread.uniqueId,
                     transaction: tx,
                 )
             }
@@ -1788,6 +1807,71 @@ struct PollManagerTest {
             #expect(waffleOption!.acis.isEmpty)
         }
     }
+
+    @Test
+    func testPollVoteChecksThreadId() throws {
+        let question = "What should we have for breakfast?"
+        let incomingMessage = insertIncomingPollMessage(question: question)
+
+        let pollCreateProto = buildPollCreateProto(
+            question: question,
+            options: ["pancakes", "waffles"],
+            allowMultiple: false,
+        )
+
+        try db.write { tx in
+            try pollMessageManager.processIncomingPollCreate(
+                interactionId: 1,
+                pollCreateProto: pollCreateProto,
+                transaction: tx,
+            )
+        }
+
+        // Before voting, insert voters into Signal Recipient Table
+        // which is referenced by id in the vote table.
+        let voterAci = Aci.constantForTesting("00000000-0000-4000-8000-000000000002")
+
+        insertSignalRecipient(
+            aci: voterAci,
+            pni: Pni.constantForTesting("PNI:00000000-0000-4000-8000-0000000000b2"),
+            phoneNumber: E164("+16505550102")!,
+        )
+
+        let pollVoteProto = buildPollVoteProto(
+            pollAuthor: pollAuthorAci,
+            targetSentTimestamp: incomingMessage.timestamp,
+            optionIndexes: [1],
+            voteCount: 1,
+        )
+
+        let otherThread = TSGroupThread.randomForTesting()
+        let result = try db.write { tx in
+            try pollMessageManager.processIncomingPollVote(
+                voteAuthor: voterAci,
+                pollVoteProto: pollVoteProto,
+                threadUniqueId: otherThread.uniqueId,
+                transaction: tx,
+            )
+        }
+
+        #expect(result == nil)
+
+        try db.read { tx in
+            let owsPoll = try pollMessageManager.buildPoll(message: incomingMessage, transaction: tx)
+            #expect(owsPoll!.question == question)
+            #expect(owsPoll!.sortedOptions()[0].text == "pancakes")
+            #expect(owsPoll!.sortedOptions()[1].text == "waffles")
+            #expect(owsPoll!.allowsMultiSelect == false)
+            #expect(owsPoll!.isEnded == false)
+            #expect(owsPoll!.totalVoters() == 0)
+
+            let pancakesOption = owsPoll!.optionForIndex(optionIndex: 0)
+            #expect(pancakesOption!.acis.isEmpty)
+
+            let wafflesOption = owsPoll!.optionForIndex(optionIndex: 1)
+            #expect(wafflesOption!.acis.isEmpty)
+        }
+    }
 }
 
 private extension TSOutgoingMessage {
@@ -1803,6 +1887,7 @@ private extension TSOutgoingMessage {
 
 private extension TSGroupThread {
     static func randomForTesting() -> TSGroupThread {
-        return .forUnitTest(groupId: 12)
+        let groupId = UInt8.random(in: 1...255)
+        return .forUnitTest(groupId: groupId)
     }
 }

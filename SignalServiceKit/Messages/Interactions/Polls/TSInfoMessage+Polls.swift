@@ -48,7 +48,7 @@ public class PersistableEndPollItem: NSObject, NSCopying, NSSecureCoding {
 }
 
 extension TSInfoMessage {
-    public func pollInteractionUniqueId(transaction: DBReadTransaction) -> String? {
+    public func pollInteractionUniqueId(threadUniqueId: String, transaction: DBReadTransaction) -> String? {
         guard let endPollItem: PersistableEndPollItem = infoMessageValue(forKey: .endPoll) else {
             return nil
         }
@@ -64,6 +64,7 @@ extension TSInfoMessage {
             return try DependenciesBridge.shared.interactionStore.fetchMessage(
                 timestamp: UInt64(endPollItem.timestamp),
                 incomingMessageAuthor: localAci == incomingMessageAuthor ? nil : incomingMessageAuthor,
+                threadUniqueId: threadUniqueId,
                 transaction: transaction,
             )?.uniqueId
         } catch {

@@ -118,6 +118,7 @@ public class OutgoingUnpinMessage: TransientOutgoingMessage {
             expiresAt: nil,
             isPin: false,
             sentTimestamp: timestamp,
+            threadUniqueId: threadUniqueId,
             tx: tx,
         )
     }

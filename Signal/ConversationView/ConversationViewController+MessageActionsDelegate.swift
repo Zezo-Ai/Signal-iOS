@@ -326,6 +326,7 @@ extension ConversationViewController: MessageActionsDelegate {
                         expiresAt: expiresAtMs,
                         isPin: true,
                         sentTimestamp: sentTimestamp,
+                        threadUniqueId: thread.uniqueId,
                         tx: tx,
                     )
                 } else if let _unpinMessage = pinMessage as? OutgoingUnpinMessage {
@@ -335,6 +336,7 @@ extension ConversationViewController: MessageActionsDelegate {
                         expiresAt: nil,
                         isPin: false,
                         sentTimestamp: sentTimestamp,
+                        threadUniqueId: thread.uniqueId,
                         tx: tx,
                     )
                 }

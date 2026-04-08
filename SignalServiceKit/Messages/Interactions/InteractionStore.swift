@@ -51,6 +51,7 @@ public protocol InteractionStore {
     func fetchMessage(
         timestamp: UInt64,
         incomingMessageAuthor: Aci?,
+        threadUniqueId: String,
         transaction: DBReadTransaction,
     ) throws -> TSMessage?
 
@@ -251,6 +252,7 @@ public class InteractionStoreImpl: InteractionStore {
     public func fetchMessage(
         timestamp: UInt64,
         incomingMessageAuthor: Aci?,
+        threadUniqueId: String,
         transaction: DBReadTransaction,
     ) throws -> TSMessage? {
         let records = try InteractionRecord.fetchAll(
@@ -259,8 +261,9 @@ public class InteractionStoreImpl: InteractionStore {
             SELECT *
             FROM \(InteractionRecord.databaseTableName)
             WHERE \(interactionColumn: .timestamp) = ?
+            AND \(interactionColumn: .threadUniqueId) = ?
             """,
-            arguments: [timestamp],
+            arguments: [timestamp, threadUniqueId],
         )
 
         for record in records {
@@ -481,6 +484,7 @@ open class MockInteractionStore: InteractionStore {
     public func fetchMessage(
         timestamp: UInt64,
         incomingMessageAuthor: Aci?,
+        threadUniqueId: String,
         transaction: DBReadTransaction,
     ) throws -> TSMessage? {
         // Unimplemented

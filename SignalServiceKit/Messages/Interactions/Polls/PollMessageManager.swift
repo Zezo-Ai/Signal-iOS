@@ -120,6 +120,7 @@ public class PollMessageManager {
     public func processIncomingPollVote(
         voteAuthor: Aci,
         pollVoteProto: SSKProtoDataMessagePollVote,
+        threadUniqueId: String,
         transaction: DBWriteTransaction,
     ) throws -> (TSMessage, shouldNotifyAuthorOfVote: Bool)? {
         guard
@@ -138,6 +139,7 @@ public class PollMessageManager {
             let targetMessage = try interactionStore.fetchMessage(
                 timestamp: pollVoteProto.targetSentTimestamp,
                 incomingMessageAuthor: localAci == pollAuthorAci ? nil : pollAuthorAci,
+                threadUniqueId: threadUniqueId,
                 transaction: transaction,
             ),
             targetMessage.isPoll,
@@ -170,6 +172,7 @@ public class PollMessageManager {
     public func processIncomingPollTerminate(
         pollTerminateProto: SSKProtoDataMessagePollTerminate,
         terminateAuthor: Aci,
+        threadUniqueId: String,
         transaction: DBWriteTransaction,
     ) throws -> TSMessage? {
 
@@ -181,6 +184,7 @@ public class PollMessageManager {
             let targetMessage = try interactionStore.fetchMessage(
                 timestamp: pollTerminateProto.targetSentTimestamp,
                 incomingMessageAuthor: terminateAuthor == localAci ? nil : terminateAuthor,
+                threadUniqueId: threadUniqueId,
                 transaction: transaction,
             ),
             targetMessage.isPoll,
@@ -315,6 +319,7 @@ public class PollMessageManager {
         targetPollAuthorAci: Aci,
         optionIndexes: [OWSPoll.OptionIndex],
         voteCount: UInt32,
+        threadUniqueId: String,
         tx: DBWriteTransaction,
     ) throws {
         guard let localAci = accountManager.localIdentifiers(tx: tx)?.aci else {
@@ -336,6 +341,7 @@ public class PollMessageManager {
             let interaction = try interactionStore.fetchMessage(
                 timestamp: UInt64(targetPollTimestamp),
                 incomingMessageAuthor: targetPollAuthorAci == localAci ? nil : targetPollAuthorAci,
+                threadUniqueId: threadUniqueId,
                 transaction: tx,
             ), let interactionId = interaction.grdbId?.int64Value
         else {

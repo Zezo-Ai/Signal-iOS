@@ -146,6 +146,7 @@ public class OutgoingPinMessage: TransientOutgoingMessage {
             expiresAt: expiresAtMs,
             isPin: true,
             sentTimestamp: timestamp,
+            threadUniqueId: threadUniqueId,
             tx: tx,
         )
     }
