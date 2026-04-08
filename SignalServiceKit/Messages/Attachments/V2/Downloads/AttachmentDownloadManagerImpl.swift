@@ -1278,14 +1278,6 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 return true
             }
 
-            // If the message that created this attachment was the first message in the
-            // thread, the thread may not yet be marked visible. In that case, just
-            // check if the thread is whitelisted. We know we just received a message.
-            // TODO: Mark the thread visible before this point to share more logic.
-            guard thread.shouldThreadBeVisible else {
-                return !profileManager.isThread(inProfileWhitelist: thread, transaction: tx)
-            }
-
             return threadStore.hasPendingMessageRequest(thread: thread, tx: tx)
         }
 
