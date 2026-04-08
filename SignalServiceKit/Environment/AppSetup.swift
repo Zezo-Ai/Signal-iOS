@@ -668,7 +668,7 @@ extension AppSetup.GlobalsContinuation {
             orphanedBackupAttachmentScheduler: orphanedBackupAttachmentScheduler,
             profileManager: profileManager,
             reachabilityManager: reachabilityManager,
-            remoteConfigManager: remoteConfigManager,
+            remoteConfigProvider: remoteConfigManager,
             signalService: signalService,
             stickerManager: AttachmentDownloadManagerImpl.Wrappers.StickerManager(),
             storyStore: storyStore,

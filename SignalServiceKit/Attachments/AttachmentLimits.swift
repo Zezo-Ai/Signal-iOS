@@ -9,7 +9,7 @@ import Foundation
 public struct IncomingAttachmentLimits {
     private let remoteConfig: RemoteConfig
 
-    public static func currentLimits(remoteConfig: RemoteConfig = .current) -> Self {
+    public static func currentLimits(remoteConfig: RemoteConfig) -> Self {
         return Self(remoteConfig: remoteConfig)
     }
 
