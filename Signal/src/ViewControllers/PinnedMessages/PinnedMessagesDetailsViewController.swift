@@ -301,7 +301,7 @@ class PinnedMessagesDetailsViewController: OWSViewController, DatabaseChangeDele
 
     // MARK: - DatabaseChangeDelegate
 
-    func databaseChangesDidUpdate(databaseChanges: any SignalServiceKit.DatabaseChanges) {
+    func databaseChangesDidUpdate(databaseChanges: SignalServiceKit.DatabaseChanges) {
         let pinnedMessagesSet = Set(pinnedMessages.map(\.uniqueId))
         guard Set(databaseChanges.interactionUniqueIds).isDisjoint(with: pinnedMessagesSet) == false else {
             return

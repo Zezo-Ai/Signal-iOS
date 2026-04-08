@@ -305,7 +305,7 @@ extension TSAccountManagerImpl: LocalIdentifiersSetter {
 }
 
 extension TSAccountManagerImpl: DatabaseChangeDelegate {
-    public func databaseChangesDidUpdate(databaseChanges: any DatabaseChanges) {}
+    public func databaseChangesDidUpdate(databaseChanges: DatabaseChanges) {}
 
     public func databaseChangesDidUpdateExternally() {
         self.db.read { tx in

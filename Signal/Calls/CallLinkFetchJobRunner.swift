@@ -97,7 +97,7 @@ actor CallLinkFetchJobRunner: DatabaseChangeDelegate {
     }
 
     @MainActor
-    func databaseChangesDidUpdate(databaseChanges: any DatabaseChanges) {
+    func databaseChangesDidUpdate(databaseChanges: DatabaseChanges) {
         guard databaseChanges.didUpdate(tableName: CallLinkRecord.databaseTableName) else {
             return
         }

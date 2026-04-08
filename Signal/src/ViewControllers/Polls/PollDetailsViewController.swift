@@ -294,7 +294,7 @@ struct PollDetailsView: View {
 }
 
 extension PollDetailsViewController: DatabaseChangeDelegate {
-    func databaseChangesDidUpdate(databaseChanges: any SignalServiceKit.DatabaseChanges) {
+    func databaseChangesDidUpdate(databaseChanges: SignalServiceKit.DatabaseChanges) {
         guard databaseChanges.interactionUniqueIds.contains(message.uniqueId) else {
             return
         }

@@ -409,7 +409,7 @@ extension ObservedDatabaseChanges {
         return threads.uniqueIds.keys
     }
 
-    func snapshot() -> DatabaseChangesSnapshot {
+    func snapshot() -> DatabaseChanges {
 #if TESTABLE_BUILD
         checkConcurrency()
 #endif
@@ -427,7 +427,7 @@ extension ObservedDatabaseChanges {
         let didUpdateThreads: Bool = tableNames.contains(TSThread.databaseTableName)
         let lastError = _lastError
 
-        return DatabaseChangesSnapshot(
+        return DatabaseChanges(
             threadUniqueIds: threadUniqueIds,
             threadUniqueIdsForChatListUpdate: threadUniqueIdsForChatListUpdate,
             interactionUniqueIds: interactionUniqueIds,

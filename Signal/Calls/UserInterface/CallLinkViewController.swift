@@ -351,7 +351,7 @@ extension CallLinkViewController: DatabaseChangeDelegate {
         }
     }
 
-    func databaseChangesDidUpdate(databaseChanges: any DatabaseChanges) {
+    func databaseChangesDidUpdate(databaseChanges: DatabaseChanges) {
         guard let callLinkRowId else {
             return
         }

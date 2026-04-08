@@ -1175,8 +1175,7 @@
 		669A2FCC2BD9D32400166DB6 /* AudioWaveformManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669A2FCB2BD9D32400166DB6 /* AudioWaveformManager.swift */; };
 		669A2FCE2BD9D48800166DB6 /* AudioWaveform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669A2FCD2BD9D48800166DB6 /* AudioWaveform.swift */; };
 		669A2FD02BDB068200166DB6 /* AudioWaveformManagerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669A2FCF2BDB068200166DB6 /* AudioWaveformManagerMock.swift */; };
-		669C4AAC2B7D4E56001EF103 /* DatabaseChanges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669C4AAB2B7D4E56001EF103 /* DatabaseChanges.swift */; };
-		669C4AAE2B7D4F7F001EF103 /* DatabaseChangesSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669C4AAD2B7D4F7F001EF103 /* DatabaseChangesSnapshot.swift */; };
+		669C4AAE2B7D4F7F001EF103 /* DatabaseChanges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669C4AAD2B7D4F7F001EF103 /* DatabaseChanges.swift */; };
 		669E8FE828B4153C00043D28 /* OWSUrlSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669E8FE728B4153B00043D28 /* OWSUrlSession.swift */; };
 		669E8FE928B415C000043D28 /* OWSURLBuilderUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669E8FDB28B02CC400043D28 /* OWSURLBuilderUtil.swift */; };
 		669E8FEF28B417D500043D28 /* OWSSignalService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669E8FEE28B417D500043D28 /* OWSSignalService.swift */; };
@@ -5449,8 +5448,7 @@
 		669A2FCB2BD9D32400166DB6 /* AudioWaveformManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioWaveformManager.swift; sourceTree = "<group>"; };
 		669A2FCD2BD9D48800166DB6 /* AudioWaveform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioWaveform.swift; sourceTree = "<group>"; };
 		669A2FCF2BDB068200166DB6 /* AudioWaveformManagerMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioWaveformManagerMock.swift; sourceTree = "<group>"; };
-		669C4AAB2B7D4E56001EF103 /* DatabaseChanges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseChanges.swift; sourceTree = "<group>"; };
-		669C4AAD2B7D4F7F001EF103 /* DatabaseChangesSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseChangesSnapshot.swift; sourceTree = "<group>"; };
+		669C4AAD2B7D4F7F001EF103 /* DatabaseChanges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseChanges.swift; sourceTree = "<group>"; };
 		669E8FDB28B02CC400043D28 /* OWSURLBuilderUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OWSURLBuilderUtil.swift; sourceTree = "<group>"; };
 		669E8FE528B4149200043D28 /* BaseOWSURLSessionMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseOWSURLSessionMock.swift; sourceTree = "<group>"; };
 		669E8FE728B4153B00043D28 /* OWSUrlSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OWSUrlSession.swift; sourceTree = "<group>"; };
@@ -15263,8 +15261,7 @@
 			isa = PBXGroup;
 			children = (
 				F9C5CA3E289453B100548EEE /* DatabaseChangeObserver.swift */,
-				669C4AAB2B7D4E56001EF103 /* DatabaseChanges.swift */,
-				669C4AAD2B7D4F7F001EF103 /* DatabaseChangesSnapshot.swift */,
+				669C4AAD2B7D4F7F001EF103 /* DatabaseChanges.swift */,
 				F9C5CA3D289453B100548EEE /* ObservedDatabaseChanges.swift */,
 			);
 			path = Snapshots;
@@ -19210,8 +19207,7 @@
 				F9C5CDFF289453B400548EEE /* Data+SSK.swift in Sources */,
 				D9F96EDE2D83BEFF00466C6A /* Database+Execute.swift in Sources */,
 				F9C5CD1D289453B300548EEE /* DatabaseChangeObserver.swift in Sources */,
-				669C4AAC2B7D4E56001EF103 /* DatabaseChanges.swift in Sources */,
-				669C4AAE2B7D4F7F001EF103 /* DatabaseChangesSnapshot.swift in Sources */,
+				669C4AAE2B7D4F7F001EF103 /* DatabaseChanges.swift in Sources */,
 				F97217F828DC9F3700113D9F /* DatabaseCorruptionState.swift in Sources */,
 				F9B652C328D8E3DF006914CA /* DatabaseRecovery.swift in Sources */,
 				725DBBE12C7628BB003BAF74 /* DataSourcePath.swift in Sources */,

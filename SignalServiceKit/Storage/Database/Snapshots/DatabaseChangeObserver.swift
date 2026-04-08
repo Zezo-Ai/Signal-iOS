@@ -628,7 +628,7 @@ extension DatabaseChangeObserverImpl: TransactionObserver {
     // See comment on databaseDidChange.
     @MainActor
     private func publishUpdates() {
-        let committedChanges = Self.committedChangesLock.withLock { () -> DatabaseChangesSnapshot in
+        let committedChanges = Self.committedChangesLock.withLock { () -> DatabaseChanges in
             // Return the current committedChanges.
             let committedChanges = self.committedChanges
             // Create a new committedChanges instance for the next batch
