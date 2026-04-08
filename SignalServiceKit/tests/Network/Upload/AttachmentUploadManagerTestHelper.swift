@@ -4,21 +4,22 @@
 //
 
 import Foundation
+import LibSignalClient
 @testable import SignalServiceKit
 
-typealias PerformTSRequestBlock = (TSRequest) async throws -> HTTPResponse
+typealias PerformUploadFormRequestBlock = () throws -> UploadForm
 typealias PerformRequestBlock = (URLRequest) async throws -> HTTPResponse
 typealias PerformUploadBlock = (URLRequest, Data, OWSURLSession.ProgressBlock) async throws -> HTTPResponse
 
 enum MockRequestType {
-    case uploadForm(PerformTSRequestBlock)
+    case uploadForm(PerformUploadFormRequestBlock)
     case uploadLocation(PerformRequestBlock)
     case uploadProgress(PerformRequestBlock)
     case uploadTask(PerformUploadBlock)
 }
 
 enum MockResultType {
-    case uploadForm(TSRequest)
+    case uploadForm
     case uploadLocation(URLRequest)
     case uploadProgress(URLRequest)
     case uploadTask(URLRequest)
@@ -73,7 +74,6 @@ class AttachmentUploadManagerMockHelper {
     lazy var mockDateProvider = { return self.mockDate }
     var mockDB = InMemoryDB()
     var mockURLSession = AttachmentUploadManagerImpl.Mocks.URLSession()
-    var mockNetworkManager = AttachmentUploadManagerImpl.Mocks.NetworkManager(appReadiness: AppReadinessMock(), libsignalNet: nil)
     var mockServiceManager = OWSSignalServiceMock()
     var mockChatConnectionManager = AttachmentUploadManagerImpl.Mocks.ChatConnectionManager()
     var mockFileSystem = AttachmentUploadManagerImpl.Mocks.FileSystem()
@@ -140,13 +140,13 @@ class AttachmentUploadManagerMockHelper {
             return self.mockURLSession
         }
 
-        mockNetworkManager.performRequestBlock = { request in
+        mockChatConnectionManager.performRequestBlock = {
             let item = self.authFormRequestBlock.removeFirst()
             guard case let .uploadForm(authDataTaskBlock) = item else {
-                return .init(error: OWSAssertionError("Mock request missing"))
+                throw OWSAssertionError("Mock request missing")
             }
-            self.capturedRequests.append(.uploadForm(request))
-            return Promise.wrapAsync { try await authDataTaskBlock(request) }
+            self.capturedRequests.append(.uploadForm)
+            return try authDataTaskBlock()
         }
 
         mockURLSession.performRequestBlock = { request in
@@ -217,13 +217,13 @@ class AttachmentUploadManagerMockHelper {
             cdnKey: UUID().uuidString,
             cdnNumber: cdn.rawValue,
         )
-        authFormRequestBlock.append(.uploadForm({ request in
+        authFormRequestBlock.append(.uploadForm({
             self.activeUploadRequestMocks = self.authToUploadRequestMockMap[authString] ?? .init()
-            return HTTPResponse(
-                requestUrl: request.url,
-                status: statusCode,
-                headers: HttpHeaders(),
-                bodyData: try! JSONEncoder().encode(form),
+            return UploadForm(
+                cdn: form.cdnNumber,
+                key: form.cdnKey,
+                headers: headers.headers,
+                signedUploadUrl: URL(string: location)!,
             )
         }))
         return .init(

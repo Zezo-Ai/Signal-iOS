@@ -64,11 +64,11 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
     private let attachmentUploadStore: AttachmentUploadStore
     private let attachmentThumbnailService: AttachmentThumbnailService
     private let backupRequestManager: BackupRequestManager
+    private let chatConnectionManager: ChatConnectionManager
     private let dateProvider: DateProvider
     private let db: any DB
     private let fileSystem: Upload.Shims.FileSystem
     private let interactionStore: InteractionStore
-    private let networkManager: NetworkManager
     private let remoteConfigProvider: any RemoteConfigProvider
     private let signalService: OWSSignalServiceProtocol
     private let sleepTimer: Upload.Shims.SleepTimer
@@ -114,11 +114,11 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
         attachmentUploadStore: AttachmentUploadStore,
         attachmentThumbnailService: AttachmentThumbnailService,
         backupRequestManager: BackupRequestManager,
+        chatConnectionManager: ChatConnectionManager,
         dateProvider: @escaping DateProvider,
         db: any DB,
         fileSystem: Upload.Shims.FileSystem,
         interactionStore: InteractionStore,
-        networkManager: NetworkManager,
         remoteConfigProvider: any RemoteConfigProvider,
         signalService: OWSSignalServiceProtocol,
         sleepTimer: Upload.Shims.SleepTimer,
@@ -130,11 +130,11 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
         self.attachmentUploadStore = attachmentUploadStore
         self.attachmentThumbnailService = attachmentThumbnailService
         self.backupRequestManager = backupRequestManager
+        self.chatConnectionManager = chatConnectionManager
         self.dateProvider = dateProvider
         self.db = db
         self.fileSystem = fileSystem
         self.interactionStore = interactionStore
-        self.networkManager = networkManager
         self.remoteConfigProvider = remoteConfigProvider
         self.signalService = signalService
         self.sleepTimer = sleepTimer
@@ -188,9 +188,9 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
         let sourceURL = dataSource.fileUrl
         let metadata = try attachmentEncrypter.encryptAttachment(at: sourceURL, output: temporaryFile)
         let localMetadata = try Upload.LocalUploadMetadata.validateAndBuild(fileUrl: temporaryFile, metadata: metadata)
-        let form = try await Upload.FormRequest(
-            networkManager: networkManager,
-        ).fetchForm(encryptedByteLength: localMetadata.encryptedDataLength)
+        let form = try await chatConnectionManager.withAuthService(.attachments) {
+            try await $0.getUploadForm(uploadSize: UInt64(localMetadata.encryptedDataLength)).asUploadForm()
+        }
 
         do {
             // We don't show progress for transient uploads
@@ -235,9 +235,9 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
             throw OWSAssertionError("invalid link n sync attachment size")
         }
         let metadata = Upload.LinkNSyncUploadMetadata(fileUrl: sourceURL, encryptedDataLength: fileSize)
-        let form = try await Upload.FormRequest(
-            networkManager: networkManager,
-        ).fetchForm(encryptedByteLength: metadata.encryptedDataLength)
+        let form = try await chatConnectionManager.withAuthService(.attachments) {
+            try await $0.getUploadForm(uploadSize: UInt64(metadata.encryptedDataLength)).asUploadForm()
+        }
 
         do {
             // We don't show progress for transient uploads
@@ -723,12 +723,8 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
             updateRecord = true
             switch type {
             case .transitTier:
-                do {
-                    uploadForm = try await Upload.FormRequest(
-                        networkManager: self.networkManager,
-                    ).fetchForm(encryptedByteLength: localMetadata.encryptedDataLength)
-                } catch {
-                    throw error
+                uploadForm = try await chatConnectionManager.withAuthService(.attachments) {
+                    try await $0.getUploadForm(uploadSize: UInt64(localMetadata.encryptedDataLength)).asUploadForm()
                 }
             case .mediaTier(let auth, _):
                 uploadForm = try await self.backupRequestManager
@@ -1196,5 +1192,20 @@ extension Upload {
             guard DebugFlags.internalSettings else { return }
             UserDefaults.standard.set(newValue, forKey: "disableTransitTierUploadReuse")
         }
+    }
+}
+
+extension Upload.Form {
+    public init(uploadForm: UploadForm) {
+        self.headers = HttpHeaders(httpHeaders: uploadForm.headers, overwriteOnConflict: true)
+        self.signedUploadLocation = uploadForm.signedUploadUrl.absoluteString
+        self.cdnKey = uploadForm.key
+        self.cdnNumber = uploadForm.cdn
+    }
+}
+
+extension UploadForm {
+    func asUploadForm() -> Upload.Form {
+        Upload.Form(uploadForm: self)
     }
 }

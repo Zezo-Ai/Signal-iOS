@@ -395,31 +395,3 @@ public enum AttachmentUpload {
         )
     }
 }
-
-extension Upload {
-    struct FormRequest {
-        private let networkManager: NetworkManager
-
-        init(
-            networkManager: NetworkManager,
-        ) {
-            self.networkManager = networkManager
-        }
-
-        func fetchForm(encryptedByteLength: UInt32) async throws -> Upload.Form {
-            let request = OWSRequestFactory.allocAttachmentRequestV4(encryptedByteLength: encryptedByteLength)
-            return try await fetchUploadForm(request: request)
-        }
-
-        private func fetchUploadForm<T: Decodable>(request: TSRequest) async throws -> T {
-            guard let data = try await performRequest(request).responseBodyData else {
-                throw OWSAssertionError("Invalid JSON")
-            }
-            return try JSONDecoder().decode(T.self, from: data)
-        }
-
-        private func performRequest(_ request: TSRequest) async throws -> HTTPResponse {
-            try await networkManager.asyncRequest(request)
-        }
-    }
-}

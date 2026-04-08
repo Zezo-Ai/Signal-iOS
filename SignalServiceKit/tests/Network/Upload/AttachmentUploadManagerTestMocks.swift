@@ -9,7 +9,6 @@ import LibSignalClient
 
 extension AttachmentUploadManagerImpl {
     enum Mocks {
-        typealias NetworkManager = _AttachmentUploadManager_NetworkManagerMock
         typealias URLSession = _AttachmentUploadManager_OWSURLSessionMock
         typealias ChatConnectionManager = _AttachmentUploadManager_ChatConnectionManagerMock
 
@@ -60,15 +59,6 @@ class _Upload_SleepTimerMock: Upload.Shims.SleepTimer {
     }
 }
 
-class _AttachmentUploadManager_NetworkManagerMock: NetworkManager {
-
-    var performRequestBlock: ((TSRequest) -> Promise<HTTPResponse>)?
-
-    override func asyncRequestImpl(_ request: TSRequest, retryPolicy: RetryPolicy) async throws -> HTTPResponse {
-        return try await performRequestBlock!(request).awaitable()
-    }
-}
-
 public class _AttachmentUploadManager_OWSURLSessionMock: BaseOWSURLSessionMock {
 
     public var performUploadDataBlock: ((URLRequest, Data, OWSURLSession.ProgressBlock) async throws -> HTTPResponse)?
@@ -87,7 +77,24 @@ public class _AttachmentUploadManager_OWSURLSessionMock: BaseOWSURLSessionMock {
     }
 }
 
-class _AttachmentUploadManager_ChatConnectionManagerMock: ChatConnectionManagerMock {}
+struct MockAuthMessageService: AuthMessagesService {
+    var performRequestBlock: (@Sendable () throws -> UploadForm)
+    func getUploadForm(uploadSize: UInt64) async throws -> UploadForm {
+        try performRequestBlock()
+    }
+}
+
+class _AttachmentUploadManager_ChatConnectionManagerMock: ChatConnectionManagerMock {
+    var performRequestBlock: (@Sendable () throws -> UploadForm)?
+    override func withAuthServiceImpl<Service, Output>(
+        _ service: Service,
+        timeout: TimeInterval,
+        do callback: @escaping (Service.Api) async throws -> Output,
+    ) async throws -> Output where Service: AuthServiceSelector {
+        let service = MockAuthMessageService(performRequestBlock: performRequestBlock!)
+        return try await callback(service as! Service.Api)
+    }
+}
 
 class _AttachmentUploadManager_BackupRequestManagerMock: BackupRequestManager {
     func fetchBackupServiceAuthForRegistration(
