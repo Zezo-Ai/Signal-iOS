@@ -69,13 +69,15 @@ struct ResourceFile: TranslatableFile {
     func downloadAllTranslations(to repositoryURL: URL, using client: Smartling) async throws {
         try await withLimitedThrowingTaskGroup(limit: Constant.concurrentRequestLimit) { taskGroup in
             for (remoteIdentifier, localIdentifier) in languageMap {
-                let fileURL = try await client.downloadTranslatedFile(for: filename, in: remoteIdentifier)
-                let localRelativePath = relativePath(for: localIdentifier)
-                try FileManager.default.copyItem(
-                    at: fileURL,
-                    replacingItemAt: repositoryURL.appendingPathComponent(localRelativePath),
-                )
-                print("Saved \(localRelativePath)")
+                try await taskGroup.addTask {
+                    let fileURL = try await client.downloadTranslatedFile(for: filename, in: remoteIdentifier)
+                    let localRelativePath = relativePath(for: localIdentifier)
+                    try FileManager.default.copyItem(
+                        at: fileURL,
+                        replacingItemAt: repositoryURL.appendingPathComponent(localRelativePath),
+                    )
+                    print("Saved \(localRelativePath)")
+                }
             }
         }
     }
