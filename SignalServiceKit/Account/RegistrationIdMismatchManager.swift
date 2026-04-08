@@ -74,7 +74,7 @@ public class RegistrationIdMismatchManagerImpl: RegistrationIdMismatchManager {
 
         // Fetch a key bundle for yourself.
         let requestMaker = RequestMaker(
-            label: "RegistrtationId Prekey Fetch",
+            label: "RegistrationId Prekey Fetch",
             serviceId: serviceId,
             canUseStoryAuth: false,
             accessKey: udAccess,
