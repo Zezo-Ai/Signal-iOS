@@ -42,8 +42,12 @@ class NSECallMessageHandler: CallMessageHandler {
         let bufferSecondsForMainAppToAnswerRing: UInt64 = 10
 
         let serverReceivedTimestamp = serverReceivedTimestamp > 0 ? serverReceivedTimestamp : sentAtTimestamp
-        let approxMessageAge = (serverDeliveryTimestamp - serverReceivedTimestamp)
-        let messageAgeForRingRtc = approxMessageAge / UInt64.secondInMs + bufferSecondsForMainAppToAnswerRing
+        let approxMessageAgeMs: UInt64 = if serverDeliveryTimestamp > serverReceivedTimestamp {
+            serverDeliveryTimestamp - serverReceivedTimestamp
+        } else {
+            0
+        }
+        let messageAgeForRingRtc = approxMessageAgeMs / UInt64.secondInMs + bufferSecondsForMainAppToAnswerRing
 
         switch callEnvelope {
         case .offer(let offer):
