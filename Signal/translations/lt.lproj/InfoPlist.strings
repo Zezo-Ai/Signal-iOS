@@ -1,0 +1,9 @@
+NSAppleMusicUsageDescription = "Norint paleisti medijos priedus, „Signal“ reikalinga „Apple Music“.";
+NSCameraUsageDescription = "Norint daryti nuotraukas ir skambinti su vaizdu, „Signal“ reikalingas jūsų fotoaparatas.";
+NSContactsUsageDescription = "„Signal“ naudoja jūsų adresatus, kad rastų jūsų pažįstamus naudotojus. Jūsų adresatų neišsaugome serveryje.";
+NSFaceIDUsageDescription = "„Signal“ ekrano užraktas naudoja veido ID.";
+NSLocationWhenInUseUsageDescription = "Norint bendrinti jūsų dabartinę vietovę, „Signal“ reikia prieigos prie vietovės.";
+NSMicrophoneUsageDescription = "Tam, kad būtų galima skambinti ir gauti skambučius bei įrašyti balso žinutes, „Signal“ reikalinga prieiga prie jūsų mikrofono.";
+NSPhotoLibraryAddUsageDescription = "„Signal“ nuotraukas išsaugos jūsų bibliotekoje.";
+NSPhotoLibraryUsageDescription = "„Signal“ leis pasirinkti, kurias nuotraukas iš jūsų bibliotekos siųsti.";
+NSLocalNetworkUsageDescription = "„Signal“ naudoja vietinį tinklą, kad leistų tiesiogiai perkelti jūsų paskyrą į naują telefoną. Jis nebus naudojamas, nebent aiškiai pasirinksite pradėti perkėlimą į naują įrenginį.";

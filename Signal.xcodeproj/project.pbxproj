@@ -5019,6 +5019,12 @@
 		506A99D32B86B39F00E3C753 /* ContactManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactManager.swift; sourceTree = "<group>"; };
 		506ABE6A2A43AECA008844D1 /* UserProfileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileStore.swift; sourceTree = "<group>"; };
 		506ABE6C2A43B2C0008844D1 /* UserProfileMergerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileMergerTest.swift; sourceTree = "<group>"; };
+		5073C3792F86C8F20026860F /* bg */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = bg; path = translations/bg.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		5073C37A2F86C8F20026860F /* bg */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = bg; path = translations/bg.lproj/Localizable.strings; sourceTree = "<group>"; };
+		5073C37B2F86C8F20026860F /* bg */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = bg; path = translations/bg.lproj/PluralAware.stringsdict; sourceTree = "<group>"; };
+		5073C37C2F86C90A0026860F /* lt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = lt; path = translations/lt.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		5073C37D2F86C90A0026860F /* lt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = lt; path = translations/lt.lproj/Localizable.strings; sourceTree = "<group>"; };
+		5073C37E2F86C90A0026860F /* lt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = lt; path = translations/lt.lproj/PluralAware.stringsdict; sourceTree = "<group>"; };
 		5073EAC62C4F0F7A001FBB3E /* LinkPreviewSettingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkPreviewSettingStore.swift; sourceTree = "<group>"; };
 		5073EAC82C4F323F001FBB3E /* LinkPreviewSettingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkPreviewSettingManager.swift; sourceTree = "<group>"; };
 		5073EACA2C4F3A16001FBB3E /* LinkPreviewFetcherTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkPreviewFetcherTest.swift; sourceTree = "<group>"; };
@@ -15972,6 +15978,7 @@
 				Base,
 				ar,
 				be,
+				bg,
 				bn,
 				ca,
 				cs,
@@ -15992,6 +15999,7 @@
 				it,
 				ja,
 				ko,
+				lt,
 				mr,
 				ms,
 				nb,
@@ -20441,6 +20449,7 @@
 			children = (
 				500049AD2833013D006A7466 /* ar */,
 				507D614D2BE433EE00DA7BA3 /* be */,
+				5073C37B2F86C8F20026860F /* bg */,
 				500049AE28330143006A7466 /* bn */,
 				1466AB2B2817F811003B3D9F /* ca */,
 				500049B528330152006A7466 /* cs */,
@@ -20462,6 +20471,7 @@
 				1466AB312817F83F003B3D9F /* it */,
 				500049BF2833016E006A7466 /* ja */,
 				500049C528330179006A7466 /* ko */,
+				5073C37E2F86C90A0026860F /* lt */,
 				500049CA28330184006A7466 /* mr */,
 				500049C828330180006A7466 /* ms */,
 				500049CB28330185006A7466 /* nb */,
@@ -20493,6 +20503,7 @@
 			children = (
 				888A27E924B3E97F0045D639 /* ar */,
 				507D614B2BE433EE00DA7BA3 /* be */,
+				5073C3792F86C8F20026860F /* bg */,
 				88E1EACA26BB283D00AD0C2D /* bn */,
 				888A27E524B3E97E0045D639 /* ca */,
 				888A27F624B3E9800045D639 /* cs */,
@@ -20514,6 +20525,7 @@
 				888A27F224B3E97F0045D639 /* it */,
 				88C483F424A3001C00D9A85A /* ja */,
 				888A27E424B3E97E0045D639 /* ko */,
+				5073C37C2F86C90A0026860F /* lt */,
 				88928A59263F0DEC009C9B30 /* mr */,
 				50F96F3A28ECBC3200541EED /* ms */,
 				888A27EB24B3E97F0045D639 /* nb */,
@@ -20545,6 +20557,7 @@
 			children = (
 				3495BC911F1426B800B478F5 /* ar */,
 				507D614C2BE433EE00DA7BA3 /* be */,
+				5073C37A2F86C8F20026860F /* bg */,
 				B69C2D1A1AA5447600A640C2 /* ca */,
 				B69C2D1B1AA5448300A640C2 /* cs */,
 				B6BC3D0C1AA544B100C2907F /* da */,
@@ -20566,6 +20579,7 @@
 				4C1D2337218B6BA000A0598F /* it */,
 				4C1D2338218B6BF100A0598F /* ja */,
 				4C1D2333218B692800A0598F /* ko */,
+				5073C37D2F86C90A0026860F /* lt */,
 				88A358252363FF63009D6B9A /* mr */,
 				34784593237C4819000D1CAA /* ms */,
 				4CFB4E9B220BC56D00ECB4DE /* nb */,

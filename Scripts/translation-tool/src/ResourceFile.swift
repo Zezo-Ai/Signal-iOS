@@ -9,6 +9,7 @@ import Foundation
 private let languageMap: [String: String] = [
     "ar": "ar",
     "be-BY": "be",
+    "bg-BG": "bg",
     "bn-BD": "bn",
     "ca": "ca",
     "cs": "cs",
@@ -29,6 +30,7 @@ private let languageMap: [String: String] = [
     "it": "it",
     "ja": "ja",
     "ko": "ko",
+    "lt-LT": "lt",
     "mr-IN": "mr",
     "ms": "ms",
     "nb": "nb",
