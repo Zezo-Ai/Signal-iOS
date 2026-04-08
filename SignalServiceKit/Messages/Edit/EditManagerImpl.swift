@@ -182,6 +182,7 @@ public class EditManagerImpl: EditManager {
             let editTarget = context.editMessageStore.editTarget(
                 timestamp: targetMessageTimestamp,
                 authorAci: nil,
+                threadUniqueId: thread.uniqueId,
                 tx: tx,
             )
         else {

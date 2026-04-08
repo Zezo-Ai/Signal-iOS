@@ -30,6 +30,7 @@ public struct EditMessageStore {
     public func editTarget(
         timestamp: UInt64,
         authorAci: Aci?,
+        threadUniqueId: String,
         tx: DBReadTransaction,
     ) -> EditMessageTarget? {
         guard SDS.fitsInInt64(timestamp) else {
@@ -42,11 +43,12 @@ public struct EditMessageStore {
         \(DEBUG_INDEXED_BY("Interaction_timestamp", or: "index_interactions_on_timestamp_sourceDeviceId_and_authorPhoneNumber"))
         WHERE \(interactionColumn: .timestamp) = ?
         AND \(interactionColumn: .authorUUID) IS ?
+        AND \(interactionColumn: .threadUniqueId) IS ?
         LIMIT 1
         """
         let interaction = TSInteraction.grdbFetchOne(
             sql: sql,
-            arguments: [timestamp, authorAci?.serviceIdUppercaseString],
+            arguments: [timestamp, authorAci?.serviceIdUppercaseString, threadUniqueId],
             transaction: tx,
         )
         switch (interaction, authorAci) {

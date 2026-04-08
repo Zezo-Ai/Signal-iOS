@@ -2130,6 +2130,7 @@ public final class MessageReceiver {
             let targetMessage = DependenciesBridge.shared.editMessageStore.editTarget(
                 timestamp: editMessage.targetSentTimestamp,
                 authorAci: nil,
+                threadUniqueId: thread.uniqueId,
                 tx: tx,
             )
         else {
@@ -2190,6 +2191,7 @@ public final class MessageReceiver {
             let targetMessage = DependenciesBridge.shared.editMessageStore.editTarget(
                 timestamp: editMessage.targetSentTimestamp,
                 authorAci: decryptedEnvelope.sourceAci,
+                threadUniqueId: thread.uniqueId,
                 tx: tx,
             )
         else {
