@@ -90,6 +90,7 @@ private extension Smartling {
 
     func buildRequest(url: URL, token: Token? = nil) -> URLRequest {
         var request = URLRequest(url: url)
+        request.timeoutInterval = 180
         if let token {
             request.addValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
         }
