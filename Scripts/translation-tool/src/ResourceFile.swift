@@ -70,13 +70,16 @@ struct ResourceFile: TranslatableFile {
         try await withLimitedThrowingTaskGroup(limit: Constant.concurrentRequestLimit) { taskGroup in
             for (remoteIdentifier, localIdentifier) in languageMap {
                 try await taskGroup.addTask {
+                    let startTime = CFAbsoluteTimeGetCurrent()
                     let fileURL = try await client.downloadTranslatedFile(for: filename, in: remoteIdentifier)
+                    let endTime = CFAbsoluteTimeGetCurrent()
                     let localRelativePath = relativePath(for: localIdentifier)
                     try FileManager.default.copyItem(
                         at: fileURL,
                         replacingItemAt: repositoryURL.appendingPathComponent(localRelativePath),
                     )
-                    print("Saved \(localRelativePath)")
+                    let formattedDuration = (endTime - startTime).formatted(.number.precision(.fractionLength(1)))
+                    print("Saved \(localRelativePath) in \(formattedDuration)s")
                 }
             }
         }
