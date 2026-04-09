@@ -187,7 +187,7 @@ class InternalSettingsViewController: OWSTableViewController2 {
             let db = DependenciesBridge.shared.db
 
             db.write { tx in
-                backupSettingsStore.wipeHaveBackupsEverBeenEnabled(tx: tx)
+                backupSettingsStore.setShouldOverrideShowBackupsOnboarding(true, tx: tx)
             }
 
             self?.presentToast(text: "Backups onboarding enabled!")

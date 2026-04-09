@@ -59,6 +59,7 @@ public struct BackupSettingsStore {
 
     private enum Keys {
         static let haveEverBeenEnabled = "haveEverBeenEnabledKey2"
+        static let shouldOverrideShowBackupsOnboarding = "shouldOverrideShowBackupsOnboarding"
         static let plan = "planKey2"
         static let firstBackupDate = "firstBackupDate"
         static let lastBackupDate = "lastBackupDate"
@@ -96,11 +97,20 @@ public struct BackupSettingsStore {
         return kvStore.getBool(Keys.haveEverBeenEnabled, defaultValue: false, transaction: tx)
     }
 
-    /// Wipes whether Backups have ever been enabled.
+    // MARK: - Internal: Show Backups Onboarding
+
+    /// Whether to force showing Backups onboarding.
     ///
-    /// **Not intended for production use.**
-    public func wipeHaveBackupsEverBeenEnabled(tx: DBWriteTransaction) {
-        kvStore.removeValue(forKey: Keys.haveEverBeenEnabled, transaction: tx)
+    /// Not intended for production use.
+    public func shouldOverrideShowBackupsOnboarding(tx: DBReadTransaction) -> Bool {
+        return kvStore.getBool(Keys.shouldOverrideShowBackupsOnboarding, defaultValue: false, transaction: tx)
+    }
+
+    /// Set an override to show Backups onboarding.
+    ///
+    /// Not intended for production use.
+    public func setShouldOverrideShowBackupsOnboarding(_ value: Bool, tx: DBWriteTransaction) {
+        kvStore.setBool(value, key: Keys.shouldOverrideShowBackupsOnboarding, transaction: tx)
     }
 
     // MARK: - BackupPlan

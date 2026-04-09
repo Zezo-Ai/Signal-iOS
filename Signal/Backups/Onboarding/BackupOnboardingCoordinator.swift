@@ -52,11 +52,15 @@ class BackupOnboardingCoordinator {
         inNavController navController: UINavigationController,
         onAppearAction: BackupSettingsViewController.OnAppearAction? = nil,
     ) -> UIViewController {
-        let haveBackupsEverBeenEnabled = db.read { tx in
-            backupSettingsStore.haveBackupsEverBeenEnabled(tx: tx)
+        let shouldSkipOnboarding = db.read { tx in
+            if backupSettingsStore.shouldOverrideShowBackupsOnboarding(tx: tx) {
+                return false
+            }
+
+            return backupSettingsStore.haveBackupsEverBeenEnabled(tx: tx)
         }
 
-        if haveBackupsEverBeenEnabled {
+        if shouldSkipOnboarding {
             return BackupSettingsViewController(onAppearAction: onAppearAction)
         } else {
             // Weakly retain the nav controller, so we can use it throughout
@@ -207,6 +211,10 @@ class BackupOnboardingCoordinator {
                 .firstIndex(where: { type(of: $0) == Self.onboardingRootViewControllerType })
         else {
             return
+        }
+
+        db.write { tx in
+            backupSettingsStore.setShouldOverrideShowBackupsOnboarding(false, tx: tx)
         }
 
         let preOnboardingViewControllers = onboardingNavController.viewControllers[0..<onboardingRootVCIndex]
