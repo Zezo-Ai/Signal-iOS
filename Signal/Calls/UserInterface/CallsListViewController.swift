@@ -13,6 +13,7 @@ import SignalUI
 private protocol CallCellDelegate: AnyObject {
     func joinCall(from viewModel: CallsListViewController.CallViewModel)
     func returnToCall(from viewModel: CallsListViewController.CallViewModel)
+    func presentToast(toastText: String)
 }
 
 // MARK: - CallsListViewController
@@ -2154,6 +2155,10 @@ extension CallsListViewController: CallCellDelegate, NewCallViewControllerDelega
         AppEnvironment.shared.windowManagerRef.returnToCallView()
     }
 
+    fileprivate func presentToast(toastText: String) {
+        presentToast(text: toastText)
+    }
+
     fileprivate func showCallInfo(from viewModel: CallViewModel) {
         AssertIsOnMainThread()
 
@@ -2544,9 +2549,62 @@ private extension CallsListViewController {
 
         // MARK: Actions
 
+        private enum canJoinCallResult {
+            case failedGroupTerminated
+            case failedNotMemberOfGroup
+            case success
+        }
+
+        private func canJoinCall(viewModel: CallViewModel) -> canJoinCallResult {
+            let db = DependenciesBridge.shared.db
+
+            switch viewModel.recipientType {
+            case .groupThread(groupId: let groupId):
+                guard
+                    let groupThread: TSGroupThread = db.read(block: { tx in
+                        return try? TSGroupThread.fetch(forGroupId: GroupIdentifier(contents: groupId), tx: tx)
+                    })
+                else {
+                    owsFailDebug("unable to fetch groupThread")
+                    return .success
+                }
+                if groupThread.isTerminatedGroup {
+                    return .failedGroupTerminated
+                }
+                if !groupThread.isLocalUserFullMemberOfThread {
+                    return .failedNotMemberOfGroup
+                }
+                return .success
+            case .callLink, .individual:
+                return .success
+            }
+        }
+
         private func detailsTapped(viewModel: CallViewModel) {
             guard let delegate else {
                 return owsFailDebug("Missing delegate")
+            }
+
+            let canJoinCall = canJoinCall(viewModel: viewModel)
+            switch canJoinCall {
+            case .failedGroupTerminated:
+                delegate.presentToast(
+                    toastText: OWSLocalizedString(
+                        "END_GROUP_ACTION_ERROR",
+                        comment: "Description for error sheet that says the user can no longer take this action because the group has ended.",
+                    ),
+                )
+                return
+            case .failedNotMemberOfGroup:
+                delegate.presentToast(
+                    toastText: OWSLocalizedString(
+                        "GROUP_CALL_NOT_A_MEMBER",
+                        comment: "Text indicating you can't take this action because you're not a member of the group",
+                    ),
+                )
+                return
+            case .success:
+                break
             }
 
             switch viewModel.state {
