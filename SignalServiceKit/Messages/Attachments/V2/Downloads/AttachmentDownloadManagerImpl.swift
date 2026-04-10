@@ -1267,8 +1267,12 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
 
             let threadRowId: Int64
             switch owner {
-            case .message(.oversizeText), .message(.sticker):
+            case .message(.oversizeText):
+                // These are bodyAttachments that branch based on their MIME type and
+                // aren't processed as media files.
                 return false
+            case .message(.sticker(let metadata)):
+                threadRowId = metadata.threadRowId
             case .message(.bodyAttachment(let metadata)):
                 threadRowId = metadata.threadRowId
             case .message(.quotedReply(let metadata)):
