@@ -143,7 +143,7 @@ public class CVItemViewModelImpl: CVComponentStateWrapper {
         return componentState.bodyMediaAttachmentStreams.map(\.attachmentStream)
     }
 
-    public var hasUnloadedAttachments: Bool {
+    private var hasUnloadedAttachments: Bool {
 
         if componentState.bodyText == .oversizeTextDownloading {
             return true
