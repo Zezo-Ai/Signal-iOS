@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import MediaPlayer
 public import SignalServiceKit
 
 // A modal view that be used during blocking interactions (e.g. waiting on response from
@@ -18,7 +17,6 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     private let canCancel: Bool
     private let isInvisible: Bool
     private var wasDimissed: Bool = false
-    private var activityIndicator: UIActivityIndicatorView?
     private var presentTimer: Timer?
     private let presentationDelay: TimeInterval
     private var asyncTask: Task<Void, Never>?
@@ -35,6 +33,7 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     @MainActor
     public class func present(
         fromViewController: UIViewController,
+        title: String? = nil,
         canCancel: Bool,
         presentationDelay: TimeInterval = Constants.defaultPresentationDelay,
         backgroundBlockQueueQos: DispatchQoS = .default,
@@ -42,6 +41,7 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     ) {
         present(
             fromViewController: fromViewController,
+            title: title,
             canCancel: canCancel,
             presentationDelay: presentationDelay,
             isInvisible: false,
@@ -57,6 +57,7 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     ) {
         present(
             fromViewController: fromViewController,
+            title: nil,
             canCancel: false,
             presentationDelay: Constants.defaultPresentationDelay,
             isInvisible: true,
@@ -68,6 +69,7 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     @MainActor
     private class func present(
         fromViewController: UIViewController,
+        title: String?,
         canCancel: Bool,
         presentationDelay: TimeInterval,
         isInvisible: Bool,
@@ -76,11 +78,13 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     ) {
         AssertIsOnMainThread()
 
-        ModalActivityIndicatorViewController(
+        let vc = ModalActivityIndicatorViewController(
             canCancel: canCancel,
             presentationDelay: presentationDelay,
             isInvisible: isInvisible,
-        ).present(
+        )
+        vc.title = title
+        vc.present(
             from: fromViewController,
             asyncBlock: { viewController in
                 DispatchQueue.global(qos: backgroundBlockQueueQos.qosClass).async {
@@ -103,6 +107,7 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     @MainActor
     public class func present(
         fromViewController: UIViewController,
+        title: String? = nil,
         canCancel: Bool = false,
         presentationDelay: TimeInterval = Constants.defaultPresentationDelay,
         isInvisible: Bool = false,
@@ -110,11 +115,13 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     ) {
         AssertIsOnMainThread()
 
-        ModalActivityIndicatorViewController(
+        let vc = ModalActivityIndicatorViewController(
             canCancel: canCancel,
             presentationDelay: presentationDelay,
             isInvisible: isInvisible,
-        ).present(
+        )
+        vc.title = title
+        vc.present(
             from: fromViewController,
             asyncBlock: asyncBlock,
         )
@@ -131,6 +138,7 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     @MainActor
     public class func presentAndPropagateResult<T, E>(
         from viewController: UIViewController,
+        title: String? = nil,
         canCancel: Bool = false,
         presentationDelay: TimeInterval = Constants.defaultPresentationDelay,
         wrappedAsyncBlock: @escaping () async throws(E) -> T,
@@ -138,6 +146,7 @@ public class ModalActivityIndicatorViewController: OWSViewController {
         let result: Result<T, E> = await withCheckedContinuation { continuation in
             present(
                 fromViewController: viewController,
+                title: title,
                 canCancel: canCancel,
                 presentationDelay: presentationDelay,
                 asyncBlock: { modal in
@@ -153,7 +162,10 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     }
 
     @MainActor
-    private func present(from viewController: UIViewController, asyncBlock: @escaping @MainActor (ModalActivityIndicatorViewController) async -> Void) {
+    private func present(
+        from viewController: UIViewController,
+        asyncBlock: @escaping @MainActor (ModalActivityIndicatorViewController) async -> Void,
+    ) {
         // Present this modal _over_ the current view contents.
         self.modalPresentationStyle = .overFullScreen
         viewController.present(self, animated: false) {
@@ -200,70 +212,163 @@ public class ModalActivityIndicatorViewController: OWSViewController {
 
     // MARK: -
 
-    override public func loadView() {
-        super.loadView()
+    override public var title: String? {
+        didSet {
+            guard isViewLoaded else { return }
+            updateUIOnTextChange()
+        }
+    }
 
-        if isInvisible {
-            self.view.backgroundColor = .clear
-            self.view.isOpaque = false
+    private lazy var titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .dynamicTypeHeadline
+        label.adjustsFontForContentSizeCategory = true
+        label.textColor = .Signal.label
+        label.textAlignment = .natural
+        label.numberOfLines = 5
+        label.lineBreakMode = .byWordWrapping
+        return label
+    }()
+
+    private lazy var textStack: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [])
+        stackView.isLayoutMarginsRelativeArrangement = true
+        stackView.directionalLayoutMargins = .init(top: 12, leading: 8, bottom: 0, trailing: 12)
+        stackView.axis = .vertical
+        stackView.alignment = .leading
+        stackView.spacing = 2
+        return stackView
+    }()
+
+    private lazy var cancelButton: UIButton = {
+        let button = UIButton(
+            configuration: .borderedProminent(),
+            primaryAction: UIAction { [weak self] _ in
+                self?.cancelPressed()
+            },
+        )
+        button.configuration?.title = CommonStrings.cancelButton
+        button.configuration?.titleTextAttributesTransformer = .defaultFont(.dynamicTypeBodyClamped.medium())
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
+        button.configuration?.baseForegroundColor = .Signal.label
+        button.configuration?.baseBackgroundColor = .Signal.secondaryFill
+        button.configuration?.contentInsets = NSDirectionalEdgeInsets(hMargin: 16, vMargin: 12)
+        if #available(iOS 26, *) {
+            button.configuration?.cornerStyle = .capsule
         } else {
-            self.view.backgroundColor = (
-                Theme.isDarkThemeEnabled
-                    ? UIColor(white: 0.35, alpha: 0.35)
-                    : UIColor(white: 0, alpha: 0.25),
-            )
-            self.view.isOpaque = false
-
-            let activityIndicator = UIActivityIndicatorView(style: .large)
-            self.activityIndicator = activityIndicator
-            self.view.addSubview(activityIndicator)
-            activityIndicator.autoCenterInSuperview()
-
-            if canCancel {
-                let cancelButton = UIButton(type: .custom)
-                cancelButton.setTitle(CommonStrings.cancelButton, for: .normal)
-                cancelButton.setTitleColor(UIColor.white, for: .normal)
-                cancelButton.backgroundColor = UIColor.ows_gray80
-                let font = UIFont.dynamicTypeHeadline
-                cancelButton.titleLabel?.font = font
-                cancelButton.layer.cornerRadius = .scaleFromIPhone5To7Plus(4, 5)
-                cancelButton.clipsToBounds = true
-                cancelButton.addTarget(self, action: #selector(cancelPressed), for: .touchUpInside)
-                let buttonWidth = CGFloat.scaleFromIPhone5To7Plus(140, 160)
-                let buttonHeight = OWSFlatButton.heightForFont(font)
-                self.view.addSubview(cancelButton)
-                cancelButton.autoHCenterInSuperview()
-                cancelButton.autoPinEdge(toSuperviewEdge: .bottom, withInset: 50)
-                cancelButton.autoSetDimension(.width, toSize: buttonWidth)
-                cancelButton.autoSetDimension(.height, toSize: buttonHeight)
-            }
+            button.configuration?.cornerStyle = .fixed
+            button.configuration?.background.cornerRadius = 14
         }
 
-        guard presentationDelay > 0 else {
-            return
+        return button
+    }()
+
+    private lazy var activityIndicator = CircularProgressView(frame: .zero)
+
+    private lazy var contentStack: UIStackView = {
+        activityIndicator.lineWidth = 3
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+
+        let aiContainer = UIView.container()
+        aiContainer.layoutMargins = .init(margin: 12)
+        aiContainer.addSubview(activityIndicator)
+        NSLayoutConstraint.activate([
+            activityIndicator.widthAnchor.constraint(equalToConstant: 40),
+            activityIndicator.heightAnchor.constraint(equalTo: activityIndicator.widthAnchor),
+
+            activityIndicator.topAnchor.constraint(equalTo: aiContainer.layoutMarginsGuide.topAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: aiContainer.layoutMarginsGuide.centerYAnchor),
+
+            activityIndicator.leadingAnchor.constraint(greaterThanOrEqualTo: aiContainer.layoutMarginsGuide.leadingAnchor),
+            activityIndicator.centerXAnchor.constraint(equalTo: aiContainer.layoutMarginsGuide.centerXAnchor),
+        ])
+        let stackView = UIStackView(arrangedSubviews: [textStack, aiContainer])
+        stackView.axis = .vertical
+        stackView.alignment = .fill
+        stackView.spacing = 18
+        return stackView
+    }()
+
+    private lazy var panelView: UIVisualEffectView = {
+        if #available(iOS 26, *) {
+            let glassEffect = UIGlassEffect(style: .regular)
+            glassEffect.tintColor = UIColor.Signal.background.withAlphaComponent(2 / 3)
+            let view = UIVisualEffectView(effect: glassEffect)
+            view.clipsToBounds = true
+            view.cornerConfiguration = .uniformCorners(radius: .fixed(canCancel ? 36 : 24))
+            return view
+        }
+
+        let view = UIVisualEffectView(effect: UIBlurEffect(style: .prominent))
+        view.clipsToBounds = true
+        view.layer.cornerRadius = 28
+        return view
+    }()
+
+    override public func viewDidLoad() {
+        super.viewDidLoad()
+
+        view.isOpaque = false
+        view.tintColor = .Signal.label
+
+        if isInvisible {
+            view.backgroundColor = .clear
+        } else {
+            view.backgroundColor = .Signal.backdrop
+
+            panelView.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(panelView)
+            NSLayoutConstraint.activate([
+                panelView.leadingAnchor.constraint(greaterThanOrEqualTo: contentLayoutGuide.leadingAnchor),
+                panelView.centerXAnchor.constraint(equalTo: contentLayoutGuide.centerXAnchor),
+                panelView.topAnchor.constraint(greaterThanOrEqualTo: contentLayoutGuide.topAnchor),
+                panelView.centerYAnchor.constraint(equalTo: contentLayoutGuide.centerYAnchor),
+                panelView.heightAnchor.constraint(lessThanOrEqualTo: panelView.widthAnchor, multiplier: 1),
+            ])
+
+            contentStack.translatesAutoresizingMaskIntoConstraints = false
+            panelView.layoutMargins = .init(margin: 16)
+            panelView.contentView.addSubview(contentStack)
+            NSLayoutConstraint.activate([
+                contentStack.topAnchor.constraint(equalTo: panelView.layoutMarginsGuide.topAnchor),
+                contentStack.leadingAnchor.constraint(equalTo: panelView.layoutMarginsGuide.leadingAnchor),
+                contentStack.trailingAnchor.constraint(equalTo: panelView.layoutMarginsGuide.trailingAnchor),
+                contentStack.bottomAnchor.constraint(equalTo: panelView.layoutMarginsGuide.bottomAnchor),
+            ])
+
+            if canCancel {
+                cancelButton.translatesAutoresizingMaskIntoConstraints = false
+                cancelButton.addConstraint(cancelButton.widthAnchor.constraint(equalToConstant: 240))
+                contentStack.addArrangedSubview(cancelButton)
+            }
+
+            updateUIOnTextChange()
         }
 
         // Hide the modal until the presentation animation completes.
-        self.view.layer.opacity = 0.0
+        if presentationDelay > 0 {
+            view.alpha = 0
+        }
     }
 
     override public func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        self.activityIndicator?.startAnimating()
-
-        guard presentationDelay > 0 else {
-            return
-        }
+        activityIndicator.startAnimating()
 
         // Hide the modal and wait for a second before revealing it,
         // to avoid "blipping" in the modal during short blocking operations.
         //
         // NOTE: It will still intercept user interactions while hidden, as it
         //       should.
-        self.presentTimer?.invalidate()
-        self.presentTimer = Timer.scheduledTimer(withTimeInterval: presentationDelay, repeats: false) { [weak self] _ in
-            self?.presentTimerFired()
+        if presentationDelay > 0 {
+            presentTimer?.invalidate()
+            presentTimer = Timer.scheduledTimer(
+                withTimeInterval: presentationDelay,
+                repeats: false,
+            ) { [weak self] _ in
+                self?.presentTimerFired()
+            }
         }
     }
 
@@ -276,16 +381,28 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     override public func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
-        self.activityIndicator?.stopAnimating()
+        activityIndicator.stopAnimating()
 
         clearTimer()
+    }
+
+    private func updateUIOnTextChange() {
+        if let title = self.title?.nilIfEmpty {
+            titleLabel.text = title
+            if titleLabel.superview == nil {
+                textStack.insertArrangedSubview(titleLabel, at: 0)
+            }
+            textStack.isHiddenInStackView = false
+        } else {
+            textStack.isHiddenInStackView = true
+        }
     }
 
     // MARK: -
 
     private func clearTimer() {
-        self.presentTimer?.invalidate()
-        self.presentTimer = nil
+        presentTimer?.invalidate()
+        presentTimer = nil
     }
 
     private func presentTimerFired() {
@@ -295,7 +412,7 @@ public class ModalActivityIndicatorViewController: OWSViewController {
 
         // Fade in the modal.
         UIView.animate(withDuration: 0.35) {
-            self.view.layer.opacity = 1.0
+            self.view.alpha = 1
         }
     }
 
@@ -303,12 +420,56 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     private func cancelPressed() {
         AssertIsOnMainThread()
 
-        if self.wasDimissed {
-            return
-        }
+        guard wasDimissed == false else { return }
 
-        self.dismiss()
-        self.wasCancelled = true
-        self.asyncTask?.cancel()
+        dismiss()
+        wasCancelled = true
+        asyncTask?.cancel()
     }
 }
+
+#if DEBUG
+
+private class MAIVCPreviewViewController: UIViewController {
+
+    private let canCancel: Bool
+
+    init(title: String?, canCancel: Bool) {
+        self.canCancel = canCancel
+        super.init(nibName: nil, bundle: nil)
+        self.title = title
+    }
+
+    required init?(coder: NSCoder) { owsFail("") }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        let vc = ModalActivityIndicatorViewController(canCancel: canCancel, presentationDelay: 0)
+        vc.title = title
+        present(vc, animated: false)
+        view.addSubview(vc.view)
+        vc.didMove(toParent: self)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            vc.viewDidAppear(true)
+        }
+    }
+}
+
+@available(iOS 17, *)
+#Preview("No Title, Can't Cancel") {
+    MAIVCPreviewViewController(title: nil, canCancel: false)
+}
+
+@available(iOS 17, *)
+#Preview("No Title, Can Cancel") {
+    MAIVCPreviewViewController(title: nil, canCancel: true)
+}
+
+@available(iOS 17, *)
+#Preview("Title, Can Cancel") {
+    MAIVCPreviewViewController(title: "Preparing...", canCancel: true)
+}
+
+#endif
