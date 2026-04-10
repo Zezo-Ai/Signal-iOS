@@ -2085,7 +2085,7 @@ public final class MessageReceiver {
                 transaction: tx,
             )
         } catch {
-            Logger.warn("Failed to insert story message with error \(error.localizedDescription)")
+            Logger.warn("Dropping story message: \(error)")
         }
     }
 

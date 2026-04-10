@@ -40,35 +40,33 @@ public class StoryManager {
                 transaction: transaction,
             ) == nil
         else {
-            Logger.warn("Dropping story message with duplicate timestamp \(timestamp) from author \(author)")
-            return
+            throw OWSGenericError("duplicate [timestamp \(timestamp), author \(author)]")
         }
 
         guard !SSKEnvironment.shared.blockingManagerRef.isAddressBlocked(SignalServiceAddress(author), transaction: transaction) else {
-            Logger.warn("Dropping story message with timestamp \(timestamp) from blocked or hidden author \(author)")
-            return
+            throw OWSGenericError("blocked author [timestamp \(timestamp), author \(author)]")
         }
 
         if DependenciesBridge.shared.recipientHidingManager.isHiddenAddress(SignalServiceAddress(author), tx: transaction) {
-            Logger.warn("Dropping story message with timestamp \(timestamp) from hidden author \(author)")
-            return
+            throw OWSGenericError("hidden author [timestamp \(timestamp), author \(author)]")
         }
 
         if let masterKey = storyMessage.group?.masterKey {
             let contextInfo = try GroupV2ContextInfo.deriveFrom(masterKeyData: masterKey)
 
-            guard !SSKEnvironment.shared.blockingManagerRef.isGroupIdBlocked(contextInfo.groupId, transaction: transaction) else {
-                Logger.warn("Dropping story message with timestamp \(timestamp) in blocked group")
-                return
+            if SSKEnvironment.shared.blockingManagerRef.isGroupIdBlocked(contextInfo.groupId, transaction: transaction) {
+                throw OWSGenericError("blocked group [timestamp \(timestamp), author \(author)]")
             }
 
             guard
                 let groupThread = TSGroupThread.fetch(groupId: contextInfo.groupId.serialize(), transaction: transaction),
-                groupThread.groupMembership.isFullMember(author),
-                !groupThread.isTerminatedGroup
+                groupThread.groupMembership.isFullMember(author)
             else {
-                Logger.warn("Dropping story message with timestamp \(timestamp) from author \(author) not in group or terminated group.")
-                return
+                throw OWSGenericError("not in group [timestamp \(timestamp), author \(author)]")
+            }
+
+            if groupThread.isTerminatedGroup {
+                throw OWSGenericError("terminated group [timestamp \(timestamp), author \(author)]")
             }
 
             if
@@ -76,14 +74,13 @@ public class StoryManager {
                 groupModel.isAnnouncementsOnly,
                 !groupModel.groupMembership.isFullMemberAndAdministrator(author)
             {
-                Logger.warn("Dropping story message with timestamp \(timestamp) from non-admin author \(author) in announcement only group")
-                return
+                throw OWSGenericError("not admin [timestamp \(timestamp), author \(author)]")
             }
 
         } else {
-            guard SSKEnvironment.shared.profileManagerRef.isUser(inProfileWhitelist: SignalServiceAddress(author), transaction: transaction) else {
-                Logger.warn("Dropping story message with timestamp \(timestamp) from unapproved author \(author).")
-                return
+            let profileManager = SSKEnvironment.shared.profileManagerRef
+            guard profileManager.isUser(inProfileWhitelist: SignalServiceAddress(author), transaction: transaction) else {
+                throw OWSGenericError("not signal connection [timestamp \(timestamp), author \(author)]")
             }
         }
 
@@ -100,14 +97,13 @@ public class StoryManager {
             )
         }
 
-        guard
-            let message = try StoryMessage.create(
-                withIncomingStoryMessage: storyMessage,
-                timestamp: timestamp,
-                receivedTimestamp: Date().ows_millisecondsSince1970,
-                author: author,
-                transaction: transaction,
-            ) else { return }
+        let message = try StoryMessage.create(
+            withIncomingStoryMessage: storyMessage,
+            timestamp: timestamp,
+            receivedTimestamp: Date().ows_millisecondsSince1970,
+            author: author,
+            transaction: transaction,
+        )
 
         switch message.context {
         case .authorAci(let authorAci):

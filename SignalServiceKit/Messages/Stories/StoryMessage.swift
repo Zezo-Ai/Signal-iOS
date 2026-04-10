@@ -157,14 +157,13 @@ public final class StoryMessage: NSObject, SDSCodableModel, Decodable {
         self.replyCount = replyCount
     }
 
-    @discardableResult
     public static func create(
         withIncomingStoryMessage storyMessage: SSKProtoStoryMessage,
         timestamp: UInt64,
         receivedTimestamp: UInt64,
         author: Aci,
         transaction: DBWriteTransaction,
-    ) throws -> StoryMessage? {
+    ) throws -> StoryMessage {
         Logger.info("Processing StoryMessage from \(author) with timestamp \(timestamp)")
 
         let groupId: GroupIdentifier?
@@ -173,20 +172,6 @@ public final class StoryMessage: NSObject, SDSCodableModel, Decodable {
             groupId = groupContext.groupId
         } else {
             groupId = nil
-        }
-
-        if let groupId, SSKEnvironment.shared.blockingManagerRef.isGroupIdBlocked(groupId, transaction: transaction) {
-            Logger.warn("Ignoring StoryMessage in blocked group.")
-            return nil
-        } else {
-            if SSKEnvironment.shared.blockingManagerRef.isAddressBlocked(SignalServiceAddress(author), transaction: transaction) {
-                Logger.warn("Ignoring StoryMessage from blocked author.")
-                return nil
-            }
-            if DependenciesBridge.shared.recipientHidingManager.isHiddenAddress(SignalServiceAddress(author), tx: transaction) {
-                Logger.warn("Ignoring StoryMessage from hidden author.")
-                return nil
-            }
         }
 
         let manifest = StoryManifest.incoming(receivedState: .init(
@@ -219,8 +204,8 @@ public final class StoryMessage: NSObject, SDSCodableModel, Decodable {
                     Logger.warn("Dropping invalid link preview; keeping story")
                     validatedLinkPreview = nil
                 } catch {
-                    owsFailDebug("Unexpected error for incoming story link preview proto! \(error)")
-                    return nil
+                    owsFailDebug("couldn't validate story link preview: \(error)")
+                    throw error
                 }
             } else {
                 validatedLinkPreview = nil
