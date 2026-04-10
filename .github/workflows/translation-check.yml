@@ -28,3 +28,6 @@ jobs:
 
       - name: Validate Localizable.strings
         run: Scripts/translation-validator/.build/debug/translation-validator Signal/translations/en.lproj/Localizable.strings
+
+      - name: Validate PluralAware.stringsdict
+        run: Scripts/translation-validator/.build/debug/translation-validator Signal/translations/en.lproj/PluralAware.stringsdict

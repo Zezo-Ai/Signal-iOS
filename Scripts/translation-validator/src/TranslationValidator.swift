@@ -10,9 +10,18 @@ struct TranslationValidator {
     static func main() {
         let sourcePath = CommandLine.arguments.dropFirst().first!
         let sourceUrl = URL(filePath: sourcePath, relativeTo: URL.currentDirectory()).standardizedFileURL
+        switch sourceUrl.pathExtension {
+        case "strings":
+            checkStrings(at: sourceUrl)
+        case "stringsdict":
+            checkStringsDict(at: sourceUrl)
+        default:
+            fatalError("invalid file extension")
+        }
+    }
+
+    private static func checkStrings(at sourceUrl: URL) {
         let sourceStrings = fetchStrings(at: sourceUrl)
-        let sourceDir = sourceUrl.deletingLastPathComponent().deletingLastPathComponent()
-        let enumerator = FileManager.default.enumerator(at: sourceDir, includingPropertiesForKeys: nil, errorHandler: nil)!
 
         var hasError = false
 
@@ -32,38 +41,82 @@ struct TranslationValidator {
         // Keys that only appear in the translations.
         var translatedOnly = [String: Set<String>]()
 
-        for fileUrl in enumerator {
-            let fileUrl = fileUrl as! URL
-            if fileUrl.lastPathComponent == sourceUrl.lastPathComponent {
-                let localeName = fileUrl.deletingLastPathComponent().deletingPathExtension().lastPathComponent
-                let translatedStrings = fetchStrings(at: fileUrl)
-                for key in Set(sourceStrings.keys).subtracting(translatedStrings.keys) {
-                    sourceOnly[key, default: []].insert(localeName)
+        enumerateLocalizedFiles(sourceUrl: sourceUrl) { fileUrl, localeName in
+            let translatedStrings = fetchStrings(at: fileUrl)
+            for key in Set(sourceStrings.keys).subtracting(translatedStrings.keys) {
+                sourceOnly[key, default: []].insert(localeName)
+            }
+            for key in Set(translatedStrings.keys).subtracting(sourceStrings.keys) {
+                translatedOnly[key, default: []].insert(localeName)
+            }
+            for (key, translatedString) in translatedStrings {
+                guard let sourceSpecifiers = sourceSpecifiers[key] else {
+                    continue
                 }
-                for key in Set(translatedStrings.keys).subtracting(sourceStrings.keys) {
-                    translatedOnly[key, default: []].insert(localeName)
+                let translatedSpecifiers: [String]
+                do {
+                    translatedSpecifiers = try formatSpecifiers(in: translatedString)
+                } catch {
+                    print("The translation for", key, "in", localeName, "has a malformed format specifier:", error)
+                    hasError = true
+                    continue
                 }
-                for (key, translatedString) in translatedStrings {
-                    guard let sourceSpecifiers = sourceSpecifiers[key] else {
-                        continue
-                    }
-                    let translatedSpecifiers: [String]
-                    do {
-                        translatedSpecifiers = try formatSpecifiers(in: translatedString)
-                    } catch {
-                        print("The translation for", key, "in", localeName, "has a malformed format specifier:", error)
-                        hasError = true
-                        continue
-                    }
-                    guard sourceSpecifiers.sorted() == translatedSpecifiers.sorted() else {
-                        print("The translation for", key, "in", localeName, "has an incorrect set of format specifiers:", translatedSpecifiers, "vs.", sourceSpecifiers)
-                        hasError = true
-                        continue
-                    }
+                guard sourceSpecifiers.sorted() == translatedSpecifiers.sorted() else {
+                    print("The translation for", key, "in", localeName, "has an incorrect set of format specifiers:", translatedSpecifiers, "vs.", sourceSpecifiers)
+                    hasError = true
+                    continue
                 }
             }
         }
 
+        printMissingExtraSummary(sourceOnly: sourceOnly, translatedOnly: translatedOnly, hasError: &hasError)
+
+        if hasError {
+            exit(1)
+        }
+    }
+
+    private static func checkStringsDict(at sourceUrl: URL) {
+        let sourceStrings = fetchStringsDict(at: sourceUrl)
+
+        var hasError = false
+
+        // Keys that only appear in the source.
+        var sourceOnly = [String: Set<String>]()
+
+        // Keys that only appear in the translations.
+        var translatedOnly = [String: Set<String>]()
+
+        enumerateLocalizedFiles(sourceUrl: sourceUrl) { fileUrl, localeName in
+            let translatedStrings = fetchStringsDict(at: fileUrl)
+            for key in Set(sourceStrings.keys).subtracting(translatedStrings.keys) {
+                sourceOnly[key, default: []].insert(localeName)
+            }
+            for key in Set(translatedStrings.keys).subtracting(sourceStrings.keys) {
+                translatedOnly[key, default: []].insert(localeName)
+            }
+        }
+
+        printMissingExtraSummary(sourceOnly: sourceOnly, translatedOnly: translatedOnly, hasError: &hasError)
+
+        if hasError {
+            exit(1)
+        }
+    }
+
+    private static func enumerateLocalizedFiles(sourceUrl: URL, block: (URL, String) -> Void) {
+        let sourceDir = sourceUrl.deletingLastPathComponent().deletingLastPathComponent()
+        let enumerator = FileManager.default.enumerator(at: sourceDir, includingPropertiesForKeys: nil, errorHandler: nil)!
+        for fileUrl in enumerator {
+            let fileUrl = fileUrl as! URL
+            if fileUrl.lastPathComponent == sourceUrl.lastPathComponent {
+                let localeName = fileUrl.deletingLastPathComponent().deletingPathExtension().lastPathComponent
+                block(fileUrl, localeName)
+            }
+        }
+    }
+
+    private static func printMissingExtraSummary(sourceOnly: [String: Set<String>], translatedOnly: [String: Set<String>], hasError: inout Bool) {
         if !sourceOnly.isEmpty {
             hasError = true
             print("The following strings are missing from some translated files:")
@@ -81,14 +134,40 @@ struct TranslationValidator {
             }
             print()
         }
-
-        if hasError {
-            exit(1)
-        }
     }
 
     private static func fetchStrings(at url: URL) -> [String: String] {
         return try! PropertyListSerialization.propertyList(from: Data(contentsOf: url), format: nil) as! [String: String]
+    }
+
+    private static func fetchStringsDict(at url: URL) -> [String: PluralTranslation] {
+        let translations = try! PropertyListSerialization.propertyList(from: Data(contentsOf: url), format: nil) as! [String: [String: Any]]
+        var results = [String: PluralTranslation]()
+        for (key, translation) in translations {
+            var translation = translation
+            let format = translation.removeValue(forKey: "NSStringLocalizedFormatKey") as! String
+            let replacements = translation.mapValues { replacement in
+                var replacement = replacement as! [String: String]
+                return PluralTranslation.Replacement(
+                    specType: replacement.removeValue(forKey: "NSStringFormatSpecTypeKey")!,
+                    valueType: replacement.removeValue(forKey: "NSStringFormatValueTypeKey")!,
+                    cases: replacement,
+                )
+            }
+            results[key] = PluralTranslation(format: format, replacements: replacements)
+        }
+        return results
+    }
+
+    struct PluralTranslation {
+        var format: String
+        var replacements: [String: Replacement]
+
+        struct Replacement {
+            var specType: String
+            var valueType: String
+            var cases: [String: String]
+        }
     }
 
     private enum FormatSpecifierError: Error {
