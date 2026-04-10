@@ -106,7 +106,6 @@ public extension UIColor {
 
 // MARK: -
 
-@available(iOS 26, *)
 public extension ColorOrGradientValue {
 
     func asChatUIElementTintColor() -> UIColor {

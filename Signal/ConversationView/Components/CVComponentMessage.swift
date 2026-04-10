@@ -627,7 +627,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
                     let bodyTextRootView: UIView
 
                     func applyLayout(bottomSelectionView: UIView, topSelectionView: UIView?) {
-                        let size = MessageSelectionView.totalSize
+                        let size = MessageSelectionView.preferredSize
                         guard let superview = bottomSelectionView.superview else {
                             owsFailDebug("Missing superview.")
                             return
@@ -697,7 +697,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             } else {
                 selectionWrapper.addSubviewToCenterOnSuperview(
                     primarySelectionView,
-                    size: MessageSelectionView.totalSize,
+                    size: MessageSelectionView.preferredSize,
                 )
             }
             hOuterStackSubviews.append(selectionWrapper)

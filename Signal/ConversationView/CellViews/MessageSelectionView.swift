@@ -4,66 +4,125 @@
 //
 
 import SignalServiceKit
-public import SignalUI
+import SignalUI
 
-public class MessageSelectionView: ManualLayoutView {
+class MessageSelectionView: ManualLayoutView {
 
-    public var isSelected: Bool = false {
+    var isSelected: Bool = false {
         didSet {
             selectedView.isHidden = !isSelected
             unselectedView.isHidden = isSelected
         }
     }
 
-    public init() {
+    init() {
         super.init(name: "MessageSelectionView")
 
-        addSubviewToFillSuperviewEdges(backgroundView)
-        addSubviewToCenterOnSuperview(selectedView, size: Self.uiSize)
-        addSubviewToCenterOnSuperview(unselectedView, size: Self.uiSize)
+        // `checkCircleFill` has some margins baked and needs to be 24 x 24 pts.
+        addSubviewToCenterOnSuperview(selectedView, size: .square(Self.circleDiameter))
 
-        selectedView.isHidden = true
+        // This view has a centered stroke and needs to be made smaller by
+        // the amount of space baked into the `checkCircleFill` and half of the stroke line width.
+        let ringDiameter = Self.circleDiameter - Self.emptyCheckmarkStrokeLineWidth / 2 - 1
+        addSubviewToCenterOnSuperview(unselectedView, size: .square(ringDiameter))
+
+        addLayoutBlock { view in
+            guard let selectionView = view as? MessageSelectionView else { return }
+            selectionView.checkmarkIcon.frame = selectionView.selectedView.bounds.insetBy(dx: 2, dy: 2)
+        }
+
+        selectedView.isHidden = !isSelected
     }
 
-    public static var totalSize: CGSize {
+    static var preferredSize: CGSize {
         CGSize(square: ConversationStyle.selectionViewWidth)
     }
 
-    private static var uiSize: CGSize {
-        CGSize(square: ConversationStyle.selectionViewWidth - 2)
+    private static var circleDiameter: CGFloat {
+        // 22 dp as per spec
+        ConversationStyle.selectionViewWidth - 2
     }
 
-    private let selectedView: CVImageView = {
-        let checkmarkView = CVImageView()
-        checkmarkView.setTemplateImage(Theme.iconImage(.checkCircleFill), tintColor: .white)
-        return checkmarkView
+    private static var emptyCheckmarkStrokeLineWidth: CGFloat { 2 }
+
+    private lazy var checkmarkIcon: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "check-20"))
+        imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .white
+        return imageView
     }()
 
-    private let unselectedView: CircleView = {
-        let circleView = CircleView(diameter: MessageSelectionView.uiSize.width)
-        circleView.layer.borderWidth = 1.5
+    private lazy var selectedView: UIView = {
+        let circleView = CircleView(frame: .init(origin: .zero, size: .square(MessageSelectionView.circleDiameter)))
+        circleView.addSubview(checkmarkIcon)
         return circleView
     }()
 
-    private let backgroundView: UIView = {
-        ManualLayoutViewWithLayer.circleView(name: "selection background")
+    private lazy var unselectedView: UIView = {
+        let circleView = RingView()
+        circleView.lineWidth = MessageSelectionView.emptyCheckmarkStrokeLineWidth
+        return circleView
     }()
 
-    public func updateStyle(conversationStyle: ConversationStyle) {
+    func updateStyle(conversationStyle: ConversationStyle) {
         AssertIsOnMainThread()
 
-        if conversationStyle.isDarkThemeEnabled || conversationStyle.hasWallpaper {
-            selectedView.tintColor = .ows_white
-            unselectedView.layer.borderColor = UIColor.ows_white.cgColor
-            backgroundView.backgroundColor = UIColor.ows_black.withAlphaComponent(0.2)
-            backgroundView.isHidden = (
-                !conversationStyle.hasWallpaper ||
-                    !conversationStyle.isWallpaperPhoto,
-            )
-        } else {
-            selectedView.tintColor = .ows_accentBlue
-            unselectedView.layer.borderColor = UIColor.ows_gray25.cgColor
-            backgroundView.isHidden = true
+        selectedView.backgroundColor = conversationStyle.chatColorValue.asChatUIElementTintColor()
+        unselectedView.tintColor = UIColor.Signal.tertiaryLabel
+    }
+
+    private class RingView: UIView {
+
+        override class var layerClass: AnyClass {
+            CAShapeLayer.self
+        }
+
+        private var shapeLayer: CAShapeLayer { layer as! CAShapeLayer }
+
+        var lineWidth: CGFloat {
+            get {
+                shapeLayer.lineWidth
+            }
+            set {
+                shapeLayer.lineWidth = newValue
+            }
+        }
+
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+
+            shapeLayer.fillColor = UIColor.clear.cgColor
+        }
+
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
+        override var frame: CGRect {
+            didSet {
+                if bounds.size != oldValue.size {
+                    updatePath()
+                }
+            }
+        }
+
+        override var tintColor: UIColor! {
+            didSet {
+                updateColor()
+            }
+        }
+
+        override func tintColorDidChange() {
+            super.tintColorDidChange()
+            updateColor()
+        }
+
+        private func updatePath() {
+            shapeLayer.path = UIBezierPath(ovalIn: layer.bounds).cgPath
+        }
+
+        private func updateColor() {
+            shapeLayer.strokeColor = tintColor?.cgColor
         }
     }
 }
