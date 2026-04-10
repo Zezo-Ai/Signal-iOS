@@ -489,7 +489,6 @@ public struct CVComponentState: Equatable {
         let isAvatarBeingDownloaded: Bool
         let titleText: String
         let shouldShowVerifiedBadge: Bool
-        let bioText: String?
         let safetySection: SafetySection?
         let groupDescriptionText: String?
     }
