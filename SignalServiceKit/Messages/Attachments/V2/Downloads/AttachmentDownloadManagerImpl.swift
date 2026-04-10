@@ -49,7 +49,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         remoteConfigProvider: any RemoteConfigProvider,
         signalService: OWSSignalServiceProtocol,
         stickerManager: Shims.StickerManager,
-        storyStore: StoryStore,
+        storyStore: any StoryStore,
         threadStore: ThreadStore,
         tsAccountManager: TSAccountManager,
     ) {
@@ -87,6 +87,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             mediaBandwidthPreferenceStore: mediaBandwidthPreferenceStore,
             profileManager: profileManager,
             reachabilityManager: reachabilityManager,
+            storyStore: storyStore,
             threadStore: threadStore,
         )
         let taskRunner = DownloadTaskRunner(
@@ -1090,6 +1091,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         private let mediaBandwidthPreferenceStore: MediaBandwidthPreferenceStore
         private let profileManager: ProfileManager
         private let reachabilityManager: SSKReachabilityManager
+        private let storyStore: any StoryStore
         private let threadStore: ThreadStore
 
         init(
@@ -1100,6 +1102,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             mediaBandwidthPreferenceStore: MediaBandwidthPreferenceStore,
             profileManager: ProfileManager,
             reachabilityManager: SSKReachabilityManager,
+            storyStore: any StoryStore,
             threadStore: ThreadStore,
         ) {
             self.attachmentStore = attachmentStore
@@ -1109,6 +1112,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             self.mediaBandwidthPreferenceStore = mediaBandwidthPreferenceStore
             self.profileManager = profileManager
             self.reachabilityManager = reachabilityManager
+            self.storyStore = storyStore
             self.threadStore = threadStore
         }
 
@@ -1265,29 +1269,52 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 return false
             }
 
-            let threadRowId: Int64
+            let thread: TSThread?
             switch owner {
-            case .message(.oversizeText):
-                // These are bodyAttachments that branch based on their MIME type and
-                // aren't processed as media files.
-                return false
-            case .message(.sticker(let metadata)):
-                threadRowId = metadata.threadRowId
-            case .message(.bodyAttachment(let metadata)):
-                threadRowId = metadata.threadRowId
-            case .message(.quotedReply(let metadata)):
-                threadRowId = metadata.threadRowId
-            case .message(.linkPreview(let metadata)):
-                threadRowId = metadata.threadRowId
-            case .message(.contactAvatar(let metadata)):
-                threadRowId = metadata.threadRowId
-            case .storyMessage, .thread:
+            case .message(let source):
+                let threadRowId: TSThread.RowId
+                switch source {
+                case .oversizeText:
+                    // These are bodyAttachments that branch based on their MIME type and
+                    // aren't processed as media files.
+                    return false
+                case .sticker(let metadata):
+                    threadRowId = metadata.threadRowId
+                case .bodyAttachment(let metadata):
+                    threadRowId = metadata.threadRowId
+                case .quotedReply(let metadata):
+                    threadRowId = metadata.threadRowId
+                case .linkPreview(let metadata):
+                    threadRowId = metadata.threadRowId
+                case .contactAvatar(let metadata):
+                    threadRowId = metadata.threadRowId
+                }
+                thread = threadStore.fetchThread(rowId: threadRowId, tx: tx)
+            case .storyMessage(let source):
+                let storyMessage = storyStore.fetchStoryMessage(rowId: source.storyMessageRowId, tx: tx)
+                guard let storyMessage else {
+                    owsFailDebug("can't check downloadability for non-existent owner")
+                    return true
+                }
+                switch storyMessage.direction {
+                case .outgoing:
+                    // Ignore outgoing stories for purposes of pending message requests.
+                    return false
+                case .incoming:
+                    break
+                }
+                if let groupId = storyMessage.groupId {
+                    thread = threadStore.fetchGroupThread(groupId: groupId, tx: tx)
+                } else {
+                    thread = threadStore.fetchContactThreads(serviceId: storyMessage.authorAci, tx: tx).first
+                }
+            case .thread:
                 // Ignore non-message cases for purposes of pending message request.
                 return false
             }
 
             // If there's not a thread, err on the safe side and don't download it.
-            guard let thread = threadStore.fetchThread(rowId: threadRowId, tx: tx) else {
+            guard let thread else {
                 return true
             }
 
