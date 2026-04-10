@@ -94,8 +94,6 @@ public class ReusableMediaView {
     }
 
     deinit {
-        AssertIsOnMainThread()
-
         loadState = .unloaded
     }
 
