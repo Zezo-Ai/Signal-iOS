@@ -167,7 +167,15 @@ public class ModalActivityIndicatorViewController: OWSViewController {
         asyncBlock: @escaping @MainActor (ModalActivityIndicatorViewController) async -> Void,
     ) {
         // Present this modal _over_ the current view contents.
-        self.modalPresentationStyle = .overFullScreen
+        modalPresentationStyle = .overFullScreen
+        if
+            let navigationController = viewController as? UINavigationController,
+            let topViewController = navigationController.topViewController
+        {
+            overrideUserInterfaceStyle = topViewController.overrideUserInterfaceStyle
+        } else {
+            overrideUserInterfaceStyle = viewController.overrideUserInterfaceStyle
+        }
         viewController.present(self, animated: false) {
             self.asyncTask = Task { await asyncBlock(self) }
             if self.wasCancelled {
