@@ -1484,7 +1484,6 @@
 		7647A33C2A270348002EAC93 /* FingerprintScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7647A33B2A270348002EAC93 /* FingerprintScanViewController.swift */; };
 		764981452A23194F00EC1287 /* CVItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764981442A23194F00EC1287 /* CVItemViewModel.swift */; };
 		764B479B2F4FB07E008C6337 /* CVLinkPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764B479A2F4FB076008C6337 /* CVLinkPreviewView.swift */; };
-		764D8C242F72029F00DA82B8 /* CircularProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764D8C232F72029100DA82B8 /* CircularProgressView.swift */; };
 		764FE03F2A2EC2E2004D2804 /* UIViewController+Permissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764FE03E2A2EC2E2004D2804 /* UIViewController+Permissions.swift */; };
 		764FE0412A2EF3A7004D2804 /* TextFieldFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764FE0402A2EF3A7004D2804 /* TextFieldFormatting.swift */; };
 		764FE0452A2F0C0F004D2804 /* QuotedReplyModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764FE0442A2F0C0F004D2804 /* QuotedReplyModel.swift */; };
@@ -1524,6 +1523,7 @@
 		76AE4D9D2A14611C000D98A4 /* MediaControlPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76AE4D9C2A14611C000D98A4 /* MediaControlPanelView.swift */; };
 		76BA0DF02A29B27100751107 /* ChatListViewController+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76BA0DEF2A29B27100751107 /* ChatListViewController+Search.swift */; };
 		76BB06FA29AD84DB00978856 /* MediaItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76BB06F929AD84DB00978856 /* MediaItemViewController.swift */; };
+		76BC91EC2F883C0000BE569B /* CircularProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 764D8C232F72029100DA82B8 /* CircularProgressView.swift */; };
 		76C87F19181EFCE600C4ACAB /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 76C87F18181EFCE600C4ACAB /* MediaPlayer.framework */; };
 		76C87FE128BE8E2400BD8709 /* LinkPreviewAttachmentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76C87FE028BE8E2400BD8709 /* LinkPreviewAttachmentViewController.swift */; };
 		76CDEB192EAD982000ADCCD6 /* ConversationBottomPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76CDEB182EAD980F00ADCCD6 /* ConversationBottomPanelView.swift */; };
@@ -9130,6 +9130,7 @@
 				83B9573827C9A1FA00A678FD /* CaptchaView.swift */,
 				D925F5502983399D00158EE4 /* CircleButton.swift */,
 				34A9553F271B510400B05242 /* CircleView.swift */,
+				764D8C232F72029100DA82B8 /* CircularProgressView.swift */,
 				76A2EB1128B57AEE00A29C24 /* ColorPickerBar.swift */,
 				B9754F532C73AD49000000E4 /* ConversationAvatarView+SwiftUI.swift */,
 				34A95543271B510400B05242 /* ConversationAvatarView.swift */,
@@ -11179,7 +11180,6 @@
 				D9CFB0132F20466100DFB14A /* ArcView.swift */,
 				4C2F454E214C00E1004871FF /* AvatarTableViewCell.swift */,
 				14E4A33F278EE999008408FD /* BlurredToolbarContainer.swift */,
-				764D8C232F72029100DA82B8 /* CircularProgressView.swift */,
 				32A9E22524C11B3F00C43518 /* EmojiMoodPickerView.swift */,
 				88905E9D229CCA96004E4234 /* ExpirationNagView.swift */,
 				8845B0C8264F12F800FA694C /* GroupDescriptionPreviewView.swift */,
@@ -17786,6 +17786,7 @@
 				83B9573927C9A1FA00A678FD /* CaptchaView.swift in Sources */,
 				D925F5512983399D00158EE4 /* CircleButton.swift in Sources */,
 				3402AA9D271D9E180084CBAE /* CircleView.swift in Sources */,
+				76BC91EC2F883C0000BE569B /* CircularProgressView.swift in Sources */,
 				34A954E0271B4F3E00B05242 /* ColorOrGradient+SignalUI.swift in Sources */,
 				34A954E2271B4F3E00B05242 /* ColorOrGradientSwatchView.swift in Sources */,
 				76A2EB1228B57AEE00A29C24 /* ColorPickerBar.swift in Sources */,
@@ -18232,7 +18233,6 @@
 				3406D32625DD5EAF00885B14 /* ChatListViewController.swift in Sources */,
 				887B380825F0355700685845 /* ChatsSettingsViewController.swift in Sources */,
 				D9680CF32DBB0B2D005DD5BE /* ChooseBackupPlanViewController.swift in Sources */,
-				764D8C242F72029F00DA82B8 /* CircularProgressView.swift in Sources */,
 				34E95C1B269F4F1B004807EC /* CLVLoader.swift in Sources */,
 				34E95C22269F4F4F004807EC /* CLVRenderState.swift in Sources */,
 				34E95C25269F4F4F004807EC /* CLVTableDataSource.swift in Sources */,

@@ -4,9 +4,9 @@
 //
 
 import SignalServiceKit
-import SignalUI
+public import UIKit
 
-class CircularProgressView: UIView {
+public class CircularProgressView: UIView {
 
     // MARK: - Progress
 
@@ -42,12 +42,12 @@ class CircularProgressView: UIView {
         }
     }
 
-    var progress: Float {
+    public var progress: Float {
         get { _progress }
         set { setProgress(newValue, animated: false) }
     }
 
-    func setProgress(_ newValue: Float, animated: Bool) {
+    public func setProgress(_ newValue: Float, animated: Bool) {
         // Can switch to determinate if indeterminate is starting or running.
         if isAnimating {
             switchToDeterminate(progress: newValue, animated: animated)
@@ -81,7 +81,7 @@ class CircularProgressView: UIView {
 
     private var animationState: IndeternimateAnimationState = .notAnimating
 
-    var isAnimating: Bool {
+    public var isAnimating: Bool {
         switch animationState {
         case .notAnimating:
             false
@@ -92,7 +92,7 @@ class CircularProgressView: UIView {
         }
     }
 
-    func startAnimating() {
+    public func startAnimating() {
         guard animationState == .notAnimating else { return }
 
         _progress = 0
@@ -161,7 +161,7 @@ class CircularProgressView: UIView {
         progressLayer.add(infiniteSpin, forKey: Animation.Indeternimate.infiniteSpin)
     }
 
-    func stopAnimating() {
+    public func stopAnimating() {
         guard isAnimating else { return }
 
         _progress = 0
@@ -252,19 +252,19 @@ class CircularProgressView: UIView {
 
     // MARK: - Appearance
 
-    var progressTintColor: UIColor? {
+    public var progressTintColor: UIColor? {
         didSet {
             updateColors()
         }
     }
 
-    var trackTintColor: UIColor? {
+    public var trackTintColor: UIColor? {
         didSet {
             updateColors()
         }
     }
 
-    var lineWidth: CGFloat = 2 {
+    public var lineWidth: CGFloat = 2 {
         didSet {
             trackLayer.lineWidth = lineWidth
             progressLayer.lineWidth = lineWidth
@@ -281,7 +281,7 @@ class CircularProgressView: UIView {
         trackLayer.strokeColor = trackColor.resolvedColor(with: traitCollection).cgColor
     }
 
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
 
         // Use `registerForTraitChanges()` on newer iOS versions.
@@ -293,7 +293,7 @@ class CircularProgressView: UIView {
         }
     }
 
-    override func tintColorDidChange() {
+    override public func tintColorDidChange() {
         super.tintColorDidChange()
 
         // Progress track might be using `self.tintColor` - update if that's the case.
@@ -304,7 +304,7 @@ class CircularProgressView: UIView {
 
     private var didBecomeActiveObservation: NotificationCenter.Observer?
 
-    override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
 
         setupLayers()
@@ -333,17 +333,17 @@ class CircularProgressView: UIView {
         }
     }
 
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
 
         updateGeometryIfNecessary()
     }
 
-    override var intrinsicContentSize: CGSize { .square(44) }
+    override public var intrinsicContentSize: CGSize { .square(44) }
 
     // MARK: - Restarting Animations
 
-    override func willMove(toWindow newWindow: UIWindow?) {
+    override public func willMove(toWindow newWindow: UIWindow?) {
         super.willMove(toWindow: newWindow)
         if newWindow != nil {
             restartAnimationsIfNeeded()
