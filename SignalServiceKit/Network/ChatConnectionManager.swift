@@ -96,6 +96,19 @@ public class ChatConnectionManagerImpl: ChatConnectionManager {
     private let connectionUnidentified: OWSUnauthConnectionUsingLibSignal
     private var connections: [OWSChatConnection] { [connectionIdentified, connectionUnidentified] }
 
+    // TODO: This is a workaround to solve the circular dependency between
+    // ChatConnectionManager and RegistrationStateChangeManager. In the event that
+    // someday RegistrationStateChangeManager is split up into smaller pieces, this
+    // can be revisited.
+    public var onRegistrationStateChange: ((_ isDelinkedOrDeregisterd: Bool, _ tx: DBWriteTransaction) -> Void)? {
+        get {
+            connectionIdentified.onRegistrationStateChange
+        }
+        set {
+            connectionIdentified.onRegistrationStateChange = newValue
+        }
+    }
+
     @MainActor
     public init(
         accountManager: TSAccountManager,
@@ -105,7 +118,6 @@ public class ChatConnectionManagerImpl: ChatConnectionManager {
         db: any DB,
         inactivePrimaryDeviceStore: InactivePrimaryDeviceStore,
         libsignalNet: Net,
-        registrationStateChangeManager: RegistrationStateChangeManager,
     ) {
         self.connectionIdentified = OWSAuthConnectionUsingLibSignal(
             libsignalNet: libsignalNet,
@@ -115,7 +127,6 @@ public class ChatConnectionManagerImpl: ChatConnectionManager {
             appReadiness: appReadiness,
             db: db,
             inactivePrimaryDeviceStore: inactivePrimaryDeviceStore,
-            registrationStateChangeManager: registrationStateChangeManager,
         )
         self.connectionUnidentified = OWSUnauthConnectionUsingLibSignal(
             libsignalNet: libsignalNet,

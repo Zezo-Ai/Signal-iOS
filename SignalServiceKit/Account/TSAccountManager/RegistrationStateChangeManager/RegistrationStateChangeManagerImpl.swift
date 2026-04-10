@@ -16,11 +16,7 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
     private let backupSubscriptionManager: BackupSubscriptionManager
     private let backupTestFlightEntitlementManager: BackupTestFlightEntitlementManager
     private let blockedRecipientStore: BlockedRecipientStore
-    private var chatConnectionManager: any ChatConnectionManager {
-        // TODO: Fix circular dependency.
-        return DependenciesBridge.shared.chatConnectionManager
-    }
-
+    private let chatConnectionManager: any ChatConnectionManager
     private let cron: Cron
     private let db: DB
     private let dmConfigurationStore: DisappearingMessagesConfigurationStore
@@ -45,6 +41,7 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
         backupSubscriptionManager: BackupSubscriptionManager,
         backupTestFlightEntitlementManager: BackupTestFlightEntitlementManager,
         blockedRecipientStore: BlockedRecipientStore,
+        chatConnectionManager: any ChatConnectionManager,
         cron: Cron,
         db: DB,
         dmConfigurationStore: DisappearingMessagesConfigurationStore,
@@ -68,6 +65,7 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
         self.backupSubscriptionManager = backupSubscriptionManager
         self.backupTestFlightEntitlementManager = backupTestFlightEntitlementManager
         self.blockedRecipientStore = blockedRecipientStore
+        self.chatConnectionManager = chatConnectionManager
         self.cron = cron
         self.db = db
         self.dmConfigurationStore = dmConfigurationStore

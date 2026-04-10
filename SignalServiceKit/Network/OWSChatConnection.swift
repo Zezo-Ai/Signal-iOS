@@ -885,9 +885,10 @@ class OWSAuthConnectionUsingLibSignal: OWSChatConnectionUsingLibSignal<Authentic
         }
     }
 
+    var onRegistrationStateChange: ((_ isDelinkedOrDeregisterd: Bool, _ tx: DBWriteTransaction) -> Void)?
+
     private let accountManager: TSAccountManager
     private let inactivePrimaryDeviceStore: InactivePrimaryDeviceStore
-    private let registrationStateChangeManager: RegistrationStateChangeManager
 
     init(
         libsignalNet: Net,
@@ -897,11 +898,9 @@ class OWSAuthConnectionUsingLibSignal: OWSChatConnectionUsingLibSignal<Authentic
         appReadiness: AppReadiness,
         db: any DB,
         inactivePrimaryDeviceStore: InactivePrimaryDeviceStore,
-        registrationStateChangeManager: RegistrationStateChangeManager,
     ) {
         self.accountManager = accountManager
         self.inactivePrimaryDeviceStore = inactivePrimaryDeviceStore
-        self.registrationStateChangeManager = registrationStateChangeManager
 
         let priority: Int
         switch appContext.type {
@@ -1028,7 +1027,7 @@ class OWSAuthConnectionUsingLibSignal: OWSChatConnectionUsingLibSignal<Authentic
                     if self.connection.isCurrentlyConnecting(token) {
                         self._setRegistrationOverride(false)
                         self.db.write { tx in
-                            self.registrationStateChangeManager.setIsDeregisteredOrDelinked(true, tx: tx)
+                            self.onRegistrationStateChange?(true, tx)
                         }
                     }
                 }
@@ -1063,7 +1062,7 @@ class OWSAuthConnectionUsingLibSignal: OWSChatConnectionUsingLibSignal<Authentic
                 service.start(listener: self)
                 if accountManager.registrationStateWithMaybeSneakyTransaction.isDeregistered {
                     db.write { tx in
-                        registrationStateChangeManager.setIsDeregisteredOrDelinked(false, tx: tx)
+                        self.onRegistrationStateChange?(false, tx)
                     }
                 }
                 keepaliveSenderTask = makeKeepaliveTask(service)

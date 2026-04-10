@@ -1011,6 +1011,16 @@ extension AppSetup.GlobalsContinuation {
         let inactivePrimaryDeviceStore = InactivePrimaryDeviceStore()
         let keyTransparencyStore = KeyTransparencyStore()
 
+        let chatConnectionManager = ChatConnectionManagerImpl(
+            accountManager: tsAccountManager,
+            appContext: appContext,
+            appExpiry: appExpiry,
+            appReadiness: appReadiness,
+            db: db,
+            inactivePrimaryDeviceStore: inactivePrimaryDeviceStore,
+            libsignalNet: libsignalNet,
+        )
+
         let registrationStateChangeManager = RegistrationStateChangeManagerImpl(
             authCredentialStore: authCredentialStore,
             backupAttachmentUploadEraStore: backupAttachmentUploadEraStore,
@@ -1018,6 +1028,7 @@ extension AppSetup.GlobalsContinuation {
             backupSubscriptionManager: backupSubscriptionManager,
             backupTestFlightEntitlementManager: backupTestFlightEntitlementManager,
             blockedRecipientStore: blockedRecipientStore,
+            chatConnectionManager: chatConnectionManager,
             cron: cron,
             db: db,
             dmConfigurationStore: disappearingMessagesConfigurationStore,
@@ -1035,17 +1046,9 @@ extension AppSetup.GlobalsContinuation {
             udManager: udManager,
             versionedProfiles: versionedProfiles,
         )
-
-        let chatConnectionManager = ChatConnectionManagerImpl(
-            accountManager: tsAccountManager,
-            appContext: appContext,
-            appExpiry: appExpiry,
-            appReadiness: appReadiness,
-            db: db,
-            inactivePrimaryDeviceStore: inactivePrimaryDeviceStore,
-            libsignalNet: libsignalNet,
-            registrationStateChangeManager: registrationStateChangeManager,
-        )
+        chatConnectionManager.onRegistrationStateChange = { [weak registrationStateChangeManager] isDelinkedOrDeregistered, tx in
+            registrationStateChangeManager?.setIsDeregisteredOrDelinked(isDelinkedOrDeregistered, tx: tx)
+        }
 
         let attachmentUploadManager = AttachmentUploadManagerImpl(
             accountKeyStore: accountKeyStore,
