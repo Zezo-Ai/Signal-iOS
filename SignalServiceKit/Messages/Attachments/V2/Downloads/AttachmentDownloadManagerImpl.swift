@@ -134,16 +134,19 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         self.beginDownloadingIfNecessary()
     }
 
+    private func maxEncryptedBackupDownloadSize() -> UInt64 {
+        return 1_000_000_000
+    }
+
     public func downloadBackup(
         metadata: BackupReadCredential,
         progress: OWSProgressSink?,
     ) async throws -> URL {
         let uuid = UUID()
         let downloadState = DownloadState(type: .backup(metadata: metadata, uuid: uuid))
-        let maxDownloadSize = BackupArchive.Constants.maxDownloadSizeBytes
         return try await self.downloadQueue.enqueueDownload(
             downloadState: downloadState,
-            maxDownloadSizeBytes: maxDownloadSize,
+            maxDownloadSizeBytes: maxEncryptedBackupDownloadSize(),
             expectedDownloadSize: .useHeadRequest,
             progress: progress,
         )
@@ -156,7 +159,11 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         let downloadState = DownloadState(type: .backup(metadata: metadata, uuid: uuid))
         var prefixLength = BackupNonce.metadataHeaderByteLengthUpperBound
         while true {
-            let (cdnInfo, prefix) = try await self.downloadQueue.performPrefixRequest(downloadState: downloadState, length: prefixLength)
+            let (cdnInfo, prefix) = try await self.downloadQueue.performPrefixRequest(
+                downloadState: downloadState,
+                maxDownloadSizeBytes: maxEncryptedBackupDownloadSize(),
+                length: prefixLength,
+            )
             do throws(BackupNonce.MetadataHeader.ParsingError) {
                 let metadataHeader = try BackupNonce.MetadataHeader.from(prefixBytes: prefix)
                 return BackupCdnInfo(
@@ -1571,11 +1578,12 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         /// limited number of bytes.
         fileprivate func performPrefixRequest(
             downloadState: DownloadState,
+            maxDownloadSizeBytes: UInt64,
             length: UInt16,
         ) async throws -> (AttachmentDownloads.CdnInfo, Data?) {
             let urlSession = await self.signalService.sharedUrlSessionForCdn(
                 cdnNumber: downloadState.cdnNumber(),
-                maxResponseSize: BackupArchive.Constants.maxDownloadSizeBytes,
+                maxResponseSize: maxDownloadSizeBytes,
             )
             let urlPath = try downloadState.urlPath()
             var headers = downloadState.additionalHeaders()
