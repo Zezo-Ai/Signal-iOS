@@ -246,6 +246,7 @@ public class ContactCellView: ManualStackView {
                         ),
                         presentationContext: .nonMessageBubble,
                         numberOfLines: 1,
+                        signalSymbolRange: nil,
                         onTap: nil,
                     )
 

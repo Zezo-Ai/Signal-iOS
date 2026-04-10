@@ -19,6 +19,7 @@ class NameEducationSheet: StackSheetViewController {
         UIColor.Signal.transparentSeparator
     }
 
+    private static let capsuleColor = UIColor.Signal.warningLabel
     private let type: SafetyTipsType
 
     init(type: SafetyTipsType) {
@@ -28,29 +29,59 @@ class NameEducationSheet: StackSheetViewController {
         stackView.alignment = .fill
         stackView.spacing = 12
 
-        stackView.addArrangedSubview(heroImageView)
-        stackView.setCustomSpacing(24, after: heroImageView)
+        stackView.addArrangedSubview(heroImageContainerView)
+        stackView.setCustomSpacing(24, after: heroImageContainerView)
         stackView.addArrangedSubview(header)
         stackView.setCustomSpacing(20, after: header)
         let bulletPoints = self.bulletPoints.map { text in
-            ListPointView(text: text)
+            BulletPointView(text: text)
         }
         stackView.addArrangedSubviews(bulletPoints)
         stackView.setCustomSpacing(20, after: bulletPoints.last!)
     }
 
-    private lazy var heroImageView: UIImageView = {
-        let view = UIImageView()
-        view.image = switch self.type {
+    private lazy var heroImageContainerView: UIView = {
+        let imageView = UIImageView()
+        imageView.image = switch self.type {
         case .contact:
-            UIImage(named: "person-questionmark-display")
+            .personQuestionmarkCompact
         case .group:
-            UIImage(named: "group-questionmark-display")
+            .groupQuestionmarkCompact
         }
-        view.tintColor = .label
-        view.contentMode = .scaleAspectFit
-        view.autoSetDimension(.height, toSize: 56)
-        return view
+        imageView.tintColor = Self.capsuleColor
+        imageView.contentMode = .scaleAspectFit
+
+        let imageInnerContainer = UIView()
+        imageInnerContainer.backgroundColor = Self.capsuleColor.withAlphaComponent(0.12)
+        imageInnerContainer.layer.cornerRadius = 24
+
+        imageInnerContainer.addSubview(imageView)
+
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            imageInnerContainer.widthAnchor.constraint(equalToConstant: 68),
+            imageInnerContainer.heightAnchor.constraint(equalToConstant: 48),
+
+            imageView.widthAnchor.constraint(equalToConstant: 32),
+            imageView.heightAnchor.constraint(equalToConstant: 32),
+            imageView.centerXAnchor.constraint(equalTo: imageInnerContainer.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: imageInnerContainer.centerYAnchor),
+        ])
+
+        let imageOuterContainer = UIView()
+        imageOuterContainer.addSubview(imageInnerContainer)
+
+        imageInnerContainer.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            imageInnerContainer.centerXAnchor.constraint(equalTo: imageOuterContainer.centerXAnchor),
+            imageInnerContainer.centerYAnchor.constraint(equalTo: imageOuterContainer.centerYAnchor),
+        ])
+
+        NSLayoutConstraint.activate([
+            imageOuterContainer.heightAnchor.constraint(equalToConstant: 48),
+        ])
+
+        return imageOuterContainer
     }()
 
     private lazy var header: UILabel = {
@@ -93,6 +124,10 @@ class NameEducationSheet: StackSheetViewController {
                     "PROFILE_NAME_EDUCATION_SHEET_BULLET_3",
                     comment: "Third bullet point for the explainer sheet for profile names",
                 ),
+                OWSLocalizedString(
+                    "PROFILE_NAME_EDUCATION_SHEET_BULLET_4",
+                    comment: "Fourth bullet point for the explainer sheet for profile names",
+                ),
             ]
         case .group:
             [
@@ -108,16 +143,20 @@ class NameEducationSheet: StackSheetViewController {
                     "GROUP_NAME_EDUCATION_SHEET_BULLET_3",
                     comment: "Third bullet point for the explainer sheet for group names",
                 ),
+                OWSLocalizedString(
+                    "GROUP_NAME_EDUCATION_SHEET_BULLET_4",
+                    comment: "Fourth bullet point for the explainer sheet for group names",
+                ),
             ]
         }
     }
 
-    private class ListPointView: UIStackView {
+    private class BulletPointView: UIStackView {
         init(text: String) {
             super.init(frame: .zero)
 
             self.axis = .horizontal
-            self.alignment = .center
+            self.alignment = .firstBaseline
             self.spacing = 8
 
             let label = UILabel()
@@ -126,17 +165,13 @@ class NameEducationSheet: StackSheetViewController {
             label.textColor = .label
             label.font = .dynamicTypeBody
 
-            let bulletPoint = UIView()
-            bulletPoint.backgroundColor = UIColor.Signal.tertiaryLabel
+            let bulletPoint = UILabel()
+            bulletPoint.text = "•"
+            bulletPoint.font = .dynamicTypeBody
 
             addArrangedSubview(.spacer(withWidth: 4))
             addArrangedSubview(bulletPoint)
             addArrangedSubview(label)
-
-            bulletPoint.autoSetDimension(.width, toSize: 4)
-            bulletPoint.autoPinHeightToSuperview(withMargin: 4)
-            bulletPoint.layer.cornerRadius = 2
-            label.setCompressionResistanceHigh()
         }
 
         required init(coder: NSCoder) {

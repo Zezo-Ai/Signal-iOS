@@ -593,6 +593,7 @@ struct ConversationHeaderBuilder {
             ),
             presentationContext: .nonMessageBubble,
             numberOfLines: 1,
+            signalSymbolRange: nil,
             onTap: { [weak delegate] in
                 delegate?.didTapMemberLabel()
             },

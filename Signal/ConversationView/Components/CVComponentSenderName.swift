@@ -105,6 +105,7 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
                 highlightFont: .dynamicTypeFootnote,
                 axLabelPrefix: nil, // handled separately in CVItemViewState
                 presentationContext: .messageBubbleRegular,
+                signalSymbolRange: nil,
                 onTap: nil,
             )
         } else {
@@ -189,6 +190,7 @@ public class CVComponentSenderName: CVComponentBase, CVComponent {
                 highlightFont: .dynamicTypeFootnote,
                 presentationContext: .messageBubbleRegular,
                 maxWidth: maxWidth,
+                signalSymbolRange: nil,
             )
         } else {
             labelSize = CVText.measureLabel(config: labelConfig, maxWidth: maxWidth)

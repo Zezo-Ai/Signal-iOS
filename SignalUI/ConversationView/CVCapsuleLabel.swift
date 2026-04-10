@@ -18,6 +18,7 @@ public class CVCapsuleLabel: UILabel {
         case messageBubbleRegular
         case messageBubbleQuoteReplyIncoming
         case messageBubbleQuoteReplyOutgoing
+        case nameNotVerifiedWarning
     }
 
     public let highlightRange: NSRange
@@ -43,6 +44,7 @@ public class CVCapsuleLabel: UILabel {
         presentationContext: PresentationContext,
         lineBreakMode: NSLineBreakMode = .byTruncatingTail,
         numberOfLines: Int = 0,
+        signalSymbolRange: NSRange?,
         onTap: (() -> Void)?,
     ) {
         self.highlightRange = highlightRange
@@ -62,11 +64,9 @@ public class CVCapsuleLabel: UILabel {
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapMemberLabel)))
 
         let attributedString = NSMutableAttributedString(attributedString: attributedText)
-        attributedString.addAttribute(.font, value: self.font!, range: attributedText.entireRange)
+        applyFontToAttributedString(attributedString, signalSymbolRange: signalSymbolRange)
         attributedString.addAttribute(.foregroundColor, value: textColor, range: attributedText.entireRange)
 
-        // The highlighted text may have different font than the sender name
-        attributedString.addAttribute(.font, value: highlightFont, range: highlightRange)
         self.attributedText = attributedString
     }
 
@@ -88,7 +88,33 @@ public class CVCapsuleLabel: UILabel {
                 return textColor.withAlphaComponent(0.32)
             }
             return textColor.withAlphaComponent(0.14)
+        case .nameNotVerifiedWarning:
+            if Theme.isDarkThemeEnabled {
+                return textColor.withAlphaComponent(0.2)
+            }
+            return textColor.withAlphaComponent(0.12)
         }
+    }
+
+    private func applyFontToAttributedString(_ attributedString: NSMutableAttributedString, signalSymbolRange: NSRange?) {
+        guard let signalSymbolRange else {
+            attributedString.addAttribute(.font, value: self.font!, range: attributedString.entireRange)
+            // The highlighted text may have different font than the sender name
+            attributedString.addAttribute(.font, value: highlightFont, range: highlightRange)
+            return
+        }
+
+        // Apply font avoiding the signal symbol
+        attributedString.applyAttributesToRangeAvoidingSubrange(
+            attributes: [.font: self.font!],
+            range: attributedString.entireRange,
+            subrangeToAvoid: signalSymbolRange,
+        )
+        attributedString.applyAttributesToRangeAvoidingSubrange(
+            attributes: [.font: highlightFont],
+            range: highlightRange,
+            subrangeToAvoid: signalSymbolRange,
+        )
     }
 
     @objc
@@ -288,6 +314,7 @@ public class CVCapsuleLabel: UILabel {
         highlightFont: UIFont,
         presentationContext: CVCapsuleLabel.PresentationContext,
         maxWidth: CGFloat,
+        signalSymbolRange: NSRange?,
     ) -> CGSize {
         let label = CVCapsuleLabel(
             attributedText: attributedText,
@@ -297,6 +324,7 @@ public class CVCapsuleLabel: UILabel {
             highlightFont: highlightFont,
             axLabelPrefix: nil,
             presentationContext: presentationContext,
+            signalSymbolRange: signalSymbolRange,
             onTap: nil,
         )
         return label.labelSize(maxWidth: maxWidth)

@@ -61,7 +61,6 @@ public class OWSContactsManager: NSObject, ContactsManagerProtocol {
 
     private let addressesAllowingAvatarDownloadCache = AtomicSet<SignalServiceAddress>(lock: .init())
     private let groupIdsAllowingAvatarDownloadCache = AtomicSet<Data>(lock: .init())
-    private let addressesNotNeedingLowTrustWarningCache = AtomicSet<SignalServiceAddress>(lock: .init())
     private let groupIdsNotNeedingLowTrustWarningCache = AtomicSet<Data>(lock: .init())
 
     private let intersectionQueue = DispatchQueue(label: "org.signal.contacts.intersection")
@@ -263,38 +262,6 @@ private class SystemContactsCache {
 // MARK: -
 
 extension OWSContactsManager: ContactManager {
-
-    // MARK: Low Trust
-
-    public func isLowTrustContact(contactThread: TSContactThread, tx: DBReadTransaction) -> Bool {
-        let address = contactThread.contactAddress
-
-        if addressesNotNeedingLowTrustWarningCache.contains(address) {
-            return false
-        }
-
-        if SSKEnvironment.shared.profileManagerRef.isThread(inProfileWhitelist: contactThread, transaction: tx) {
-            addressesNotNeedingLowTrustWarningCache.insert(address)
-            return false
-        }
-
-        if !contactThread.hasPendingMessageRequest(transaction: tx) {
-            return false
-        }
-
-        if
-            isInWhitelistedGroupsWithLocalUser(
-                otherAddress: address,
-                requireMultipleMutualGroups: true,
-                tx: tx,
-            )
-        {
-            addressesNotNeedingLowTrustWarningCache.insert(address)
-            return false
-        }
-
-        return true
-    }
 
     public func isLowTrustGroup(groupThread: TSGroupThread, tx: DBReadTransaction) -> Bool {
         if groupIdsNotNeedingLowTrustWarningCache.contains(groupThread.groupId) {

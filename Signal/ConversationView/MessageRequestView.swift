@@ -33,6 +33,7 @@ public struct MessageRequestType: Equatable {
     let isThreadFromHiddenRecipient: Bool
     let hasReportedSpam: Bool
     let isLocalUserInvitedMember: Bool
+    let showReviewRequestsCarefullyWarning: Bool
 }
 
 // MARK: -
@@ -92,6 +93,10 @@ class MessageRequestView: ConversationBottomPanelView {
 
     private var hasReportedSpam: Bool {
         messageRequestType.hasReportedSpam
+    }
+
+    private var showReviewRequestsCarefullyWarning: Bool {
+        messageRequestType.showReviewRequestsCarefullyWarning
     }
 
     weak var delegate: MessageRequestDelegate?
@@ -170,6 +175,26 @@ class MessageRequestView: ConversationBottomPanelView {
             isLocalUserInvitedMember = true
         }
 
+        var showReviewRequestsCarefullyWarning = false
+        if let contactThread = thread as? TSContactThread {
+            if isThreadBlocked || isThreadFromHiddenRecipient || hasSentMessages {
+                showReviewRequestsCarefullyWarning = false
+            } else {
+                let displayName = SSKEnvironment.shared.contactManagerRef.displayName(
+                    for: contactThread.contactAddress,
+                    tx: transaction,
+                )
+                switch displayName {
+                case .nickname:
+                    showReviewRequestsCarefullyWarning = false
+                default:
+                    showReviewRequestsCarefullyWarning = true
+                }
+            }
+        } else {
+            showReviewRequestsCarefullyWarning = isLocalUserInvitedMember
+        }
+
         return MessageRequestType(
             isGroupV1Thread: isGroupV1Thread,
             isGroupV2Thread: isGroupV2Thread,
@@ -178,6 +203,7 @@ class MessageRequestView: ConversationBottomPanelView {
             isThreadFromHiddenRecipient: isThreadFromHiddenRecipient,
             hasReportedSpam: hasReportedSpam,
             isLocalUserInvitedMember: isLocalUserInvitedMember,
+            showReviewRequestsCarefullyWarning: showReviewRequestsCarefullyWarning,
         )
     }
 
@@ -256,10 +282,11 @@ class MessageRequestView: ConversationBottomPanelView {
                 )
                 appendLearnMoreLink = true
             } else {
-                formatString = OWSLocalizedString(
-                    "MESSAGE_REQUEST_VIEW_NEW_CONTACT_PROMPT_FORMAT",
-                    comment: "A prompt asking if the user wants to accept a conversation invite. Embeds {{contact name}}.",
+                let attrString = OWSLocalizedString(
+                    "MESSAGE_REQUEST_VIEW_NEW_CONTACT_PROMPT",
+                    comment: "A prompt asking if the user wants to accept a conversation invite.",
                 )
+                return preparePromptTextView(prompt: attrString)
             }
 
             let shortName = SSKEnvironment.shared.databaseStorageRef.read { transaction in
@@ -392,10 +419,15 @@ class MessageRequestView: ConversationBottomPanelView {
             comment: "A prompt asking if the user wants to accept a group invite.",
         )
 
+        let centered = NSMutableParagraphStyle()
+        centered.alignment = .center
+        centered.paragraphSpacingBefore = 8
+
         return prepareTextView(
             attributedString: NSAttributedString(string: string, attributes: [
                 .font: UIFont.dynamicTypeSubheadlineClamped,
                 .foregroundColor: Theme.secondaryTextAndIconColor,
+                .paragraphStyle: centered,
             ]),
             appendLearnMoreLink: false,
         )
@@ -452,6 +484,22 @@ class MessageRequestView: ConversationBottomPanelView {
         return button
     }
 
+    private func preparePromptTextView(prompt: String) -> UITextView {
+        let centered = NSMutableParagraphStyle()
+        centered.alignment = .center
+        if showReviewRequestsCarefullyWarning {
+            centered.paragraphSpacingBefore = 8
+        }
+        let defaultAttributes: AttributedFormatArg.Attributes = [
+            .font: UIFont.dynamicTypeSubheadlineClamped,
+            .foregroundColor: Theme.secondaryTextAndIconColor,
+            .paragraphStyle: centered,
+        ]
+
+        let attrString = NSAttributedString(string: prompt, attributes: defaultAttributes)
+        return prepareTextView(attributedString: attrString, appendLearnMoreLink: false)
+    }
+
     private func preparePromptTextView(formatString: String, embeddedString: String, appendLearnMoreLink: Bool) -> UITextView {
         let centered = NSMutableParagraphStyle()
         centered.alignment = .center
@@ -475,7 +523,10 @@ class MessageRequestView: ConversationBottomPanelView {
         return prepareTextView(attributedString: attributedString, appendLearnMoreLink: appendLearnMoreLink)
     }
 
-    private func prepareTextView(attributedString: NSAttributedString, appendLearnMoreLink: Bool) -> UITextView {
+    private func prepareTextView(
+        attributedString: NSAttributedString,
+        appendLearnMoreLink: Bool,
+    ) -> UITextView {
         let textView = LinkingTextView()
         if appendLearnMoreLink {
             textView.attributedText = .composed(of: [
@@ -487,6 +538,30 @@ class MessageRequestView: ConversationBottomPanelView {
                 ),
             ])
             .styled(with: .alignment(.center))
+        } else if showReviewRequestsCarefullyWarning {
+            let fullText = NSMutableAttributedString()
+
+            let centered = NSMutableParagraphStyle()
+            centered.alignment = .center
+            let reviewWarningAttributes: AttributedFormatArg.Attributes = [
+                .font: UIFont.dynamicTypeSubheadlineClamped.semibold(),
+                .foregroundColor: UIColor.Signal.warningLabel,
+                .paragraphStyle: centered,
+            ]
+
+            let warningIcon = SignalSymbol.errorTriangle.attributedString(
+                dynamicTypeBaseSize: UIFont.dynamicTypeSubheadlineClamped.pointSize,
+                attributes: [.foregroundColor: UIColor.Signal.warningLabel],
+            )
+
+            let warningLabel = warningIcon + " " + NSAttributedString(
+                string: OWSLocalizedString("SYSTEM_MESSAGE_UNKNOWN_THREAD_REVIEW_CAREFULLY_WARNING", comment: "Indicator warning about an unknown contact thread") + "\n",
+                attributes: reviewWarningAttributes,
+            )
+            fullText.append(warningLabel)
+            fullText.append(attributedString)
+
+            textView.attributedText = fullText.styled(with: .alignment(.center))
         } else {
             textView.attributedText = attributedString.styled(with: .alignment(.center))
         }

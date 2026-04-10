@@ -171,6 +171,13 @@ extension UIColor.Signal {
         )
     }
 
+    public static var warningLabel: UIColor {
+        UIColor(
+            light: UIColor(rgbHex: 0xB44828),
+            dark: UIColor(rgbHex: 0xEB977D),
+        )
+    }
+
     // MARK: Background
 
     public static var background: UIColor {
@@ -528,6 +535,10 @@ extension Color.Signal {
 
     public static var emphasisLabel: Color {
         Color(UIColor.Signal.emphasisLabel)
+    }
+
+    public static var warningLabel: Color {
+        Color(UIColor.Signal.warningLabel)
     }
 
     // MARK: Background

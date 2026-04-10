@@ -552,6 +552,7 @@ public class CVQuotedMessageView: ManualStackViewWithLayer {
                 presentationContext: configurator.isIncoming ? .messageBubbleQuoteReplyIncoming : .messageBubbleQuoteReplyOutgoing,
                 lineBreakMode: .byTruncatingTail,
                 numberOfLines: 0,
+                signalSymbolRange: nil,
                 onTap: nil,
             )
         } else {
@@ -852,6 +853,7 @@ public class CVQuotedMessageView: ManualStackViewWithLayer {
                 highlightFont: .dynamicTypeFootnote,
                 presentationContext: configurator.isIncoming ? .messageBubbleQuoteReplyIncoming : .messageBubbleQuoteReplyOutgoing,
                 maxWidth: maxLabelWidth,
+                signalSymbolRange: nil,
             )
         } else {
             quotedAuthorSize = CVText.measureLabel(

@@ -474,8 +474,6 @@ public struct CVComponentState: Equatable {
 
     struct ThreadDetails: Equatable {
         struct SafetySection: Equatable {
-            /// For "⚠️ Review Carefully"
-            let shouldShowLowTrustWarning: Bool
             /// For "Profile names are not verified"
             let shouldShowProfileNamesEducation: Bool
             /// For phone numbers or group member count

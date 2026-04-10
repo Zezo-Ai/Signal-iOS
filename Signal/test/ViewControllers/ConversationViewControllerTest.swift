@@ -25,6 +25,7 @@ class ConversationViewControllerTest: SignalBaseTest {
                     isThreadFromHiddenRecipient: false,
                     hasReportedSpam: false,
                     isLocalUserInvitedMember: false,
+                    showReviewRequestsCarefullyWarning: false,
                 ),
             ),
         )
@@ -38,6 +39,7 @@ class ConversationViewControllerTest: SignalBaseTest {
                     isThreadFromHiddenRecipient: false,
                     hasReportedSpam: false,
                     isLocalUserInvitedMember: false,
+                    showReviewRequestsCarefullyWarning: false,
                 ),
             ),
             CVCBottomViewType.messageRequestView(
@@ -49,6 +51,7 @@ class ConversationViewControllerTest: SignalBaseTest {
                     isThreadFromHiddenRecipient: false,
                     hasReportedSpam: false,
                     isLocalUserInvitedMember: false,
+                    showReviewRequestsCarefullyWarning: false,
                 ),
             ),
         )
@@ -62,6 +65,7 @@ class ConversationViewControllerTest: SignalBaseTest {
                     isThreadFromHiddenRecipient: false,
                     hasReportedSpam: false,
                     isLocalUserInvitedMember: false,
+                    showReviewRequestsCarefullyWarning: false,
                 ),
             ),
             CVCBottomViewType.messageRequestView(
@@ -73,6 +77,7 @@ class ConversationViewControllerTest: SignalBaseTest {
                     isThreadFromHiddenRecipient: false,
                     hasReportedSpam: false,
                     isLocalUserInvitedMember: false,
+                    showReviewRequestsCarefullyWarning: false,
                 ),
             ),
         )
@@ -86,6 +91,7 @@ class ConversationViewControllerTest: SignalBaseTest {
                     isThreadFromHiddenRecipient: false,
                     hasReportedSpam: false,
                     isLocalUserInvitedMember: false,
+                    showReviewRequestsCarefullyWarning: false,
                 ),
             ),
             CVCBottomViewType.messageRequestView(
@@ -97,6 +103,7 @@ class ConversationViewControllerTest: SignalBaseTest {
                     isThreadFromHiddenRecipient: false,
                     hasReportedSpam: false,
                     isLocalUserInvitedMember: false,
+                    showReviewRequestsCarefullyWarning: false,
                 ),
             ),
         )
@@ -110,6 +117,7 @@ class ConversationViewControllerTest: SignalBaseTest {
                     isThreadFromHiddenRecipient: false,
                     hasReportedSpam: false,
                     isLocalUserInvitedMember: false,
+                    showReviewRequestsCarefullyWarning: false,
                 ),
             ),
             CVCBottomViewType.messageRequestView(
@@ -121,6 +129,7 @@ class ConversationViewControllerTest: SignalBaseTest {
                     isThreadFromHiddenRecipient: false,
                     hasReportedSpam: false,
                     isLocalUserInvitedMember: false,
+                    showReviewRequestsCarefullyWarning: false,
                 ),
             ),
         )

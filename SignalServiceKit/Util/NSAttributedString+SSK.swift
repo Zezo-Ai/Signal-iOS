@@ -219,6 +219,44 @@ public extension NSAttributedString {
     }
 }
 
+public extension NSMutableAttributedString {
+    func applyAttributesToRangeAvoidingSubrange(attributes: [NSAttributedString.Key: Any], range: NSRange, subrangeToAvoid: NSRange) {
+
+        guard NSIntersectionRange(range, subrangeToAvoid).length > 0 else {
+            // subrange does not exist in range, can apply to entire range.
+            for (key, value) in attributes {
+                addAttribute(key, value: value, range: range)
+            }
+            return
+        }
+
+        let rangeEnd = NSMaxRange(range)
+
+        let subrangeToAvoidStart = subrangeToAvoid.location
+        let subrangeToAvoidEnd = NSMaxRange(subrangeToAvoid)
+
+        if subrangeToAvoidStart > range.location {
+            let before = NSRange(
+                location: range.location,
+                length: subrangeToAvoidStart - range.location,
+            )
+            for (key, value) in attributes {
+                addAttribute(key, value: value, range: before)
+            }
+        }
+
+        if subrangeToAvoidEnd < rangeEnd {
+            let after = NSRange(
+                location: subrangeToAvoidEnd,
+                length: rangeEnd - subrangeToAvoidEnd,
+            )
+            for (key, value) in attributes {
+                addAttribute(key, value: value, range: after)
+            }
+        }
+    }
+}
+
 /// Unicode isolates help us avoid RTL/LTR formatting issues when substituting
 /// strings into other strings.
 ///
