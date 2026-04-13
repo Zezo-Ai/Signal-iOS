@@ -189,15 +189,7 @@ public enum ReportSpamUIUtils {
             owsFailDebug("Failed to lookup guids to report \(error)")
         }
 
-        var reportingToken: SpamReportingToken?
-        do {
-            reportingToken = try SpamReportingTokenRecord.reportingToken(
-                for: aci,
-                database: tx.database,
-            )
-        } catch {
-            owsFailBeta("Failed to look up spam reporting token. Continuing on, as the parameter is optional. Error: \(error)")
-        }
+        let reportingToken = SpamReportingTokenRecord.reportingToken(for: aci, database: tx.database)
 
         guard !guidsToReport.isEmpty else {
             Logger.warn("No messages with serverGuids to report.")

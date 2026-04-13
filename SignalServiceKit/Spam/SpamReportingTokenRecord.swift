@@ -38,8 +38,10 @@ public struct SpamReportingTokenRecord: Codable, FetchableRecord, PersistableRec
     public static func reportingToken(
         for sourceAci: Aci,
         database: Database,
-    ) throws -> SpamReportingToken? {
-        try Self.fetchOne(database, key: sourceAci.rawUUID)?.spamReportingToken
+    ) -> SpamReportingToken? {
+        return failIfThrows {
+            return try Self.fetchOne(database, key: sourceAci.rawUUID)
+        }?.spamReportingToken
     }
 }
 
