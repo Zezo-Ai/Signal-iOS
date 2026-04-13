@@ -166,8 +166,11 @@ private extension ConversationViewController {
     }
 
     func blockThreadAndReportSpam(in thread: TSThread) {
-        SSKEnvironment.shared.databaseStorageRef.write { tx in
-            ReportSpamUIUtils.blockAndReport(in: thread, tx: tx)
+        let spamReport = SSKEnvironment.shared.databaseStorageRef.write { tx in
+            return ReportSpamUIUtils.blockAndBuildSpamReport(in: thread, tx: tx)
+        }
+        Task {
+            try? await spamReport?.submit(using: SSKEnvironment.shared.networkManagerRef)
         }
 
         presentToastCVC(ReportSpamUIUtils.successfulReportText(didBlock: true))
@@ -175,8 +178,11 @@ private extension ConversationViewController {
     }
 
     func reportSpamInThread() {
-        SSKEnvironment.shared.databaseStorageRef.write { tx in
-            ReportSpamUIUtils.report(in: thread, tx: tx)
+        let spamReport = SSKEnvironment.shared.databaseStorageRef.write { tx in
+            return ReportSpamUIUtils.buildSpamReport(in: thread, tx: tx)
+        }
+        Task {
+            try? await spamReport?.submit(using: SSKEnvironment.shared.networkManagerRef)
         }
 
         presentToastCVC(ReportSpamUIUtils.successfulReportText(didBlock: false))
