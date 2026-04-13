@@ -33,10 +33,47 @@ extension ConversationViewController: MessageRequestDelegate {
     func messageRequestViewDidTapAccept(mode: MessageRequestMode, unblockThread: Bool, unhideRecipient: Bool) {
         AssertIsOnMainThread()
 
-        let thread = self.thread
-        Task {
-            await self.acceptMessageRequest(in: thread, mode: mode, unblockThread: unblockThread, unhideRecipient: unhideRecipient)
-        }
+        let messageFormat = OWSLocalizedString(
+            "MESSAGE_REQUEST_CONFIRM_ACCEPT_MESSAGE",
+            comment: "Message for an action sheet asking the user to confirm if they want to accept a message request. {{ Embeds 'Signal will never' in bolded text }}",
+        )
+
+        let embeddedMessage = OWSLocalizedString(
+            "MESSAGE_REQUEST_CONFIRM_ACCEPT_MESSAGE_EMBEDDED_BOLD_TEXT",
+            comment: "Embedded text in the message for an action sheet asking the user to confirm if they want to accept a message request.",
+        )
+
+        let message = NSAttributedString.make(
+            fromFormat: messageFormat,
+            attributedFormatArgs: [
+                .string(
+                    embeddedMessage,
+                    attributes: [
+                        .foregroundColor: UIColor.Signal.label,
+                        .font: UIFont.dynamicTypeBody.semibold(),
+                    ],
+                ),
+            ],
+            defaultAttributes: [
+                .foregroundColor: UIColor.Signal.label,
+                .font: UIFont.dynamicTypeBody,
+            ],
+        )
+
+        OWSActionSheets.showConfirmationAlert(
+            title: OWSLocalizedString("MESSAGE_REQUEST_CONFIRM_ACCEPT_TITLE", comment: "Title for an action sheet asking the user to confirm if they want to accept a message request"),
+            message: message,
+            proceedTitle: OWSLocalizedString(
+                "MESSAGE_REQUEST_VIEW_ACCEPT_BUTTON",
+                comment: "A button used to accept a user on an incoming message request.",
+            ),
+            proceedAction: { _ in
+                let thread = self.thread
+                Task {
+                    await self.acceptMessageRequest(in: thread, mode: mode, unblockThread: unblockThread, unhideRecipient: unhideRecipient)
+                }
+            },
+        )
     }
 
     func messageRequestViewDidTapDelete() {

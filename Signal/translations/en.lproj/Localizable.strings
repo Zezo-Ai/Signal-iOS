@@ -5449,6 +5449,15 @@
 /* Action sheet title to confirm blocking a group via a message request. Embeds {{group name}} */
 "MESSAGE_REQUEST_BLOCK_GROUP_TITLE_FORMAT" = "Block and Leave %@?";
 
+/* Message for an action sheet asking the user to confirm if they want to accept a message request. {{ Embeds 'Signal will never' in bolded text }} */
+"MESSAGE_REQUEST_CONFIRM_ACCEPT_MESSAGE" = "Only accept requests from people you trust. %@ message you for a registration code, PIN, or recovery key.";
+
+/* Embedded text in the message for an action sheet asking the user to confirm if they want to accept a message request. */
+"MESSAGE_REQUEST_CONFIRM_ACCEPT_MESSAGE_EMBEDDED_BOLD_TEXT" = "Signal will never";
+
+/* Title for an action sheet asking the user to confirm if they want to accept a message request */
+"MESSAGE_REQUEST_CONFIRM_ACCEPT_TITLE" = "Accept Request?";
+
 /* Action sheet action to confirm deleting a conversation via a message request. */
 "MESSAGE_REQUEST_DELETE_CONVERSATION_ACTION" = "Delete";
 

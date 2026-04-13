@@ -83,6 +83,26 @@ public enum OWSActionSheets {
         showActionSheet(actionSheet, fromViewController: fromViewController)
     }
 
+    public static func showConfirmationAlert(
+        title: String? = nil,
+        message: NSAttributedString,
+        proceedTitle: String? = nil,
+        proceedStyle: ActionSheetAction.Style = .default,
+        proceedAction: @escaping ActionSheetAction.Handler,
+    ) {
+        let actionSheet = ActionSheetController(title: title, message: message)
+        actionSheet.addAction(self.cancelAction)
+
+        let actionTitle = proceedTitle ?? CommonStrings.okButton
+        let okAction = ActionSheetAction(
+            title: actionTitle,
+            style: proceedStyle,
+            handler: proceedAction,
+        )
+        actionSheet.addAction(okAction)
+        showActionSheet(actionSheet, fromViewController: nil)
+    }
+
     public static func showConfirmationWithNotNowAlert(
         title: String? = nil,
         message: String? = nil,
