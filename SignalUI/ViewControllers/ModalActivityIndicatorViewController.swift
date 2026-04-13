@@ -17,9 +17,11 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     private let canCancel: Bool
     private let isInvisible: Bool
     private var wasDimissed: Bool = false
+    private var wasPresented: Bool = false
     private var presentTimer: Timer?
     private let presentationDelay: TimeInterval
     private var asyncTask: Task<Void, Never>?
+    private lazy var customTransitioningDelegate = TransitioningDelegate()
 
     public init(canCancel: Bool, presentationDelay: TimeInterval, isInvisible: Bool = false) {
         self.canCancel = canCancel
@@ -189,16 +191,20 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     public func dismiss(completion: (() -> Void)? = nil) {
         AssertIsOnMainThread()
 
-        if !wasDimissed {
-            // Only dismiss once.
-            self.dismiss(animated: false, completion: completion)
-            wasDimissed = true
-        } else {
-            // If already dismissed, wait a beat then call completion.
+        // If already dismissed, wait a beat then call completion.
+        guard wasDimissed == false else {
             DispatchQueue.main.async {
                 completion?()
             }
+            return
         }
+
+        if wasPresented {
+            modalPresentationStyle = .custom
+            transitioningDelegate = customTransitioningDelegate
+        }
+        dismiss(animated: wasPresented, completion: completion)
+        wasDimissed = true
     }
 
     /// A helper for a common dismissal pattern.
@@ -313,49 +319,65 @@ public class ModalActivityIndicatorViewController: OWSViewController {
         return view
     }()
 
+    private lazy var backdropView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .Signal.backdrop
+        return view
+    }()
+
     override public func viewDidLoad() {
         super.viewDidLoad()
 
         view.isOpaque = false
+        view.backgroundColor = .clear
         view.tintColor = .Signal.label
 
-        if isInvisible {
-            view.backgroundColor = .clear
-        } else {
-            view.backgroundColor = .Signal.backdrop
+        guard isInvisible == false else { return }
 
-            panelView.translatesAutoresizingMaskIntoConstraints = false
-            view.addSubview(panelView)
-            NSLayoutConstraint.activate([
-                panelView.leadingAnchor.constraint(greaterThanOrEqualTo: contentLayoutGuide.leadingAnchor),
-                panelView.centerXAnchor.constraint(equalTo: contentLayoutGuide.centerXAnchor),
-                panelView.topAnchor.constraint(greaterThanOrEqualTo: contentLayoutGuide.topAnchor),
-                panelView.centerYAnchor.constraint(equalTo: contentLayoutGuide.centerYAnchor),
-                panelView.heightAnchor.constraint(lessThanOrEqualTo: panelView.widthAnchor, multiplier: 1),
-            ])
+        backdropView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(backdropView)
+        NSLayoutConstraint.activate([
+            backdropView.topAnchor.constraint(equalTo: view.topAnchor),
+            backdropView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backdropView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            backdropView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
 
-            contentStack.translatesAutoresizingMaskIntoConstraints = false
-            panelView.layoutMargins = .init(margin: 16)
-            panelView.contentView.addSubview(contentStack)
-            NSLayoutConstraint.activate([
-                contentStack.topAnchor.constraint(equalTo: panelView.layoutMarginsGuide.topAnchor),
-                contentStack.leadingAnchor.constraint(equalTo: panelView.layoutMarginsGuide.leadingAnchor),
-                contentStack.trailingAnchor.constraint(equalTo: panelView.layoutMarginsGuide.trailingAnchor),
-                contentStack.bottomAnchor.constraint(equalTo: panelView.layoutMarginsGuide.bottomAnchor),
-            ])
+        panelView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(panelView)
+        NSLayoutConstraint.activate([
+            panelView.leadingAnchor.constraint(greaterThanOrEqualTo: contentLayoutGuide.leadingAnchor),
+            panelView.centerXAnchor.constraint(equalTo: contentLayoutGuide.centerXAnchor),
+            panelView.topAnchor.constraint(greaterThanOrEqualTo: contentLayoutGuide.topAnchor),
+            panelView.centerYAnchor.constraint(equalTo: contentLayoutGuide.centerYAnchor),
+            panelView.heightAnchor.constraint(lessThanOrEqualTo: panelView.widthAnchor, multiplier: 1),
+        ])
 
-            if canCancel {
-                cancelButton.translatesAutoresizingMaskIntoConstraints = false
-                cancelButton.addConstraint(cancelButton.widthAnchor.constraint(equalToConstant: 240))
-                contentStack.addArrangedSubview(cancelButton)
-            }
+        contentStack.translatesAutoresizingMaskIntoConstraints = false
+        panelView.layoutMargins = .init(margin: 16)
+        panelView.contentView.addSubview(contentStack)
+        NSLayoutConstraint.activate([
+            contentStack.topAnchor.constraint(equalTo: panelView.layoutMarginsGuide.topAnchor),
+            contentStack.leadingAnchor.constraint(equalTo: panelView.layoutMarginsGuide.leadingAnchor),
+            contentStack.trailingAnchor.constraint(equalTo: panelView.layoutMarginsGuide.trailingAnchor),
+            contentStack.bottomAnchor.constraint(equalTo: panelView.layoutMarginsGuide.bottomAnchor),
+        ])
 
-            updateUIOnTextChange()
+        if canCancel {
+            cancelButton.translatesAutoresizingMaskIntoConstraints = false
+            cancelButton.addConstraint(cancelButton.widthAnchor.constraint(equalToConstant: 240))
+            contentStack.addArrangedSubview(cancelButton)
         }
+
+        updateUIOnTextChange()
 
         // Hide the modal until the presentation animation completes.
         if presentationDelay > 0 {
-            view.alpha = 0
+            backdropView.alpha = 0
+            panelView.effect = nil
+            contentStack.alpha = 0
+        } else {
+            wasPresented = true
         }
     }
 
@@ -406,6 +428,40 @@ public class ModalActivityIndicatorViewController: OWSViewController {
         }
     }
 
+    private var panelViewVisualEffect: UIVisualEffect {
+        guard #available(iOS 26, *) else { return UIBlurEffect(style: .prominent) }
+
+        let glassEffect = UIGlassEffect(style: .regular)
+        glassEffect.tintColor = UIColor.Signal.background.withAlphaComponent(2 / 3)
+        return glassEffect
+    }
+
+    private func makeViewVisible(animated: Bool) {
+        defer {
+            wasPresented = true
+        }
+
+        guard animated else {
+            backdropView.alpha = 1
+            panelView.effect = panelViewVisualEffect
+            contentStack.alpha = 1
+            return
+        }
+
+        UIView.performWithoutAnimation {
+            self.panelView.transform = .scale(1.2)
+        }
+
+        let animator = UIViewPropertyAnimator(duration: 0.25, springDamping: 1, springResponse: 0.25)
+        animator.addAnimations {
+            self.backdropView.alpha = 1
+            self.panelView.effect = self.panelViewVisualEffect
+            self.panelView.transform = .identity
+            self.contentStack.alpha = 1
+        }
+        animator.startAnimation()
+    }
+
     // MARK: -
 
     private func clearTimer() {
@@ -415,13 +471,8 @@ public class ModalActivityIndicatorViewController: OWSViewController {
 
     private func presentTimerFired() {
         AssertIsOnMainThread()
-
         clearTimer()
-
-        // Fade in the modal.
-        UIView.animate(withDuration: 0.35) {
-            self.view.alpha = 1
-        }
+        makeViewVisible(animated: true)
     }
 
     @objc
@@ -433,6 +484,50 @@ public class ModalActivityIndicatorViewController: OWSViewController {
         dismiss()
         wasCancelled = true
         asyncTask?.cancel()
+    }
+
+    private final class TransitioningDelegate: NSObject, UIViewControllerTransitioningDelegate {
+
+        func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+            DismissAnimator()
+        }
+
+        // Returning nil falls back to the default presentation animation
+        func animationController(
+            forPresented presented: UIViewController,
+            presenting: UIViewController,
+            source: UIViewController,
+        ) -> UIViewControllerAnimatedTransitioning? {
+            nil
+        }
+    }
+
+    private final class DismissAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+
+        func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+            0.25
+        }
+
+        func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+            guard let fromVC = transitionContext.viewController(forKey: .from) as? ModalActivityIndicatorViewController else {
+                transitionContext.completeTransition(false)
+                return
+            }
+
+            UIView.animate(
+                withDuration: transitionDuration(using: transitionContext),
+                delay: 0,
+                usingSpringWithDamping: 1,
+                initialSpringVelocity: 0,
+                options: .curveEaseInOut,
+            ) {
+                fromVC.backdropView.alpha = 0
+                fromVC.panelView.effect = nil
+                fromVC.contentStack.alpha = 0
+            } completion: { _ in
+                transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+            }
+        }
     }
 }
 
