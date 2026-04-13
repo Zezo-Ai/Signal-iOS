@@ -207,7 +207,7 @@ public struct CVComponentState: Equatable {
     struct BodyMedia: Equatable {
         let items: [CVMediaAlbumItem]
         let mediaAlbumHasFailedAttachment: Bool
-        let mediaAlbumHasPendingAttachment: Bool
+        let mediaAlbumHasSkippedAttachment: Bool
     }
 
     let bodyMedia: BodyMedia?
@@ -289,7 +289,7 @@ public struct CVComponentState: Equatable {
             isUploading: Bool,
         )
         case downloading(attachmentPointer: ReferencedAttachmentPointer)
-        case failedOrPending(
+        case skipped(
             attachmentPointer: ReferencedAttachmentPointer,
             downloadState: AttachmentDownloadState,
         )
@@ -298,7 +298,7 @@ public struct CVComponentState: Equatable {
             switch self {
             case .available(let stickerMetadata, attachmentStream: _, isUploading: _):
                 return stickerMetadata
-            case .downloading, .failedOrPending:
+            case .downloading, .skipped:
                 return nil
             }
         }
@@ -309,7 +309,7 @@ public struct CVComponentState: Equatable {
                 return attachmentStream
             case .downloading:
                 return nil
-            case .failedOrPending:
+            case .skipped:
                 return nil
             }
         }
@@ -320,7 +320,7 @@ public struct CVComponentState: Equatable {
                 return nil
             case .downloading(let attachmentPointer):
                 return attachmentPointer
-            case .failedOrPending(let attachmentPointer, _):
+            case .skipped(let attachmentPointer, _):
                 return attachmentPointer
             }
         }
@@ -335,11 +335,11 @@ public struct CVComponentState: Equatable {
             case let (.downloading(lhsPointer), .downloading(rhsPointer)):
                 return lhsPointer.attachment.id == rhsPointer.attachment.id
                     && lhsPointer.reference.hasSameOwner(as: rhsPointer.reference)
-            case let (.failedOrPending(lhsPointer, lhsState), .failedOrPending(rhsPointer, rhsState)):
+            case let (.skipped(lhsPointer, lhsState), .skipped(rhsPointer, rhsState)):
                 return lhsPointer.attachment.id == rhsPointer.attachment.id
                     && lhsPointer.reference.hasSameOwner(as: rhsPointer.reference)
                     && lhsState == rhsState
-            case (.available, _), (.downloading, _), (.failedOrPending, _):
+            case (.available, _), (.downloading, _), (.skipped, _):
                 return false
             }
         }
@@ -509,15 +509,15 @@ public struct CVComponentState: Equatable {
 
     let bottomLabel: String?
 
-    struct FailedOrPendingDownloads: Equatable {
+    struct SkippedDownloads: Equatable {
         let attachmentPointers: [AttachmentPointer]
 
-        static func ==(lhs: CVComponentState.FailedOrPendingDownloads, rhs: CVComponentState.FailedOrPendingDownloads) -> Bool {
+        static func ==(lhs: CVComponentState.SkippedDownloads, rhs: CVComponentState.SkippedDownloads) -> Bool {
             return lhs.attachmentPointers.map(\.id) == rhs.attachmentPointers.map(\.id)
         }
     }
 
-    let failedOrPendingDownloads: FailedOrPendingDownloads?
+    let skippedDownloads: SkippedDownloads?
 
     struct SendFailureBadge: Equatable {
         let color: UIColor
@@ -554,7 +554,7 @@ public struct CVComponentState: Equatable {
         defaultDisappearingMessageTimer: DefaultDisappearingMessageTimer?,
         bottomButtons: BottomButtons?,
         bottomLabel: String?,
-        failedOrPendingDownloads: FailedOrPendingDownloads?,
+        skippedDownloads: SkippedDownloads?,
         sendFailureBadge: SendFailureBadge?,
         messageHasBodyAttachments: Bool,
         hasRenderableContent: Bool,
@@ -586,7 +586,7 @@ public struct CVComponentState: Equatable {
         self.defaultDisappearingMessageTimer = defaultDisappearingMessageTimer
         self.bottomButtons = bottomButtons
         self.bottomLabel = bottomLabel
-        self.failedOrPendingDownloads = failedOrPendingDownloads
+        self.skippedDownloads = skippedDownloads
         self.sendFailureBadge = sendFailureBadge
         self.messageHasBodyAttachments = messageHasBodyAttachments
         self.hasRenderableContent = hasRenderableContent
@@ -622,7 +622,7 @@ public struct CVComponentState: Equatable {
             lhs.defaultDisappearingMessageTimer == rhs.defaultDisappearingMessageTimer &&
             lhs.bottomButtons == rhs.bottomButtons &&
             lhs.bottomLabel == rhs.bottomLabel &&
-            lhs.failedOrPendingDownloads == rhs.failedOrPendingDownloads &&
+            lhs.skippedDownloads == rhs.skippedDownloads &&
             lhs.sendFailureBadge == rhs.sendFailureBadge &&
             lhs.poll == rhs.poll
     }
@@ -652,7 +652,7 @@ public struct CVComponentState: Equatable {
         typealias ThreadDetails = CVComponentState.ThreadDetails
         typealias UnknownThreadWarning = CVComponentState.UnknownThreadWarning
         typealias DefaultDisappearingMessageTimer = CVComponentState.DefaultDisappearingMessageTimer
-        typealias FailedOrPendingDownloads = CVComponentState.FailedOrPendingDownloads
+        typealias SkippedDownloads = CVComponentState.SkippedDownloads
         typealias BottomButtons = CVComponentState.BottomButtons
         typealias SendFailureBadge = CVComponentState.SendFailureBadge
         typealias Poll = CVComponentState.Poll
@@ -687,7 +687,7 @@ public struct CVComponentState: Equatable {
         var unknownThreadWarning: UnknownThreadWarning?
         var defaultDisappearingMessageTimer: DefaultDisappearingMessageTimer?
         var reactions: Reactions?
-        var failedOrPendingDownloads: FailedOrPendingDownloads?
+        var skippedDownloads: SkippedDownloads?
         var sendFailureBadge: SendFailureBadge?
         var messageHasBodyAttachments: Bool
         var hasRenderableContent: Bool
@@ -736,7 +736,7 @@ public struct CVComponentState: Equatable {
                 defaultDisappearingMessageTimer: defaultDisappearingMessageTimer,
                 bottomButtons: bottomButtons,
                 bottomLabel: bottomLabel,
-                failedOrPendingDownloads: failedOrPendingDownloads,
+                skippedDownloads: skippedDownloads,
                 sendFailureBadge: sendFailureBadge,
                 messageHasBodyAttachments: messageHasBodyAttachments,
                 hasRenderableContent: hasRenderableContent,
@@ -901,8 +901,8 @@ public struct CVComponentState: Equatable {
         if bottomLabel != nil {
             result.insert(.bottomLabel)
         }
-        if failedOrPendingDownloads != nil {
-            result.insert(.failedOrPendingDownloads)
+        if skippedDownloads != nil {
+            result.insert(.skippedDownloads)
         }
         if sendFailureBadge != nil {
             result.insert(.sendFailureBadge)
@@ -1005,7 +1005,7 @@ public struct CVComponentState: Equatable {
                 break
             case .bodyMedia, .sticker, .audioAttachment, .genericAttachment, .contactShare:
                 hasPrimaryContent = true
-            case .senderName, .senderAvatar, .footer, .reactions, .bottomButtons, .bottomLabel, .sendFailureBadge, .dateHeader, .unreadIndicator, .typingIndicator, .threadDetails, .failedOrPendingDownloads, .unknownThreadWarning, .defaultDisappearingMessageTimer, .messageRoot:
+            case .senderName, .senderAvatar, .footer, .reactions, .bottomButtons, .bottomLabel, .sendFailureBadge, .dateHeader, .unreadIndicator, .typingIndicator, .threadDetails, .skippedDownloads, .unknownThreadWarning, .defaultDisappearingMessageTimer, .messageRoot:
                 // "Primary" content is not just metadata / UI.
                 break
             case .giftBadge:
@@ -1118,7 +1118,7 @@ private extension CVComponentState.Builder {
 
         self.senderAvatar = tryToBuildSenderAvatar()
 
-        self.failedOrPendingDownloads = tryToBuildFailedOrPendingDownloads()
+        self.skippedDownloads = tryToBuildSkippedDownloads()
 
         switch interaction.interactionType {
         case .threadDetails:
@@ -1206,15 +1206,15 @@ private extension CVComponentState.Builder {
         return SenderAvatar(avatarDataSource: avatarDataSource)
     }
 
-    private func tryToBuildFailedOrPendingDownloads() -> FailedOrPendingDownloads? {
+    private func tryToBuildSkippedDownloads() -> SkippedDownloads? {
         guard let message = interaction as? TSMessage else {
             return nil
         }
-        let attachmentPointers = message.failedOrPendingAttachments(transaction: transaction)
+        let attachmentPointers = message.skippedAttachments(transaction: transaction)
         guard !attachmentPointers.isEmpty else {
             return nil
         }
-        return FailedOrPendingDownloads(attachmentPointers: attachmentPointers)
+        return SkippedDownloads(attachmentPointers: attachmentPointers)
     }
 
     mutating func populateAndBuild(
@@ -1316,7 +1316,7 @@ private extension CVComponentState.Builder {
             let mediaAlbumItems = buildMediaAlbumItems(for: bodyAttachments, message: message)
             if mediaAlbumItems.count > 0 {
                 var mediaAlbumHasFailedAttachment = false
-                var mediaAlbumHasPendingAttachment = false
+                var mediaAlbumHasSkippedAttachment = false
                 // TODO
                 for attachment in bodyAttachments {
                     guard
@@ -1331,14 +1331,14 @@ private extension CVComponentState.Builder {
                     case .failed:
                         mediaAlbumHasFailedAttachment = true
                     case .none:
-                        mediaAlbumHasPendingAttachment = true
+                        mediaAlbumHasSkippedAttachment = true
                     }
                 }
 
                 self.bodyMedia = BodyMedia(
                     items: mediaAlbumItems,
                     mediaAlbumHasFailedAttachment: mediaAlbumHasFailedAttachment,
-                    mediaAlbumHasPendingAttachment: mediaAlbumHasPendingAttachment,
+                    mediaAlbumHasSkippedAttachment: mediaAlbumHasSkippedAttachment,
                 )
                 return build()
             }
@@ -1564,7 +1564,7 @@ private extension CVComponentState.Builder {
             case .enqueuedOrDownloading:
                 self.sticker = .downloading(attachmentPointer: referencedAttachmentPointer)
             case .failed, .none:
-                self.sticker = .failedOrPending(
+                self.sticker = .skipped(
                     attachmentPointer: referencedAttachmentPointer,
                     downloadState: downloadState,
                 )

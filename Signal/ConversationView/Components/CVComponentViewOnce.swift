@@ -229,7 +229,7 @@ public class CVComponentViewOnce: CVComponentBase, CVComponent {
              .incomingInvalidContent:
             break
         case .incomingFailed, .incomingPending:
-            componentDelegate.didTapFailedOrPendingDownloads(message)
+            componentDelegate.didTapSkippedDownloads(message)
         case .incomingAvailable:
             componentDelegate.didTapViewOnceAttachment(message)
         case .incomingExpired, .outgoingSentExpired:

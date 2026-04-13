@@ -223,7 +223,7 @@ public class CVComponentAudioAttachment: CVComponentBase, CVComponent {
 
         } else if let message = interaction as? TSMessage {
             Logger.debug("Retrying download for message: \(message.uniqueId)")
-            componentDelegate.didTapFailedOrPendingDownloads(message)
+            componentDelegate.didTapSkippedDownloads(message)
             return true
 
         } else {

@@ -155,7 +155,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         // We don't render sender avatars with a subcomponent.
         case .senderAvatar:
             return nil
-        case .systemMessage, .dateHeader, .unreadIndicator, .typingIndicator, .threadDetails, .failedOrPendingDownloads, .sendFailureBadge, .unknownThreadWarning, .defaultDisappearingMessageTimer, .messageRoot:
+        case .systemMessage, .dateHeader, .unreadIndicator, .typingIndicator, .threadDetails, .skippedDownloads, .sendFailureBadge, .unknownThreadWarning, .defaultDisappearingMessageTimer, .messageRoot:
             return nil
         }
     }
@@ -1345,7 +1345,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
                 return true
             case .senderName:
                 return false
-            case .senderAvatar, .reactions, .systemMessage, .dateHeader, .unreadIndicator, .typingIndicator, .threadDetails, .unknownThreadWarning, .failedOrPendingDownloads, .sendFailureBadge, .defaultDisappearingMessageTimer, .messageRoot:
+            case .senderAvatar, .reactions, .systemMessage, .dateHeader, .unreadIndicator, .typingIndicator, .threadDetails, .unknownThreadWarning, .skippedDownloads, .sendFailureBadge, .defaultDisappearingMessageTimer, .messageRoot:
                 owsFailDebug("Unexpected component.")
                 return false
             case .footer:
@@ -2001,8 +2001,8 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             }
         }
 
-        if let message = interaction as? TSMessage, nil != componentState.failedOrPendingDownloads {
-            componentDelegate.didTapFailedOrPendingDownloads(message)
+        if let message = interaction as? TSMessage, nil != componentState.skippedDownloads {
+            componentDelegate.didTapSkippedDownloads(message)
             return true
         }
 
@@ -2380,7 +2380,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             case .senderAvatar:
                 owsFailDebug("Invalid component key: \(key)")
                 return nil
-            case .systemMessage, .dateHeader, .unreadIndicator, .typingIndicator, .threadDetails, .failedOrPendingDownloads, .sendFailureBadge, .unknownThreadWarning, .defaultDisappearingMessageTimer, .messageRoot:
+            case .systemMessage, .dateHeader, .unreadIndicator, .typingIndicator, .threadDetails, .skippedDownloads, .sendFailureBadge, .unknownThreadWarning, .defaultDisappearingMessageTimer, .messageRoot:
                 owsFailDebug("Invalid component key: \(key)")
                 return nil
             }
@@ -2429,7 +2429,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             // We don't render sender avatars with a subcomponent.
             case .senderAvatar:
                 owsAssertDebug(subcomponentView == nil)
-            case .systemMessage, .dateHeader, .unreadIndicator, .typingIndicator, .threadDetails, .failedOrPendingDownloads, .sendFailureBadge, .unknownThreadWarning, .defaultDisappearingMessageTimer, .messageRoot:
+            case .systemMessage, .dateHeader, .unreadIndicator, .typingIndicator, .threadDetails, .skippedDownloads, .sendFailureBadge, .unknownThreadWarning, .defaultDisappearingMessageTimer, .messageRoot:
                 owsAssertDebug(subcomponentView == nil)
             }
         }

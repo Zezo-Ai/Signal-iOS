@@ -147,7 +147,7 @@ class CVMediaView: ManualLayoutViewWithLayer {
             removeProgressView()
             return false
 
-        case .pendingDownload:
+        case .skipped:
             // We don't need to add a download indicator for pending
             // attachments; CVComponentBodyMedia will add a download
             // button if any media in the gallery is pending.

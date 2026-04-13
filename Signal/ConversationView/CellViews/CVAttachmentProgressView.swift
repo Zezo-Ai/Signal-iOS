@@ -357,7 +357,7 @@ class CVAttachmentProgressView: ManualLayoutView {
     enum ProgressType {
         case none
         case uploading(attachmentStream: AttachmentStream)
-        case pendingDownload(attachmentPointer: AttachmentPointer)
+        case skipped(attachmentPointer: AttachmentPointer)
         case downloading(attachmentPointer: AttachmentPointer, downloadState: AttachmentDownloadState)
     }
 
@@ -375,7 +375,7 @@ class CVAttachmentProgressView: ManualLayoutView {
         case .pointer(let attachmentPointer, let downloadState):
             switch downloadState {
             case .none:
-                return .pendingDownload(attachmentPointer: attachmentPointer.attachmentPointer)
+                return .skipped(attachmentPointer: attachmentPointer.attachmentPointer)
             case .failed, .enqueuedOrDownloading:
                 return .downloading(
                     attachmentPointer: attachmentPointer.attachmentPointer,

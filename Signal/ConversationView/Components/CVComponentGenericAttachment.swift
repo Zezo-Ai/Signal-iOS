@@ -256,7 +256,7 @@ public class CVComponentGenericAttachment: CVComponentBase, CVComponent {
         case .uploading:
             // We currently only show progress for downloads here.
             return nil
-        case .pendingDownload(let attachmentPointer):
+        case .skipped(let attachmentPointer):
             direction = .download(
                 attachmentPointer: attachmentPointer,
                 downloadState: .none,
@@ -280,12 +280,10 @@ public class CVComponentGenericAttachment: CVComponentBase, CVComponent {
         switch CVAttachmentProgressView.progressType(
             cvAttachment: genericAttachment.attachment,
         ) {
-        case .none,
-             .uploading:
+        case .none, .uploading:
             // We currently only show progress for downloads here.
             return false
-        case .pendingDownload,
-             .downloading:
+        case .skipped, .downloading:
             return true
         }
     }
@@ -387,7 +385,7 @@ public class CVComponentGenericAttachment: CVComponentBase, CVComponent {
                     owsFailDebug("Invalid interaction.")
                     return true
                 }
-                componentDelegate.didTapFailedOrPendingDownloads(message)
+                componentDelegate.didTapSkippedDownloads(message)
             case .enqueuedOrDownloading:
                 break
             }
@@ -396,7 +394,7 @@ public class CVComponentGenericAttachment: CVComponentBase, CVComponent {
                 owsFailDebug("Invalid interaction.")
                 return true
             }
-            componentDelegate.didTapFailedOrPendingDownloads(message)
+            componentDelegate.didTapSkippedDownloads(message)
         case .undownloadable:
             componentDelegate.didTapUndownloadableGenericFile()
         }

@@ -156,7 +156,7 @@ class CVComponentBodyMedia: CVComponentBase, CVComponent {
             stackView.layoutSubviewToFillSuperviewEdges(innerShadowView)
         }
 
-        if bodyMedia.mediaAlbumHasPendingAttachment {
+        if bodyMedia.mediaAlbumHasSkippedAttachment {
             let iconView = CVImageView()
             iconView.setTemplateImageName(Theme.iconName(.arrowDown), tintColor: tintColor)
             if albumView.itemViews.count > 1 {
@@ -226,7 +226,7 @@ class CVComponentBodyMedia: CVComponentBase, CVComponent {
                 stackView.addSubviewToCenterOnSuperview(iconView, size: .square(24))
             }
 
-            if bodyMedia.mediaAlbumHasPendingAttachment {
+            if bodyMedia.mediaAlbumHasSkippedAttachment {
                 let pendingManualDownloadAttachments = items
                     .lazy
                     .compactMap { (item: CVMediaAlbumItem) -> ReferencedAttachment? in
@@ -388,9 +388,9 @@ class CVComponentBodyMedia: CVComponentBase, CVComponent {
 
         if
             let message = interaction as? TSMessage,
-            bodyMedia.mediaAlbumHasFailedAttachment || bodyMedia.mediaAlbumHasPendingAttachment
+            bodyMedia.mediaAlbumHasFailedAttachment || bodyMedia.mediaAlbumHasSkippedAttachment
         {
-            componentDelegate.willBecomeVisibleWithFailedOrPendingDownloads(message)
+            componentDelegate.willBecomeVisibleWithSkippedDownloads(message)
         }
     }
 
@@ -411,8 +411,8 @@ class CVComponentBodyMedia: CVComponentBase, CVComponent {
             return false
         }
 
-        if bodyMedia.mediaAlbumHasPendingAttachment {
-            componentDelegate.didTapFailedOrPendingDownloads(message)
+        if bodyMedia.mediaAlbumHasSkippedAttachment {
+            componentDelegate.didTapSkippedDownloads(message)
             return true
         }
 
@@ -427,7 +427,7 @@ class CVComponentBodyMedia: CVComponentBase, CVComponent {
             albumView.isMoreItemsView(mediaView: mediaView),
             bodyMedia.mediaAlbumHasFailedAttachment
         {
-            componentDelegate.didTapFailedOrPendingDownloads(message)
+            componentDelegate.didTapSkippedDownloads(message)
             return true
         }
 
@@ -435,7 +435,7 @@ class CVComponentBodyMedia: CVComponentBase, CVComponent {
         case .pointer(let pointer, let downloadState):
             switch downloadState {
             case .failed, .none:
-                componentDelegate.didTapFailedOrPendingDownloads(message)
+                componentDelegate.didTapSkippedDownloads(message)
                 return true
             case .enqueuedOrDownloading:
                 componentDelegate.didCancelDownload(message, attachmentId: pointer.attachment.id)
@@ -455,7 +455,7 @@ class CVComponentBodyMedia: CVComponentBase, CVComponent {
             return true
         case .backupThumbnail:
             // Download the fullsize attachment
-            componentDelegate.didTapFailedOrPendingDownloads(message)
+            componentDelegate.didTapSkippedDownloads(message)
             return true
         case .undownloadable:
             componentDelegate.didTapUndownloadableMedia()

@@ -89,9 +89,9 @@ public protocol CVComponentDelegate: AnyObject, AudioMessageViewDelegate, CVPoll
 
     // MARK: -
 
-    func willBecomeVisibleWithFailedOrPendingDownloads(_ message: TSMessage)
+    func willBecomeVisibleWithSkippedDownloads(_ message: TSMessage)
 
-    func didTapFailedOrPendingDownloads(_ message: TSMessage)
+    func didTapSkippedDownloads(_ message: TSMessage)
 
     func didCancelDownload(_ message: TSMessage, attachmentId: Attachment.IDType)
 

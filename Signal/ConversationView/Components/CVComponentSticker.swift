@@ -86,7 +86,7 @@ public class CVComponentSticker: CVComponentBase, CVComponent {
                 )
                 stackView.addSubview(progressView)
                 stackView.centerSubviewOnSuperview(progressView, size: Self.progressViewSize)
-            case .pendingDownload:
+            case .skipped:
                 break
             case .downloading:
                 break
@@ -98,7 +98,7 @@ public class CVComponentSticker: CVComponentBase, CVComponent {
                 stackView: stackView,
                 cellMeasurement: cellMeasurement,
             )
-        case .failedOrPending(let attachmentPointer, let downloadState):
+        case .skipped(let attachmentPointer, let downloadState):
             configureForRendering(
                 attachmentPointer: attachmentPointer,
                 downloadState: downloadState,

@@ -66,7 +66,7 @@ public extension TSMessage {
         return self.body?.nilIfEmpty
     }
 
-    func failedOrPendingAttachments(transaction tx: DBReadTransaction) -> [AttachmentPointer] {
+    func skippedAttachments(transaction tx: DBReadTransaction) -> [AttachmentPointer] {
         let attachments: [Attachment] = allAttachments(transaction: tx).map(\.attachment)
         let states: [AttachmentDownloadState] = [.failed, .none]
 

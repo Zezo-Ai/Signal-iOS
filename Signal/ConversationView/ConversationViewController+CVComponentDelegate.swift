@@ -156,7 +156,7 @@ extension ConversationViewController: CVComponentDelegate {
 
     // MARK: -
 
-    public func willBecomeVisibleWithFailedOrPendingDownloads(_ message: TSMessage) {
+    public func willBecomeVisibleWithSkippedDownloads(_ message: TSMessage) {
         AssertIsOnMainThread()
 
         if viewState.manuallyCanceledDownloadsMessageIds.contains(message.uniqueId) {
@@ -219,7 +219,7 @@ extension ConversationViewController: CVComponentDelegate {
         }
     }
 
-    public func didTapFailedOrPendingDownloads(_ message: TSMessage) {
+    public func didTapSkippedDownloads(_ message: TSMessage) {
         AssertIsOnMainThread()
 
         let db = DependenciesBridge.shared.db
