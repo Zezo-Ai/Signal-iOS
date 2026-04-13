@@ -78,7 +78,7 @@ public class AccountAttributesUpdaterImpl: AccountAttributesUpdater {
             },
             handleResult: { result in
                 switch result {
-                case .failure(is NotRegisteredError), .success(false), .failure(is CancellationError):
+                case .success(false), .failure(is CancellationError):
                     break
                 case .success(true):
                     // Handled by updateAccountAttributes.

@@ -68,16 +68,17 @@ final class IdentityKeyMismatchManagerTest: XCTestCase {
                 identityKeyMismatchManager.recordSuspectedIssueWithPniIdentityKey(tx: tx)
             }
         }
-        await identityKeyMismatchManager.validateLocalPniIdentityKeyIfNecessary()
+        try? await identityKeyMismatchManager.validateLocalPniIdentityKeyIfNecessary()
     }
 
     func testDoesntRecordIfPrimaryDevice() async {
+        messageProcessorMock.waitForFetchingAndProcessingMock = {}
         tsAccountManagerMock.registrationStateMock = { .registered }
 
         await db.awaitableWrite { tx in
             return identityKeyMismatchManager.recordSuspectedIssueWithPniIdentityKey(tx: tx)
         }
-        await identityKeyMismatchManager.validateLocalPniIdentityKeyIfNecessary()
+        try? await identityKeyMismatchManager.validateLocalPniIdentityKeyIfNecessary()
 
         XCTAssertFalse(kvStore.hasDecryptionError())
     }
@@ -140,6 +141,7 @@ final class IdentityKeyMismatchManagerTest: XCTestCase {
     }
 
     func testEarlyExitIfPrimary() async {
+        messageProcessorMock.waitForFetchingAndProcessingMock = {}
         tsAccountManagerMock.registrationStateMock = { .registered }
 
         // This will fail if it doesn't early-exit, due to missing mocks.
@@ -177,50 +179,6 @@ final class IdentityKeyMismatchManagerTest: XCTestCase {
         await runRunRun(recordIssue: false)
 
         // Expect an unlink
-        XCTAssertFalse(kvStore.hasDecryptionError())
-        XCTAssertTrue(self.isMarkedDeregistered)
-        XCTAssertEqual(serverHasSameKeyResponses, [])
-    }
-
-    /// Checks that multiple overlapping validation attempts are collapsed into
-    /// one. Also checks that a subsequent validation runs.
-    func testMultipleCallsResultInOneRun() async {
-        let fetchingAndProcessing = CancellableContinuation<Void>()
-        messageProcessorMock.waitForFetchingAndProcessingMock = { try! await fetchingAndProcessing.wait() }
-        let localIdentifiers = LocalIdentifiers.mock
-        whoAmIManagerMock.whoAmIResponse = .value(.forUnitTest(localIdentifiers: localIdentifiers))
-        tsAccountManagerMock.localIdentifiersMock = { localIdentifiers }
-        var serverHasSameKeyResponses = [true]
-        identityKeyCheckerMock.serverHasSameKeyAsLocalMock = { _, _ in serverHasSameKeyResponses.popFirst()! }
-
-        await db.awaitableWrite { tx in
-            identityKeyMismatchManager.recordSuspectedIssueWithPniIdentityKey(tx: tx)
-        }
-        await withTaskGroup(of: Void.self) { taskGroup in
-            taskGroup.addTask {
-                await self.identityKeyMismatchManager.validateLocalPniIdentityKeyIfNecessary()
-            }
-            taskGroup.addTask {
-                await self.identityKeyMismatchManager.validateLocalPniIdentityKeyIfNecessary()
-            }
-            // One of the two Tasks should be able to complete immediately.
-            _ = await taskGroup.next()
-            // Once it does, we can let the other one complete as well.
-            fetchingAndProcessing.resume(with: .success(()))
-            _ = await taskGroup.next()
-        }
-
-        XCTAssertFalse(kvStore.hasDecryptionError())
-        XCTAssertFalse(self.isMarkedDeregistered)
-        XCTAssertEqual(serverHasSameKeyResponses, [])
-
-        messageProcessorMock.waitForFetchingAndProcessingMock = {}
-        whoAmIManagerMock.whoAmIResponse = .value(.forUnitTest(localIdentifiers: localIdentifiers))
-        tsAccountManagerMock.localIdentifiersMock = { localIdentifiers }
-        serverHasSameKeyResponses = [false]
-
-        await runRunRun(recordIssue: true)
-
         XCTAssertFalse(kvStore.hasDecryptionError())
         XCTAssertTrue(self.isMarkedDeregistered)
         XCTAssertEqual(serverHasSameKeyResponses, [])

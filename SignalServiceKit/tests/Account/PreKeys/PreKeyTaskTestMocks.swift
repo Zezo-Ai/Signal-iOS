@@ -26,12 +26,12 @@ class _PreKeyTaskManager_IdentityKeyMismatchManagerMock: IdentityKeyMismatchMana
     func recordSuspectedIssueWithPniIdentityKey(tx: DBWriteTransaction) {
     }
 
-    func validateLocalPniIdentityKeyIfNecessary() async {
+    func validateLocalPniIdentityKeyIfNecessary() async throws {
     }
 
-    var validateIdentityKeyMock: ((_ identity: OWSIdentity) async -> Void)!
-    func validateIdentityKey(for identity: OWSIdentity) async {
-        await validateIdentityKeyMock!(identity)
+    var validateIdentityKeyMock: ((_ identity: OWSIdentity) async throws -> Void)!
+    func validateIdentityKey(for identity: OWSIdentity) async throws {
+        try await validateIdentityKeyMock!(identity)
     }
 }
 

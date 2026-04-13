@@ -184,6 +184,14 @@ public class AppEnvironment: NSObject {
             operation: { try await subscriptionConfigManager.refresh() },
         )
 
+        let identityKeyMismatchManager = DependenciesBridge.shared.identityKeyMismatchManager
+        cron.scheduleFrequently(
+            mustBeRegistered: true,
+            mustBeDeviceType: .linked,
+            mustBeConnected: true,
+            operation: { try await identityKeyMismatchManager.validateLocalPniIdentityKeyIfNecessary() },
+        )
+
         appReadiness.runNowOrWhenAppWillBecomeReady {
             self.badgeManager.startObservingChanges(in: DependenciesBridge.shared.databaseChangeObserver)
             self.appIconBadgeUpdater.startObserving()
@@ -200,7 +208,6 @@ public class AppEnvironment: NSObject {
             let callRecordQuerier = DependenciesBridge.shared.callRecordQuerier
             let db = DependenciesBridge.shared.db
             let groupCallPeekClient = SSKEnvironment.shared.groupCallManagerRef.groupCallPeekClient
-            let identityKeyMismatchManager = DependenciesBridge.shared.identityKeyMismatchManager
             let interactionStore = DependenciesBridge.shared.interactionStore
             let masterKeySyncManager = DependenciesBridge.shared.masterKeySyncManager
             let notificationPresenter = SSKEnvironment.shared.notificationPresenterRef
@@ -276,9 +283,6 @@ public class AppEnvironment: NSObject {
                     registeredState: registeredState,
                 )
             } else {
-                Task {
-                    await identityKeyMismatchManager.validateLocalPniIdentityKeyIfNecessary()
-                }
             }
 
             Task {

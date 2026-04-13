@@ -282,9 +282,6 @@ public final class KeyTransparencyManager {
 
                 try await prepareAndPerformSelfCheck(localIdentifiers: localIdentifiers)
             },
-            handleResult: { _ in
-                // prepareAndPerformSelfCheck manages Cron state internally.
-            },
         )
     }
 

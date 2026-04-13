@@ -790,12 +790,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         cron.scheduleFrequently(
             mustBeRegistered: true,
             mustBeConnected: true,
-            operation: {
-                try await blockingManager.syncBlockListIfNecessary(force: false)
-            },
-            handleResult: { _ in
-                // Handled internally by BlockingManager.
-            },
+            operation: { try await blockingManager.syncBlockListIfNecessary(force: false) },
         )
 
         // Warm the "available emoji" cache, intentionally off the main thread.

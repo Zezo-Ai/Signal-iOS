@@ -37,9 +37,9 @@ public protocol IdentityKeyMismatchManager {
     ///
     /// We do not expect many devices to have ended up in a bad state, and so we
     /// hope that this unlinking will be a rare last resort.
-    func validateLocalPniIdentityKeyIfNecessary() async
+    func validateLocalPniIdentityKeyIfNecessary() async throws
 
-    func validateIdentityKey(for identity: OWSIdentity) async
+    func validateIdentityKey(for identity: OWSIdentity) async throws
 }
 
 class IdentityKeyMismatchManagerImpl: IdentityKeyMismatchManager {
@@ -57,8 +57,6 @@ class IdentityKeyMismatchManagerImpl: IdentityKeyMismatchManager {
     private let registrationStateChangeManager: RegistrationStateChangeManager
     private let tsAccountManager: TSAccountManager
     private let whoAmIManager: any WhoAmIManager
-
-    private let isValidating = AtomicBool(false, lock: .init())
 
     init(
         db: any DB,
@@ -89,26 +87,16 @@ class IdentityKeyMismatchManagerImpl: IdentityKeyMismatchManager {
         )
     }
 
-    func validateLocalPniIdentityKeyIfNecessary() async {
-        let logger = logger
+    private let taskQueue = ConcurrentTaskQueue(concurrentLimit: 1)
 
-        guard isValidating.tryToSetFlag() else {
-            logger.warn("Skipping validation - already in flight!")
-            return
+    func validateLocalPniIdentityKeyIfNecessary() async throws {
+        try await taskQueue.run {
+            try await _validateLocalPniIdentityKeyIfNecessary()
         }
-        defer {
-            self.isValidating.set(false)
-        }
+    }
 
-        guard tsAccountManager.registrationStateWithMaybeSneakyTransaction.isPrimaryDevice == false else {
-            return
-        }
-
-        do throws(CancellationError) {
-            try await self.messageProcessor.waitForFetchingAndProcessing()
-        } catch {
-            return
-        }
+    private func _validateLocalPniIdentityKeyIfNecessary() async throws {
+        try await self.messageProcessor.waitForFetchingAndProcessing()
 
         let hasSuspectedIssue = self.db.read { tx in
             return self.kvStore.getBool(
@@ -121,10 +109,10 @@ class IdentityKeyMismatchManagerImpl: IdentityKeyMismatchManager {
             return
         }
 
-        await validateIdentityKey(for: .pni)
+        try await validateIdentityKey(for: .pni)
     }
 
-    func validateIdentityKey(for identity: OWSIdentity) async {
+    func validateIdentityKey(for identity: OWSIdentity) async throws {
         let logger = logger
         logger.info("Validating identity key for \(identity)")
         do {
@@ -139,9 +127,8 @@ class IdentityKeyMismatchManagerImpl: IdentityKeyMismatchManager {
                 }
             }
         } catch {
-            // Eat all the errors -- the caller should be triggering this in response
-            // to its own error, and we always want to pass that error to the caller.
             logger.warn("Couldn't validate identity key: \(error)")
+            throw error
         }
     }
 

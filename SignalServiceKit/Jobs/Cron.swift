@@ -128,6 +128,9 @@ public class Cron {
     /// - Parameter mustBeRegistered: If true, `operation` won't be invoked
     /// until the user is registered.
     ///
+    /// - Parameter mustBeDeviceType: If set, `operation` won't be invoked
+    /// unless the user is (or was) registered as the specific device type.
+    ///
     /// - Parameter mustBeConnected: If true, `operation` won't be invoked until
     /// the user is connected.
     ///
@@ -140,6 +143,7 @@ public class Cron {
         uniqueKey: UniqueKey,
         approximateInterval: TimeInterval,
         mustBeRegistered: Bool,
+        mustBeDeviceType: DeviceType? = nil,
         mustBeConnected: Bool,
         isRetryable: @escaping (E) -> Bool = { $0.isRetryable },
         operation: @escaping () async throws(E) -> Void,
@@ -147,6 +151,7 @@ public class Cron {
         let store = CronStore(uniqueKey: uniqueKey)
         scheduleFrequently(
             mustBeRegistered: mustBeRegistered,
+            mustBeDeviceType: mustBeDeviceType,
             mustBeConnected: mustBeConnected,
             maxAverageBackoff: approximateInterval,
             isRetryable: isRetryable,
@@ -162,10 +167,10 @@ public class Cron {
             },
             handleResult: { [db] result in
                 switch result {
-                case .failure(is NotRegisteredError), .success(false), .failure(is CancellationError):
-                    // A requirement (e.g., mustBeRegistered) wasn't met, it's too early to run
-                    // again, or we were canceled while running. Don't set any state so that we
-                    // run again at the next opportunity.
+                case .success(false), .failure(is CancellationError):
+                    // It's too early to run again or we were canceled while running/waiting to
+                    // run (e.g., while waiting for a connection). Don't set any state so that
+                    // we run again at the next opportunity.
                     break
                 case .success(true), .failure:
                     // We ran or hit a terminal error while trying to run; mark the job as
@@ -208,6 +213,9 @@ public class Cron {
     /// - Parameter mustBeRegistered: If true, `operation` won't be invoked
     /// until the user is registered.
     ///
+    /// - Parameter mustBeDeviceType: If set, `operation` won't be invoked
+    /// unless the user is (or was) registered as the specific device type.
+    ///
     /// - Parameter mustBeConnected: If true, `operation` won't be invoked until
     /// the user is connected.
     ///
@@ -230,17 +238,19 @@ public class Cron {
     /// network) and `NotRegisteredError`s that may be thrown.
     public func scheduleFrequently<T, E>(
         mustBeRegistered: Bool,
+        mustBeDeviceType: DeviceType? = nil,
         mustBeConnected: Bool,
         minAverageBackoff: TimeInterval = ExponentialBackoff.Defaults.minAverageBackoff,
         maxAverageBackoff: TimeInterval = ExponentialBackoff.Defaults.maxAverageBackoff,
         isRetryable: @escaping (E) -> Bool = { $0.isRetryable },
         operation: @escaping () async throws(E) -> T,
-        handleResult: @escaping (Result<T, any Error>) async -> Void,
+        handleResult: @escaping (Result<T, any Error>) async -> Void = { _ in },
     ) {
         self.jobs.update {
             $0.append({ ctx async -> Void in
                 let attemptResult = await Self.runOuterOperationAttempt(
                     mustBeRegistered: mustBeRegistered,
+                    mustBeDeviceType: mustBeDeviceType,
                     mustBeConnected: mustBeConnected,
                     minAverageBackoff: minAverageBackoff,
                     maxAverageBackoff: maxAverageBackoff,
@@ -261,6 +271,7 @@ public class Cron {
     /// throws a non-`isRetryable` error.
     private static func runOuterOperationAttempt<T, E>(
         mustBeRegistered: Bool,
+        mustBeDeviceType: DeviceType?,
         mustBeConnected: Bool,
         minAverageBackoff: TimeInterval,
         maxAverageBackoff: TimeInterval,
@@ -277,6 +288,7 @@ public class Cron {
                 block: { () throws(E) -> Result<T, any Error> in
                     return try await runInnerOperationAttempt(
                         mustBeRegistered: mustBeRegistered,
+                        mustBeDeviceType: mustBeDeviceType,
                         mustBeConnected: mustBeConnected,
                         operation: operation,
                         ctx: ctx,
@@ -299,6 +311,7 @@ public class Cron {
     /// `operation` is invoked. All errors are immediately rethrown.
     private static func runInnerOperationAttempt<T, E>(
         mustBeRegistered: Bool,
+        mustBeDeviceType: DeviceType?,
         mustBeConnected: Bool,
         operation: () async throws(E) -> T,
         ctx: CronContext,
@@ -319,6 +332,9 @@ public class Cron {
         // Before each attempt, check if we're registered.
         if mustBeRegistered, !ctx.tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegistered {
             return .failure(NotRegisteredError())
+        }
+        if let mustBeDeviceType, ctx.tsAccountManager.registrationStateWithMaybeSneakyTransaction.deviceType != mustBeDeviceType {
+            return .failure(OWSGenericError("must be \(mustBeDeviceType)"))
         }
 
         return .success(try await operation())

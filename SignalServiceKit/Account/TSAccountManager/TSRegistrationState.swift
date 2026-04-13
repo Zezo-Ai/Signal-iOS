@@ -87,7 +87,7 @@ extension TSRegistrationState {
         }
     }
 
-    public var isPrimaryDevice: Bool? {
+    public var deviceType: DeviceType? {
         switch self {
         case .unregistered, .transferringIncoming:
             // We don't yet know if this will be a primary
@@ -97,9 +97,17 @@ extension TSRegistrationState {
             // Irrelevant what this was, return nil.
             return nil
         case .registered, .deregistered, .reregistering, .transferringPrimaryOutgoing:
-            return true
+            return .primary
         case .provisioned, .delinked, .relinking, .transferringLinkedOutgoing:
-            return false
+            return .linked
+        }
+    }
+
+    public var isPrimaryDevice: Bool? {
+        switch self.deviceType {
+        case .primary: true
+        case .linked: false
+        case .none: nil
         }
     }
 

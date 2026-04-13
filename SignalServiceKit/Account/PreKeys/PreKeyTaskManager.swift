@@ -503,8 +503,9 @@ struct PreKeyTaskManager {
             }
         case let .failure(error) where error.httpStatusCode == 422:
             // We think we might have an incorrect identity key -- check it and
-            // deregister if it's wrong.
-            await self.identityKeyMismatchManager.validateIdentityKey(for: identity)
+            // deregister if it's wrong. We always eat this error because we want the
+            // caller to see the `error` from `uploadResult`.
+            try? await self.identityKeyMismatchManager.validateIdentityKey(for: identity)
             fallthrough
         case let .failure(error):
             logger.info("[\(identity)] Failed to upload prekeys")
