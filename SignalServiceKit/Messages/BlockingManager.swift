@@ -11,7 +11,7 @@ public enum BlockMode {
     case restoreFromBackup
     case local
 
-    var locallyInitiated: Bool {
+    var isLocallyInitiated: Bool {
         switch self {
         case .remote, .restoreFromBackup:
             return false
@@ -148,7 +148,7 @@ public class BlockingManager {
 
         Logger.info("Added blocked address: \(address)")
 
-        if blockMode.locallyInitiated {
+        if blockMode.isLocallyInitiated {
             SSKEnvironment.shared.storageServiceManagerRef.recordPendingUpdates(updatedAddresses: [address])
         }
 
@@ -181,7 +181,7 @@ public class BlockingManager {
             }
         }
 
-        didUpdate(wasLocallyInitiated: blockMode.locallyInitiated, tx: tx)
+        didUpdate(wasLocallyInitiated: blockMode.isLocallyInitiated, tx: tx)
     }
 
     public func removeBlockedAddress(
@@ -242,7 +242,7 @@ public class BlockingManager {
         let groupThread = TSGroupThread.fetch(groupId: groupId, transaction: transaction)
         owsAssertDebug(groupThread != nil, "Must have TSGroupThread in order to block it.")
 
-        if blockMode.locallyInitiated, let masterKey = try? (groupThread?.groupModel as? TSGroupModelV2)?.masterKey() {
+        if blockMode.isLocallyInitiated, let masterKey = try? (groupThread?.groupModel as? TSGroupModelV2)?.masterKey() {
             SSKEnvironment.shared.storageServiceManagerRef.recordPendingUpdates(updatedGroupV2MasterKeys: [masterKey])
         }
 
@@ -269,7 +269,7 @@ public class BlockingManager {
             }
         }
 
-        didUpdate(wasLocallyInitiated: blockMode.locallyInitiated, tx: transaction)
+        didUpdate(wasLocallyInitiated: blockMode.isLocallyInitiated, tx: transaction)
     }
 
     public func removeBlockedGroup(groupId: Data, wasLocallyInitiated: Bool, transaction: DBWriteTransaction) {
