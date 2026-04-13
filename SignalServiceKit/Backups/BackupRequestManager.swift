@@ -186,6 +186,7 @@ public struct BackupRequestManagerImpl: BackupRequestManager {
     private let backupAuthCredentialManager: BackupAuthCredentialManager
     private let backupCDNCredentialStore: BackupCDNCredentialStore
     private let backupSettingsStore: BackupSettingsStore
+    private let chatConnectionManager: ChatConnectionManager
     private let dateProvider: DateProvider
     private let db: any DB
     private let kvStore: KeyValueStore
@@ -195,6 +196,7 @@ public struct BackupRequestManagerImpl: BackupRequestManager {
         backupAuthCredentialManager: BackupAuthCredentialManager,
         backupCDNCredentialStore: BackupCDNCredentialStore,
         backupSettingsStore: BackupSettingsStore,
+        chatConnectionManager: ChatConnectionManager,
         dateProvider: @escaping DateProvider,
         db: any DB,
         networkManager: NetworkManager,
@@ -202,6 +204,7 @@ public struct BackupRequestManagerImpl: BackupRequestManager {
         self.backupAuthCredentialManager = backupAuthCredentialManager
         self.backupCDNCredentialStore = backupCDNCredentialStore
         self.backupSettingsStore = backupSettingsStore
+        self.chatConnectionManager = chatConnectionManager
         self.dateProvider = dateProvider
         self.db = db
         self.kvStore = KeyValueStore(collection: "BackupRequestManager")
@@ -250,16 +253,12 @@ public struct BackupRequestManagerImpl: BackupRequestManager {
     ) async throws -> Upload.Form {
         owsAssertDebug(auth.type == .messages)
         do {
-            return try await executeBackupService(
-                auth: auth,
-                requestFactory: { auth in
-                    OWSRequestFactory.backupUploadFormRequest(
-                        backupByteLength: backupByteLength,
-                        auth: auth,
-                        logger: logger,
-                    )
-                },
-            )
+            return try await chatConnectionManager.withUnauthService(.backups) {
+                try await $0.getUploadForm(
+                    auth: auth.backupAuth,
+                    uploadSize: UInt64(backupByteLength),
+                )
+            }.asUploadForm()
         } catch let error {
             if
                 let httpStatusCode = error.httpStatusCode,
@@ -279,16 +278,12 @@ public struct BackupRequestManagerImpl: BackupRequestManager {
         logger: PrefixedLogger,
     ) async throws -> Upload.Form {
         owsAssertDebug(auth.type == .media)
-        return try await executeBackupService(
-            auth: auth,
-            requestFactory: { auth in
-                OWSRequestFactory.backupMediaUploadFormRequest(
-                    encryptedByteLength: encryptedByteLength,
-                    auth: auth,
-                    logger: logger,
-                )
-            },
-        )
+        return try await chatConnectionManager.withUnauthService(.backups) {
+            try await $0.getMediaUploadForm(
+                auth: auth.backupAuth,
+                uploadSize: UInt64(safeCast: encryptedByteLength),
+            )
+        }.asUploadForm()
     }
 
     // MARK: - Backup Info

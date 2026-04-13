@@ -26,41 +26,6 @@ extension OWSRequestFactory {
         return request
     }
 
-    /// - parameter backupByteLength: length in bytes of the encrypted backup file we will upload
-    public static func backupUploadFormRequest(
-        backupByteLength: UInt32,
-        auth: BackupServiceAuth,
-        logger: PrefixedLogger,
-    ) -> TSRequest {
-        var urlComps = URLComponents(string: "v1/archives/upload/form")!
-        urlComps.queryItems = [URLQueryItem(name: "uploadLength", value: "\(backupByteLength)")]
-        var request = TSRequest(
-            url: urlComps.url!,
-            method: "GET",
-            parameters: nil,
-            logger: logger,
-        )
-        request.auth = .backup(auth)
-        return request
-    }
-
-    public static func backupMediaUploadFormRequest(
-        encryptedByteLength: UInt32,
-        auth: BackupServiceAuth,
-        logger: PrefixedLogger,
-    ) -> TSRequest {
-        var urlComps = URLComponents(string: "v1/archives/media/upload/form")!
-        urlComps.queryItems = [URLQueryItem(name: "uploadLength", value: "\(encryptedByteLength)")]
-        var request = TSRequest(
-            url: urlComps.url!,
-            method: "GET",
-            parameters: nil,
-            logger: logger,
-        )
-        request.auth = .backup(auth)
-        return request
-    }
-
     public static func backupInfoRequest(
         auth: BackupServiceAuth,
         logger: PrefixedLogger,

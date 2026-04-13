@@ -519,6 +519,17 @@ extension AppSetup.GlobalsContinuation {
             tsAccountManager: tsAccountManager,
         )
 
+        let inactivePrimaryDeviceStore = InactivePrimaryDeviceStore()
+        let chatConnectionManager = ChatConnectionManagerImpl(
+            accountManager: tsAccountManager,
+            appContext: appContext,
+            appExpiry: appExpiry,
+            appReadiness: appReadiness,
+            db: db,
+            inactivePrimaryDeviceStore: inactivePrimaryDeviceStore,
+            libsignalNet: libsignalNet,
+        )
+
         let backupRequestManager = BackupRequestManagerImpl(
             backupAuthCredentialManager: BackupAuthCredentialManagerImpl(
                 authCredentialStore: authCredentialStore,
@@ -531,6 +542,7 @@ extension AppSetup.GlobalsContinuation {
             ),
             backupCDNCredentialStore: backupCDNCredentialStore,
             backupSettingsStore: backupSettingsStore,
+            chatConnectionManager: chatConnectionManager,
             dateProvider: dateProvider,
             db: db,
             networkManager: networkManager,
@@ -1008,18 +1020,7 @@ extension AppSetup.GlobalsContinuation {
             tsAccountManager: tsAccountManager,
         )
 
-        let inactivePrimaryDeviceStore = InactivePrimaryDeviceStore()
         let keyTransparencyStore = KeyTransparencyStore()
-
-        let chatConnectionManager = ChatConnectionManagerImpl(
-            accountManager: tsAccountManager,
-            appContext: appContext,
-            appExpiry: appExpiry,
-            appReadiness: appReadiness,
-            db: db,
-            inactivePrimaryDeviceStore: inactivePrimaryDeviceStore,
-            libsignalNet: libsignalNet,
-        )
 
         let registrationStateChangeManager = RegistrationStateChangeManagerImpl(
             authCredentialStore: authCredentialStore,
