@@ -162,6 +162,7 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
         let detailsButton = componentView.detailsButton
         let mutualGroupsLabel = componentView.mutualGroupsLabel
         let showTipsButton = componentView.showTipsButton
+        let nameNotVerifiedButton = componentView.profileNamesEducationButton
 
         let groupInfoWrapper = ManualLayoutViewWithLayer(name: "groupWrapper")
 
@@ -186,24 +187,15 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
             if safetySection.shouldShowProfileNamesEducation {
                 innerViews.append(UIView.spacer(withHeight: vSpacingNotVerifiedLabel))
 
-                let (namesEducationString, symbolRange) = nameNotVerifiedStringAndSymbolRange()
-                let namesEducationLabel = CVCapsuleLabel(
-                    attributedText: namesEducationString,
-                    textColor: UIColor.Signal.warningLabel,
-                    font: .dynamicTypeCallout.medium(),
-                    highlightRange: namesEducationString.string.entireRange,
-                    highlightFont: .dynamicTypeCallout,
-                    axLabelPrefix: nil,
-                    presentationContext: .nameNotVerifiedWarning,
-                    numberOfLines: 1,
-                    signalSymbolRange: symbolRange,
-                    onTap: {
-                        componentDelegate.didTapNameEducation(type: safetySection.threadType)
-                    },
-                )
-                namesEducationLabel.textAlignment = .center
-                innerViews.append(namesEducationLabel)
-                componentView.profileNamesEducationLabel = namesEducationLabel
+                let nameNotVerifiedButtonLabelConfig = nameNotVerifiedConfig()
+                nameNotVerifiedButtonLabelConfig.applyForRendering(button: nameNotVerifiedButton)
+                nameNotVerifiedButton.backgroundColor = UIColor.Signal.warningLabel.withAlphaComponent(0.2)
+                nameNotVerifiedButton.ows_contentEdgeInsets = .init(hMargin: hPaddingNotVerifiedButton, vMargin: vPaddingNotVerifiedButton)
+                nameNotVerifiedButton.dimsWhenHighlighted = true
+                nameNotVerifiedButton.block = {
+                    componentDelegate.didTapNameEducation(type: safetySection.threadType)
+                }
+                innerViews.append(nameNotVerifiedButton)
             }
 
             if let groupDescriptionText = self.groupDescriptionText {
@@ -369,22 +361,6 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
 
     private static var underlineColor: UIColor { UIColor.Signal.transparentSeparator }
 
-    private func nameNotVerifiedStringAndSymbolRange() -> (NSAttributedString, NSRange) {
-        let symbol = SignalSymbol.personQuestion.attributedString(dynamicTypeBaseSize: UIFont.dynamicTypeCallout.pointSize)
-        let notVerifiedString = NSAttributedString.composed(
-            of: [
-                symbol,
-                SignalSymbol.LeadingCharacter.space.rawValue,
-                OWSLocalizedString(
-                    "THREAD_DETAILS_PROFILE_NAMES_ARE_NOT_VERIFIED_SUBJECT",
-                    comment: "Label displayed below profiles",
-                ),
-            ],
-        )
-
-        return (notVerifiedString, (notVerifiedString.string as NSString).range(of: symbol.string))
-    }
-
     private func mutualGroupsLabelConfig(attributedText: NSAttributedString) -> CVLabelConfig {
         CVLabelConfig(
             text: .attributedText(attributedText),
@@ -397,6 +373,31 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
             numberOfLines: 0,
             lineBreakMode: .byWordWrapping,
             textAlignment: .center,
+        )
+    }
+
+    private func nameNotVerifiedConfig() -> CVLabelConfig {
+        let symbol = SignalSymbol.personQuestion.attributedString(dynamicTypeBaseSize: UIFont.dynamicTypeCalloutClamped.pointSize)
+        let notVerifiedString = NSAttributedString.composed(
+            of: [
+                symbol,
+                SignalSymbol.LeadingCharacter.space.rawValue,
+                OWSLocalizedString(
+                    "THREAD_DETAILS_PROFILE_NAMES_ARE_NOT_VERIFIED_SUBJECT",
+                    comment: "Label displayed below profiles",
+                ),
+            ],
+        )
+        return CVLabelConfig(
+            text: .attributedText(notVerifiedString),
+            displayConfig: .forUnstyledText(
+                font: .dynamicTypeCallout.medium(),
+                textColor: UIColor.Signal.warningLabel,
+            ),
+            font: .dynamicTypeCallout.medium(),
+            textColor: UIColor.Signal.warningLabel,
+            numberOfLines: 0,
+            lineBreakMode: .byWordWrapping,
         )
     }
 
@@ -559,6 +560,9 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
     private let hPaddingSafetyButton: CGFloat = 12
     private let hPaddingSafetySection: CGFloat = 30
 
+    private let vPaddingNotVerifiedButton: CGFloat = 2
+    private let hPaddingNotVerifiedButton: CGFloat = 12
+
     private let hPaddingGroupDetails: CGFloat = 40
 
     private let vOffsetThreadDetailsOutline: CGFloat = 16
@@ -607,17 +611,12 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
         if let safetySection = threadDetails.safetySection {
             if safetySection.shouldShowProfileNamesEducation {
                 innerSubviewInfos.append(CGSize(square: vSpacingNotVerifiedLabel).asManualSubviewInfo)
-                let (namesEducationString, symbolRange) = nameNotVerifiedStringAndSymbolRange()
-                let size = CVCapsuleLabel.measureLabel(
-                    attributedText: namesEducationString,
-                    font: .dynamicTypeCallout.medium(),
-                    highlightRange: namesEducationString.string.entireRange,
-                    highlightFont: .dynamicTypeCallout,
-                    presentationContext: .nonMessageBubble,
-                    maxWidth: maxContentWidth,
-                    signalSymbolRange: symbolRange,
+                let notVerifiedSize = CVText.measureLabel(
+                    config: nameNotVerifiedConfig(),
+                    maxWidth: maxGroupWidth,
                 )
-                innerSubviewInfos.append(size.asManualSubviewInfo)
+                let notVerifiedSizeWithPadding = CGSize(width: notVerifiedSize.width + hPaddingNotVerifiedButton * 2, height: notVerifiedSize.height + vPaddingNotVerifiedButton * 2)
+                innerSubviewInfos.append(notVerifiedSizeWithPadding.asManualSubviewInfo)
             }
 
             if let groupDescriptionText = self.groupDescriptionText {
@@ -720,8 +719,7 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
 
             if
                 safetySection.shouldShowProfileNamesEducation,
-                let profileNamesEducationLabel = componentView.profileNamesEducationLabel,
-                profileNamesEducationLabel.bounds.contains(sender.location(in: profileNamesEducationLabel))
+                componentView.profileNamesEducationButton.bounds.contains(sender.location(in: componentView.profileNamesEducationButton))
             {
                 componentDelegate.didTapNameEducation(type: safetySection.threadType)
                 return true
@@ -756,7 +754,7 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
         fileprivate let titleButton = CVButton()
         fileprivate let bioLabel = CVLabel()
 
-        fileprivate var profileNamesEducationLabel: CVCapsuleLabel?
+        fileprivate let profileNamesEducationButton = OWSRoundedButton()
 
         fileprivate let reviewCarefullyLabel = CVLabel()
         fileprivate let detailsButton = CVButton()
@@ -798,7 +796,6 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
             titleButton.reset()
             bioLabel.text = nil
             reviewCarefullyLabel.text = nil
-            profileNamesEducationLabel = nil
             detailsButton.reset()
             mutualGroupsLabel.text = nil
             groupDescriptionPreviewView.descriptionText = nil
