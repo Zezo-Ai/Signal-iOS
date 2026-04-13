@@ -141,7 +141,8 @@ private extension ConversationViewController {
         SSKEnvironment.shared.databaseStorageRef.write { transaction in
             SSKEnvironment.shared.blockingManagerRef.addBlockedThread(
                 thread,
-                blockMode: .localShouldLeaveGroups,
+                blockMode: .local,
+                shouldLeaveIfGroup: true,
                 transaction: transaction,
             )
         }
@@ -156,7 +157,8 @@ private extension ConversationViewController {
         SSKEnvironment.shared.databaseStorageRef.write { transaction in
             SSKEnvironment.shared.blockingManagerRef.addBlockedThread(
                 thread,
-                blockMode: .localShouldNotLeaveGroups,
+                blockMode: .local,
+                shouldLeaveIfGroup: false,
                 transaction: transaction,
             )
         }
@@ -188,7 +190,7 @@ private extension ConversationViewController {
         SSKEnvironment.shared.databaseStorageRef.write { transaction in
             SSKEnvironment.shared.blockingManagerRef.addBlockedAci(
                 aci,
-                blockMode: .localShouldNotLeaveGroups,
+                blockMode: .local,
                 tx: transaction,
             )
         }
@@ -203,7 +205,8 @@ private extension ConversationViewController {
                 // if leaving the group fails.
                 SSKEnvironment.shared.blockingManagerRef.addBlockedGroupId(
                     groupThread.groupId,
-                    blockMode: .localShouldNotLeaveGroups,
+                    blockMode: .local,
+                    shouldLeave: false,
                     transaction: transaction,
                 )
             } else {
@@ -211,7 +214,7 @@ private extension ConversationViewController {
             }
             SSKEnvironment.shared.blockingManagerRef.addBlockedAci(
                 aci,
-                blockMode: .localShouldNotLeaveGroups,
+                blockMode: .local,
                 tx: transaction,
             )
         }

@@ -79,7 +79,7 @@ public class _MessageBackup_BlockingManagerWrapper: _MessageBackup_BlockingManag
     }
 
     public func addBlockedGroupId(_ groupId: Data, tx: DBWriteTransaction) {
-        blockingManager.addBlockedGroupId(groupId, blockMode: .restoreFromBackup, transaction: tx)
+        blockingManager.addBlockedGroupId(groupId, blockMode: .restoreFromBackup, shouldLeave: false, transaction: tx)
     }
 }
 

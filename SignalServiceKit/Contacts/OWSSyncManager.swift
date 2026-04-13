@@ -348,18 +348,18 @@ extension OWSSyncManager: SyncManagerProtocol, SyncManagerProtocolSwift {
                 tx: transaction,
             )
         case .block:
-            SSKEnvironment.shared.blockingManagerRef.addBlockedThread(thread, blockMode: .remote, transaction: transaction)
+            SSKEnvironment.shared.blockingManagerRef.addBlockedThread(thread, blockMode: .remote, shouldLeaveIfGroup: false, transaction: transaction)
         case .blockAndDelete:
             DependenciesBridge.shared.threadSoftDeleteManager.softDelete(
                 threads: [thread],
                 sendDeleteForMeSyncMessage: false,
                 tx: transaction,
             )
-            SSKEnvironment.shared.blockingManagerRef.addBlockedThread(thread, blockMode: .remote, transaction: transaction)
+            SSKEnvironment.shared.blockingManagerRef.addBlockedThread(thread, blockMode: .remote, shouldLeaveIfGroup: false, transaction: transaction)
         case .spam:
             TSInfoMessage(thread: thread, messageType: .reportedSpam).anyInsert(transaction: transaction)
         case .blockAndSpam:
-            SSKEnvironment.shared.blockingManagerRef.addBlockedThread(thread, blockMode: .remote, transaction: transaction)
+            SSKEnvironment.shared.blockingManagerRef.addBlockedThread(thread, blockMode: .remote, shouldLeaveIfGroup: false, transaction: transaction)
             TSInfoMessage(thread: thread, messageType: .reportedSpam).anyInsert(transaction: transaction)
         case .unknown, .none:
             owsFailDebug("unexpected message request response type")

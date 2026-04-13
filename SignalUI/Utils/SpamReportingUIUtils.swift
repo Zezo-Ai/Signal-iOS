@@ -83,7 +83,8 @@ public enum ReportSpamUIUtils {
     public static func blockAndReport(in thread: TSThread, tx: DBWriteTransaction) {
         SSKEnvironment.shared.blockingManagerRef.addBlockedThread(
             thread,
-            blockMode: .localShouldNotLeaveGroups,
+            blockMode: .local,
+            shouldLeaveIfGroup: false,
             transaction: tx,
         )
 

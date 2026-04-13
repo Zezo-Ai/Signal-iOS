@@ -956,7 +956,7 @@ extension ConversationViewController: CVComponentDelegate {
                 SSKEnvironment.shared.databaseStorageRef.write { tx in
                     SSKEnvironment.shared.blockingManagerRef.addBlockedAddress(
                         address,
-                        blockMode: .localShouldLeaveGroups,
+                        blockMode: .local,
                         transaction: tx,
                     )
                 }

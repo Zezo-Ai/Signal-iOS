@@ -146,7 +146,7 @@ public class BlockListUIUtils {
         owsAssertDebug(address.isValid)
 
         SSKEnvironment.shared.databaseStorageRef.write { tx in
-            SSKEnvironment.shared.blockingManagerRef.addBlockedAddress(address, blockMode: .localShouldLeaveGroups, transaction: tx)
+            SSKEnvironment.shared.blockingManagerRef.addBlockedAddress(address, blockMode: .local, transaction: tx)
         }
 
         showOkActionSheet(
@@ -196,7 +196,8 @@ public class BlockListUIUtils {
         SSKEnvironment.shared.databaseStorageRef.write(block: { tx in
             SSKEnvironment.shared.blockingManagerRef.addBlockedGroupId(
                 groupThread.groupId,
-                blockMode: .localShouldLeaveGroups,
+                blockMode: .local,
+                shouldLeave: true,
                 transaction: tx,
             )
         })
