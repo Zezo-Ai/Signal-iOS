@@ -777,6 +777,7 @@
 		509085BC2C498D3600409B85 /* LinkPreviewFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509085BB2C498D3500409B85 /* LinkPreviewFetcher.swift */; };
 		509085BE2C49C29400409B85 /* PaddingBucket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509085BD2C49C29400409B85 /* PaddingBucket.swift */; };
 		509085C02C49C2A500409B85 /* PaddingBucketTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509085BF2C49C2A500409B85 /* PaddingBucketTest.swift */; };
+		5090B1A12F8D7239003F029D /* GroupMembershipTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5090B1A02F8D7239003F029D /* GroupMembershipTest.swift */; };
 		50925DEA2DA86E3A00DAB484 /* GroupMessageProcessorJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50925DE92DA86E3A00DAB484 /* GroupMessageProcessorJob.swift */; };
 		50925DEC2DA87AEF00DAB484 /* GroupMessageProcessorJobTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50925DEB2DA87AEF00DAB484 /* GroupMessageProcessorJobTest.swift */; };
 		5094D5052EE3A6780041F402 /* AttachmentLimits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5094D5042EE3A6780041F402 /* AttachmentLimits.swift */; };
@@ -5052,6 +5053,7 @@
 		509085BB2C498D3500409B85 /* LinkPreviewFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkPreviewFetcher.swift; sourceTree = "<group>"; };
 		509085BD2C49C29400409B85 /* PaddingBucket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddingBucket.swift; sourceTree = "<group>"; };
 		509085BF2C49C2A500409B85 /* PaddingBucketTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddingBucketTest.swift; sourceTree = "<group>"; };
+		5090B1A02F8D7239003F029D /* GroupMembershipTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupMembershipTest.swift; sourceTree = "<group>"; };
 		50925DE92DA86E3A00DAB484 /* GroupMessageProcessorJob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupMessageProcessorJob.swift; sourceTree = "<group>"; };
 		50925DEB2DA87AEF00DAB484 /* GroupMessageProcessorJobTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupMessageProcessorJobTest.swift; sourceTree = "<group>"; };
 		5094D5042EE3A6780041F402 /* AttachmentLimits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentLimits.swift; sourceTree = "<group>"; };
@@ -14334,6 +14336,7 @@
 		F94261E2289B1B5400460798 /* Groups */ = {
 			isa = PBXGroup;
 			children = (
+				5090B1A02F8D7239003F029D /* GroupMembershipTest.swift */,
 				F94261E3289B1B5400460798 /* GroupModelsTest.swift */,
 			);
 			name = Groups;
@@ -20202,6 +20205,7 @@
 				F97217FE28DCBC5100113D9F /* GRDBSchemaMigratorTest.swift in Sources */,
 				D979CC5E2AD618EA006AAC49 /* GroupCallRecordManagerTest.swift in Sources */,
 				D91F0B4F2B193A7A0086DB30 /* GroupCallRecordRingUpdateDelegateTest.swift in Sources */,
+				5090B1A12F8D7239003F029D /* GroupMembershipTest.swift in Sources */,
 				5075C21729CA1EE700A260D2 /* GroupMemberUpdaterTest.swift in Sources */,
 				50925DEC2DA87AEF00DAB484 /* GroupMessageProcessorJobTest.swift in Sources */,
 				F9426251289B1B5500460798 /* GroupModelsTest.swift in Sources */,

@@ -30,12 +30,7 @@ class LeaveGroupCoordinator: ReplaceAdminViewControllerDelegate {
         // Retain self for the lifetime of rootViewController.
         ObjectRetainer.retainObject(self, forLifetimeOf: rootViewController)
 
-        if
-            GroupManager.canLocalUserLeaveGroupWithoutChoosingNewAdmin(
-                localAci: localAci,
-                groupMembership: groupModel.groupMembership,
-            )
-        {
+        if groupModel.groupMembership.canLocalUserLeaveGroupWithoutChoosingNewAdmin(localAci: localAci) {
             showLeaveGroupConfirmAlert(
                 fromViewController: rootViewController,
                 replacementAdminAci: nil,

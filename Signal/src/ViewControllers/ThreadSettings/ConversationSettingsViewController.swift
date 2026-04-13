@@ -687,10 +687,7 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
             let groupThread = thread as? TSGroupThread,
             let groupModel = groupThread.groupModel as? TSGroupModelV2,
             let localAci = DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction?.aci,
-            GroupManager.canLocalUserLeaveGroupWithoutChoosingNewAdmin(
-                localAci: localAci,
-                groupMembership: groupModel.groupMembership,
-            )
+            groupModel.groupMembership.canLocalUserLeaveGroupWithoutChoosingNewAdmin(localAci: localAci)
         {
             LeaveGroupCoordinator(
                 groupThread: groupThread,

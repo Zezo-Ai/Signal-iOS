@@ -585,6 +585,28 @@ public class GroupMembership: NSObject, NSSecureCoding {
 
     // MARK: -
 
+    public func canLocalUserLeaveGroupWithoutChoosingNewAdmin(localAci: Aci) -> Bool {
+        let fullMembers = Set(self.fullMembers.compactMap { $0.serviceId as? Aci })
+        let fullMemberAdmins = Set(self.fullMemberAdministrators.compactMap { $0.serviceId as? Aci })
+        return Self.canLocalUserLeaveGroupWithoutChoosingNewAdmin(
+            localAci: localAci,
+            fullMembers: fullMembers,
+            admins: fullMemberAdmins,
+        )
+    }
+
+    static func canLocalUserLeaveGroupWithoutChoosingNewAdmin(
+        localAci: Aci,
+        fullMembers: Set<Aci>,
+        admins: Set<Aci>,
+    ) -> Bool {
+        // If there's already another admin or we're the only member, we can leave
+        // without selecting a new admin.
+        return Set([localAci]) != admins || Set([localAci]) == fullMembers
+    }
+
+    // MARK: -
+
     /// Is this user's profile key exposed to the group?
     public func hasProfileKeyInGroup(serviceId: ServiceId) -> Bool {
         guard let memberState = memberStates[SignalServiceAddress(serviceId)] else {

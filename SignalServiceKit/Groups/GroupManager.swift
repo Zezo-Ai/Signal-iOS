@@ -70,34 +70,6 @@ public class GroupManager: NSObject {
         return isV1GroupId(groupId) || isV2GroupId(groupId)
     }
 
-    // MARK: -
-
-    public static func canLocalUserLeaveGroupWithoutChoosingNewAdmin(
-        localAci: Aci,
-        groupMembership: GroupMembership,
-    ) -> Bool {
-        let fullMembers = Set(groupMembership.fullMembers.compactMap { $0.serviceId as? Aci })
-        let fullMemberAdmins = Set(groupMembership.fullMemberAdministrators.compactMap { $0.serviceId as? Aci })
-        return canLocalUserLeaveGroupWithoutChoosingNewAdmin(
-            localAci: localAci,
-            fullMembers: fullMembers,
-            admins: fullMemberAdmins,
-        )
-    }
-
-    public static func canLocalUserLeaveGroupWithoutChoosingNewAdmin(
-        localAci: Aci,
-        fullMembers: Set<Aci>,
-        admins: Set<Aci>,
-    ) -> Bool {
-        // If the current user is the only admin and they're not the only member of
-        // the group, then they must select a new admin.
-        if Set([localAci]) == admins, Set([localAci]) != fullMembers {
-            return false
-        }
-        return true
-    }
-
     // MARK: - Group Models
 
     /// Confirms that a given address supports V2 groups.
