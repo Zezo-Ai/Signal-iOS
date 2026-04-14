@@ -40,7 +40,7 @@ public enum ReportSpamUIUtils {
                 ),
                 handler: { _ in
                     let spamReport = SSKEnvironment.shared.databaseStorageRef.write { tx in
-                        return Self._buildSpamReport(in: thread, tx: tx)
+                        return Self.buildSpamReport(in: thread, tx: tx)
                     }
                     Task {
                         try? await spamReport?.submit(using: SSKEnvironment.shared.networkManagerRef)
@@ -110,7 +110,7 @@ public enum ReportSpamUIUtils {
 
         SSKEnvironment.shared.syncManagerRef.sendMessageRequestResponseSyncMessage(
             thread: thread,
-            responseType: .blockAndSpam,
+            responseType: .spam,
             transaction: tx,
         )
 
