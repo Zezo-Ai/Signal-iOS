@@ -366,20 +366,6 @@ extension OWSSyncManager: SyncManagerProtocol, SyncManagerProtocolSwift {
         }
     }
 
-    public func sendMessageRequestResponseSyncMessage(thread: TSThread, responseType: OutgoingMessageRequestResponseSyncMessage.ResponseType) {
-        Logger.info("")
-
-        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
-        guard tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegistered else {
-            owsFailDebug("Unexpectedly tried to send sync message before registration.")
-            return
-        }
-
-        SSKEnvironment.shared.databaseStorageRef.asyncWrite { transaction in
-            self.sendMessageRequestResponseSyncMessage(thread: thread, responseType: responseType, transaction: transaction)
-        }
-    }
-
     public func sendMessageRequestResponseSyncMessage(
         thread: TSThread,
         responseType: OutgoingMessageRequestResponseSyncMessage.ResponseType,

@@ -145,8 +145,12 @@ private extension ConversationViewController {
                 shouldLeaveIfGroup: true,
                 transaction: transaction,
             )
+            SSKEnvironment.shared.syncManagerRef.sendMessageRequestResponseSyncMessage(
+                thread: thread,
+                responseType: .block,
+                transaction: transaction,
+            )
         }
-        SSKEnvironment.shared.syncManagerRef.sendMessageRequestResponseSyncMessage(thread: thread, responseType: .block)
         NotificationCenter.default.post(name: ChatListViewController.clearSearch, object: nil)
     }
 
@@ -232,13 +236,19 @@ private extension ConversationViewController {
     ) {
         AssertIsOnMainThread()
 
-        SSKEnvironment.shared.syncManagerRef.sendMessageRequestResponseSyncMessage(
-            thread: self.thread,
-            responseType: messageRequestResponseType,
-        )
+        let databaseStorage = SSKEnvironment.shared.databaseStorageRef
+        let syncManager = SSKEnvironment.shared.syncManagerRef
+
+        databaseStorage.write { tx in
+            syncManager.sendMessageRequestResponseSyncMessage(
+                thread: self.thread,
+                responseType: messageRequestResponseType,
+                transaction: tx,
+            )
+        }
 
         let completion = {
-            SSKEnvironment.shared.databaseStorageRef.write { transaction in
+            databaseStorage.write { transaction in
                 DependenciesBridge.shared.threadSoftDeleteManager.softDelete(
                     threads: [self.thread],
                     // We're already sending a sync message about this above!

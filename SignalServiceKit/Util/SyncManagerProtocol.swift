@@ -42,6 +42,5 @@ public protocol SyncManagerProtocolSwift {
         _ syncMessage: SSKProtoSyncMessageMessageRequestResponse,
         transaction: DBWriteTransaction,
     )
-    func sendMessageRequestResponseSyncMessage(thread: TSThread, responseType: OutgoingMessageRequestResponseSyncMessage.ResponseType)
     func sendMessageRequestResponseSyncMessage(thread: TSThread, responseType: OutgoingMessageRequestResponseSyncMessage.ResponseType, transaction: DBWriteTransaction)
 }

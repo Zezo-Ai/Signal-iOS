@@ -99,6 +99,7 @@ public enum ReportSpamUIUtils {
         SSKEnvironment.shared.syncManagerRef.sendMessageRequestResponseSyncMessage(
             thread: thread,
             responseType: .blockAndSpam,
+            transaction: tx,
         )
 
         return result
@@ -110,6 +111,7 @@ public enum ReportSpamUIUtils {
         SSKEnvironment.shared.syncManagerRef.sendMessageRequestResponseSyncMessage(
             thread: thread,
             responseType: .blockAndSpam,
+            transaction: tx,
         )
 
         return result
