@@ -398,6 +398,7 @@ final class GroupCallViewController: UIViewController {
 
         ModalActivityIndicatorViewController.present(
             fromViewController: frontmostViewController,
+            title: CommonStrings.preparingModal,
             canCancel: false,
             presentationDelay: 0.25,
             asyncBlock: { modal in

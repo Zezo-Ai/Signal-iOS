@@ -161,14 +161,17 @@ public final class MemberLabelCoordinator {
                 })
 
                 do {
-                    try await ModalActivityIndicatorViewController.presentAndPropagateResult(from: presenter, wrappedAsyncBlock: {
-
-                        try await GroupManager.changeMemberLabel(
-                            groupModel: self.groupModel,
-                            aci: self.localIdentifiers.aci,
-                            label: memberLabel,
-                        )
-                    })
+                    try await ModalActivityIndicatorViewController.presentAndPropagateResult(
+                        from: presenter,
+                        title: CommonStrings.updatingModal,
+                        wrappedAsyncBlock: {
+                            try await GroupManager.changeMemberLabel(
+                                groupModel: self.groupModel,
+                                aci: self.localIdentifiers.aci,
+                                label: memberLabel,
+                            )
+                        },
+                    )
 
                     if memberLabel != nil {
                         self.showOverrideAboutWarningIfNeeded(localUserBio: localUserBio)

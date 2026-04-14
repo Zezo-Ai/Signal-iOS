@@ -305,6 +305,7 @@ extension ThreadContextualActionProvider where Self: UIViewController {
 
             ModalActivityIndicatorViewController.present(
                 fromViewController: self,
+                title: CommonStrings.deletingModal,
             ) { [weak self] modal in
                 guard let self else { return }
 

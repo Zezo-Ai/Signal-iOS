@@ -212,7 +212,11 @@ class StoryPrivacySettingsViewController: OWSTableViewController2 {
     }
 
     func turnOffStories() {
-        ModalActivityIndicatorViewController.present(fromViewController: self, canCancel: false) { modal in
+        ModalActivityIndicatorViewController.present(
+            fromViewController: self,
+            title: CommonStrings.updatingModal,
+            canCancel: false,
+        ) { modal in
             SSKEnvironment.shared.databaseStorageRef.asyncWrite { transaction in
                 StoryFinder.enumerateOutgoingStories(transaction: transaction) { storyMessage, _ in
                     storyMessage.remotelyDeleteForAllRecipients(transaction: transaction)

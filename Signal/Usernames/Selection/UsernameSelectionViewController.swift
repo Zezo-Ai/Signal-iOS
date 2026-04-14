@@ -641,6 +641,7 @@ private extension UsernameSelectionViewController {
     ) {
         ModalActivityIndicatorViewController.present(
             fromViewController: self,
+            title: CommonStrings.updatingModal,
             canCancel: false,
         ) { modal in
             UsernameLogger.shared.info("Changing username case.")
@@ -701,6 +702,7 @@ private extension UsernameSelectionViewController {
     ) {
         ModalActivityIndicatorViewController.present(
             fromViewController: self,
+            title: CommonStrings.updatingModal,
             canCancel: false,
         ) { modal in
             UsernameLogger.shared.info("Confirming username.")

@@ -444,6 +444,7 @@ private class GroupInviteLinksActionSheet: ActionSheetController {
 
         ModalActivityIndicatorViewController.present(
             fromViewController: self,
+            title: CommonStrings.joiningGroupModal,
             canCancel: false,
             asyncBlock: { [weak self, groupInviteLinkInfo, groupV2ContextInfo] modal in
                 do {

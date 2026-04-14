@@ -23,6 +23,7 @@ public extension GroupManager {
 
         ModalActivityIndicatorViewController.present(
             fromViewController: fromViewController,
+            title: CommonStrings.updatingModal,
             canCancel: false,
             asyncBlock: { modal in
                 do {
@@ -60,6 +61,7 @@ public extension GroupManager {
         do {
             try await ModalActivityIndicatorViewController.presentAndPropagateResult(
                 from: fromViewController,
+                title: CommonStrings.joiningGroupModal,
             ) {
                 guard let groupModelV2 = groupThread.groupModel as? TSGroupModelV2 else {
                     throw OWSAssertionError("Invalid group model")

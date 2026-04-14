@@ -338,6 +338,7 @@ extension ChatListViewController {
             // thing in a UI-blocking modal.
             ModalActivityIndicatorViewController.present(
                 fromViewController: self,
+                title: CommonStrings.deletingModal,
                 canCancel: false,
             ) { modal in
                 // We want to protect this whole operation with a single write

@@ -112,6 +112,7 @@ public struct UsernameQuerier {
 
         return try await ModalActivityIndicatorViewController.presentAndPropagateResult(
             from: fromViewController,
+            title: CommonStrings.searchingModal,
             canCancel: true,
         ) { () throws(SheetDisplayableError) -> (username: String, Aci) in
             let username: String?
@@ -193,6 +194,7 @@ public struct UsernameQuerier {
 
         return try await ModalActivityIndicatorViewController.presentAndPropagateResult(
             from: fromViewController,
+            title: CommonStrings.searchingModal,
             canCancel: true,
         ) { () throws(SheetDisplayableError) -> Aci in
             guard

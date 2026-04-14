@@ -57,6 +57,7 @@ enum ContactSupportActionSheet {
 
             ModalActivityIndicatorViewController.present(
                 fromViewController: fromViewController,
+                title: CommonStrings.preparingModal,
                 canCancel: true,
                 asyncBlock: { modal in
                     let result = await Result {

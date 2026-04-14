@@ -342,6 +342,7 @@ extension ConversationViewController {
 
             ModalActivityIndicatorViewController.present(
                 fromViewController: self,
+                title: CommonStrings.deletingModal,
                 canCancel: false,
             ) { [weak self] modalActivityIndicator in
                 guard let self else { return }
@@ -396,6 +397,7 @@ extension ConversationViewController {
                     completion: {
                         ModalActivityIndicatorViewController.present(
                             fromViewController: self,
+                            title: CommonStrings.deletingModal,
                             canCancel: false,
                         ) { @MainActor [weak self] modalActivityIndicator in
                             guard let self else { return }
@@ -617,7 +619,11 @@ extension ConversationViewController {
         let deleteTitle = OWSLocalizedString("DELETE_ALL_MESSAGES_IN_CONVERSATION_BUTTON", comment: "button text")
         let delete = ActionSheetAction(title: deleteTitle, style: .destructive) { [weak self] _ in
             guard let self else { return }
-            ModalActivityIndicatorViewController.present(fromViewController: self, canCancel: false) { [weak self] modalActivityIndicator in
+            ModalActivityIndicatorViewController.present(
+                fromViewController: self,
+                title: CommonStrings.deletingModal,
+                canCancel: false,
+            ) { [weak self] modal in
                 guard let self else { return }
                 db.write {
                     threadSoftDeleteManager.removeAllInteractions(
@@ -627,7 +633,7 @@ extension ConversationViewController {
                     )
                 }
                 DispatchQueue.main.async {
-                    modalActivityIndicator.dismiss { [weak self] in
+                    modal.dismiss { [weak self] in
                         guard let self else { return }
                         self.uiMode = .normal
                     }

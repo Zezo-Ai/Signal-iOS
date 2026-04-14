@@ -84,6 +84,7 @@ final class BackupEnablingManager {
 
         try await ModalActivityIndicatorViewController.presentAndPropagateResult(
             from: fromViewController,
+            title: CommonStrings.updatingModal,
         ) { [self] () throws(SheetDisplayableError) in
             try await _enableBackups(
                 planSelection: planSelection,

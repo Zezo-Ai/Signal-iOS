@@ -540,6 +540,7 @@ private extension SendMediaNavigationController {
     ) {
         ModalActivityIndicatorViewController.present(
             fromViewController: pickerViewController,
+            title: CommonStrings.preparingModal,
             canCancel: true,
             asyncBlock: { modal in
                 let result = await Result<[PendingAttachment], any Error> {

@@ -122,6 +122,7 @@ class NameEditorViewController: OWSTableViewController2 {
     private func didTapDone() {
         ModalActivityIndicatorViewController.present(
             fromViewController: self,
+            title: CommonStrings.updatingModal,
             presentationDelay: 0.25,
             asyncBlock: { [weak self] modal in
                 guard let self else { return }

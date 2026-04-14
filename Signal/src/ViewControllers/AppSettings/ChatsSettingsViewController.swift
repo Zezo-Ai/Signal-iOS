@@ -211,6 +211,7 @@ class ChatsSettingsViewController: OWSTableViewController2 {
 
         ModalActivityIndicatorViewController.present(
             fromViewController: self,
+            title: CommonStrings.deletingModal,
             canCancel: false,
             presentationDelay: 0.5,
             backgroundBlockQueueQos: .userInitiated,

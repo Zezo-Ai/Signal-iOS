@@ -234,8 +234,12 @@ public class NewGroupConfirmViewController: OWSTableViewController2 {
         // GroupsV2 TODO: Should we allow cancel here?
         ModalActivityIndicatorViewController.present(
             fromViewController: self,
+            title: OWSLocalizedString(
+                "GROUP_CREATING",
+                comment: "Displayed in a full screen modal when creating a new group.",
+            ),
             canCancel: false,
-        ) { modalActivityIndicator in
+        ) { modal in
             Task {
                 do {
                     let groupThread = try await GroupManager.localCreateNewGroup(
@@ -247,12 +251,12 @@ public class NewGroupConfirmViewController: OWSTableViewController2 {
                     )
                     self.groupWasCreated(
                         groupThread: groupThread,
-                        modalActivityIndicator: modalActivityIndicator,
+                        modalActivityIndicator: modal,
                     )
                 } catch {
                     owsFailDebug("Could not create group: \(error)")
 
-                    modalActivityIndicator.dismiss {
+                    modal.dismiss {
                         // Partial success could create the group on the service. This would cause
                         // retries to fail with 409. Therefore we rotate the seed after failures.
                         self.newGroupState.deriveNewGroupSeedForRetry()

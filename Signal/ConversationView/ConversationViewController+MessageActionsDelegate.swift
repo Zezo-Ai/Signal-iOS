@@ -351,7 +351,10 @@ extension ConversationViewController: MessageActionsDelegate {
         completion: (() -> Void)?,
     ) async {
         do {
-            try await ModalActivityIndicatorViewController.presentAndPropagateResult(from: modalDelegate) {
+            try await ModalActivityIndicatorViewController.presentAndPropagateResult(
+                from: modalDelegate,
+                title: CommonStrings.updatingModal,
+            ) {
                 try await self.sendPinMessageChange(pinMessage: pinMessage)
             }
         } catch {

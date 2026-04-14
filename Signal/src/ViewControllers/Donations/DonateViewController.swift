@@ -653,6 +653,7 @@ class DonateViewController: OWSViewController, OWSNavigationChildController {
 
         ModalActivityIndicatorViewController.present(
             fromViewController: self,
+            title: CommonStrings.updatingModal,
             canCancel: false,
             asyncBlock: { modal in
                 do {

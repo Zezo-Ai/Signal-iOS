@@ -74,6 +74,7 @@ extension DonateViewController {
     ) async throws -> (Data, Paypal.SubscriptionAuthorizationParams) {
         return try await ModalActivityIndicatorViewController.presentAndPropagateResult(
             from: self,
+            title: CommonStrings.preparingModal,
             wrappedAsyncBlock: {
                 if let existingSubscriberId = monthly.subscriberID {
                     Logger.info("[Donations] Cancelling existing subscription")

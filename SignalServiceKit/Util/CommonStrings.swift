@@ -335,6 +335,41 @@ public enum CommonStrings {
             comment: "Confirmation button within contextual alert",
         )
     }
+
+    public static var updatingModal: String {
+        OWSLocalizedString(
+            "MODAL_UPDATING",
+            comment: "Text on a blocking progress screen that indicates that there's an update in progress.",
+        )
+    }
+
+    public static var searchingModal: String {
+        OWSLocalizedString(
+            "MODAL_SEARCHING",
+            comment: "Text on a blocking progress screen that indicates that there's a search in progress.",
+        )
+    }
+
+    public static var deletingModal: String {
+        OWSLocalizedString(
+            "MODAL_DELETING",
+            comment: "Text on a blocking progress screen that indicates that there's a deletion in progress.",
+        )
+    }
+
+    public static var preparingModal: String {
+        OWSLocalizedString(
+            "MODAL_PREPARING",
+            comment: "Text on a blocking progress screen that indicates that there's a preparation in progress.",
+        )
+    }
+
+    public static var joiningGroupModal: String {
+        OWSLocalizedString(
+            "GROUP_INVITE_LINK_JOINING",
+            comment: "Displayed in a full screen modal when joining a group via an invite link",
+        )
+    }
 }
 
 // MARK: -

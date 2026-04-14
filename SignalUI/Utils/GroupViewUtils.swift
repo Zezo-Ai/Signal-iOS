@@ -37,6 +37,7 @@ public class GroupViewUtils {
         // GroupsV2 TODO: Should we allow cancel here?
         ModalActivityIndicatorViewController.present(
             fromViewController: fromViewController,
+            title: CommonStrings.updatingModal,
             canCancel: false,
             asyncBlock: { modalActivityIndicator in
                 do {

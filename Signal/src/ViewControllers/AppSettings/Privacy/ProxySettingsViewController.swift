@@ -184,29 +184,34 @@ class ProxySettingsViewController: OWSTableViewController2 {
             return
         }
 
-        ModalActivityIndicatorViewController.present(fromViewController: self, canCancel: true, asyncBlock: { modal in
-            let connected = await self.checkConnection()
+        ModalActivityIndicatorViewController.present(
+            fromViewController: self,
+            title: CommonStrings.updatingModal,
+            canCancel: true,
+            asyncBlock: { modal in
+                let connected = await self.checkConnection()
 
-            modal.dismiss {
-                if connected {
-                    if self.navigationController?.viewControllers.count == 1 {
-                        self.presentingViewController?.presentToast(text: OWSLocalizedString("PROXY_CONNECTED_SUCCESSFULLY", comment: "The provided proxy connected successfully"))
-                        self.dismiss(animated: true)
+                modal.dismiss {
+                    if connected {
+                        if self.navigationController?.viewControllers.count == 1 {
+                            self.presentingViewController?.presentToast(text: OWSLocalizedString("PROXY_CONNECTED_SUCCESSFULLY", comment: "The provided proxy connected successfully"))
+                            self.dismiss(animated: true)
+                        } else {
+                            self.presentToast(text: OWSLocalizedString("PROXY_CONNECTED_SUCCESSFULLY", comment: "The provided proxy connected successfully"))
+                        }
                     } else {
-                        self.presentToast(text: OWSLocalizedString("PROXY_CONNECTED_SUCCESSFULLY", comment: "The provided proxy connected successfully"))
+                        if !modal.wasCancelled {
+                            self.presentToast(text: OWSLocalizedString("PROXY_FAILED_TO_CONNECT", comment: "The provided proxy couldn't connect"))
+                        }
+                        SSKEnvironment.shared.databaseStorageRef.write { transaction in
+                            SignalProxy.setProxyHost(host: self.host, useProxy: false, transaction: transaction)
+                        }
+                        self.updateTableContents()
+                        self.updateNavigationBar()
                     }
-                } else {
-                    if !modal.wasCancelled {
-                        self.presentToast(text: OWSLocalizedString("PROXY_FAILED_TO_CONNECT", comment: "The provided proxy couldn't connect"))
-                    }
-                    SSKEnvironment.shared.databaseStorageRef.write { transaction in
-                        SignalProxy.setProxyHost(host: self.host, useProxy: false, transaction: transaction)
-                    }
-                    self.updateTableContents()
-                    self.updateNavigationBar()
                 }
-            }
-        })
+            },
+        )
     }
 
     private func checkConnection() async -> Bool {

@@ -65,7 +65,11 @@ extension BadgeGiftingConfirmationViewController: PKPaymentAuthorizationControll
                 @MainActor
                 func presentModalActivityIndicatorIfNotAlreadyPresented() {
                     guard modalActivityIndicatorViewController == nil else { return }
-                    ModalActivityIndicatorViewController.present(fromViewController: self, canCancel: false) { modal in
+                    ModalActivityIndicatorViewController.present(
+                        fromViewController: self,
+                        title: CommonStrings.preparingModal,
+                        canCancel: false,
+                    ) { modal in
                         DispatchQueue.main.async {
                             modalActivityIndicatorViewController = modal
                             // Depending on how things are dispatched, we could need the modal closed immediately.

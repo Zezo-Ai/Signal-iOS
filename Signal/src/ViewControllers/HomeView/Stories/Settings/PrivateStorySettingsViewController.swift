@@ -227,7 +227,11 @@ final class PrivateStorySettingsViewController: OWSTableViewController2 {
             return owsFailDebug("Missing dlist identifier for thread \(thread.logString)")
         }
 
-        ModalActivityIndicatorViewController.present(fromViewController: self, canCancel: false) { modal in
+        ModalActivityIndicatorViewController.present(
+            fromViewController: self,
+            title: CommonStrings.deletingModal,
+            canCancel: false,
+        ) { modal in
             SSKEnvironment.shared.databaseStorageRef.asyncWrite { transaction in
                 StoryFinder.enumerateStoriesForContext(self.thread.storyContext, transaction: transaction) { storyMessage, _ in
                     storyMessage.remotelyDelete(for: self.thread, transaction: transaction)

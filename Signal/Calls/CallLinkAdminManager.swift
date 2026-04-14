@@ -53,6 +53,7 @@ class CallLinkAdminManager {
         let isOn = sender.isOn
         ModalActivityIndicatorViewController.present(
             fromViewController: viewController,
+            title: CommonStrings.updatingModal,
             presentationDelay: 0.25,
             asyncBlock: { modal in
                 let updateResult = await Result {

@@ -891,46 +891,51 @@ extension AttachmentApprovalViewController {
     private func didTapSend() {
         // Generate the attachments once, so that any changes we
         // make below are reflected afterwards.
-        ModalActivityIndicatorViewController.present(fromViewController: self, canCancel: false, asyncBlock: { modalVC in
-            do {
-                let imageQuality = self.outputImageQuality
-                let attachments = try await self.prepareAttachments()
-                modalVC.dismiss {
-                    let isViewOnce = self.options.contains(.canToggleViewOnce) && self.isViewOnceEnabled
-                    let messageBody = self.attachmentTextToolbar.messageBodyForSending
-                    owsPrecondition(!isViewOnce || messageBody == nil)
-                    self.approvalDelegate?.attachmentApproval(
-                        self,
-                        didApproveAttachments: {
-                            if isViewOnce {
-                                // The `options` property and UI layer enforce this requirement.
-                                owsPrecondition(attachments.count == 1)
-                                return ApprovedAttachments(viewOnceAttachment: attachments.first!, imageQuality: imageQuality)
-                            } else {
-                                return ApprovedAttachments(nonViewOnceAttachments: attachments, imageQuality: imageQuality)
-                            }
-                        }(),
-                        messageBody: messageBody,
-                    )
-                }
-            } catch {
-                owsFailDebug("Error: \(error)")
+        ModalActivityIndicatorViewController.present(
+            fromViewController: self,
+            title: CommonStrings.preparingModal,
+            canCancel: false,
+            asyncBlock: { modalVC in
+                do {
+                    let imageQuality = self.outputImageQuality
+                    let attachments = try await self.prepareAttachments()
+                    modalVC.dismiss {
+                        let isViewOnce = self.options.contains(.canToggleViewOnce) && self.isViewOnceEnabled
+                        let messageBody = self.attachmentTextToolbar.messageBodyForSending
+                        owsPrecondition(!isViewOnce || messageBody == nil)
+                        self.approvalDelegate?.attachmentApproval(
+                            self,
+                            didApproveAttachments: {
+                                if isViewOnce {
+                                    // The `options` property and UI layer enforce this requirement.
+                                    owsPrecondition(attachments.count == 1)
+                                    return ApprovedAttachments(viewOnceAttachment: attachments.first!, imageQuality: imageQuality)
+                                } else {
+                                    return ApprovedAttachments(nonViewOnceAttachments: attachments, imageQuality: imageQuality)
+                                }
+                            }(),
+                            messageBody: messageBody,
+                        )
+                    }
+                } catch {
+                    owsFailDebug("Error: \(error)")
 
-                modalVC.dismiss {
-                    let actionSheet = ActionSheetController(
-                        title: CommonStrings.errorAlertTitle,
-                        message: (
-                            (error as? SignalAttachmentError)?.localizedDescription
-                                ?? OWSLocalizedString("ATTACHMENT_APPROVAL_FAILED_TO_EXPORT", comment: "Error that outgoing attachments could not be exported."),
-                        ),
-                    )
-                    actionSheet.overrideUserInterfaceStyle = .dark
-                    actionSheet.addAction(ActionSheetAction(title: CommonStrings.okButton, style: .default))
+                    modalVC.dismiss {
+                        let actionSheet = ActionSheetController(
+                            title: CommonStrings.errorAlertTitle,
+                            message: (
+                                (error as? SignalAttachmentError)?.localizedDescription
+                                    ?? OWSLocalizedString("ATTACHMENT_APPROVAL_FAILED_TO_EXPORT", comment: "Error that outgoing attachments could not be exported."),
+                            ),
+                        )
+                        actionSheet.overrideUserInterfaceStyle = .dark
+                        actionSheet.addAction(ActionSheetAction(title: CommonStrings.okButton, style: .default))
 
-                    self.present(actionSheet, animated: true)
+                        self.present(actionSheet, animated: true)
+                    }
                 }
-            }
-        })
+            },
+        )
     }
 
     @objc

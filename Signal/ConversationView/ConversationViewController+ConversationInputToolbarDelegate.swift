@@ -858,6 +858,7 @@ extension ConversationViewController: UIDocumentPickerDelegate {
 
         ModalActivityIndicatorViewController.present(
             fromViewController: self,
+            title: CommonStrings.preparingModal,
             canCancel: true,
             asyncBlock: { modalActivityIndicator in
                 do {
@@ -889,17 +890,21 @@ extension ConversationViewController: SendMediaNavDelegate {
         didApproveAttachments approvedAttachments: ApprovedAttachments,
         messageBody: MessageBody?,
     ) {
-        ModalActivityIndicatorViewController.present(fromViewController: sendMediaNavigationController, asyncBlock: { modal in
-            await self.sendAttachments(
-                approvedAttachments,
-                messageBody: messageBody,
-                from: sendMediaNavigationController,
-                attachmentLimits: sendMediaNavigationController.attachmentLimits,
-            )
-            modal.dismiss(completion: {
-                self.dismiss(animated: true)
-            })
-        })
+        ModalActivityIndicatorViewController.present(
+            fromViewController: sendMediaNavigationController,
+            title: CommonStrings.preparingModal,
+            asyncBlock: { modal in
+                await self.sendAttachments(
+                    approvedAttachments,
+                    messageBody: messageBody,
+                    from: sendMediaNavigationController,
+                    attachmentLimits: sendMediaNavigationController.attachmentLimits,
+                )
+                modal.dismiss(completion: {
+                    self.dismiss(animated: true)
+                })
+            },
+        )
     }
 
     /// Attempts to send attachments. Handles prompting to unblock or un-verify safety numbers, as well as showing failure states.

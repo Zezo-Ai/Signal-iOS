@@ -427,6 +427,7 @@ private extension InternalSettingsViewController {
         do {
             (backupKey, exportMetadata) = try await ModalActivityIndicatorViewController.presentAndPropagateResult(
                 from: self,
+                title: "Exporting...",
             ) {
                 let (messageBackupKey, localIdentifiers) = try db.read { tx in
                     let localIdentifiers = tsAccountManager.localIdentifiers(tx: tx)!

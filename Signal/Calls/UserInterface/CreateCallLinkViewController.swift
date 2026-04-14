@@ -71,6 +71,10 @@ class CreateCallLinkViewController: InteractiveSheetViewController {
     static func createCallLinkOnServerAndPresent(from viewController: UIViewController) {
         ModalActivityIndicatorViewController.present(
             fromViewController: viewController,
+            title: OWSLocalizedString(
+                "CALL_LINK_CREATING_MODAL",
+                comment: "Displayed in a full screen modal view when creating a Call Link",
+            ),
             canCancel: true,
             presentationDelay: 0.25,
             asyncBlock: { modal in

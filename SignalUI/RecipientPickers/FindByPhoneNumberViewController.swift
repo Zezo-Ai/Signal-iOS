@@ -227,6 +227,7 @@ public class FindByPhoneNumberViewController: OWSTableViewController2 {
         if requiresRegisteredNumber {
             ModalActivityIndicatorViewController.present(
                 fromViewController: self,
+                title: CommonStrings.searchingModal,
                 canCancel: true,
                 asyncBlock: { modal in
                     do {

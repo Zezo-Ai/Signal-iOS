@@ -227,7 +227,10 @@ class AccountSettingsViewController: OWSTableViewController2 {
                 let keyFetcher = SSKEnvironment.shared.databaseStorageRef.keyFetcher
                 let registrationStateChangeManager = DependenciesBridge.shared.registrationStateChangeManager
 
-                ModalActivityIndicatorViewController.present(fromViewController: self) { _ in
+                ModalActivityIndicatorViewController.present(
+                    fromViewController: self,
+                    title: CommonStrings.deletingModal,
+                ) { _ in
                     await SignalApp.shared.resetLinkedAppDataAndExit(
                         localDeviceId: localDeviceId,
                         keyFetcher: keyFetcher,
@@ -251,7 +254,10 @@ class AccountSettingsViewController: OWSTableViewController2 {
             proceedTitle: OWSLocalizedString("PROCEED_BUTTON", comment: ""),
             proceedStyle: .destructive,
             proceedAction: { _ in
-                ModalActivityIndicatorViewController.present(fromViewController: self) { _ in
+                ModalActivityIndicatorViewController.present(
+                    fromViewController: self,
+                    title: CommonStrings.deletingModal,
+                ) { _ in
                     let keyFetcher = SSKEnvironment.shared.databaseStorageRef.keyFetcher
                     SignalApp.shared.resetAppDataAndExit(keyFetcher: keyFetcher)
                 }
@@ -395,7 +401,10 @@ class AccountSettingsViewController: OWSTableViewController2 {
 
                 Task {
                     do {
-                        try await ModalActivityIndicatorViewController.presentAndPropagateResult(from: self) {
+                        try await ModalActivityIndicatorViewController.presentAndPropagateResult(
+                            from: self,
+                            title: CommonStrings.updatingModal,
+                        ) {
                             try await SSKEnvironment.shared.ows2FAManagerRef.enableRegistrationLockV2(logger: PrefixedLogger(prefix: "[Settings]"))
                         }
                     } catch where error.isNetworkFailureOrTimeout {
@@ -440,7 +449,10 @@ class AccountSettingsViewController: OWSTableViewController2 {
             ) { _ in
                 Task {
                     do {
-                        try await ModalActivityIndicatorViewController.presentAndPropagateResult(from: self) {
+                        try await ModalActivityIndicatorViewController.presentAndPropagateResult(
+                            from: self,
+                            title: CommonStrings.updatingModal,
+                        ) {
                             try await SSKEnvironment.shared.ows2FAManagerRef.disableRegistrationLockV2()
                         }
                     } catch where error.isNetworkFailureOrTimeout {

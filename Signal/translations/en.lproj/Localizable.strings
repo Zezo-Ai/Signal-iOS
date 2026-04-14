@@ -460,6 +460,9 @@
 /* Accessibility label for attaching photos */
 "ATTACHMENT_LABEL" = "Attachment";
 
+/* Displayed in a full screen modal when app is processing media that was pasted into message compose field. */
+"ATTACHMENT_PASTING" = "Pasting…";
+
 /* Alert title when picking a document fails for an unknown reason */
 "ATTACHMENT_PICKER_DOCUMENTS_FAILED_ALERT_TITLE" = "Failed to choose document.";
 
@@ -1317,6 +1320,9 @@
 
 /* Navigation bar title for the sheet used to create & configure a Call Link. */
 "CALL_LINK_CREATE" = "Create Call Link";
+
+/* Displayed in a full screen modal view when creating a Call Link */
+"CALL_LINK_CREATING_MODAL" = "Creating…";
 
 /* Description of sheet presented when call link creation fails. */
 "CALL_LINK_CREATION_FAILURE_SHEET_DESCRIPTION" = "Call link could not be created. Check your internet connection and try again.";
@@ -3967,6 +3973,9 @@
 /* Message indicating that group was created by an unknown user. */
 "GROUP_CREATED_BY_UNKNOWN_USER" = "Group was created.";
 
+/* Displayed in a full screen modal when creating a new group. */
+"GROUP_CREATING" = "Creating…";
+
 /* Message shown in conversation view that indicates there were issues with group creation. */
 "GROUP_CREATION_FAILED" = "Not all members could be added to the group. Tap to retry.";
 
@@ -4011,6 +4020,9 @@
 
 /* Message indicating that the group invite link was enabled by a remote user. Embeds {{ user who enabled the group invite link }}. */
 "GROUP_INVITE_LINK_ENABLED_WITHOUT_APPROVAL_BY_REMOTE_USER_FORMAT" = "%@ turned on the group link with admin approval off.";
+
+/* Displayed in a full screen modal when joining a group via an invite link */
+"GROUP_INVITE_LINK_JOINING" = "Joining…";
 
 /* Message indicating that the group invite link was reset. */
 "GROUP_INVITE_LINK_RESET" = " The group link was reset.";
@@ -5652,6 +5664,18 @@
 
 /* Alert title when user has previously denied media library access */
 "MISSING_MEDIA_LIBRARY_PERMISSION_TITLE" = "Signal requires access to your photos for this feature.";
+
+/* Text on a blocking progress screen that indicates that there's a deletion in progress. */
+"MODAL_DELETING" = "Deleting…";
+
+/* Text on a blocking progress screen that indicates that there's a preparation in progress. */
+"MODAL_PREPARING" = "Preparing…";
+
+/* Text on a blocking progress screen that indicates that there's a search in progress. */
+"MODAL_SEARCHING" = "Searching…";
+
+/* Text on a blocking progress screen that indicates that there's an update in progress. */
+"MODAL_UPDATING" = "Updating…";
 
 /* An error shown as the title of an alert when try to link a new device & the user is already at the limit. */
 "MULTIDEVICE_PAIRING_MAX_DESC" = "You cannot link any more devices.";

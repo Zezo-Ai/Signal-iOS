@@ -18,6 +18,7 @@ extension DonationViewsUtil {
         ) async throws -> (URL, String) {
             return try await ModalActivityIndicatorViewController.presentAndPropagateResult(
                 from: fromViewController,
+                title: CommonStrings.preparingModal,
             ) {
                 return try await SignalServiceKit.Paypal.createBoost(
                     amount: amount,

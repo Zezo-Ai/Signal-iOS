@@ -1269,7 +1269,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                             proceedTitle: wipeAppDataActionTitle,
                             proceedStyle: .destructive,
                             proceedAction: { _ in
-                                ModalActivityIndicatorViewController.present(fromViewController: viewController) { _ in
+                                ModalActivityIndicatorViewController.present(
+                                    fromViewController: viewController,
+                                    title: CommonStrings.deletingModal,
+                                ) { _ in
                                     SignalApp.shared.resetAppDataAndExit(keyFetcher: keyFetcher)
                                 }
                             },

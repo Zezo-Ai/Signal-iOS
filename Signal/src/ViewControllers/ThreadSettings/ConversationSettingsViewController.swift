@@ -654,7 +654,10 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
                 showEndGroupConfirmation(title: nil, description: finalConfirmationDescription, action: {
                     Task { @MainActor in
                         do {
-                            try await ModalActivityIndicatorViewController.presentAndPropagateResult(from: self) { [weak self] in
+                            try await ModalActivityIndicatorViewController.presentAndPropagateResult(
+                                from: self,
+                                title: CommonStrings.updatingModal,
+                            ) { [weak self] in
                                 guard let self else { return }
                                 guard let groupThread = thread as? TSGroupThread else { return }
                                 try await GroupManager.terminateGroup(groupModel: groupModelV2, threadId: groupThread.sqliteRowId!)

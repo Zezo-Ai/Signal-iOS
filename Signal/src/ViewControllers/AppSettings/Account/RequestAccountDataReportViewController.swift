@@ -166,6 +166,7 @@ class RequestAccountDataReportViewController: OWSTableViewController2 {
 
         ModalActivityIndicatorViewController.present(
             fromViewController: self,
+            title: CommonStrings.preparingModal,
             canCancel: true,
             asyncBlock: { modal in
                 do {

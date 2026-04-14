@@ -1273,7 +1273,10 @@ extension RecipientPickerViewController {
     ///
     /// - Parameter phoneNumberResult: The search result the user tapped.
     private func findByNumber(_ phoneNumberResult: PhoneNumberFinder.SearchResult, using finder: PhoneNumberFinder) {
-        ModalActivityIndicatorViewController.present(fromViewController: self) { modal in
+        ModalActivityIndicatorViewController.present(
+            fromViewController: self,
+            title: CommonStrings.searchingModal,
+        ) { modal in
             do {
                 let lookupResult = try await finder.lookUp(phoneNumber: phoneNumberResult)
                 modal.dismissIfNotCanceled {

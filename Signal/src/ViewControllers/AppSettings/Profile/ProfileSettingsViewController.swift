@@ -573,6 +573,7 @@ class ProfileSettingsViewController: OWSTableViewController2 {
     private func deleteUsernameBehindModalActivityIndicator() {
         ModalActivityIndicatorViewController.present(
             fromViewController: self,
+            title: CommonStrings.updatingModal,
             canCancel: false,
             asyncBlock: { modal in
                 let remoteMutationResult = await self.context.localUsernameManager.deleteUsername()
@@ -694,45 +695,50 @@ class ProfileSettingsViewController: OWSTableViewController2 {
         }
 
         // Show an activity indicator to block the UI during the profile upload.
-        ModalActivityIndicatorViewController.present(fromViewController: self, canCancel: false, asyncBlock: { modalActivityIndicator in
-            let databaseStorage = SSKEnvironment.shared.databaseStorageRef
-            do {
-                let updatePromise = await databaseStorage.awaitableWrite { tx in
-                    SSKEnvironment.shared.profileManagerRef.updateLocalProfile(
-                        profileGivenName: profileValues.givenName.changedValue,
-                        profileFamilyName: profileValues.familyName.changedValue,
-                        profileBio: profileValues.bio.changedValue,
-                        profileBioEmoji: profileValues.bioEmoji.changedValue,
-                        profileAvatarData: { () -> OptionalAvatarChange<Data?> in
-                            switch profileValues.avatarData.changedValue {
-                            case .noChange:
-                                return .noChange
-                            case .setTo(let newValue):
-                                return .setTo(newValue)
-                            }
-                        }(),
-                        visibleBadgeIds: profileValues.visibleBadgeIds.changedValue,
-                        unsavedRotatedProfileKey: nil,
-                        userProfileWriter: .localUser,
-                        authedAccount: .implicit(),
-                        tx: tx,
-                    )
+        ModalActivityIndicatorViewController.present(
+            fromViewController: self,
+            title: CommonStrings.updatingModal,
+            canCancel: false,
+            asyncBlock: { modal in
+                let databaseStorage = SSKEnvironment.shared.databaseStorageRef
+                do {
+                    let updatePromise = await databaseStorage.awaitableWrite { tx in
+                        SSKEnvironment.shared.profileManagerRef.updateLocalProfile(
+                            profileGivenName: profileValues.givenName.changedValue,
+                            profileFamilyName: profileValues.familyName.changedValue,
+                            profileBio: profileValues.bio.changedValue,
+                            profileBioEmoji: profileValues.bioEmoji.changedValue,
+                            profileAvatarData: { () -> OptionalAvatarChange<Data?> in
+                                switch profileValues.avatarData.changedValue {
+                                case .noChange:
+                                    return .noChange
+                                case .setTo(let newValue):
+                                    return .setTo(newValue)
+                                }
+                            }(),
+                            visibleBadgeIds: profileValues.visibleBadgeIds.changedValue,
+                            unsavedRotatedProfileKey: nil,
+                            userProfileWriter: .localUser,
+                            authedAccount: .implicit(),
+                            tx: tx,
+                        )
+                    }
+                    try await updatePromise.awaitable()
+                    await databaseStorage.awaitableWrite { transaction in
+                        DonationSubscriptionManager.setDisplayBadgesOnProfile(
+                            displayBadgesOnProfile,
+                            updateStorageService: true,
+                            transaction: transaction,
+                        )
+                    }
+                } catch {
+                    owsFailDebug("\(error)")
                 }
-                try await updatePromise.awaitable()
-                await databaseStorage.awaitableWrite { transaction in
-                    DonationSubscriptionManager.setDisplayBadgesOnProfile(
-                        displayBadgesOnProfile,
-                        updateStorageService: true,
-                        transaction: transaction,
-                    )
+                modal.dismiss { [weak self] in
+                    self?.profileCompleted()
                 }
-            } catch {
-                owsFailDebug("\(error)")
-            }
-            modalActivityIndicator.dismiss { [weak self] in
-                self?.profileCompleted()
-            }
-        })
+            },
+        )
     }
 
     private func profileCompleted() {

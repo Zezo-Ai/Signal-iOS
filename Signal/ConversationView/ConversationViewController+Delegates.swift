@@ -16,17 +16,21 @@ extension ConversationViewController: AttachmentApprovalViewControllerDelegate {
         didApproveAttachments approvedAttachments: ApprovedAttachments,
         messageBody: MessageBody?,
     ) {
-        ModalActivityIndicatorViewController.present(fromViewController: attachmentApproval, asyncBlock: { modal in
-            await self.sendAttachments(
-                approvedAttachments,
-                messageBody: messageBody,
-                from: attachmentApproval,
-                attachmentLimits: attachmentApproval.attachmentLimits,
-            )
-            modal.dismiss(completion: {
-                self.dismiss(animated: true)
-            })
-        })
+        ModalActivityIndicatorViewController.present(
+            fromViewController: attachmentApproval,
+            title: CommonStrings.preparingModal,
+            asyncBlock: { modal in
+                await self.sendAttachments(
+                    approvedAttachments,
+                    messageBody: messageBody,
+                    from: attachmentApproval,
+                    attachmentLimits: attachmentApproval.attachmentLimits,
+                )
+                modal.dismiss(completion: {
+                    self.dismiss(animated: true)
+                })
+            },
+        )
     }
 
     public func attachmentApprovalDidCancel() {
@@ -241,19 +245,26 @@ extension ConversationViewController: ConversationInputTextViewDelegate {
             return
         }
 
-        ModalActivityIndicatorViewController.present(fromViewController: self, asyncBlock: { modal in
-            do {
-                let attachments = try await PasteboardAttachment.loadPreviewableAttachments(attachmentLimits: attachmentLimits)
-                modal.dismiss {
-                    // Note: attachment array might be nil at this point; that's fine.
-                    self.didPasteAttachments(attachments, attachmentLimits: attachmentLimits)
+        ModalActivityIndicatorViewController.present(
+            fromViewController: self,
+            title: OWSLocalizedString(
+                "ATTACHMENT_PASTING",
+                comment: "Displayed in a full screen modal when app is processing media that was pasted into message compose field.",
+            ),
+            asyncBlock: { modal in
+                do {
+                    let attachments = try await PasteboardAttachment.loadPreviewableAttachments(attachmentLimits: attachmentLimits)
+                    modal.dismiss {
+                        // Note: attachment array might be nil at this point; that's fine.
+                        self.didPasteAttachments(attachments, attachmentLimits: attachmentLimits)
+                    }
+                } catch {
+                    modal.dismiss {
+                        self.showErrorAlert(attachmentError: error as? SignalAttachmentError)
+                    }
                 }
-            } catch {
-                modal.dismiss {
-                    self.showErrorAlert(attachmentError: error as? SignalAttachmentError)
-                }
-            }
-        })
+            },
+        )
     }
 
     func didPasteAttachments(
