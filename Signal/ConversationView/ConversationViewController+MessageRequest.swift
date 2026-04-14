@@ -181,18 +181,6 @@ private extension ConversationViewController {
         NotificationCenter.default.post(name: ChatListViewController.clearSearch, object: nil)
     }
 
-    func reportSpamInThread() {
-        let spamReport = SSKEnvironment.shared.databaseStorageRef.write { tx in
-            return ReportSpamUIUtils.buildSpamReport(in: thread, tx: tx)
-        }
-        Task {
-            try? await spamReport?.submit(using: SSKEnvironment.shared.networkManagerRef)
-        }
-
-        presentToastCVC(ReportSpamUIUtils.successfulReportText(didBlock: false))
-        NotificationCenter.default.post(name: ChatListViewController.clearSearch, object: nil)
-    }
-
     func blockUserAndDelete(_ aci: Aci) {
         // Do not leave the group while blocking the thread; we'll
         // that below so that we can surface an error to the user
