@@ -1011,8 +1011,8 @@ extension ConversationAvatarView.Configuration.SizeClass {
         case ..<24: return 0
         case 24...36: return 16
         case 36..<40: return CGFloat(diameter).inverseLerp(36, 40).lerp(16, 24)
-        case 40...64: return 24
-        case 64..<80: return CGFloat(diameter).inverseLerp(64, 80).lerp(24, 36)
+        case 40...74: return 24
+        case 64..<80: return CGFloat(diameter).inverseLerp(74, 80).lerp(24, 36)
         case 80...112: return 36
         case 112...: return (CGFloat(diameter) / 112) * 36
         default: return 0
@@ -1031,7 +1031,7 @@ extension ConversationAvatarView.Configuration.SizeClass {
         case .fortyEight: return CGPoint(x: 28, y: 30)
         case .fiftySix: return CGPoint(x: 32, y: 38)
         case .sixtyFour: return CGPoint(x: 40, y: 46)
-        case .seventyFour: return CGPoint(x: 40, y: 46) // TODO: [KC] update once design has these
+        case .seventyFour: return CGPoint(x: 48, y: 54)
         case .eighty: return CGPoint(x: 44, y: 52)
         case .eightyEight: return CGPoint(x: 49, y: 56)
         case .oneHundredTwelve: return CGPoint(x: 74, y: 80)
