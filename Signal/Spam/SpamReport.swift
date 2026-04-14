@@ -5,14 +5,14 @@
 
 import Foundation
 import LibSignalClient
-public import SignalServiceKit
+import SignalServiceKit
 
-public struct SpamReport {
+struct SpamReport {
     let aci: Aci
     let serverGuids: Set<String>
     let reportingToken: SpamReportingToken?
 
-    public func submit(using networkManager: NetworkManagerProtocol) async throws {
+    func submit(using networkManager: NetworkManagerProtocol) async throws {
         Logger.info("reporting \(serverGuids.count) message(s) from \(aci) as spam (reportingToken? \(reportingToken != nil)")
         try await withThrowingTaskGroup(of: Void.self) { group in
             for guid in serverGuids {

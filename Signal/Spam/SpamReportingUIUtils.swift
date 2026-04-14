@@ -4,14 +4,15 @@
 //
 
 import LibSignalClient
-public import SignalServiceKit
+import SignalServiceKit
+import SignalUI
 
-public enum ReportSpamUIUtils {
+enum ReportSpamUIUtils {
     /// Called only if the user reports spam.
     /// The `Bool` parameter represents if the thread was also blocked.
-    public typealias Completion = (Bool) -> Void
+    typealias Completion = (Bool) -> Void
 
-    public static func showReportSpamActionSheet(
+    static func showReportSpamActionSheet(
         _ thread: TSThread,
         isBlocked: Bool,
         from viewController: UIViewController,
@@ -21,7 +22,7 @@ public enum ReportSpamUIUtils {
         viewController.presentActionSheet(actionSheet)
     }
 
-    public static func createReportSpamActionSheet(for thread: TSThread, isBlocked: Bool, completion: Completion? = nil) -> ActionSheetController {
+    static func createReportSpamActionSheet(for thread: TSThread, isBlocked: Bool, completion: Completion? = nil) -> ActionSheetController {
         let actionSheetTitle = OWSLocalizedString(
             "MESSAGE_REQUEST_REPORT_CONVERSATION_TITLE",
             comment: "Action sheet title to confirm reporting a conversation as spam via a message request.",
@@ -72,7 +73,7 @@ public enum ReportSpamUIUtils {
         return actionSheet
     }
 
-    public static func successfulReportText(didBlock: Bool) -> String {
+    static func successfulReportText(didBlock: Bool) -> String {
         if didBlock {
             OWSLocalizedString(
                 "MESSAGE_REQUEST_SPAM_REPORTED_AND_BLOCKED",
@@ -86,7 +87,7 @@ public enum ReportSpamUIUtils {
         }
     }
 
-    public static func blockAndBuildSpamReport(in thread: TSThread, tx: DBWriteTransaction) -> SpamReport? {
+    static func blockAndBuildSpamReport(in thread: TSThread, tx: DBWriteTransaction) -> SpamReport? {
         SSKEnvironment.shared.blockingManagerRef.addBlockedThread(
             thread,
             blockMode: .local,
@@ -105,7 +106,7 @@ public enum ReportSpamUIUtils {
         return result
     }
 
-    public static func buildSpamReport(in thread: TSThread, tx: DBWriteTransaction) -> SpamReport? {
+    static func buildSpamReport(in thread: TSThread, tx: DBWriteTransaction) -> SpamReport? {
         let result = Self._buildSpamReport(in: thread, tx: tx)
 
         SSKEnvironment.shared.syncManagerRef.sendMessageRequestResponseSyncMessage(
