@@ -1,2 +1,1 @@
-• 'लिक्विड ग्लास' में कुछ और नए अपडेट किए गए हैं, जिनमें नए डिज़ाइन वाले टोस्ट नोटिफ़िकेशन भी शामिल हैं।
-• इस अपडेट में 'शुरू करें' वाले सेक्शन में नए Signal यूज़र के लिए ऐक्सेसिबिलिटी बेहतर की गई है और VoiceOver सपोर्ट को और मज़बूत बनाया गया है। शुक्रिया, @meherkasam!
+• The freshly spun emoji in Unicode 17.0 have now pirouetted into place in Signal. Send a message with the new Ballet Dancer emoji to perform your own digital version of a pas de chat.

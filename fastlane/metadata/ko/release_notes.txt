@@ -1,2 +1,1 @@
-• 리퀴드 글래스 디자인을 추가로 개선했습니다.
-• 접근성을 개선했습니다. 감사합니다, @meherkasam 님!
+• The freshly spun emoji in Unicode 17.0 have now pirouetted into place in Signal. Send a message with the new Ballet Dancer emoji to perform your own digital version of a pas de chat.

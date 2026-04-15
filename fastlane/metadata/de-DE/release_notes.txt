@@ -1,2 +1,1 @@
-• Ein Hoch auf einige weitere Liquid Glass-Optimierungen, darunter die neu gestalteten Toast-Benachrichtigungen.
-• Dieses Update bietet auch einige Anpassungen zur Verbesserung der Barrierefreiheit und eine bessere VoiceOver-Unterstützung im Abschnitt »Erste Schritte« für neue Signal-Nutzer*innen. Danke, @meherkasam!
+• The freshly spun emoji in Unicode 17.0 have now pirouetted into place in Signal. Send a message with the new Ballet Dancer emoji to perform your own digital version of a pas de chat.

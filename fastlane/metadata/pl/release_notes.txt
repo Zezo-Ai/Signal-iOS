@@ -1,2 +1,1 @@
-• Wprowadziliśmy kolejne ulepszenia motywu Liquid Glass – w tym nowy wygląd powiadomień typu toast.
-• Usprawniliśmy też głosowe ułatwienia dostępu w sekcji „Na dobry początek” z myślą o nowych użytkownikach komunikatora Signal. Dzięki, @meherkasam!
+• The freshly spun emoji in Unicode 17.0 have now pirouetted into place in Signal. Send a message with the new Ballet Dancer emoji to perform your own digital version of a pas de chat.

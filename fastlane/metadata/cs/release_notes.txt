@@ -1,2 +1,1 @@
-• Další vylepšení designu Liquid Glass (tekuté sklo)
-• Vylepšení přístupnosti. Díky, @meherkasam!
+• The freshly spun emoji in Unicode 17.0 have now pirouetted into place in Signal. Send a message with the new Ballet Dancer emoji to perform your own digital version of a pas de chat.

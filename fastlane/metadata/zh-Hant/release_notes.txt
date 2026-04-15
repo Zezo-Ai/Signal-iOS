@@ -1,2 +1,1 @@
-• 讓我們舉杯慶祝 Liquid Glass 的幾項新改進，其中包括重新設計的彈出式系統通知。
-• 此更新還在「開始使用」中為新 Signal 用戶引入了多項輔助使用功能改進，並提供了更好的「旁白」支援。謝謝，@meherkasam！
+• The freshly spun emoji in Unicode 17.0 have now pirouetted into place in Signal. Send a message with the new Ballet Dancer emoji to perform your own digital version of a pas de chat.

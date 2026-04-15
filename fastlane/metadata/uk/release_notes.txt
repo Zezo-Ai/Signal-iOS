@@ -1,2 +1,1 @@
-• Нам на думку спливла ідея ще попрацювати над Liquid Glass, тож представляємо новий дизайн спливних сповіщень.
-• У цьому оновленні ми також поліпшили деякі спеціальні можливості й підтримку VoiceOver у розділі «Для початку» для нових користувачів Signal. Дякуємо, @meherkasam!
+• The freshly spun emoji in Unicode 17.0 have now pirouetted into place in Signal. Send a message with the new Ballet Dancer emoji to perform your own digital version of a pas de chat.

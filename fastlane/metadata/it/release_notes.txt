@@ -1,2 +1,1 @@
-• Festeggiamo l'arrivo di alcuni miglioramenti per Liquid Glass, tra cui un nuovo design delle notifiche.
-• Questo aggiornamento introduce anche vari miglioramenti per l'accessibilità e un supporto migliorato al VoiceOver per i nuovi utenti di Signal che si registrano e usano l'app per la prima volta. Grazie, @meherkasam!
+• The freshly spun emoji in Unicode 17.0 have now pirouetted into place in Signal. Send a message with the new Ballet Dancer emoji to perform your own digital version of a pas de chat.
