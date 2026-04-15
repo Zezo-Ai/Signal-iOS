@@ -172,7 +172,7 @@ public class BlockListUIUtils {
         from viewController: UIViewController,
         completion: ((ActionSheetAction) -> Void)?,
     ) {
-        guard groupThread.groupModel.groupMembership.isLocalUserMemberOfAnyKind else {
+        guard groupThread.groupModel.groupMembership.isLocalUserFullOrInvitedMember else {
             blockGroupStep2(groupThread, from: viewController, completion: completion)
             return
         }

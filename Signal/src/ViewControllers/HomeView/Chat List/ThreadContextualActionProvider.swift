@@ -87,7 +87,8 @@ extension ThreadContextualActionProvider where Self: UIViewController {
         if
             let groupThread = threadViewModel.threadRecord as? TSGroupThread,
             let groupModel = groupThread.groupModel as? TSGroupModelV2,
-            let localAci = tsAccountManager.localIdentifiersWithMaybeSneakyTransaction?.aci
+            let localAci = tsAccountManager.localIdentifiersWithMaybeSneakyTransaction?.aci,
+            groupModel.groupMembership.isLocalUserFullOrInvitedMember
         {
             actions.append(leaveGroupContextualAction(
                 threadViewModel: threadViewModel,

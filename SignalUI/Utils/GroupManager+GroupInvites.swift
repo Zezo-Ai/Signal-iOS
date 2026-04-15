@@ -15,11 +15,9 @@ public extension GroupManager {
         replacementAdminAci: Aci? = nil,
         success: (() -> Void)?,
     ) {
-
-        guard groupThread.groupModel.groupMembership.isLocalUserMemberOfAnyKind else {
-            owsFailDebug("unexpectedly trying to leave group for which we're not a member.")
-            return
-        }
+        // Note: Requests to join aren't handled by this method.
+        // Note: If we *aren't* a member, this method turns into a no-op.
+        owsAssertDebug(groupThread.groupModel.groupMembership.isLocalUserFullOrInvitedMember, "must be member")
 
         ModalActivityIndicatorViewController.present(
             fromViewController: fromViewController,
