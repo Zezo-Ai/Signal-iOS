@@ -279,6 +279,8 @@ public protocol CVComponentDelegate: AnyObject, AudioMessageViewDelegate, CVPoll
     func didTapViewPoll(pollInteractionUniqueId: String)
 
     func didTapViewPinnedMessage(pinnedMessageUniqueId: String)
+
+    func didTapSafetyTips()
 }
 
 // MARK: -

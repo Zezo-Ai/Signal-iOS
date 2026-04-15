@@ -234,6 +234,10 @@ public enum CommonStrings {
         OWSLocalizedString("BUTTON_VIEW", comment: "Label for the 'view' button.")
     }
 
+    public static var viewMoreButton: String {
+        OWSLocalizedString("VIEW_MORE_BUTTON", comment: "Label for the 'view more' button")
+    }
+
     public static var seeAllButton: String {
         OWSLocalizedString("SEE_ALL_BUTTON", comment: "Label for the 'see all' button.")
     }

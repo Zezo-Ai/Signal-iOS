@@ -1449,6 +1449,21 @@ extension ConversationViewController: CVComponentDelegate {
             isAnimated: true,
         )
     }
+
+    public func didTapSafetyTips() {
+        let viewController = SafetyTipsViewController()
+        viewController.delegate = self
+        present(viewController, animated: true)
+    }
+}
+
+// MARK: - SafetyTipsViewControllerDelegate
+
+extension ConversationViewController: SafetyTipsViewControllerDelegate {
+    public func didTapViewMoreSafetyTips() {
+        let viewController = MoreSafetyTipsViewController()
+        present(viewController, animated: true)
+    }
 }
 
 // MARK: - OWSNavigationChildController

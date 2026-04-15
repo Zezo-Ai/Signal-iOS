@@ -234,8 +234,8 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
                 safetyButtonLabelConfig.applyForRendering(button: showTipsButton)
                 showTipsButton.ows_contentEdgeInsets = .init(hMargin: hPaddingSafetyButton, vMargin: vPaddingSafetyButton)
                 showTipsButton.dimsWhenHighlighted = true
-                showTipsButton.block = { [weak self] in
-                    self?.didShowTips(type: safetySection.threadType)
+                showTipsButton.block = { [weak componentDelegate] in
+                    componentDelegate?.didTapSafetyTips()
                 }
 
                 if conversationStyle.hasWallpaper {
@@ -704,7 +704,7 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
                 safetySection.shouldShowSafetyTipsButton,
                 componentView.showTipsButton.bounds.contains(sender.location(in: componentView.showTipsButton))
             {
-                didShowTips(type: safetySection.threadType)
+                componentDelegate.didTapSafetyTips()
                 return true
             }
 
@@ -808,12 +808,6 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
 }
 
 extension CVComponentThreadDetails {
-
-    private func didShowTips(type: SafetyTipsType) {
-        let viewController = SafetyTipsViewController(type: type)
-        UIApplication.shared.frontmostViewController?.present(viewController, animated: true)
-    }
-
     private static func buildGroupsSafetySection(
         from groupThread: TSGroupThread,
         tx: DBReadTransaction,

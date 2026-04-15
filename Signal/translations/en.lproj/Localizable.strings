@@ -7925,34 +7925,40 @@
 "SAFETY_TIPS_FAKE_BUSINESS_BODY" = "Be careful of businesses or government agencies contacting you. Messages involving tax agencies, couriers, and more can be spam.";
 
 /* Message title describing the safety tip about unknown or fake businesses. */
-"SAFETY_TIPS_FAKE_BUSINESS_TITLE" = "Fake businesses and institutions";
-
-/* Message contents for the fake names safety tip. */
-"SAFETY_TIPS_FAKE_NAMES_BODY" = "Signal will never contact you for your registration code or PIN. Be cautious of requests that impersonate others. Profile names are chosen by their account holder and aren't verified.";
-
-/* Message title describing the fake names safety tip. */
-"SAFETY_TIPS_FAKE_NAMES_TITLE" = "Fake names and accounts";
-
-/* Message describing safety tips for group conversations. */
-"SAFETY_TIPS_GROUPS_HEADER_MESSAGE" = "Review this request carefully. None of your contacts or people you chat with are in this group. Here are a few things to watch out for:";
+"SAFETY_TIPS_FAKE_BUSINESS_TITLE" = "Fake businesses";
 
 /* Title for Safety Tips education screen. */
 "SAFETY_TIPS_HEADER_TITLE" = "Safety Tips";
 
-/* Message describing safety tips for 1:1 conversations. */
-"SAFETY_TIPS_INDIVIDUAL_HEADER_MESSAGE" = "Be careful when accepting message requests from people you don’t know. Watch out for:";
+/* Message body describing the scams safety tip. */
+"SAFETY_TIPS_LOOK_OUT_FOR_SCAMS_BODY" = "Avoid vague messages that try to get you to reply. Be aware of financial tips and suspicious web links.";
+
+/* Message title describing the scams safety tip. */
+"SAFETY_TIPS_LOOK_OUT_FOR_SCAMS_TITLE" = "Look out for scams";
 
 /* Message contents for the unknown links in messages safety tip. */
 "SAFETY_TIPS_MESSAGE_LINKS_BODY" = "Be careful of messages from people you don’t know that have links to websites. Never visit links from people you don’t trust.";
 
 /* Message title describing the safety tip about unknown links in messages. */
-"SAFETY_TIPS_MESSAGE_LINKS_TITLE" = "Messages with links";
+"SAFETY_TIPS_MESSAGE_LINKS_TITLE" = "Messages with web links";
 
-/* Button that will show the next safety tip. */
-"SAFETY_TIPS_NEXT_TIP_BUTTON" = "Next";
+/* Message body describing the review names safety tip. */
+"SAFETY_TIPS_REVIEW_NAMES_BODY" = "Look out for the “Name not verified” notice. Everyone sets their own profile name in Signal.";
 
-/* Button that will show the previous safety tip. */
-"SAFETY_TIPS_PREVIOUS_TIP_BUTTON" = "Previous";
+/* Message body describing the review names safety tip in the 'view more' flow. */
+"SAFETY_TIPS_REVIEW_NAMES_BODY_VIEW_MORE" = "Look out for the “Name not verified” notice. Everyone sets their own profile name and photo in Signal. If you’re unsure who a new request is from, it’s safer to ignore it.";
+
+/* Message title describing the review names safety tip. */
+"SAFETY_TIPS_REVIEW_NAMES_TITLE" = "Review names and photos";
+
+/* Message body describing the signal chats tip. */
+"SAFETY_TIPS_SIGNAL_CHATS_BODY" = "Signal will never message you for your registration code, PIN, or recovery key. Never respond to a chat pretending to be Signal.";
+
+/* Message body describing the signal chats tip in the 'view more' flow. */
+"SAFETY_TIPS_SIGNAL_CHATS_BODY_VIEW_MORE" = "Signal will never message you for your registration code, PIN, or recovery key. Don’t reply to chats pretending to be Signal or Signal Support. Bad actors set up fake names to try to take over your account.";
+
+/* Message title describing the signal chats tip. */
+"SAFETY_TIPS_SIGNAL_CHATS_TITLE" = "Don’t respond to chats from Signal";
 
 /* Message contents for the vague message safety tip. */
 "SAFETY_TIPS_VAGUE_MESSAGE_BODY" = "Spammers often start with a simple message like “Hi” to draw you in. If you respond they may engage you further.";
@@ -10101,6 +10107,9 @@
 
 /* Button label for the 'View Contact' button */
 "VIEW_CONTACT_BUTTON" = "View Contact";
+
+/* Label for the 'view more' button */
+"VIEW_MORE_BUTTON" = "View More";
 
 /* Toast alert text shown when tapping on a view-once message that has already been viewed. */
 "VIEW_ONCE_ALREADY_VIEWED_TOAST" = "You already viewed this message.";
