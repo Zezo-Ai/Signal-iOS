@@ -580,53 +580,39 @@ extension ConversationSettingsViewController {
         }
 
         if !isTerminatedGroup {
+            let isGroup = thread.isGroupThread
+            let isBlocked = threadViewModel.isBlocked
             section.add(OWSTableItem(
-                customCellBlock: { [weak self] in
-                    guard let self else {
-                        owsFailDebug("Missing self")
-                        return OWSTableItem.newCell()
-                    }
-
+                customCellBlock: {
                     let cellTitle: String
                     var customColor: UIColor?
-                    if self.threadViewModel.isBlocked {
-                        cellTitle =
-                            (
-                                self.thread.isGroupThread
-                                    ? OWSLocalizedString(
-                                        "CONVERSATION_SETTINGS_UNBLOCK_GROUP",
-                                        comment: "Label for 'unblock group' action in conversation settings view.",
-                                    )
-                                    : OWSLocalizedString(
-                                        "CONVERSATION_SETTINGS_UNBLOCK_USER",
-                                        comment: "Label for 'unblock user' action in conversation settings view.",
-                                    ),
-                            )
+                    if isBlocked {
+                        cellTitle = isGroup ? OWSLocalizedString(
+                            "CONVERSATION_SETTINGS_UNBLOCK_GROUP",
+                            comment: "Label for 'unblock group' action in conversation settings view.",
+                        ) : OWSLocalizedString(
+                            "CONVERSATION_SETTINGS_UNBLOCK_USER",
+                            comment: "Label for 'unblock user' action in conversation settings view.",
+                        )
                     } else {
-                        cellTitle =
-                            (
-                                self.thread.isGroupThread
-                                    ? OWSLocalizedString(
-                                        "CONVERSATION_SETTINGS_BLOCK_GROUP",
-                                        comment: "Label for 'block group' action in conversation settings view.",
-                                    )
-                                    : OWSLocalizedString(
-                                        "CONVERSATION_SETTINGS_BLOCK_USER",
-                                        comment: "Label for 'block user' action in conversation settings view.",
-                                    ),
-                            )
+                        cellTitle = isGroup ? OWSLocalizedString(
+                            "CONVERSATION_SETTINGS_BLOCK_GROUP",
+                            comment: "Label for 'block group' action in conversation settings view.",
+                        ) : OWSLocalizedString(
+                            "CONVERSATION_SETTINGS_BLOCK_USER",
+                            comment: "Label for 'block user' action in conversation settings view.",
+                        )
                         customColor = UIColor.ows_accentRed
                     }
                     let cell = OWSTableItem.buildCell(
                         icon: .chatSettingsBlock,
                         itemName: cellTitle,
                         customColor: customColor,
-                        accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "block"),
                     )
                     return cell
                 },
                 actionBlock: { [weak self] in
-                    if self?.threadViewModel.isBlocked == true {
+                    if isBlocked {
                         self?.didTapUnblockThread()
                     } else {
                         self?.didTapBlockThread()
