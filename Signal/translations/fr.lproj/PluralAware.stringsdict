@@ -381,6 +381,70 @@
 			<string>Messages texte + %1$d jours de médias</string>
 		</dict>
 	</dict>
+	<key>COLLAPSE_SET_CALL_EVENTS_%d</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@text@</string>
+		<key>text</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>ld</string>
+			<key>one</key>
+			<string>%1$ld call</string>
+			<key>other</key>
+			<string>%1$ld calls</string>
+		</dict>
+	</dict>
+	<key>COLLAPSE_SET_CHAT_UPDATES_%d</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@text@</string>
+		<key>text</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>ld</string>
+			<key>one</key>
+			<string>%1$ld chat update</string>
+			<key>other</key>
+			<string>%1$ld chat updates</string>
+		</dict>
+	</dict>
+	<key>COLLAPSE_SET_GROUP_UPDATES_%d</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@text@</string>
+		<key>text</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>ld</string>
+			<key>one</key>
+			<string>%1$ld group update</string>
+			<key>other</key>
+			<string>%1$ld group updates</string>
+		</dict>
+	</dict>
+	<key>COLLAPSE_SET_TIMER_CHANGES_%d</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@text@</string>
+		<key>text</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>ld</string>
+			<key>one</key>
+			<string>%1$ld disappearing message timer change</string>
+			<key>other</key>
+			<string>%1$ld disappearing message timer changes</string>
+		</dict>
+	</dict>
 	<key>CONVERSATION_DELETE_CONFIRMATIONS_ALERT_TITLE_%d</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

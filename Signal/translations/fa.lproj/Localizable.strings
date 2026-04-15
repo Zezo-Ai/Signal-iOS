@@ -368,13 +368,13 @@
 "ATTACHMENT_APPROVAL_MEDIA_QUALITY_TITLE" = "کیفیت رسانه";
 
 /* Notification body shown when media sync to a linked device is complete. */
-"ATTACHMENT_BACKFILL_FINISHED_NOTIFICATION" = "Finished syncing with Signal on your linked device.";
+"ATTACHMENT_BACKFILL_FINISHED_NOTIFICATION" = "همگام‌سازی با سیگنال در دستگاه متصل شما تکمیل شد.";
 
 /* Notification body shown when media sync to a linked device was interrupted. */
-"ATTACHMENT_BACKFILL_INTERRUPTED_NOTIFICATION" = "Open Signal to continue syncing with your linked device";
+"ATTACHMENT_BACKFILL_INTERRUPTED_NOTIFICATION" = "برای ادامه همگام‌سازی با دستگاه متصل خود، سیگنال را باز کنید";
 
 /* Notification body shown while syncing media to a linked device. */
-"ATTACHMENT_BACKFILL_SYNCING_NOTIFICATION" = "Syncing with Signal on your linked device";
+"ATTACHMENT_BACKFILL_SYNCING_NOTIFICATION" = "در حال همگام‌سازی با سیگنال در دستگاه متصل شما";
 
 /* Generic filename for an attachment with no known name */
 "ATTACHMENT_DEFAULT_FILENAME" = "پیوست";
@@ -459,6 +459,9 @@
 
 /* Accessibility label for attaching photos */
 "ATTACHMENT_LABEL" = "پیوست";
+
+/* Displayed in a full screen modal when app is processing media that was pasted into message compose field. */
+"ATTACHMENT_PASTING" = "Pasting…";
 
 /* Alert title when picking a document fails for an unknown reason */
 "ATTACHMENT_PICKER_DOCUMENTS_FAILED_ALERT_TITLE" = "انتخاب سند موفق نبود.";
@@ -1318,6 +1321,9 @@
 /* Navigation bar title for the sheet used to create & configure a Call Link. */
 "CALL_LINK_CREATE" = "ایجاد پیوند تماس";
 
+/* Displayed in a full screen modal view when creating a Call Link */
+"CALL_LINK_CREATING_MODAL" = "Creating…";
+
 /* Description of sheet presented when call link creation fails. */
 "CALL_LINK_CREATION_FAILURE_SHEET_DESCRIPTION" = "امکان ایجاد پیوند تماس نیست. اتصال اینترنت خود را بررسی و دوباره امتحان کنید.";
 
@@ -1950,6 +1956,15 @@
 
 /* Title for a view allowing users to choose a Backup plan. */
 "CHOOSE_BACKUP_PLAN_TITLE" = "طرح پشتیبان را انتخاب کنید";
+
+/* VoiceOver hint for an expanded collapse set button. */
+"COLLAPSE_SET_ACCESSIBILITY_HINT_COLLAPSE" = "Hide updates";
+
+/* VoiceOver hint for a collapsed collapse set button. */
+"COLLAPSE_SET_ACCESSIBILITY_HINT_EXPAND" = "Show updates";
+
+/* Short label shown in a collapsed timer-changes set indicating the timer is now disabled. */
+"COLLAPSE_SET_TIMER_DISABLED" = "Disabled";
 
 /* Title for the color & wallpaper settings view. */
 "COLOR_AND_WALLPAPER_SETTINGS_TITLE" = "رنگ و کاغذدیواری گفتگو";
@@ -3865,6 +3880,9 @@
 /* Text explaining that you are the only person currently in the group call */
 "GROUP_CALL_NO_ONE_HERE" = "هیچکس دیگری اینجا نیست";
 
+/* Text indicating you can't take this action because you're not a member of the group */
+"GROUP_CALL_NOT_A_MEMBER" = "This action is unavailable because you’re no longer a member of this group.";
+
 /* Copy explaining that a user has joined the group call. Embeds {member name} */
 "GROUP_CALL_NOTIFICATION_ONE_JOINED_FORMAT" = "%1$@ به تماس پیوست";
 
@@ -3964,6 +3982,9 @@
 /* Message indicating that group was created by an unknown user. */
 "GROUP_CREATED_BY_UNKNOWN_USER" = "گروه ایجاد شد.";
 
+/* Displayed in a full screen modal when creating a new group. */
+"GROUP_CREATING" = "Creating…";
+
 /* Message shown in conversation view that indicates there were issues with group creation. */
 "GROUP_CREATION_FAILED" = "همهٔ اعضا به گروه اضافه نشدند. برای تلاش دوباره ضربه بزنید.";
 
@@ -4008,6 +4029,9 @@
 
 /* Message indicating that the group invite link was enabled by a remote user. Embeds {{ user who enabled the group invite link }}. */
 "GROUP_INVITE_LINK_ENABLED_WITHOUT_APPROVAL_BY_REMOTE_USER_FORMAT" = "%1$@ پیوند گروه را با موافقت مدیر فعال کرد.";
+
+/* Displayed in a full screen modal when joining a group via an invite link */
+"GROUP_INVITE_LINK_JOINING" = "Joining…";
 
 /* Message indicating that the group invite link was reset. */
 "GROUP_INVITE_LINK_RESET" = " لینک گروه بازنشانی شد.";
@@ -4253,10 +4277,13 @@
 "GROUP_NAME_EDUCATION_SHEET_BULLET_1" = "مراقب گروه‌هایی باشید که خود را به جای سازمان‌ها و کسب‌وکارها جا می‌زنند";
 
 /* Second bullet point for the explainer sheet for group names */
-"GROUP_NAME_EDUCATION_SHEET_BULLET_2" = "نام‌های نمایه اعضای گروه‌ها نیاز به تأیید ندارد";
+"GROUP_NAME_EDUCATION_SHEET_BULLET_2" = "Signal can't verify names and photos";
 
 /* Third bullet point for the explainer sheet for group names */
-"GROUP_NAME_EDUCATION_SHEET_BULLET_3" = "اطلاعات شخصی خود را با افرادی که نمی‌شناسید به اشتراک نگذارید";
+"GROUP_NAME_EDUCATION_SHEET_BULLET_3" = "Signal will never contact you for your registration code, PIN, or recovery key";
+
+/* Fourth bullet point for the explainer sheet for group names */
+"GROUP_NAME_EDUCATION_SHEET_BULLET_4" = "Don’t share personal information with people you don’t know";
 
 /* Header for the explainer sheet for group names */
 "GROUP_NAME_EDUCATION_SHEET_HEADER_FORMAT" = "<bold>نام گروه</bold> توسط اعضای گروه انتخاب می‌شود.";
@@ -4504,15 +4531,6 @@
 /* Error indicating that an error occurred while accepting an invite. */
 "GROUPS_INVITE_ACCEPT_INVITE_FAILED" = "امکان قبول کردن دعوتنامه نیست.";
 
-/* Label for 'block group' button in group invite view. */
-"GROUPS_INVITE_BLOCK_GROUP" = "مسدود کردن گروه";
-
-/* Label for 'block group and inviter' button in group invite view. Embeds {{name of user who invited you}}. */
-"GROUPS_INVITE_BLOCK_GROUP_AND_INVITER_FORMAT" = "مسدود کردن گروه و %1$@";
-
-/* Label for 'block inviter' button in group invite view. Embeds {{name of user who invited you}}. */
-"GROUPS_INVITE_BLOCK_INVITER_FORMAT" = "مسدود کردن %1$@";
-
 /* Label for 'invite friends to group' button. */
 "GROUPS_INVITE_FRIENDS_BUTTON" = "دعوت دوستان";
 
@@ -4717,6 +4735,12 @@
 /* An info message inserted into the chat when you accept a message request, in a 1:1 or group chat. */
 "INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST" = "شما درخواست تبادل پیام را پذیرفتید.";
 
+/* An info message inserted into the chat when you accept a message request in a group chat. */
+"INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_GROUP" = "You accepted the group request.";
+
+/* An info message inserted into the chat when you accept a message request in a 1:1. {{ Embeds name of your chat partner }}. */
+"INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_ONE_ON_ONE" = "You accepted %1$@'s message request.";
+
 /* Header for an action sheet providing options in response to an accepted 1:1 message request. Embeds {{ the name of your chat partner }}. */
 "INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_OPTIONS_ACTION_SHEET_HEADER_CONTACT" = "درخواست پیامی از %1$@ را پذیرفتید. اگر این به‌اشتباه رخ داده است، می‌توانید اقدامی را در زیر انتخاب کنید.";
 
@@ -4724,7 +4748,7 @@
 "INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_OPTIONS_ACTION_SHEET_HEADER_GROUP" = "شما درخواست تبادل پیام را از این گروه پذیرفتید. اگر این به‌اشتباه رخ داده است، می‌توانید یکی از اقدامات زیر را انتخاب کنید.";
 
 /* Title for a button shown alongside an info message indicating you accepted a message request. */
-"INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_OPTIONS_BUTTON" = "گزینه‌ها";
+"INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_OPTIONS_BUTTON" = "Block or Report…";
 
 /* An info message inserted into a group chat when you block the group. */
 "INFO_MESSAGE_BLOCKED_GROUP" = "شما این گروه را مسدود کردید.";
@@ -5443,6 +5467,15 @@
 /* Action sheet title to confirm blocking a group via a message request. Embeds {{group name}} */
 "MESSAGE_REQUEST_BLOCK_GROUP_TITLE_FORMAT" = "%1$@ را مسدود و آن را ترک می‌کنید؟";
 
+/* Message for an action sheet asking the user to confirm if they want to accept a message request. {{ Embeds 'Signal will never' in bolded text }} */
+"MESSAGE_REQUEST_CONFIRM_ACCEPT_MESSAGE" = "Only accept requests from people you trust. %1$@ message you for a registration code, PIN, or recovery key.";
+
+/* Embedded text in the message for an action sheet asking the user to confirm if they want to accept a message request. */
+"MESSAGE_REQUEST_CONFIRM_ACCEPT_MESSAGE_EMBEDDED_BOLD_TEXT" = "Signal will never";
+
+/* Title for an action sheet asking the user to confirm if they want to accept a message request */
+"MESSAGE_REQUEST_CONFIRM_ACCEPT_TITLE" = "Accept Request?";
+
 /* Action sheet action to confirm deleting a conversation via a message request. */
 "MESSAGE_REQUEST_DELETE_CONVERSATION_ACTION" = "پاک کردن";
 
@@ -5515,8 +5548,8 @@
 /* A prompt notifying that the user must share their profile with this group. */
 "MESSAGE_REQUEST_VIEW_EXISTING_GROUP_PROMPT" = "آیا می‌خواهید به گفتگو‌ی خود با این گروه ادامه دهید و نام و عکس خود را با اعضای آن به اشتراک بگذارید؟";
 
-/* A prompt asking if the user wants to accept a conversation invite. Embeds {{contact name}}. */
-"MESSAGE_REQUEST_VIEW_NEW_CONTACT_PROMPT_FORMAT" = "به %1$@ اجازه می‌دهید که به شما پیام دهد و نام و عکس خود را با آن‌ها به اشتراک می‌گذارید؟ تا زمانی که نپذیرید آن‌ها متوجه نمی‌شوند که پیام‌شان را خوانده‌اید.";
+/* A prompt asking if the user wants to accept a conversation invite. */
+"MESSAGE_REQUEST_VIEW_NEW_CONTACT_PROMPT" = "Let this person message you and share your name and photo with them? They won’t know you’ve seen their message until you accept.";
 
 /* A prompt asking if the user wants to accept a group invite. */
 "MESSAGE_REQUEST_VIEW_NEW_GROUP_PROMPT" = "آیا می‌خواهید به این گروه بپیوندید و نام و عکس خود را با اعضای آن به اشتراک بگذارید؟ تا زمانی که نپذیرید آن‌ها متوجه نمی‌شوند که پیام‌شان را خوانده‌اید.";
@@ -5637,6 +5670,18 @@
 
 /* Alert title when user has previously denied media library access */
 "MISSING_MEDIA_LIBRARY_PERMISSION_TITLE" = "signal برای این قابلیت نیاز به دسترسی به عکس های شما دارد.";
+
+/* Text on a blocking progress screen that indicates that there's a deletion in progress. */
+"MODAL_DELETING" = "Deleting…";
+
+/* Text on a blocking progress screen that indicates that there's a preparation in progress. */
+"MODAL_PREPARING" = "Preparing…";
+
+/* Text on a blocking progress screen that indicates that there's a search in progress. */
+"MODAL_SEARCHING" = "Searching…";
+
+/* Text on a blocking progress screen that indicates that there's an update in progress. */
+"MODAL_UPDATING" = "Updating…";
 
 /* An error shown as the title of an alert when try to link a new device & the user is already at the limit. */
 "MULTIDEVICE_PAIRING_MAX_DESC" = "شما دستگاه های بیشتری را نمیتوانید لینک کنید.";
@@ -7145,13 +7190,16 @@
 "PROFILE_NAME_CHANGE_SYSTEM_NONCONTACT_FORMAT" = "%1$@ نام نمایه خود را به %2$@ تغییر داد.";
 
 /* First bullet point for the explainer sheet for profile names */
-"PROFILE_NAME_EDUCATION_SHEET_BULLET_1" = "نام‌های نمایه نیاز به تأیید ندارند";
+"PROFILE_NAME_EDUCATION_SHEET_BULLET_1" = "Signal can't verify names and photos";
 
 /* Second bullet point for the explainer sheet for profile names */
-"PROFILE_NAME_EDUCATION_SHEET_BULLET_2" = "مراقب حساب‌هایی باشید که خود را به جای دیگران جا می‌زنند";
+"PROFILE_NAME_EDUCATION_SHEET_BULLET_2" = "Signal will never contact you for your registration code, PIN, or recovery key";
 
 /* Third bullet point for the explainer sheet for profile names */
-"PROFILE_NAME_EDUCATION_SHEET_BULLET_3" = "اطلاعات شخصی خود را با افرادی که نمی‌شناسید به اشتراک نگذارید";
+"PROFILE_NAME_EDUCATION_SHEET_BULLET_3" = "Be cautious of accounts that impersonate others";
+
+/* Fourth bullet point for the explainer sheet for profile names */
+"PROFILE_NAME_EDUCATION_SHEET_BULLET_4" = "Don’t share personal information with people you don’t know";
 
 /* Header for the explainer sheet for profile names */
 "PROFILE_NAME_EDUCATION_SHEET_HEADER_FORMAT" = "<bold>نام نمایه</bold> در سیگنال توسط دارنده حساب انتخاب می‌شود.";
@@ -7877,34 +7925,40 @@
 "SAFETY_TIPS_FAKE_BUSINESS_BODY" = "در مورد کسب‌وکارها و سازمان‌های دولتی که با شما تماس می‌گیرند احتیاط کنید. پیام‌های مربوط به نهادهای مالیاتی، شرکت مخابراتی و نظایر آن ممکن است هرزنامه باشند.";
 
 /* Message title describing the safety tip about unknown or fake businesses. */
-"SAFETY_TIPS_FAKE_BUSINESS_TITLE" = "کسب‌وکارها و سازمان‌های جعلی";
-
-/* Message contents for the fake names safety tip. */
-"SAFETY_TIPS_FAKE_NAMES_BODY" = "سیگنال هرگز برای دریافت کد ثبت‌نام یا پین با شما تماس نمی‌گیرد. مراقب درخواست‌هایی باشید که خود را به جای دیگران جا می‌زنند. نام نمایه توسط دارنده حساب انتخاب می‌شود و نیاز به تأیید ندارد.";
-
-/* Message title describing the fake names safety tip. */
-"SAFETY_TIPS_FAKE_NAMES_TITLE" = "نام‌ها و حساب‌های جعلی";
-
-/* Message describing safety tips for group conversations. */
-"SAFETY_TIPS_GROUPS_HEADER_MESSAGE" = "این درخواست را بادقت مرور کنید. هیچ‌یک از مخاطبان شما یا کسانی که با آن‌ها گفتگو می‌کنید در این گروه نیستند. چند چیز که باید در مورد آن‌ها احتیاط کنید:";
+"SAFETY_TIPS_FAKE_BUSINESS_TITLE" = "Fake businesses";
 
 /* Title for Safety Tips education screen. */
 "SAFETY_TIPS_HEADER_TITLE" = "نکات ایمنی";
 
-/* Message describing safety tips for 1:1 conversations. */
-"SAFETY_TIPS_INDIVIDUAL_HEADER_MESSAGE" = "هنگام پذیرفتن درخواست پیام از افراد ناشناس احتیاط کنید. در موارد زیر احتیاط کنید:";
+/* Message body describing the scams safety tip. */
+"SAFETY_TIPS_LOOK_OUT_FOR_SCAMS_BODY" = "Avoid vague messages that try to get you to reply. Be aware of financial tips and suspicious web links.";
+
+/* Message title describing the scams safety tip. */
+"SAFETY_TIPS_LOOK_OUT_FOR_SCAMS_TITLE" = "Look out for scams";
 
 /* Message contents for the unknown links in messages safety tip. */
 "SAFETY_TIPS_MESSAGE_LINKS_BODY" = "در مورد پیام‌هایی که از افراد ناشناس دریافت می‌کنید و داخل آن‌ها پیوند به وب‌سایتی وجود دارد احتیاط کنید. هیچ‌وقت پیوندی که از افراد غیرقابل‌اعتماد دریافت کرده‌اید را باز نکنید.";
 
 /* Message title describing the safety tip about unknown links in messages. */
-"SAFETY_TIPS_MESSAGE_LINKS_TITLE" = "پیام‌های دارای پیوند";
+"SAFETY_TIPS_MESSAGE_LINKS_TITLE" = "Messages with web links";
 
-/* Button that will show the next safety tip. */
-"SAFETY_TIPS_NEXT_TIP_BUTTON" = "بعدی";
+/* Message body describing the review names safety tip. */
+"SAFETY_TIPS_REVIEW_NAMES_BODY" = "Look out for the “Name not verified” notice. Everyone sets their own profile name in Signal.";
 
-/* Button that will show the previous safety tip. */
-"SAFETY_TIPS_PREVIOUS_TIP_BUTTON" = "قبلی";
+/* Message body describing the review names safety tip in the 'view more' flow. */
+"SAFETY_TIPS_REVIEW_NAMES_BODY_VIEW_MORE" = "Look out for the “Name not verified” notice. Everyone sets their own profile name and photo in Signal. If you’re unsure who a new request is from, it’s safer to ignore it.";
+
+/* Message title describing the review names safety tip. */
+"SAFETY_TIPS_REVIEW_NAMES_TITLE" = "Review names and photos";
+
+/* Message body describing the signal chats tip. */
+"SAFETY_TIPS_SIGNAL_CHATS_BODY" = "Signal will never message you for your registration code, PIN, or recovery key. Never respond to a chat pretending to be Signal.";
+
+/* Message body describing the signal chats tip in the 'view more' flow. */
+"SAFETY_TIPS_SIGNAL_CHATS_BODY_VIEW_MORE" = "Signal will never message you for your registration code, PIN, or recovery key. Don’t reply to chats pretending to be Signal or Signal Support. Bad actors set up fake names to try to take over your account.";
+
+/* Message title describing the signal chats tip. */
+"SAFETY_TIPS_SIGNAL_CHATS_TITLE" = "Don’t respond to chats from Signal";
 
 /* Message contents for the vague message safety tip. */
 "SAFETY_TIPS_VAGUE_MESSAGE_BODY" = "ارسال‌کنندگان هرزنامه معمولاً با پیام ساده‌ای مثل «سلام» شروع می‌کنند تا شما را درگیر کنند. اگر پاسخ دهید ممکن است گفتگو را بیشتر پیش ببرند تا شما را درگیر کنند.";
@@ -9632,7 +9686,7 @@
 "SYSTEM_MESSAGE_DEFAULT_DISAPPEARING_MESSAGE_TIMER_FORMAT" = "زمان پیام ناپدید شونده هنگامی که به آن‌ها پیام دهید روی %1$@ تنظیم خواهد شد.";
 
 /* Indicator warning about an unknown contact thread */
-"SYSTEM_MESSAGE_UNKNOWN_THREAD_REVIEW_CAREFULLY_WARNING" = "با دقت بازنگری کنید";
+"SYSTEM_MESSAGE_UNKNOWN_THREAD_REVIEW_CAREFULLY_WARNING" = "Review requests carefully";
 
 /* Tap to Replace Emoji string for reaction configuration */
 "TAP_REPLACE_EMOJI" = "برای جایگزینی ایموجی ضربه بزنید";
@@ -9664,12 +9718,6 @@
 /* Label for a group you are not in which has four members, listing their names */
 "THREAD_DETAILS_FOUR_MEMBERS" = "%1$@ ، %2$@ ، %3$@ و %4$@";
 
-/* Label displayed below group info. This is the predicate part of the sentence 'Group names are not verified'. Embeds {{ THREAD_DETAILS_GROUP_NAMES_ARE_NOT_VERIFIED_SUBJECT }} */
-"THREAD_DETAILS_GROUP_NAMES_ARE_NOT_VERIFIED_PREDICATE" = "%1$@ نیاز به تأیید ندارد";
-
-/* Label displayed below group info. This is the subject part of the sentence 'Group names are not verified'. It is embedded into THREAD_DETAILS_GROUP_NAMES_ARE_NOT_VERIFIED_PREDICATE. */
-"THREAD_DETAILS_GROUP_NAMES_ARE_NOT_VERIFIED_SUBJECT" = "نام گروه";
-
 /* Label for a group with more than four members, listing the first three members' names and embedding THREAD_DETAILS_OTHER_MEMBERS_COUNT_%ld as a count of other members */
 "THREAD_DETAILS_MANY_MEMBERS" = "%1$@ ، %2$@ ، %3$@ و %4$@";
 
@@ -9688,11 +9736,8 @@
 /* A string indicating a mutual group the user shares with this contact. Embeds {{mutual group name}} */
 "THREAD_DETAILS_ONE_MUTUAL_GROUP" = "عضو %1$@";
 
-/* Label displayed below profiles. This is the predicate part of the sentence 'Profile names are not verified'. Embeds {{ THREAD_DETAILS_PROFILE_NAMES_ARE_NOT_VERIFIED_SUBJECT }} */
-"THREAD_DETAILS_PROFILE_NAMES_ARE_NOT_VERIFIED_PREDICATE" = "%1$@ نیاز به تأیید ندارد";
-
-/* Label displayed below profiles. This is the subject part of the sentence 'Profile names are not verified'. It is embedded into THREAD_DETAILS_PROFILE_NAMES_ARE_NOT_VERIFIED_PREDICATE. */
-"THREAD_DETAILS_PROFILE_NAMES_ARE_NOT_VERIFIED_SUBJECT" = "نام نمایه";
+/* Label displayed below profiles */
+"THREAD_DETAILS_PROFILE_NAMES_ARE_NOT_VERIFIED_SUBJECT" = "Name not verified";
 
 /* Indicator that a blurred avatar can be revealed by tapping. */
 "THREAD_DETAILS_TAP_TO_UNBLUR_AVATAR" = "نمایش";
@@ -10063,6 +10108,9 @@
 /* Button label for the 'View Contact' button */
 "VIEW_CONTACT_BUTTON" = "مشاهده مخاطب";
 
+/* Label for the 'view more' button */
+"VIEW_MORE_BUTTON" = "View More";
+
 /* Toast alert text shown when tapping on a view-once message that has already been viewed. */
 "VIEW_ONCE_ALREADY_VIEWED_TOAST" = "شما قبلاً این پیام را دیده‌اید.";
 
@@ -10070,7 +10118,7 @@
 "VIEW_ONCE_MESSAGES_TOOLTIP" = "اینجا ضربه بزنید تا این پیام پس از مشاهده شدن ناپدید شود.";
 
 /* Toast alert text shown when tapping on a view-once message that you have sent. */
-"VIEW_ONCE_OUTGOING_TOAST" = "View-once media is deleted after sending";
+"VIEW_ONCE_OUTGOING_TOAST" = "رسانه یک‌بار قابل مشاهده پس از ارسال پاک می‌شود";
 
 /* View the photo of a group or user */
 "VIEW_PHOTO" = "مشاهده عکس";

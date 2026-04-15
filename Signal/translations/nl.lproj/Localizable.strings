@@ -368,13 +368,13 @@
 "ATTACHMENT_APPROVAL_MEDIA_QUALITY_TITLE" = "Mediakwaliteit";
 
 /* Notification body shown when media sync to a linked device is complete. */
-"ATTACHMENT_BACKFILL_FINISHED_NOTIFICATION" = "Finished syncing with Signal on your linked device.";
+"ATTACHMENT_BACKFILL_FINISHED_NOTIFICATION" = "Synchroniseren met Signal op je gekoppelde apparaat voltooid.";
 
 /* Notification body shown when media sync to a linked device was interrupted. */
-"ATTACHMENT_BACKFILL_INTERRUPTED_NOTIFICATION" = "Open Signal to continue syncing with your linked device";
+"ATTACHMENT_BACKFILL_INTERRUPTED_NOTIFICATION" = "Open Signal om door te gaan met synchroniseren met je gekoppelde apparaat";
 
 /* Notification body shown while syncing media to a linked device. */
-"ATTACHMENT_BACKFILL_SYNCING_NOTIFICATION" = "Syncing with Signal on your linked device";
+"ATTACHMENT_BACKFILL_SYNCING_NOTIFICATION" = "Aan het synchroniseren met Signal op je gekoppelde apparaat";
 
 /* Generic filename for an attachment with no known name */
 "ATTACHMENT_DEFAULT_FILENAME" = "Bijlage";
@@ -459,6 +459,9 @@
 
 /* Accessibility label for attaching photos */
 "ATTACHMENT_LABEL" = "Bijlage";
+
+/* Displayed in a full screen modal when app is processing media that was pasted into message compose field. */
+"ATTACHMENT_PASTING" = "Pasting…";
 
 /* Alert title when picking a document fails for an unknown reason */
 "ATTACHMENT_PICKER_DOCUMENTS_FAILED_ALERT_TITLE" = "Document kiezen mislukt.";
@@ -566,7 +569,7 @@
 "BACKUP_KEY_REMINDER_MEGAPHONE_ACTION" = "Verifiëren";
 
 /* Body for Recovery Key reminder megaphone */
-"BACKUP_KEY_REMINDER_MEGAPHONE_BODY" = "We vragen je af en toe om je herstelsleutel te verifiëren om te bevestigen dat je die nog steeds weet";
+"BACKUP_KEY_REMINDER_MEGAPHONE_BODY" = "We vragen je af en toe om je herstelsleutel in te voeren om te bevestigen dat je die nog steeds weet";
 
 /* Title for Recovery Key reminder megaphone */
 "BACKUP_KEY_REMINDER_MEGAPHONE_TITLE" = "Verifieer je herstelsleutel";
@@ -605,7 +608,7 @@
 "BACKUP_ONBOARDING_INTRO_BULLET_1" = "End-to-end versleuteld";
 
 /* Bullet point on a view introducing Backups during an onboarding flow. */
-"BACKUP_ONBOARDING_INTRO_BULLET_2" = "Optioneel, altijd";
+"BACKUP_ONBOARDING_INTRO_BULLET_2" = "Optioneel";
 
 /* Bullet point on a view introducing Backups during an onboarding flow. */
 "BACKUP_ONBOARDING_INTRO_BULLET_3" = "Verwijder je back-up wanneer je wilt";
@@ -1318,6 +1321,9 @@
 /* Navigation bar title for the sheet used to create & configure a Call Link. */
 "CALL_LINK_CREATE" = "Oproeplink maken";
 
+/* Displayed in a full screen modal view when creating a Call Link */
+"CALL_LINK_CREATING_MODAL" = "Creating…";
+
 /* Description of sheet presented when call link creation fails. */
 "CALL_LINK_CREATION_FAILURE_SHEET_DESCRIPTION" = "Oproeplink kon niet worden gemaakt. Controleer je internetverbinding en probeer het opnieuw.";
 
@@ -1950,6 +1956,15 @@
 
 /* Title for a view allowing users to choose a Backup plan. */
 "CHOOSE_BACKUP_PLAN_TITLE" = "Kies je back-upabonnement";
+
+/* VoiceOver hint for an expanded collapse set button. */
+"COLLAPSE_SET_ACCESSIBILITY_HINT_COLLAPSE" = "Hide updates";
+
+/* VoiceOver hint for a collapsed collapse set button. */
+"COLLAPSE_SET_ACCESSIBILITY_HINT_EXPAND" = "Show updates";
+
+/* Short label shown in a collapsed timer-changes set indicating the timer is now disabled. */
+"COLLAPSE_SET_TIMER_DISABLED" = "Disabled";
 
 /* Title for the color & wallpaper settings view. */
 "COLOR_AND_WALLPAPER_SETTINGS_TITLE" = "Chatkleur & -achtergrond";
@@ -3446,7 +3461,7 @@
 "END_GROUP_ACTION_ERROR" = "Deze optie is niet beschikbaar omdat de groep is beëindigd.";
 
 /* Label for a banner in group settings indicating that the group has been ended */
-"END_GROUP_BANNER_LABEL" = "De groep is beëindigd.";
+"END_GROUP_BANNER_LABEL" = "Deze groep is beëindigd.";
 
 /* Label for group chats that have been ended */
 "END_GROUP_BOTTOM_PANEL_LABEL" = "Je kunt geen berichten sturen omdat deze groep is beëindigd.";
@@ -3865,6 +3880,9 @@
 /* Text explaining that you are the only person currently in the group call */
 "GROUP_CALL_NO_ONE_HERE" = "Er is niemand hier";
 
+/* Text indicating you can't take this action because you're not a member of the group */
+"GROUP_CALL_NOT_A_MEMBER" = "This action is unavailable because you’re no longer a member of this group.";
+
 /* Copy explaining that a user has joined the group call. Embeds {member name} */
 "GROUP_CALL_NOTIFICATION_ONE_JOINED_FORMAT" = "%1$@ neemt nu deel aan de oproep";
 
@@ -3964,6 +3982,9 @@
 /* Message indicating that group was created by an unknown user. */
 "GROUP_CREATED_BY_UNKNOWN_USER" = "De groep is aangemaakt.";
 
+/* Displayed in a full screen modal when creating a new group. */
+"GROUP_CREATING" = "Creating…";
+
 /* Message shown in conversation view that indicates there were issues with group creation. */
 "GROUP_CREATION_FAILED" = "Niet alle leden konden worden toegevoegd aan de groep. Tik om opnieuw te proberen.";
 
@@ -4008,6 +4029,9 @@
 
 /* Message indicating that the group invite link was enabled by a remote user. Embeds {{ user who enabled the group invite link }}. */
 "GROUP_INVITE_LINK_ENABLED_WITHOUT_APPROVAL_BY_REMOTE_USER_FORMAT" = "%1$@ heeft de groepslink zonder beheerdersgoedkeuring van nieuwe leden ingeschakeld.";
+
+/* Displayed in a full screen modal when joining a group via an invite link */
+"GROUP_INVITE_LINK_JOINING" = "Joining…";
 
 /* Message indicating that the group invite link was reset. */
 "GROUP_INVITE_LINK_RESET" = " De groepslink is vernieuwd.";
@@ -4253,10 +4277,13 @@
 "GROUP_NAME_EDUCATION_SHEET_BULLET_1" = "Wees voorzichtig met groepen die zich voordoen als organisaties en bedrijven";
 
 /* Second bullet point for the explainer sheet for group names */
-"GROUP_NAME_EDUCATION_SHEET_BULLET_2" = "Profielnamen van leden in groepen worden niet geverifieerd";
+"GROUP_NAME_EDUCATION_SHEET_BULLET_2" = "Signal can't verify names and photos";
 
 /* Third bullet point for the explainer sheet for group names */
-"GROUP_NAME_EDUCATION_SHEET_BULLET_3" = "Deel geen persoonlijke informatie met mensen die je niet kent";
+"GROUP_NAME_EDUCATION_SHEET_BULLET_3" = "Signal will never contact you for your registration code, PIN, or recovery key";
+
+/* Fourth bullet point for the explainer sheet for group names */
+"GROUP_NAME_EDUCATION_SHEET_BULLET_4" = "Don’t share personal information with people you don’t know";
 
 /* Header for the explainer sheet for group names */
 "GROUP_NAME_EDUCATION_SHEET_HEADER_FORMAT" = "<bold>Groepsnamen</bold> worden gekozen door leden van de groep.";
@@ -4504,15 +4531,6 @@
 /* Error indicating that an error occurred while accepting an invite. */
 "GROUPS_INVITE_ACCEPT_INVITE_FAILED" = "Kon de uitnodiging niet accepteren.";
 
-/* Label for 'block group' button in group invite view. */
-"GROUPS_INVITE_BLOCK_GROUP" = "Groep blokkeren";
-
-/* Label for 'block group and inviter' button in group invite view. Embeds {{name of user who invited you}}. */
-"GROUPS_INVITE_BLOCK_GROUP_AND_INVITER_FORMAT" = "%1$@ en de groep blokkeren";
-
-/* Label for 'block inviter' button in group invite view. Embeds {{name of user who invited you}}. */
-"GROUPS_INVITE_BLOCK_INVITER_FORMAT" = "%1$@ blokkeren";
-
 /* Label for 'invite friends to group' button. */
 "GROUPS_INVITE_FRIENDS_BUTTON" = "Vrienden uitnodigen";
 
@@ -4717,6 +4735,12 @@
 /* An info message inserted into the chat when you accept a message request, in a 1:1 or group chat. */
 "INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST" = "Je hebt het gespreksverzoek geaccepteerd.";
 
+/* An info message inserted into the chat when you accept a message request in a group chat. */
+"INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_GROUP" = "You accepted the group request.";
+
+/* An info message inserted into the chat when you accept a message request in a 1:1. {{ Embeds name of your chat partner }}. */
+"INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_ONE_ON_ONE" = "You accepted %1$@'s message request.";
+
 /* Header for an action sheet providing options in response to an accepted 1:1 message request. Embeds {{ the name of your chat partner }}. */
 "INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_OPTIONS_ACTION_SHEET_HEADER_CONTACT" = "Je hebt een gespreksverzoek van %1$@ geaccepteerd. Als dit een vergissing was, kun je hieronder een actie kiezen.";
 
@@ -4724,7 +4748,7 @@
 "INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_OPTIONS_ACTION_SHEET_HEADER_GROUP" = "Je hebt een gespreksverzoek van deze groep geaccepteerd. Als dit een vergissing was, kun je hieronder een actie kiezen.";
 
 /* Title for a button shown alongside an info message indicating you accepted a message request. */
-"INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_OPTIONS_BUTTON" = "Opties";
+"INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_OPTIONS_BUTTON" = "Block or Report…";
 
 /* An info message inserted into a group chat when you block the group. */
 "INFO_MESSAGE_BLOCKED_GROUP" = "Je hebt deze groep geblokkeerd.";
@@ -5443,6 +5467,15 @@
 /* Action sheet title to confirm blocking a group via a message request. Embeds {{group name}} */
 "MESSAGE_REQUEST_BLOCK_GROUP_TITLE_FORMAT" = "%1$@ blokkeren en verlaten?";
 
+/* Message for an action sheet asking the user to confirm if they want to accept a message request. {{ Embeds 'Signal will never' in bolded text }} */
+"MESSAGE_REQUEST_CONFIRM_ACCEPT_MESSAGE" = "Only accept requests from people you trust. %1$@ message you for a registration code, PIN, or recovery key.";
+
+/* Embedded text in the message for an action sheet asking the user to confirm if they want to accept a message request. */
+"MESSAGE_REQUEST_CONFIRM_ACCEPT_MESSAGE_EMBEDDED_BOLD_TEXT" = "Signal will never";
+
+/* Title for an action sheet asking the user to confirm if they want to accept a message request */
+"MESSAGE_REQUEST_CONFIRM_ACCEPT_TITLE" = "Accept Request?";
+
 /* Action sheet action to confirm deleting a conversation via a message request. */
 "MESSAGE_REQUEST_DELETE_CONVERSATION_ACTION" = "Verwijderen";
 
@@ -5515,8 +5548,8 @@
 /* A prompt notifying that the user must share their profile with this group. */
 "MESSAGE_REQUEST_VIEW_EXISTING_GROUP_PROMPT" = "Wil je je profielnaam, -foto en -omschrijving met de andere leden delen om je chat met de groep voort te kunnen zetten?";
 
-/* A prompt asking if the user wants to accept a conversation invite. Embeds {{contact name}}. */
-"MESSAGE_REQUEST_VIEW_NEW_CONTACT_PROMPT_FORMAT" = "Wil je berichten van %1$@ ontvangen en je profielnaam, -foto en -omschrijving met diegene delen? Personen weten niet dat je hun berichten hebt gezien totdat je het gespreksverzoek hebt geaccepteerd.";
+/* A prompt asking if the user wants to accept a conversation invite. */
+"MESSAGE_REQUEST_VIEW_NEW_CONTACT_PROMPT" = "Let this person message you and share your name and photo with them? They won’t know you’ve seen their message until you accept.";
 
 /* A prompt asking if the user wants to accept a group invite. */
 "MESSAGE_REQUEST_VIEW_NEW_GROUP_PROMPT" = "Wil je lid worden van deze groep en je profielnaam, -foto en -omschrijving met de andere leden delen? Leden van de groep weten niet dat je hun berichten hebt gezien totdat je het gespreksverzoek hebt geaccepteerd.";
@@ -5637,6 +5670,18 @@
 
 /* Alert title when user has previously denied media library access */
 "MISSING_MEDIA_LIBRARY_PERMISSION_TITLE" = "Signal heeft voor deze functie toegang tot je foto’s nodig.";
+
+/* Text on a blocking progress screen that indicates that there's a deletion in progress. */
+"MODAL_DELETING" = "Deleting…";
+
+/* Text on a blocking progress screen that indicates that there's a preparation in progress. */
+"MODAL_PREPARING" = "Preparing…";
+
+/* Text on a blocking progress screen that indicates that there's a search in progress. */
+"MODAL_SEARCHING" = "Searching…";
+
+/* Text on a blocking progress screen that indicates that there's an update in progress. */
+"MODAL_UPDATING" = "Updating…";
 
 /* An error shown as the title of an alert when try to link a new device & the user is already at the limit. */
 "MULTIDEVICE_PAIRING_MAX_DESC" = "Je kunt niet nog meer apparaten koppelen.";
@@ -6833,7 +6878,7 @@
 "PIN_REMINDER_MEGAPHONE_ACTION" = "Pincode bevestigen";
 
 /* Body for PIN reminder megaphone */
-"PIN_REMINDER_MEGAPHONE_BODY" = "We vragen je af en toe om je pincode te bevestigen, zodat je je pincode goed onthoudt.";
+"PIN_REMINDER_MEGAPHONE_BODY" = "We vragen je af en toe om je pincode in te voeren, zodat je je pincode goed onthoudt.";
 
 /* Toast indicating that we'll ask you for your PIN again tomorrow, after successfully entering it. */
 "PIN_REMINDER_MEGAPHONE_FEW_DAYS_SUCCESSFUL_TOAST" = "Juiste pincode. We zullen het over een aantal dagen opnieuw vragen.";
@@ -7145,13 +7190,16 @@
 "PROFILE_NAME_CHANGE_SYSTEM_NONCONTACT_FORMAT" = "%1$@ heeft diens profielnaam naar ‘%2$@’ gewijzigd.";
 
 /* First bullet point for the explainer sheet for profile names */
-"PROFILE_NAME_EDUCATION_SHEET_BULLET_1" = "Profielnamen zijn niet geverifieerd";
+"PROFILE_NAME_EDUCATION_SHEET_BULLET_1" = "Signal can't verify names and photos";
 
 /* Second bullet point for the explainer sheet for profile names */
-"PROFILE_NAME_EDUCATION_SHEET_BULLET_2" = "Wees voorzichtig met accounts die zich voordoen als andere personen";
+"PROFILE_NAME_EDUCATION_SHEET_BULLET_2" = "Signal will never contact you for your registration code, PIN, or recovery key";
 
 /* Third bullet point for the explainer sheet for profile names */
-"PROFILE_NAME_EDUCATION_SHEET_BULLET_3" = "Deel geen persoonlijke informatie met mensen die je niet kent";
+"PROFILE_NAME_EDUCATION_SHEET_BULLET_3" = "Be cautious of accounts that impersonate others";
+
+/* Fourth bullet point for the explainer sheet for profile names */
+"PROFILE_NAME_EDUCATION_SHEET_BULLET_4" = "Don’t share personal information with people you don’t know";
 
 /* Header for the explainer sheet for profile names */
 "PROFILE_NAME_EDUCATION_SHEET_HEADER_FORMAT" = "Op Signal worden <bold>profielnamen</bold> gekozen door de eigenaar van het account.";
@@ -7877,34 +7925,40 @@
 "SAFETY_TIPS_FAKE_BUSINESS_BODY" = "Wees voorzichtig met bedrijven of overheidsinstanties die je benaderen. Berichten van de belastingdienst, koeriers en andere bedrijven kunnen spam zijn.";
 
 /* Message title describing the safety tip about unknown or fake businesses. */
-"SAFETY_TIPS_FAKE_BUSINESS_TITLE" = "Nepbedrijven en -instellingen";
-
-/* Message contents for the fake names safety tip. */
-"SAFETY_TIPS_FAKE_NAMES_BODY" = "Signal neemt nooit contact met je op om je registratie- of pincode te vragen. Wees voorzichtig met verzoeken waarin iemand zich voordoet als iemand anders. Profielnamen worden gekozen door de eigenaar van het account en worden niet geverifieerd.";
-
-/* Message title describing the fake names safety tip. */
-"SAFETY_TIPS_FAKE_NAMES_TITLE" = "Valse namen en accounts";
-
-/* Message describing safety tips for group conversations. */
-"SAFETY_TIPS_GROUPS_HEADER_MESSAGE" = "Beoordeel dit verzoek zorgvuldig. Geen van je contacten of mensen met wie je chat, maakt deel uit van deze groep. Hier zijn een paar dingen om op te letten:";
+"SAFETY_TIPS_FAKE_BUSINESS_TITLE" = "Fake businesses";
 
 /* Title for Safety Tips education screen. */
 "SAFETY_TIPS_HEADER_TITLE" = "Veiligheidstips";
 
-/* Message describing safety tips for 1:1 conversations. */
-"SAFETY_TIPS_INDIVIDUAL_HEADER_MESSAGE" = "Wees voorzichtig met het accepteren van gespreksverzoeken van mensen die je niet kent. Kijk uit voor:";
+/* Message body describing the scams safety tip. */
+"SAFETY_TIPS_LOOK_OUT_FOR_SCAMS_BODY" = "Avoid vague messages that try to get you to reply. Be aware of financial tips and suspicious web links.";
+
+/* Message title describing the scams safety tip. */
+"SAFETY_TIPS_LOOK_OUT_FOR_SCAMS_TITLE" = "Look out for scams";
 
 /* Message contents for the unknown links in messages safety tip. */
 "SAFETY_TIPS_MESSAGE_LINKS_BODY" = "Wees voorzichtig met berichten van mensen die je niet kent die links bevatten. Klik nooit op links van mensen die je niet vertrouwt.";
 
 /* Message title describing the safety tip about unknown links in messages. */
-"SAFETY_TIPS_MESSAGE_LINKS_TITLE" = "Berichten met links";
+"SAFETY_TIPS_MESSAGE_LINKS_TITLE" = "Messages with web links";
 
-/* Button that will show the next safety tip. */
-"SAFETY_TIPS_NEXT_TIP_BUTTON" = "Volgende";
+/* Message body describing the review names safety tip. */
+"SAFETY_TIPS_REVIEW_NAMES_BODY" = "Look out for the “Name not verified” notice. Everyone sets their own profile name in Signal.";
 
-/* Button that will show the previous safety tip. */
-"SAFETY_TIPS_PREVIOUS_TIP_BUTTON" = "Vorige";
+/* Message body describing the review names safety tip in the 'view more' flow. */
+"SAFETY_TIPS_REVIEW_NAMES_BODY_VIEW_MORE" = "Look out for the “Name not verified” notice. Everyone sets their own profile name and photo in Signal. If you’re unsure who a new request is from, it’s safer to ignore it.";
+
+/* Message title describing the review names safety tip. */
+"SAFETY_TIPS_REVIEW_NAMES_TITLE" = "Review names and photos";
+
+/* Message body describing the signal chats tip. */
+"SAFETY_TIPS_SIGNAL_CHATS_BODY" = "Signal will never message you for your registration code, PIN, or recovery key. Never respond to a chat pretending to be Signal.";
+
+/* Message body describing the signal chats tip in the 'view more' flow. */
+"SAFETY_TIPS_SIGNAL_CHATS_BODY_VIEW_MORE" = "Signal will never message you for your registration code, PIN, or recovery key. Don’t reply to chats pretending to be Signal or Signal Support. Bad actors set up fake names to try to take over your account.";
+
+/* Message title describing the signal chats tip. */
+"SAFETY_TIPS_SIGNAL_CHATS_TITLE" = "Don’t respond to chats from Signal";
 
 /* Message contents for the vague message safety tip. */
 "SAFETY_TIPS_VAGUE_MESSAGE_BODY" = "Spammers beginnen vaak met een eenvoudig bericht als “Hallo” om je te lokken. Als je reageert, proberen ze je aan de praat te houden.";
@@ -9632,7 +9686,7 @@
 "SYSTEM_MESSAGE_DEFAULT_DISAPPEARING_MESSAGE_TIMER_FORMAT" = "Zodra je een bericht verzendt zal de timer voor verdwijnende berichten op %1$@ worden ingesteld.";
 
 /* Indicator warning about an unknown contact thread */
-"SYSTEM_MESSAGE_UNKNOWN_THREAD_REVIEW_CAREFULLY_WARNING" = "Beoordeel zorgvuldig";
+"SYSTEM_MESSAGE_UNKNOWN_THREAD_REVIEW_CAREFULLY_WARNING" = "Review requests carefully";
 
 /* Tap to Replace Emoji string for reaction configuration */
 "TAP_REPLACE_EMOJI" = "Tik op een emoji om die te vervangen";
@@ -9664,12 +9718,6 @@
 /* Label for a group you are not in which has four members, listing their names */
 "THREAD_DETAILS_FOUR_MEMBERS" = "%1$@, %2$@, %3$@ en %4$@";
 
-/* Label displayed below group info. This is the predicate part of the sentence 'Group names are not verified'. Embeds {{ THREAD_DETAILS_GROUP_NAMES_ARE_NOT_VERIFIED_SUBJECT }} */
-"THREAD_DETAILS_GROUP_NAMES_ARE_NOT_VERIFIED_PREDICATE" = "%1$@ zijn niet geverifieerd";
-
-/* Label displayed below group info. This is the subject part of the sentence 'Group names are not verified'. It is embedded into THREAD_DETAILS_GROUP_NAMES_ARE_NOT_VERIFIED_PREDICATE. */
-"THREAD_DETAILS_GROUP_NAMES_ARE_NOT_VERIFIED_SUBJECT" = "Groepsnamen";
-
 /* Label for a group with more than four members, listing the first three members' names and embedding THREAD_DETAILS_OTHER_MEMBERS_COUNT_%ld as a count of other members */
 "THREAD_DETAILS_MANY_MEMBERS" = "%1$@, %2$@, %3$@ en %4$@";
 
@@ -9688,11 +9736,8 @@
 /* A string indicating a mutual group the user shares with this contact. Embeds {{mutual group name}} */
 "THREAD_DETAILS_ONE_MUTUAL_GROUP" = "Lid van %1$@";
 
-/* Label displayed below profiles. This is the predicate part of the sentence 'Profile names are not verified'. Embeds {{ THREAD_DETAILS_PROFILE_NAMES_ARE_NOT_VERIFIED_SUBJECT }} */
-"THREAD_DETAILS_PROFILE_NAMES_ARE_NOT_VERIFIED_PREDICATE" = "%1$@ zijn niet geverifieerd";
-
-/* Label displayed below profiles. This is the subject part of the sentence 'Profile names are not verified'. It is embedded into THREAD_DETAILS_PROFILE_NAMES_ARE_NOT_VERIFIED_PREDICATE. */
-"THREAD_DETAILS_PROFILE_NAMES_ARE_NOT_VERIFIED_SUBJECT" = "Profielnamen";
+/* Label displayed below profiles */
+"THREAD_DETAILS_PROFILE_NAMES_ARE_NOT_VERIFIED_SUBJECT" = "Name not verified";
 
 /* Indicator that a blurred avatar can be revealed by tapping. */
 "THREAD_DETAILS_TAP_TO_UNBLUR_AVATAR" = "Bekijk";
@@ -10063,6 +10108,9 @@
 /* Button label for the 'View Contact' button */
 "VIEW_CONTACT_BUTTON" = "Contact bekijken";
 
+/* Label for the 'view more' button */
+"VIEW_MORE_BUTTON" = "View More";
+
 /* Toast alert text shown when tapping on a view-once message that has already been viewed. */
 "VIEW_ONCE_ALREADY_VIEWED_TOAST" = "Je hebt dit bericht al bekeken.";
 
@@ -10070,7 +10118,7 @@
 "VIEW_ONCE_MESSAGES_TOOLTIP" = "Tik hier om ervoor te zorgen dat dit bericht wordt verwijderd nadat het is gezien.";
 
 /* Toast alert text shown when tapping on a view-once message that you have sent. */
-"VIEW_ONCE_OUTGOING_TOAST" = "View-once media is deleted after sending";
+"VIEW_ONCE_OUTGOING_TOAST" = "Eenmaligeweergave-media worden verwijderd na verzenden";
 
 /* View the photo of a group or user */
 "VIEW_PHOTO" = "Afbeelding bekijken";
