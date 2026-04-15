@@ -686,23 +686,6 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
     }
 
     func didTapBlockThread() {
-        if
-            let groupThread = thread as? TSGroupThread,
-            let groupModel = groupThread.groupModel as? TSGroupModelV2,
-            let localAci = DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction?.aci,
-            groupModel.groupMembership.canLocalUserLeaveGroupWithoutChoosingNewAdmin(localAci: localAci)
-        {
-            LeaveGroupCoordinator(
-                groupThread: groupThread,
-                groupModel: groupModel,
-                localAci: localAci,
-                onSuccess: { [weak self] in
-                    self?.navigationController?.popViewController(animated: true)
-                },
-            ).startLeaveGroupFlow(rootViewController: self)
-            return
-        }
-
         // Blocking auto-leaves the group on its own.
         BlockListUIUtils.showBlockThreadActionSheet(thread, from: self) { [weak self] _ in
             self?.reloadThreadAndUpdateContent()
