@@ -7,7 +7,7 @@ import SignalServiceKit
 import SignalUI
 
 protocol MessageRequestDelegate: AnyObject {
-    func messageRequestViewDidTapBlock(mode: MessageRequestMode)
+    func messageRequestViewDidTapBlock()
     func messageRequestViewDidTapDelete()
     func messageRequestViewDidTapAccept(mode: MessageRequestMode, unblockThread: Bool, unhideRecipient: Bool)
     func messageRequestViewDidTapUnblock(mode: MessageRequestMode)
@@ -334,7 +334,7 @@ class MessageRequestView: ConversationBottomPanelView {
         } else if isThreadFromHiddenRecipient {
             buttons.append(
                 prepareButton(title: LocalizedStrings.block, destructive: true) { [weak self] in
-                    self?.delegate?.messageRequestViewDidTapBlock(mode: mode)
+                    self?.delegate?.messageRequestViewDidTapBlock()
                 },
             )
             if !hasReportedSpam {
@@ -358,7 +358,7 @@ class MessageRequestView: ConversationBottomPanelView {
         } else if hasSentMessages {
             buttons.append(
                 prepareButton(title: LocalizedStrings.block, destructive: true) { [weak self] in
-                    self?.delegate?.messageRequestViewDidTapBlock(mode: mode)
+                    self?.delegate?.messageRequestViewDidTapBlock()
                 },
             )
             if !hasReportedSpam {
@@ -385,7 +385,7 @@ class MessageRequestView: ConversationBottomPanelView {
         } else {
             buttons.append(
                 prepareButton(title: LocalizedStrings.block, destructive: true) { [weak self] in
-                    self?.delegate?.messageRequestViewDidTapBlock(mode: mode)
+                    self?.delegate?.messageRequestViewDidTapBlock()
                 },
             )
             if !hasReportedSpam {
@@ -439,7 +439,7 @@ class MessageRequestView: ConversationBottomPanelView {
 
         buttons.append(
             prepareButton(title: LocalizedStrings.block, destructive: true) { [weak self] in
-                self?.delegate?.messageRequestViewDidTapBlock(mode: mode)
+                self?.delegate?.messageRequestViewDidTapBlock()
             },
         )
 

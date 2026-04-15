@@ -9,18 +9,11 @@ import SignalServiceKit
 import SignalUI
 
 extension ConversationViewController: MessageRequestDelegate {
-    func messageRequestViewDidTapBlock(mode: MessageRequestMode) {
+    func messageRequestViewDidTapBlock() {
         AssertIsOnMainThread()
 
-        switch mode {
-        case .none:
-            owsFailDebug("Invalid mode.")
-        case .contactOrGroupRequest:
-            let blockSheet = createBlockThreadActionSheet()
-            presentActionSheet(blockSheet)
-        case .groupInviteRequest:
-            showBlockInviteActionSheet()
-        }
+        let blockSheet = createBlockThreadActionSheet()
+        presentActionSheet(blockSheet)
     }
 
     func messageRequestViewDidTapReport() {
@@ -181,44 +174,6 @@ private extension ConversationViewController {
         NotificationCenter.default.post(name: ChatListViewController.clearSearch, object: nil)
     }
 
-    func blockUserAndDelete(_ aci: Aci) {
-        // Do not leave the group while blocking the thread; we'll
-        // that below so that we can surface an error to the user
-        // if leaving the group fails.
-        SSKEnvironment.shared.databaseStorageRef.write { transaction in
-            SSKEnvironment.shared.blockingManagerRef.addBlockedAci(
-                aci,
-                blockMode: .local,
-                tx: transaction,
-            )
-        }
-        leaveAndSoftDeleteThread(messageRequestResponseType: .delete)
-    }
-
-    func blockUserAndGroupAndDelete(_ aci: Aci) {
-        SSKEnvironment.shared.databaseStorageRef.write { transaction in
-            if let groupThread = self.thread as? TSGroupThread {
-                // Do not leave the group while blocking the thread; we'll
-                // that below so that we can surface an error to the user
-                // if leaving the group fails.
-                SSKEnvironment.shared.blockingManagerRef.addBlockedGroupId(
-                    groupThread.groupId,
-                    blockMode: .local,
-                    shouldLeave: false,
-                    transaction: transaction,
-                )
-            } else {
-                owsFailDebug("Invalid thread.")
-            }
-            SSKEnvironment.shared.blockingManagerRef.addBlockedAci(
-                aci,
-                blockMode: .local,
-                tx: transaction,
-            )
-        }
-        leaveAndSoftDeleteThread(messageRequestResponseType: .blockAndDelete)
-    }
-
     func leaveAndSoftDeleteThread(
         messageRequestResponseType: OutgoingMessageRequestResponseSyncMessage.ResponseType,
     ) {
@@ -376,79 +331,6 @@ private extension ConversationViewController {
 // MARK: - Action Sheets
 
 extension ConversationViewController {
-
-    func showBlockInviteActionSheet() {
-        Logger.info("")
-
-        guard let groupThread = thread as? TSGroupThread else {
-            owsFailDebug("Invalid thread.")
-            return
-        }
-
-        guard let localIdentifiers = DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction else {
-            owsFailDebug("Missing local identifiers!")
-            return
-        }
-
-        let groupMembership = groupThread.groupModel.groupMembership
-
-        guard
-            let invitedAtServiceId = groupMembership.localUserInvitedAtServiceId(
-                localIdentifiers: localIdentifiers,
-            )
-        else {
-            owsFailDebug("Can't reject invite if not invited!")
-            return
-        }
-
-        let actionSheet = ActionSheetController(title: nil, message: nil)
-
-        actionSheet.addAction(ActionSheetAction(
-            title: OWSLocalizedString(
-                "GROUPS_INVITE_BLOCK_GROUP",
-                comment: "Label for 'block group' button in group invite view.",
-            ),
-            style: .default,
-        ) { [weak self] _ in
-            self?.blockThread()
-        })
-
-        if let addedByAci = groupMembership.addedByAci(forInvitedMember: invitedAtServiceId) {
-            let addedByName = SSKEnvironment.shared.databaseStorageRef.read { tx in
-                return SSKEnvironment.shared.contactManagerRef.displayName(for: SignalServiceAddress(addedByAci), tx: tx).resolvedValue()
-            }
-
-            actionSheet.addAction(ActionSheetAction(
-                title: String.nonPluralLocalizedStringWithFormat(
-                    OWSLocalizedString(
-                        "GROUPS_INVITE_BLOCK_INVITER_FORMAT",
-                        comment: "Label for 'block inviter' button in group invite view. Embeds {{name of user who invited you}}.",
-                    ),
-                    addedByName,
-                ),
-                style: .default,
-            ) { [weak self] _ in
-                self?.blockUserAndDelete(addedByAci)
-            })
-
-            actionSheet.addAction(ActionSheetAction(
-                title: String.nonPluralLocalizedStringWithFormat(
-                    OWSLocalizedString(
-                        "GROUPS_INVITE_BLOCK_GROUP_AND_INVITER_FORMAT",
-                        comment: "Label for 'block group and inviter' button in group invite view. Embeds {{name of user who invited you}}.",
-                    ),
-                    addedByName,
-                ),
-                style: .default,
-            ) { [weak self] _ in
-                self?.blockUserAndGroupAndDelete(addedByAci)
-            })
-        }
-
-        actionSheet.addAction(OWSActionSheets.cancelAction)
-
-        presentActionSheet(actionSheet)
-    }
 
     func createBlockThreadActionSheet(sheetCompletion: ((Bool) -> Void)? = nil) -> ActionSheetController {
         Logger.info("")
