@@ -139,6 +139,22 @@ extension TSInfoMessage {
                 comment: "An info message inserted into a group chat when you unblock the group.",
             )
         case .acceptedMessageRequest:
+            let thread = TSThread.fetchViaCache(uniqueId: self.uniqueThreadId, transaction: tx)
+            if let thread, thread.isGroupThread {
+                return OWSLocalizedString(
+                    "INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_GROUP",
+                    comment: "An info message inserted into the chat when you accept a message request in a group chat.",
+                )
+            }
+            if let address = TSContactThread.contactAddress(fromThreadId: self.uniqueThreadId, transaction: tx) {
+                let recipientName = SSKEnvironment.shared.contactManagerRef.displayNameString(for: address, transaction: tx)
+                let format = OWSLocalizedString(
+                    "INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST_ONE_ON_ONE",
+                    comment: "An info message inserted into the chat when you accept a message request in a 1:1. {{ Embeds name of your chat partner }}.",
+                )
+                return String.nonPluralLocalizedStringWithFormat(format, recipientName)
+            }
+            owsFailDebug("No contact address for message request that is not in a group thread")
             return OWSLocalizedString(
                 "INFO_MESSAGE_ACCEPTED_MESSAGE_REQUEST",
                 comment: "An info message inserted into the chat when you accept a message request, in a 1:1 or group chat.",
