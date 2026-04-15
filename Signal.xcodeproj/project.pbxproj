@@ -1777,6 +1777,8 @@
 		B95A765E2B76E93500AA7E97 /* FindByUsernameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95A765D2B76E93500AA7E97 /* FindByUsernameViewController.swift */; };
 		B965716E2F0DC91900690CE9 /* CallQualitySurvey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B965716C2F0CAA3600690CE9 /* CallQualitySurvey.swift */; };
 		B96D6D792B9F83270039EB99 /* SignalSymbols-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = B96D6D782B9F83270039EB99 /* SignalSymbols-Regular.otf */; };
+		B96EFB512F7B03B600BD721E /* CollapseSetInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96EFB502F7B03B600BD721E /* CollapseSetInteraction.swift */; };
+		B96EFB532F7B041200BD721E /* CVComponentCollapseSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96EFB522F7B041200BD721E /* CVComponentCollapseSet.swift */; };
 		B9754F542C73AD49000000E4 /* ConversationAvatarView+SwiftUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9754F532C73AD49000000E4 /* ConversationAvatarView+SwiftUI.swift */; };
 		B97803012DD65B0A00E9FC82 /* LinearProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97803002DD65B0A00E9FC82 /* LinearProgressView.swift */; };
 		B982ACFF2BA8FD2A00AD7E81 /* SignalSymbols-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = B982ACFE2BA8FD2A00AD7E81 /* SignalSymbols-Bold.otf */; };
@@ -6058,6 +6060,8 @@
 		B95BBAC12BB36025009EFB4A /* ProfileName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileName.swift; sourceTree = "<group>"; };
 		B965716C2F0CAA3600690CE9 /* CallQualitySurvey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallQualitySurvey.swift; sourceTree = "<group>"; };
 		B96D6D782B9F83270039EB99 /* SignalSymbols-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SignalSymbols-Regular.otf"; sourceTree = "<group>"; };
+		B96EFB502F7B03B600BD721E /* CollapseSetInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollapseSetInteraction.swift; sourceTree = "<group>"; };
+		B96EFB522F7B041200BD721E /* CVComponentCollapseSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CVComponentCollapseSet.swift; sourceTree = "<group>"; };
 		B96FEE2E2CDC297500836191 /* User.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = User.xcconfig; sourceTree = "<group>"; };
 		B9754F532C73AD49000000E4 /* ConversationAvatarView+SwiftUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ConversationAvatarView+SwiftUI.swift"; sourceTree = "<group>"; };
 		B97803002DD65B0A00E9FC82 /* LinearProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearProgressView.swift; sourceTree = "<group>"; };
@@ -8906,6 +8910,7 @@
 				347C383C252CE6C900F3D941 /* CVComponentBodyText.swift */,
 				3426A3792563F0EA0036407F /* CVComponentBottomButtons.swift */,
 				04FAAD0D2E82EEA900E4AAC3 /* CVComponentBottomLabel.swift */,
+				B96EFB522F7B041200BD721E /* CVComponentCollapseSet.swift */,
 				3470C8792555DE5F00F5847C /* CVComponentContactShare.swift */,
 				347C3848252D004C00F3D941 /* CVComponentDateHeader.swift */,
 				348815C3255343FC00D4F4C4 /* CVComponentDelegate.swift */,
@@ -9950,6 +9955,7 @@
 		50E7E1CF2BACC1A500A94861 /* DynamicInteractions */ = {
 			isa = PBXGroup;
 			children = (
+				B96EFB502F7B03B600BD721E /* CollapseSetInteraction.swift */,
 				88535063240829950011D318 /* DateHeaderInteraction.swift */,
 				88DBDFB8263731C800C2101C /* DefaultDisappearingMessageTimerInteraction.swift */,
 				88D1D40322EF8A9700F472C5 /* ThreadDetailsInteraction.swift */,
@@ -18251,6 +18257,7 @@
 				34E95C25269F4F4F004807EC /* CLVTableDataSource.swift in Sources */,
 				0550A5E22C4035170072CC02 /* CLVViewInfo.swift in Sources */,
 				34E95C24269F4F4F004807EC /* CLVViewState.swift in Sources */,
+				B96EFB512F7B03B600BD721E /* CollapseSetInteraction.swift in Sources */,
 				886BB3D425BA0CA900079781 /* ColorAndWallpaperSettingsViewController.swift in Sources */,
 				D9E43C232CC194140001536E /* CommonCallState.swift in Sources */,
 				32B3286524C6957B00E4F974 /* ComposeSupportEmailOperation.swift in Sources */,
@@ -18333,6 +18340,7 @@
 				347C3843252CE6C900F3D941 /* CVComponentBodyText.swift in Sources */,
 				3426A37A2563F0EA0036407F /* CVComponentBottomButtons.swift in Sources */,
 				04FAAD0E2E82EEAE00E4AAC3 /* CVComponentBottomLabel.swift in Sources */,
+				B96EFB532F7B041200BD721E /* CVComponentCollapseSet.swift in Sources */,
 				3470C87A2555DE5F00F5847C /* CVComponentContactShare.swift in Sources */,
 				347C3849252D004C00F3D941 /* CVComponentDateHeader.swift in Sources */,
 				348815C4255343FC00D4F4C4 /* CVComponentDelegate.swift in Sources */,

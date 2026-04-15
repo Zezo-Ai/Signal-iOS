@@ -186,7 +186,10 @@ extension ConversationViewController {
             return scrollToBottomOfConversation(animated: animated)
         }
 
-        guard let indexPath = indexPath(forInteractionUniqueId: lastVisibleInteraction.uniqueId) else {
+        guard
+            let renderedId = safeUniqueIdForScrolling(interactionUniqueId: lastVisibleInteraction.uniqueId),
+            let indexPath = indexPath(forInteractionUniqueId: renderedId)
+        else {
             owsFailDebug("No index path for interaction, scrolling to bottom")
             scrollToBottomOfConversation(animated: animated)
             return
@@ -194,7 +197,7 @@ extension ConversationViewController {
 
         scrollToInteraction(
             indexPath: indexPath,
-            interactionUniqueId: lastVisibleInteraction.uniqueId,
+            interactionUniqueId: renderedId,
             onScreenPercentage: CGFloat(lastVisibleInteraction.onScreenPercentage),
             alignment: .bottom,
             animated: animated,
@@ -373,6 +376,7 @@ extension ConversationViewController {
                 animated: isAnimated,
             )
         } else {
+            expandCollapseSetContaining(interactionId: interactionId)
             loadCoordinator.enqueueLoadAndScrollToInteraction(
                 interactionId: interactionId,
                 onScreenPercentage: onScreenPercentage,
@@ -380,6 +384,21 @@ extension ConversationViewController {
                 isAnimated: isAnimated,
             )
         }
+    }
+
+    /// Finds the uniqueId of the rendered item representing the given interaction.
+    /// If the interaction is inside a CollapseSetInteraction, returns the set's uniqueId.
+    private func safeUniqueIdForScrolling(interactionUniqueId: String) -> String? {
+        if indexPath(forInteractionUniqueId: interactionUniqueId) != nil {
+            return interactionUniqueId
+        }
+        return renderState.collapseSetUniqueId(forCollapsedInteractionId: interactionUniqueId)
+    }
+
+    private func expandCollapseSetContaining(interactionId: String) {
+        guard let parentUniqueId = renderState.collapseSetUniqueId(forCollapsedInteractionId: interactionId) else { return }
+        viewState.expandedCollapseSets.insert(parentUniqueId)
+        loadCoordinator.enqueueReload()
     }
 
     func setScrollActionForSizeTransition() {
@@ -409,9 +428,12 @@ extension ConversationViewController {
                 return CVScrollAction(action: .bottomOfLoadWindow, isAnimated: false)
             }
 
+            let renderedId = safeUniqueIdForScrolling(
+                interactionUniqueId: lastVisibleInteraction.uniqueId,
+            ) ?? lastVisibleInteraction.uniqueId
             return CVScrollAction(
                 action: .scrollTo(
-                    interactionId: lastVisibleInteraction.uniqueId,
+                    interactionId: renderedId,
                     onScreenPercentage: lastVisibleInteraction.onScreenPercentage,
                     alignment: .bottom,
                 ),

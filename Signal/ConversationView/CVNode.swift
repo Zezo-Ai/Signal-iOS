@@ -32,6 +32,7 @@ public enum CVMessageCellType: Int, CustomStringConvertible, Equatable {
     case systemMessage
     case unknownThreadWarning
     case defaultDisappearingMessageTimer
+    case collapseSet
 
     // MARK: - CustomStringConvertible
 
@@ -58,6 +59,7 @@ public enum CVMessageCellType: Int, CustomStringConvertible, Equatable {
         case .unknownThreadWarning: return "unknownThreadWarning"
         case .defaultDisappearingMessageTimer: return "defaultDisappearingMessageTimer"
         case .poll: return "poll"
+        case .collapseSet: return "collapseSet"
         }
     }
 }

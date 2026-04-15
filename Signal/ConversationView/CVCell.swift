@@ -21,6 +21,7 @@ public enum CVCellReuseIdentifier: String, CaseIterable {
     case threadDetails
     case systemMessage
     case unknownThreadWarning
+    case collapseSet
 }
 
 // MARK: -

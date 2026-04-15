@@ -94,6 +94,8 @@ public enum BuildFlags {
     public enum AttachmentBackfill {
         public static let handleRequests = true
     }
+
+    public static let collapsingChatEvents = build <= .internal
 }
 
 // MARK: -

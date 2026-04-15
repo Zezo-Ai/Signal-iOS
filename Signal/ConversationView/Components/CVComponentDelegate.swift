@@ -34,6 +34,10 @@ public protocol CVComponentDelegate: AnyObject, AudioMessageViewDelegate, CVPoll
 
     func didTapSystemMessageItem(_ item: CVTextLabel.Item)
 
+    // MARK: - Collapse Sets
+
+    func didTapCollapseSet(collapseSetId: String)
+
     // MARK: - Double-Tap
 
     func didDoubleTapTextViewItem(_ itemViewModel: CVItemViewModelImpl)

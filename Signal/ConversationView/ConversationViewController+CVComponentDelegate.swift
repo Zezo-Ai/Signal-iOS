@@ -23,6 +23,18 @@ extension ConversationViewController: CVComponentDelegate {
         self.loadCoordinator.enqueueReloadWithoutCaches()
     }
 
+    // MARK: - Collapse Sets
+
+    public func didTapCollapseSet(collapseSetId: String) {
+        AssertIsOnMainThread()
+        if viewState.expandedCollapseSets.contains(collapseSetId) {
+            viewState.expandedCollapseSets.remove(collapseSetId)
+        } else {
+            viewState.expandedCollapseSets.insert(collapseSetId)
+        }
+        loadCoordinator.enqueueReload()
+    }
+
     // MARK: - Double-Tap
 
     public func didDoubleTapTextViewItem(_ viewModel: CVItemViewModelImpl) {

@@ -998,14 +998,10 @@ public class ConversationViewLayout: UICollectionViewLayout {
     // Some interactions shift around and cannot be reliably used as
     // references for scroll continuity.
     public static func canInteractionBeUsedForScrollContinuity(_ interaction: TSInteraction) -> Bool {
-        guard !interaction.isDynamicInteraction else {
-            return false
-        }
-
         switch interaction.interactionType {
-        case .unknown, .unreadIndicator, .dateHeader, .typingIndicator:
+        case .unknown, .unreadIndicator, .dateHeader, .typingIndicator, .threadDetails, .defaultDisappearingMessageTimer:
             return false
-        case .incomingMessage, .outgoingMessage, .error, .call, .info, .threadDetails, .unknownThreadWarning, .defaultDisappearingMessageTimer:
+        case .incomingMessage, .outgoingMessage, .error, .call, .info, .unknownThreadWarning, .collapseSet:
             return true
         }
     }

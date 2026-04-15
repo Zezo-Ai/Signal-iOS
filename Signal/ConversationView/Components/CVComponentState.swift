@@ -501,6 +501,22 @@ public struct CVComponentState: Equatable {
     typealias DefaultDisappearingMessageTimer = CVComponentState.SystemMessage
     let defaultDisappearingMessageTimer: DefaultDisappearingMessageTimer?
 
+    struct CollapseSet: Equatable {
+        let collapsedInteractions: [TSInteraction]
+        let collapseSetType: CollapseSetInteraction.MessagesType
+        let isExpanded: Bool
+        let finalTimerDescription: String?
+
+        static func ==(lhs: CollapseSet, rhs: CollapseSet) -> Bool {
+            return lhs.collapsedInteractions.map(\.uniqueId) == rhs.collapsedInteractions.map(\.uniqueId)
+                && lhs.collapseSetType == rhs.collapseSetType
+                && lhs.isExpanded == rhs.isExpanded
+                && lhs.finalTimerDescription == rhs.finalTimerDescription
+        }
+    }
+
+    let collapseSet: CollapseSet?
+
     struct BottomButtons: Equatable {
         let actions: [CVMessageAction]
     }
@@ -552,6 +568,7 @@ public struct CVComponentState: Equatable {
         threadDetails: ThreadDetails?,
         unknownThreadWarning: UnknownThreadWarning?,
         defaultDisappearingMessageTimer: DefaultDisappearingMessageTimer?,
+        collapseSet: CollapseSet?,
         bottomButtons: BottomButtons?,
         bottomLabel: String?,
         skippedDownloads: SkippedDownloads?,
@@ -584,6 +601,7 @@ public struct CVComponentState: Equatable {
         self.threadDetails = threadDetails
         self.unknownThreadWarning = unknownThreadWarning
         self.defaultDisappearingMessageTimer = defaultDisappearingMessageTimer
+        self.collapseSet = collapseSet
         self.bottomButtons = bottomButtons
         self.bottomLabel = bottomLabel
         self.skippedDownloads = skippedDownloads
@@ -620,6 +638,7 @@ public struct CVComponentState: Equatable {
             lhs.threadDetails == rhs.threadDetails &&
             lhs.unknownThreadWarning == rhs.unknownThreadWarning &&
             lhs.defaultDisappearingMessageTimer == rhs.defaultDisappearingMessageTimer &&
+            lhs.collapseSet == rhs.collapseSet &&
             lhs.bottomButtons == rhs.bottomButtons &&
             lhs.bottomLabel == rhs.bottomLabel &&
             lhs.skippedDownloads == rhs.skippedDownloads &&
@@ -686,6 +705,7 @@ public struct CVComponentState: Equatable {
         var threadDetails: ThreadDetails?
         var unknownThreadWarning: UnknownThreadWarning?
         var defaultDisappearingMessageTimer: DefaultDisappearingMessageTimer?
+        var collapseSet: CollapseSet?
         var reactions: Reactions?
         var skippedDownloads: SkippedDownloads?
         var sendFailureBadge: SendFailureBadge?
@@ -734,6 +754,7 @@ public struct CVComponentState: Equatable {
                 threadDetails: threadDetails,
                 unknownThreadWarning: unknownThreadWarning,
                 defaultDisappearingMessageTimer: defaultDisappearingMessageTimer,
+                collapseSet: collapseSet,
                 bottomButtons: bottomButtons,
                 bottomLabel: bottomLabel,
                 skippedDownloads: skippedDownloads,
@@ -772,6 +793,9 @@ public struct CVComponentState: Equatable {
             }
             if defaultDisappearingMessageTimer != nil {
                 return .defaultDisappearingMessageTimer
+            }
+            if collapseSet != nil {
+                return .collapseSet
             }
             if systemMessage != nil {
                 return .systemMessage
@@ -895,6 +919,9 @@ public struct CVComponentState: Equatable {
         if defaultDisappearingMessageTimer != nil {
             result.insert(.defaultDisappearingMessageTimer)
         }
+        if collapseSet != nil {
+            result.insert(.collapseSet)
+        }
         if bottomButtons != nil {
             result.insert(.bottomButtons)
         }
@@ -980,6 +1007,23 @@ public struct CVComponentState: Equatable {
         return builder.build()
     }
 
+    static func buildCollapseSet(
+        interaction: CollapseSetInteraction,
+        itemBuildingContext: CVItemBuildingContext,
+    ) -> CVComponentState {
+        var builder = CVComponentState.Builder(
+            interaction: interaction,
+            itemBuildingContext: itemBuildingContext,
+        )
+        builder.collapseSet = CollapseSet(
+            collapsedInteractions: interaction.collapsedInteractions,
+            collapseSetType: interaction.collapseSetType,
+            isExpanded: interaction.isExpanded,
+            finalTimerDescription: interaction.finalTimerDescription,
+        )
+        return builder.build()
+    }
+
     static func build(
         interaction: TSInteraction,
         itemBuildingContext: CVItemBuildingContext,
@@ -1005,7 +1049,7 @@ public struct CVComponentState: Equatable {
                 break
             case .bodyMedia, .sticker, .audioAttachment, .genericAttachment, .contactShare:
                 hasPrimaryContent = true
-            case .senderName, .senderAvatar, .footer, .reactions, .bottomButtons, .bottomLabel, .sendFailureBadge, .dateHeader, .unreadIndicator, .typingIndicator, .threadDetails, .skippedDownloads, .unknownThreadWarning, .defaultDisappearingMessageTimer, .messageRoot:
+            case .senderName, .senderAvatar, .footer, .reactions, .bottomButtons, .bottomLabel, .sendFailureBadge, .dateHeader, .unreadIndicator, .typingIndicator, .threadDetails, .skippedDownloads, .unknownThreadWarning, .defaultDisappearingMessageTimer, .collapseSet, .messageRoot:
                 // "Primary" content is not just metadata / UI.
                 break
             case .giftBadge:
@@ -1162,6 +1206,18 @@ private extension CVComponentState.Builder {
                 threadViewModel: threadViewModel,
                 currentGroupThreadCallGroupId: currentGroupThreadCallGroupId,
                 transaction: transaction,
+            )
+            return build()
+        case .collapseSet:
+            guard let collapseSetInteraction = interaction as? CollapseSetInteraction else {
+                owsFailDebug("Invalid collapseSet interaction.")
+                return build()
+            }
+            self.collapseSet = CVComponentState.CollapseSet(
+                collapsedInteractions: collapseSetInteraction.collapsedInteractions,
+                collapseSetType: collapseSetInteraction.collapseSetType,
+                isExpanded: collapseSetInteraction.isExpanded,
+                finalTimerDescription: collapseSetInteraction.finalTimerDescription,
             )
             return build()
         case .unreadIndicator:

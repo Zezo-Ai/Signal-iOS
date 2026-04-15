@@ -664,7 +664,6 @@ struct CVItemModelBuilder: CVItemBuilding {
         prevRenderState: CVRenderState,
         updatedInteractionIds: Set<String>,
     ) {
-
         for renderItem in prevRenderState.items {
             guard !updatedInteractionIds.contains(renderItem.interactionUniqueId) else {
                 continue
@@ -672,6 +671,17 @@ struct CVItemModelBuilder: CVItemBuilding {
             componentStateCache.add(
                 interactionId: renderItem.interactionUniqueId,
                 componentState: renderItem.rootComponent.componentState,
+            )
+        }
+    }
+
+    mutating func reuseComponentStates(from itemModels: [CVItemModel]) {
+        // Dynamic interactions like collapse sets could have their
+        // ID change as more are loaded, so don't cache them.
+        for model in itemModels where !model.interaction.isDynamicInteraction {
+            componentStateCache.add(
+                interactionId: model.interaction.uniqueId,
+                componentState: model.componentState,
             )
         }
     }
@@ -883,7 +893,7 @@ private class ItemBuilder {
 
     var canShowDate: Bool {
         switch interaction.interactionType {
-        case .unknown, .typingIndicator, .threadDetails, .dateHeader, .unknownThreadWarning, .defaultDisappearingMessageTimer:
+        case .unknown, .typingIndicator, .threadDetails, .dateHeader, .unknownThreadWarning, .defaultDisappearingMessageTimer, .collapseSet:
             return false
         case .info:
             guard let infoMessage = interaction as? TSInfoMessage else {

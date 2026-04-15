@@ -206,6 +206,8 @@ extension CVUpdate {
                     if newIndex + 2 > updateItems.count {
                         shouldAnimateUpdate = false
                     }
+                case .collapseSet:
+                    break
                 default:
                     shouldAnimateUpdate = false
                 }

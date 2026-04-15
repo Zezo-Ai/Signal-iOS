@@ -223,7 +223,7 @@ extension CVSelectionState {
         }
         for item in itemMap.values {
             switch item.interactionType {
-            case .threadDetails, .unknownThreadWarning, .defaultDisappearingMessageTimer, .typingIndicator, .unreadIndicator, .dateHeader:
+            case .threadDetails, .unknownThreadWarning, .defaultDisappearingMessageTimer, .typingIndicator, .unreadIndicator, .dateHeader, .collapseSet:
                 return false
             case .outgoingMessage where item.selectionType != .allContent:
                 return false
@@ -253,7 +253,7 @@ extension CVSelectionState {
             }
 
             switch item.interactionType {
-            case .threadDetails, .unknownThreadWarning, .defaultDisappearingMessageTimer, .typingIndicator, .unreadIndicator, .dateHeader:
+            case .threadDetails, .unknownThreadWarning, .defaultDisappearingMessageTimer, .typingIndicator, .unreadIndicator, .dateHeader, .collapseSet:
                 return false
             case .info, .error, .call:
                 return false

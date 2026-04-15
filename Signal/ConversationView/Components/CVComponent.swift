@@ -393,6 +393,7 @@ public enum CVComponentKey: CustomStringConvertible, CaseIterable {
     case skippedDownloads
     case unknownThreadWarning
     case defaultDisappearingMessageTimer
+    case collapseSet
     case messageRoot
 
     public var description: String {
@@ -451,6 +452,8 @@ public enum CVComponentKey: CustomStringConvertible, CaseIterable {
             return ".sendFailureBadge"
         case .defaultDisappearingMessageTimer:
             return ".defaultDisappearingMessageTimer"
+        case .collapseSet:
+            return ".collapseSet"
         case .messageRoot:
             return ".messageRoot"
         case .poll:

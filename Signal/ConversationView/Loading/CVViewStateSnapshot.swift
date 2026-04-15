@@ -42,6 +42,8 @@ struct CVViewStateSnapshot {
     let hasActiveCall: Bool
     let currentGroupThreadCallGroupId: GroupIdentifier?
 
+    let expandedCollapseSets: Set<String>
+
     private static var currentCallProvider: any CurrentCallProvider { DependenciesBridge.shared.currentCallProvider }
 
     static func snapshot(
@@ -62,6 +64,7 @@ struct CVViewStateSnapshot {
             oldestUnreadMessageSortId: oldestUnreadMessageSortId,
             hasActiveCall: currentCallProvider.hasCurrentCall,
             currentGroupThreadCallGroupId: currentCallProvider.currentGroupThreadCallGroupId,
+            expandedCollapseSets: viewState.expandedCollapseSets,
         )
     }
 
@@ -81,6 +84,7 @@ struct CVViewStateSnapshot {
             oldestUnreadMessageSortId: nil,
             hasActiveCall: false,
             currentGroupThreadCallGroupId: nil,
+            expandedCollapseSets: [],
         )
     }
 }

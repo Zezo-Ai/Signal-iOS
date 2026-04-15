@@ -263,7 +263,7 @@ extension CVItemViewModelImpl {
         }
 
         switch messageCellType {
-        case .unknown, .dateHeader, .typingIndicator, .unreadIndicator, .threadDetails, .systemMessage, .unknownThreadWarning, .defaultDisappearingMessageTimer:
+        case .unknown, .dateHeader, .typingIndicator, .unreadIndicator, .threadDetails, .systemMessage, .unknownThreadWarning, .defaultDisappearingMessageTimer, .collapseSet:
             return false
         case .giftBadge:
             return false

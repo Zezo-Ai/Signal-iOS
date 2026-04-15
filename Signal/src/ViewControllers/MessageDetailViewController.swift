@@ -1036,6 +1036,8 @@ extension MessageDetailViewController: CVComponentDelegate {
 
     func didTapSystemMessageItem(_ item: CVTextLabel.Item) {}
 
+    func didTapCollapseSet(collapseSetId: String) {}
+
     // MARK: - Double-Tap
 
     func didDoubleTapTextViewItem(_ itemViewModel: CVItemViewModelImpl) {}

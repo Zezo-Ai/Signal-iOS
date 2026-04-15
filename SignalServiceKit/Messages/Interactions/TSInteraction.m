@@ -35,6 +35,8 @@ NSString *NSStringFromOWSInteractionType(OWSInteractionType value)
             return @"OWSInteractionType_UnknownThreadWarning";
         case OWSInteractionType_DefaultDisappearingMessageTimer:
             return @"OWSInteractionType_DefaultDisappearingMessageTimer";
+        case OWSInteractionType_CollapseSet:
+            return @"OWSInteractionType_CollapseSet";
     }
 }
 

@@ -171,14 +171,57 @@ public class CVLoader: NSObject {
                     throw error
                 }
 
+                var ungroupedItemModels = self.buildUngroupedItemModels(
+                    loadContext: loadContext,
+                    updatedInteractionIds: updatedInteractionIds,
+                    localAci: localAci,
+                    cachedModels: nil,
+                )
+                var groupedModels = Self.applyCollapseGroups(
+                    to: ungroupedItemModels,
+                    loadContext: loadContext,
+                )
+
+                // MessageLoader doesn't know the type of messages, so we
+                // collapse them here and ask for more if it's not enough.
+                if case .loadInitialMapping = loadRequest.loadType {
+                    let maxExtraLoads = 5
+                    var extraLoads = 0
+                    while
+                        groupedModels.count < messageLoader.initialLoadCount,
+                        messageLoader.canLoadOlder,
+                        extraLoads < maxExtraLoads
+                    {
+                        try messageLoader.loadOlderMessagePage(
+                            reusableInteractions: reusableInteractions,
+                            deletedInteractionIds: deletedInteractionIds,
+                            tx: transaction,
+                        )
+                        ungroupedItemModels = self.buildUngroupedItemModels(
+                            loadContext: loadContext,
+                            updatedInteractionIds: updatedInteractionIds,
+                            localAci: localAci,
+                            cachedModels: ungroupedItemModels,
+                        )
+                        groupedModels = Self.applyCollapseGroups(
+                            to: ungroupedItemModels,
+                            loadContext: loadContext,
+                        )
+                        extraLoads += 1
+                    }
+                }
+
+                let items = groupedModels.compactMap { item in
+                    Self.buildRenderItem(
+                        itemBuildingContext: loadContext,
+                        itemModel: item,
+                    )
+                }
+
                 return LoadState(
                     threadViewModel: threadViewModel,
                     conversationViewModel: conversationViewModel,
-                    items: self.buildRenderItems(
-                        loadContext: loadContext,
-                        updatedInteractionIds: updatedInteractionIds,
-                        localAci: localAci,
-                    ),
+                    items: items,
                 )
             }
 
@@ -205,12 +248,12 @@ public class CVLoader: NSObject {
 
     // MARK: -
 
-    private func buildRenderItems(
+    private func buildUngroupedItemModels(
         loadContext: CVLoadContext,
         updatedInteractionIds: Set<String>,
         localAci: Aci,
-    ) -> [CVRenderItem] {
-
+        cachedModels: [CVItemModel]?,
+    ) -> [CVItemModel] {
         let conversationStyle = loadContext.conversationStyle
 
         // Don't cache in the reset() case.
@@ -222,40 +265,180 @@ public class CVLoader: NSObject {
         // can be expensive. Therefore we want to reuse them _unless_:
         //
         // * The corresponding interaction was updated.
-        // * We're do a "reset" reload where we deliberately reload everything, e.g.
-        //   in response to an error or a cross-process write, etc.
+        // * We're doing a "reset" reload where we deliberately reload
+        //   everything, e.g. in response to an error or a cross-process write.
         if canReuseState {
             itemModelBuilder.reuseComponentStates(
                 prevRenderState: prevRenderState,
                 updatedInteractionIds: updatedInteractionIds,
             )
         }
-        let itemModels: [CVItemModel] = itemModelBuilder.buildItems(localAci: localAci)
 
-        var renderItems = [CVRenderItem]()
-        for itemModel in itemModels {
-            guard
-                let renderItem = buildRenderItem(
-                    itemBuildingContext: loadContext,
-                    itemModel: itemModel,
-                )
-            else {
-                continue
-            }
-            renderItems.append(renderItem)
+        if let cachedModels = cachedModels?.nilIfEmpty {
+            itemModelBuilder.reuseComponentStates(from: cachedModels)
         }
 
-        return renderItems
+        return itemModelBuilder.buildItems(localAci: localAci)
     }
 
-    private func buildRenderItem(
-        itemBuildingContext: CVItemBuildingContext,
-        itemModel: CVItemModel,
-    ) -> CVRenderItem? {
-        Self.buildRenderItem(
-            itemBuildingContext: itemBuildingContext,
-            itemModel: itemModel,
-        )
+    // MARK: - Collapse Set Grouping
+
+    private static let maxCollapseSetSize = 50
+
+    /// Takes ungrouped item models and returns a list of item models with info
+    /// messages merged into collapse sets
+    private static func applyCollapseGroups(
+        to itemModels: [CVItemModel],
+        loadContext: CVLoadContext,
+    ) -> [CVItemModel] {
+        guard BuildFlags.collapsingChatEvents else {
+            return itemModels
+        }
+
+        let thread = loadContext.thread
+        let threadAssociatedData = loadContext.threadViewModel.associatedData
+        let isGroupThread = thread.isGroupThread
+        let expandedCollapseSets = loadContext.viewStateSnapshot.expandedCollapseSets
+        let coreState = loadContext.viewStateSnapshot.coreState
+
+        var result = [CVItemModel]()
+        var currentRun = [CVItemModel]()
+        var currentRunType: CollapseSetInteraction.MessagesType?
+        var pastUnreadIndicator = false
+
+        func finalizeSet() {
+            defer {
+                currentRun.removeAll()
+                currentRunType = nil
+            }
+            guard currentRun.count >= 2, let runType = currentRunType else {
+                // Nothing to collapse
+                result.append(contentsOf: currentRun)
+                return
+            }
+            let collapseId = "CollapseSet_\(currentRun[0].interaction.timestamp)"
+
+            let isExpanded = expandedCollapseSets.contains(collapseId)
+            let collapseSetInteraction = CollapseSetInteraction(
+                thread: thread,
+                collapsedInteractions: currentRun.map(\.interaction),
+                collapseSetType: runType,
+                isExpanded: isExpanded,
+            )
+            let componentState = CVComponentState.buildCollapseSet(
+                interaction: collapseSetInteraction,
+                itemBuildingContext: loadContext,
+            )
+            let itemModel = CVItemModel(
+                interaction: collapseSetInteraction,
+                thread: thread,
+                threadAssociatedData: threadAssociatedData,
+                componentState: componentState,
+                itemViewState: CVItemViewState.Builder().build(),
+                coreState: coreState,
+            )
+            result.append(itemModel)
+            if isExpanded {
+                result.append(contentsOf: currentRun)
+            }
+        }
+
+        for item in itemModels {
+            // Don't collapse unread items
+            if pastUnreadIndicator {
+                result.append(item)
+                continue
+            }
+
+            switch item.interaction.interactionType {
+            case .dateHeader:
+                finalizeSet()
+                result.append(item)
+            case .unreadIndicator:
+                finalizeSet()
+                pastUnreadIndicator = true
+                result.append(item)
+            default:
+                let collapseSetType = collapseSetType(for: item.interaction, isGroupThread: isGroupThread)
+                if let collapseSetType {
+                    let isDifferentSetThanCurrentRun = currentRunType != nil && currentRunType != collapseSetType
+                    let exceededCurrentRunLimit = currentRun.count >= maxCollapseSetSize
+                    if isDifferentSetThanCurrentRun || exceededCurrentRunLimit {
+                        finalizeSet()
+                    }
+                    currentRun.append(item)
+                    currentRunType = collapseSetType
+                } else {
+                    finalizeSet()
+                    result.append(item)
+                }
+            }
+        }
+        finalizeSet()
+        return result
+    }
+
+    private static func collapseSetType(
+        for interaction: TSInteraction,
+        isGroupThread: Bool,
+    ) -> CollapseSetInteraction.MessagesType? {
+        switch interaction.interactionType {
+        case .info:
+            guard let infoMessage = interaction as? TSInfoMessage else {
+                owsFailDebug("info interaction is not TSInfoMessage")
+                return nil
+            }
+            switch infoMessage.messageType {
+            case .typeDisappearingMessagesUpdate:
+                return .timerChanges
+            case .typeGroupUpdate:
+                if
+                    let wrapper = infoMessage.infoMessageUserInfo?[.groupUpdateItems]
+                    as? TSInfoMessage.PersistableGroupUpdateItemsWrapper
+                {
+                    for event in wrapper.updateItems {
+                        switch event {
+                        case
+                            .groupTerminatedByLocalUser,
+                            .groupTerminatedByOtherUser,
+                            .groupTerminatedByUnknownUser:
+                            return nil
+                        case
+                            .disappearingMessagesEnabledByLocalUser,
+                            .disappearingMessagesEnabledByOtherUser,
+                            .disappearingMessagesEnabledByUnknownUser,
+                            .disappearingMessagesDisabledByLocalUser,
+                            .disappearingMessagesDisabledByOtherUser,
+                            .disappearingMessagesDisabledByUnknownUser:
+                            return .timerChanges
+                        default:
+                            break
+                        }
+                    }
+                }
+
+                return isGroupThread ? .groupUpdates : .chatUpdates
+            case .verificationStateChange,
+                 .profileUpdate,
+                 .phoneNumberChange,
+                 .typeEndPoll,
+                 .typePinnedMessage:
+                return isGroupThread ? .groupUpdates : .chatUpdates
+            default:
+                return nil
+            }
+        case .call:
+            // Don't collapse an active group call.
+            if
+                let groupCallMessage = interaction as? OWSGroupCallMessage,
+                !groupCallMessage.hasEnded
+            {
+                return nil
+            }
+            return .callEvents
+        default:
+            return nil
+        }
     }
 
 #if USE_DEBUG_UI
@@ -523,6 +706,12 @@ public class CVLoader: NSObject {
                 return nil
             }
             rootComponent = CVComponentSystemMessage(itemModel: itemModel, systemMessage: systemMessage)
+        case .collapseSet:
+            guard let collapseSet = itemModel.componentState.collapseSet else {
+                owsFailDebug("Missing collapseSet.")
+                return nil
+            }
+            rootComponent = CVComponentCollapseSet(itemModel: itemModel, collapseSet: collapseSet)
         case .unknown:
             Logger.warn("Discarding item: \(itemModel.messageCellType).")
             return nil

@@ -62,6 +62,8 @@ class CVRenderState {
     let indexPathOfUnreadIndicator: IndexPath?
 
     private let interactionIdToIndexPathMap: [String: IndexPath]
+    /// Maps each collapsed interaction's uniqueId to the uniqueId of its parent CollapseSetInteraction.
+    private let collapsedInteractionToParentUniqueIdMap: [String: String]
 
     let allIndexPaths: [IndexPath]
 
@@ -89,6 +91,7 @@ class CVRenderState {
         let messageSection = CVLoadCoordinator.messageSection
         var indexPathOfUnreadIndicator: IndexPath?
         var interactionIdToIndexPathMap = [String: IndexPath]()
+        var collapsedInteractionToParentUniqueIdMap = [String: String]()
         var allIndexPaths = [IndexPath]()
         for (index, item) in items.enumerated() {
             let indexPath = IndexPath(row: index, section: messageSection)
@@ -98,9 +101,18 @@ class CVRenderState {
             if item.interactionType == .unreadIndicator {
                 indexPathOfUnreadIndicator = indexPath
             }
+            if
+                item.interactionType == .collapseSet,
+                let collapseSet = item.interaction as? CollapseSetInteraction
+            {
+                for collapsed in collapseSet.collapsedInteractions {
+                    collapsedInteractionToParentUniqueIdMap[collapsed.uniqueId] = collapseSet.uniqueId
+                }
+            }
         }
         self.indexPathOfUnreadIndicator = indexPathOfUnreadIndicator
         self.interactionIdToIndexPathMap = interactionIdToIndexPathMap
+        self.collapsedInteractionToParentUniqueIdMap = collapsedInteractionToParentUniqueIdMap
         self.allIndexPaths = allIndexPaths
     }
 
@@ -123,6 +135,12 @@ class CVRenderState {
 
     func indexPath(forInteractionUniqueId interactionUniqueId: String) -> IndexPath? {
         interactionIdToIndexPathMap[interactionUniqueId]
+    }
+
+    /// Returns the uniqueId of the CollapseSetInteraction that contains
+    /// the given interaction if it is inside a collapse set.
+    func collapseSetUniqueId(forCollapsedInteractionId interactionId: String) -> String? {
+        collapsedInteractionToParentUniqueIdMap[interactionId]
     }
 
     var debugDescription: String {
