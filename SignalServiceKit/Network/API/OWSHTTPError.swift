@@ -13,7 +13,7 @@ public enum OWSHTTPError: Error, CustomDebugStringConvertible, IsRetryableProvid
 
     // MARK: -
 
-    public enum NetworkErrorType: Error, CustomDebugStringConvertible, IsRetryableProvider {
+    public enum NetworkErrorType: CustomDebugStringConvertible {
         case invalidResponseStatus
         case unknownNetworkFailure
         case genericTimeout
@@ -30,8 +30,6 @@ public enum OWSHTTPError: Error, CustomDebugStringConvertible, IsRetryableProvid
                 return true
             }
         }
-
-        public var isRetryableProvider: Bool { true }
 
         public var debugDescription: String {
             switch self {
