@@ -91,7 +91,7 @@ enum GroupCallVideoContextMenuConfiguration {
     ) -> [UIAction] {
         var contextMenuActions: [UIAction] = []
 
-        if BuildFlags.RemoteMute.send {
+        if RemoteConfig.current.isRemoteMuteSendEnabled {
             let attributes: UIMenuElement.Attributes = isAudioMuted ? .disabled : []
 
             contextMenuActions.append(UIAction(

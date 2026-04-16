@@ -363,6 +363,10 @@ public class RemoteConfig {
         return !isEnabled(.dynamicSendMessageTimeoutKillSwitch)
     }
 
+    public var isRemoteMuteSendEnabled: Bool {
+        return !isEnabled(.remoteMuteKillSwitch)
+    }
+
     // MARK: - RingRTC
 
     public var ringrtcNwPathMonitorTrial: Bool {
@@ -608,6 +612,7 @@ private enum IsEnabledFlag: String, FlagType {
     case paypalGiftDonationKillSwitch = "ios.paypalGiftDonationKillSwitch"
     case paypalMonthlyDonationKillSwitch = "ios.paypalMonthlyDonationKillSwitch"
     case paypalOneTimeDonationKillSwitch = "ios.paypalOneTimeDonationKillSwitch"
+    case remoteMuteKillSwitch = "ios.remoteMuteKillSwitch"
     case ringrtcNwPathMonitorTrialKillSwitch = "ios.ringrtcNwPathMonitorTrialKillSwitch"
     case ringrtcVp9Enabled = "ios.ringrtcVp9Enabled.2"
     case serviceExtensionFailureKillSwitch = "ios.serviceExtensionFailureKillSwitch"
@@ -636,6 +641,7 @@ private enum IsEnabledFlag: String, FlagType {
         case .paypalGiftDonationKillSwitch: false
         case .paypalMonthlyDonationKillSwitch: false
         case .paypalOneTimeDonationKillSwitch: false
+        case .remoteMuteKillSwitch: true
         case .ringrtcNwPathMonitorTrialKillSwitch: true // cached during launch, so not hot-swapped in practice
         case .ringrtcVp9Enabled: true
         case .serviceExtensionFailureKillSwitch: true

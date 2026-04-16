@@ -53,10 +53,6 @@ public enum BuildFlags {
         public static let useLowerDefaultListMediaRefreshInterval = build <= .beta
     }
 
-    public enum RemoteMute {
-        public static let send = build <= .internal
-    }
-
     static let netBuildVariant: Net.BuildVariant = build <= .beta ? .beta : .production
 
     // Turn this off after all still-registered clients have run this
