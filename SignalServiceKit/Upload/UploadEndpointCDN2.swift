@@ -209,7 +209,7 @@ struct UploadEndpointCDN2: UploadEndpoint {
             switch error {
             case let error as Upload.Error:
                 throw error
-            case let error as OWSHTTPError where (500...599).contains(error.responseStatusCode):
+            case let error as OWSHTTPError where error.is5xxServiceResponse:
                 // On 5XX errors, clients should try to resume the upload
                 attempt.logger.warn("Temporary upload failure [\(error.responseStatusCode)], retry.")
                 // Check for any progress here

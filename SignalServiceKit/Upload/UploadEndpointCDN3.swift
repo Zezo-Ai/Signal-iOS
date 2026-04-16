@@ -179,7 +179,7 @@ struct UploadEndpointCDN3: UploadEndpoint {
                 // On 4XX errors, clients should restart the upload
                 attempt.logger.warn("Unexpected upload failure [\(error.responseStatusCode)], restart.\(debugInfo)")
                 throw Upload.Error.uploadFailure(recovery: .restart(retryMode))
-            case let error where (500...599).contains(error.responseStatusCode):
+            case let error where error.is5xxServiceResponse:
                 // On 5XX errors, clients should try to resume the upload
                 attempt.logger.warn("Temporary upload failure [\(error.responseStatusCode)], retry.\(debugInfo)")
                 throw Upload.Error.uploadFailure(recovery: .resume(retryMode))
