@@ -663,7 +663,7 @@ public class CVQuotedMessageView: ManualStackViewWithLayer {
                     wrapper.backgroundColor = UIColor(rgbHex: 0xB5B5B5)
 
                     // TODO: design review icon and color
-                    quotedImageView.setTemplateImageName("refresh", tintColor: .white)
+                    quotedImageView.setTemplateImage(Theme.iconImage(.refresh), tintColor: .white)
                     quotedImageView.contentMode = .scaleAspectFit
                     quotedImageView.clipsToBounds = false
                     let iconSize = CGSize.square(configurator.quotedAttachmentSize.width * 0.5)

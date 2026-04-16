@@ -570,7 +570,7 @@ private class QuotedMessageSnippetView: UIView {
 
             quotedAttachmentView = contentImageView
         } else if attachment.asAnyPointer() != nil {
-            let refreshIcon = buildImageView(image: UIImage(imageLiteralResourceName: "refresh"))
+            let refreshIcon = buildImageView(image: Theme.iconImage(.refresh))
             refreshIcon.contentMode = .scaleAspectFit
             refreshIcon.tintColor = .Signal.tertiaryLabel
 
