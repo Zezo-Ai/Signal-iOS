@@ -408,26 +408,14 @@ public class OWSURLSession: OWSURLSessionProtocol {
         var httpHeaders = rawRequest.headers
         try rawRequest.applyAuth(to: &httpHeaders, socketAuth: nil)
 
-        let method: HTTPMethod
-        do {
-            method = try HTTPMethod.method(for: rawRequest.method)
-        } catch {
-            owsFailDebug("Invalid HTTP method: \(rawRequest.method)", logger: rawRequest.logger)
-            throw OWSHTTPError.invalidRequest
-        }
+        let method = try HTTPMethod.method(for: rawRequest.method)
 
         let requestBody: Data
         switch rawRequest.body {
         case .data(let bodyData):
             requestBody = bodyData
         case .parameters(let bodyParameters) where !bodyParameters.isEmpty:
-            do {
-                requestBody = try TSRequest.Body.encodedParameters(bodyParameters)
-            } catch {
-                owsFailDebug("Could not serialize JSON parameters: \(error).", logger: rawRequest.logger)
-                throw OWSHTTPError.invalidRequest
-            }
-
+            requestBody = try TSRequest.Body.encodedParameters(bodyParameters)
             // If we're going to use the json serialized parameters as our body, we should overwrite
             // the Content-Type on the request.
             httpHeaders.addHeader("Content-Type", value: "application/json", overwriteOnConflict: true)
@@ -435,17 +423,11 @@ public class OWSURLSession: OWSURLSessionProtocol {
             requestBody = Data()
         }
 
-        var request: URLRequest
-        do {
-            request = try self.endpoint.buildRequest(
-                rawRequest.url.absoluteString,
-                method: method,
-                headers: httpHeaders,
-            )
-        } catch {
-            owsFailDebug("Missing or invalid request: \(rawRequest.url).", logger: rawRequest.logger)
-            throw OWSHTTPError.invalidRequest
-        }
+        var request = try self.endpoint.buildRequest(
+            rawRequest.url.absoluteString,
+            method: method,
+            headers: httpHeaders,
+        )
 
         let backgroundTask = OWSBackgroundTask(label: "\(#function)")
         defer {

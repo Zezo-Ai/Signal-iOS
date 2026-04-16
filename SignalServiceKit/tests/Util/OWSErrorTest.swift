@@ -17,7 +17,6 @@ class OWSErrorTest: XCTestCase {
 
         let errorFooBar = FooError.bar
         let errorGeneric = OWSGenericError("Yipes!")
-        let error1 = OWSHTTPError.invalidRequest
         let error2 = OWSHTTPError.networkFailure(.genericFailure)
         let error4 = OWSRetryableError()
         let error5 = MessageSenderNoSuchSignalRecipientError()
@@ -27,9 +26,6 @@ class OWSErrorTest: XCTestCase {
 
         XCTAssertFalse(errorGeneric.isRetryable)
         XCTAssertFalse(errorGeneric.isFatalError)
-
-        XCTAssertFalse(error1.isRetryable)
-        XCTAssertFalse(error1.isFatalError)
 
         XCTAssertTrue(error2.isRetryable)
         XCTAssertFalse(error2.isFatalError)
