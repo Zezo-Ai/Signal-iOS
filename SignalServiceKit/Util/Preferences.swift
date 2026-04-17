@@ -28,6 +28,7 @@ public class Preferences {
         case screenSecurity = "Screen Security Key"
         case notificationPreviewType = "Notification Preview Type Key"
         case playSoundInForeground = "NotificationSoundInForeground"
+        case messageSentSound = "MessageSentSound"
         case lastRecordedPushToken = "LastRecordedPushToken"
         case callsHideIPAddress = "CallsHideIPAddress"
         case hasDeclinedNoContactsView = "hasDeclinedNoContactsView"
@@ -280,6 +281,14 @@ public class Preferences {
 
     public func setSoundInForeground(_ value: Bool) {
         setBool(value, forKey: .playSoundInForeground)
+    }
+
+    public var isMessageSentSoundEnabled: Bool {
+        bool(forKey: .messageSentSound, defaultValue: true)
+    }
+
+    public func setIsMessageSentSoundEnabled(_ value: Bool) {
+        setBool(value, forKey: .messageSentSound)
     }
 
     public func notificationPreviewType(tx: DBReadTransaction) -> NotificationType {

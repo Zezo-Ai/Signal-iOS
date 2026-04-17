@@ -8473,6 +8473,9 @@
 /* Label for the 'video' attachment type in the media download settings. */
 "SETTINGS_MEDIA_DOWNLOAD_TYPE_VIDEO" = "Videos";
 
+/* Setting for enabling & disabling the sound effect played when a message is sent. */
+"SETTINGS_MESSAGE_SENT_SOUND" = "Message Sent Sound";
+
 /* Explanation for the 'messaging' privacy settings. */
 "SETTINGS_MESSAGING_FOOTER" = "See and share when messages are being read and typed. If disabled, you won’t see read receipts or typing indicators from others.";
 

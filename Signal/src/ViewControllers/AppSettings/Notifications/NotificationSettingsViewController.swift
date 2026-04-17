@@ -49,6 +49,15 @@ class NotificationSettingsViewController: OWSTableViewController2 {
             target: self,
             selector: #selector(didToggleSoundNotificationsSwitch),
         ))
+        soundsSection.add(.switch(
+            withText: OWSLocalizedString(
+                "SETTINGS_MESSAGE_SENT_SOUND",
+                comment: "Setting for enabling & disabling the sound effect played when a message is sent.",
+            ),
+            isOn: { SSKEnvironment.shared.preferencesRef.isMessageSentSoundEnabled },
+            target: self,
+            selector: #selector(didToggleMessageSentSoundSwitch),
+        ))
         contents.add(soundsSection)
 
         let notificationContentSection = OWSTableSection()
@@ -123,6 +132,11 @@ class NotificationSettingsViewController: OWSTableViewController2 {
     @objc
     private func didToggleSoundNotificationsSwitch(_ sender: UISwitch) {
         SSKEnvironment.shared.preferencesRef.setSoundInForeground(sender.isOn)
+    }
+
+    @objc
+    private func didToggleMessageSentSoundSwitch(_ sender: UISwitch) {
+        SSKEnvironment.shared.preferencesRef.setIsMessageSentSoundEnabled(sender.isOn)
     }
 
     @objc

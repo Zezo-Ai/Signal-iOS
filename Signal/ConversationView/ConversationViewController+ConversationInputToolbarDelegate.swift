@@ -56,6 +56,7 @@ extension ConversationViewController: ConversationInputToolbarDelegate {
 
         if
             SSKEnvironment.shared.preferencesRef.soundInForeground,
+            SSKEnvironment.shared.preferencesRef.isMessageSentSoundEnabled,
             let soundId = Sounds.systemSoundIDForSound(.standard(.messageSent), quiet: true)
         {
             AudioServicesPlaySystemSound(soundId)
