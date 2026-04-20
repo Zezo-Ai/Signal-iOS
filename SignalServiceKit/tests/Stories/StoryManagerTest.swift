@@ -151,7 +151,6 @@ class StoryManagerTest: SSKBaseTest {
             SSKEnvironment.shared.blockingManagerRef.addBlockedGroupId(
                 groupId,
                 blockMode: .local,
-                shouldLeave: false,
                 transaction: $0,
             )
 

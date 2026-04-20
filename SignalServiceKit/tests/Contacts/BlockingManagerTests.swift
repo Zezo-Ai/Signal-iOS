@@ -128,7 +128,6 @@ class BlockingManagerTests: SSKBaseTest {
             blockingManager.addBlockedGroupId(
                 try noLongerBlockedGroupParams.getPublicParams().getGroupIdentifier().serialize(),
                 blockMode: .local,
-                shouldLeave: false,
                 transaction: tx,
             )
 
@@ -148,7 +147,6 @@ class BlockingManagerTests: SSKBaseTest {
             blockingManager.addBlockedGroupId(
                 try stillBlockedGroupParams.getPublicParams().getGroupIdentifier().serialize(),
                 blockMode: .local,
-                shouldLeave: false,
                 transaction: tx,
             )
             _ = otherBlockingManager.blockedAddresses(transaction: tx)

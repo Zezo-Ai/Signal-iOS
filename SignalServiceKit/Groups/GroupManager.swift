@@ -415,27 +415,6 @@ public class GroupManager: NSObject {
         )
     }
 
-    public static func leaveGroupOrDeclineInviteAsyncWithoutUI(groupThread: TSGroupThread, tx: DBWriteTransaction) {
-        guard groupThread.groupModel.groupMembership.isLocalUserMemberOfAnyKind else {
-            owsFailDebug("unexpectedly trying to leave group for which we're not a member.")
-            return
-        }
-
-        tx.addSyncCompletion {
-            Task {
-                let databaseStorage = SSKEnvironment.shared.databaseStorageRef
-                let leavePromise = await databaseStorage.awaitableWrite { tx in
-                    return self.localLeaveGroupOrDeclineInvite(groupThread: groupThread, tx: tx)
-                }
-                do {
-                    _ = try await leavePromise.awaitable()
-                } catch {
-                    owsFailDebug("Couldn't leave group: \(error)")
-                }
-            }
-        }
-    }
-
     // MARK: - Remove From Group / Revoke Invite
 
     public static func removeFromGroupOrRevokeInviteV2(

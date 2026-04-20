@@ -197,7 +197,6 @@ public class BlockListUIUtils {
             SSKEnvironment.shared.blockingManagerRef.addBlockedGroupId(
                 groupThread.groupId,
                 blockMode: .local,
-                shouldLeave: true,
                 transaction: tx,
             )
         })

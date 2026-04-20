@@ -32,7 +32,6 @@ enum MessageRequestDecliner {
                 blockingManager.addBlockedThread(
                     thread,
                     blockMode: .local,
-                    shouldLeaveIfGroup: false,
                     transaction: tx,
                 )
             }

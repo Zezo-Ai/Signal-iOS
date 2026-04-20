@@ -225,7 +225,7 @@ public class BlockingManager {
         didUpdate(wasLocallyInitiated: wasLocallyInitiated, tx: tx)
     }
 
-    public func addBlockedGroupId(_ groupId: Data, blockMode: BlockMode, shouldLeave: Bool, transaction: DBWriteTransaction) {
+    public func addBlockedGroupId(_ groupId: Data, blockMode: BlockMode, transaction: DBWriteTransaction) {
         guard GroupManager.isValidGroupIdOfAnyKind(groupId) else {
             owsFailDebug("Can't block invalid groupId: \(groupId.toHex())")
             return
@@ -247,14 +247,6 @@ public class BlockingManager {
         }
 
         if let groupThread {
-            // Quit the group if we're a member.
-            if shouldLeave, groupThread.groupModel.groupMembership.isLocalUserMemberOfAnyKind {
-                GroupManager.leaveGroupOrDeclineInviteAsyncWithoutUI(
-                    groupThread: groupThread,
-                    tx: transaction,
-                )
-            }
-
             switch blockMode {
             case .restoreFromBackup:
                 // If we're restoring from a Backup, avoid the side effect of
@@ -329,11 +321,11 @@ public class BlockingManager {
         }
     }
 
-    public func addBlockedThread(_ thread: TSThread, blockMode: BlockMode, shouldLeaveIfGroup: Bool, transaction: DBWriteTransaction) {
+    public func addBlockedThread(_ thread: TSThread, blockMode: BlockMode, transaction: DBWriteTransaction) {
         if let contactThread = thread as? TSContactThread {
             addBlockedAddress(contactThread.contactAddress, blockMode: blockMode, transaction: transaction)
         } else if let groupThread = thread as? TSGroupThread {
-            addBlockedGroupId(groupThread.groupId, blockMode: blockMode, shouldLeave: shouldLeaveIfGroup, transaction: transaction)
+            addBlockedGroupId(groupThread.groupId, blockMode: blockMode, transaction: transaction)
         } else {
             owsFailDebug("Invalid thread: \(type(of: thread))")
         }
