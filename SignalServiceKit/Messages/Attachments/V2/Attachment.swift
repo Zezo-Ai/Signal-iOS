@@ -388,7 +388,7 @@ public class Attachment {
                     // Okay to fall back to our local data length even if the original sender
                     // didn't include it; we now know it from the local file.
                     plaintextDataLength: latestTransitTierInfo.unencryptedByteCount ?? metadata.plaintextDataLength,
-                    // Encryped length is the same regardless of the key used.
+                    // Encrypted length is the same regardless of the key used.
                     encryptedDataLength: metadata.encryptedDataLength,
                 ),
             )
