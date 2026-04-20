@@ -27,6 +27,33 @@ public final class OutgoingMessageRequestResponseSyncMessage: OutgoingSyncMessag
             case .blockAndSpam: .blockAndSpam
             }
         }
+
+        public var shouldBlockThread: Bool {
+            switch self {
+            case .block, .blockAndDelete, .blockAndSpam:
+                return true
+            case .accept, .delete, .spam:
+                return false
+            }
+        }
+
+        public var shouldDeleteThread: Bool {
+            switch self {
+            case .delete, .blockAndDelete:
+                return true
+            case .accept, .block, .spam, .blockAndSpam:
+                return false
+            }
+        }
+
+        public var shouldReportSpam: Bool {
+            switch self {
+            case .spam, .blockAndSpam:
+                return true
+            case .accept, .block, .delete, .blockAndDelete:
+                return false
+            }
+        }
     }
 
     // v0: The sending thread is also the acted-upon thread.

@@ -694,13 +694,14 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
 
     func didTapReportSpam() {
         ReportSpamUIUtils.showReportSpamActionSheet(
-            thread,
-            isBlocked: threadViewModel.isBlocked,
             from: self,
-        ) { [weak self] didBlock in
-            self?.reloadThreadAndUpdateContent()
-            self?.presentToast(text: ReportSpamUIUtils.successfulReportText(didBlock: didBlock))
-        }
+            forThread: thread,
+            isBlocked: threadViewModel.isBlocked,
+            onSuccess: { [weak self] responseType in
+                self?.reloadThreadAndUpdateContent()
+                self?.presentToast(text: ReportSpamUIUtils.successfulReportText(didBlock: responseType.shouldBlockThread))
+            },
+        )
     }
 
     func didTapInternalSettings() {

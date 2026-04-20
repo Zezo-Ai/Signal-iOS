@@ -129,87 +129,20 @@ extension ConversationViewController: MessageRequestDelegate {
 }
 
 private extension ConversationViewController {
-    func blockThread() {
-        // Leave the group while blocking the thread.
-        SSKEnvironment.shared.databaseStorageRef.write { transaction in
-            SSKEnvironment.shared.blockingManagerRef.addBlockedThread(
-                thread,
-                blockMode: .local,
-                shouldLeaveIfGroup: true,
-                transaction: transaction,
-            )
-            SSKEnvironment.shared.syncManagerRef.sendMessageRequestResponseSyncMessage(
-                thread: thread,
-                responseType: .block,
-                transaction: transaction,
-            )
-        }
-        NotificationCenter.default.post(name: ChatListViewController.clearSearch, object: nil)
-    }
-
-    func blockThreadAndDelete() {
-        // Do not leave the group while blocking the thread; we'll
-        // that below so that we can surface an error to the user
-        // if leaving the group fails.
-        SSKEnvironment.shared.databaseStorageRef.write { transaction in
-            SSKEnvironment.shared.blockingManagerRef.addBlockedThread(
-                thread,
-                blockMode: .local,
-                shouldLeaveIfGroup: false,
-                transaction: transaction,
-            )
-        }
-        leaveAndSoftDeleteThread(messageRequestResponseType: .blockAndDelete)
-    }
-
-    func blockThreadAndReportSpam(in thread: TSThread) {
-        let spamReport = SSKEnvironment.shared.databaseStorageRef.write { tx in
-            return ReportSpamUIUtils.blockAndBuildSpamReport(in: thread, tx: tx)
-        }
-        Task {
-            try? await spamReport?.submit(using: SSKEnvironment.shared.networkManagerRef)
-        }
-
-        presentToastCVC(ReportSpamUIUtils.successfulReportText(didBlock: true))
-        NotificationCenter.default.post(name: ChatListViewController.clearSearch, object: nil)
-    }
-
-    func leaveAndSoftDeleteThread(
-        messageRequestResponseType: OutgoingMessageRequestResponseSyncMessage.ResponseType,
-    ) {
-        AssertIsOnMainThread()
-
-        let databaseStorage = SSKEnvironment.shared.databaseStorageRef
-        let syncManager = SSKEnvironment.shared.syncManagerRef
-
-        databaseStorage.write { tx in
-            syncManager.sendMessageRequestResponseSyncMessage(
-                thread: self.thread,
-                responseType: messageRequestResponseType,
-                transaction: tx,
-            )
-        }
-
-        let completion = {
-            databaseStorage.write { transaction in
-                DependenciesBridge.shared.threadSoftDeleteManager.softDelete(
-                    threads: [self.thread],
-                    // We're already sending a sync message about this above!
-                    sendDeleteForMeSyncMessage: false,
-                    tx: transaction,
-                )
-            }
+    func declineMessageRequest(responseType: OutgoingMessageRequestResponseSyncMessage.ResponseType) {
+        MessageRequestDecliner.declineMessageRequest(
+            inThread: self.thread,
+            responseType: responseType,
+        )
+        if responseType.shouldDeleteThread {
             self.conversationSplitViewController?.closeSelectedConversation(animated: true)
-            NotificationCenter.default.post(name: ChatListViewController.clearSearch, object: nil)
         }
-
-        guard let groupThread = thread as? TSGroupThread, groupThread.groupModel.groupMembership.isLocalUserFullOrInvitedMember else {
-            // If we don't need to leave the group, finish up immediately.
-            return completion()
+        if responseType.shouldReportSpam {
+            self.presentToastCVC(
+                ReportSpamUIUtils.successfulReportText(didBlock: responseType.shouldBlockThread),
+            )
         }
-
-        // Leave the group if we're a member.
-        GroupManager.leaveGroupOrDeclineInviteAsyncWithUI(groupThread: groupThread, fromViewController: self, success: completion)
+        NotificationCenter.default.post(name: ChatListViewController.clearSearch, object: nil)
     }
 
     /// Accept a message request, or unblock chat.
@@ -380,19 +313,18 @@ extension ConversationViewController {
         )
 
         actionSheet.addAction(ActionSheetAction(title: blockActionTitle) { [weak self] _ in
-            self?.blockThread()
+            self?.declineMessageRequest(responseType: .block)
             sheetCompletion?(true)
         })
 
         if !hasReportedSpam {
             actionSheet.addAction(ActionSheetAction(title: blockAndReportSpamActionTitle) { [weak self] _ in
-                guard let self else { return }
-                self.blockThreadAndReportSpam(in: self.thread)
+                self?.declineMessageRequest(responseType: .blockAndSpam)
                 sheetCompletion?(true)
             })
         } else {
             actionSheet.addAction(ActionSheetAction(title: blockAndDeleteActionTitle) { [weak self] _ in
-                self?.blockThreadAndDelete()
+                self?.declineMessageRequest(responseType: .blockAndDelete)
                 sheetCompletion?(true)
             })
         }
@@ -442,8 +374,8 @@ extension ConversationViewController {
         }
 
         let actionSheet = ActionSheetController(title: actionSheetTitle, message: actionSheetMessage)
-        actionSheet.addAction(ActionSheetAction(title: confirmationText, handler: { _ in
-            self.leaveAndSoftDeleteThread(messageRequestResponseType: .delete)
+        actionSheet.addAction(ActionSheetAction(title: confirmationText, handler: { [weak self] _ in
+            self?.declineMessageRequest(responseType: .delete)
         }))
         actionSheet.addAction(ActionSheetAction(title: CommonStrings.cancelButton, style: .cancel))
         return actionSheet
@@ -452,8 +384,9 @@ extension ConversationViewController {
     // TODO[SPAM]: For groups, fetch the inviter to add to the message
     func createReportThreadActionSheet() -> ActionSheetController {
         return ReportSpamUIUtils.createReportSpamActionSheet(
-            for: thread,
+            forThread: thread,
             isBlocked: threadViewModel.isBlocked,
+            declineMessageRequest: self.declineMessageRequest(responseType:),
         )
     }
 }

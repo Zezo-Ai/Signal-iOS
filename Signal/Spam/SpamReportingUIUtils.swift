@@ -8,21 +8,28 @@ import SignalServiceKit
 import SignalUI
 
 enum ReportSpamUIUtils {
-    /// Called only if the user reports spam.
-    /// The `Bool` parameter represents if the thread was also blocked.
-    typealias Completion = (Bool) -> Void
-
     static func showReportSpamActionSheet(
-        _ thread: TSThread,
-        isBlocked: Bool,
         from viewController: UIViewController,
-        completion: Completion?,
+        forThread thread: TSThread,
+        isBlocked: Bool,
+        onSuccess: @escaping @MainActor (OutgoingMessageRequestResponseSyncMessage.ResponseType) -> Void,
     ) {
-        let actionSheet = createReportSpamActionSheet(for: thread, isBlocked: isBlocked, completion: completion)
+        let actionSheet = createReportSpamActionSheet(
+            forThread: thread,
+            isBlocked: isBlocked,
+            declineMessageRequest: { responseType in
+                MessageRequestDecliner.declineMessageRequest(inThread: thread, responseType: responseType)
+                onSuccess(responseType)
+            },
+        )
         viewController.presentActionSheet(actionSheet)
     }
 
-    static func createReportSpamActionSheet(for thread: TSThread, isBlocked: Bool, completion: Completion? = nil) -> ActionSheetController {
+    static func createReportSpamActionSheet(
+        forThread thread: TSThread,
+        isBlocked: Bool,
+        declineMessageRequest: @escaping @MainActor (OutgoingMessageRequestResponseSyncMessage.ResponseType) -> Void,
+    ) -> ActionSheetController {
         let actionSheetTitle = OWSLocalizedString(
             "MESSAGE_REQUEST_REPORT_CONVERSATION_TITLE",
             comment: "Action sheet title to confirm reporting a conversation as spam via a message request.",
@@ -40,13 +47,7 @@ enum ReportSpamUIUtils {
                     comment: "Action sheet action to confirm reporting a conversation as spam via a message request.",
                 ),
                 handler: { _ in
-                    let spamReport = SSKEnvironment.shared.databaseStorageRef.write { tx in
-                        return Self.buildSpamReport(in: thread, tx: tx)
-                    }
-                    Task {
-                        try? await spamReport?.submit(using: SSKEnvironment.shared.networkManagerRef)
-                    }
-                    completion?(false)
+                    declineMessageRequest(.spam)
                 },
             ),
         )
@@ -58,13 +59,7 @@ enum ReportSpamUIUtils {
                         comment: "Action sheet action to confirm blocking and reporting spam for a thread via a message request.",
                     ),
                     handler: { _ in
-                        let spamReport = SSKEnvironment.shared.databaseStorageRef.write { tx in
-                            return Self.blockAndBuildSpamReport(in: thread, tx: tx)
-                        }
-                        Task {
-                            try? await spamReport?.submit(using: SSKEnvironment.shared.networkManagerRef)
-                        }
-                        completion?(true)
+                        declineMessageRequest(.blockAndSpam)
                     },
                 ),
             )
@@ -87,38 +82,7 @@ enum ReportSpamUIUtils {
         }
     }
 
-    static func blockAndBuildSpamReport(in thread: TSThread, tx: DBWriteTransaction) -> SpamReport? {
-        SSKEnvironment.shared.blockingManagerRef.addBlockedThread(
-            thread,
-            blockMode: .local,
-            shouldLeaveIfGroup: false,
-            transaction: tx,
-        )
-
-        let result = Self._buildSpamReport(in: thread, tx: tx)
-
-        SSKEnvironment.shared.syncManagerRef.sendMessageRequestResponseSyncMessage(
-            thread: thread,
-            responseType: .blockAndSpam,
-            transaction: tx,
-        )
-
-        return result
-    }
-
-    static func buildSpamReport(in thread: TSThread, tx: DBWriteTransaction) -> SpamReport? {
-        let result = Self._buildSpamReport(in: thread, tx: tx)
-
-        SSKEnvironment.shared.syncManagerRef.sendMessageRequestResponseSyncMessage(
-            thread: thread,
-            responseType: .spam,
-            transaction: tx,
-        )
-
-        return result
-    }
-
-    private static func _buildSpamReport(in thread: TSThread, tx: DBWriteTransaction) -> SpamReport? {
+    static func insertSpamReportMessage(in thread: TSThread, tx: DBWriteTransaction) -> SpamReport? {
         var aci: Aci?
         var isGroup = false
         if let contactThread = thread as? TSContactThread {
