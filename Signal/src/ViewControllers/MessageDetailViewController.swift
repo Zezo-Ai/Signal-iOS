@@ -318,7 +318,11 @@ class MessageDetailViewController: OWSTableViewController2 {
                 ))
             }
 
-            if let formattedByteCount = byteCountFormatter.string(for: attachment.attachment.asStream()?.unencryptedByteCount ?? 0) {
+            if
+                let formattedByteCount = byteCountFormatter.string(
+                    for: attachment.attachment.asStream()?.unencryptedByteCount ?? attachment.attachment.anyPointerFullsizeUnencryptedByteCount,
+                )
+            {
                 messageStack.addArrangedSubview(Self.buildValueLabel(
                     name: OWSLocalizedString(
                         "MESSAGE_METADATA_VIEW_ATTACHMENT_FILE_SIZE",
@@ -331,6 +335,17 @@ class MessageDetailViewController: OWSTableViewController2 {
             }
 
             if DebugFlags.messageDetailsExtraInfo {
+                if
+                    let thumbnail = AttachmentBackupThumbnail(attachment: attachment.attachment),
+                    let thumbnailSize = try? OWSFileSystem.fileSize(of: thumbnail.fileURL),
+                    let formattedThumbnailByteCount = byteCountFormatter.string(for: thumbnailSize)
+                {
+                    messageStack.addArrangedSubview(Self.buildValueLabel(
+                        name: "Thumbnail Size",
+                        value: formattedThumbnailByteCount,
+                    ))
+                }
+
                 let mimeType = attachment.attachment.mimeType
                 messageStack.addArrangedSubview(Self.buildValueLabel(
                     name: OWSLocalizedString(
