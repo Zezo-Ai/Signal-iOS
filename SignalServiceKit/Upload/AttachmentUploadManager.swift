@@ -368,6 +368,13 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
                 logger: logger,
             )
         } catch let error as BackupArchive.Response.CopyToMediaTierError {
+
+            await db.awaitableWrite { tx in
+                // Clean up the upload record; if we failed to copy
+                // we want to start an upload fresh next time.
+                self.cleanup(record: record, logger: logger, tx: tx)
+            }
+
             switch error {
             case .sourceObjectNotFound, .badArgument:
                 let attachmentFileUrl = AttachmentStream.absoluteAttachmentFileURL(
@@ -381,10 +388,6 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
                 }
 
                 await db.awaitableWrite { tx in
-                    // Clean up the upload record; if we failed to copy
-                    // we want to start an upload fresh next time.
-                    self.cleanup(record: record, logger: logger, tx: tx)
-
                     guard let attachment = attachmentStore.fetch(id: attachmentStream.id, tx: tx) else {
                         return
                     }
