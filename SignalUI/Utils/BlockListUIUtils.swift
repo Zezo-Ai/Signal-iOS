@@ -172,33 +172,26 @@ public class BlockListUIUtils {
         from viewController: UIViewController,
         completion: ((ActionSheetAction) -> Void)?,
     ) {
-        guard groupThread.groupModel.groupMembership.isLocalUserFullOrInvitedMember else {
-            blockGroupStep2(groupThread, from: viewController, completion: completion)
-            return
-        }
+        let blockingManager = SSKEnvironment.shared.blockingManagerRef
+        let databaseStorage = SSKEnvironment.shared.databaseStorageRef
 
-        GroupManager.leaveGroupOrDeclineInviteAsyncWithUI(
-            groupThread: groupThread,
-            fromViewController: viewController,
-            success: {
-                blockGroupStep2(groupThread, from: viewController, completion: completion)
-            },
-        )
-    }
-
-    private static func blockGroupStep2(
-        _ groupThread: TSGroupThread,
-        from viewController: UIViewController,
-        completion: ((ActionSheetAction) -> Void)?,
-    ) {
-        // block the group regardless of the ability to deliver the
-        // "leave group" message.
-        SSKEnvironment.shared.databaseStorageRef.write(block: { tx in
-            SSKEnvironment.shared.blockingManagerRef.addBlockedGroupId(
+        databaseStorage.write(block: { tx in
+            // block the group regardless of the ability to deliver the
+            // "leave group" message.
+            blockingManager.addBlockedGroupId(
                 groupThread.groupId,
                 blockMode: .local,
                 transaction: tx,
             )
+            if groupThread.groupModel.groupMembership.isLocalUserFullOrInvitedMember {
+                // We don't wait for this because it's durably enqeueued and may take up to
+                // 24 hours to complete.
+                _ = GroupManager.localLeaveGroupOrDeclineInvite(
+                    groupThread: groupThread,
+                    waitForMessageProcessing: true,
+                    tx: tx,
+                )
+            }
         })
 
         let actionSheetTitle = OWSLocalizedString(
