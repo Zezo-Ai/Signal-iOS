@@ -495,9 +495,11 @@ public class AttachmentManagerImpl: AttachmentManager {
         owningMessageReceivedAtTimestamp: UInt64?,
         incrementalMacInfo: Attachment.IncrementalMacInfo?,
     ) -> Attachment.TransitTierInfo? {
-        guard locatorInfo.key.count > 0 else { return nil }
+        if locatorInfo.key.isEmpty {
+            return nil
+        }
 
-        guard locatorInfo.transitCdnKey.isEmpty.negated else {
+        if locatorInfo.transitCdnKey.isEmpty {
             // Ok to be missing transit-tier CDN info on a backup locator, if
             // this attachment was never uploaded.
             return nil
