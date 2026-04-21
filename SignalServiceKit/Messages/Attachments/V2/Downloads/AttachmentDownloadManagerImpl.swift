@@ -597,7 +597,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     record.priority != .backupRestore,
                     let attachment = attachmentStore.fetch(id: record.attachmentId, tx: tx)
                 {
-                    // Backup restore doenload queue does its own marking of failed state.
+                    // Backup restore download queue does its own marking of failed state.
                     attachmentStore.updateAttachmentAsFailedToDownload(
                         attachment: attachment,
                         sourceType: record.sourceType,
