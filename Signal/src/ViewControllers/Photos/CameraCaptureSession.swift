@@ -879,7 +879,7 @@ class CameraCaptureSession: NSObject {
 
     // MARK: - Audio Recording Stack
 
-    private let recordingAudioActivity = AudioActivity(audioDescription: "VideoCapture", behavior: .playAndRecord)
+    private let recordingAudioActivity = AudioActivity(audioDescription: "VideoCapture", behavior: .recordAudio)
 
     private func startAudioCapture() -> Bool {
         assertIsOnSessionQueue()

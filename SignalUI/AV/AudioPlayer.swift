@@ -12,7 +12,7 @@ public enum AudioBehavior {
     case playback
     case playbackMixWithOthers
     case audioMessagePlayback
-    case playAndRecord
+    case recordAudio
     case call
 }
 

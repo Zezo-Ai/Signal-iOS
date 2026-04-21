@@ -30,7 +30,7 @@ final class VoiceMessageInProgressDraft: VoiceMessageSendableDraft {
             fileExtension: "m4a",
             isAvailableWhileDeviceLocked: false,
         )
-        self.audioActivity = AudioActivity(audioDescription: "Voice Message Recording", behavior: .playAndRecord)
+        self.audioActivity = AudioActivity(audioDescription: "Voice Message Recording", behavior: .recordAudio)
         self.audioSession = audioSession
         self.sleepManager = sleepManager
     }

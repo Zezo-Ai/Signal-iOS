@@ -14,7 +14,7 @@ public class AudioActivity: NSObject {
 
     public var requiresRecordingPermissions: Bool {
         switch behavior {
-        case .playAndRecord, .call:
+        case .recordAudio, .call:
             return true
         case .playback, .playbackMixWithOthers, .audioMessagePlayback, .unknown:
             return false
@@ -26,7 +26,7 @@ public class AudioActivity: NSObject {
         switch behavior {
         case .audioMessagePlayback, .call:
             return true
-        case .playback, .playbackMixWithOthers, .playAndRecord, .unknown:
+        case .playback, .playbackMixWithOthers, .recordAudio, .unknown:
             return false
         }
     }
@@ -170,7 +170,7 @@ public class AudioSession: NSObject {
             // WebRTC/CallAudioService manages call audio
             // Eventually it would be nice to consolidate more of the audio
             // session handling.
-        } else if aggregateBehaviors.contains(.playAndRecord) {
+        } else if aggregateBehaviors.contains(.recordAudio) {
             assert(avAudioSession.recordPermission == .granted)
             try setCategory(
                 .playAndRecord,
@@ -178,7 +178,6 @@ public class AudioSession: NSObject {
                 options: [
                     .defaultToSpeaker,
                     .allowBluetoothHFP,
-                    .allowBluetoothA2DP,
                 ],
             )
             try avAudioSession.setAllowHapticsAndSystemSoundsDuringRecording(true)
@@ -291,8 +290,8 @@ extension AudioBehavior: CustomStringConvertible {
             return "OWSAudioBehavior.playbackMixWithOthers"
         case .audioMessagePlayback:
             return "OWSAudioBehavior.audioMessagePlayback"
-        case .playAndRecord:
-            return "OWSAudioBehavior.playAndRecord"
+        case .recordAudio:
+            return "OWSAudioBehavior.recordAudioMessage"
         case .call:
             return "OWSAudioBehavior.call"
         }
