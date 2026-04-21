@@ -218,11 +218,13 @@ public class GroupV2UpdatesImpl: GroupV2Updates {
                 return abs(lastSuccessfulRefreshDate.timeIntervalSinceNow) < refreshFrequency
             }()
 
-            let databaseStorage = SSKEnvironment.shared.databaseStorageRef
-            try databaseStorage.read { tx in
-                // - If we're blocked, it's an immediate error
-                if SSKEnvironment.shared.blockingManagerRef.isGroupIdBlocked(groupId, transaction: tx) {
-                    throw GroupsV2Error.groupBlocked
+            if !options.contains(.leavingGroup) {
+                let databaseStorage = SSKEnvironment.shared.databaseStorageRef
+                try databaseStorage.read { tx in
+                    // If we're blocked, it's an immediate error unless we're leaving the group.
+                    if SSKEnvironment.shared.blockingManagerRef.isGroupIdBlocked(groupId, transaction: tx) {
+                        throw GroupsV2Error.groupBlocked
+                    }
                 }
             }
 

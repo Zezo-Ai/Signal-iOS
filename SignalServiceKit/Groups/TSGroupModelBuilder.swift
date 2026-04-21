@@ -169,6 +169,7 @@ public struct TSGroupModelOptions: OptionSet {
 
     public static let didJustAddSelfViaGroupLink = TSGroupModelOptions(rawValue: 1 << 0)
     public static let throttle = TSGroupModelOptions(rawValue: 1 << 1)
+    public static let leavingGroup = TSGroupModelOptions(rawValue: 1 << 2)
 
     public init(rawValue: Int) {
         self.rawValue = rawValue

@@ -49,12 +49,15 @@ public class GroupsV2Impl: GroupsV2 {
         observeNotifications()
     }
 
-    private func refreshGroupWithTimeout(secretParams: GroupSecretParams) async throws {
+    private func refreshGroupWithTimeout(secretParams: GroupSecretParams, isLeavingGroup: Bool) async throws {
         do {
             // Ignore the result after the timeout. However, keep refreshing the group
             // in the background since the result is still useful/reusable.
             try await withUncooperativeTimeout(seconds: GroupManager.groupUpdateTimeoutDuration) {
-                try await SSKEnvironment.shared.groupV2UpdatesRef.refreshGroup(secretParams: secretParams)
+                try await SSKEnvironment.shared.groupV2UpdatesRef.refreshGroup(
+                    secretParams: secretParams,
+                    options: isLeavingGroup ? [.leavingGroup] : [],
+                )
             }
         } catch is UncooperativeTimeoutError {
             throw GroupsV2Error.timeout
@@ -227,7 +230,10 @@ public class GroupsV2Impl: GroupsV2 {
                 // committed to the service, we should refresh our local state
                 // for the group and try again to apply our changes.
 
-                try await refreshGroupWithTimeout(secretParams: groupV2Params.groupSecretParams)
+                try await refreshGroupWithTimeout(
+                    secretParams: groupV2Params.groupSecretParams,
+                    isLeavingGroup: changes.shouldLeaveGroupDeclineInvite,
+                )
 
                 groupUpdateResult = try await buildGroupChangeProtoAndTryToUpdateGroupOnService(
                     groupV2Params: groupV2Params,
@@ -1715,7 +1721,7 @@ public class GroupsV2Impl: GroupsV2 {
         // First try to fetch latest group state from service.
         // This will fail for users trying to join via group link
         // who are not yet in the group.
-        try await refreshGroupWithTimeout(secretParams: secretParams)
+        try await refreshGroupWithTimeout(secretParams: secretParams, isLeavingGroup: false)
 
         let groupThread = SSKEnvironment.shared.databaseStorageRef.read { tx in
             return TSGroupThread.fetch(forGroupId: groupId, tx: tx)

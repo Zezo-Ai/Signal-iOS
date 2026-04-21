@@ -70,7 +70,7 @@ public class GroupsV2OutgoingChanges {
     private var inviteLinkPasswordMode: InviteLinkPasswordMode?
 
     private var shouldAcceptInvite = false
-    private var shouldLeaveGroupDeclineInvite = false
+    private(set) var shouldLeaveGroupDeclineInvite = false
     private var shouldRevokeInvalidInvites = false
 
     /// Non-nil if the value changed.
