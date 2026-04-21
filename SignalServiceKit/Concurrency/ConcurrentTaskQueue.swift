@@ -76,7 +76,7 @@ public final actor ConcurrentTaskQueue {
     }
 
     /// See documentation for method above; variant for non-throwing blocks that just throws CancellationError.
-    public func run<T>(_ block: () async -> T) async throws(CancellationError) -> T {
+    public func run<T>(_ block: () async throws(CancellationError) -> T) async throws(CancellationError) -> T {
         return try await _run(isCancellable: true, block).get()
     }
 
