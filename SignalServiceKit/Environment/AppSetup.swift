@@ -2123,7 +2123,6 @@ extension AppSetup.FinalContinuation {
             sskEnvironment.donationReceiptCredentialRedemptionJobQueue.start(appContext: appContext)
             sskEnvironment.smJobQueuesRef.incomingContactSyncJobQueue.start(appContext: appContext)
             sskEnvironment.smJobQueuesRef.sendGiftBadgeJobQueue.start(appContext: appContext)
-            sskEnvironment.smJobQueuesRef.sessionResetJobQueue.start(appContext: appContext)
 
             let preKeyManager = dependenciesBridge.preKeyManager
             Task {

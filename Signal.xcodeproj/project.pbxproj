@@ -731,7 +731,6 @@
 		505C2ED42997015800C23FB2 /* LinkDeviceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 505C2ED32997015800C23FB2 /* LinkDeviceViewController.swift */; };
 		505C2ED629971D4E00C23FB2 /* DeviceLimitExceededError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 505C2ED529971D4E00C23FB2 /* DeviceLimitExceededError.swift */; };
 		505C2ED92997422D00C23FB2 /* SelfSignedIdentityTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 505C2ED82997422D00C23FB2 /* SelfSignedIdentityTest.swift */; };
-		505CC1652F229B8400D311CD /* OutgoingEndSessionMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 505CC1642F229B8400D311CD /* OutgoingEndSessionMessage.swift */; };
 		505CC1672F22BC7A00D311CD /* OutgoingPaymentActivationRequestMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 505CC1662F22BC7A00D311CD /* OutgoingPaymentActivationRequestMessage.swift */; };
 		505CC1692F22C2EC00D311CD /* OutgoingPaymentActivationRequestFinishedMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 505CC1682F22C2EC00D311CD /* OutgoingPaymentActivationRequestFinishedMessage.swift */; };
 		505F76332BC45C0700B1B51C /* BuildFlags+Generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 505F76322BC45C0700B1B51C /* BuildFlags+Generated.swift */; };
@@ -1374,7 +1373,6 @@
 		7254651E2BA012BD00EABFD2 /* AvatarBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FC7EEB265834F30046707A /* AvatarBuilder.swift */; };
 		7254651F2BA014FC00EABFD2 /* PaymentsCurrenciesImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3474C56D26111605006723D2 /* PaymentsCurrenciesImpl.swift */; };
 		725465202BA016A200EABFD2 /* GroupsV2AvatarDownloadOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347191F823F457BD003A3106 /* GroupsV2AvatarDownloadOperation.swift */; };
-		725465242BA017D500EABFD2 /* SessionResetJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D231761DC7E8F10034FA89 /* SessionResetJob.swift */; };
 		725465252BA017EF00EABFD2 /* ThreadUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 348C686C246B0B100039705A /* ThreadUtil.swift */; };
 		7254652A2BA01B4800EABFD2 /* PaymentsHelperImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3465F4DA27287858001663AF /* PaymentsHelperImpl.swift */; };
 		725465382BA01FAA00EABFD2 /* SignalMessagingJobQueues.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9668B34291B088200665298 /* SignalMessagingJobQueues.swift */; };
@@ -4785,7 +4783,6 @@
 		45CADA8A298DD2B4009EBDF5 /* MediaTileScrollFlag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaTileScrollFlag.swift; sourceTree = "<group>"; };
 		45CB2FA71CB7146C00E1B343 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Signal/util/Launch Screen.storyboard"; sourceTree = SOURCE_ROOT; };
 		45D062F427D7F49800BD505E /* OWSContactsManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OWSContactsManagerTest.swift; sourceTree = "<group>"; };
-		45D231761DC7E8F10034FA89 /* SessionResetJob.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionResetJob.swift; sourceTree = "<group>"; };
 		45D49114296F69AA00B92BB1 /* AllMediaViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllMediaViewController.swift; sourceTree = "<group>"; };
 		45D9784129F0B50000BBB3C0 /* MediaTileListModeCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaTileListModeCell.swift; sourceTree = "<group>"; };
 		45D9784329F0B51F00BBB3C0 /* AudioCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCell.swift; sourceTree = "<group>"; };
@@ -5007,7 +5004,6 @@
 		505C2ED529971D4E00C23FB2 /* DeviceLimitExceededError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceLimitExceededError.swift; sourceTree = "<group>"; };
 		505C2ED82997422D00C23FB2 /* SelfSignedIdentityTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfSignedIdentityTest.swift; sourceTree = "<group>"; };
 		505C2EDA29974D2000C23FB2 /* StorageServiceContactTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageServiceContactTest.swift; sourceTree = "<group>"; };
-		505CC1642F229B8400D311CD /* OutgoingEndSessionMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingEndSessionMessage.swift; sourceTree = "<group>"; };
 		505CC1662F22BC7A00D311CD /* OutgoingPaymentActivationRequestMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingPaymentActivationRequestMessage.swift; sourceTree = "<group>"; };
 		505CC1682F22C2EC00D311CD /* OutgoingPaymentActivationRequestFinishedMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingPaymentActivationRequestFinishedMessage.swift; sourceTree = "<group>"; };
 		505F76322BC45C0700B1B51C /* BuildFlags+Generated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BuildFlags+Generated.swift"; sourceTree = "<group>"; };
@@ -13611,7 +13607,6 @@
 				D925937928B0497900D5D437 /* LocalUserLeaveGroupJob.swift */,
 				F9C5CAF5289453B200548EEE /* MessageSenderJobQueue.swift */,
 				F98EA264286A469100791EB4 /* SendGiftBadgeJobQueue.swift */,
-				45D231761DC7E8F10034FA89 /* SessionResetJob.swift */,
 				D9668B34291B088200665298 /* SignalMessagingJobQueues.swift */,
 			);
 			path = Jobs;
@@ -14858,7 +14853,6 @@
 				50468F2829EE130A00948E02 /* InteractionStore.swift */,
 				F9C5C8EB289453B100548EEE /* MentionFinder.swift */,
 				50B74C742F1716F500F59813 /* OutgoingDeleteMessage.swift */,
-				505CC1642F229B8400D311CD /* OutgoingEndSessionMessage.swift */,
 				50DE50632F21FE1700F30994 /* OutgoingStaticMessage.swift */,
 				F9C5C908289453B100548EEE /* OWSDisappearingConfigurationUpdateInfoMessage+SDS.swift */,
 				F9C5C8F1289453B100548EEE /* OWSDisappearingConfigurationUpdateInfoMessage.h */,
@@ -19561,7 +19555,6 @@
 				D9AA7D6E2D11F08A0014137C /* OutgoingDeviceNameChangeSyncMessage.swift in Sources */,
 				C13B9BB62A1819C7007F74C4 /* OutgoingEditMessage.swift in Sources */,
 				C1EAECDF2A1EFC21008A3D58 /* OutgoingEditMessageSyncTranscript.swift in Sources */,
-				505CC1652F229B8400D311CD /* OutgoingEndSessionMessage.swift in Sources */,
 				50C55EB82F1B0EFC00BA8309 /* OutgoingFetchLatestSyncMessage.swift in Sources */,
 				D9AA37A42A8A9A910088EFFB /* OutgoingGroupCallUpdateMessage.swift in Sources */,
 				F96A534328A1AE7C003262D4 /* OutgoingGroupUpdateMessage.swift in Sources */,
@@ -19861,7 +19854,6 @@
 				50A5AA9B2A7449D000CF2ECC /* ServerReceiptEnvelope.swift in Sources */,
 				507CD5E529660D5100E47DAC /* ServiceId.swift in Sources */,
 				F9C5CC96289453B300548EEE /* SessionRecord.pb.swift in Sources */,
-				725465242BA017D500EABFD2 /* SessionResetJob.swift in Sources */,
 				D9AE0AD729187A700063488B /* SessionResetJobRecord.swift in Sources */,
 				501050BB2EB959A4005161CA /* SessionStore.swift in Sources */,
 				1700E34128BD41150073D949 /* SetAlgebra+SSK.swift in Sources */,

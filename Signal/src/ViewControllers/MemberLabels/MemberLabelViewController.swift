@@ -707,8 +707,6 @@ extension MemberLabelViewController: CVComponentDelegate {
 
     func didTapUnverifiedIdentityChange(_ address: SignalServiceAddress) {}
 
-    func didTapCorruptedMessage(_ message: TSErrorMessage) {}
-
     func didTapSessionRefreshMessage(_ message: TSErrorMessage) {}
 
     func didTapResendGroupUpdateForErrorMessage(_ errorMessage: TSErrorMessage) {}

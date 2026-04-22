@@ -1205,18 +1205,14 @@ extension CVComponentSystemMessage {
             )
         case .wrongTrustedIdentityKey:
             return nil
-        case .invalidKeyException,
-             .missingKeyId,
-             .noSession,
-             .invalidMessage:
-            return Action(
-                title: OWSLocalizedString(
-                    "FINGERPRINT_SHRED_KEYMATERIAL_BUTTON",
-                    comment: "Label for button to reset a session.",
-                ),
-                accessibilityIdentifier: "reset_session",
-                action: .didTapCorruptedMessage(errorMessage: message),
-            )
+        case .invalidKeyException:
+            return nil
+        case .missingKeyId:
+            return nil
+        case .noSession:
+            return nil
+        case .invalidMessage:
+            return nil
         case .sessionRefresh:
             return Action(
                 title: CommonStrings.learnMore,

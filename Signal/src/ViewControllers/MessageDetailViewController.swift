@@ -1259,9 +1259,6 @@ extension MessageDetailViewController: CVComponentDelegate {
     func didTapUnverifiedIdentityChange(_ address: SignalServiceAddress) {}
 
     // TODO:
-    func didTapCorruptedMessage(_ message: TSErrorMessage) {}
-
-    // TODO:
     func didTapSessionRefreshMessage(_ message: TSErrorMessage) {}
 
     // See: resendGroupUpdate

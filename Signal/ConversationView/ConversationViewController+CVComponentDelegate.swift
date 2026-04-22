@@ -808,46 +808,6 @@ extension ConversationViewController: CVComponentDelegate {
         presentActionSheet(actionSheet)
     }
 
-    public func didTapCorruptedMessage(_ message: TSErrorMessage) {
-        AssertIsOnMainThread()
-
-        let threadName = SSKEnvironment.shared.databaseStorageRef.read { transaction in
-            SSKEnvironment.shared.contactManagerRef.displayName(for: self.thread, transaction: transaction)
-        }
-        let alertMessage = String.nonPluralLocalizedStringWithFormat(
-            OWSLocalizedString(
-                "CORRUPTED_SESSION_DESCRIPTION",
-                comment: "ActionSheet title",
-            ),
-            threadName,
-        )
-        let alert = ActionSheetController(title: nil, message: alertMessage)
-
-        alert.addAction(OWSActionSheets.cancelAction)
-
-        alert.addAction(ActionSheetAction(
-            title: OWSLocalizedString(
-                "FINGERPRINT_SHRED_KEYMATERIAL_BUTTON",
-                comment: "",
-            ),
-            style: .default,
-        ) { [weak self] _ in
-            guard let self else { return }
-            guard let contactThread = self.thread as? TSContactThread else {
-                // Corrupt Message errors only appear in contact threads.
-                Logger.error("Unexpected request to reset session in group thread.")
-                return
-            }
-
-            SSKEnvironment.shared.databaseStorageRef.asyncWrite { transaction in
-                SSKEnvironment.shared.smJobQueuesRef.sessionResetJobQueue.add(contactThread: contactThread, transaction: transaction)
-            }
-        })
-
-        dismissKeyBoard()
-        self.presentActionSheet(alert)
-    }
-
     public func didTapSessionRefreshMessage(_ message: TSErrorMessage) {
         dismissKeyBoard()
 
