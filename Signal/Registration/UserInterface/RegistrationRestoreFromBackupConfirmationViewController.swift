@@ -222,7 +222,7 @@ struct RegistrationRestoreFromBackupConfirmationView: View {
                 let formattedDate = DateUtil.dateFormatter.string(for: date),
                 let formattedTime = DateUtil.timeFormatter.string(for: date)
             {
-                formattedString = String.nonPluralLocalizedStringWithFormat(formattedString, formattedDate, formattedTime, OWSFormat.formatFileSize(size))
+                formattedString = String.nonPluralLocalizedStringWithFormat(formattedString, formattedDate, formattedTime, OWSByteCountFormatStyle().format(UInt64(safeCast: size)))
                 return Text(formattedString)
             } else {
                 return Text("")
