@@ -914,7 +914,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         var registrationMessage: RegistrationProvisioningMessage?
 
         /// Tracks the state of "username reclamation" following Storage Service
-        /// restore during registration. See ``attemptToReclaimUsername()`` for
+        /// restore during registration. See ``reclaimUsername()`` for
         /// more details.
         enum UsernameReclamationState {
             case localUsernameStateNotLoaded
@@ -3690,7 +3690,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         }
 
         if let localUsernameState = shouldAttemptToReclaimUsername() {
-            return await attemptToReclaimUsername(
+            return await reclaimUsername(
                 accountIdentity: accountIdentity,
                 localUsernameState: localUsernameState,
             )
@@ -4106,17 +4106,33 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
     /// network retries, we will simply move on. Any further recovery will
     /// happen via the username validation job and interactive recovery flows.
     @MainActor
-    private func attemptToReclaimUsername(
+    private func reclaimUsername(
         accountIdentity: AccountIdentity,
         localUsernameState: Usernames.LocalUsernameState,
-        remainingNetworkErrorRetries: UInt = 2,
     ) async -> RegistrationStep {
-        @MainActor
-        func attemptComplete() async -> RegistrationStep {
-            inMemoryState.usernameReclamationState = .reclamationAttempted
-            return await nextStep()
+        do {
+            try await Retry.performWithBackoff(
+                maxAttempts: 3,
+                isRetryable: { $0.isNetworkFailureOrTimeout },
+                block: {
+                    try await reclaimUsernameAttempt(
+                        accountIdentity: accountIdentity,
+                        localUsernameState: localUsernameState,
+                    )
+                },
+            )
+        } catch {
+            logger.warn("couldn't reclaim username; giving up: \(error)")
         }
+        inMemoryState.usernameReclamationState = .reclamationAttempted
+        return await nextStep()
+    }
 
+    @MainActor
+    private func reclaimUsernameAttempt(
+        accountIdentity: AccountIdentity,
+        localUsernameState: Usernames.LocalUsernameState,
+    ) async throws {
         let logger = PrefixedLogger(prefix: "UsernameReclamation")
 
         let localUsername: String
@@ -4124,58 +4140,32 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
 
         switch localUsernameState {
         case .unset, .linkCorrupted, .usernameAndLinkCorrupted:
-            return await attemptComplete()
+            return
         case .available(let username, let usernameLink):
             localUsername = username
             localUsernameLink = usernameLink
         }
 
-        let hashedLocalUsername: Usernames.HashedUsername
-        let encryptedUsernameForLink: Data
+        let hashedLocalUsername = try Usernames.HashedUsername(forUsername: localUsername)
+        let (_, encryptedUsernameForLink) = try deps.usernameLinkManager.generateEncryptedUsername(
+            username: localUsername,
+            existingEntropy: localUsernameLink.entropy,
+        )
 
-        do {
-            hashedLocalUsername = try Usernames.HashedUsername(forUsername: localUsername)
-            (_, encryptedUsernameForLink) = try deps.usernameLinkManager.generateEncryptedUsername(
-                username: localUsername,
-                existingEntropy: localUsernameLink.entropy,
-            )
-        } catch let error {
-            logger.error("Failed to reclaim username: error while generating params! \(error)")
-            return await attemptComplete()
-        }
-
-        do {
-            let confirmationResult = try await deps.usernameApiClient.confirmReservedUsername(
-                reservedUsername: hashedLocalUsername,
-                encryptedUsernameForLink: encryptedUsernameForLink,
-                chatServiceAuth: accountIdentity.chatServiceAuth,
-            )
-            switch confirmationResult {
-            case .success(let usernameLinkHandle):
-                if localUsernameLink.handle != usernameLinkHandle {
-                    logger.error("Username link handle rotated during reclamation! Our local username link is now broken.")
-                } else {
-                    logger.info("Successfully reclaimed username during registration.")
-                }
-            case .rejected, .rateLimited:
-                logger.error("Unexpectedly failed to confirm .username! \(confirmationResult)")
-            }
-
-            return await attemptComplete()
-        } catch {
-            if error.isNetworkFailureOrTimeout, remainingNetworkErrorRetries > 0 {
-                return await self.attemptToReclaimUsername(
-                    accountIdentity: accountIdentity,
-                    localUsernameState: localUsernameState,
-                    remainingNetworkErrorRetries: remainingNetworkErrorRetries - 1,
-                )
-            } else if error.isNetworkFailureOrTimeout {
-                logger.error("Failed to reclaim username: network error!")
+        let confirmationResult = try await deps.usernameApiClient.confirmReservedUsername(
+            reservedUsername: hashedLocalUsername,
+            encryptedUsernameForLink: encryptedUsernameForLink,
+            chatServiceAuth: accountIdentity.chatServiceAuth,
+        )
+        switch confirmationResult {
+        case .success(let usernameLinkHandle):
+            if localUsernameLink.handle != usernameLinkHandle {
+                logger.error("Username link handle rotated during reclamation! Our local username link is now broken.")
             } else {
-                logger.error("Failed to reclaim username: unknown error!")
+                logger.info("Successfully reclaimed username during registration.")
             }
-
-            return await attemptComplete()
+        case .rejected, .rateLimited:
+            logger.warn("Unexpectedly failed to confirm .username! \(confirmationResult)")
         }
     }
 
