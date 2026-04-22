@@ -32,7 +32,7 @@ class MediaGalleryAlbum {
     }
 }
 
-class MediaGalleryItem: Equatable, Hashable, MediaGallerySectionItem {
+struct MediaGalleryItem: Equatable, Hashable, MediaGallerySectionItem {
     struct Sender {
         let name: String
         let abbreviatedName: String

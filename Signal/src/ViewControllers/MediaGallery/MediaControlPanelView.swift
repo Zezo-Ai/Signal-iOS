@@ -658,7 +658,7 @@ class MediaControlPanelView: UIView {
         transitionDirection: UIPageViewController.NavigationDirection,
         animated: Bool,
     ) {
-        guard currentItem !== item else { return }
+        guard currentItem != item else { return }
 
         currentItem = item
         if currentMediaAlbum?.items.contains(item) != true {
