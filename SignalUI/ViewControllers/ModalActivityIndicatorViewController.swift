@@ -238,7 +238,6 @@ public class ModalActivityIndicatorViewController: OWSViewController {
         label.font = .dynamicTypeHeadline
         label.adjustsFontForContentSizeCategory = true
         label.textColor = .Signal.label
-        label.textAlignment = .natural
         label.numberOfLines = 5
         label.lineBreakMode = .byWordWrapping
         return label
@@ -247,7 +246,8 @@ public class ModalActivityIndicatorViewController: OWSViewController {
     private lazy var textStack: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [])
         stackView.isLayoutMarginsRelativeArrangement = true
-        stackView.directionalLayoutMargins = .init(top: 12, leading: 8, bottom: 0, trailing: 12)
+        // Top and bottom margins will be adjusted in `updateUIOnTextChange`.
+        stackView.directionalLayoutMargins = .init(hMargin: 8, vMargin: 0)
         stackView.axis = .vertical
         stackView.alignment = .leading
         stackView.spacing = 2
@@ -284,6 +284,7 @@ public class ModalActivityIndicatorViewController: OWSViewController {
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
 
         let aiContainer = UIView.container()
+        // Results in 28 dp on all edges when no title, no Cancel button.
         aiContainer.layoutMargins = .init(margin: 12)
         aiContainer.addSubview(activityIndicator)
         NSLayoutConstraint.activate([
@@ -299,7 +300,8 @@ public class ModalActivityIndicatorViewController: OWSViewController {
         let stackView = UIStackView(arrangedSubviews: [textStack, aiContainer])
         stackView.axis = .vertical
         stackView.alignment = .fill
-        stackView.spacing = 18
+        // 30 dp spacing between activity indicator and Cancel button.
+        stackView.setCustomSpacing(18, after: aiContainer)
         return stackView
     }()
 
@@ -422,6 +424,24 @@ public class ModalActivityIndicatorViewController: OWSViewController {
             if titleLabel.superview == nil {
                 textStack.insertArrangedSubview(titleLabel, at: 0)
             }
+
+            //
+            // Sligthly different alignment / spacing when there's no Cancel button.
+            //
+            // Text is centered when no Cancel button.
+            titleLabel.textAlignment = canCancel ? .natural : .center
+            // `panelView` has 16 dp margins on all edges.
+            // `activityIndicator` has 12 dp margins around it.
+            if canCancel {
+                // 28 dp above text, 24 dp between text and activity indicator.
+                textStack.directionalLayoutMargins.top = 12
+                textStack.directionalLayoutMargins.bottom = 12
+            } else {
+                // 20 dp above text, 20 dp between text and activity indicator.
+                textStack.directionalLayoutMargins.top = 4
+                textStack.directionalLayoutMargins.bottom = 8
+            }
+
             textStack.isHiddenInStackView = false
         } else {
             textStack.isHiddenInStackView = true
@@ -568,6 +588,11 @@ private class MAIVCPreviewViewController: UIViewController {
 @available(iOS 17, *)
 #Preview("No Title, Can Cancel") {
     MAIVCPreviewViewController(title: nil, canCancel: true)
+}
+
+@available(iOS 17, *)
+#Preview("Title, Can't Cancel") {
+    MAIVCPreviewViewController(title: "Preparing...", canCancel: false)
 }
 
 @available(iOS 17, *)
