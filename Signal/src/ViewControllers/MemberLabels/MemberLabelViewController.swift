@@ -325,13 +325,14 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
 
     @objc
     private func didTapDone() {
+        Logger.info("")
         var memberLabel: MemberLabel?
         if let updatedMemberLabel {
             memberLabel = MemberLabel(label: updatedMemberLabel, labelEmoji: updatedEmoji)
         }
-        let delegateReference = self.updateDelegate
         dismiss(animated: true, completion: {
-            delegateReference?.updateLabelForLocalUser(memberLabel: memberLabel)
+            Logger.info("Updating member label")
+            self.updateDelegate?.updateLabelForLocalUser(memberLabel: memberLabel)
         })
     }
 
