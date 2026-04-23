@@ -159,34 +159,33 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
         self.configureTitleAction(button: titleButton, delegate: componentDelegate)
         innerViews.append(titleButton)
 
-        let detailsButton = componentView.detailsButton
-        let mutualGroupsLabel = componentView.mutualGroupsLabel
-        let showTipsButton = componentView.showTipsButton
-        let nameNotVerifiedButton = componentView.profileNamesEducationButton
-
         let groupInfoWrapper = ManualLayoutViewWithLayer(name: "groupWrapper")
 
+        // Blurred background for when there's wallpaper,
+        // frame with rounded corners otherwise.
+        let cornerRadius: CGFloat = 40
+        if conversationStyle.hasWallpaper {
+            let wallpaperBlurView = componentView.ensureWallpaperBlurView()
+            configureWallpaperBlurView(
+                wallpaperBlurView: wallpaperBlurView,
+                componentDelegate: componentDelegate,
+                bubbleConfig: BubbleConfiguration(
+                    corners: .uniform(cornerRadius),
+                    stroke: ConversationStyle.bubbleStroke(isDarkThemeEnabled: isDarkThemeEnabled),
+                ),
+            )
+            groupInfoWrapper.addSubviewToFillSuperviewEdges(wallpaperBlurView)
+        } else {
+            groupInfoWrapper.layer.cornerRadius = cornerRadius
+            groupInfoWrapper.layer.borderWidth = 2
+            groupInfoWrapper.layer.borderColor = UIColor.Signal.tertiaryFill.cgColor
+        }
+
         if let safetySection = threadDetails.safetySection {
-            let reduceTransparency = UIAccessibility.isReduceTransparencyEnabled
-
-            groupInfoWrapper.layer.cornerRadius = 40
-            if conversationStyle.hasWallpaper {
-                if reduceTransparency {
-                    groupInfoWrapper.backgroundColor = isDarkThemeEnabled ? .black : .white
-                } else {
-                    groupInfoWrapper.backgroundColor = isDarkThemeEnabled ? .black.withAlphaComponent(0.3) : .white.withAlphaComponent(0.6)
-                }
-                groupInfoWrapper.layer.borderWidth = 0.5
-                groupInfoWrapper.layer.borderColor = isDarkThemeEnabled ? UIColor.white.withAlphaComponent(0.1).cgColor : UIColor.black.withAlphaComponent(0.1).cgColor
-            } else {
-                groupInfoWrapper.layer.borderWidth = 2
-                groupInfoWrapper.backgroundColor = .clear
-                groupInfoWrapper.layer.borderColor = UIColor.Signal.tertiaryFill.cgColor
-            }
-
             if safetySection.shouldShowProfileNamesEducation {
                 innerViews.append(UIView.spacer(withHeight: vSpacingNotVerifiedLabel))
 
+                let nameNotVerifiedButton = componentView.profileNamesEducationButton
                 let nameNotVerifiedButtonLabelConfig = nameNotVerifiedConfig()
                 nameNotVerifiedButtonLabelConfig.applyForRendering(button: nameNotVerifiedButton)
                 nameNotVerifiedButton.backgroundColor = UIColor.Signal.warningLabel.withAlphaComponent(0.2)
@@ -197,17 +196,21 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
                 }
                 innerViews.append(nameNotVerifiedButton)
             }
+        }
 
-            if let groupDescriptionText = self.groupDescriptionText {
-                innerViews.append(UIView.spacer(withHeight: vSpacingSafetySectionDefault))
-                let groupDescriptionPreviewView = componentView.groupDescriptionPreviewView
-                let config = groupDescriptionTextLabelConfig(text: groupDescriptionText)
-                groupDescriptionPreviewView.apply(config: config)
-                groupDescriptionPreviewView.groupName = titleText
-                innerViews.append(groupDescriptionPreviewView)
-            }
+        if let groupDescriptionText {
+            innerViews.append(UIView.spacer(withHeight: vSpacingSafetySectionDefault))
+            let groupDescriptionPreviewView = componentView.groupDescriptionPreviewView
+            let config = groupDescriptionTextLabelConfig(text: groupDescriptionText)
+            groupDescriptionPreviewView.apply(config: config)
+            groupDescriptionPreviewView.groupName = titleText
+            innerViews.append(groupDescriptionPreviewView)
+        }
 
+        if let safetySection = threadDetails.safetySection {
             if let detailsText = safetySection.detailsText {
+                let detailsButton = componentView.detailsButton
+
                 innerViews.append(UIView.spacer(withHeight: vSpacingSafetySectionDefault))
                 innerViews.append(detailsButton)
                 let config = mutualGroupsLabelConfig(attributedText: detailsText)
@@ -221,6 +224,8 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
             }
 
             if let mutualGroupsText = safetySection.mutualGroupsText {
+                let mutualGroupsLabel = componentView.mutualGroupsLabel
+
                 innerViews.append(UIView.spacer(withHeight: vSpacingSafetySectionDefault))
                 let mutualGroupsLabelConfig = mutualGroupsLabelConfig(attributedText: mutualGroupsText)
                 mutualGroupsLabelConfig.applyForRendering(label: mutualGroupsLabel)
@@ -228,28 +233,20 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
             }
 
             if safetySection.shouldShowSafetyTipsButton {
+                let showTipsButton = componentView.showTipsButton
+                safetyTipsButtonLabelConfig.applyForRendering(buttonConfiguration: &showTipsButton.configuration!)
+                showTipsButton.configuration?.baseBackgroundColor =
+                    conversationStyle.hasWallpaper ? .Signal.MaterialBase.button : .Signal.secondaryFill
+                showTipsButton.addAction(
+                    UIAction { _ in
+                        componentDelegate.didTapSafetyTips()
+                    },
+                    for: .primaryActionTriggered,
+                )
+
                 innerViews.append(UIView.spacer(withHeight: vSpacingSafetyButton))
                 innerViews.append(showTipsButton)
-                let safetyButtonLabelConfig = safetyTipsConfig()
-                safetyButtonLabelConfig.applyForRendering(button: showTipsButton)
-                showTipsButton.ows_contentEdgeInsets = .init(hMargin: hPaddingSafetyButton, vMargin: vPaddingSafetyButton)
-                showTipsButton.dimsWhenHighlighted = true
-                showTipsButton.block = { [weak componentDelegate] in
-                    componentDelegate?.didTapSafetyTips()
-                }
-
-                if conversationStyle.hasWallpaper {
-                    if isDarkThemeEnabled {
-                        showTipsButton.backgroundColor = UIColor.white.withAlphaComponent(0.2)
-                    } else {
-                        showTipsButton.backgroundColor = UIColor.black.withAlphaComponent(0.12)
-                    }
-                } else {
-                    showTipsButton.backgroundColor = UIColor.Signal.secondaryFill
-                }
             }
-        } else {
-            innerViews.append(UIView.spacer(withHeight: minBottomPadding))
         }
 
         innerStackView.configure(
@@ -401,14 +398,14 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
         )
     }
 
-    private func safetyTipsConfig() -> CVLabelConfig {
+    private var safetyTipsButtonLabelConfig: CVLabelConfig {
         CVLabelConfig.unstyledText(
             OWSLocalizedString(
                 "SAFETY_TIPS_BUTTON_ACTION_TITLE",
                 comment: "Title for Safety Tips button in thread details.",
             ),
             font: UIFont.dynamicTypeSubheadline.semibold(),
-            textColor: Theme.isDarkThemeEnabled ? .ows_white : .ows_black,
+            textColor: Theme.primaryTextColor,
         )
     }
 
@@ -556,8 +553,7 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
     private let vSpacingSafetyButton: CGFloat = 16
     private let vSpacingSafetySectionDefault: CGFloat = 8
 
-    private let vPaddingSafetyButton: CGFloat = 5
-    private let hPaddingSafetyButton: CGFloat = 12
+    private let safetyButtonContentInsets = NSDirectionalEdgeInsets(hMargin: 12, vMargin: 5)
     private let hPaddingSafetySection: CGFloat = 30
 
     private let vPaddingNotVerifiedButton: CGFloat = 2
@@ -606,34 +602,34 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
         let titleSize = CVText.measureLabel(config: titleLabelConfig, maxWidth: maxContentWidth)
         innerSubviewInfos.append(titleSize.asManualSubviewInfo)
 
-        let maxGroupWidth = maxContentWidth
-
         if let safetySection = threadDetails.safetySection {
             if safetySection.shouldShowProfileNamesEducation {
                 innerSubviewInfos.append(CGSize(square: vSpacingNotVerifiedLabel).asManualSubviewInfo)
                 let notVerifiedSize = CVText.measureLabel(
                     config: nameNotVerifiedConfig(),
-                    maxWidth: maxGroupWidth,
+                    maxWidth: maxContentWidth,
                 )
                 let notVerifiedSizeWithPadding = CGSize(width: notVerifiedSize.width + hPaddingNotVerifiedButton * 2, height: notVerifiedSize.height + vPaddingNotVerifiedButton * 2)
                 innerSubviewInfos.append(notVerifiedSizeWithPadding.asManualSubviewInfo)
             }
+        }
 
-            if let groupDescriptionText = self.groupDescriptionText {
-                innerSubviewInfos.append(CGSize(square: vSpacingSafetySectionDefault).asManualSubviewInfo)
-                var groupDescriptionSize = CVText.measureLabel(
-                    config: groupDescriptionTextLabelConfig(text: groupDescriptionText),
-                    maxWidth: maxContentWidth,
-                )
-                groupDescriptionSize.width = maxContentWidth
-                innerSubviewInfos.append(groupDescriptionSize.asManualSubviewInfo(hasFixedWidth: true))
-            }
+        if let groupDescriptionText {
+            innerSubviewInfos.append(CGSize(square: vSpacingSafetySectionDefault).asManualSubviewInfo)
+            var groupDescriptionSize = CVText.measureLabel(
+                config: groupDescriptionTextLabelConfig(text: groupDescriptionText),
+                maxWidth: maxContentWidth,
+            )
+            groupDescriptionSize.width = maxContentWidth
+            innerSubviewInfos.append(groupDescriptionSize.asManualSubviewInfo(hasFixedWidth: true))
+        }
 
+        if let safetySection = threadDetails.safetySection {
             if let detailsText = safetySection.detailsText {
                 innerSubviewInfos.append(CGSize(square: vSpacingSafetySectionDefault).asManualSubviewInfo)
                 let size = CVText.measureLabel(
                     config: mutualGroupsLabelConfig(attributedText: detailsText),
-                    maxWidth: maxGroupWidth,
+                    maxWidth: maxContentWidth,
                 )
                 innerSubviewInfos.append(size.asManualSubviewInfo)
             }
@@ -642,22 +638,19 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
                 innerSubviewInfos.append(CGSize(square: vSpacingSafetySectionDefault).asManualSubviewInfo)
                 let groupLabelSize = CVText.measureLabel(
                     config: mutualGroupsLabelConfig(attributedText: mutualGroupsText),
-                    maxWidth: maxGroupWidth,
+                    maxWidth: maxContentWidth,
                 )
                 innerSubviewInfos.append(groupLabelSize.asManualSubviewInfo)
             }
 
             if safetySection.shouldShowSafetyTipsButton {
                 innerSubviewInfos.append(CGSize(square: vSpacingSafetyButton).asManualSubviewInfo)
-                let safetyTipSize = CVText.measureLabel(
-                    config: safetyTipsConfig(),
-                    maxWidth: maxGroupWidth,
-                )
-                let safetyTipSizeWithPadding = CGSize(width: safetyTipSize.width + hPaddingSafetyButton * 2, height: safetyTipSize.height + vPaddingSafetyButton * 2)
-                innerSubviewInfos.append(safetyTipSizeWithPadding.asManualSubviewInfo)
+                let buttonSize = CVText.measureLabel(
+                    config: safetyTipsButtonLabelConfig,
+                    maxWidth: maxContentWidth,
+                ) + safetyButtonContentInsets.asSize
+                innerSubviewInfos.append(buttonSize.asManualSubviewInfo)
             }
-        } else {
-            innerSubviewInfos.append(CGSize(square: minBottomPadding).asManualSubviewInfo)
         }
 
         let innerStackMeasurement = ManualStackView.measure(
@@ -759,7 +752,12 @@ public class CVComponentThreadDetails: CVComponentBase, CVRootComponent {
         fileprivate let reviewCarefullyLabel = CVLabel()
         fileprivate let detailsButton = CVButton()
         fileprivate let mutualGroupsLabel = CVLabel()
-        fileprivate let showTipsButton = OWSRoundedButton()
+        fileprivate let showTipsButton: UIButton = {
+            let button = UIButton(configuration: .gray())
+            button.configuration?.contentInsets = NSDirectionalEdgeInsets(hMargin: 10, vMargin: 5)
+            return button
+        }()
+
         fileprivate let groupDescriptionPreviewView = GroupDescriptionPreviewView(
             shouldDeactivateConstraints: true,
         )
