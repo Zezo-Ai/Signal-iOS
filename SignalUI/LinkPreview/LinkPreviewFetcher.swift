@@ -91,6 +91,7 @@ public class LinkPreviewFetcherImpl: LinkPreviewFetcher {
             if
                 let imageUrlString = content.ogImageUrlString ?? content.faviconUrlString,
                 let imageUrl = URL(string: imageUrlString, relativeTo: respondingUrl),
+                LinkPreviewHelper.isPermittedLinkPreviewUrl(imageUrl),
                 let imageData = try? await self.fetchImageResource(from: imageUrl)
             {
                 previewThumbnail = await Self.previewThumbnail(srcImageData: imageData)
