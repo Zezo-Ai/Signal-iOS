@@ -25,7 +25,7 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
     private let db: DB
     private let contactManager: OWSContactsManager
 
-    weak var updateDelegate: MemberLabelCoordinator?
+    var updateDelegate: MemberLabelCoordinator?
 
     private static let maxCharCount = 24
     private static let showCharacterCountMax = 9
@@ -330,13 +330,9 @@ class MemberLabelViewController: OWSViewController, UITextFieldDelegate {
         if let updatedMemberLabel {
             memberLabel = MemberLabel(label: updatedMemberLabel, labelEmoji: updatedEmoji)
         }
-        dismiss(animated: true, completion: { [updateDelegate] in
-            guard let updateDelegate else {
-                Logger.info("Missing update delegate")
-                return
-            }
-            Logger.info("Updating member label")
-            updateDelegate.updateLabelForLocalUser(memberLabel: memberLabel)
+        dismiss(animated: true, completion: {
+            owsAssertDebug(self.updateDelegate != nil)
+            self.updateDelegate?.updateLabelForLocalUser(memberLabel: memberLabel)
         })
     }
 
