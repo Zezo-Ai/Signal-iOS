@@ -79,7 +79,7 @@ public enum AttachmentUpload {
             maxAttempts: Upload.Constants.maxUploadProgressRetries + 1,
             isRetryable: { $0.isNetworkFailureOrTimeout },
             block: {
-                attempt.logger.info("fetching resumable progress")
+                attempt.logger.info("Checking upload progress")
                 return try await attempt.endpoint.getResumableUploadProgress(attempt: attempt)
             },
         )
@@ -111,20 +111,20 @@ public enum AttachmentUpload {
             }
             switch uploadProgress {
             case .complete:
-                attempt.logger.info("Complete upload reported by endpoint.")
+                attempt.logger.info("Endpoint reported complete upload")
                 return
             case .uploaded(let updatedBytesAlreadUploaded):
-                attempt.logger.info("Endpoint reported \(updatedBytesAlreadUploaded)/\(attempt.encryptedDataLength) uploaded.")
+                attempt.logger.info("Endpoint reported \(updatedBytesAlreadUploaded) of \(attempt.encryptedDataLength) bytes uploaded")
                 bytesAlreadyUploaded = updatedBytesAlreadUploaded
                 if bytesAlreadyUploaded == totalDataLength {
-                    attempt.logger.info("Complete upload reported by endpoint.")
+                    attempt.logger.info("Inferred that endpoint reported complete upload")
                     return
                 } else if bytesAlreadyUploaded > totalDataLength {
-                    attempt.logger.warn("Endpoint reported upload size larger than local size. Marking as failed")
+                    attempt.logger.warn("Endpoint reported upload size larger than local size")
                     throw Upload.Error.uploadFailure(recovery: .restart(.afterBackoff))
                 }
             case .restart:
-                attempt.logger.warn("Error with fetching progress. Restart upload.")
+                attempt.logger.warn("Endpoint couldn't provide upload progress; restarting")
                 throw Upload.Error.uploadFailure(recovery: .restart(.afterBackoff))
             }
         } else {
@@ -165,12 +165,14 @@ public enum AttachmentUpload {
                     progress?.incrementCompletedUnitCount(to: overallByteCount)
                 },
             )
-            attempt.logger.info("Attachment uploaded successfully. \(bytesAlreadyUploaded) -> \(newBytesUploaded) (\(downloadTimeLogString(newBytesUploaded))")
+            attempt.logger.info("Uploaded chunk of \(downloadTimeLogString(newBytesUploaded)) (now complete at \(newBytesUploaded) bytes)")
         } catch {
-            if let statusCode = error.httpStatusCode {
-                attempt.logger.warn("Encountered error during upload. (code=\(statusCode)")
+            if case .partialUpload = error {
+                // This isn't a "failure"; don't report a warning.
+            } else if let statusCode = error.httpStatusCode {
+                attempt.logger.warn("Couldn't upload (code=\(statusCode)")
             } else {
-                attempt.logger.warn("Encountered error during upload. ")
+                attempt.logger.warn("Couldn't upload")
             }
 
             let failureMode: Upload.FailureMode
@@ -178,7 +180,7 @@ public enum AttachmentUpload {
             var remoteConfirmedProgress = false
             switch error {
             case .partialUpload(let bytesUploaded):
-                attempt.logger.info("Endpoint successfully uploaded chunk of \(bytesUploaded) bytes.")
+                attempt.logger.info("Uploaded chunk of \(downloadTimeLogString(bytesAlreadyUploaded + bytesUploaded)) (now at \(bytesAlreadyUploaded + bytesUploaded) of \(totalDataLength) bytes)")
                 remoteConfirmedProgress = true
                 failureMode = .resume(.afterBackoff)
             case .uploadFailure(let retryMode):
@@ -197,11 +199,12 @@ public enum AttachmentUpload {
                 case .none:
                     failureMode = .resume(.afterBackoff)
                 case .uploaded(let remoteByteCount):
-                    attempt.logger.info("Endpoint reported \(remoteByteCount)/\(attempt.encryptedDataLength) uploaded.")
                     if remoteByteCount > bytesAlreadyUploaded {
                         // The remote endpoint reports progress was made, so retry immediately.
                         remoteConfirmedProgress = true
-                        attempt.logger.info("Endpoint reported we made progress: \(bytesAlreadyUploaded) -> \(remoteByteCount) (\(downloadTimeLogString(remoteByteCount)))")
+                        attempt.logger.info("Uploaded chunk of \(downloadTimeLogString(remoteByteCount)) (now at \(remoteByteCount) of \(totalDataLength) bytes)")
+                    } else {
+                        attempt.logger.warn("Endpoint reported no progress on the prior attempt")
                     }
                     failureMode = .resume(.afterBackoff)
                 }
