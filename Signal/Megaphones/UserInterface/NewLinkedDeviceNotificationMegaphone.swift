@@ -57,11 +57,6 @@ final class NewLinkedDeviceNotificationMegaphone: Megaphone {
         buttons = [acknowledgeButton, viewDeviceButton]
     }
 
-    @MainActor
-    required init(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
     private func stopShowing() {
         db.write { tx in
             deviceStore.clearMostRecentlyLinkedDeviceDetails(tx: tx)

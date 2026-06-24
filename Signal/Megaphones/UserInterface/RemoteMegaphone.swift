@@ -65,10 +65,6 @@ class RemoteMegaphone: Megaphone {
         }
     }
 
-    required init(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
     // MARK: Perform actions
 
     /// Perform the given action.

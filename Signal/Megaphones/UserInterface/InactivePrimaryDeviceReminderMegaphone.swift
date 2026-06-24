@@ -44,9 +44,4 @@ final class InactivePrimaryDeviceReminderMegaphone: Megaphone {
 
         buttons = [gotItButton, learnMoreButton]
     }
-
-    @available(*, unavailable, message: "Use other constructor!")
-    required init(coder: NSCoder) {
-        owsFail("Use other constructor!")
-    }
 }

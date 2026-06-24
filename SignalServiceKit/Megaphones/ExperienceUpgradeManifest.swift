@@ -270,56 +270,6 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
 
     // MARK: - Metadata
 
-    /// Whether we should save state for this upgrade in an ``ExperienceUpgrade``
-    /// record. If we track state for this upgrade using other components, we
-    /// may not need to persist ``ExperienceUpgrade`` state.
-    public var shouldSave: Bool {
-        switch self {
-        case
-            .newLinkedDeviceNotification,
-            .pinReminder,
-            .backupsEnabledRecentlyNotification,
-            .unrecognized:
-            return false
-        case
-            .notificationPermissionReminder,
-            .introducingPins,
-            .createUsernameReminder,
-            .inactiveLinkedDeviceReminder,
-            .inactivePrimaryDeviceReminder,
-            .remoteMegaphone,
-            .backupsUpsellReminder,
-            .backupKeyReminder,
-            .contactPermissionReminder:
-            return true
-        }
-    }
-
-    /// Whether we should mark this upgrade's corresponding ``ExperienceUpgrade``
-    /// record as complete, if it exists. If we track state for this upgrade
-    /// using other components, we may not need to mark the ``ExperienceUpgrade``
-    /// as complete.
-    var shouldComplete: Bool {
-        switch self {
-        case
-            .newLinkedDeviceNotification,
-            .introducingPins,
-            .notificationPermissionReminder,
-            .createUsernameReminder,
-            .inactiveLinkedDeviceReminder,
-            .inactivePrimaryDeviceReminder,
-            .pinReminder,
-            .contactPermissionReminder,
-            .backupKeyReminder,
-            .backupsUpsellReminder,
-            .backupsEnabledRecentlyNotification,
-            .unrecognized:
-            return false
-        case .remoteMegaphone:
-            return true
-        }
-    }
-
     /// The interval after snoozing during which we should not show the upgrade.
     func snoozeDuration(forSnoozeCount snoozeCount: UInt) -> TimeInterval {
         guard snoozeCount > 0 else {
@@ -329,23 +279,25 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
 
         switch self {
         case
-            .introducingPins,
-            .pinReminder:
+            // These megaphones track state externally, and never snooze.
+            .pinReminder,
+            .newLinkedDeviceNotification,
+            .backupsEnabledRecentlyNotification,
+            // These megaphones complete (permanently), rather than snooze.
+            .contactPermissionReminder,
+            .createUsernameReminder:
+            owsFailDebug("Attempting to snooze non-snoozable megaphone? \(self)")
+            return 0
+        case .introducingPins:
             return 2 * .day
-        case
-            .notificationPermissionReminder,
-            .inactiveLinkedDeviceReminder:
+        case .notificationPermissionReminder,
+             .inactiveLinkedDeviceReminder:
             return 3 * .day
         case .inactivePrimaryDeviceReminder,
              .backupKeyReminder:
-            return 7 * .day
-        case
-            .newLinkedDeviceNotification,
-            .contactPermissionReminder,
-            .backupsEnabledRecentlyNotification,
-            .createUsernameReminder:
-            // On snooze, never show again.
-            return .infinity
+            return .week
+        case .backupsUpsellReminder:
+            return snoozeCount == 1 ? 60 * .day : 120 * .day
         case .remoteMegaphone(let megaphone):
             let daysToSnooze: UInt = {
                 // If we have snooze duration days as action data, get the
@@ -381,8 +333,6 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
             }()
 
             return Double(daysToSnooze) * .day
-        case .backupsUpsellReminder:
-            return snoozeCount == 1 ? 60 * .day : 120 * .day
         case .unrecognized:
             return .infinity
         }

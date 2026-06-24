@@ -1111,6 +1111,50 @@ struct GRDBSchemaMigratorTest {
         }
     }
 
+    @Test
+    func testCompletePermasnoozedReminderMegaphones() throws {
+        let databaseQueue = DatabaseQueue()
+        try databaseQueue.write { db in
+            try db.execute(sql: """
+            CREATE TABLE "model_ExperienceUpgrade" (
+                "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                "uniqueId" TEXT NOT NULL UNIQUE,
+                "lastSnoozedTimestamp" DOUBLE NOT NULL,
+                "isComplete" BOOLEAN NOT NULL,
+                "snoozeCount" INTEGER NOT NULL DEFAULT 0
+            );
+            INSERT INTO "model_ExperienceUpgrade" ("uniqueId", "lastSnoozedTimestamp", "isComplete", "snoozeCount") VALUES
+                ('contactPermissionReminder', 1234, 0, 1),
+                ('createUsernameReminder', 0, 0, 0),
+                ('inactivePrimaryDeviceReminder', 5678, 0, 3);
+            """)
+
+            do {
+                let tx = DBWriteTransaction(database: db)
+                defer { tx.finalizeTransaction() }
+                try GRDBSchemaMigrator.completePermasnoozedReminderMegaphones(tx: tx)
+            }
+
+            struct MigratedRow: FetchableRecord, Decodable, Equatable {
+                let lastSnoozedTimestamp: Double
+                let isComplete: Bool
+                let snoozeCount: Int
+            }
+
+            func getMigratedRow(_ uniqueId: String) throws -> MigratedRow? {
+                try MigratedRow.fetchOne(
+                    db,
+                    sql: "SELECT lastSnoozedTimestamp, isComplete, snoozeCount FROM model_ExperienceUpgrade WHERE uniqueId = ?",
+                    arguments: [uniqueId],
+                )
+            }
+
+            #expect(try getMigratedRow("contactPermissionReminder") == MigratedRow(lastSnoozedTimestamp: 0, isComplete: true, snoozeCount: 0))
+            #expect(try getMigratedRow("createUsernameReminder") == MigratedRow(lastSnoozedTimestamp: 0, isComplete: false, snoozeCount: 0))
+            #expect(try getMigratedRow("inactivePrimaryDeviceReminder") == MigratedRow(lastSnoozedTimestamp: 5678, isComplete: false, snoozeCount: 3))
+        }
+    }
+
     private func keyedArchiverSessionData(deviceIds: [Int32]) -> Data {
         let sessionDictionary = Dictionary(uniqueKeysWithValues: deviceIds.map { ($0, Data()) })
         return Self.keyedArchiverData(rootObject: sessionDictionary)

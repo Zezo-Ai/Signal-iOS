@@ -298,11 +298,6 @@ class ExperienceUpgradeManager {
                 return
             }
 
-            guard experienceUpgrade.manifest.shouldSave else {
-                // Ignore saved records that we no longer persist.
-                return
-            }
-
             experienceUpgrades.append(experienceUpgrade)
             localManifestsWithoutRecords.remove(experienceUpgrade.manifest)
         }

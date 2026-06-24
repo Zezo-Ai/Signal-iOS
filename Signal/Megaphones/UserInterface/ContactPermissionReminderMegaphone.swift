@@ -103,18 +103,16 @@ class ContactPermissionReminderMegaphone: Megaphone {
             fromViewController.presentActionSheet(actionSheetController)
         }
 
-        let secondaryButton = snoozeButton(
-            fromViewController: fromViewController,
-            snoozeTitle: OWSLocalizedString(
+        let secondaryButton = Button(
+            title: OWSLocalizedString(
                 "CONTACT_PERMISSION_NOT_NOW_ACTION",
                 comment: "Snooze action text for contact permission reminder megaphone",
             ),
+            action: { [weak self] in
+                self?.markAsCompleteWithSneakyTransaction()
+            },
         )
 
         buttons = [primaryButton, secondaryButton]
-    }
-
-    required init(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 }

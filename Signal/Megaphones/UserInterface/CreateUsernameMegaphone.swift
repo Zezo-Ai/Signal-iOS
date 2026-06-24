@@ -8,15 +8,11 @@ import SignalServiceKit
 import UIKit
 
 class CreateUsernameMegaphone: Megaphone {
-    private let usernameSelectionCoordinator: UsernameSelectionCoordinator
-
     init(
         usernameSelectionCoordinator: UsernameSelectionCoordinator,
         experienceUpgrade: ExperienceUpgrade,
         fromViewController: UIViewController,
     ) {
-        self.usernameSelectionCoordinator = usernameSelectionCoordinator
-
         super.init(experienceUpgrade: experienceUpgrade)
 
         titleText = OWSLocalizedString(
@@ -38,28 +34,15 @@ class CreateUsernameMegaphone: Megaphone {
                 let fromViewController
             else { return }
 
-            self.onSetUpTapped(fromViewController: fromViewController)
+            markAsCompleteWithSneakyTransaction()
+            usernameSelectionCoordinator.present(fromViewController: fromViewController)
         }
 
         let notNowButton = Button(title: CommonStrings.notNowButton) { [weak self] in
             guard let self else { return }
-            self.onNotNowTapped()
+            markAsCompleteWithSneakyTransaction()
         }
 
         buttons = [setUpButton, notNowButton]
-    }
-
-    @available(*, unavailable, message: "Use other constructor!")
-    required init(coder: NSCoder) {
-        owsFail("Use other constructor!")
-    }
-
-    private func onSetUpTapped(fromViewController: UIViewController) {
-        markAsSnoozedWithSneakyTransaction()
-        usernameSelectionCoordinator.present(fromViewController: fromViewController)
-    }
-
-    private func onNotNowTapped() {
-        markAsSnoozedWithSneakyTransaction()
     }
 }

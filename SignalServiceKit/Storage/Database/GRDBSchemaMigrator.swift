@@ -341,6 +341,7 @@ public class GRDBSchemaMigrator {
         case migrateAutoDownloadStore
         case zeroOutCallExpirationColumns
         case addReleaseNotesCallToAction
+        case completePermasnoozedReminderMegaphones
 
         // NOTE: Every time we add a migration id, consider
         // incrementing grdbSchemaVersionLatest.
@@ -464,7 +465,7 @@ public class GRDBSchemaMigrator {
     }
 
     public static let grdbSchemaVersionDefault: UInt = 0
-    public static let grdbSchemaVersionLatest: UInt = 150
+    public static let grdbSchemaVersionLatest: UInt = 151
 
     private class DatabaseMigratorWrapper {
         // Run with immediate (or disabled) foreign key checks so that pre-existing
@@ -5318,6 +5319,11 @@ public class GRDBSchemaMigrator {
             return .success(())
         }
 
+        migrator.registerMigration(.completePermasnoozedReminderMegaphones) { tx in
+            try completePermasnoozedReminderMegaphones(tx: tx)
+            return .success(())
+        }
+
         // MARK: - Schema Migration Insertion Point
     }
 
@@ -7609,6 +7615,20 @@ public class GRDBSchemaMigrator {
         try tx.database.execute(
             sql: """
             UPDATE "CallLink" SET "name"=NULL WHERE "name" IS ''
+            """,
+        )
+    }
+
+    /// These megaphones were "snoozable", with a `snoozeDuration` of
+    /// `TimeInterval.infinity`. Instead, mark them as `isComplete` to better
+    /// convey those semantics.
+    static func completePermasnoozedReminderMegaphones(tx: DBWriteTransaction) throws {
+        try tx.database.execute(
+            sql: """
+            UPDATE model_ExperienceUpgrade
+            SET isComplete = 1, snoozeCount = 0, lastSnoozedTimestamp = 0
+            WHERE uniqueId IN ('contactPermissionReminder', 'createUsernameReminder')
+            AND snoozeCount > 0
             """,
         )
     }

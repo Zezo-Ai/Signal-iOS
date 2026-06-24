@@ -24,11 +24,6 @@ public struct ExperienceUpgradeStore {
     }
 
     public func markAsComplete(experienceUpgrade: ExperienceUpgrade, tx: DBWriteTransaction) {
-        guard experienceUpgrade.manifest.shouldComplete else {
-            Logger.info("Skipping marking complete: \(experienceUpgrade.uniqueId)")
-            return
-        }
-
         Logger.info("Marking complete: \(experienceUpgrade.uniqueId)")
 
         experienceUpgrade.isComplete = true
@@ -69,10 +64,6 @@ public struct ExperienceUpgradeStore {
     }
 
     private func upsert(experienceUpgrade: ExperienceUpgrade, tx: DBWriteTransaction) {
-        guard experienceUpgrade.manifest.shouldSave else {
-            return
-        }
-
         failIfThrows {
             try experienceUpgrade.upsert(tx: tx)
         }
