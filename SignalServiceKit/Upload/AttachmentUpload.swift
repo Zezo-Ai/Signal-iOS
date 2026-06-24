@@ -174,7 +174,7 @@ public enum AttachmentUpload {
                 attempt.logger.warn("Encountered error during upload. ")
             }
 
-            var failureMode: Upload.FailureMode = .noMoreRetries
+            let failureMode: Upload.FailureMode
             var latestUploadProgress: Upload.ResumeProgress?
             var latestUploadProgressBytes = internalProgress.completedUnitCount
             var uploadReportedRemoteProgress = false
