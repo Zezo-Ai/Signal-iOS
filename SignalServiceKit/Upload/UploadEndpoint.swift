@@ -31,7 +31,7 @@ protocol UploadEndpoint {
     func performUpload<Metadata: UploadMetadata>(
         startPoint: Int,
         attempt: Upload.Attempt<Metadata>,
-        progress: OWSProgressSource?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws(Upload.Error)
 }
 

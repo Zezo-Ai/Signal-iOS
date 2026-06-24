@@ -179,7 +179,7 @@ public enum AttachmentUpload {
             try await attempt.endpoint.performUpload(
                 startPoint: bytesAlreadyUploaded,
                 attempt: attempt,
-                progress: internalProgress,
+                progressBlock: internalProgress.asProgressBlock(),
             )
             attempt.logger.info("Attachment uploaded successfully. \(bytesAlreadyUploaded) -> \(internalProgress.completedUnitCount) (\(downloadTimeLogString(internalProgress.completedUnitCount))")
         } catch {
