@@ -74,28 +74,15 @@ public enum AttachmentUpload {
     }
 
     /// Consult the UploadEndpoint to determine how much has already been uploaded.
-    private static func getResumableUploadProgress<Metadata: UploadMetadata>(
-        attempt: Upload.Attempt<Metadata>,
-        count: UInt = 0,
-    ) async throws -> Upload.ResumeProgress {
-        do {
-            return try await attempt.endpoint.getResumableUploadProgress(attempt: attempt)
-        } catch {
-            guard
-                count < Upload.Constants.maxUploadProgressRetries,
-                error.isNetworkFailureOrTimeout
-            else {
-                throw error
-            }
-            if
-                case Upload.Error.uploadFailure(let recoveryMode) = error,
-                case .restart = recoveryMode
-            {
-                throw error
-            }
-            attempt.logger.info("Retry fetching upload progress.")
-            return try await getResumableUploadProgress(attempt: attempt, count: count + 1)
-        }
+    private static func getResumableUploadProgress<Metadata: UploadMetadata>(forAttempt attempt: Upload.Attempt<Metadata>) async throws -> Upload.ResumeProgress {
+        return try await Retry.performWithBackoff(
+            maxAttempts: Upload.Constants.maxUploadProgressRetries + 1,
+            isRetryable: { $0.isNetworkFailureOrTimeout },
+            block: {
+                attempt.logger.info("fetching resumable progress")
+                return try await attempt.endpoint.getResumableUploadProgress(attempt: attempt)
+            },
+        )
     }
 
     /// Upload the file using the endpoint and report progress
@@ -120,7 +107,7 @@ public enum AttachmentUpload {
             if let priorUploadProgress {
                 uploadProgress = priorUploadProgress
             } else {
-                uploadProgress = try await getResumableUploadProgress(attempt: attempt)
+                uploadProgress = try await getResumableUploadProgress(forAttempt: attempt)
             }
             switch uploadProgress {
             case .complete:
@@ -203,7 +190,7 @@ public enum AttachmentUpload {
             case .networkTimeout:
                 // if this isn't an understood error, map into a failure mode
                 // fetch the progress to determine if we've made progress.
-                latestUploadProgress = try? await getResumableUploadProgress(attempt: attempt)
+                latestUploadProgress = try? await getResumableUploadProgress(forAttempt: attempt)
                 switch latestUploadProgress {
                 case .complete:
                     latestUploadProgressBytes = totalDataLength
