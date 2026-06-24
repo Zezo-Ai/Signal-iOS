@@ -63,6 +63,7 @@ public enum AttachmentUpload {
             failureCount: 0,
             progress: progress,
         )
+        progress?.complete()
         return Upload.Result(
             cdnKey: attempt.cdnKey,
             cdnNumber: attempt.cdnNumber,
@@ -124,16 +125,12 @@ public enum AttachmentUpload {
             switch uploadProgress {
             case .complete:
                 attempt.logger.info("Complete upload reported by endpoint.")
-
-                progress?.incrementCompletedUnitCount(by: UInt64(totalDataLength))
-
                 return
             case .uploaded(let updatedBytesAlreadUploaded):
                 attempt.logger.info("Endpoint reported \(updatedBytesAlreadUploaded)/\(attempt.encryptedDataLength) uploaded.")
                 bytesAlreadyUploaded = updatedBytesAlreadUploaded
                 if bytesAlreadyUploaded == totalDataLength {
                     attempt.logger.info("Complete upload reported by endpoint.")
-                    progress?.incrementCompletedUnitCount(by: UInt64(totalDataLength))
                     return
                 } else if bytesAlreadyUploaded > totalDataLength {
                     attempt.logger.warn("Endpoint reported upload size larger than local size. Marking as failed")
