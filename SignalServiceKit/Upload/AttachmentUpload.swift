@@ -169,13 +169,11 @@ public enum AttachmentUpload {
 
             let failureMode: Upload.FailureMode
             var latestUploadProgress: Upload.ResumeProgress?
-            var latestUploadProgressBytes = newBytesUploaded
             var uploadReportedRemoteProgress = false
             switch error {
             case .partialUpload(let bytesUploaded):
                 attempt.logger.info("Endpoint successfully uploaded chunk of \(bytesUploaded) bytes.")
                 uploadReportedRemoteProgress = true
-                latestUploadProgressBytes += bytesUploaded
                 failureMode = .resume(.immediately)
             case .uploadFailure(let retryMode):
                 // if a failure mode was passed back
@@ -186,18 +184,16 @@ public enum AttachmentUpload {
                 latestUploadProgress = try? await getResumableUploadProgress(forAttempt: attempt)
                 switch latestUploadProgress {
                 case .complete:
-                    latestUploadProgressBytes = totalDataLength
                     failureMode = .resume(.immediately)
                 case .restart:
-                    latestUploadProgressBytes = 0
                     failureMode = .restart(.afterBackoff)
                 case .none:
                     failureMode = .resume(.afterBackoff)
-                case .uploaded(let remoteBytesCount):
-                    attempt.logger.info("Endpoint reported \(remoteBytesCount)/\(attempt.encryptedDataLength) uploaded.")
-                    latestUploadProgressBytes = remoteBytesCount
-                    if latestUploadProgressBytes > bytesAlreadyUploaded {
+                case .uploaded(let remoteByteCount):
+                    attempt.logger.info("Endpoint reported \(remoteByteCount)/\(attempt.encryptedDataLength) uploaded.")
+                    if remoteByteCount > bytesAlreadyUploaded {
                         uploadReportedRemoteProgress = true
+                        attempt.logger.info("Endpoint reported we made progress: \(bytesAlreadyUploaded) -> \(remoteByteCount) (\(downloadTimeLogString(remoteByteCount)))")
                         // The remote endpoint reports progress was made, so retry immediately.
                         failureMode = .resume(.immediately)
                     } else {
@@ -212,10 +208,6 @@ public enum AttachmentUpload {
             case .invalidUploadURL, .unsupportedEndpoint, .unexpectedResponseStatusCode, .unknown:
                 // These errors are unrecoverable, so restart the upload in hopes of correcting the issue.
                 failureMode = .restart(.afterBackoff)
-            }
-
-            if uploadReportedRemoteProgress {
-                attempt.logger.info("Upload reported making progress: \(bytesAlreadyUploaded) -> \(latestUploadProgressBytes) (\(downloadTimeLogString(UInt64(latestUploadProgressBytes))))")
             }
 
             switch failureMode {
