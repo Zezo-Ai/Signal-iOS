@@ -169,11 +169,11 @@ public enum AttachmentUpload {
 
             let failureMode: Upload.FailureMode
             var latestUploadProgress: Upload.ResumeProgress?
-            var uploadReportedRemoteProgress = false
+            var remoteConfirmedProgress = false
             switch error {
             case .partialUpload(let bytesUploaded):
                 attempt.logger.info("Endpoint successfully uploaded chunk of \(bytesUploaded) bytes.")
-                uploadReportedRemoteProgress = true
+                remoteConfirmedProgress = true
                 failureMode = .resume(.immediately)
             case .uploadFailure(let retryMode):
                 // if a failure mode was passed back
@@ -192,7 +192,7 @@ public enum AttachmentUpload {
                 case .uploaded(let remoteByteCount):
                     attempt.logger.info("Endpoint reported \(remoteByteCount)/\(attempt.encryptedDataLength) uploaded.")
                     if remoteByteCount > bytesAlreadyUploaded {
-                        uploadReportedRemoteProgress = true
+                        remoteConfirmedProgress = true
                         attempt.logger.info("Endpoint reported we made progress: \(bytesAlreadyUploaded) -> \(remoteByteCount) (\(downloadTimeLogString(remoteByteCount)))")
                         // The remote endpoint reports progress was made, so retry immediately.
                         failureMode = .resume(.immediately)
@@ -235,7 +235,7 @@ public enum AttachmentUpload {
             attempt.logger.info("Resuming upload.")
             // Reset the attempt count to 1 as long as remote progress was made. Make it 1, since 0
             // will behave like a fresh upload and skip fetching the remote upload progress.
-            let nextFailureCount = uploadReportedRemoteProgress ? 1 : failureCount + 1
+            let nextFailureCount = remoteConfirmedProgress ? 1 : failureCount + 1
             try await performResumableUpload(
                 attempt: attempt,
                 sleepTimer: sleepTimer,
