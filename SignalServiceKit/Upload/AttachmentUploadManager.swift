@@ -56,7 +56,7 @@ public protocol AttachmentUploadManager {
     ) async throws
 }
 
-public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
+public class AttachmentUploadManagerImpl: AttachmentUploadManager {
 
     private let accountKeyStore: AccountKeyStore
     private let attachmentEncrypter: Upload.Shims.AttachmentEncrypter
@@ -74,7 +74,7 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
     private let sleepTimer: Upload.Shims.SleepTimer
     private let storyStore: StoryStore
 
-    private struct ActiveUploadKey: Hashable {
+    private struct UploadId: Hashable {
         let attachmentId: Attachment.IDType
         let isThumbnailUpload: Bool
 
@@ -89,8 +89,7 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
         }
     }
 
-    // Map of active upload tasks.
-    private var activeUploads = [ActiveUploadKey: Task<(AttachmentUploadRecord, Upload.AttachmentResult), Error>]()
+    private let uploadQueue = KeyedConcurrentTaskQueue<UploadId>(concurrentLimitPerKey: 1)
 
     private enum UploadType {
         case transitTier
@@ -275,6 +274,18 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
         attachmentId: Attachment.IDType,
         progress: OWSProgressSink?,
     ) async throws {
+        let type = UploadType.transitTier
+        let uploadId = UploadId(attachmentId: attachmentId, uploadType: type)
+        return try await uploadQueue.run(forKey: uploadId) {
+            return try await _uploadTransitTierAttachment(attachmentId: attachmentId, type: type, progress: progress)
+        }
+    }
+
+    private func _uploadTransitTierAttachment(
+        attachmentId: Attachment.IDType,
+        type: UploadType,
+        progress: OWSProgressSink?,
+    ) async throws {
         let logger = PrefixedLogger(prefix: "[Upload]", suffix: "[\(attachmentId)]")
 
         let encryptedByteCount = db.read { tx in
@@ -295,12 +306,7 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
             }
         }
 
-        let (record, result) = try await uploadAttachment(
-            attachmentId: attachmentId,
-            type: .transitTier,
-            logger: logger,
-            progress: wrappedProgress,
-        )
+        let (record, result) = try await _uploadAttachmentId(attachmentId, type: type, logger: logger, progress: wrappedProgress)
 
         // Update the attachment and associated messages with the success
         // and clean up and left over upload state
@@ -333,13 +339,32 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
         auth: BackupServiceAuth,
         progress: OWSProgressSink?,
     ) async throws {
+        let type = UploadType.mediaTier(auth: auth, isThumbnail: false)
+        let uploadId = UploadId(attachmentId: attachmentId, uploadType: type)
+        return try await uploadQueue.run(forKey: uploadId) {
+            return try await _uploadMediaTierAttachment(
+                attachmentId: attachmentId,
+                type: type,
+                uploadEra: uploadEra,
+                localAci: localAci,
+                backupKey: backupKey,
+                auth: auth,
+                progress: progress,
+            )
+        }
+    }
+
+    private func _uploadMediaTierAttachment(
+        attachmentId: Attachment.IDType,
+        type: UploadType,
+        uploadEra: String,
+        localAci: Aci,
+        backupKey: MediaRootBackupKey,
+        auth: BackupServiceAuth,
+        progress: OWSProgressSink?,
+    ) async throws {
         let logger = PrefixedLogger(prefix: "[MediaTierUpload]", suffix: "[\(attachmentId)]")
-        let (record, uploadResult) = try await uploadAttachment(
-            attachmentId: attachmentId,
-            type: .mediaTier(auth: auth, isThumbnail: false),
-            logger: logger,
-            progress: progress,
-        )
+        let (record, uploadResult) = try await _uploadAttachmentId(attachmentId, type: type, logger: logger, progress: progress)
 
         // Read the attachment fresh from the DB
         guard
@@ -490,13 +515,32 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
         auth: BackupServiceAuth,
         progress: OWSProgressSink?,
     ) async throws {
+        let type = UploadType.mediaTier(auth: auth, isThumbnail: true)
+        let uploadId = UploadId(attachmentId: attachmentId, uploadType: type)
+        return try await uploadQueue.run(forKey: uploadId) {
+            return try await _uploadMediaTierThumbnailAttachment(
+                attachmentId: attachmentId,
+                type: type,
+                uploadEra: uploadEra,
+                localAci: localAci,
+                backupKey: backupKey,
+                auth: auth,
+                progress: progress,
+            )
+        }
+    }
+
+    private func _uploadMediaTierThumbnailAttachment(
+        attachmentId: Attachment.IDType,
+        type: UploadType,
+        uploadEra: String,
+        localAci: Aci,
+        backupKey: MediaRootBackupKey,
+        auth: BackupServiceAuth,
+        progress: OWSProgressSink?,
+    ) async throws {
         let logger = PrefixedLogger(prefix: "[MediaTierThumbnailUpload]", suffix: "[\(attachmentId)]")
-        let (record, result) = try await uploadAttachment(
-            attachmentId: attachmentId,
-            type: .mediaTier(auth: auth, isThumbnail: true),
-            logger: logger,
-            progress: progress,
-        )
+        let (record, result) = try await _uploadAttachmentId(attachmentId, type: type, logger: logger, progress: progress)
 
         // Read the attachment fresh from the DB
         guard
@@ -559,66 +603,36 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
         }
     }
 
-    /// Entry point for uploading an `AttachmentStream`
-    /// Fetches the `AttachmentStream`, fetches an upload form, builds the AttachmentUpload, begins the
-    /// upload, and updates the `AttachmentStream` upon success.
+    /// Uploads an `AttachmentStream`.
     ///
-    /// It is assumed any errors that could be retried or otherwise handled will have happend at a lower level,
-    /// so any error encountered here is considered unrecoverable and thrown to the caller.
+    /// Fetches the `AttachmentStream`, fetches an upload form, builds the
+    /// AttachmentUpload, begins the upload, and updates the `AttachmentStream`
+    /// upon success.
     ///
-    /// Resumption of an active upload can be handled at a lower level, but if the endpoint returns an
-    /// error that requires a full restart, this is the method that will be called to fetch a new upload form and
-    /// rebuild the endpoint and upload state before trying again.
-    private func uploadAttachment(
-        attachmentId: Attachment.IDType,
+    /// It is assumed any errors that could be retried or otherwise handled will
+    /// have happend at a lower level, so any error encountered here is
+    /// considered unrecoverable and thrown to the caller.
+    ///
+    /// Resumption of an active upload can be handled at a lower level, but if
+    /// the endpoint returns an error that requires a full restart, this is the
+    /// method that will be called to fetch a new upload form and rebuild the
+    /// endpoint and upload state before trying again.
+    private func _uploadAttachmentId(
+        _ attachmentId: Attachment.IDType,
         type: UploadType,
         logger: PrefixedLogger,
         progress: OWSProgressSink?,
     ) async throws -> (record: AttachmentUploadRecord, result: Upload.AttachmentResult) {
-
-        let activeUploadKey = ActiveUploadKey(attachmentId: attachmentId, uploadType: type)
-        if let activeUpload = activeUploads[activeUploadKey] {
-            // If this fails, it means the internal retry logic has given up, so don't
-            // attempt any retries here
-            do {
-                return try await activeUpload.value
-            } catch {
-                return try await uploadAttachment(
-                    attachmentId: attachmentId,
-                    type: type,
-                    logger: logger,
-                    progress: progress,
-                )
-            }
-        }
-
         let attachment = try db.read(block: { tx in
             try fetchAttachment(attachmentId: attachmentId, logger: logger, tx: tx)
         })
-
-        let uploadTask = Task {
-            defer {
-                // Clear out the active upload task once it finishes running.
-                activeUploads[activeUploadKey] = nil
-            }
-
-            // This task will only fail if a non-recoverable error is encountered, or the
-            // max number of retries is exhausted.
-            return try await self.upload(
-                attachment: attachment,
-                type: type,
-                logger: logger,
-                progress: progress,
-            )
-        }
-
-        // Add the active task to allow any additional scheduled uploads to reuse the same upload
-        activeUploads[activeUploadKey] = uploadTask
-        return try await uploadTask.value
+        // This task will only fail if a non-recoverable error is encountered, or the
+        // max number of retries is exhausted.
+        return try await self._uploadAttachment(attachment, type: type, logger: logger, progress: progress)
     }
 
-    private func upload(
-        attachment: Attachment,
+    private func _uploadAttachment(
+        _ attachment: Attachment,
         type: UploadType,
         logger: PrefixedLogger,
         progress: OWSProgressSink?,
@@ -702,7 +716,7 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
             switch type {
             case .transitTier:
                 uploadForm = try await chatConnectionManager.withAuthService(.attachments) {
-                    try await $0.getUploadForm(uploadSize: UInt64(localMetadata.encryptedDataLength)).asUploadForm()
+                    try await $0.getUploadForm(uploadSize: UInt64(safeCast: localMetadata.encryptedDataLength)).asUploadForm()
                 }
             case .mediaTier(let auth, _):
                 uploadForm = try await self.backupRequestManager
@@ -774,19 +788,20 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
                 throw error
             }
 
-            // If an uploadFailure has percolated up to this layer, it means AttachmentUpload
-            // has failed in it's retries. Usually this means something with the form or
-            // metadata is in error or expired, so clear everything out and try again.
+            // If an uploadFailure has percolated up to this layer, it means
+            // AttachmentUpload has failed in its retries. Usually this means something
+            // with the form or metadata is in error or expired, so clear everything
+            // out and try again.
             if case Upload.Error.uploadFailure = error {
 
-                // Only bump the attempt count if the upload failed.  Don't bump for things
+                // Only bump the attempt count if the upload failed. Don't bump for things
                 // like network issues
                 attachmentUploadRecord.attempt += 1
 
-                // If the error has made it here, something was encountered during upload that requires
-                // a full restart of the upload.
-                // This means at least throwing away the upload form, and just to be sure,
-                // throw away the local metadata as well.
+                // If the error has made it here, something was encountered during upload
+                // that requires a full restart of the upload. This means at least throwing
+                // away the upload form, and just to be sure, throw away the local metadata
+                // as well.
                 attachmentUploadRecord.localMetadata = nil
                 attachmentUploadRecord.uploadForm = nil
                 attachmentUploadRecord.uploadSessionUrl = nil
@@ -794,18 +809,13 @@ public actor AttachmentUploadManagerImpl: AttachmentUploadManager {
                 await db.awaitableWrite { tx in
                     attachmentUploadStore.upsert(record: attachmentUploadRecord, tx: tx)
                 }
-                return try await upload(
-                    attachment: attachment,
-                    type: type,
-                    logger: logger,
-                    progress: progress,
-                )
+                return try await _uploadAttachment(attachment, type: type, logger: logger, progress: progress)
             } else if case Upload.Error.missingFile = error {
                 await db.awaitableWrite { tx in
                     if
                         let attachmentRelFilePath = attachment.streamInfo?.localRelativeFilePath,
-                        // If the missing file matches the url of the primary attachment file,
-                        // mark the whole attachment as not having a file anymore.
+                        // If the missing file matches the url of the primary attachment file, mark
+                        // the whole attachment as not having a file anymore.
                         localMetadata.fileUrl == AttachmentStream.absoluteAttachmentFileURL(relativeFilePath: attachmentRelFilePath),
                         let attachment = attachmentStore.fetch(id: attachmentId, tx: tx)
                     {
