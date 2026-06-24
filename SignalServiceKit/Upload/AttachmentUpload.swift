@@ -132,7 +132,6 @@ public enum AttachmentUpload {
         }
 
         // We might have made progress that wasn't reported; report it now.
-        var newBytesUploaded = bytesAlreadyUploaded
         progress?.incrementCompletedUnitCount(to: bytesAlreadyUploaded)
 
         func downloadTimeLogString(_ bytesUploaded: UInt64) -> String {
@@ -151,12 +150,19 @@ public enum AttachmentUpload {
         }
 
         do {
+            var newBytesUploaded = bytesAlreadyUploaded
             try await attempt.endpoint.performUpload(
                 startPoint: bytesAlreadyUploaded,
                 attempt: attempt,
                 progressBlock: { currentByteCount, totalByteCount in
-                    newBytesUploaded = max(newBytesUploaded, UInt64(currentByteCount))
-                    progress?.incrementCompletedUnitCount(to: UInt64(currentByteCount))
+                    if currentByteCount == NSURLSessionTransferSizeUnknown {
+                        return
+                    }
+                    // We're uploading a chunk starting at bytesAlreadyUploaded, so we need to
+                    // offset the progress we've made by the amount we're skipping.
+                    let overallByteCount = bytesAlreadyUploaded + UInt64(currentByteCount)
+                    newBytesUploaded = max(newBytesUploaded, overallByteCount)
+                    progress?.incrementCompletedUnitCount(to: overallByteCount)
                 },
             )
             attempt.logger.info("Attachment uploaded successfully. \(bytesAlreadyUploaded) -> \(newBytesUploaded) (\(downloadTimeLogString(newBytesUploaded))")
