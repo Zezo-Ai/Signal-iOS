@@ -184,6 +184,7 @@ public enum AttachmentUpload {
                 latestUploadProgress = try? await getResumableUploadProgress(forAttempt: attempt)
                 switch latestUploadProgress {
                 case .complete:
+                    remoteConfirmedProgress = true
                     failureMode = .resume(.immediately)
                 case .restart:
                     failureMode = .restart(.afterBackoff)
