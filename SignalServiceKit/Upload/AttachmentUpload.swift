@@ -61,6 +61,7 @@ public enum AttachmentUpload {
             attempt: attempt,
             sleepTimer: sleepTimer,
             failureCount: 0,
+            immediatelyResumeAtByteOffset: nil,
             progress: progress,
         )
         progress?.complete()
@@ -90,7 +91,7 @@ public enum AttachmentUpload {
         attempt: Upload.Attempt<Metadata>,
         sleepTimer: Upload.Shims.SleepTimer,
         failureCount: Int,
-        priorUploadProgress: Upload.ResumeProgress? = nil,
+        immediatelyResumeAtByteOffset: UInt64?,
         progress: OWSProgressSource?,
     ) async throws {
         guard failureCount < Upload.Constants.uploadMaxRetries else {
@@ -101,34 +102,34 @@ public enum AttachmentUpload {
         let totalDataLength = UInt64(safeCast: attempt.encryptedDataLength)
         let bytesAlreadyUploaded: UInt64
 
-        // Only check remote upload progress if we think progress was made locally
-        if attempt.isResumedUpload || failureCount > 0 {
-            let uploadProgress: Upload.ResumeProgress
-            if let priorUploadProgress {
-                uploadProgress = priorUploadProgress
-            } else {
-                uploadProgress = try await getResumableUploadProgress(forAttempt: attempt)
-            }
+        if let immediatelyResumeAtByteOffset {
+            bytesAlreadyUploaded = immediatelyResumeAtByteOffset
+        } else if attempt.isResumedUpload || failureCount > 0 {
+            // Only check remote upload progress if we think progress was made locally
+            let uploadProgress = try await getResumableUploadProgress(forAttempt: attempt)
             switch uploadProgress {
             case .complete:
                 attempt.logger.info("Endpoint reported complete upload")
                 return
-            case .uploaded(let updatedBytesAlreadUploaded):
-                attempt.logger.info("Endpoint reported \(updatedBytesAlreadUploaded) of \(attempt.encryptedDataLength) bytes uploaded")
-                bytesAlreadyUploaded = updatedBytesAlreadUploaded
-                if bytesAlreadyUploaded == totalDataLength {
-                    attempt.logger.info("Inferred that endpoint reported complete upload")
-                    return
-                } else if bytesAlreadyUploaded > totalDataLength {
-                    attempt.logger.warn("Endpoint reported upload size larger than local size")
-                    throw Upload.Error.uploadFailure(recovery: .restart(.afterBackoff))
-                }
+            case .uploaded(let remoteByteCount):
+                attempt.logger.info("Endpoint reported \(remoteByteCount) of \(totalDataLength) bytes uploaded")
+                bytesAlreadyUploaded = remoteByteCount
             case .restart:
                 attempt.logger.warn("Endpoint couldn't provide upload progress; restarting")
                 throw Upload.Error.uploadFailure(recovery: .restart(.afterBackoff))
             }
         } else {
             bytesAlreadyUploaded = 0
+        }
+
+        if bytesAlreadyUploaded == totalDataLength {
+            attempt.logger.info("Upload has been completed")
+            return
+        }
+
+        if bytesAlreadyUploaded > totalDataLength {
+            attempt.logger.warn("Too many bytes have been uploaded")
+            throw Upload.Error.uploadFailure(recovery: .restart(.afterBackoff))
         }
 
         // We might have made progress that wasn't reported; report it now.
@@ -176,12 +177,11 @@ public enum AttachmentUpload {
             }
 
             let failureMode: Upload.FailureMode
-            var latestUploadProgress: Upload.ResumeProgress?
-            var remoteConfirmedProgress = false
+            var immediatelyResumeAtByteOffset: UInt64?
             switch error {
             case .partialUpload(let bytesUploaded):
                 attempt.logger.info("Uploaded chunk of \(downloadTimeLogString(bytesAlreadyUploaded + bytesUploaded)) (now at \(bytesAlreadyUploaded + bytesUploaded) of \(totalDataLength) bytes)")
-                remoteConfirmedProgress = true
+                immediatelyResumeAtByteOffset = bytesAlreadyUploaded + bytesUploaded
                 failureMode = .resume(.afterBackoff)
             case .uploadFailure(let retryMode):
                 // if a failure mode was passed back
@@ -189,10 +189,10 @@ public enum AttachmentUpload {
             case .networkTimeout:
                 // if this isn't an understood error, map into a failure mode
                 // fetch the progress to determine if we've made progress.
-                latestUploadProgress = try? await getResumableUploadProgress(forAttempt: attempt)
-                switch latestUploadProgress {
+                let uploadProgress = try? await getResumableUploadProgress(forAttempt: attempt)
+                switch uploadProgress {
                 case .complete:
-                    remoteConfirmedProgress = true
+                    immediatelyResumeAtByteOffset = totalDataLength
                     failureMode = .resume(.afterBackoff)
                 case .restart:
                     failureMode = .restart(.afterBackoff)
@@ -201,8 +201,8 @@ public enum AttachmentUpload {
                 case .uploaded(let remoteByteCount):
                     if remoteByteCount > bytesAlreadyUploaded {
                         // The remote endpoint reports progress was made, so retry immediately.
-                        remoteConfirmedProgress = true
                         attempt.logger.info("Uploaded chunk of \(downloadTimeLogString(remoteByteCount)) (now at \(remoteByteCount) of \(totalDataLength) bytes)")
+                        immediatelyResumeAtByteOffset = remoteByteCount
                     } else {
                         attempt.logger.warn("Endpoint reported no progress on the prior attempt")
                     }
@@ -224,7 +224,7 @@ public enum AttachmentUpload {
                 throw error
             case .resume(let recoveryMode):
                 switch recoveryMode {
-                case .afterBackoff where remoteConfirmedProgress:
+                case .afterBackoff where immediatelyResumeAtByteOffset != nil:
                     // If we confirmed that we made progress, we want to retry immediately.
                     // This may be because we uploaded a single chunk (and have more chunks to
                     // upload) or because we got interrupted partway through and want to start
@@ -233,10 +233,10 @@ public enum AttachmentUpload {
                     break
                 case .afterBackoff:
                     let backoff = OWSOperation.retryIntervalForExponentialBackoff(failureCount: failureCount, maxAverageBackoff: 14.1 * .minute)
-                    attempt.logger.warn(String(format: "Retry upload after %.3f seconds.", backoff))
+                    attempt.logger.warn(String(format: "Resuming upload after %.3f seconds.", backoff))
                     try await sleepTimer.sleep(for: backoff)
                 case .afterServerRequestedDelay(let delay):
-                    attempt.logger.warn(String(format: "Retry upload after %.3f seconds.", delay))
+                    attempt.logger.warn(String(format: "Resuming upload after %.3f seconds.", delay))
                     try await sleepTimer.sleep(for: delay)
                 }
             case .restart:
@@ -245,15 +245,12 @@ public enum AttachmentUpload {
                 throw Upload.Error.uploadFailure(recovery: failureMode)
             }
 
-            attempt.logger.info("Resuming upload.")
-            // Reset the attempt count to 1 as long as remote progress was made. Make it 1, since 0
-            // will behave like a fresh upload and skip fetching the remote upload progress.
-            let nextFailureCount = remoteConfirmedProgress ? 1 : failureCount + 1
             try await performResumableUpload(
                 attempt: attempt,
                 sleepTimer: sleepTimer,
-                failureCount: nextFailureCount,
-                priorUploadProgress: latestUploadProgress,
+                // Reset the attempt count to zero if we made confirmed progress.
+                failureCount: immediatelyResumeAtByteOffset != nil ? 0 : failureCount + 1,
+                immediatelyResumeAtByteOffset: immediatelyResumeAtByteOffset,
                 progress: progress,
             )
         }

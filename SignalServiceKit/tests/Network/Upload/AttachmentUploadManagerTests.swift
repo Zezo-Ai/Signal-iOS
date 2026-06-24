@@ -126,7 +126,6 @@ struct AttachmentUploadManagerTests {
         }
         let attempt2 = helper.addUploadFormAndLocationRequestMock(cdn: cdn) { auth, _, location in
             helper.addUploadRequestMock(auth: auth, location: location, type: .success(initialResponseCode))
-            helper.addResumeProgressMock(cdn: cdn, auth: auth, location: location, type: .progress(count: Int(chunkSize)))
             helper.addUploadRequestMock(auth: auth, location: location, type: .success(200))
         }
 
@@ -186,9 +185,7 @@ struct AttachmentUploadManagerTests {
         }
         let attempt2 = helper.addUploadFormAndLocationRequestMock(cdn: cdn) { auth, _, location in
             helper.addUploadRequestMock(auth: auth, location: location, type: .success(initialResponseCode))
-            helper.addResumeProgressMock(cdn: cdn, auth: auth, location: location, type: .progress(count: Int(chunkSize)))
             helper.addUploadRequestMock(auth: auth, location: location, type: .success(initialResponseCode))
-            helper.addResumeProgressMock(cdn: cdn, auth: auth, location: location, type: .progress(count: Int(chunkSize * 2)))
             helper.addUploadRequestMock(auth: auth, location: location, type: .success(200))
         }
 
