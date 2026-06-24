@@ -74,7 +74,7 @@ struct UploadEndpointCDN3: UploadEndpoint {
             return .uploaded(0)
         }
 
-        guard let bytesAlreadyUploaded = Int(bytesAlreadyUploadedString) else {
+        guard let bytesAlreadyUploaded = UInt64(bytesAlreadyUploadedString) else {
             attempt.logger.error("'upload-offset' contains something unexpected, discard upload form and restart")
             return .restart
         }
@@ -83,7 +83,7 @@ struct UploadEndpointCDN3: UploadEndpoint {
     }
 
     func performUpload<Metadata: UploadMetadata>(
-        startPoint: Int,
+        startPoint: UInt64,
         attempt: Upload.Attempt<Metadata>,
         progressBlock: OWSURLSession.ProgressBlock,
     ) async throws(Upload.Error) {
@@ -140,7 +140,7 @@ struct UploadEndpointCDN3: UploadEndpoint {
                 if truncated {
                     // The upload succeeded in uploading a chunk of data. Throw this error
                     // to the caller, which should trigger an immediate resume with the next chunk
-                    throw Upload.Error.partialUpload(bytesUploaded: UInt32(clamping: uploadData.count))
+                    throw Upload.Error.partialUpload(bytesUploaded: UInt64(uploadData.count))
                 }
                 return
             default:

@@ -98,8 +98,8 @@ public enum AttachmentUpload {
         }
         let startTime = CACurrentMediaTime()
 
-        let totalDataLength = attempt.encryptedDataLength
-        let bytesAlreadyUploaded: Int
+        let totalDataLength = UInt64(safeCast: attempt.encryptedDataLength)
+        let bytesAlreadyUploaded: UInt64
 
         // Only check remote upload progress if we think progress was made locally
         if attempt.isResumedUpload || failureCount > 0 {
@@ -142,14 +142,14 @@ public enum AttachmentUpload {
         // Total progress is (progress from previous attempts/slices +
         // progress from this attempt/slice).
         if internalProgress.completedUnitCount < bytesAlreadyUploaded {
-            internalProgress.incrementCompletedUnitCount(by: UInt64(bytesAlreadyUploaded) - internalProgress.completedUnitCount)
+            internalProgress.incrementCompletedUnitCount(by: bytesAlreadyUploaded - internalProgress.completedUnitCount)
         }
 
         func downloadTimeLogString(_ bytesUploaded: UInt64) -> String {
             let totalTime = CACurrentMediaTime() - startTime
             guard totalTime > 0 else { return "" }
 
-            let bytesDownloaded = bytesUploaded - UInt64(bytesAlreadyUploaded)
+            let bytesDownloaded = bytesUploaded - bytesAlreadyUploaded
             let rate = Double(bytesDownloaded / 1024) / totalTime
             let timeMessage = String(format: "%lld bytes in %.2fs", bytesDownloaded, totalTime)
 
@@ -176,7 +176,7 @@ public enum AttachmentUpload {
 
             var failureMode: Upload.FailureMode = .noMoreRetries
             var latestUploadProgress: Upload.ResumeProgress?
-            var latestUploadProgressBytes: UInt32 = UInt32(truncatingIfNeeded: internalProgress.completedUnitCount)
+            var latestUploadProgressBytes = internalProgress.completedUnitCount
             var uploadReportedRemoteProgress = false
             switch error {
             case .partialUpload(let bytesUploaded):
@@ -202,7 +202,7 @@ public enum AttachmentUpload {
                     failureMode = .resume(.afterBackoff)
                 case .uploaded(let remoteBytesCount):
                     attempt.logger.info("Endpoint reported \(remoteBytesCount)/\(attempt.encryptedDataLength) uploaded.")
-                    latestUploadProgressBytes = UInt32(truncatingIfNeeded: remoteBytesCount)
+                    latestUploadProgressBytes = remoteBytesCount
                     if latestUploadProgressBytes > bytesAlreadyUploaded {
                         uploadReportedRemoteProgress = true
                         // The remote endpoint reports progress was made, so retry immediately.

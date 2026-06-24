@@ -122,17 +122,14 @@ struct UploadEndpointCDN2: UploadEndpoint {
         let expectedPrefix = "bytes=0-"
         guard
             let rangeHeader = response.headers["range"],
-            rangeHeader.hasPrefix(expectedPrefix)
+            let rangePrefix = rangeHeader.range(of: expectedPrefix, options: [.anchored])
         else {
             // Return zero to restart the upload.
             return .uploaded(0)
         }
 
-        let rangeEndString = rangeHeader.suffix(rangeHeader.count - expectedPrefix.count)
-        guard
-            !rangeEndString.isEmpty,
-            let rangeEnd = Int(rangeEndString)
-        else {
+        let rangeEndString = rangeHeader[rangePrefix.upperBound...]
+        guard !rangeEndString.isEmpty, let rangeEnd = UInt64(rangeEndString) else {
             logger.warn("Invalid Range header: \(rangeHeader) (\(rangeEndString)).")
             // There was a range header present, but it was
             // invalid - restart the upload from scratch
@@ -148,7 +145,7 @@ struct UploadEndpointCDN2: UploadEndpoint {
     }
 
     func performUpload<Metadata: UploadMetadata>(
-        startPoint: Int,
+        startPoint: UInt64,
         attempt: Upload.Attempt<Metadata>,
         progressBlock: OWSURLSession.ProgressBlock,
     ) async throws(Upload.Error) {
@@ -173,7 +170,7 @@ struct UploadEndpointCDN2: UploadEndpoint {
             // Content-Length: 4992079
             // Since this is an index into the range, subtract one from the byte count uploaded
             // `truncated` (chunked) uploads should always add this header, even on the first request
-            headers["Content-Range"] = "bytes \(startPoint)-\(startPoint + uploadData.count - 1)/\(totalDataLength)"
+            headers["Content-Range"] = "bytes \(startPoint)-\(startPoint + UInt64(uploadData.count) - 1)/\(totalDataLength)"
         }
 
         do {
@@ -192,7 +189,7 @@ struct UploadEndpointCDN2: UploadEndpoint {
             case 308 where truncated:
                 // The upload succeeded in uploading a chunk of data. Throw this error
                 // to the caller, which should trigger an immediate resume with the next chunk
-                throw Upload.Error.partialUpload(bytesUploaded: UInt32(clamping: uploadData.count))
+                throw Upload.Error.partialUpload(bytesUploaded: UInt64(uploadData.count))
             default:
                 throw Upload.Error.unknown
             }

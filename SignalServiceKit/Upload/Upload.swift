@@ -76,7 +76,7 @@ public enum Upload {
         // Contains the number of bytes the upload endpoint has received.  This
         // can be 0 bytes, which is effectively a new upload, but can use the
         // existing upload form.
-        case uploaded(Int)
+        case uploaded(UInt64)
     }
 
     public enum Error: Swift.Error, LocalizedError, Equatable {
@@ -84,7 +84,7 @@ public enum Upload {
         case networkError
         case networkTimeout
         case uploadFailure(recovery: FailureMode)
-        case partialUpload(bytesUploaded: UInt32)
+        case partialUpload(bytesUploaded: UInt64)
         case unsupportedEndpoint
         case unexpectedResponseStatusCode(Int)
         case missingFile
@@ -242,7 +242,7 @@ extension UploadEndpoint {
     func readUploadFileChunk(
         fileSystem: Upload.Shims.FileSystem,
         url: URL,
-        startIndex chunkStartIndex: Int,
+        startIndex chunkStartIndex: UInt64,
     ) throws(Upload.Error) -> (data: Data, truncated: Bool) {
         guard fileSystem.fileOrFolderExists(url: url) else {
             throw .missingFile
@@ -256,7 +256,7 @@ extension UploadEndpoint {
             throw .missingFile
         }
 
-        let remainingData = fileData.dropFirst(chunkStartIndex)
+        let remainingData = fileData.dropFirst(Int(chunkStartIndex))
         let dataChunk = remainingData.prefix(fileSystem.maxFileChunkSizeBytes())
         return (
             dataChunk,

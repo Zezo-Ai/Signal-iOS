@@ -29,7 +29,7 @@ protocol UploadEndpoint {
     ///   - attempt: The current upload attempt, containing the local file metadata, upload endpoint, and target location.
     ///   - progress: Updated with progress data as reported by the internal upload implementation.
     func performUpload<Metadata: UploadMetadata>(
-        startPoint: Int,
+        startPoint: UInt64,
         attempt: Upload.Attempt<Metadata>,
         progressBlock: OWSURLSession.ProgressBlock,
     ) async throws(Upload.Error)
