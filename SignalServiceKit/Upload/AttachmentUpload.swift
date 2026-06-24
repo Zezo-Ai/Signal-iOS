@@ -60,6 +60,7 @@ public enum AttachmentUpload {
         try await performResumableUpload(
             attempt: attempt,
             sleepTimer: sleepTimer,
+            failureCount: 0,
             progress: progress,
         )
         return Upload.Result(
@@ -100,11 +101,11 @@ public enum AttachmentUpload {
     private static func performResumableUpload<Metadata: UploadMetadata>(
         attempt: Upload.Attempt<Metadata>,
         sleepTimer: Upload.Shims.SleepTimer,
-        count: UInt = 0,
+        failureCount: Int,
         priorUploadProgress: Upload.ResumeProgress? = nil,
         progress: OWSProgressSource?,
     ) async throws {
-        guard count < Upload.Constants.uploadMaxRetries else {
+        guard failureCount < Upload.Constants.uploadMaxRetries else {
             throw Upload.Error.uploadFailure(recovery: .noMoreRetries)
         }
         let startTime = CACurrentMediaTime()
@@ -113,7 +114,7 @@ public enum AttachmentUpload {
         let bytesAlreadyUploaded: Int
 
         // Only check remote upload progress if we think progress was made locally
-        if attempt.isResumedUpload || count > 0 {
+        if attempt.isResumedUpload || failureCount > 0 {
             let uploadProgress: Upload.ResumeProgress
             if let priorUploadProgress {
                 uploadProgress = priorUploadProgress
@@ -249,7 +250,7 @@ public enum AttachmentUpload {
                 case .immediately:
                     attempt.logger.warn("Retry upload immediately.")
                 case .afterBackoff:
-                    let backoff = OWSOperation.retryIntervalForExponentialBackoff(failureCount: count, maxAverageBackoff: 14.1 * .minute)
+                    let backoff = OWSOperation.retryIntervalForExponentialBackoff(failureCount: failureCount, maxAverageBackoff: 14.1 * .minute)
                     attempt.logger.warn(String(format: "Retry upload after %.3f seconds.", backoff))
                     try await sleepTimer.sleep(for: backoff)
                 case .afterServerRequestedDelay(let delay):
@@ -265,11 +266,11 @@ public enum AttachmentUpload {
             attempt.logger.info("Resuming upload.")
             // Reset the attempt count to 1 as long as remote progress was made. Make it 1, since 0
             // will behave like a fresh upload and skip fetching the remote upload progress.
-            let nextAttemptCount = uploadReportedRemoteProgress ? 1 : count + 1
+            let nextFailureCount = uploadReportedRemoteProgress ? 1 : failureCount + 1
             try await performResumableUpload(
                 attempt: attempt,
                 sleepTimer: sleepTimer,
-                count: nextAttemptCount,
+                failureCount: nextFailureCount,
                 priorUploadProgress: latestUploadProgress,
                 progress: progress,
             )
