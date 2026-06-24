@@ -43,9 +43,6 @@ public enum Upload {
 
     public enum FailureMode: Equatable {
         public enum RetryMode: Equatable {
-            /// This was a temporary failure, such as a network
-            /// timeout, so an immediate retry should be possible
-            case immediately
             /// The remote server sent back a retry-after header that should be honored
             /// when attempting a backoff before retry
             case afterServerRequestedDelay(TimeInterval)

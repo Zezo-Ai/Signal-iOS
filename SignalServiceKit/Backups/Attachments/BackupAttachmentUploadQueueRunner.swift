@@ -624,8 +624,6 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                         return .retryableError(RateLimitedRetryError(retryAfter: nil))
                     case .afterServerRequestedDelay(let retryAfter):
                         return .retryableError(RateLimitedRetryError(retryAfter: retryAfter))
-                    case .immediately:
-                        return .retryableError(RateLimitedRetryError(retryAfter: 0))
                     }
                 case .noMoreRetries:
                     let message = "No more upload retries; stopping the queue"

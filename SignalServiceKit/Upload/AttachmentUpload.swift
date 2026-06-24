@@ -174,7 +174,7 @@ public enum AttachmentUpload {
             case .partialUpload(let bytesUploaded):
                 attempt.logger.info("Endpoint successfully uploaded chunk of \(bytesUploaded) bytes.")
                 remoteConfirmedProgress = true
-                failureMode = .resume(.immediately)
+                failureMode = .resume(.afterBackoff)
             case .uploadFailure(let retryMode):
                 // if a failure mode was passed back
                 failureMode = retryMode
@@ -185,7 +185,7 @@ public enum AttachmentUpload {
                 switch latestUploadProgress {
                 case .complete:
                     remoteConfirmedProgress = true
-                    failureMode = .resume(.immediately)
+                    failureMode = .resume(.afterBackoff)
                 case .restart:
                     failureMode = .restart(.afterBackoff)
                 case .none:
@@ -193,13 +193,11 @@ public enum AttachmentUpload {
                 case .uploaded(let remoteByteCount):
                     attempt.logger.info("Endpoint reported \(remoteByteCount)/\(attempt.encryptedDataLength) uploaded.")
                     if remoteByteCount > bytesAlreadyUploaded {
+                        // The remote endpoint reports progress was made, so retry immediately.
                         remoteConfirmedProgress = true
                         attempt.logger.info("Endpoint reported we made progress: \(bytesAlreadyUploaded) -> \(remoteByteCount) (\(downloadTimeLogString(remoteByteCount)))")
-                        // The remote endpoint reports progress was made, so retry immediately.
-                        failureMode = .resume(.immediately)
-                    } else {
-                        failureMode = .resume(.afterBackoff)
                     }
+                    failureMode = .resume(.afterBackoff)
                 }
             case .networkError:
                 failureMode = .resume(.afterBackoff)
@@ -217,8 +215,13 @@ public enum AttachmentUpload {
                 throw error
             case .resume(let recoveryMode):
                 switch recoveryMode {
-                case .immediately:
-                    attempt.logger.warn("Retry upload immediately.")
+                case .afterBackoff where remoteConfirmedProgress:
+                    // If we confirmed that we made progress, we want to retry immediately.
+                    // This may be because we uploaded a single chunk (and have more chunks to
+                    // upload) or because we got interrupted partway through and want to start
+                    // again immediately. (This flag requires positive confirmation that the
+                    // server accepted some number of bytes we sent.)
+                    break
                 case .afterBackoff:
                     let backoff = OWSOperation.retryIntervalForExponentialBackoff(failureCount: failureCount, maxAverageBackoff: 14.1 * .minute)
                     attempt.logger.warn(String(format: "Retry upload after %.3f seconds.", backoff))
