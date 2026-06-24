@@ -302,6 +302,13 @@ extension OWSProgressSource {
     func complete() {
         incrementCompletedUnitCount(by: totalUnitCount)
     }
+
+    func incrementCompletedUnitCount(to value: UInt64) {
+        if completedUnitCount >= value {
+            return
+        }
+        incrementCompletedUnitCount(by: value - completedUnitCount)
+    }
 }
 
 extension OWSProgressSource where Self: Sendable {

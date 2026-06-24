@@ -131,19 +131,9 @@ public enum AttachmentUpload {
             bytesAlreadyUploaded = 0
         }
 
-        let internalProgress: OWSProgressSource
-        if let progress {
-            internalProgress = progress
-        } else {
-            let internalProgressSink = OWSProgress.createSink { _ in }
-            internalProgress = internalProgressSink.addSource(withLabel: "upload", unitCount: UInt64(totalDataLength))
-        }
-
-        // Total progress is (progress from previous attempts/slices +
-        // progress from this attempt/slice).
-        if internalProgress.completedUnitCount < bytesAlreadyUploaded {
-            internalProgress.incrementCompletedUnitCount(by: bytesAlreadyUploaded - internalProgress.completedUnitCount)
-        }
+        // We might have made progress that wasn't reported; report it now.
+        var newBytesUploaded = bytesAlreadyUploaded
+        progress?.incrementCompletedUnitCount(to: bytesAlreadyUploaded)
 
         func downloadTimeLogString(_ bytesUploaded: UInt64) -> String {
             let totalTime = CACurrentMediaTime() - startTime
@@ -164,9 +154,12 @@ public enum AttachmentUpload {
             try await attempt.endpoint.performUpload(
                 startPoint: bytesAlreadyUploaded,
                 attempt: attempt,
-                progressBlock: internalProgress.asProgressBlock(),
+                progressBlock: { currentByteCount, totalByteCount in
+                    newBytesUploaded = max(newBytesUploaded, UInt64(currentByteCount))
+                    progress?.incrementCompletedUnitCount(to: UInt64(currentByteCount))
+                },
             )
-            attempt.logger.info("Attachment uploaded successfully. \(bytesAlreadyUploaded) -> \(internalProgress.completedUnitCount) (\(downloadTimeLogString(internalProgress.completedUnitCount))")
+            attempt.logger.info("Attachment uploaded successfully. \(bytesAlreadyUploaded) -> \(newBytesUploaded) (\(downloadTimeLogString(newBytesUploaded))")
         } catch {
             if let statusCode = error.httpStatusCode {
                 attempt.logger.warn("Encountered error during upload. (code=\(statusCode)")
@@ -176,7 +169,7 @@ public enum AttachmentUpload {
 
             let failureMode: Upload.FailureMode
             var latestUploadProgress: Upload.ResumeProgress?
-            var latestUploadProgressBytes = internalProgress.completedUnitCount
+            var latestUploadProgressBytes = newBytesUploaded
             var uploadReportedRemoteProgress = false
             switch error {
             case .partialUpload(let bytesUploaded):
