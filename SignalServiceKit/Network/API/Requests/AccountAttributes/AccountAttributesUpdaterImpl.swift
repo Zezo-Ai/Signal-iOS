@@ -107,27 +107,18 @@ public class AccountAttributesUpdaterImpl: AccountAttributesUpdater {
         self.cronStore.setMostRecentDate(Date(), jitter: Constants.periodicRefreshInterval / 20, tx: tx)
     }
 
-    public func updateAccountAttributes(authedAccount: AuthedAccount) async throws {
-        await db.awaitableWrite { tx in
-            self.kvStore.setData(
-                Randomness.generateRandomBytes(16),
-                key: Keys.latestUpdateRequestToken,
-                transaction: tx,
-            )
-        }
-        _ = try await updateAccountAttributesIfNeeded(authedAccount: authedAccount)
-    }
-
-    public func scheduleAccountAttributesUpdate(authedAccount: AuthedAccount, tx: DBWriteTransaction) {
+    @discardableResult
+    public func scheduleAccountAttributesUpdate(authedAccount: AuthedAccount, tx: DBWriteTransaction) -> Task<Void, any Error> {
         self.kvStore.setData(
             Randomness.generateRandomBytes(16),
             key: Keys.latestUpdateRequestToken,
             transaction: tx,
         )
-        tx.addSyncCompletion {
-            Task {
-                try await self.updateAccountAttributesIfNeeded(authedAccount: authedAccount)
-            }
+        let txCompletion = CancellableContinuation<Void>()
+        tx.addSyncCompletion { txCompletion.resume(with: .success(())) }
+        return Task {
+            try await txCompletion.wait()
+            _ = try await self.updateAccountAttributesIfNeeded(authedAccount: authedAccount)
         }
     }
 

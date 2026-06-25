@@ -608,7 +608,8 @@ extension OWSProfileManager: ProfileManager {
 
         Logger.info("Persisting rotated profile key and kicking off subsequent operations.")
 
-        let needsAnotherRotation = await SSKEnvironment.shared.databaseStorageRef.awaitableWrite { tx in
+        let databaseStorage = SSKEnvironment.shared.databaseStorageRef
+        let (needsAnotherRotation, attributesUpdateTask) = await databaseStorage.awaitableWrite { tx -> (Bool, Task<Void, any Error>) in
             self.setLocalProfileKey(
                 newProfileKey,
                 userProfileWriter: .localUser,
@@ -624,6 +625,10 @@ extension OWSProfileManager: ProfileManager {
             // intermediary steps are done.
             SSKEnvironment.shared.groupsV2Ref.scheduleAllGroupsV2ForProfileKeyUpdate(transaction: tx)
 
+            let accountAttributesUpdater = DependenciesBridge.shared.accountAttributesUpdater
+            Logger.info("Scheduling account attributes update after profile key rotation.")
+            let attributesUpdateTask = accountAttributesUpdater.scheduleAccountAttributesUpdate(authedAccount: authedAccount, tx: tx)
+
             var needsAnotherRotation = false
 
             triggers.forEach { trigger in
@@ -635,11 +640,10 @@ extension OWSProfileManager: ProfileManager {
                 }
             }
 
-            return needsAnotherRotation
+            return (needsAnotherRotation, attributesUpdateTask)
         }
 
-        Logger.info("Updating account attributes after profile key rotation.")
-        try await DependenciesBridge.shared.accountAttributesUpdater.updateAccountAttributes(authedAccount: authedAccount)
+        try await attributesUpdateTask.value
 
         Logger.info("Completed profile key rotation.")
         SSKEnvironment.shared.groupsV2Ref.processProfileKeyUpdates()
