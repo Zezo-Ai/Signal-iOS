@@ -502,7 +502,6 @@ public class PinSetupViewController: OWSViewController, OWSNavigationChildContro
     }
 
     private func _enable2FAAndContinue(withPin pin: String) async throws {
-        let accountAttributesUpdater = DependenciesBridge.shared.accountAttributesUpdater
         let ows2FAManager = SSKEnvironment.shared.ows2FAManagerRef
 
         Logger.warn("Setting PIN.")
@@ -512,16 +511,6 @@ public class PinSetupViewController: OWSViewController, OWSNavigationChildContro
         } catch {
             owsFailDebug("Failed to set PIN! \(error)")
             throw error
-        }
-
-        await DependenciesBridge.shared.db.awaitableWrite { tx in
-            // Attempt to update account attributes. This should have been
-            // handled internally when we enabled things above, but it doesn't
-            // hurt to make sure.
-            //
-            // This just schedules an update to happen eventually; don't wait on
-            // the result.
-            accountAttributesUpdater.scheduleAccountAttributesUpdate(authedAccount: .implicit(), tx: tx)
         }
 
         NotificationCenter.default.post(name: .megaphoneStateDidChange, object: nil)
