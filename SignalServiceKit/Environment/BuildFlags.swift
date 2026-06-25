@@ -59,7 +59,7 @@ public enum BuildFlags {
     public static let migrateDeprecatedSessions = true
 
     public enum KeyTransparency {
-        public static let enabled = build <= .beta
+        public static let enabled = true
         public static let conservativeSelfCheck = build <= .internal
     }
 
