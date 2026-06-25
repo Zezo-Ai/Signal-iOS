@@ -503,7 +503,7 @@ class SendMediaNavigationController: OWSNavigationController, AttachmentApproval
             if self.pendingAttachments.isEmpty {
                 captureViewController.captureMode = .single
             }
-            captureViewController.updateDoneButtonAppearance()
+            captureViewController.updateCameraModeProceedButtonBadgeAndVisibility(animated: false)
             return
         }
 

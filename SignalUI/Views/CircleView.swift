@@ -39,6 +39,7 @@ public class CircleView: UIView {
     }
 }
 
+@available(iOS, deprecated: 26)
 public class CircleBlurView: UIVisualEffectView {
 
     @available(*, unavailable, message: "use other constructor instead.")

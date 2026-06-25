@@ -111,8 +111,10 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         super.viewDidLoad()
 
         definesPresentationContext = true
+        overrideUserInterfaceStyle = .dark
+        layout = layoutForCurrentViewState()
 
-        view.backgroundColor = Theme.darkThemeBackgroundColor
+        view.backgroundColor = .Signal.background
         view.preservesSuperviewLayoutMargins = true
 
         initializeUI()
@@ -142,7 +144,7 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         }
         UIViewController.attemptRotationToDeviceOrientation()
         cameraCaptureSession.updateVideoPreviewConnection(toOrientation: previewOrientation)
-        updateIconOrientations(isAnimated: false, captureOrientation: previewOrientation)
+        updateButtonIconOrientations(isAnimated: false, captureOrientation: previewOrientation)
 
         NotificationCenter.default.addObserver(
             self,
@@ -156,11 +158,12 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         if let dataSource, dataSource.numberOfMediaItems > 0 {
             captureMode = .multi
         }
-        updateDoneButtonAppearance()
+        updateCameraModeProceedButtonBadgeAndVisibility(animated: false)
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+
         isViewVisible = true
         cameraCaptureSession.updateVideoCaptureOrientation()
     }
@@ -173,7 +176,8 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
     }
 
     override var prefersStatusBarHidden: Bool {
-        !UIDevice.current.hasIPhoneXNotch && !UIDevice.current.isIPad && AppEnvironment.shared.callService.callServiceState.currentCall == nil
+        guard AppEnvironment.shared.callService.callServiceState.currentCall == nil else { return false }
+        return (UIDevice.current.isIPad || UIDevice.current.hasIPhoneXNotch) == false
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -196,7 +200,9 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         // while the rotation occurs.
         self.previewView.alpha = 0
         coordinator.animate(
-            alongsideTransition: { _ in },
+            alongsideTransition: { _ in
+                self.layout = self.layoutForCurrentViewState()
+            },
             completion: { _ in
                 UIView.animate(withDuration: 0.1) {
                     self.previewView.alpha = 1
@@ -211,34 +217,35 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         // Safe area insets will change during interactive dismiss - ignore those changes.
         guard !(interactiveDismiss?.interactionInProgress ?? false) else { return }
 
-        if let contentLayoutGuideTop = previewViewContentLayoutGuideTop {
-            contentLayoutGuideTop.constant = view.safeAreaInsets.top
-
-            // Rounded corners if preview view isn't full-screen.
-            previewView.previewLayer.cornerRadius = view.safeAreaInsets.top > 0 ? 18 : 0
-        }
-
-        if let bottomBarControlsLayoutGuideBottom {
-            bottomBarControlsLayoutGuideBottom.constant = -view.safeAreaInsets.bottom
+        if let contentViewTopEdgeConstraintPhoneLayout {
+            contentViewTopEdgeConstraintPhoneLayout.constant = view.safeAreaInsets.top
         }
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        isIPadUIInRegularMode = traitCollection.horizontalSizeClass == .regular && traitCollection.verticalSizeClass == .regular
+
+        layout = layoutForCurrentViewState()
     }
 
-    // MARK: - Layout Code
+    // MARK: - Subview Configuration
 
-    private var isIPadUIInRegularMode = false {
-        didSet {
-            guard oldValue != isIPadUIInRegularMode else { return }
-            updateIPadInterfaceLayout()
+    private var isInitialUISetupComplete = false
+
+    private let isUsingLiquidGlassUI: Bool = if #available(iOS 26, *) { true } else { false }
+
+    private func contentViewCornerRadius() -> CGFloat {
+        guard layout.useCornerRounding else {
+            return 0
         }
+        // Rounded corners if preview view isn't full-screen.
+        return isUsingLiquidGlassUI ? 40 : 18
     }
 
-    private let previewViewLayoutGuide = UILayoutGuide()
-    private var previewViewContentLayoutGuideTop: NSLayoutConstraint? // controls vertical position of `previewViewLayoutGuide` on iPhones.
+    // We'll do rounded corners on this view so it's important to add all UI elements to this view.
+    private let contentView = UIView()
+
+    private var bottomAreaProtectionView: UIView?
 
     // Values match ContentTypeSelectionControl.selectedSegmentIndex.
     private enum ComposerMode: Int {
@@ -246,36 +253,44 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         case text
     }
 
-    private var _internalComposerMode: ComposerMode = .camera
-    private var composerMode: ComposerMode { _internalComposerMode }
+    private var _composerMode: ComposerMode = .camera
+    private var composerMode: ComposerMode {
+        get { _composerMode }
+        set { setComposerMode(newValue, animated: false) }
+    }
+
     private func setComposerMode(_ composerMode: ComposerMode, animated: Bool) {
         owsAssertDebug(!isRecordingVideo, "Invalid state - should not be recording video")
 
-        guard _internalComposerMode != composerMode else { return }
-        _internalComposerMode = composerMode
+        guard _composerMode != composerMode else { return }
+        _composerMode = composerMode
+
+        guard let composerTypeSelectionControl else {
+            owsFailDebug("composerTypeSelectionControl not initialized")
+            return
+        }
 
         if composerMode == .text {
             startObservingKeyboardNotifications()
-            initializeTextEditorUIIfNecessary()
+            initializeTextEditorUI()
         }
 
-        updateTopBarAppearance(animated: animated)
-        // No need to update bottom bar's visibility because it's always visible if CAMERA|TEXT switch is accessible.
-        bottomBar.setMode(composerMode == .text ? .text : .camera, animated: animated)
-        updateSideBarVisibility(animated: animated)
+        updateTopBarMode(animated: animated)
+
+        updateCameraBottomBarVisibility(animated: animated)
+        updateCameraSideBarVisibility(animated: animated)
 
         // Show / hide camera controls and viewfinder.
         let hideCameraUI = composerMode != .camera
-        let isFrontCamera = cameraCaptureSession.desiredPosition == .front
-        frontCameraZoomControl?.setIsHidden(hideCameraUI || !isFrontCamera, animated: animated)
-        rearCameraZoomControl?.setIsHidden(hideCameraUI || isFrontCamera, animated: animated)
         previewView.setIsHidden(hideCameraUI, animated: animated)
-        doneButton.setIsHidden(shouldHideDoneButton, animated: animated)
+        cameraZoomControlsView?.setIsHidden(hideCameraUI, animated: animated)
+        updateCameraModeProceedButtonBadgeAndVisibility(animated: animated)
 
         // Show / hide text editor controls.
         let hideTextComposerUI = composerMode != .text
         textStoryComposerView.setIsHidden(hideTextComposerUI, animated: animated)
         textEditorToolbar.setIsHidden(hideTextComposerUI, animated: animated)
+        textStoryModeProceedButton.setIsHidden(hideTextComposerUI, animated: animated)
 
         // Stop / start camera as necessary.
         switch composerMode {
@@ -284,46 +299,63 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         }
 
         // Update CAMERA | TEXT switch if necessary.
-        if bottomBar.contentTypeSelectionControl.selectedSegmentIndex != composerMode.rawValue {
-            bottomBar.contentTypeSelectionControl.selectedSegmentIndex = composerMode.rawValue
+        if composerTypeSelectionControl.selectedSegmentIndex != composerMode.rawValue {
+            composerTypeSelectionControl.selectedSegmentIndex = composerMode.rawValue
         }
     }
 
-    private var _internalIsRecordingVideo = false
-    private var isRecordingVideo: Bool { _internalIsRecordingVideo }
+    private var _isRecordingVideo = false
+    private var isRecordingVideo: Bool {
+        get { _isRecordingVideo }
+        set { setIsRecordingVideo(newValue, animated: false) }
+    }
+
     private func setIsRecordingVideo(_ isRecordingVideo: Bool, animated: Bool) {
-        guard _internalIsRecordingVideo != isRecordingVideo else { return }
-        _internalIsRecordingVideo = isRecordingVideo
+        guard _isRecordingVideo != isRecordingVideo else { return }
+        _isRecordingVideo = isRecordingVideo
 
         updateShouldProcessQRCodes()
 
-        updateTopBarAppearance(animated: animated)
-        topBar.recordingTimerView.isRecordingInProgress = isRecordingVideo
+        updateTopBarMode(animated: animated)
         if isRecordingVideo {
             topBar.recordingTimerView.duration = 0
 
-            let captureControlState: CameraCaptureControl.State = UIAccessibility.isVoiceOverRunning ? .recordingUsingVoiceOver : .recording
+            let captureControlState: CameraCaptureControl.RecordingState = UIAccessibility.isVoiceOverRunning ? .recordingUsingVoiceOver : .recording
             let animationDuration: TimeInterval = animated ? 0.4 : 0
-            bottomBar.captureControl.setState(captureControlState, animationDuration: animationDuration)
-            if let sideBar {
-                sideBar.cameraCaptureControl.setState(captureControlState, animationDuration: animationDuration)
+            cameraBottomBar.captureControl.setRecordingState(
+                captureControlState,
+                animationDuration: animationDuration,
+            )
+            if let cameraSideBar {
+                cameraSideBar.cameraCaptureControl.setRecordingState(
+                    captureControlState,
+                    animationDuration: animationDuration,
+                )
             }
         } else {
             let animationDuration: TimeInterval = animated ? 0.2 : 0
-            bottomBar.captureControl.setState(.initial, animationDuration: animationDuration)
-            if let sideBar {
-                sideBar.cameraCaptureControl.setState(.initial, animationDuration: animationDuration)
+            cameraBottomBar.captureControl.setRecordingState(
+                .notRecording,
+                animationDuration: animationDuration,
+            )
+            if let cameraSideBar {
+                cameraSideBar.cameraCaptureControl.setRecordingState(
+                    .notRecording,
+                    animationDuration: animationDuration,
+                )
             }
         }
 
-        bottomBar.setMode(isRecordingVideo ? .videoRecording : .camera, animated: animated)
-        if let sideBar {
-            sideBar.isRecordingVideo = isRecordingVideo
+        cameraBottomBar.setIsRecordingVideo(isRecordingVideo, animated: animated)
+        if let cameraSideBar {
+            cameraSideBar.setIsRecordingVideo(isRecordingVideo, animated: animated)
         }
 
-        doneButton.setIsHidden(shouldHideDoneButton, animated: animated)
+        updateCameraModeProceedButtonBadgeAndVisibility(animated: animated)
     }
 
+    // Defines whether UI is advanced to the media review screen after
+    // taking a photo or a video.
     enum CaptureMode {
         case single
         case multi
@@ -331,23 +363,29 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
 
     var captureMode: CaptureMode = .single {
         didSet {
-            topBar.batchModeButton.setCaptureMode(captureMode, animated: true)
-            if let sideBar {
-                sideBar.batchModeButton.setCaptureMode(captureMode, animated: true)
+            // Animate changes because `captureMode` can only be changed by user tapping the corresponding button.
+            topBar.captureModeButton.setMode(captureMode, animated: true)
+            if let cameraSideBar {
+                cameraSideBar.captureModeButton.setMode(captureMode, animated: true)
             }
+            updateCameraModeProceedButtonBadgeAndVisibility(animated: false)
         }
     }
 
-    private let topBar = CameraTopBar(frame: .zero)
-    private func updateTopBarAppearance(animated: Bool) {
+    private let topBar = CameraTopBar()
+    // Top bar will show:
+    // • only close button on iPad and then in text story editing mode.
+    // • only recording indicator when recording a video.
+    // • close button, Flash and Capture Mode buttons on iPhones.
+    private func updateTopBarMode(animated: Bool) {
         let mode: CameraTopBar.Mode = {
+            if case .text = composerMode {
+                return .closeButton
+            }
             if isRecordingVideo {
                 return .videoRecording
             }
-            if composerMode == .text {
-                return .closeButton
-            }
-            if isIPadUIInRegularMode {
+            if layout.showsSideBar {
                 return .closeButton
             }
             return .cameraControls
@@ -355,33 +393,62 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         topBar.setMode(mode, animated: animated)
     }
 
-    private lazy var bottomBar = CameraBottomBar(isContentTypeSelectionControlAvailable: delegate?.photoCaptureViewControllerCanShowTextEditor(self) ?? false)
-    private var bottomBarControlsLayoutGuideBottom: NSLayoutConstraint?
-    private func updateBottomBarVisibility(animated: Bool) {
-        let isBarHidden: Bool = {
-            if textEditorUIInitialized {
-                return textStoryComposerView.isEditing
-            }
-            if bottomBar.isContentTypeSelectionControlAvailable {
-                return false
-            }
-            return isIPadUIInRegularMode
-        }()
-        bottomBar.setIsHidden(isBarHidden, animated: animated)
+    private var cameraBottomBar = CameraBottomBar()
+
+    private func updateCameraBottomBarVisibility(animated: Bool) {
+        // Camera bottom bar is hidden:
+        // • when camera side bar controls are visible.
+        // • when text editor is visible.
+
+        let isBottomBarHidden: Bool = switch composerMode {
+        case .text: true
+        case .camera: layout.showsSideBar
+        }
+        cameraBottomBar.setIsHidden(isBottomBarHidden, animated: animated)
     }
 
-    private var sideBar: CameraSideBar? // Optional because most devices are iPhones and will never need this.
-    private func updateSideBarVisibility(animated: Bool) {
-        guard let sideBar else { return }
-        sideBar.setIsHidden(composerMode == .text || !isIPadUIInRegularMode, animated: true)
+    private let bottomBarLayoutMargin: CGFloat = 44
+
+    // Camera controls shown in regular x regular layouts.
+    // Centered vertically along the trailing edge of the screen.
+    // Optional because most devices will never need it.
+    private var cameraSideBar: CameraSideBar?
+
+    private func updateCameraSideBarVisibility(animated: Bool) {
+        // Side bar is hidden when not in regular x regular UI.
+
+        guard let cameraSideBar else { return }
+        let isSideBarHidden: Bool = switch composerMode {
+        case .camera: layout.showsSideBar == false
+        case .text: true
+        }
+        cameraSideBar.setIsHidden(isSideBarHidden, animated: true)
+    }
+
+    // Optional because cameras are not guaranteed to be available.
+    private var cameraZoomControlsView: CameraZoomControlsView?
+
+    // Optional because in some flows (e.g. launching from chat) it's camera-only UI.
+    private var composerTypeSelectionControl: ComposerTypeSelectionControl?
+    // Composer mode selection control is only hidden when editing text story.
+    private func updateComposerTypeSelectionControlVisibility(animated: Bool) {
+        guard let composerTypeSelectionControl, isTextEditorUIInitialized else { return }
+
+        composerTypeSelectionControl.setIsHidden(textStoryComposerView.isEditing, animated: animated)
+    }
+
+    private lazy var cameraModeProceedButton = BadgedProceedButton(frame: .zero)
+    func updateCameraModeProceedButtonBadgeAndVisibility(animated: Bool) {
+        let badgeNumber = dataSource?.numberOfMediaItems ?? 0
+        let isProceedButtonHidden = switch composerMode {
+        case .camera: isRecordingVideo || badgeNumber == 0
+        case .text: true
+        }
+        cameraModeProceedButton.badgeNumber = badgeNumber
+        cameraModeProceedButton.setIsHidden(isProceedButtonHidden, animated: animated)
     }
 
     // MARK: - Camera Controls
-
-    private var frontCameraZoomControl: CameraZoomSelectionControl?
-    private var rearCameraZoomControl: CameraZoomSelectionControl?
-    private var cameraZoomControlIPhoneConstraints: [NSLayoutConstraint]?
-    private var cameraZoomControlIPadConstraints: [NSLayoutConstraint]?
 
     private lazy var tapToFocusView: LottieAnimationView = {
         let view = LottieAnimationView(name: "tap_to_focus")
@@ -404,321 +471,657 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
 
     // MARK: - Text Editor
 
-    private var textEditorUIInitialized = false
-    private var textEditoriPhoneConstraints = [NSLayoutConstraint]()
-    private var textEditoriPadConstraints = [NSLayoutConstraint]()
+    private var isTextEditorUIInitialized = false
 
     private lazy var textStoryComposerView = TextStoryComposerView(text: "")
 
-    private lazy var textEditorToolbar: UIView = {
-        let stackView = UIStackView(arrangedSubviews: [textBackgroundSelectionButton, textViewAttachLinkButton])
-        stackView.axis = .horizontal
-        stackView.spacing = 16
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        return stackView
-    }()
+    private lazy var textEditorToolbar = TextStoryComposerToolbarView()
 
-    private lazy var textBackgroundSelectionButton = RoundGradientButton()
-    private lazy var textViewAttachLinkButton: UIButton = {
-        let button = RoundMediaButton(image: UIImage(imageLiteralResourceName: "link"), backgroundStyle: .blur)
-        button.ows_contentEdgeInsets = UIEdgeInsets(margin: 3)
-        button.layoutMargins = .zero
-        return button
-    }()
+    // Leading and bottom margin.
+    private let textEditorToolbarLayoutMargin: CGFloat = 20
+
+    private lazy var textStoryModeProceedButton = BadgedProceedButton()
 
     // This constraint gets updated when onscreen keyboard appears/disappears.
-    private var textStoryComposerContentLayoutGuideBottomIphone: NSLayoutConstraint?
-    private var textStoryComposerContentLayoutGuideBottomIpad: NSLayoutConstraint?
+    private var textStoryComposerContentLayoutGuideBottomPhone: NSLayoutConstraint?
+    private var textStoryComposerContentLayoutGuideBottomPad: NSLayoutConstraint?
     private var observingKeyboardNotifications = false
 
-    private lazy var doneButton: MediaDoneButton = {
-        let button = MediaDoneButton(type: .custom)
-        button.badgeNumber = 0
-        button.overrideUserInterfaceStyle = .dark
-        return button
-    }()
+    // MARK: - Layout
 
-    private var shouldHideDoneButton: Bool {
-        isRecordingVideo || composerMode == .text || doneButton.badgeNumber == 0
-    }
+    private enum Layout {
+        case pad // Any device having `regular` width and height.
+        case padNarrow // iPad device when height is `regular` and width is `compact`.
+        case phone // Modern phones with a 9:19.5 screen.
+        case legacyPhone // Older phones with a 9:16 screen.
 
-    private lazy var doneButtonIPhoneConstraints = [
-        doneButton.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-        doneButton.centerYAnchor.constraint(equalTo: bottomBar.shutterButtonLayoutGuide.centerYAnchor),
-    ]
-    private var doneButtonIPadConstraints: [NSLayoutConstraint]?
-
-    private func initializeUI() {
-        // `previewViewLayoutGuide` defines area occupied by the content:
-        // either camera viewfinder or text story composing area.
-        view.addLayoutGuide(previewViewLayoutGuide)
-        // Always full-width.
-        view.addConstraints([
-            previewViewLayoutGuide.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            previewViewLayoutGuide.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        ])
-        if UIDevice.current.isIPad {
-            // Full-height on iPads.
-            view.addConstraints([
-                previewViewLayoutGuide.topAnchor.constraint(equalTo: view.topAnchor),
-                previewViewLayoutGuide.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            ])
-        } else {
-            // 9:16 aspect ratio on iPhones.
-            // Note that there's no constraint on the bottom edge of the `previewViewLayoutGuide`.
-            // This works because all iPhones have screens 9:16 or taller.
-            view.addConstraint(previewViewLayoutGuide.heightAnchor.constraint(equalTo: previewViewLayoutGuide.widthAnchor, multiplier: 16 / 9))
-            // Constrain to the top of the view now and update offset with the height of top safe area later.
-            // Can't constrain to the safe area layout guide because safe area insets changes during interactive dismiss.
-            let constraint = previewViewLayoutGuide.topAnchor.constraint(equalTo: view.topAnchor)
-            view.addConstraint(constraint)
-            previewViewContentLayoutGuideTop = constraint
+        var showsSideBar: Bool {
+            self == .pad
         }
 
-        // Step 1. Initialize all UI elements for iPhone layout (which can also be used on an iPad).
+        var useCornerRounding: Bool {
+            self == .phone
+        }
+    }
 
-        // Camera Viewfinder - simply occupies the entire frame of `previewViewLayoutGuide`.
+    private func layoutForCurrentViewState() -> Layout {
+        guard view.bounds.isEmpty == false else { return .phone }
+        let viewAspectRatio = view.bounds.size.aspectRatio
+
+        if
+            (traitCollection.horizontalSizeClass == .regular && traitCollection.verticalSizeClass == .regular) ||
+            (traitCollection.userInterfaceIdiom == .pad)
+        {
+            return viewAspectRatio > 9 / 16 ? .pad : .padNarrow
+        }
+
+        // Up until iPhone X aspect ratio was 9:16.
+        // Modern iPhones are 9:19.5.
+        if viewAspectRatio > 9 / 18 {
+            return .legacyPhone
+        }
+        return .phone
+    }
+
+    private var layout: Layout = .phone {
+        didSet {
+            guard oldValue != layout else { return }
+            if isInitialUISetupComplete {
+                updateInterfaceForCurrentViewState(animated: true)
+            }
+        }
+    }
+
+    private func updateInterfaceForCurrentViewState(animated: Bool) {
+        // Initialize camera side bar if needed.
+        if layout.showsSideBar {
+            initializeCameraSideBar()
+        }
+
+        // Update constraints.
+        if let layoutSpecificConstraints {
+            NSLayoutConstraint.deactivate(layoutSpecificConstraints)
+        }
+        let layoutSpecificConstraints: [NSLayoutConstraint] = switch layout {
+        case .pad, .padNarrow: constraintsForPadLayout(isWideLayout: layout.showsSideBar)
+        case .phone: constraintsForPhoneLayout()
+        case .legacyPhone: constraintsForLegacyPhoneLayout()
+        }
+        NSLayoutConstraint.activate(layoutSpecificConstraints)
+        self.layoutSpecificConstraints = layoutSpecificConstraints
+
+        // Orientation of camera zoom control is layout-dependent.
+        if let cameraZoomControlsView {
+            cameraZoomControlsView.axis = layout.showsSideBar ? .vertical : .horizontal
+        }
+
+        // Orientation of text story composer's toolbar is layout-dependent.
+        if isTextEditorUIInitialized {
+            textEditorToolbar.axis = layout.showsSideBar ? .vertical : .horizontal
+        }
+
+        // Apply corner rounding if necessary.
+        let cornerRadius = contentViewCornerRadius()
+        if #available(iOS 26, *) {
+            contentView.cornerConfiguration = .uniformCorners(radius: .fixed(cornerRadius))
+        } else {
+            contentView.layer.cornerRadius = cornerRadius
+        }
+
+        // Bottom area protection.
+        // On modern iphones, top controls are shown over camera viewfinder.
+        // To make interactive dismiss look nicer, view's background is set to `clear`.
+        // This black view at the bottom lets us keep background underneath controls
+        // at the bottom of the screen, below camera viewfinder / text story composer area.
+        // For other layouts this is not reqired: on legacy phones camera viewfinder occupies
+        // the entire screen area and on pad layouts we keep black backgrounds during dismiss.
+        let bottomAreaProtectionRequired = layout == .phone
+        if bottomAreaProtectionRequired {
+            let protectionView = bottomAreaProtectionView ?? UIView()
+            protectionView.backgroundColor = view.backgroundColor
+            if protectionView.superview == nil {
+                protectionView.translatesAutoresizingMaskIntoConstraints = false
+                view.insertSubview(protectionView, at: 0)
+                NSLayoutConstraint.activate([
+                    protectionView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5),
+                    protectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                    protectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                    protectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                ])
+                bottomAreaProtectionView = protectionView
+            }
+        } else {
+            bottomAreaProtectionView?.removeFromSuperview()
+            bottomAreaProtectionView = nil
+        }
+
+        // Update view states.
+        updateTopBarMode(animated: animated)
+        updateCameraBottomBarVisibility(animated: animated)
+        updateCameraSideBarVisibility(animated: animated)
+    }
+
+    private var layoutSpecificConstraints: [NSLayoutConstraint]?
+
+    // Controls vertical position of `contentView` in `phone` layout.
+    private var contentViewTopEdgeConstraintPhoneLayout: NSLayoutConstraint?
+
+    private func constraintsForPadLayout(isWideLayout: Bool) -> [NSLayoutConstraint] {
+        var constraints = [NSLayoutConstraint]()
+
+        // Use this, instead of `self.view`, to position all UI elements.
+        let topLevelContentContainer = view!
+
+        // Fix content view at 9:16 aspect ratio.
+        constraints.append(contentView.heightAnchor.constraint(
+            equalTo: contentView.widthAnchor,
+            multiplier: 16 / 9,
+        ))
+
+        // Content view is centered in view controller's view using "aspect fit" logic.
+        constraints.append(contentsOf: [
+            contentView.centerXAnchor.constraint(equalTo: topLevelContentContainer.centerXAnchor),
+            contentView.centerYAnchor.constraint(equalTo: topLevelContentContainer.centerYAnchor),
+
+            contentView.topAnchor.constraint(greaterThanOrEqualTo: topLevelContentContainer.topAnchor),
+            contentView.leadingAnchor.constraint(greaterThanOrEqualTo: topLevelContentContainer.leadingAnchor),
+        ])
+
+        // Stretch content view as much as possible.
+        let sizingConstraints = [
+            contentView.widthAnchor.constraint(equalTo: topLevelContentContainer.widthAnchor),
+            contentView.heightAnchor.constraint(equalTo: topLevelContentContainer.heightAnchor),
+        ]
+        sizingConstraints.forEach { $0.priority = .defaultHigh }
+        constraints += sizingConstraints
+
+        // Top bar: pinned to view's top edge.
+        constraints.append(topBar.topAnchor.constraint(
+            equalTo: topLevelContentContainer.topAnchor,
+        ))
+
+        let layoutPadding: CGFloat = 28
+
+        // CAMERA | TEXT control, bottom camera controls, side camera controls, Proceed button.
+        // Note that `cameraBottomBar` might be hidden - but we still position it properly.
+
+        // Proceed button is horizontally aligned to the trailing edge of the screen.
+        constraints.append(cameraModeProceedButton.trailingAnchor.constraint(
+            equalTo: topLevelContentContainer.trailingAnchor,
+            constant: -layoutPadding,
+        ))
+
+        if let composerTypeSelectionControl {
+            constraints += [
+                // CAMERA | TEXT control is pinned to the bottom of the screen with a fixed margin.
+                composerTypeSelectionControl.bottomAnchor.constraint(
+                    equalTo: topLevelContentContainer.bottomAnchor,
+                    constant: -layoutPadding,
+                ),
+
+                // Bottom camera controls are placed above CAMERA | TEXT with a fixed margin.
+                // Note that `cameraBottomBar` might be hidden - but we still position it properly.
+                cameraBottomBar.bottomAnchor.constraint(
+                    equalTo: composerTypeSelectionControl.topAnchor,
+                    constant: -layoutPadding,
+                ),
+
+                // Proceed button is centered vertically with CAMERA | TEXT control.
+                cameraModeProceedButton.centerYAnchor.constraint(
+                    equalTo: composerTypeSelectionControl.centerYAnchor,
+                ),
+            ]
+        } else {
+            constraints += [
+                // Proceed button is pinned to the bottom of the screen with a fixed margin.
+                cameraModeProceedButton.bottomAnchor.constraint(
+                    equalTo: topLevelContentContainer.bottomAnchor,
+                    constant: -layoutPadding,
+                ),
+
+                // Bottom camera controls are placed above the Proceed button with a fixed margin.
+                cameraBottomBar.bottomAnchor.constraint(
+                    equalTo: cameraModeProceedButton.topAnchor,
+                    constant: -layoutPadding,
+                ),
+            ]
+        }
+
+        // Along the trailing edge of the screen with a fixed margin, vertically centered.
+        // Note that `cameraSideBar` might be hidden.
+        if let cameraSideBar {
+            constraints += [
+                cameraSideBar.trailingAnchor.constraint(
+                    equalTo: topLevelContentContainer.trailingAnchor,
+                    constant: -layoutPadding,
+                ),
+                cameraSideBar.cameraCaptureControl.shutterButtonLayoutGuide.centerYAnchor.constraint(
+                    equalTo: topLevelContentContainer.centerYAnchor,
+                ),
+            ]
+        }
+
+        // Camera Zoom control:
+        // * wide layout: along the leading edge of the screen, centered vertically.
+        // * narrow layout: above camera shutter with a fixed spacing, centered horizontally.
+        if let cameraZoomControlsView {
+            if isWideLayout {
+                constraints += [
+                    cameraZoomControlsView.leadingAnchor.constraint(
+                        equalTo: topLevelContentContainer.leadingAnchor,
+                        constant: layoutPadding,
+                    ),
+                    cameraZoomControlsView.centerYAnchor.constraint(
+                        equalTo: topLevelContentContainer.centerYAnchor,
+                    ),
+                ]
+            } else {
+                constraints += [
+                    cameraZoomControlsView.bottomAnchor.constraint(
+                        equalTo: cameraBottomBar.topAnchor,
+                        constant: -16,
+                    ),
+                    cameraZoomControlsView.centerXAnchor.constraint(
+                        equalTo: topLevelContentContainer.centerXAnchor,
+                    ),
+                ]
+            }
+        }
+
+        // Text Editor constraints.
+        if isTextEditorUIInitialized, let composerTypeSelectionControl {
+            // Text composer toolbar:
+            // * wide layout: along the trailing edge of the screen, centered vertically.
+            // * narrow layout: along the leading edge of the screen, fixed distance above CAMERA | TEXT control.
+            if isWideLayout {
+                constraints += [
+                    textEditorToolbar.trailingAnchor.constraint(
+                        equalTo: topLevelContentContainer.trailingAnchor,
+                        constant: -layoutPadding,
+                    ),
+                    textEditorToolbar.centerYAnchor.constraint(
+                        equalTo: topLevelContentContainer.centerYAnchor,
+                    ),
+                ]
+            } else {
+                constraints += [
+                    textEditorToolbar.leadingAnchor.constraint(
+                        equalTo: topLevelContentContainer.leadingAnchor,
+                        constant: layoutPadding,
+                    ),
+                    textEditorToolbar.bottomAnchor.constraint(
+                        equalTo: composerTypeSelectionControl.topAnchor,
+                        constant: -layoutPadding,
+                    ),
+                ]
+            }
+
+            if
+                let textStoryComposerContentLayoutGuideBottomPad,
+                let textStoryComposerContentLayoutGuideBottomPhone
+            {
+                if isWideLayout {
+                    constraints.append(textStoryComposerContentLayoutGuideBottomPad)
+                } else {
+                    constraints.append(textStoryComposerContentLayoutGuideBottomPhone)
+                }
+            }
+        }
+
+        return constraints
+    }
+
+    private func constraintsForPhoneLayout() -> [NSLayoutConstraint] {
+        var constraints = [NSLayoutConstraint]()
+
+        // Constraint for position of the top edge of the content view - created earlier.
+        if let contentViewTopEdgeConstraintPhoneLayout {
+            constraints.append(contentViewTopEdgeConstraintPhoneLayout)
+        }
+
+        // Content view is full-width.
+        constraints += [
+            contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ]
+
+        // Fix content view at 9:16 aspect ratio.
+        // Note that there's no constraint on the bottom edge of the `contentView`
+        // because this type of layout is only used on iPhones with 9:19 and taller screen aspect ratios.
+        constraints.append(contentView.heightAnchor.constraint(
+            equalTo: contentView.widthAnchor,
+            multiplier: 16 / 9,
+        ))
+
+        // Top bar: vertically aligned with camera viewfinder / text story composer area.
+        constraints.append(topBar.topAnchor.constraint(
+            equalTo: contentView.topAnchor,
+        ))
+
+        // Camera controls are placed above the bottom edge of the camera viewfinder with a fixed inset.
+        constraints.append(cameraBottomBar.photoLibraryButton.bottomAnchor.constraint(
+            equalTo: contentView.bottomAnchor,
+            constant: -bottomBarLayoutMargin,
+        ))
+
+        // CAMERA | TEXT control has a fixed spacing below the content view.
+        if let composerTypeSelectionControl {
+            constraints.append(composerTypeSelectionControl.topAnchor.constraint(
+                equalTo: contentView.bottomAnchor,
+                constant: 16,
+            ))
+        }
+
+        // Camera Zoom control: above camera shutter with a fixed spacing, horizontally centered.
+        if let cameraZoomControlsView {
+            constraints += [
+                cameraZoomControlsView.bottomAnchor.constraint(equalTo: cameraBottomBar.topAnchor, constant: -44),
+                cameraZoomControlsView.centerXAnchor.constraint(equalTo: cameraBottomBar.centerXAnchor),
+            ]
+        }
+
+        // Camera mode proceed button:
+        // * horizontal: aligned to the trailing edge of the screen.
+        // * vertical: below camera viewfinder, aligned with CAMERA | TEXT control if it's there.
+        constraints.append(cameraModeProceedButton.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor))
+        if let composerTypeSelectionControl {
+            constraints.append(cameraModeProceedButton.centerYAnchor.constraint(
+                equalTo: composerTypeSelectionControl.centerYAnchor,
+            ))
+        } else {
+            constraints.append(cameraModeProceedButton.topAnchor.constraint(
+                equalTo: contentView.bottomAnchor,
+                constant: 28,
+            ))
+        }
+
+        if isTextEditorUIInitialized {
+            // Text composer toolbar is pinned to the bottom leading of the composer area with a fixed padding.
+            let layoutMargin = OWSTableViewController2.defaultHOuterMargin
+            constraints += [
+                textEditorToolbar.leadingAnchor.constraint(
+                    equalTo: contentView.leadingAnchor,
+                    constant: layoutMargin,
+                ),
+                textEditorToolbar.bottomAnchor.constraint(
+                    equalTo: textStoryComposerView.bottomAnchor,
+                    constant: -layoutMargin,
+                ),
+            ]
+
+            if let textStoryComposerContentLayoutGuideBottomPhone {
+                constraints.append(textStoryComposerContentLayoutGuideBottomPhone)
+            }
+        }
+
+        return constraints
+    }
+
+    private func constraintsForLegacyPhoneLayout() -> [NSLayoutConstraint] {
+        var constraints = [NSLayoutConstraint]()
+
+        // Full-screen content view.
+        constraints += [
+            contentView.topAnchor.constraint(equalTo: view.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ]
+
+        // Top bar: attached to view's top safe area.
+        constraints.append(topBar.topAnchor.constraint(
+            equalTo: view.safeAreaLayoutGuide.topAnchor,
+        ))
+
+        // CAMERA | TEXT control, bottom camera controls, Proceed button.
+        let verticalSpacing: CGFloat = 28
+        // Proceed button is horizontally aligned to the trailing edge of the screen.
+        constraints.append(cameraModeProceedButton.trailingAnchor.constraint(
+            equalTo: contentView.trailingAnchor,
+            constant: -verticalSpacing,
+        ))
+
+        if let composerTypeSelectionControl {
+            constraints += [
+                // CAMERA | TEXT control is pinned to the bottom of the screen with a fixed margin.
+                composerTypeSelectionControl.bottomAnchor.constraint(
+                    equalTo: contentView.bottomAnchor,
+                    constant: -verticalSpacing,
+                ),
+
+                // Camera controls are placed above CAMERA | TEXT with a fixed margin.
+                cameraBottomBar.bottomAnchor.constraint(
+                    equalTo: composerTypeSelectionControl.topAnchor,
+                    constant: -verticalSpacing,
+                ),
+
+                // Proceed button is centered vertically with CAMERA | TEXT control.
+                cameraModeProceedButton.centerYAnchor.constraint(
+                    equalTo: composerTypeSelectionControl.centerYAnchor,
+                ),
+            ]
+        } else {
+            constraints += [
+                // Proceed button is pinned to the bottom of the screen with a fixed margin.
+                cameraModeProceedButton.bottomAnchor.constraint(
+                    equalTo: contentView.bottomAnchor,
+                    constant: -verticalSpacing,
+                ),
+
+                // Camera controls are placed above the Proceed button with a fixed margin.
+                cameraBottomBar.bottomAnchor.constraint(
+                    equalTo: cameraModeProceedButton.topAnchor,
+                    constant: -verticalSpacing,
+                ),
+            ]
+        }
+
+        // Camera Zoom control: above camera shutter with a fixed spacing, horizontally centered.
+        if let cameraZoomControlsView {
+            constraints += [
+                cameraZoomControlsView.bottomAnchor.constraint(equalTo: cameraBottomBar.topAnchor, constant: -16),
+                cameraZoomControlsView.centerXAnchor.constraint(equalTo: cameraBottomBar.centerXAnchor),
+            ]
+        }
+
+        if isTextEditorUIInitialized, let composerTypeSelectionControl {
+            // Toolbar is placed above CAMERA | TEXT control with a fixed spacing,
+            // along the leading edge with a standard padding.
+            let layoutMargin = OWSTableViewController2.defaultHOuterMargin
+            constraints += [
+                textEditorToolbar.leadingAnchor.constraint(
+                    equalTo: contentView.leadingAnchor,
+                    constant: layoutMargin,
+                ),
+                textEditorToolbar.bottomAnchor.constraint(
+                    equalTo: composerTypeSelectionControl.topAnchor,
+                    constant: -verticalSpacing,
+                ),
+            ]
+
+            if let textStoryComposerContentLayoutGuideBottomPhone {
+                constraints.append(textStoryComposerContentLayoutGuideBottomPhone)
+            }
+        }
+
+        return constraints
+    }
+
+    private func initializeUI() {
+        // `contentView` is the container view for camera viewfinder and text story editor.
+        contentView.clipsToBounds = true
+        contentView.preservesSuperviewLayoutMargins = true
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(contentView)
+
+        // Variable top margin used in `phone` layout.
+        // Constrain to the top of the view now and update offset with the height of top safe area later.
+        // Can't constrain to the safe area layout guide because safe area insets changes during interactive dismiss.
+        contentViewTopEdgeConstraintPhoneLayout = contentView.topAnchor.constraint(equalTo: view.topAnchor)
+
+        // Step 1.
+        // Initialize UI elements that are used on all devices and set up permanently active constraints.
+
+        // Camera Viewfinder - always occupies the entire frame of `contentView`.
         previewView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(previewView)
-        view.addConstraints([
-            previewView.leadingAnchor.constraint(equalTo: previewViewLayoutGuide.leadingAnchor),
-            previewView.topAnchor.constraint(equalTo: previewViewLayoutGuide.topAnchor),
-            previewView.trailingAnchor.constraint(equalTo: previewViewLayoutGuide.trailingAnchor),
-            previewView.bottomAnchor.constraint(equalTo: previewViewLayoutGuide.bottomAnchor),
+        contentView.addSubview(previewView)
+        NSLayoutConstraint.activate([
+            previewView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            previewView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            previewView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            previewView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
         ])
         configureCameraGestures()
 
         // Top Bar
+        topBar.translatesAutoresizingMaskIntoConstraints = false
+        topBar.closeButton.addAction(
+            UIAction { [weak self] _ in self?.didTapClose() },
+            for: .primaryActionTriggered,
+        )
+        topBar.captureModeButton.addAction(
+            UIAction { [weak self] _ in self?.didTapBatchMode() },
+            for: .primaryActionTriggered,
+        )
+        topBar.flashModeButton.addAction(
+            UIAction { [weak self] _ in self?.didTapFlashMode() },
+            for: .primaryActionTriggered,
+        )
         view.addSubview(topBar)
-        topBar.closeButton.addTarget(self, action: #selector(didTapClose), for: .touchUpInside)
-        topBar.batchModeButton.addTarget(self, action: #selector(didTapBatchMode), for: .touchUpInside)
-        topBar.flashModeButton.addTarget(self, action: #selector(didTapFlashMode), for: .touchUpInside)
-        topBar.autoPinWidthToSuperview()
-        if UIDevice.current.isIPad {
-            topBar.autoPinEdge(toSuperviewSafeArea: .top)
-        } else {
-            topBar.topAnchor.constraint(equalTo: previewViewLayoutGuide.topAnchor).isActive = true
+        NSLayoutConstraint.activate([
+            // Vertical position constraint is device-dependent.
+            topBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            topBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+
+        // Bottom Bar
+        cameraBottomBar.translatesAutoresizingMaskIntoConstraints = false
+        cameraBottomBar.photoLibraryButton.addAction(
+            UIAction { [weak self] _ in self?.didTapPhotoLibrary() },
+            for: .primaryActionTriggered,
+        )
+        cameraBottomBar.switchCameraButton.addAction(
+            UIAction { [weak self] _ in self?.switchCameraPosition() },
+            for: .primaryActionTriggered,
+        )
+        view.addSubview(cameraBottomBar)
+        NSLayoutConstraint.activate([
+            cameraBottomBar.photoLibraryButton.leadingAnchor.constraint(
+                equalTo: contentView.leadingAnchor,
+                constant: bottomBarLayoutMargin,
+            ),
+            cameraBottomBar.switchCameraButton.trailingAnchor.constraint(
+                equalTo: contentView.trailingAnchor,
+                constant: -bottomBarLayoutMargin,
+            ),
+            // Vertical position constraints are device-dependent.
+        ])
+
+        // Content type (CAMERA | TEXT) selection control. Not added when camera is launched from the chat.
+        if delegate?.photoCaptureViewControllerCanShowTextEditor(self) ?? false {
+            let composerTypeSelectionControl = ComposerTypeSelectionControl()
+            composerTypeSelectionControl.selectedSegmentIndex = 0
+            composerTypeSelectionControl.translatesAutoresizingMaskIntoConstraints = false
+            composerTypeSelectionControl.addAction(
+                UIAction { [weak self] _ in self?.didTapChangeComposerMode() },
+                for: .valueChanged,
+            )
+            view.addSubview(composerTypeSelectionControl)
+
+            // Horizontal position is fixed for all devices.
+            // Vertical position varies between layouts.
+            NSLayoutConstraint.activate([
+                composerTypeSelectionControl.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            ])
+
+            self.composerTypeSelectionControl = composerTypeSelectionControl
         }
 
-        // Bottom Bar (contains shutter button)
-        view.addSubview(bottomBar)
-        bottomBar.isCompactHeightLayout = !UIDevice.current.hasIPhoneXNotch
-        bottomBar.switchCameraButton.addTarget(self, action: #selector(didTapSwitchCamera), for: .touchUpInside)
-        bottomBar.photoLibraryButton.addTarget(self, action: #selector(didTapPhotoLibrary), for: .touchUpInside)
-        if bottomBar.isContentTypeSelectionControlAvailable {
-            bottomBar.contentTypeSelectionControl.selectedSegmentIndex = 0
-            bottomBar.contentTypeSelectionControl.addTarget(self, action: #selector(contentTypeChanged), for: .valueChanged)
-        }
-        bottomBar.autoPinWidthToSuperview()
-        if bottomBar.isCompactHeightLayout {
-            // On devices with home button and iPads bar is simply pinned to the bottom of the screen
-            // with a fixed margin that defines space under the shutter button or CAMERA|TEXT switch.
-            bottomBar.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -32).isActive = true
-        } else {
-            // On `notch` devices:
-            //  i. Shutter button is placed 16 pts above the bottom edge of the preview view.
-            bottomBar.shutterButtonLayoutGuide.bottomAnchor.constraint(equalTo: previewViewLayoutGuide.bottomAnchor, constant: -16).isActive = true
+        // Zoom control.
+        if let cameraZoomControlsView = CameraZoomControlsView(cameraCaptureSession: cameraCaptureSession, axis: .horizontal) {
+            cameraZoomControlsView.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(cameraZoomControlsView)
 
-            //  ii. Other buttons are centered vertically in the black box between bottom of the preview view and top of bottom safe area.
-            bottomBar.controlButtonsLayoutGuide.topAnchor.constraint(equalTo: previewViewLayoutGuide.bottomAnchor).isActive = true
-            // Constrain to the bottom of the view now and update offset with the height of bottom safe area later.
-            // Can't constrain to the safe area layout guide because safe area insets changes during interactive dismiss.
-            let constraint = bottomBar.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-            view.addConstraint(constraint)
-            bottomBarControlsLayoutGuideBottom = constraint
+            self.cameraZoomControlsView = cameraZoomControlsView
+
+            // No constraints added here because position is device-dependent.
         }
 
-        // Camera Zoom Controls
-        cameraZoomControlIPhoneConstraints = []
-
-        let availableFrontCameras = cameraCaptureSession.cameraZoomFactorMap(forPosition: .front)
-        if availableFrontCameras.count > 0 {
-            let cameras = availableFrontCameras.sorted { $0.0 < $1.0 }.map { ($0.0, $0.1) }
-
-            let cameraZoomControl = CameraZoomSelectionControl(availableCameras: cameras)
-            cameraZoomControl.delegate = self
-            view.addSubview(cameraZoomControl)
-            self.frontCameraZoomControl = cameraZoomControl
-
-            let cameraZoomControlConstraints =
-                [
-                    cameraZoomControl.centerXAnchor.constraint(equalTo: bottomBar.shutterButtonLayoutGuide.centerXAnchor),
-                    cameraZoomControl.bottomAnchor.constraint(equalTo: bottomBar.shutterButtonLayoutGuide.topAnchor, constant: -32),
-                ]
-            view.addConstraints(cameraZoomControlConstraints)
-            cameraZoomControlIPhoneConstraints?.append(contentsOf: cameraZoomControlConstraints)
-        }
-
-        let availableRearCameras = cameraCaptureSession.cameraZoomFactorMap(forPosition: .back)
-        if availableRearCameras.count > 0 {
-            let cameras = availableRearCameras.sorted { $0.0 < $1.0 }.map { ($0.0, $0.1) }
-
-            let cameraZoomControl = CameraZoomSelectionControl(availableCameras: cameras)
-            cameraZoomControl.delegate = self
-            view.addSubview(cameraZoomControl)
-            self.rearCameraZoomControl = cameraZoomControl
-
-            let cameraZoomControlConstraints =
-                [
-                    cameraZoomControl.centerXAnchor.constraint(equalTo: bottomBar.shutterButtonLayoutGuide.centerXAnchor),
-                    cameraZoomControl.bottomAnchor.constraint(equalTo: bottomBar.shutterButtonLayoutGuide.topAnchor, constant: -32),
-                ]
-            view.addConstraints(cameraZoomControlConstraints)
-            cameraZoomControlIPhoneConstraints?.append(contentsOf: cameraZoomControlConstraints)
-        }
-        updateUIOnCameraPositionChange()
-
-        // Done Button
-        view.addSubview(doneButton)
-        doneButton.isHidden = true
-        doneButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addConstraints(doneButtonIPhoneConstraints)
-        doneButton.addTarget(self, action: #selector(didTapDoneButton), for: .touchUpInside)
+        // > Proceed Button
+        cameraModeProceedButton.isHidden = true
+        cameraModeProceedButton.translatesAutoresizingMaskIntoConstraints = false
+        cameraModeProceedButton.addAction(
+            UIAction { [weak self] _ in self?.didTapCameraModeProceedButton() },
+            for: .primaryActionTriggered,
+        )
+        view.addSubview(cameraModeProceedButton)
 
         // Focusing frame
         previewView.addSubview(tapToFocusView)
-        previewView.addConstraints([tapToFocusCenterXConstraint, tapToFocusCenterYConstraint])
+        NSLayoutConstraint.activate([tapToFocusCenterXConstraint, tapToFocusCenterYConstraint])
 
-        // Step 2. Check if we're running on an iPad and update UI accordingly.
-        // Note that `traitCollectionDidChange` won't be called during initial view loading process.
-        isIPadUIInRegularMode = traitCollection.horizontalSizeClass == .regular && traitCollection.verticalSizeClass == .regular
+        // Step 2.
+        // Activate constraints for the current layout and update control states.
+        updateInterfaceForCurrentViewState(animated: false)
 
-        // This background footer doesn't let view controller underneath current VC
-        // to be visible at the bottom of the screen during interactive dismiss.
-        if UIDevice.current.hasIPhoneXNotch {
-            let blackFooter = UIView()
-            blackFooter.backgroundColor = view.backgroundColor
-            view.insertSubview(blackFooter, at: 0)
-            blackFooter.autoPinWidthToSuperview()
-            blackFooter.autoPinEdge(toSuperviewEdge: .bottom)
-            blackFooter.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5).isActive = true
-        }
+        updateUIOnCameraPositionChange()
+
+        isInitialUISetupComplete = true
     }
 
-    private func initializeIPadSpecificUIIfNecessary() {
-        guard sideBar == nil else { return }
+    private func initializeCameraSideBar() {
+        guard cameraSideBar == nil else { return }
 
         let sideBar = CameraSideBar(frame: .zero)
         sideBar.cameraCaptureControl.delegate = cameraCaptureSession
-        sideBar.batchModeButton.addTarget(self, action: #selector(didTapBatchMode), for: .touchUpInside)
-        sideBar.flashModeButton.addTarget(self, action: #selector(didTapFlashMode), for: .touchUpInside)
-        sideBar.switchCameraButton.addTarget(self, action: #selector(didTapSwitchCamera), for: .touchUpInside)
-        sideBar.photoLibraryButton.addTarget(self, action: #selector(didTapPhotoLibrary), for: .touchUpInside)
+        sideBar.captureModeButton.mode = topBar.captureModeButton.mode
+        sideBar.captureModeButton.addAction(
+            UIAction { [weak self] _ in self?.didTapBatchMode() },
+            for: .primaryActionTriggered,
+        )
+        sideBar.flashModeButton.addAction(
+            UIAction { [weak self] _ in self?.didTapFlashMode() },
+            for: .primaryActionTriggered,
+        )
+        sideBar.switchCameraButton.addAction(
+            UIAction { [weak self] _ in self?.switchCameraPosition() },
+            for: .primaryActionTriggered,
+        )
+        sideBar.photoLibraryButton.addAction(
+            UIAction { [weak self] _ in self?.didTapPhotoLibrary() },
+            for: .primaryActionTriggered,
+        )
         view.addSubview(sideBar)
-        sideBar.autoPinTrailingToSuperviewMargin(withInset: 12)
-        sideBar.cameraCaptureControl.shutterButtonLayoutGuide.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        self.sideBar = sideBar
+        sideBar.translatesAutoresizingMaskIntoConstraints = false
 
-        sideBar.batchModeButton.setImage(topBar.batchModeButton.image(for: .normal), for: .normal)
+        // Pinned to the trailing edge of camera viewfinder, shutter button centered vertically.
+        NSLayoutConstraint.activate([
+            sideBar.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor,
+                constant: -28,
+            ),
+            sideBar.cameraCaptureControl.shutterButtonLayoutGuide.centerYAnchor.constraint(
+                equalTo: contentView.centerYAnchor,
+            ),
+        ])
+        self.cameraSideBar = sideBar
+
         updateFlashModeControl(animated: false)
-
-        doneButtonIPadConstraints = [
-            doneButton.centerXAnchor.constraint(equalTo: sideBar.centerXAnchor),
-            doneButton.bottomAnchor.constraint(equalTo: sideBar.topAnchor, constant: -8),
-        ]
-
-        cameraZoomControlIPadConstraints = []
-        if let cameraZoomControl = frontCameraZoomControl {
-            let constraints = [
-                cameraZoomControl.centerYAnchor.constraint(equalTo: sideBar.cameraCaptureControl.shutterButtonLayoutGuide.centerYAnchor),
-                cameraZoomControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
-            ]
-            cameraZoomControlIPadConstraints?.append(contentsOf: constraints)
-        }
-        if let cameraZoomControl = rearCameraZoomControl {
-            let constraints = [
-                cameraZoomControl.centerYAnchor.constraint(equalTo: sideBar.cameraCaptureControl.shutterButtonLayoutGuide.centerYAnchor),
-                cameraZoomControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
-            ]
-            cameraZoomControlIPadConstraints?.append(contentsOf: constraints)
-        }
-
-        if textEditorUIInitialized {
-            initializeTextEditoriPadUI()
-        }
-    }
-
-    private func updateIPadInterfaceLayout() {
-        owsAssertDebug(UIDevice.current.isIPad)
-
-        if isIPadUIInRegularMode {
-            initializeIPadSpecificUIIfNecessary()
-
-            view.removeConstraints(doneButtonIPhoneConstraints)
-            if let doneButtonIPadConstraints {
-                view.addConstraints(doneButtonIPadConstraints)
-            }
-        } else {
-            if let doneButtonIPadConstraints {
-                view.removeConstraints(doneButtonIPadConstraints)
-            }
-            view.addConstraints(doneButtonIPhoneConstraints)
-        }
-
-        if let cameraZoomControl = frontCameraZoomControl {
-            cameraZoomControl.axis = isIPadUIInRegularMode ? .vertical : .horizontal
-        }
-        if let cameraZoomControl = rearCameraZoomControl {
-            cameraZoomControl.axis = isIPadUIInRegularMode ? .vertical : .horizontal
-        }
-        if
-            let iPhoneConstraints = cameraZoomControlIPhoneConstraints,
-            let iPadConstraints = cameraZoomControlIPadConstraints
-        {
-            if isIPadUIInRegularMode {
-                view.removeConstraints(iPhoneConstraints)
-                view.addConstraints(iPadConstraints)
-            } else {
-                view.removeConstraints(iPadConstraints)
-                view.addConstraints(iPhoneConstraints)
-            }
-        }
-
-        updateTopBarAppearance(animated: true)
-        updateBottomBarVisibility(animated: true)
-        bottomBar.setLayout(isIPadUIInRegularMode ? .iPad : .iPhone, animated: true)
-        updateSideBarVisibility(animated: true)
-
-        if textEditorUIInitialized {
-            textStoryComposerView.layer.cornerRadius = isIPadUIInRegularMode || UIDevice.current.hasIPhoneXNotch ? 18 : 0
-
-            if isIPadUIInRegularMode {
-                view.removeConstraints(textEditoriPhoneConstraints)
-                view.addConstraints(textEditoriPadConstraints)
-
-                bottomBar.constrainControlButtonsLayoutGuideHorizontallyTo(
-                    leadingAnchor: textStoryComposerView.leadingAnchor,
-                    trailingAnchor: textStoryComposerView.trailingAnchor,
-                )
-            } else {
-                view.removeConstraints(textEditoriPadConstraints)
-                view.addConstraints(textEditoriPhoneConstraints)
-
-                bottomBar.constrainControlButtonsLayoutGuideHorizontallyTo(leadingAnchor: nil, trailingAnchor: nil)
-            }
-        }
-    }
-
-    func updateDoneButtonAppearance() {
-        doneButton.badgeNumber = dataSource?.numberOfMediaItems ?? 0
-        doneButton.isHidden = shouldHideDoneButton
-        if bottomBar.isCompactHeightLayout {
-            bottomBar.switchCameraButton.isHidden = !doneButton.isHidden
-        }
     }
 
     private func updateUIOnCameraPositionChange(animated: Bool = false) {
-        let isFrontCamera = cameraCaptureSession.desiredPosition == .front
-        frontCameraZoomControl?.setIsHidden(!isFrontCamera, animated: animated)
-        rearCameraZoomControl?.setIsHidden(isFrontCamera, animated: animated)
-        bottomBar.switchCameraButton.isFrontCameraActive = isFrontCamera
-        if let sideBar {
-            sideBar.switchCameraButton.isFrontCameraActive = isFrontCamera
+        let isFrontCameraActive = cameraCaptureSession.desiredPosition == .front
+        if let cameraZoomControlsView {
+            cameraZoomControlsView.setIsFrontCameraActive(isFrontCameraActive, animated: animated)
+        }
+        cameraBottomBar.setIsFrontCameraActive(isFrontCameraActive, animated: animated)
+        if let cameraSideBar {
+            cameraSideBar.setIsFrontCameraActive(isFrontCameraActive, animated: animated)
         }
     }
 
-    private func updateIconOrientations(isAnimated: Bool, captureOrientation: AVCaptureVideoOrientation) {
-        guard !UIDevice.current.isIPad else { return }
+    private func updateButtonIconOrientations(isAnimated: Bool, captureOrientation: AVCaptureVideoOrientation) {
+        guard UIDevice.current.isIPad == false else { return }
 
         let transformFromOrientation: CGAffineTransform
         switch captureOrientation {
@@ -738,16 +1141,19 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         // Don't "unrotate" the switch camera icon if the front facing camera had been selected.
         let transformFromCameraType: CGAffineTransform = cameraCaptureSession.desiredPosition == .front ? CGAffineTransform(rotationAngle: -.pi) : .identity
 
-        var buttonsToUpdate: [UIView] = [topBar.batchModeButton, topBar.flashModeButton, bottomBar.photoLibraryButton]
-        if let cameraZoomControl = frontCameraZoomControl {
-            buttonsToUpdate.append(contentsOf: cameraZoomControl.cameraZoomLevelIndicators)
+        var buttonsToUpdate: [UIView] = [topBar.captureModeButton, topBar.flashModeButton, cameraBottomBar.photoLibraryButton]
+        if let cameraZoomControlsView {
+            if let frontCameraZoomControl = cameraZoomControlsView.frontCameraZoomControl {
+                buttonsToUpdate.append(contentsOf: frontCameraZoomControl.cameraZoomLevelIndicators)
+            }
+            if let rearCameraZoomControl = cameraZoomControlsView.rearCameraZoomControl {
+                buttonsToUpdate.append(contentsOf: rearCameraZoomControl.cameraZoomLevelIndicators)
+            }
         }
-        if let cameraZoomControl = rearCameraZoomControl {
-            buttonsToUpdate.append(contentsOf: cameraZoomControl.cameraZoomLevelIndicators)
-        }
+
         let updateOrientation = {
             buttonsToUpdate.forEach { $0.transform = transformFromOrientation }
-            self.bottomBar.switchCameraButton.transform = transformFromOrientation.concatenating(transformFromCameraType)
+            self.cameraBottomBar.switchCameraButton.transform = transformFromOrientation.concatenating(transformFromCameraType)
         }
 
         if isAnimated {
@@ -759,25 +1165,20 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
 
     // MARK: - Text Editor
 
-    private func initializeTextEditorUIIfNecessary() {
-        guard !textEditorUIInitialized else { return }
+    private func initializeTextEditorUI() {
+        guard isTextEditorUIInitialized == false else { return }
 
-        // Connect button actions.
-        bottomBar.proceedButton.addTarget(self, action: #selector(didTapTextStoryProceedButton), for: .touchUpInside)
-        textBackgroundSelectionButton.addTarget(self, action: #selector(didTapTextBackgroundButton), for: .touchUpInside)
-        textViewAttachLinkButton.addTarget(self, action: #selector(didTapAttachLinkPreviewButton), for: .touchUpInside)
-        updateTextBackgroundSelectionButton()
-
-        // Set up composer view.
+        // Text story composer view.
         textStoryComposerView.delegate = self
         textStoryComposerView.translatesAutoresizingMaskIntoConstraints = false
-        textStoryComposerView.layer.cornerRadius = isIPadUIInRegularMode || UIDevice.current.hasIPhoneXNotch ? 18 : 0
-        view.insertSubview(textStoryComposerView, aboveSubview: previewView)
-        textEditoriPhoneConstraints.append(contentsOf: [
-            textStoryComposerView.leadingAnchor.constraint(equalTo: previewViewLayoutGuide.leadingAnchor),
-            textStoryComposerView.topAnchor.constraint(equalTo: previewViewLayoutGuide.topAnchor),
-            textStoryComposerView.trailingAnchor.constraint(equalTo: previewViewLayoutGuide.trailingAnchor),
-            textStoryComposerView.bottomAnchor.constraint(equalTo: previewViewLayoutGuide.bottomAnchor),
+        contentView.insertSubview(textStoryComposerView, aboveSubview: previewView)
+
+        // Text composer area occupies entire `contentView`, just like camera viewfinder does.
+        NSLayoutConstraint.activate([
+            textStoryComposerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            textStoryComposerView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            textStoryComposerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            textStoryComposerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
         ])
 
         // Swipe right to switch to camera.
@@ -786,103 +1187,69 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         textStoryComposerView.addGestureRecognizer(swipeGesture)
 
         // Choose Background and Attach Link buttons.
-        // Toolbar is added to VC's view because it might be located outside of the textStoryComposerView.
-        view.addSubview(textEditorToolbar)
-        // Align leading edge of Background button to leading edge of the content area of the `bottomBar`,
-        // which is in turn might constrained to the leading edge of text editor "card".
-        view.addConstraint(textEditorToolbar.leadingAnchor.constraint(equalTo: bottomBar.controlButtonsLayoutGuide.leadingAnchor))
-        if bottomBar.isCompactHeightLayout {
-            // On devices without top and bottom safe areas buttons are placed above CAMERA | TEXT controls.
-            textEditoriPhoneConstraints.append(
-                textEditorToolbar.bottomAnchor.constraint(equalTo: bottomBar.controlButtonsLayoutGuide.topAnchor),
-            )
-        } else {
-            // On devices with bottom safe area buttons are pinned to the bottom edge of the colored background,
-            // which always clears CAMERA | TEXT controls.
-            textEditoriPhoneConstraints.append(
-                textEditorToolbar.bottomAnchor.constraint(equalTo: textStoryComposerView.bottomAnchor, constant: -16),
-            )
-        }
-
-        // This constraint defines bottom edge of the area that contains text view and link preview inside of the `textStoryComposerView`.
-        // Initially the bottom edge is pinned to the top of `textEditorToolbar`.
-        // If on-screen keyboard appears the constraint is updated so that content clears the keyboard.
-        textStoryComposerContentLayoutGuideBottomIphone = textStoryComposerView.contentLayoutGuide.bottomAnchor.constraint(
-            equalTo: textEditorToolbar.bottomAnchor,
+        textEditorToolbar.attachLinkButton.addAction(
+            UIAction { [weak self] _ in
+                self?.didTapAttachLinkPreviewButton()
+            },
+            for: .primaryActionTriggered,
         )
-        textEditoriPhoneConstraints.append(textStoryComposerContentLayoutGuideBottomIphone!)
+        textEditorToolbar.backgroundSelectionButton.addAction(
+            UIAction { [weak self] _ in
+                self?.didTapTextBackgroundButton()
+            },
+            for: .primaryActionTriggered,
+        )
+        updateTextBackgroundSelectionButton()
+        textEditorToolbar.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(textEditorToolbar)
 
-        if isIPadUIInRegularMode {
-            initializeTextEditoriPadUI()
-        } else {
-            view.addConstraints(textEditoriPhoneConstraints)
-        }
-
-        view.setNeedsLayout()
-        UIView.performWithoutAnimation {
-            self.view.layoutIfNeeded()
-        }
-
-        textEditorUIInitialized = true
-    }
-
-    private func initializeTextEditoriPadUI() {
-        owsAssertDebug(textEditoriPadConstraints.isEmpty)
-
-        // Container - 16:9 aspect ratio, constrained vertically, centered on the screen horizontally.
-        textEditoriPadConstraints.append(contentsOf: [
-            textStoryComposerView.topAnchor.constraint(equalTo: topBar.bottomAnchor, constant: -8),
-            textStoryComposerView.bottomAnchor.constraint(equalTo: bottomBar.controlButtonsLayoutGuide.topAnchor, constant: -24),
-            textStoryComposerView.centerXAnchor.constraint(equalTo: previewViewLayoutGuide.centerXAnchor),
-            textStoryComposerView.widthAnchor.constraint(equalTo: textStoryComposerView.heightAnchor, multiplier: 9 / 16),
+        // > Proceed button without a badge.
+        textStoryModeProceedButton.isEnabled = false
+        textStoryModeProceedButton.addAction(
+            UIAction { [weak self] _ in
+                self?.didTapTextStoryProceedButton()
+            },
+            for: .primaryActionTriggered,
+        )
+        textStoryModeProceedButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(textStoryModeProceedButton)
+        // Proceed button in text story composer mode is the same as in camera mode.
+        NSLayoutConstraint.activate([
+            textStoryModeProceedButton.centerXAnchor.constraint(
+                equalTo: cameraModeProceedButton.centerXAnchor,
+            ),
+            textStoryModeProceedButton.centerYAnchor.constraint(
+                equalTo: cameraModeProceedButton.centerYAnchor,
+            ),
         ])
 
-        // This constraint defines bottom edge of the text content area
-        // and would allow to resize content to clear onscreen keyboard.
-        textStoryComposerContentLayoutGuideBottomIpad = textStoryComposerView.contentLayoutGuide.bottomAnchor.constraint(
+        // These define bottom edge of the area that contains text view and link preview inside of the `textStoryComposerView`.
+        // Initially the bottom edge is pinned to the top of `textEditorToolbar`.
+        // If on-screen keyboard appears the constraint is updated so that content clears the keyboard.
+        textStoryComposerContentLayoutGuideBottomPhone = textStoryComposerView.contentLayoutGuide.bottomAnchor.constraint(
+            equalTo: textEditorToolbar.topAnchor,
+        )
+        textStoryComposerContentLayoutGuideBottomPad = textStoryComposerView.contentLayoutGuide.bottomAnchor.constraint(
             equalTo: textStoryComposerView.bottomAnchor,
-            constant: -8,
-        )
-        textEditoriPadConstraints.append(textStoryComposerContentLayoutGuideBottomIpad!)
-
-        // Background and Add Link buttons are vertically centered with CAMERA|TEXT switch and Proceed button.
-        textEditoriPadConstraints.append(
-            textEditorToolbar.centerYAnchor.constraint(equalTo: bottomBar.controlButtonsLayoutGuide.centerYAnchor),
         )
 
-        // Additional constraint that will at least 20 dp between Add Link button and CAMERA|TEXT switch.
-        // This constraint will override
-        textEditoriPadConstraints.append(
-            textEditorToolbar.trailingAnchor.constraint(
-                lessThanOrEqualTo: bottomBar.contentTypeSelectionControl.leadingAnchor,
-                constant: -20,
-            ),
-        )
-        if isIPadUIInRegularMode {
-            bottomBar.constrainControlButtonsLayoutGuideHorizontallyTo(
-                leadingAnchor: textStoryComposerView.leadingAnchor,
-                trailingAnchor: textStoryComposerView.trailingAnchor,
-            )
-        }
+        isTextEditorUIInitialized = true
 
-        view.addConstraints(textEditoriPadConstraints)
+        // Re-apply constraints now that we have UI elements.
+        updateInterfaceForCurrentViewState(animated: false)
     }
 
     private func updateTextEditorToolbarVisibility(animated: Bool) {
-        textEditorToolbar.setIsHidden(textStoryComposerView.isEditing || composerMode != .text, animated: animated)
+        let isTextEditorToolbarHidden = textStoryComposerView.isEditing || composerMode != .text
+        textEditorToolbar.setIsHidden(isTextEditorToolbarHidden, animated: animated)
+        // Hide CAMERA | TEXT control and Proceed button too.
+        composerTypeSelectionControl?.setIsHidden(isTextEditorToolbarHidden, animated: animated)
+        textStoryModeProceedButton.setIsHidden(isTextEditorToolbarHidden, animated: animated)
     }
 
     // Update background of the background selection button to match the editor.
     private func updateTextBackgroundSelectionButton() {
-        switch textStoryComposerView.background {
-        case .color(let color):
-            textBackgroundSelectionButton.gradientView.colors = [color, color]
-
-        case .gradient(let gradient):
-            textBackgroundSelectionButton.gradientView.colors = gradient.colors
-            textBackgroundSelectionButton.gradientView.locations = gradient.locations
-            textBackgroundSelectionButton.gradientView.setAngle(gradient.angle)
-        }
+        textEditorToolbar.backgroundSelectionButton.background = textStoryComposerView.background
     }
 
     // MARK: - Keyboard Handling
@@ -915,8 +1282,9 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
     private func handleKeyboardNotification(_ notification: Notification) {
         guard composerMode == .text else { return }
 
-        guard let iPhoneConstraint = textStoryComposerContentLayoutGuideBottomIphone else { return }
-        let iPadConstraint = textStoryComposerContentLayoutGuideBottomIpad
+        guard
+            let constraintPhone = textStoryComposerContentLayoutGuideBottomPhone,
+            let constraintPad = textStoryComposerContentLayoutGuideBottomPad else { return }
 
         guard
             let userInfo = notification.userInfo,
@@ -929,20 +1297,20 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
             keyboardFrame.minX <= textStoryComposerView.bounds.minX &&
             keyboardFrame.maxX >= textStoryComposerView.bounds.maxX
 
-        let iPhoneInset: CGFloat
-        let iPadInset: CGFloat
+        let insetPhone: CGFloat
+        let insetPad: CGFloat
         if isNonFloatingKeyboardVisible {
             let convertedKeyboardFrame = textEditorToolbar.convert(keyboardFrame, from: textStoryComposerView)
-            iPhoneInset = convertedKeyboardFrame.minY - textEditorToolbar.bounds.maxY
-            iPadInset = keyboardFrame.minY - textStoryComposerView.bounds.maxY
+            insetPhone = convertedKeyboardFrame.minY - textEditorToolbar.bounds.maxY
+            insetPad = keyboardFrame.minY - textStoryComposerView.bounds.maxY
         } else {
-            iPhoneInset = textEditorToolbar.bounds.height
-            iPadInset = 0
+            insetPhone = textEditorToolbar.bounds.height
+            insetPad = 0
         }
 
         let layoutUpdateBlock = {
-            iPhoneConstraint.constant = min(iPhoneInset, 0) - 8
-            iPadConstraint?.constant = min(iPadInset, 0) - 8
+            constraintPhone.constant = min(insetPhone, 0) - 8
+            constraintPad.constant = min(insetPad, 0) - 8
         }
         if
             let animationDuration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval,
@@ -966,45 +1334,19 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         }
     }
 
-    // MARK: - Background
-
-    private class RoundGradientButton: RoundMediaButton {
-        let gradientView = GradientView(colors: [])
-
-        init() {
-            let gradientCircleView = PillView()
-            gradientCircleView.isUserInteractionEnabled = false
-            gradientCircleView.layer.borderWidth = 2
-            gradientCircleView.layer.borderColor = UIColor.white.cgColor
-            gradientCircleView.addSubview(gradientView)
-            gradientCircleView.autoSetDimensions(to: CGSize(square: 28))
-            gradientView.autoPinEdgesToSuperviewEdges()
-
-            super.init(image: nil, backgroundStyle: .blur, customView: gradientCircleView)
-
-            ows_contentEdgeInsets = .zero
-            layoutMargins = .zero
-        }
-
-        override var intrinsicContentSize: CGSize { CGSize(square: 44) }
-    }
-
     // MARK: - Button Actions
 
-    @objc
     private func didTapTextBackgroundButton() {
         textStoryComposerView.switchToNextBackground()
         updateTextBackgroundSelectionButton()
     }
 
-    @objc
     private func didTapAttachLinkPreviewButton() {
         let linkPreviewViewController = LinkPreviewAttachmentViewController(textStoryComposerView.linkPreviewDraft)
         linkPreviewViewController.delegate = self
         present(linkPreviewViewController, animated: true)
     }
 
-    @objc
     private func didTapTextStoryProceedButton() {
         let body: StyleOnlyMessageBody
         let textStyle: TextAttachment.TextStyle
@@ -1045,17 +1387,17 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
     // MARK: - TextStoryComposerViewDelegate
 
     fileprivate func textStoryComposerDidBeginEditing(_ textStoryComposer: TextStoryComposerView) {
-        updateBottomBarVisibility(animated: true)
+        updateCameraBottomBarVisibility(animated: true)
         updateTextEditorToolbarVisibility(animated: true)
     }
 
     fileprivate func textStoryComposerDidEndEditing(_ textStoryComposer: TextStoryComposerView) {
-        updateBottomBarVisibility(animated: true)
+        updateCameraBottomBarVisibility(animated: true)
         updateTextEditorToolbarVisibility(animated: true)
     }
 
     fileprivate func textStoryComposerDidChange(_ textStoryComposer: TextStoryComposerView) {
-        bottomBar.proceedButton.isEnabled = !textStoryComposer.isEmpty
+        textStoryModeProceedButton.isEnabled = !textStoryComposer.isEmpty
     }
 
     // MARK: - LinkPreviewAttachmentViewControllerDelegate
@@ -1070,18 +1412,12 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
 
     // MARK: - Button Actions
 
-    @objc
     private func didTapClose() {
         delegate?.photoCaptureViewControllerDidCancel(self)
     }
 
-    @objc
-    private func didTapSwitchCamera() {
-        switchCameraPosition()
-    }
-
     private func switchCameraPosition() {
-        if let switchCameraButton = isIPadUIInRegularMode ? sideBar?.switchCameraButton : bottomBar.switchCameraButton {
+        if let switchCameraButton = layout == .pad ? cameraSideBar?.switchCameraButton : cameraBottomBar.switchCameraButton {
             switchCameraButton.performSwitchAnimation()
         }
         cameraCaptureSession.switchCameraPosition().done { [weak self] in
@@ -1092,7 +1428,6 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         }
     }
 
-    @objc
     private func didTapFlashMode() {
         cameraCaptureSession.toggleFlashMode().done {
             self.updateFlashModeControl(animated: true)
@@ -1101,7 +1436,6 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         }
     }
 
-    @objc
     private func didTapBatchMode() {
         guard let delegate else {
             return
@@ -1115,24 +1449,25 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         delegate.photoCaptureViewController(self, didRequestSwitchCaptureModeTo: targetMode) { approved in
             if approved {
                 self.captureMode = targetMode
-                self.updateDoneButtonAppearance()
             }
         }
     }
 
-    @objc
     private func didTapPhotoLibrary() {
         delegate?.photoCaptureViewControllerDidRequestPresentPhotoLibrary(self)
     }
 
-    @objc
-    private func didTapDoneButton() {
+    private func didTapCameraModeProceedButton() {
         delegate?.photoCaptureViewControllerDidFinish(self)
     }
 
-    @objc
-    private func contentTypeChanged() {
-        guard let newComposerMode = ComposerMode(rawValue: bottomBar.contentTypeSelectionControl.selectedSegmentIndex) else { return }
+    private func didTapChangeComposerMode() {
+        guard
+            let composerTypeSelectionControl,
+            let newComposerMode = ComposerMode(rawValue: composerTypeSelectionControl.selectedSegmentIndex)
+        else {
+            return
+        }
         setComposerMode(newComposerMode, animated: true)
     }
 
@@ -1150,7 +1485,7 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         previewView.addGestureRecognizer(tapToFocusGesture)
 
         // Swipe left to switch to text story composer.
-        if bottomBar.isContentTypeSelectionControlAvailable {
+        if composerTypeSelectionControl != nil {
             let swipeGesture = UISwipeGestureRecognizer(target: self, action: #selector(didSwipeToTextComposer(gesture:)))
             swipeGesture.direction = CurrentAppContext().isRTL ? .right : .left
             previewView.addGestureRecognizer(swipeGesture)
@@ -1200,7 +1535,7 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
     @objc
     private func didSwipeToTextComposer(gesture: UISwipeGestureRecognizer) {
         guard composerMode == .camera else { return }
-        guard bottomBar.captureControl.state == .initial else { return }
+        guard cameraBottomBar.captureControl.recordingState == .notRecording else { return }
         setComposerMode(.text, animated: true)
     }
 
@@ -1229,9 +1564,9 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
     // MARK: - Photo Capture
 
     private func setupPhotoCapture() {
-        bottomBar.captureControl.delegate = cameraCaptureSession
-        if let sideBar {
-            sideBar.cameraCaptureControl.delegate = cameraCaptureSession
+        cameraBottomBar.captureControl.delegate = cameraCaptureSession
+        if let cameraSideBar {
+            cameraSideBar.cameraCaptureControl.delegate = cameraCaptureSession
         }
 
         // If the session is already running, we're good to go.
@@ -1277,16 +1612,18 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
     }
 
     private func updateFlashModeControl(animated: Bool) {
-        topBar.flashModeButton.setFlashMode(cameraCaptureSession.flashMode, animated: animated)
-        if let sideBar {
-            sideBar.flashModeButton.setFlashMode(cameraCaptureSession.flashMode, animated: animated)
+        topBar.flashModeButton.setMode(cameraCaptureSession.flashMode, animated: animated)
+        if let cameraSideBar {
+            cameraSideBar.flashModeButton.setMode(cameraCaptureSession.flashMode, animated: animated)
         }
     }
 
     // MARK: - InteractiveDismissDelegate
 
     func interactiveDismissDidBegin(_ interactiveDismiss: UIPercentDrivenInteractiveTransition) {
-        view.backgroundColor = .clear
+        if bottomAreaProtectionView != nil {
+            view.backgroundColor = .clear
+        }
     }
 
     func interactiveDismiss(
@@ -1300,13 +1637,18 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
     }
 
     func interactiveDismissDidCancel(_ interactiveDismiss: UIPercentDrivenInteractiveTransition) {
-        view.backgroundColor = Theme.darkThemeBackgroundColor
+        // Undo changes potentially made in `interactiveDismissDidBegin()`.
+        view.backgroundColor = .Signal.background
     }
 
     // MARK: - CameraZoomSelectionControlDelegate
 
     func cameraZoomControl(_ cameraZoomControl: CameraZoomSelectionControl, didSelect camera: CameraCaptureSession.CameraType) {
-        let position: AVCaptureDevice.Position = cameraZoomControl == frontCameraZoomControl ? .front : .back
+        guard let cameraZoomControlsView else {
+            owsFailDebug("cameraZoomControlsView is nil")
+            return
+        }
+        let position: AVCaptureDevice.Position = cameraZoomControl == cameraZoomControlsView.frontCameraZoomControl ? .front : .back
         cameraCaptureSession.switchCamera(to: camera, at: position, animated: true)
     }
 
@@ -1409,10 +1751,7 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         self.showFailureUI(error: error)
     }
 
-    private func showUsernameLinkSheet(
-        username: String,
-        aci: Aci,
-    ) {
+    private func showUsernameLinkSheet(username: String, aci: Aci) {
         // `shouldProcessQRCodes` should prevent QR codes being scanned after a
         // recording is done, but a race condition between the recording ending
         // and this view hiding can allow a scan to slip through, so do an extra
@@ -1480,7 +1819,7 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
     func cameraCaptureSession(_ session: CameraCaptureSession, didFinishProcessing attachment: PreviewableAttachment) {
         dataSource?.addMedia(attachment: attachment)
 
-        updateDoneButtonAppearance()
+        updateCameraModeProceedButtonBadgeAndVisibility(animated: true)
 
         if captureMode == .multi {
             resumePhotoCapture()
@@ -1525,36 +1864,46 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         topBar.recordingTimerView.duration = duration
     }
 
-    // MARK: -
+    // MARK: UI
 
     var zoomScaleReferenceDistance: CGFloat? {
-        if isIPadUIInRegularMode {
-            return previewView.bounds.width / 2
-        }
-        return previewView.bounds.height / 2
+        guard let cameraZoomControlsView else { return nil }
+        return 0.5 * (cameraZoomControlsView.axis == .horizontal ? previewView.bounds.height : previewView.bounds.width)
     }
 
-    func cameraCaptureSession(_ session: CameraCaptureSession, didChangeZoomFactor zoomFactor: CGFloat, forCameraPosition position: AVCaptureDevice.Position) {
-        guard let cameraZoomControl = position == .front ? frontCameraZoomControl : rearCameraZoomControl else { return }
+    func cameraCaptureSession(
+        _ session: CameraCaptureSession,
+        didChangeZoomFactor zoomFactor: CGFloat,
+        forCameraPosition position: AVCaptureDevice.Position,
+    ) {
+        guard
+            let cameraZoomControlsView,
+            let cameraZoomControl: CameraZoomSelectionControl = position == .front
+            ? cameraZoomControlsView.frontCameraZoomControl
+            : cameraZoomControlsView.rearCameraZoomControl
+        else {
+            owsFailDebug("Invalid configuration.")
+            return
+        }
         cameraZoomControl.currentZoomFactor = zoomFactor
     }
 
     func beginCaptureButtonAnimation(_ duration: TimeInterval) {
-        bottomBar.captureControl.setState(.recording, animationDuration: duration)
-        if let sideBar {
-            sideBar.cameraCaptureControl.setState(.recording, animationDuration: duration)
+        cameraBottomBar.captureControl.setRecordingState(.recording, animationDuration: duration)
+        if let cameraSideBar {
+            cameraSideBar.cameraCaptureControl.setRecordingState(.recording, animationDuration: duration)
         }
     }
 
     func endCaptureButtonAnimation(_ duration: TimeInterval) {
-        bottomBar.captureControl.setState(.initial, animationDuration: duration)
-        if let sideBar {
-            sideBar.cameraCaptureControl.setState(.initial, animationDuration: duration)
+        cameraBottomBar.captureControl.setRecordingState(.notRecording, animationDuration: duration)
+        if let cameraSideBar {
+            cameraSideBar.cameraCaptureControl.setRecordingState(.notRecording, animationDuration: duration)
         }
     }
 
     func cameraCaptureSession(_ session: CameraCaptureSession, didChangeOrientation orientation: AVCaptureVideoOrientation) {
-        updateIconOrientations(isAnimated: true, captureOrientation: orientation)
+        updateButtonIconOrientations(isAnimated: true, captureOrientation: orientation)
         if UIDevice.current.isIPad {
             session.updateVideoPreviewConnection(toOrientation: orientation)
         }
@@ -2046,5 +2395,178 @@ private class TextStoryComposerView: TextAttachmentView, UITextViewDelegate {
             nextBackgroundIndex = 0
         }
         currentBackgroundIndex = nextBackgroundIndex
+    }
+}
+
+private class TextStoryComposerToolbarView: UIView {
+
+    typealias Axis = NSLayoutConstraint.Axis
+
+    var axis: Axis {
+        get { stackView.axis }
+        set {
+            stackView.axis = newValue
+            if #available(iOS 26, *) {
+                updateStackViewLayoutMargins()
+            }
+        }
+    }
+
+    let backgroundSelectionButton = TextEditorBackgroundSelectionButton()
+
+    let attachLinkButton: UIButton = {
+        let hasBackground: Bool = if #available(iOS 26, *) { false } else { true }
+        let configuration = UIButton.Configuration.roundMedia(
+            image: UIImage(resource: .link),
+            size: 44,
+            withBackground: hasBackground,
+        )
+        return UIButton(configuration: configuration)
+    }()
+
+    private let stackView = UIStackView()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+
+        stackView.addArrangedSubviews([backgroundSelectionButton, attachLinkButton])
+        stackView.axis = .horizontal
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+
+        guard #available(iOS 26, *) else {
+            stackView.spacing = 16
+            addSubview(stackView)
+            NSLayoutConstraint.activate([
+                stackView.topAnchor.constraint(equalTo: topAnchor),
+                stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
+                stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
+                stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            ])
+            return
+        }
+
+        // Add Liquid Glass panel on newer iOS versions.
+        stackView.isLayoutMarginsRelativeArrangement = true
+        stackView.spacing = 4
+        updateStackViewLayoutMargins()
+
+        let glassEffect = UIGlassEffect(style: .regular)
+        glassEffect.isInteractive = true
+        let glassEffectView = UIVisualEffectView(effect: glassEffect)
+        glassEffectView.clipsToBounds = true
+        glassEffectView.cornerConfiguration = .capsule()
+        glassEffectView.contentView.addSubview(stackView)
+        glassEffectView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(glassEffectView)
+        NSLayoutConstraint.activate([
+            stackView.topAnchor.constraint(equalTo: glassEffectView.topAnchor),
+            stackView.leadingAnchor.constraint(equalTo: glassEffectView.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: glassEffectView.trailingAnchor),
+            stackView.bottomAnchor.constraint(equalTo: glassEffectView.bottomAnchor),
+
+            glassEffectView.topAnchor.constraint(equalTo: topAnchor),
+            glassEffectView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            glassEffectView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            glassEffectView.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    @available(iOS 26, *)
+    private func updateStackViewLayoutMargins() {
+        if stackView.axis == .horizontal {
+            stackView.directionalLayoutMargins = .init(hMargin: 6, vMargin: 0)
+        } else {
+            stackView.directionalLayoutMargins = .init(hMargin: 0, vMargin: 6)
+        }
+    }
+
+    class TextEditorBackgroundSelectionButton: UIButton {
+
+        var background: TextAttachment.Background? {
+            didSet {
+                updateBackground()
+            }
+        }
+
+        var buttonSize: CGSize = .square(44) {
+            didSet {
+                invalidateIntrinsicContentSize()
+            }
+        }
+
+        private let gradientView = GradientView(colors: [])
+
+        private func updateBackground() {
+            guard let background else { return }
+
+            // This will display our gradient.
+            let gradientView = GradientView(colors: [])
+            switch background {
+            case .color(let color):
+                gradientView.colors = [color, color]
+
+            case .gradient(let gradient):
+                gradientView.colors = gradient.colors
+                gradientView.locations = gradient.locations
+
+                gradientView.setAngle(gradient.angle)
+            }
+
+            // This will give us round shape without needing to specify corner radius at init.
+            let circleView = CircleView()
+            circleView.clipsToBounds = true
+            circleView.layer.borderWidth = 2
+            circleView.layer.borderColor = UIColor.white.cgColor
+            circleView.addSubview(gradientView)
+
+            let backgroundView: UIView
+            if #available(iOS 26, *) {
+                // Transparent background on iOS 26+ because we put the button onto a shared glass pill.
+                backgroundView = UIView()
+                backgroundView.directionalLayoutMargins = .init(margin: 10)
+                backgroundView.addSubview(circleView)
+            } else {
+                // Blur background on legacy iOS versions to match `roundMedia()` style.
+                let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
+                blurView.contentView.addSubview(circleView)
+
+                backgroundView = blurView
+                backgroundView.directionalLayoutMargins = .init(margin: 8)
+            }
+
+            circleView.translatesAutoresizingMaskIntoConstraints = false
+            gradientView.translatesAutoresizingMaskIntoConstraints = false
+
+            NSLayoutConstraint.activate([
+                gradientView.topAnchor.constraint(equalTo: circleView.topAnchor),
+                gradientView.leadingAnchor.constraint(equalTo: circleView.leadingAnchor),
+                gradientView.trailingAnchor.constraint(equalTo: circleView.trailingAnchor),
+                gradientView.bottomAnchor.constraint(equalTo: circleView.bottomAnchor),
+
+                gradientView.topAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.topAnchor),
+                gradientView.leadingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.leadingAnchor),
+                gradientView.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor),
+                gradientView.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
+            ])
+
+            configuration?.background.customView = backgroundView
+        }
+
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+
+            configuration = .plain()
+            configuration?.cornerStyle = .capsule
+        }
+
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
+        override var intrinsicContentSize: CGSize { buttonSize }
     }
 }

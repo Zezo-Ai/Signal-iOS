@@ -159,3 +159,33 @@ open class RoundMediaButton: UIButton {
         }
     }
 }
+
+public extension UIButton.Configuration {
+
+    static func roundMedia(
+        image: UIImage,
+        size: CGFloat,
+        withBackground: Bool = true,
+    ) -> Self {
+        var configuration: UIButton.Configuration
+        if #available(iOS 26, *), withBackground {
+            configuration = .glass()
+        } else {
+            configuration = .plain()
+            if withBackground {
+                var background = UIBackgroundConfiguration.clear()
+                background.customView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
+                configuration.background = background
+            }
+        }
+        configuration.image = image
+        configuration.baseForegroundColor = .Signal.label
+        configuration.cornerStyle = .capsule
+        configuration.contentInsets = .init(
+            hMargin: 0.5 * (size - image.size.width),
+            vMargin: 0.5 * (size - image.size.height),
+        )
+
+        return configuration
+    }
+}

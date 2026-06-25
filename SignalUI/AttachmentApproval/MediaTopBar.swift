@@ -12,29 +12,12 @@ open class MediaTopBar: UIView {
     // sometimes doesn't work for this view because top inset gets overridden by UIKit
     // since `preservesSuperviewLayoutMargins` is set to `true`.
     public let controlsLayoutGuide = UILayoutGuide()
-    private lazy var controlsLayoutGuideTop: NSLayoutConstraint = {
-        if #available(iOS 26, *) {
-            // Avoid stoplight buttons in windowed mode on iPad
-            let guide = layoutGuide(for: .margins(cornerAdaptation: .vertical))
-            return controlsLayoutGuide.topAnchor.constraint(equalTo: guide.topAnchor)
-        } else {
-            return controlsLayoutGuide.topAnchor.constraint(equalTo: topAnchor)
-        }
-    }()
-
-    private lazy var controlsLayoutGuideLeading: NSLayoutConstraint = {
-        controlsLayoutGuide.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor)
-    }()
-
-    private lazy var controlsLayoutGuideTrailing: NSLayoutConstraint = {
-        controlsLayoutGuide.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor)
-    }()
 
     override public init(frame: CGRect) {
         super.init(frame: frame)
 
-        layoutMargins = .zero
         preservesSuperviewLayoutMargins = true
+        translatesAutoresizingMaskIntoConstraints = false
 
         installConstraints()
     }
@@ -45,47 +28,38 @@ open class MediaTopBar: UIView {
 
     private func installConstraints() {
         addLayoutGuide(controlsLayoutGuide)
-        controlsLayoutGuideTop.isActive = true
-        controlsLayoutGuideLeading.isActive = true
-        controlsLayoutGuideTrailing.isActive = true
-        controlsLayoutGuide.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-    }
 
-    override public func updateConstraints() {
-        super.updateConstraints()
+        let otherLayoutGuide: UILayoutGuide = if #available(iOS 26, *) {
+            // Avoids stoplight buttons in windowed mode on iPad.
+            layoutGuide(for: .margins(cornerAdaptation: .vertical))
+        } else {
+            layoutMarginsGuide
+        }
 
-        let isIPadUIInRegularMode = traitCollection.horizontalSizeClass == .regular && traitCollection.verticalSizeClass == .regular
-        let horizontalMargin: CGFloat = isIPadUIInRegularMode ? 12 : 0
-        let topMargin: CGFloat = {
-            // Unnecessary, but looks better with some more padding on iPad screens.
-            if isIPadUIInRegularMode {
-                return 10
-            }
-            // iPhones in landscape mode.
-            if traitCollection.verticalSizeClass == .compact {
-                return 0
-            }
-            // iPhones with a screen notch, iPads in windowed mode.
-            if UIDevice.current.hasIPhoneXNotch || UIDevice.current.isIPad {
-                return 4
-            }
-            // iPhones with a home button have their status bar hidden (safeArea.top == 0)
-            // so it's necessary to add some padding manually.
-            return 16
-        }()
-        controlsLayoutGuideLeading.constant = horizontalMargin
-        controlsLayoutGuideTrailing.constant = -horizontalMargin
-        controlsLayoutGuideTop.constant = topMargin
-    }
-
-    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        setNeedsUpdateConstraints()
+        NSLayoutConstraint.activate([
+            // This first constraint is a crude but effective way of getting top margin same as side margin.
+            // It works because `OWSTableViewController2.defaultHOuterMargin` is in most cases the size
+            // of leading/trailing margin and `8` is the default top margin.
+            controlsLayoutGuide.topAnchor.constraint(
+                equalTo: otherLayoutGuide.topAnchor,
+                constant: OWSTableViewController2.defaultHOuterMargin - 8,
+            ),
+            controlsLayoutGuide.leadingAnchor.constraint(
+                equalTo: otherLayoutGuide.leadingAnchor,
+            ),
+            controlsLayoutGuide.trailingAnchor.constraint(
+                equalTo: otherLayoutGuide.trailingAnchor,
+            ),
+            controlsLayoutGuide.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
     }
 
     public func install(in view: UIView) {
         view.addSubview(self)
-        autoPinWidthToSuperview()
-        autoPinEdge(toSuperviewSafeArea: .top)
+        NSLayoutConstraint.activate([
+            topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
     }
 }
