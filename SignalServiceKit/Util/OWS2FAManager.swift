@@ -308,7 +308,6 @@ public class OWS2FAManager {
                 forKey: StoreKeys.isRegistrationLockEnabled,
                 tx: transaction,
             )
-            accountAttributesUpdater.scheduleAccountAttributesUpdate(authedAccount: .implicit(), tx: transaction)
         }
     }
 
@@ -333,7 +332,6 @@ public class OWS2FAManager {
                 forKey: StoreKeys.isRegistrationLockEnabled,
                 tx: transaction,
             )
-            accountAttributesUpdater.scheduleAccountAttributesUpdate(authedAccount: .implicit(), tx: transaction)
         }
     }
 
