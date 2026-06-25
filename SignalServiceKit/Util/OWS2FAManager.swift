@@ -222,9 +222,7 @@ public class OWS2FAManager {
     public func markDisabled(transaction tx: DBWriteTransaction) {
         keyValueStore.removeValue(forKey: StoreKeys.pinCode, tx: tx)
         keyValueStore.removeValue(forKey: StoreKeys.isRegistrationLockEnabled, tx: tx)
-        tx.addSyncCompletion {
-            self.triggerAccountAttributesUpdate()
-        }
+        accountAttributesUpdater.scheduleAccountAttributesUpdate(authedAccount: .implicit(), tx: tx)
     }
 
     public func clearLocalPinCode(transaction: DBWriteTransaction) {
@@ -249,9 +247,7 @@ public class OWS2FAManager {
             setLastCompletedReminderDate(Date(), tx: transaction)
         }
 
-        transaction.addSyncCompletion {
-            self.triggerAccountAttributesUpdate()
-        }
+        accountAttributesUpdater.scheduleAccountAttributesUpdate(authedAccount: .implicit(), tx: transaction)
     }
 
     public func restorePinFromBackup(_ pin: String, transaction: DBWriteTransaction) {
@@ -312,9 +308,8 @@ public class OWS2FAManager {
                 forKey: StoreKeys.isRegistrationLockEnabled,
                 tx: transaction,
             )
+            accountAttributesUpdater.scheduleAccountAttributesUpdate(authedAccount: .implicit(), tx: transaction)
         }
-
-        triggerAccountAttributesUpdate()
     }
 
     public func markRegistrationLockV2Enabled(transaction: DBWriteTransaction) {
@@ -338,20 +333,7 @@ public class OWS2FAManager {
                 forKey: StoreKeys.isRegistrationLockEnabled,
                 tx: transaction,
             )
-        }
-
-        triggerAccountAttributesUpdate()
-    }
-
-    // MARK: -
-
-    private func triggerAccountAttributesUpdate() {
-        Task {
-            do {
-                try await accountAttributesUpdater.updateAccountAttributes(authedAccount: .implicit())
-            } catch {
-                Logger.warn("\(error)")
-            }
+            accountAttributesUpdater.scheduleAccountAttributesUpdate(authedAccount: .implicit(), tx: transaction)
         }
     }
 

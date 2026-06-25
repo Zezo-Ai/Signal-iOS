@@ -402,16 +402,8 @@ public class OWSUDManagerImpl: OWSUDManager {
     public func setShouldAllowUnrestrictedAccessLocal(_ value: Bool, tx: DBWriteTransaction) {
         self.keyValueStore.setBool(value, key: self.kUDUnrestrictedAccessKey, transaction: tx)
 
-        // Try to update the account attributes to reflect this change.
-        tx.addSyncCompletion {
-            Task {
-                do {
-                    try await DependenciesBridge.shared.accountAttributesUpdater.updateAccountAttributes(authedAccount: .implicit())
-                } catch {
-                    Logger.warn("Error: \(error)")
-                }
-            }
-        }
+        let accountAttributesUpdater = DependenciesBridge.shared.accountAttributesUpdater
+        accountAttributesUpdater.scheduleAccountAttributesUpdate(authedAccount: .implicit(), tx: tx)
     }
 
     // MARK: - Phone Number Sharing
