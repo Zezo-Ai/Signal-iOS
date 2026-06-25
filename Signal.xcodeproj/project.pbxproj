@@ -13570,27 +13570,20 @@
 			isa = PBXGroup;
 			children = (
 				D9DE34FB2DEE76E6005099D7 /* Onboarding */,
-				D91174552E8F35BD009EB756 /* AccountEntropyPoolTextView.swift */,
+				D9BA97F22FEDEF3D009A4D5B /* RecoveryKey */,
 				D932C0EA2E13AD3600FEF9C3 /* BackupAttachmentDownloadTracker.swift */,
 				D93964B52E038C7B00094117 /* BackupAttachmentUploadTracker.swift */,
 				66A1F4E52E0364140095DE4B /* BackupBGProcessingTaskRunner.swift */,
-				D949C4042DF3A588007E095C /* BackupConfirmKeyViewController.swift */,
 				D97C9FF12DD3FB7200191CE2 /* BackupDisablingManager.swift */,
 				D93FA5BE2DE77E440013879E /* BackupEnablingManager.swift */,
-				D93BDD932E43063B00779BD8 /* BackupKeepKeySafeSheet.swift */,
-				D9697C152FD78FDD00119F72 /* BackupNeverShareRecoveryKeySheet.swift */,
 				D92B55EE2FD0D9210083B070 /* BackupPlanOptionView.swift */,
 				D92B55F42FD0E95A0083B070 /* BackupPlanTermsAndConditionsView.swift */,
 				D92B55F22FD0E00E0083B070 /* BackupPlanUpsellConfiguration.swift */,
 				D92B55F02FD0D96C0083B070 /* BackupPlanUpsellViewController.swift */,
-				D98CA2B22DF2450E0060370E /* BackupRecordKeyViewController.swift */,
-				04E66D412DFF3A3E0059DBAC /* BackupRecoveryKeyReminderCoordinator.swift */,
 				04B975452E43A4AA00E20364 /* BackupRefreshManager.swift */,
 				D951F5302D9B236100C5EBF3 /* BackupSettingsViewController.swift */,
 				D92CB5552F030F7A00537EBE /* BackupSubscriptionAlreadyRedeemedSheet.swift */,
 				D9680CF22DBB0B28005DD5BE /* ChooseBackupPlanViewController.swift */,
-				D92812DD2FA94B6E00667DCF /* DisplayableAccountEntropyPool.swift */,
-				D98CA2BD2DF398DF0060370E /* EnterAccountEntropyPoolViewController.swift */,
 			);
 			path = Backups;
 			sourceTree = "<group>";
@@ -13952,6 +13945,21 @@
 				D9B95A9429E682E900D7CB95 /* JobRecordTest.swift */,
 			);
 			path = JobRecords;
+			sourceTree = "<group>";
+		};
+		D9BA97F22FEDEF3D009A4D5B /* RecoveryKey */ = {
+			isa = PBXGroup;
+			children = (
+				D91174552E8F35BD009EB756 /* AccountEntropyPoolTextView.swift */,
+				D949C4042DF3A588007E095C /* BackupConfirmKeyViewController.swift */,
+				D93BDD932E43063B00779BD8 /* BackupKeepKeySafeSheet.swift */,
+				D9697C152FD78FDD00119F72 /* BackupNeverShareRecoveryKeySheet.swift */,
+				D98CA2B22DF2450E0060370E /* BackupRecordKeyViewController.swift */,
+				04E66D412DFF3A3E0059DBAC /* BackupRecoveryKeyReminderCoordinator.swift */,
+				D92812DD2FA94B6E00667DCF /* DisplayableAccountEntropyPool.swift */,
+				D98CA2BD2DF398DF0060370E /* EnterAccountEntropyPoolViewController.swift */,
+			);
+			path = RecoveryKey;
 			sourceTree = "<group>";
 		};
 		D9C0AE702BDC6B4000FCB05E /* Calls */ = {
