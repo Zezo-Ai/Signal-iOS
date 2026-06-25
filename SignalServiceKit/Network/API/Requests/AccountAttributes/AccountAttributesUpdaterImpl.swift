@@ -56,25 +56,7 @@ public class AccountAttributesUpdaterImpl: AccountAttributesUpdater {
             mustBeRegistered: true,
             mustBeConnected: true,
             operation: { () throws -> Bool in
-                let updateConfig = self.db.read { tx -> UpdateConfig? in
-                    guard let updateConfig = self.updateConfig(tx: tx) else {
-                        return nil
-                    }
-                    // We update periodically (according to Cron), whenever the capabilities
-                    // change (useful during testing or if capabilities are influenced by
-                    // RemoteConfig, DB migrations, etc.), and whenever requested explicitly.
-                    let shouldUpdate: Bool = (
-                        updateConfig.updateRequestToken != nil
-                            || Date() >= self.cronStore.mostRecentDate(tx: tx).addingTimeInterval(Constants.periodicRefreshInterval)
-                            || updateConfig.capabilities.requestParameters != self.oldCapabilities(tx: tx),
-                    )
-                    return shouldUpdate ? updateConfig : nil
-                }
-                guard let updateConfig else {
-                    return false
-                }
-                try await self.updateAccountAttributes(updateConfig: updateConfig, authedAccount: .implicit())
-                return true
+                return try await self.updateAccountAttributesIfNeeded(authedAccount: .implicit())
             },
             handleResult: { result in
                 switch result {
@@ -91,23 +73,49 @@ public class AccountAttributesUpdaterImpl: AccountAttributesUpdater {
         )
     }
 
+    private let updateQueue = ConcurrentTaskQueue(concurrentLimit: 1)
+
+    private func updateAccountAttributesIfNeeded(authedAccount: AuthedAccount) async throws -> Bool {
+        return try await updateQueue.run {
+            return try await _updateAccountAttributesIfNeeded(authedAccount: authedAccount)
+        }
+    }
+
+    private func _updateAccountAttributesIfNeeded(authedAccount: AuthedAccount) async throws -> Bool {
+        let updateConfig = self.db.read { tx -> UpdateConfig? in
+            guard let updateConfig = self.updateConfig(tx: tx) else {
+                return nil
+            }
+            // We update periodically (according to Cron), whenever the capabilities
+            // change (useful during testing or if capabilities are influenced by
+            // RemoteConfig, DB migrations, etc.), and whenever requested explicitly.
+            let shouldUpdate: Bool = (
+                updateConfig.updateRequestToken != nil
+                    || Date() >= self.cronStore.mostRecentDate(tx: tx).addingTimeInterval(Constants.periodicRefreshInterval)
+                    || updateConfig.capabilities.requestParameters != self.oldCapabilities(tx: tx),
+            )
+            return shouldUpdate ? updateConfig : nil
+        }
+        guard let updateConfig else {
+            return false
+        }
+        try await self.updateAccountAttributes(updateConfig: updateConfig, authedAccount: authedAccount)
+        return true
+    }
+
     private func updateMostRecentDate(tx: DBWriteTransaction) {
         self.cronStore.setMostRecentDate(Date(), jitter: Constants.periodicRefreshInterval / 20, tx: tx)
     }
 
     public func updateAccountAttributes(authedAccount: AuthedAccount) async throws {
-        let updateConfig = await db.awaitableWrite { tx -> UpdateConfig? in
+        await db.awaitableWrite { tx in
             self.kvStore.setData(
                 Randomness.generateRandomBytes(16),
                 key: Keys.latestUpdateRequestToken,
                 transaction: tx,
             )
-            return self.updateConfig(tx: tx)
         }
-        guard let updateConfig else {
-            return
-        }
-        try await self.updateAccountAttributes(updateConfig: updateConfig, authedAccount: authedAccount)
+        _ = try await updateAccountAttributesIfNeeded(authedAccount: authedAccount)
     }
 
     public func scheduleAccountAttributesUpdate(authedAccount: AuthedAccount, tx: DBWriteTransaction) {
@@ -116,13 +124,9 @@ public class AccountAttributesUpdaterImpl: AccountAttributesUpdater {
             key: Keys.latestUpdateRequestToken,
             transaction: tx,
         )
-        let updateConfig = self.updateConfig(tx: tx)
-        guard let updateConfig else {
-            return
-        }
         tx.addSyncCompletion {
             Task {
-                try await self.updateAccountAttributes(updateConfig: updateConfig, authedAccount: authedAccount)
+                try await self.updateAccountAttributesIfNeeded(authedAccount: authedAccount)
             }
         }
     }
