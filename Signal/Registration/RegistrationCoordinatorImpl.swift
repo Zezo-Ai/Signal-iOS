@@ -1337,12 +1337,12 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
     private func exportAndWipeState(
         accountEntropyPool: SignalServiceKit.AccountEntropyPool,
         accountIdentity: AccountIdentity,
-    ) async -> RegistrationStep {
+    ) async {
         logger.info("")
 
         switch mode {
         case .registering:
-            return await self.finalize(
+            await self.finalize(
                 accountEntropyPool: accountEntropyPool,
                 accountIdentity: accountIdentity,
             ) { tx in
@@ -1358,7 +1358,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
             }
 
         case .reRegistering:
-            return await finalize(
+            await finalize(
                 accountEntropyPool: accountEntropyPool,
                 accountIdentity: accountIdentity,
             )
@@ -1409,8 +1409,8 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
     private func finalize(
         accountEntropyPool: SignalServiceKit.AccountEntropyPool,
         accountIdentity: AccountIdentity,
-        block: ((DBWriteTransaction) -> Void)? = nil,
-    ) async -> RegistrationStep {
+        block: (DBWriteTransaction) -> Void = { _ in },
+    ) async {
         await db.awaitableWrite { tx in
             if needsToScheduleRestoreFromSVRB() {
                 deps.backupArchiveManager.scheduleRestoreFromSVRBBeforeNextExport(tx: tx)
@@ -1427,7 +1427,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
             deps.tsAccountManager.setRegistrationId(persistedState.aciRegistrationId, for: .aci, tx: tx)
             deps.tsAccountManager.setRegistrationId(persistedState.pniRegistrationId, for: .pni, tx: tx)
 
-            block?(tx)
+            block(tx)
 
             deps.registrationStateChangeManager.didRegisterPrimary(
                 e164: accountIdentity.e164,
@@ -1456,8 +1456,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
             authedDevice: accountIdentity.authedDevice,
         )
 
-        // Update the account attributes once, now, at the end.
-        return await updateAccountAttributesAndFinish(accountIdentity: accountIdentity, failureCount: 0)
+        await finish(accountIdentity: accountIdentity)
     }
 
     private func fetchBackupCdnInfo(
@@ -1547,29 +1546,8 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
     }
 
     @MainActor
-    private func updateAccountAttributesAndFinish(
-        accountIdentity: AccountIdentity,
-        failureCount: Int,
-    ) async -> RegistrationStep {
-        let maxAutomaticRetries = Constants.networkErrorRetries
-
+    private func finish(accountIdentity: AccountIdentity) async {
         logger.info("")
-
-        let error = await self.updateAccountAttributes(accountIdentity)
-
-        if let error, failureCount < maxAutomaticRetries, error.isNetworkFailureOrTimeout {
-            let minimumBackoff = OWSOperation.retryIntervalForExponentialBackoff(failureCount: failureCount + 1)
-            try? await Task.sleep(nanoseconds: minimumBackoff.clampedNanoseconds)
-            return await updateAccountAttributesAndFinish(
-                accountIdentity: accountIdentity,
-                failureCount: failureCount + 1,
-            )
-        }
-        // If we have a deregistration error, it doesn't matter. We are finished
-        // and cleaning up anyway; the main app will discover the issue.
-        if let error {
-            logger.warn("Failed account attributes update, finishing registration anyway: \(error)")
-        }
         // We are done! Wipe everything
         self.inMemoryState = InMemoryState()
         self.db.write { tx in
@@ -1579,7 +1557,6 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         self.deps.storageServiceManager.backupPendingChanges(
             authedDevice: accountIdentity.authedDevice,
         )
-        return .done
     }
 
     private func wipePersistedState(_ tx: DBWriteTransaction) {
@@ -3507,7 +3484,8 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
                     accountIdentity: accountIdentity,
                 )
             }
-            return await updateAccountAttributesAndFinish(accountIdentity: accountIdentity, failureCount: 0)
+            await finish(accountIdentity: accountIdentity)
+            return .done
         }
 
         // We _must_ do these steps first.
@@ -3693,13 +3671,14 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         }
 
         if let finalizeProgress {
-            return await finalizeProgress.updatePeriodically(
+            await finalizeProgress.updatePeriodically(
                 estimatedTimeToCompletion: 5,
                 work: finalStep,
             )
         } else {
-            return await finalStep()
+            await finalStep()
         }
+        return .done
     }
 
     private enum BackupResult {
@@ -4217,24 +4196,6 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         inMemoryState.udAccessKey = udAccessKey
     }
 
-    private func updateAccountAttributes(_ accountIdentity: AccountIdentity) async -> Error? {
-        logger.info("")
-        do {
-            try await Service.makeUpdateAccountAttributesRequest(
-                makeAccountAttributes(
-                    isManualMessageFetchEnabled: inMemoryState.isManualMessageFetchEnabled,
-                    reglockToken: self.reglockToken(for: accountIdentity.e164),
-                ),
-                auth: accountIdentity.chatServiceAuth,
-                networkManager: deps.networkManager,
-                logger: logger,
-            )
-            return nil
-        } catch {
-            return error
-        }
-    }
-
     private func updatePhoneNumberDiscoverability(accountIdentity: AccountIdentity, phoneNumberDiscoverability: PhoneNumberDiscoverability) {
         logger.info("")
 
@@ -4722,28 +4683,6 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         isManualMessageFetchEnabled: Bool,
         reglockToken: RegistrationLock?,
     ) -> AccountAttributes {
-        let hasSVRBackups: Bool
-        switch getPathway() {
-        case
-            .opening,
-            .quickRestore,
-            .manualRestore,
-            .registrationRecoveryPassword,
-            .svrAuthCredential,
-            .svrAuthCredentialCandidates,
-            .session:
-            hasSVRBackups = inMemoryState.didHaveSVRBackupsPriorToReg
-        case .profileSetup:
-            if inMemoryState.didHaveSVRBackupsPriorToReg, !inMemoryState.didSkipSVRBackup {
-                hasSVRBackups = true
-            } else if inMemoryState.hasRestoredFromStorageService {
-                hasSVRBackups = true
-            } else if inMemoryState.hasBackedUpToSVR {
-                hasSVRBackups = true
-            } else {
-                hasSVRBackups = false
-            }
-        }
         return AccountAttributes(
             isManualMessageFetchEnabled: isManualMessageFetchEnabled,
             registrationId: persistedState.aciRegistrationId,
@@ -4754,7 +4693,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
             registrationRecoveryPassword: inMemoryState.regRecoveryPw?.canonicalStringRepresentation,
             encryptedDeviceName: nil, // This class only deals in primary devices, which have no name
             discoverableByPhoneNumber: inMemoryState.phoneNumberDiscoverability,
-            capabilities: AccountAttributes.Capabilities(hasSVRBackups: hasSVRBackups),
+            capabilities: AccountAttributes.Capabilities(hasSVRBackups: inMemoryState.didHaveSVRBackupsPriorToReg),
         )
     }
 

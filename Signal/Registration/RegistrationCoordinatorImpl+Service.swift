@@ -279,30 +279,6 @@ extension RegistrationCoordinatorImpl {
             }
         }
 
-        static func makeUpdateAccountAttributesRequest(
-            _ attributes: AccountAttributes,
-            auth: ChatServiceAuth,
-            networkManager: any NetworkManagerProtocol,
-            logger: PrefixedLogger,
-        ) async throws {
-            try await Retry.performWithBackoff(
-                maxAttempts: RegistrationCoordinatorImpl.Constants.networkErrorRetries + 1,
-                isRetryable: { $0.isNetworkFailureOrTimeout },
-            ) {
-                let request = RegistrationRequestFactory.updatePrimaryDeviceAccountAttributesRequest(
-                    attributes,
-                    auth: auth,
-                    logger: logger,
-                )
-                let response = try await networkManager.asyncRequest(request)
-                guard response.responseStatusCode >= 200, response.responseStatusCode < 300 else {
-                    // Errors are undifferentiated; the only actual error we can get is an unauthenticated
-                    // one and there isn't any way to handle that as different from a, say server 500.
-                    throw OWSAssertionError("Got unexpected response code from update attributes request: \(response.responseStatusCode).")
-                }
-            }
-        }
-
         enum WhoAmIResponse {
             case success(WhoAmIRequestFactory.Responses.WhoAmI)
             case networkError

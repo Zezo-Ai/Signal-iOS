@@ -337,29 +337,6 @@ public enum RegistrationRequestFactory {
         return TSRequest(url: url, method: "PUT", parameters: parameters, logger: logger)
     }
 
-    public static func updatePrimaryDeviceAccountAttributesRequest(
-        _ accountAttributes: AccountAttributes,
-        auth: ChatServiceAuth,
-        logger: PrefixedLogger,
-    ) -> TSRequest {
-        let urlPathComponents = URLPathComponents(
-            ["v1", "accounts", "attributes"],
-        )
-        var urlComponents = URLComponents()
-        urlComponents.percentEncodedPath = urlPathComponents.percentEncoded
-        let url = urlComponents.url!
-
-        // The request expects the AccountAttributes to be the root object.
-        // Serialize it to JSON then get the key value dict to do that.
-        let data = try! JSONEncoder().encode(accountAttributes)
-        let parameters = try! JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as! [String: Any]
-
-        var result = TSRequest(url: url, method: "PUT", parameters: parameters, logger: logger)
-        result.headers["X-Signal-Agent"] = "OWI"
-        result.auth = .identified(auth)
-        return result
-    }
-
     // MARK: - Helpers
 
     private static func redactSessionIdFromLogs(_ sessionId: String, in request: inout TSRequest) {

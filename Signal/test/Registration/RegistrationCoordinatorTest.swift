@@ -424,18 +424,7 @@ public class RegistrationCoordinatorTest {
         }]
 
         // Once we do the username reclamation,
-        // we will sync account attributes and then we are finished!
-        let expectedAttributesRequest = RegistrationRequestFactory.updatePrimaryDeviceAccountAttributesRequest(
-            Stubs.accountAttributes(registrationRecoveryPassword: finalMasterKey.deriveRegistrationRecoveryPassword()),
-            auth: .implicit(), // doesn't matter for url matching
-            logger: .empty(),
-        )
-        networkManagerMock.asyncRequestHandlers.append({ request, _ in
-            if request.url == expectedAttributesRequest.url {
-                return HTTPResponse(requestUrl: request.url, status: 200, headers: HttpHeaders(), bodyData: nil)
-            }
-            throw OWSAssertionError("")
-        })
+        // then we are finished!
 
         // NOTE: We expect to skip opening path steps because
         // if we have a SVR master key locally, this _must_ be
@@ -555,19 +544,7 @@ public class RegistrationCoordinatorTest {
         localUsernameManagerMock.startingUsernameState = .usernameAndLinkCorrupted
 
         // Once we do the storage service restore,
-        // we will sync account attributes and then we are finished!
-        let expectedAttributesRequest = RegistrationRequestFactory.updatePrimaryDeviceAccountAttributesRequest(
-            Stubs.accountAttributes(registrationRecoveryPassword: finalMasterKey.deriveRegistrationRecoveryPassword()),
-            auth: .implicit(), // // doesn't matter for url matching
-            logger: .empty(),
-        )
-        networkManagerMock.asyncRequestHandlers.append({ request, _ in
-            if request.url == expectedAttributesRequest.url {
-                #expect(finalMasterKey.regRecoveryPw == (request.parameters["recoveryPassword"] as? String) ?? "")
-                return HTTPResponse(requestUrl: request.url, status: 200, headers: HttpHeaders(), bodyData: nil)
-            }
-            throw OWSAssertionError("")
-        })
+        // then we are finished!
 
         // We haven't set a phone number so it should ask for that.
         #expect(
@@ -931,19 +908,7 @@ public class RegistrationCoordinatorTest {
         }]
 
         // Once we do the storage service restore,
-        // we will sync account attributes and then we are finished!
-        let expectedAttributesRequest = RegistrationRequestFactory.updatePrimaryDeviceAccountAttributesRequest(
-            Stubs.accountAttributes(registrationRecoveryPassword: finalMasterKey.deriveRegistrationRecoveryPassword()),
-            auth: .implicit(), // // doesn't matter for url matching
-            logger: .empty(),
-        )
-        networkManagerMock.asyncRequestHandlers.append({ request, _ in
-            if request.url == expectedAttributesRequest.url {
-                self.testRun.addObservedStep(.updateAccountAttribute)
-                return HTTPResponse(requestUrl: request.url, status: 200, headers: HttpHeaders(), bodyData: nil)
-            }
-            throw OWSAssertionError("")
-        })
+        // then we are finished!
 
         // We haven't set a phone number so it should ask for that.
         #expect(
@@ -975,7 +940,6 @@ public class RegistrationCoordinatorTest {
             .restoreStorageService,
             .confirmReservedUsername,
             .rotateManifest,
-            .updateAccountAttribute,
         ]
 
         #expect(testRun.recordedSteps == expectedSteps)
@@ -1280,18 +1244,7 @@ public class RegistrationCoordinatorTest {
         storageServiceManagerMock.addRotateManifestMock({ _, _ in return .value(()) })
 
         // Once we do the username reclamation,
-        // we will sync account attributes and then we are finished!
-        let expectedAttributesRequest = RegistrationRequestFactory.updatePrimaryDeviceAccountAttributesRequest(
-            Stubs.accountAttributes(registrationRecoveryPassword: finalMasterKey.deriveRegistrationRecoveryPassword()),
-            auth: .implicit(), // doesn't matter for url matching
-            logger: .empty(),
-        )
-        networkManagerMock.asyncRequestHandlers.append({ request, _ in
-            if request.url == expectedAttributesRequest.url {
-                return HTTPResponse(requestUrl: request.url, status: 200, headers: HttpHeaders(), bodyData: nil)
-            }
-            throw OWSAssertionError("")
-        })
+        // then we are finished!
 
         // We haven't set a phone number so it should ask for that.
         #expect(
@@ -1606,19 +1559,7 @@ public class RegistrationCoordinatorTest {
             return .success(usernameLinkHandle: mockUsernameLink.handle)
         }]
 
-        // Once we do the storage service restore, we will sync account attributes and then we are finished!
-        let expectedAttributesRequest = RegistrationRequestFactory.updatePrimaryDeviceAccountAttributesRequest(
-            Stubs.accountAttributes(registrationRecoveryPassword: finalMasterKey.deriveRegistrationRecoveryPassword()),
-            auth: .implicit(), // doesn't matter for url matching
-            logger: .empty(),
-        )
-        networkManagerMock.asyncRequestHandlers.append({ request, _ in
-            if request.url == expectedAttributesRequest.url {
-                self.testRun.addObservedStep(.updateAccountAttribute)
-                return HTTPResponse(requestUrl: request.url, status: 200, headers: HttpHeaders(), bodyData: nil)
-            }
-            throw OWSAssertionError("")
-        })
+        // Once we do the storage service restore, then we are finished!
 
         // At this point, we should be asking for PIN entry so we can use the credential
         // to recover the SVR master key.
@@ -1645,7 +1586,6 @@ public class RegistrationCoordinatorTest {
             .backupMasterKey,
             .confirmReservedUsername,
             .rotateManifest,
-            .updateAccountAttribute,
         ]
 
         #expect(testRun.recordedSteps == expectedSteps)
@@ -1885,18 +1825,7 @@ public class RegistrationCoordinatorTest {
         }]
 
         // And once we do the storage service restore,
-        // we will sync account attributes and then we are finished!
-        let expectedAttributesRequest = RegistrationRequestFactory.updatePrimaryDeviceAccountAttributesRequest(
-            Stubs.accountAttributes(registrationRecoveryPassword: newMasterKey.deriveRegistrationRecoveryPassword()),
-            auth: .implicit(), // doesn't matter for url matching
-            logger: .empty(),
-        )
-        networkManagerMock.asyncRequestHandlers.append({ request, _ in
-            if request.url == expectedAttributesRequest.url {
-                return HTTPResponse(requestUrl: request.url, status: 200, headers: HttpHeaders(), bodyData: nil)
-            }
-            throw OWSAssertionError("")
-        })
+        // then we are finished!
 
         storageServiceManagerMock.addRotateManifestMock({ _, _ in return .value(()) })
 
@@ -2893,18 +2822,7 @@ public class RegistrationCoordinatorTest {
         })
 
         // Once we skip the storage service restore,
-        // we will sync account attributes and then we are finished!
-        let expectedAttributesRequest = RegistrationRequestFactory.updatePrimaryDeviceAccountAttributesRequest(
-            Stubs.accountAttributes(registrationRecoveryPassword: newMasterKey.deriveRegistrationRecoveryPassword()),
-            auth: .implicit(), // doesn't matter for url matching
-            logger: .empty(),
-        )
-        networkManagerMock.asyncRequestHandlers.append({ request, _ in
-            if request.url == expectedAttributesRequest.url {
-                return HTTPResponse(requestUrl: request.url, status: 200, headers: HttpHeaders(), bodyData: nil)
-            }
-            throw OWSAssertionError("")
-        })
+        // then we are finished!
 
         // Once we sync push tokens, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
@@ -3031,18 +2949,7 @@ public class RegistrationCoordinatorTest {
         storageServiceManagerMock.addRotateManifestMock({ _, _ in return .value(()) })
 
         // Once we skip the storage service restore,
-        // we will sync account attributes and then we are finished!
-        let expectedAttributesRequest = RegistrationRequestFactory.updatePrimaryDeviceAccountAttributesRequest(
-            Stubs.accountAttributes(registrationRecoveryPassword: newMasterKey.deriveRegistrationRecoveryPassword()),
-            auth: .implicit(), // doesn't matter for url matching
-            logger: .empty(),
-        )
-        networkManagerMock.asyncRequestHandlers.append({ request, _ in
-            if request.url == expectedAttributesRequest.url {
-                return HTTPResponse(requestUrl: request.url, status: 200, headers: HttpHeaders(), bodyData: nil)
-            }
-            throw OWSAssertionError("")
-        })
+        // then we are finished!
 
         // Now we should ask to restore the PIN.
         #expect(
