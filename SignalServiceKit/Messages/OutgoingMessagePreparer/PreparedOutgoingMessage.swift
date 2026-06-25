@@ -241,12 +241,10 @@ public class PreparedOutgoingMessage {
     }
 
     public func attachmentUploadOperations(tx: DBReadTransaction) -> [() async throws -> Void] {
+        let attachmentUploadManager = DependenciesBridge.shared.attachmentUploadManager
         return attachmentIdsForUpload(tx: tx).map { attachmentId in
             return {
-                try await DependenciesBridge.shared.attachmentUploadManager.uploadTransitTierAttachment(
-                    attachmentId: attachmentId,
-                    progress: nil,
-                )
+                try await attachmentUploadManager.uploadTransitTierAttachment(attachmentId: attachmentId)
             }
         }
     }

@@ -197,11 +197,16 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
             auth: backupAuth,
             logger: logger,
         )
+        let progressSource = progress?.addSource(
+            withLabel: "upload",
+            unitCount: UInt64(safeCast: metadata.encryptedDataLength),
+        )
         let result = try await attachmentUploadManager.uploadBackup(
             localUploadMetadata: metadata,
             form: form,
-            progress: progress,
+            progressBlock: progressSource?.asProgressBlock() ?? { _, _ in },
         )
+        progressSource?.complete()
 
         await db.awaitableWrite { tx in
             let backupFileSizeBytes: UInt64

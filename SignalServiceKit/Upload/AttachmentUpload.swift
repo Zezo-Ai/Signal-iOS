@@ -22,20 +22,14 @@ public enum AttachmentUpload {
         attempt: Upload.Attempt<Metadata>,
         dateProvider: @escaping DateProvider,
         sleepTimer: Upload.Shims.SleepTimer,
-        progress: OWSProgressSink?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> Upload.Result<Metadata> {
         try Task.checkCancellation()
-
-        let progressSource = progress?.addSource(
-            withLabel: "upload",
-            unitCount: UInt64(attempt.encryptedDataLength),
-        )
-
         return try await attemptUpload(
             attempt: attempt,
             dateProvider: dateProvider,
             sleepTimer: sleepTimer,
-            progress: progressSource,
+            progressBlock: progressBlock,
         )
     }
 
@@ -54,7 +48,7 @@ public enum AttachmentUpload {
         attempt: Upload.Attempt<Metadata>,
         dateProvider: @escaping DateProvider,
         sleepTimer: Upload.Shims.SleepTimer,
-        progress: OWSProgressSource?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> Upload.Result<Metadata> {
         attempt.logger.info("Begin upload. (CDN\(attempt.cdnNumber)) [\(attempt.encryptedDataLength) bytes]")
         try await performResumableUpload(
@@ -62,9 +56,8 @@ public enum AttachmentUpload {
             sleepTimer: sleepTimer,
             failureCount: 0,
             immediatelyResumeAtByteOffset: nil,
-            progress: progress,
+            progressBlock: progressBlock,
         )
-        progress?.complete()
         return Upload.Result(
             cdnKey: attempt.cdnKey,
             cdnNumber: attempt.cdnNumber,
@@ -92,7 +85,7 @@ public enum AttachmentUpload {
         sleepTimer: Upload.Shims.SleepTimer,
         failureCount: Int,
         immediatelyResumeAtByteOffset: UInt64?,
-        progress: OWSProgressSource?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws {
         guard failureCount < Upload.Constants.uploadMaxRetries else {
             throw Upload.Error.uploadFailure(recovery: .noMoreRetries)
@@ -132,9 +125,6 @@ public enum AttachmentUpload {
             throw Upload.Error.uploadFailure(recovery: .restart(.afterBackoff))
         }
 
-        // We might have made progress that wasn't reported; report it now.
-        progress?.incrementCompletedUnitCount(to: bytesAlreadyUploaded)
-
         func downloadTimeLogString(_ bytesUploaded: UInt64) -> String {
             let totalTime = CACurrentMediaTime() - startTime
             guard totalTime > 0 else { return "" }
@@ -156,14 +146,21 @@ public enum AttachmentUpload {
                 startPoint: bytesAlreadyUploaded,
                 attempt: attempt,
                 progressBlock: { currentByteCount, totalByteCount in
-                    if currentByteCount == NSURLSessionTransferSizeUnknown {
-                        return
+                    var currentByteCount = currentByteCount
+                    if currentByteCount != NSURLSessionTransferSizeUnknown {
+                        // We're uploading a chunk starting at bytesAlreadyUploaded, so we need to
+                        // offset the progress we've made by the amount we're skipping.
+                        currentByteCount += Int64(bytesAlreadyUploaded)
                     }
-                    // We're uploading a chunk starting at bytesAlreadyUploaded, so we need to
-                    // offset the progress we've made by the amount we're skipping.
-                    let overallByteCount = bytesAlreadyUploaded + UInt64(currentByteCount)
-                    newBytesUploaded = max(newBytesUploaded, overallByteCount)
-                    progress?.incrementCompletedUnitCount(to: overallByteCount)
+                    var totalByteCount = totalByteCount
+                    if totalByteCount != NSURLSessionTransferSizeUnknown {
+                        totalByteCount = Int64(totalDataLength)
+                    }
+
+                    if currentByteCount != NSURLSessionTransferSizeUnknown {
+                        newBytesUploaded = max(newBytesUploaded, UInt64(currentByteCount))
+                    }
+                    await progressBlock(currentByteCount, totalByteCount)
                 },
             )
             attempt.logger.info("Uploaded chunk of \(downloadTimeLogString(newBytesUploaded)) (now complete at \(newBytesUploaded) bytes)")
@@ -251,7 +248,7 @@ public enum AttachmentUpload {
                 // Reset the attempt count to zero if we made confirmed progress.
                 failureCount: immediatelyResumeAtByteOffset != nil ? 0 : failureCount + 1,
                 immediatelyResumeAtByteOffset: immediatelyResumeAtByteOffset,
-                progress: progress,
+                progressBlock: progressBlock,
             )
         }
     }

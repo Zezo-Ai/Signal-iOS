@@ -312,6 +312,18 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
         }
 
         func runTask(record: Store.Record, loader: TaskQueueLoader<TaskRunner>) async -> TaskRecordResult {
+            let result = await _runTask(record: record, loader: loader)
+            if case .success = result, record.record.isFullsize {
+                await progress.didUpdateProgressForFullsizeAttachment(
+                    uploadRecord: record.record,
+                    completedByteCount: UInt64(safeCast: record.record.estimatedByteCount),
+                    totalByteCount: UInt64(safeCast: record.record.estimatedByteCount),
+                )
+            }
+            return result
+        }
+
+        private func _runTask(record: Store.Record, loader: TaskQueueLoader<TaskRunner>) async -> TaskRecordResult {
             struct ExplicitlySuspendedError: Error {}
             struct NeedsBatteryError: Error {}
             struct NeedsInternetError: Error {}
@@ -469,15 +481,6 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                 return .retryableError(IsFreeTierError())
             }
 
-            let progressSink: OWSProgressSink?
-            if record.record.isFullsize {
-                progressSink = await progress.willBeginUploadingFullsizeAttachment(
-                    uploadRecord: record.record,
-                )
-            } else {
-                progressSink = nil
-            }
-
             guard
                 db.read(block: { tx in
                     backupAttachmentUploadScheduler.isEligibleToUpload(
@@ -488,11 +491,6 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                     )
                 })
             else {
-                if record.record.isFullsize {
-                    await progress.didFinishUploadOfFullsizeAttachment(
-                        uploadRecord: record.record,
-                    )
-                }
                 // Not eligible anymore, count as success.
                 return .success
             }
@@ -505,7 +503,16 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                         localAci: localAci,
                         backupKey: backupKey,
                         auth: backupAuth,
-                        progress: progressSink,
+                        progressBlock: { completedByteCount, totalByteCount in
+                            if completedByteCount == NSURLSessionTransferSizeUnknown || totalByteCount == NSURLSessionTransferSizeUnknown {
+                                return
+                            }
+                            await progress.didUpdateProgressForFullsizeAttachment(
+                                uploadRecord: record.record,
+                                completedByteCount: UInt64(completedByteCount),
+                                totalByteCount: UInt64(totalByteCount),
+                            )
+                        },
                     )
                 } else {
                     try await attachmentUploadManager.uploadMediaTierThumbnailAttachment(
@@ -514,7 +521,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                         localAci: localAci,
                         backupKey: backupKey,
                         auth: backupAuth,
-                        progress: nil,
+                        progressBlock: { _, _ in },
                     )
                 }
             } catch let cancellationError as CancellationError {
@@ -610,11 +617,6 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                 // call it a "success" so we don't mess with progress
                 // state and so we wipe the upload task row, and move on.
                 logger.error("Missing attachment file; skipping and proceeding")
-                if record.record.isFullsize {
-                    await progress.didFinishUploadOfFullsizeAttachment(
-                        uploadRecord: record.record,
-                    )
-                }
                 return .success
             } catch Upload.Error.uploadFailure(let recovery) {
                 switch recovery {
@@ -644,21 +646,9 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                     // Ignore the error if we e.g. fail to generate a thumbnail;
                     // just upload the fullsize.
                     logger.error("Failed to upload thumbnail; proceeding")
-                    if record.record.isFullsize {
-                        await progress.didFinishUploadOfFullsizeAttachment(
-                            uploadRecord: record.record,
-                        )
-                    }
                     return .success
                 }
             }
-
-            if record.record.isFullsize {
-                await progress.didFinishUploadOfFullsizeAttachment(
-                    uploadRecord: record.record,
-                )
-            }
-
             return .success
         }
 

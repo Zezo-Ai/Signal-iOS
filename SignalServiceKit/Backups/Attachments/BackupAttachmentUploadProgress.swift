@@ -62,18 +62,10 @@ public protocol BackupAttachmentUploadProgress: AnyObject {
 
     func removeObserver(_ id: UUID) async
 
-    /// Create an OWSProgressSink for a single attachment to be uploaded.
-    /// Should be called prior to uploading any backup attachment.
-    func willBeginUploadingFullsizeAttachment(
+    func didUpdateProgressForFullsizeAttachment(
         uploadRecord: QueuedBackupAttachmentUpload,
-    ) async -> OWSProgressSink
-
-    /// Stopgap to inform that an attachment finished uploading.
-    /// There are a couple edge cases (e.g. already uploaded) that result in uploads
-    /// finishing without reporting any progress updates. This method ensures we always mark
-    /// attachments as finished in all cases.
-    func didFinishUploadOfFullsizeAttachment(
-        uploadRecord: QueuedBackupAttachmentUpload,
+        completedByteCount: UInt64,
+        totalByteCount: UInt64,
     ) async
 
     /// Called when there are no more enqueued uploads.
@@ -114,39 +106,6 @@ public actor BackupAttachmentUploadProgressImpl: BackupAttachmentUploadProgress 
     }
 
     // MARK: - BackupAttachmentUploadManager API
-
-    public func willBeginUploadingFullsizeAttachment(
-        uploadRecord: QueuedBackupAttachmentUpload,
-    ) async -> OWSProgressSink {
-        guard uploadRecord.isFullsize else {
-            owsFailDebug("Attempting to count thumbnail upload!")
-            return OWSProgress.createSink({ _ in })
-        }
-        let sink = OWSProgress.createSink { [weak self] progress in
-            Task {
-                await self?.didUpdateProgressForActiveUpload(
-                    uploadRecord: uploadRecord,
-                    completedByteCount: progress.completedUnitCount,
-                    totalByteCount: progress.totalUnitCount,
-                )
-            }
-        }
-        return sink
-    }
-
-    public func didFinishUploadOfFullsizeAttachment(
-        uploadRecord: QueuedBackupAttachmentUpload,
-    ) {
-        guard uploadRecord.isFullsize else {
-            owsFailDebug("Attempting to count thumbnail upload!")
-            return
-        }
-        didUpdateProgressForActiveUpload(
-            uploadRecord: uploadRecord,
-            completedByteCount: UInt64(uploadRecord.estimatedByteCount),
-            totalByteCount: UInt64(uploadRecord.estimatedByteCount),
-        )
-    }
 
     public func didEmptyFullsizeUploadQueue() async {
         activeUploadCompletedByteCounts.keys.forEach {
@@ -228,14 +187,12 @@ public actor BackupAttachmentUploadProgressImpl: BackupAttachmentUploadProgress 
     /// is we misreport progress until we hit 100%, big whoop.
     private var recentlyCompletedUploads = LRUCache<PerObserverUploadId, Void>(maxSize: 100)
 
-    private func didUpdateProgressForActiveUpload(
+    public func didUpdateProgressForFullsizeAttachment(
         uploadRecord: QueuedBackupAttachmentUpload,
         completedByteCount: UInt64,
         totalByteCount totalByteCountInput: UInt64,
     ) {
-        guard
-            totalByteCountInput != 0
-        else {
+        guard totalByteCountInput != 0 else {
             return
         }
 
@@ -417,14 +374,10 @@ open class BackupAttachmentUploadProgressMock: BackupAttachmentUploadProgress {
         // Do nothing
     }
 
-    open func willBeginUploadingFullsizeAttachment(
+    open func didUpdateProgressForFullsizeAttachment(
         uploadRecord: QueuedBackupAttachmentUpload,
-    ) async -> any OWSProgressSink {
-        OWSProgress.createSink({ _ in })
-    }
-
-    open func didFinishUploadOfFullsizeAttachment(
-        uploadRecord: QueuedBackupAttachmentUpload,
+        completedByteCount: UInt64,
+        totalByteCount: UInt64,
     ) async {
         // Do nothing
     }

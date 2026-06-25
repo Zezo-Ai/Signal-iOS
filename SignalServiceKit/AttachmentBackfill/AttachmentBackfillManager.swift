@@ -418,7 +418,6 @@ public class AttachmentBackfillManager {
                 // tier info.
                 try await attachmentUploadManager.uploadTransitTierAttachment(
                     attachmentId: referencedAttachment.attachment.id,
-                    progress: nil,
                 )
             }
 

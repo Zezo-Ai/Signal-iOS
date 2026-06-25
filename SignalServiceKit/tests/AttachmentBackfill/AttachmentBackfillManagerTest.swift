@@ -375,29 +375,29 @@ class AttachmentBackfillManagerTest: SSKBaseTest {
 // MARK: -
 
 private class MockAttachmentUploadManager: AttachmentUploadManager {
+    func uploadBackup(localUploadMetadata: Upload.EncryptedBackupUploadMetadata, form: Upload.Form, progressBlock: OWSURLSession.ProgressBlock) async throws -> Upload.Result<Upload.EncryptedBackupUploadMetadata> {
+        fatalError()
+    }
+
+    func uploadTransientAttachment(dataSource: DataSourcePath) async throws -> Upload.Result<Upload.LocalUploadMetadata> {
+        fatalError()
+    }
+
+    func uploadLinkNSyncAttachment(dataSource: DataSourcePath, progressBlock: OWSURLSession.ProgressBlock) async throws -> Upload.Result<Upload.LinkNSyncUploadMetadata> {
+        fatalError()
+    }
+
     var uploadBlock: ((Attachment.IDType) async throws -> Void)?
 
-    func uploadTransitTierAttachment(attachmentId: Attachment.IDType, progress: OWSProgressSink?) async throws {
+    func uploadTransitTierAttachment(attachmentId: Attachment.IDType) async throws {
         try await uploadBlock?(attachmentId)
     }
 
-    func uploadBackup(localUploadMetadata: Upload.EncryptedBackupUploadMetadata, form: Upload.Form, progress: (any OWSProgressSink)?) async throws -> Upload.Result<Upload.EncryptedBackupUploadMetadata> {
+    func uploadMediaTierAttachment(attachmentId: Attachment.IDType, uploadEra: String, localAci: Aci, backupKey: MediaRootBackupKey, auth: BackupServiceAuth, progressBlock: OWSURLSession.ProgressBlock) async throws {
         fatalError()
     }
 
-    func uploadTransientAttachment(dataSource: DataSourcePath, progress: (any OWSProgressSink)?) async throws -> Upload.Result<Upload.LocalUploadMetadata> {
-        fatalError()
-    }
-
-    func uploadLinkNSyncAttachment(dataSource: DataSourcePath, progress: (any OWSProgressSink)?) async throws -> Upload.Result<Upload.LinkNSyncUploadMetadata> {
-        fatalError()
-    }
-
-    func uploadMediaTierAttachment(attachmentId: Attachment.IDType, uploadEra: String, localAci: LibSignalClient.Aci, backupKey: MediaRootBackupKey, auth: BackupServiceAuth, progress: (any OWSProgressSink)?) async throws {
-        fatalError()
-    }
-
-    func uploadMediaTierThumbnailAttachment(attachmentId: Attachment.IDType, uploadEra: String, localAci: LibSignalClient.Aci, backupKey: MediaRootBackupKey, auth: BackupServiceAuth, progress: (any OWSProgressSink)?) async throws {
+    func uploadMediaTierThumbnailAttachment(attachmentId: Attachment.IDType, uploadEra: String, localAci: Aci, backupKey: MediaRootBackupKey, auth: BackupServiceAuth, progressBlock: OWSURLSession.ProgressBlock) async throws {
         fatalError()
     }
 }

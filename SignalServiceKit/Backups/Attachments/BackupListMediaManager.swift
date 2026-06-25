@@ -988,8 +988,10 @@ class BackupListMediaManagerImpl: BackupListMediaManager {
             logger.info("Marked discovered attachment \(attachment.id) done. fullsize? \(!isThumbnail)")
             if finishedRecord.isFullsize {
                 Task {
-                    await backupAttachmentUploadProgress.didFinishUploadOfFullsizeAttachment(
+                    await backupAttachmentUploadProgress.didUpdateProgressForFullsizeAttachment(
                         uploadRecord: finishedRecord,
+                        completedByteCount: UInt64(safeCast: finishedRecord.estimatedByteCount),
+                        totalByteCount: UInt64(safeCast: finishedRecord.estimatedByteCount),
                     )
                 }
             }

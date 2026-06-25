@@ -459,10 +459,16 @@ public class LinkAndSyncManagerImpl: LinkAndSyncManager {
         progress: OWSProgressSink,
     ) async throws(PrimaryLinkNSyncError) -> Upload.Result<Upload.LinkNSyncUploadMetadata> {
         do {
-            return try await attachmentUploadManager.uploadLinkNSyncAttachment(
-                dataSource: DataSourcePath(fileUrl: metadata.fileUrl, ownership: .owned),
-                progress: progress,
+            let progressSource = progress.addSource(
+                withLabel: "upload",
+                unitCount: UInt64(safeCast: metadata.encryptedDataLength),
             )
+            let result = try await attachmentUploadManager.uploadLinkNSyncAttachment(
+                dataSource: DataSourcePath(fileUrl: metadata.fileUrl, ownership: .owned),
+                progressBlock: progressSource.asProgressBlock(),
+            )
+            progressSource.complete()
+            return result
         } catch {
             if error is CancellationError {
                 throw .cancelled(linkedDeviceId: waitForDeviceToLinkResponse.id)
