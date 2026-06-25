@@ -1481,7 +1481,6 @@
 		7622B3B22A4510D7000E31DA /* MediaGalleryCellItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7622B3B12A4510D7000E31DA /* MediaGalleryCellItem.swift */; };
 		7628DDBE2807505D009AA53D /* ImageEditorCropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7628DDBC28075056009AA53D /* ImageEditorCropView.swift */; };
 		7628DDBF2807505D009AA53D /* RotationControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7628DDBD2807505D009AA53D /* RotationControl.swift */; };
-		7628DDC1280750BC009AA53D /* ExpandableContactListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7628DDC0280750BC009AA53D /* ExpandableContactListView.swift */; };
 		7628DDC32807609F009AA53D /* ImageEditorToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7628DDC22807609F009AA53D /* ImageEditorToolbar.swift */; };
 		7628DDC5280A01B8009AA53D /* ImageEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7628DDC4280A01B8009AA53D /* ImageEditorViewController.swift */; };
 		762A41692A37D71600057955 /* UIViewController+SignalUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 762A41682A37D71600057955 /* UIViewController+SignalUI.swift */; };
@@ -5699,7 +5698,6 @@
 		7622B3B12A4510D7000E31DA /* MediaGalleryCellItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaGalleryCellItem.swift; sourceTree = "<group>"; };
 		7628DDBC28075056009AA53D /* ImageEditorCropView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageEditorCropView.swift; sourceTree = "<group>"; };
 		7628DDBD2807505D009AA53D /* RotationControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RotationControl.swift; sourceTree = "<group>"; };
-		7628DDC0280750BC009AA53D /* ExpandableContactListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExpandableContactListView.swift; sourceTree = "<group>"; };
 		7628DDC22807609F009AA53D /* ImageEditorToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageEditorToolbar.swift; sourceTree = "<group>"; };
 		7628DDC4280A01B8009AA53D /* ImageEditorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageEditorViewController.swift; sourceTree = "<group>"; };
 		762A41682A37D71600057955 /* UIViewController+SignalUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+SignalUI.swift"; sourceTree = "<group>"; };
@@ -9373,7 +9371,6 @@
 				34A95599271B510500B05242 /* AttachmentPrepViewController.swift */,
 				34A9559E271B510500B05242 /* AttachmentTextToolbar.swift */,
 				34A95597271B510500B05242 /* AttachmentTextView.swift */,
-				7628DDC0280750BC009AA53D /* ExpandableContactListView.swift */,
 				766035A8286CE4CB00F6B71C /* MediaTopBar.swift */,
 			);
 			path = AttachmentApproval;
@@ -17856,7 +17853,6 @@
 				66420F682BB2376100252B0D /* DraftQuotedReplyModel+Payments.swift in Sources */,
 				3402AA49271D9DCD0084CBAE /* EditContactShareNameViewController.swift in Sources */,
 				B9A87A362A9D1D25009FCA13 /* EditorSticker.swift in Sources */,
-				7628DDC1280750BC009AA53D /* ExpandableContactListView.swift in Sources */,
 				3402AA56271D9DCD0084CBAE /* FindByPhoneNumberViewController.swift in Sources */,
 				B95A765E2B76E93500AA7E97 /* FindByUsernameViewController.swift in Sources */,
 				7647A33C2A270348002EAC93 /* FingerprintScanViewController.swift in Sources */,

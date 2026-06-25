@@ -87,7 +87,10 @@ public struct AttachmentApprovalViewControllerOptions: OptionSet {
 
 // MARK: -
 
-public final class AttachmentApprovalViewController: UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate, OWSNavigationChildController {
+public final class AttachmentApprovalViewController: UIPageViewController, UIPageViewControllerDataSource,
+    UIPageViewControllerDelegate, OWSNavigationChildController, AttachmentPrepViewControllerDelegate,
+    AttachmentTextToolbarDelegate, BodyRangesTextViewDelegate
+{
 
     // MARK: - Properties
 
@@ -197,9 +200,6 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         self.bottomToolView.attachmentTextToolbarDelegate = self
         self.attachmentTextToolbar.mentionTextViewDelegate = self
 
-        // This fixes an issue with keyboard flashing white while being dismissed.
-        overrideUserInterfaceStyle = .dark
-
         observerToken = NotificationCenter.default.addObserver(forName: .OWSApplicationDidBecomeActive, object: nil, queue: .main) { [weak self] _ in
             guard let self else { return }
             self.updateContents(animated: false)
@@ -262,14 +262,15 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
 
     lazy var contentDimmerView: UIView = {
         let dimmerView = UIView()
-        dimmerView.backgroundColor = .ows_blackAlpha40
+        dimmerView.backgroundColor = .Signal.background.withAlphaComponent(0.4)
         return dimmerView
     }()
 
     // MARK: - View Lifecycle
 
     override public var prefersStatusBarHidden: Bool {
-        !UIDevice.current.hasIPhoneXNotch && !UIDevice.current.isIPad && !DependenciesBridge.shared.currentCallProvider.hasCurrentCall
+        guard DependenciesBridge.shared.currentCallProvider.hasCurrentCall == false else { return false }
+        return (UIDevice.current.isIPad || UIDevice.current.hasIPhoneXNotch) == false
     }
 
     override public var preferredStatusBarStyle: UIStatusBarStyle {
@@ -277,21 +278,19 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
     }
 
     public var prefersNavigationBarHidden: Bool {
-        return true
+        true
     }
 
     override public func viewDidLoad() {
         super.viewDidLoad()
 
-        self.definesPresentationContext = true
+        definesPresentationContext = true
+        overrideUserInterfaceStyle = .dark
 
-        view.backgroundColor = .black
+        view.backgroundColor = .Signal.background
 
         // avoid an unpleasant "bounce" which doesn't make sense in the context of a single item.
         pagerScrollView?.isScrollEnabled = attachmentApprovalItems.count > 1
-
-        // Navigation
-        navigationItem.title = nil
 
         guard let firstItem = attachmentApprovalItems.first else {
             owsFailDebug("firstItem was unexpectedly nil")
@@ -301,17 +300,21 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         setCurrentItem(firstItem, direction: .forward, animated: false)
 
         // Top Bar
-        topBar.cancelButton.addTarget(self, action: #selector(cancelPressed), for: .touchUpInside)
-        topBar.backButton.addTarget(self, action: #selector(navigateBackPressed), for: .touchUpInside)
-
-        let topBarSize = topBar.systemLayoutSizeFitting(view.bounds.size, withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
-        topBar.frame = CGRect(x: 0, y: view.layoutMargins.top, width: view.width, height: topBarSize.height)
-        UIView.performWithoutAnimation {
-            topBar.setNeedsLayout()
-            topBar.layoutIfNeeded()
-        }
+        topBar.cancelButton.addAction(
+            UIAction { [weak self] _ in
+                self?.cancelPressed()
+            },
+            for: .primaryActionTriggered,
+        )
+        topBar.backButton.addAction(
+            UIAction { [weak self] _ in
+                self?.navigateBackPressed()
+            },
+            for: .primaryActionTriggered,
+        )
         topBar.install(in: view)
 
+        // Bottom Bar
         bottomToolView.buttonAddMedia.addTarget(self, action: #selector(didTapAddMedia), for: .touchUpInside)
         bottomToolView.buttonViewOnce.addTarget(self, action: #selector(didToggleViewOnce), for: .touchUpInside)
         bottomToolView.buttonSend.addTarget(self, action: #selector(didTapSend), for: .touchUpInside)
@@ -347,7 +350,6 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
     }
 
     override public func viewWillAppear(_ animated: Bool) {
-        Logger.debug("")
         super.viewWillAppear(animated)
 
         UIViewController.attemptRotationToDeviceOrientation()
@@ -361,13 +363,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         }
     }
 
-    override public func viewDidAppear(_ animated: Bool) {
-        Logger.debug("")
-        super.viewDidAppear(animated)
-    }
-
     override public func viewWillDisappear(_ animated: Bool) {
-        Logger.debug("")
         super.viewWillDisappear(animated)
 
         currentPageViewController?.prepareToMoveOffscreen()
@@ -396,7 +392,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         var contentLayoutMargins: UIEdgeInsets = .zero
         // On devices with a screen notch at the top content is constrained to safe area inset so that status bar is visible.
         // On older devices content is pinned to the top of the screen and status bar is hidden to allow for more screen room.
-        if UIDevice.current.hasIPhoneXNotch || UIDevice.current.isIPad {
+        if prefersStatusBarHidden == false {
             contentLayoutMargins.top = view.safeAreaInsets.top
         }
 
@@ -409,7 +405,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
             bottomToolView.layoutIfNeeded()
             contentLayoutMargins.bottom = bottomToolView.opaqueAreaHeight
 
-            // For videos there's thumbnail timelinebar embedded into the `bottomToolView`
+            // For videos there's thumbnail timeline bar embedded into the `bottomToolView`
             if let supplementaryView = viewController.toolbarSupplementaryView {
                 contentLayoutMargins.bottom += supplementaryView.height
             }
@@ -521,8 +517,6 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         _ pageViewController: UIPageViewController,
         willTransitionTo pendingViewControllers: [UIViewController],
     ) {
-        Logger.debug("")
-
         owsAssertDebug(pendingViewControllers.count == 1)
 
         // Pause video playback for current page
@@ -544,8 +538,6 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         previousViewControllers: [UIViewController],
         transitionCompleted: Bool,
     ) {
-        Logger.debug("")
-
         assert(previousViewControllers.count == 1)
         previousViewControllers.forEach { viewController in
             guard let previousPage = viewController as? AttachmentPrepViewController else {
@@ -814,18 +806,13 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
 
         return nextItem
     }
-}
 
-// MARK: - Event Handlers
+    // MARK: - Event Handlers
 
-extension AttachmentApprovalViewController {
-
-    @objc
     private func cancelPressed() {
         self.approvalDelegate?.attachmentApprovalDidCancel()
     }
 
-    @objc
     private func navigateBackPressed() {
         navigationController?.popViewController(animated: true)
     }
@@ -947,11 +934,8 @@ extension AttachmentApprovalViewController {
     private func didTapCropTool() {
         currentPageViewController?.activateCropTool()
     }
-}
 
-// MARK: -
-
-extension AttachmentApprovalViewController: AttachmentTextToolbarDelegate {
+    // MARK: - AttachmentTextToolbarDelegate {
 
     private func showContentDimmerView() {
         contentDimmerView.alpha = 0
@@ -1076,11 +1060,8 @@ extension AttachmentApprovalViewController: AttachmentTextToolbarDelegate {
             currentPageViewController.keyboardHeight = keyboardHeight
         }
     }
-}
 
-// MARK: - Media Quality Selection Sheet
-
-extension AttachmentApprovalViewController {
+    // MARK: - Media Quality Selection Sheet
 
     private static let mediaQualityLocalizedString = OWSLocalizedString(
         "ATTACHMENT_APPROVAL_MEDIA_QUALITY_TITLE",
@@ -1304,9 +1285,8 @@ extension AttachmentApprovalViewController {
             }
         }
     }
-}
 
-extension AttachmentApprovalViewController: BodyRangesTextViewDelegate {
+    // MARK: - BodyRangesTextViewDelegate
 
     public func textViewDidBeginTypingMention(_ textView: BodyRangesTextView) { }
 
@@ -1335,11 +1315,8 @@ extension AttachmentApprovalViewController: BodyRangesTextViewDelegate {
     public func textViewMentionCacheInvalidationKey(_ textView: BodyRangesTextView) -> String {
         return approvalDataSource?.attachmentApprovalMentionCacheInvalidationKey() ?? UUID().uuidString
     }
-}
 
-// MARK: -
-
-extension AttachmentApprovalViewController: AttachmentPrepViewControllerDelegate {
+    // MARK: - AttachmentPrepViewControllerDelegate
 
     func attachmentPrepViewControllerDidRequestUpdateControlsVisibility(
         _ viewController: AttachmentPrepViewController,
