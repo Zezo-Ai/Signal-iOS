@@ -80,9 +80,7 @@ public class DonationPermitFetcher {
             now: now,
         )
 
-        var permits = libsignalPermits.map {
-            DonationPermit(donationPermit: $0, expiration: permitResponse.expiration)
-        }
+        var permits = libsignalPermits.map { DonationPermit(donationPermit: $0) }
 
         guard let lastPermit = permits.popLast() else {
             throw OWSAssertionError("Missing permits in response!", logger: logger)
@@ -99,10 +97,10 @@ public struct DonationPermit {
     public let serializedPermit: Data
     public let expiration: Date
 
-    public init(donationPermit: LibSignalClient.DonationPermit, expiration: Date) {
+    public init(donationPermit: LibSignalClient.DonationPermit) {
         self.init(
             serializedPermit: donationPermit.serialize(),
-            expiration: expiration,
+            expiration: donationPermit.expiration,
         )
     }
 
