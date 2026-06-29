@@ -32,7 +32,7 @@ public struct AccountEntropyPool: Codable, Equatable {
         let normalizedKey = key.lowercased()
 
         guard LibSignalClient.AccountEntropyPool.isValid(normalizedKey) else {
-            throw OWSAssertionError("Invalid entropy pool key")
+            throw OWSGenericError("Invalid entropy pool key")
         }
 
         self.rawString = normalizedKey
