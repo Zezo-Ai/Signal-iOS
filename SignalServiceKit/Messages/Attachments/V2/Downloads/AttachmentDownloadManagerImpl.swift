@@ -935,16 +935,15 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 let cdnNumber = attachment.mediaTierInfo?.cdnNumber ?? remoteConfigProvider.currentConfig().mediaTierFallbackCdnNumber
                 guard
                     let mediaTierInfo = attachment.mediaTierInfo,
-                    let mediaName = attachment.mediaName,
-                    let backupKey = db.read(block: { accountKeyStore.getMediaRootBackupKey(tx: $0) }),
-                    let outerEncryptionMetadata = buildCdnEncryptionMetadata(mediaName: mediaName, backupKey: backupKey, type: .outerLayerFullsizeOrThumbnail),
-                    let cdnCredential = await fetchBackupCdnReadCredential(
-                        for: cdnNumber,
-                        backupKey: backupKey,
-                        logger: PrefixedLogger(prefix: "[Backups]"),
-                    )
+                    let mediaName = attachment.mediaName
                 else {
-                    return .unretryableError(OWSAssertionError("Attempting to download an attachment without cdn info"))
+                    return .unretryableError(OWSAssertionError("missing media tier info"))
+                }
+                guard
+                    let backupKey = db.read(block: { accountKeyStore.getMediaRootBackupKey(tx: $0) }),
+                    let outerEncryptionMetadata = buildCdnEncryptionMetadata(mediaName: mediaName, backupKey: backupKey, type: .outerLayerFullsizeOrThumbnail)
+                else {
+                    return .unretryableError(OWSAssertionError("missing or invalid MRBK"))
                 }
                 guard let outerAttachmentKey = try? outerEncryptionMetadata.attachmentKey() else {
                     return .unretryableError(OWSAssertionError("can't download media file with malformed media key"))
@@ -952,6 +951,20 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 guard let attachmentKey = try? AttachmentKey(combinedKey: attachment.encryptionKey) else {
                     return .unretryableError(OWSAssertionError("can't download media file with malformed attachment key"))
                 }
+
+                let cdnCredential: MediaTierReadCredential
+                do {
+                    cdnCredential = try await fetchBackupCdnReadCredential(
+                        for: cdnNumber,
+                        backupKey: backupKey,
+                        logger: PrefixedLogger(prefix: "[Backups]"),
+                    )
+                } catch let error where error.isRetryable {
+                    return .retryableError(error)
+                } catch {
+                    return .unretryableError(error)
+                }
+
                 downloadMetadata = .init(
                     cdnNumber: cdnNumber,
                     source: .mediaTier(
@@ -978,7 +991,11 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 let cdnNumber = attachment.thumbnailMediaTierInfo?.cdnNumber ?? remoteConfigProvider.currentConfig().mediaTierFallbackCdnNumber
                 guard
                     attachment.thumbnailMediaTierInfo != nil || MimeTypeUtil.isSupportedVisualMediaMimeType(attachment.mimeType),
-                    let mediaName = attachment.mediaName,
+                    let mediaName = attachment.mediaName
+                else {
+                    return .unretryableError(OWSAssertionError("missing cdn info"))
+                }
+                guard
                     let backupKey = db.read(block: { accountKeyStore.getMediaRootBackupKey(tx: $0) }),
                     // This is the outer encryption
                     let outerEncryptionMetadata = buildCdnEncryptionMetadata(
@@ -991,14 +1008,9 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                         mediaName: AttachmentBackupThumbnail.thumbnailMediaName(fullsizeMediaName: mediaName),
                         backupKey: backupKey,
                         type: .transitTierThumbnail,
-                    ),
-                    let cdnReadCredential = await fetchBackupCdnReadCredential(
-                        for: cdnNumber,
-                        backupKey: backupKey,
-                        logger: PrefixedLogger(prefix: "[Backups]"),
                     )
                 else {
-                    return .unretryableError(OWSAssertionError("Attempting to download an attachment without cdn info"))
+                    return .unretryableError(OWSAssertionError("missing or invalid MRBK"))
                 }
                 guard let outerAttachmentKey = try? outerEncryptionMetadata.attachmentKey() else {
                     return .unretryableError(OWSAssertionError("can't download thumbnail with malformed outer media key"))
@@ -1008,6 +1020,19 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 }
                 guard let attachmentKey = try? AttachmentKey(combinedKey: attachment.encryptionKey) else {
                     return .unretryableError(OWSAssertionError("can't download thumbnail with malformed attachment key"))
+                }
+
+                let cdnReadCredential: MediaTierReadCredential
+                do {
+                    cdnReadCredential = try await fetchBackupCdnReadCredential(
+                        for: cdnNumber,
+                        backupKey: backupKey,
+                        logger: PrefixedLogger(prefix: "[Backups]"),
+                    )
+                } catch let error where error.isRetryable {
+                    return .retryableError(error)
+                } catch {
+                    return .unretryableError(error)
                 }
 
                 downloadMetadata = .init(
@@ -1193,40 +1218,27 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             for cdn: UInt32,
             backupKey: MediaRootBackupKey,
             logger: PrefixedLogger,
-        ) async -> MediaTierReadCredential? {
+        ) async throws -> MediaTierReadCredential {
             guard
                 let localAci = db.read(block: { tx in
                     self.tsAccountManager.localIdentifiers(tx: tx)?.aci
                 })
             else {
-                owsFailDebug("Missing local identifier")
-                return nil
+                throw OWSAssertionError("missing local aci")
             }
 
-            guard
-                let auth = try? await backupRequestManager.fetchBackupServiceAuth(
-                    for: backupKey,
-                    localAci: localAci,
-                    auth: .implicit(),
-                    logger: logger,
-                )
-            else {
-                owsFailDebug("Failed to fetch backup credential")
-                return nil
-            }
+            let auth = try await backupRequestManager.fetchBackupServiceAuth(
+                for: backupKey,
+                localAci: localAci,
+                auth: .implicit(),
+                logger: logger,
+            )
 
-            guard
-                let metadata = try? await backupRequestManager.fetchMediaTierCdnRequestMetadata(
-                    cdn: Int32(cdn),
-                    auth: auth,
-                    logger: logger,
-                )
-            else {
-                owsFailDebug("Failed to fetch backup credential")
-                return nil
-            }
-
-            return metadata
+            return try await backupRequestManager.fetchMediaTierCdnRequestMetadata(
+                cdn: Int32(cdn),
+                auth: auth,
+                logger: logger,
+            )
         }
     }
 
