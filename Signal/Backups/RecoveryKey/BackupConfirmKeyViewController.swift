@@ -9,35 +9,16 @@ import SignalUI
 class BackupConfirmKeyViewController: EnterAccountEntropyPoolViewController, OWSNavigationChildController {
     private let aep: AccountEntropyPool
 
-    private let onBackPressed: (() -> Void)?
-    var shouldCancelNavigationBack: Bool {
-        onBackPressed != nil
-    }
-
     init(
         aep: AccountEntropyPool,
         onConfirmed: @escaping (BackupConfirmKeyViewController) -> Void,
         onSeeKeyAgain: @escaping () -> Void,
-        onBackPressed: (() -> Void)? = nil,
     ) {
         self.aep = aep
-        self.onBackPressed = onBackPressed
 
         super.init()
 
         OWSTableViewController2.removeBackButtonText(viewController: self)
-
-        if let onBackPressed {
-            navigationItem.hidesBackButton = true
-            navigationItem.leftBarButtonItem = .init(
-                image: UIImage(named: "chevron-left-bold-28"),
-                primaryAction: UIAction { _ in
-                    onBackPressed()
-                },
-            )
-
-            isModalInPresentation = true
-        }
 
         let seeKeyAgainButtonTitle = OWSLocalizedString(
             "BACKUP_ONBOARDING_CONFIRM_KEY_SEE_KEY_AGAIN_BUTTON_TITLE",

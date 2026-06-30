@@ -7,18 +7,46 @@ import SignalServiceKit
 import SignalUI
 import SwiftUI
 
-class BackupOnboardingKeyIntroViewController: HostingController<BackupOnboardingKeyIntroView> {
-    private let onDeviceAuthSucceeded: (LocalDeviceAuthentication.AuthSuccess) -> Void
+class BackupOnboardingKeyIntroViewController: HostingContainer<BackupOnboardingKeyIntroView> {
     private let viewModel: BackupsOnboardingKeyIntroViewModel
 
-    init(onDeviceAuthSucceeded: @escaping (LocalDeviceAuthentication.AuthSuccess) -> Void) {
-        self.onDeviceAuthSucceeded = onDeviceAuthSucceeded
+    private let onBackPressed: (BackupOnboardingKeyIntroViewController) -> Void
+    private let onDeviceAuthSucceeded: (LocalDeviceAuthentication.AuthSuccess) -> Void
+
+    init(
+        onBackPressed: @escaping (BackupOnboardingKeyIntroViewController) -> Void,
+        onDeviceAuthSucceeded: @escaping (LocalDeviceAuthentication.AuthSuccess) -> Void,
+    ) {
         self.viewModel = BackupsOnboardingKeyIntroViewModel()
+
+        self.onBackPressed = onBackPressed
+        self.onDeviceAuthSucceeded = onDeviceAuthSucceeded
 
         super.init(wrappedView: BackupOnboardingKeyIntroView(viewModel: viewModel))
 
         viewModel.actionsDelegate = self
         OWSTableViewController2.removeBackButtonText(viewController: self)
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        navigationItem.hidesBackButton = true
+        navigationItem.leftBarButtonItem = .init(
+            image: UIImage(named: "chevron-left-bold-28"),
+            primaryAction: UIAction { [weak self] _ in
+                guard let self else { return }
+                onBackPressed(self)
+            },
+        )
+
+        isModalInPresentation = true
+    }
+
+    // MARK: - OWSNavigationChildController
+
+    override var shouldCancelNavigationBack: Bool {
+        true
     }
 }
 

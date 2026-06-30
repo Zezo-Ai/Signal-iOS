@@ -102,6 +102,9 @@ class BackupOnboardingCoordinator {
 
         onboardingNavController.pushViewController(
             BackupOnboardingKeyIntroViewController(
+                onBackPressed: { [self] keyIntroViewController in
+                    promptToCancelOnboarding(fromViewController: keyIntroViewController)
+                },
                 onDeviceAuthSucceeded: { [self] authSuccess in
                     showRecordRecoveryKey(localDeviceAuthSuccess: authSuccess)
                 },
@@ -127,9 +130,6 @@ class BackupOnboardingCoordinator {
                 onContinuePressed: { [self] _ in
                     showConfirmRecoveryKey(aep: aep)
                 },
-                onBackPressed: { [weak self] in
-                    self?.promptToCancelOnboarding()
-                },
             ),
             animated: true,
         )
@@ -153,9 +153,6 @@ class BackupOnboardingCoordinator {
             },
             onSeeKeyAgain: {
                 onboardingNavController.popViewController(animated: true)
-            },
-            onBackPressed: { [weak self] in
-                self?.promptToCancelOnboarding()
             },
         )
 
@@ -207,8 +204,7 @@ class BackupOnboardingCoordinator {
     private func completeOnboarding() {
         guard
             let onboardingNavController,
-            let onboardingRootVCIndex = onboardingNavController.viewControllers
-                .firstIndex(where: { type(of: $0) == Self.onboardingRootViewControllerType })
+            let preOnboardingViewControllers = preOnboardingViewControllers()
         else {
             return
         }
@@ -217,16 +213,15 @@ class BackupOnboardingCoordinator {
             backupSettingsStore.setShouldOverrideShowBackupsOnboarding(false, tx: tx)
         }
 
-        let preOnboardingViewControllers = onboardingNavController.viewControllers[0..<onboardingRootVCIndex]
-        let backupSettingsViewController = BackupSettingsViewController(onAppearAction: .presentWelcomeToBackupsSheet)
-
         onboardingNavController.setViewControllers(
-            preOnboardingViewControllers + [backupSettingsViewController],
+            preOnboardingViewControllers + [
+                BackupSettingsViewController(onAppearAction: .presentWelcomeToBackupsSheet),
+            ],
             animated: true,
         )
     }
 
-    private func promptToCancelOnboarding() {
+    private func promptToCancelOnboarding(fromViewController: UIViewController) {
         let actionSheet = ActionSheetController(
             title: OWSLocalizedString(
                 "BACKUP_ONBOARDING_CANCEL_SHEET_TITLE",
@@ -244,11 +239,35 @@ class BackupOnboardingCoordinator {
             ),
             style: .default,
             handler: { [weak onboardingNavController] _ in
-                onboardingNavController?.popToRootViewController(animated: true)
+                guard
+                    let onboardingNavController,
+                    let preOnboardingViewControllers = self.preOnboardingViewControllers()
+                else {
+                    return
+                }
+
+                onboardingNavController.setViewControllers(
+                    preOnboardingViewControllers,
+                    animated: true,
+                )
             },
         ))
         actionSheet.addAction(.cancel)
 
-        onboardingNavController?.topViewController?.presentActionSheet(actionSheet)
+        fromViewController.presentActionSheet(actionSheet)
+    }
+
+    // MARK: -
+
+    private func preOnboardingViewControllers() -> [UIViewController]? {
+        guard
+            let onboardingNavController,
+            let onboardingRootVCIndex = onboardingNavController.viewControllers
+                .firstIndex(where: { type(of: $0) == Self.onboardingRootViewControllerType })
+        else {
+            return nil
+        }
+
+        return Array(onboardingNavController.viewControllers[0..<onboardingRootVCIndex])
     }
 }

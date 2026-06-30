@@ -32,7 +32,7 @@ extension EnvironmentValues {
 /// Useful when you want to manually set navigation item bar buttons from a
 /// UIKit context, to avoid `UIHostingController`'s behavior of only displaying
 /// bar buttons once fully appeared.
-open class HostingContainer<Wrapped: View>: UIViewController {
+open class HostingContainer<Wrapped: View>: UIViewController, OWSNavigationChildController {
     private let hostingController: HostingController<Wrapped>
 
     public init(wrappedView: Wrapped) {
@@ -51,13 +51,27 @@ open class HostingContainer<Wrapped: View>: UIViewController {
         hostingController.view.autoPinEdgesToSuperviewEdges()
         hostingController.didMove(toParent: self)
     }
-}
 
-// MARK: OWSNavigationChildController
+    // MARK: - OWSNavigationChildController
 
-extension HostingContainer: OWSNavigationChildController {
-    public var childForOWSNavigationConfiguration: (any OWSNavigationChildController)? {
-        hostingController
+    open var shouldCancelNavigationBack: Bool {
+        false
+    }
+
+    public var preferredNavigationBarStyle: OWSNavigationBarStyle {
+        hostingController.preferredNavigationBarStyle
+    }
+
+    public var navbarBackgroundColorOverride: UIColor? {
+        hostingController.navbarBackgroundColorOverride
+    }
+
+    public var navbarTintColorOverride: UIColor? {
+        hostingController.navbarTintColorOverride
+    }
+
+    public var prefersNavigationBarHidden: Bool {
+        hostingController.prefersNavigationBarHidden
     }
 }
 
