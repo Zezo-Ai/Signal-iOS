@@ -605,7 +605,7 @@
 "BACKUP_ONBOARDING_CONFIRM_KEY_SEE_KEY_AGAIN_BUTTON_TITLE" = "See Key Again";
 
 /* Subtitle for a view asking users to confirm their 'Recovery Key'. */
-"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "Enter the recovery key you just recorded";
+"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "Enter the recovery key you just saved.";
 
 /* Title for a view asking users to confirm their 'Recovery Key'. */
 "BACKUP_ONBOARDING_CONFIRM_KEY_TITLE" = "Confirm Your Recovery Key";
@@ -670,6 +670,12 @@
 /* Title for a button allowing users to create a new 'Recovery Key'. */
 "BACKUP_RECORD_KEY_CREATE_NEW_KEY_BUTTON_TITLE" = "Create New Key";
 
+/* Subtitle for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
+"BACKUP_RECORD_KEY_NEW_SUBTITLE" = "This new key will replace your old one, and will be required to recover your account and data. Store this key somewhere safe. If you lose it, you won’t be able to recover your account.";
+
+/* Title for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
+"BACKUP_RECORD_KEY_NEW_TITLE" = "Save Your New Recovery Key";
+
 /* Title for a button allowing users to save their 'Recovery Key' to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_BUTTON_TITLE" = "Save to Password Manager";
 
@@ -691,11 +697,11 @@
 /* Toast shown after the user successfully saves their 'Recovery Key' to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_SUCCESS_TOAST" = "Done. Check your password manager to verify.";
 
-/* Subtitle for a view allowing users to record their 'Recovery Key'. */
+/* Subtitle for a view allowing users to save their 'Recovery Key'. */
 "BACKUP_RECORD_KEY_SUBTITLE" = "This key is required to recover your account and data. Store this key somewhere safe. If you lose it, you won’t be able to recover your account.";
 
-/* Title for a view allowing users to record their 'Recovery Key'. */
-"BACKUP_RECORD_KEY_TITLE" = "Record Your Recovery Key";
+/* Title for a view allowing users to save their 'Recovery Key'. */
+"BACKUP_RECORD_KEY_TITLE" = "Save Your Recovery Key";
 
 /* Title for a button offering help if the user has forgotten their recovery key. */
 "BACKUP_RECOVERY_KEY_REMINDER_FORGOT_KEY_BUTTON" = "Forgot Key?";

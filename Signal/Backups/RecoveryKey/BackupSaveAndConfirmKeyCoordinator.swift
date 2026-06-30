@@ -5,10 +5,10 @@
 
 import SignalServiceKit
 
-class BackupRecordAndConfirmKeyCoordinator {
+class BackupSaveAndConfirmKeyCoordinator {
     enum Option {
-        case showConfirmKeyButton(onConfirmed: () -> Void)
-        case showCreateNewKeyButton(onPressed: (BackupRecordKeyViewController) -> Void)
+        case showConfirmKey(onConfirmed: () -> Void)
+        case showCreateNewKey(onPressed: (BackupSaveKeyViewController) -> Void)
     }
 
     private weak var navigationController: UINavigationController?
@@ -24,19 +24,19 @@ class BackupRecordAndConfirmKeyCoordinator {
     }
 
     func present(
-        aepMode: BackupRecordKeyViewController.AEPMode,
+        aepMode: BackupSaveKeyViewController.AEPMode,
         options: [Option],
     ) {
         guard let navigationController else {
             return
         }
 
-        let recordKeyViewController = BackupRecordKeyViewController(
+        let saveKeyViewController = BackupSaveKeyViewController(
             aepMode: aepMode,
             bottomButtonConfigs: options.compactMap { option in
                 switch option {
-                case .showConfirmKeyButton(let onConfirmed):
-                    return BackupRecordKeyViewController.BottomButtonConfig(
+                case .showConfirmKey(let onConfirmed):
+                    return BackupSaveKeyViewController.BottomButtonConfig(
                         titleText: CommonStrings.continueButton,
                         style: .primary,
                     ) { [self] _ in
@@ -45,22 +45,22 @@ class BackupRecordAndConfirmKeyCoordinator {
                             onConfirmed: onConfirmed,
                         )
                     }
-                case .showCreateNewKeyButton(let onPressed):
-                    return BackupRecordKeyViewController.BottomButtonConfig(
+                case .showCreateNewKey(let onPressed):
+                    return BackupSaveKeyViewController.BottomButtonConfig(
                         titleText: OWSLocalizedString(
                             "BACKUP_RECORD_KEY_CREATE_NEW_KEY_BUTTON_TITLE",
                             comment: "Title for a button allowing users to create a new 'Recovery Key'.",
                         ),
                         style: .secondary,
-                        action: { recordKeyViewController in
-                            onPressed(recordKeyViewController)
+                        action: { saveKeyViewController in
+                            onPressed(saveKeyViewController)
                         },
                     )
                 }
             },
         )
 
-        navigationController.pushViewController(recordKeyViewController, animated: true)
+        navigationController.pushViewController(saveKeyViewController, animated: true)
     }
 
     private func showConfirmKey(
@@ -72,7 +72,7 @@ class BackupRecordAndConfirmKeyCoordinator {
         }
 
         owsAssertDebug(
-            navigationController.topViewController is BackupRecordKeyViewController,
+            navigationController.topViewController is BackupSaveKeyViewController,
             "Unexpected topViewController! \(type(of: navigationController.topViewController))",
         )
 

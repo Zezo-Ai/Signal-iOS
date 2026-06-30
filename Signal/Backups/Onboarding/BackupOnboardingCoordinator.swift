@@ -110,7 +110,7 @@ class BackupOnboardingCoordinator {
                     promptToCancelOnboarding(fromViewController: keyIntroViewController)
                 },
                 onContinue: { [self] _ in
-                    showRecordAndConfirmKey()
+                    showSaveAndConfirmKey()
                 },
             ),
             animated: true,
@@ -119,7 +119,7 @@ class BackupOnboardingCoordinator {
 
     // MARK: -
 
-    private func showRecordAndConfirmKey() {
+    private func showSaveAndConfirmKey() {
         Task {
             guard
                 let authSuccess = await LocalDeviceAuthentication().performBiometricAuth(),
@@ -128,14 +128,14 @@ class BackupOnboardingCoordinator {
                 return
             }
 
-            _showRecordAndConfirmKey(
+            _showSaveAndConfirmKey(
                 aep: aep,
                 localDeviceAuthSuccess: authSuccess,
             )
         }
     }
 
-    private func _showRecordAndConfirmKey(
+    private func _showSaveAndConfirmKey(
         aep: AccountEntropyPool,
         localDeviceAuthSuccess: LocalDeviceAuthentication.AuthSuccess,
     ) {
@@ -143,13 +143,13 @@ class BackupOnboardingCoordinator {
             return
         }
 
-        let recordAndConfirmKeyCoordinator = BackupRecordAndConfirmKeyCoordinator(
+        let saveAndConfirmKeyCoordinator = BackupSaveAndConfirmKeyCoordinator(
             navigationController: onboardingNavController,
         )
-        recordAndConfirmKeyCoordinator.present(
+        saveAndConfirmKeyCoordinator.present(
             aepMode: .current(aep, localDeviceAuthSuccess),
             options: [
-                .showConfirmKeyButton(onConfirmed: { [self] in
+                .showConfirmKey(onConfirmed: { [self] in
                     Task {
                         do throws(SheetDisplayableError) {
                             try await showChooseBackupPlan()

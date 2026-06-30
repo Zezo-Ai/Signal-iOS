@@ -3143,7 +3143,7 @@
 		D98BC53A2EE49EF30052A81F /* DisappearingMessagesExpirationJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98BC5392EE49EEE0052A81F /* DisappearingMessagesExpirationJob.swift */; };
 		D98CA2AD2DF14A890060370E /* BackupOnboardingKeyIntroViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98CA2AC2DF14A830060370E /* BackupOnboardingKeyIntroViewController.swift */; };
 		D98CA2B12DF238EA0060370E /* LocalDeviceAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98CA2AF2DF171110060370E /* LocalDeviceAuthentication.swift */; };
-		D98CA2B32DF245140060370E /* BackupRecordKeyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98CA2B22DF2450E0060370E /* BackupRecordKeyViewController.swift */; };
+		D98CA2B32DF245140060370E /* BackupSaveKeyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98CA2B22DF2450E0060370E /* BackupSaveKeyViewController.swift */; };
 		D98CA2BE2DF398EF0060370E /* EnterAccountEntropyPoolViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98CA2BD2DF398DF0060370E /* EnterAccountEntropyPoolViewController.swift */; };
 		D98DD86028EE53B00089333E /* RemoteMegaphoneModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98DD85E28EE53B00089333E /* RemoteMegaphoneModel.swift */; };
 		D9905D822EB2AC9100BF22EC /* ReceiptCredentialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9905D812EB2AC8B00BF22EC /* ReceiptCredentialManager.swift */; };
@@ -3202,7 +3202,7 @@
 		D9B95A9629E6830B00D7CB95 /* JobRecordTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B95A9429E682E900D7CB95 /* JobRecordTest.swift */; };
 		D9B95A9B29E8923B00D7CB95 /* InMemoryDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B95A9929E8918200D7CB95 /* InMemoryDB.swift */; };
 		D9B95A9D29E894A600D7CB95 /* ValidatableModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B95A9C29E894A600D7CB95 /* ValidatableModel.swift */; };
-		D9BA97F42FEDEFA4009A4D5B /* BackupRecordAndConfirmKeyCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BA97F32FEDEF96009A4D5B /* BackupRecordAndConfirmKeyCoordinator.swift */; };
+		D9BA97F42FEDEFA4009A4D5B /* BackupSaveAndConfirmKeyCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BA97F32FEDEF96009A4D5B /* BackupSaveAndConfirmKeyCoordinator.swift */; };
 		D9BF53362D0814A000EC3DF0 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BF53352D08149D00EC3DF0 /* QRCodeView.swift */; };
 		D9BFB8BF2C4EE33C00D67881 /* BackupArchiveThreadMergeChatUpdateArchiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BFB8BE2C4EE33C00D67881 /* BackupArchiveThreadMergeChatUpdateArchiver.swift */; };
 		D9BFB8C82C4F02C900D67881 /* BackupArchiveSessionSwitchoverChatUpdateArchiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BFB8C72C4F02C900D67881 /* BackupArchiveSessionSwitchoverChatUpdateArchiver.swift */; };
@@ -7455,7 +7455,7 @@
 		D98BC5392EE49EEE0052A81F /* DisappearingMessagesExpirationJob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisappearingMessagesExpirationJob.swift; sourceTree = "<group>"; };
 		D98CA2AC2DF14A830060370E /* BackupOnboardingKeyIntroViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupOnboardingKeyIntroViewController.swift; sourceTree = "<group>"; };
 		D98CA2AF2DF171110060370E /* LocalDeviceAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalDeviceAuthentication.swift; sourceTree = "<group>"; };
-		D98CA2B22DF2450E0060370E /* BackupRecordKeyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupRecordKeyViewController.swift; sourceTree = "<group>"; };
+		D98CA2B22DF2450E0060370E /* BackupSaveKeyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupSaveKeyViewController.swift; sourceTree = "<group>"; };
 		D98CA2BD2DF398DF0060370E /* EnterAccountEntropyPoolViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnterAccountEntropyPoolViewController.swift; sourceTree = "<group>"; };
 		D98DD85D28EE53B00089333E /* RemoteMegaphoneFetcher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteMegaphoneFetcher.swift; sourceTree = "<group>"; };
 		D98DD85E28EE53B00089333E /* RemoteMegaphoneModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteMegaphoneModel.swift; sourceTree = "<group>"; };
@@ -7515,7 +7515,7 @@
 		D9B95A9429E682E900D7CB95 /* JobRecordTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobRecordTest.swift; sourceTree = "<group>"; };
 		D9B95A9929E8918200D7CB95 /* InMemoryDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryDB.swift; sourceTree = "<group>"; };
 		D9B95A9C29E894A600D7CB95 /* ValidatableModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidatableModel.swift; sourceTree = "<group>"; };
-		D9BA97F32FEDEF96009A4D5B /* BackupRecordAndConfirmKeyCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupRecordAndConfirmKeyCoordinator.swift; sourceTree = "<group>"; };
+		D9BA97F32FEDEF96009A4D5B /* BackupSaveAndConfirmKeyCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupSaveAndConfirmKeyCoordinator.swift; sourceTree = "<group>"; };
 		D9BF53352D08149D00EC3DF0 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		D9BFB8BE2C4EE33C00D67881 /* BackupArchiveThreadMergeChatUpdateArchiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupArchiveThreadMergeChatUpdateArchiver.swift; sourceTree = "<group>"; };
 		D9BFB8C72C4F02C900D67881 /* BackupArchiveSessionSwitchoverChatUpdateArchiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupArchiveSessionSwitchoverChatUpdateArchiver.swift; sourceTree = "<group>"; };
@@ -13956,9 +13956,9 @@
 				D949C4042DF3A588007E095C /* BackupConfirmKeyViewController.swift */,
 				D93BDD932E43063B00779BD8 /* BackupKeepKeySafeSheet.swift */,
 				D9697C152FD78FDD00119F72 /* BackupNeverShareRecoveryKeySheet.swift */,
-				D9BA97F32FEDEF96009A4D5B /* BackupRecordAndConfirmKeyCoordinator.swift */,
-				D98CA2B22DF2450E0060370E /* BackupRecordKeyViewController.swift */,
 				04E66D412DFF3A3E0059DBAC /* BackupRecoveryKeyReminderCoordinator.swift */,
+				D9BA97F32FEDEF96009A4D5B /* BackupSaveAndConfirmKeyCoordinator.swift */,
+				D98CA2B22DF2450E0060370E /* BackupSaveKeyViewController.swift */,
 				D92812DD2FA94B6E00667DCF /* DisplayableAccountEntropyPool.swift */,
 				D98CA2BD2DF398DF0060370E /* EnterAccountEntropyPoolViewController.swift */,
 			);
@@ -18163,11 +18163,11 @@
 				D92B55F52FD0E9600083B070 /* BackupPlanTermsAndConditionsView.swift in Sources */,
 				D92B55F32FD0E0120083B070 /* BackupPlanUpsellConfiguration.swift in Sources */,
 				D92B55F12FD0D96C0083B070 /* BackupPlanUpsellViewController.swift in Sources */,
-				D9BA97F42FEDEFA4009A4D5B /* BackupRecordAndConfirmKeyCoordinator.swift in Sources */,
-				D98CA2B32DF245140060370E /* BackupRecordKeyViewController.swift in Sources */,
 				04E66D422DFF3A4B0059DBAC /* BackupRecoveryKeyReminderCoordinator.swift in Sources */,
 				50438A8E2ECBBDF600FCB28F /* BackupRefreshManager.swift in Sources */,
 				B9A53B912CF507FB0000578B /* BackupRestoreProgressModal.swift in Sources */,
+				D9BA97F42FEDEFA4009A4D5B /* BackupSaveAndConfirmKeyCoordinator.swift in Sources */,
+				D98CA2B32DF245140060370E /* BackupSaveKeyViewController.swift in Sources */,
 				D92B55F72FD125C50083B070 /* BackupsBackUpYourMediaMegaphone.swift in Sources */,
 				0480F0002E57C51A006CBB29 /* BackupsEnabledRecentlyNotificationMegaphone.swift in Sources */,
 				D951F5312D9B236700C5EBF3 /* BackupSettingsViewController.swift in Sources */,

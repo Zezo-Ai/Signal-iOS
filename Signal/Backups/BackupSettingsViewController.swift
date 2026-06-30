@@ -549,7 +549,7 @@ class BackupSettingsViewController:
                     return
                 }
 
-                _showRecordAndConfirmExistingRecoveryKey(
+                _showSaveAndConfirmExistingRecoveryKey(
                     aep: aep,
                     authSuccess: authSuccess,
                     onConfirmed: { [weak self] in
@@ -571,7 +571,7 @@ class BackupSettingsViewController:
     }
 
     @MainActor
-    private func _showRecordAndConfirmExistingRecoveryKey(
+    private func _showSaveAndConfirmExistingRecoveryKey(
         aep: AccountEntropyPool,
         authSuccess: LocalDeviceAuthentication.AuthSuccess,
         onConfirmed: @escaping () -> Void,
@@ -580,13 +580,13 @@ class BackupSettingsViewController:
             return
         }
 
-        let recordAndConfirmKeyCoordinator = BackupRecordAndConfirmKeyCoordinator(
+        let saveAndConfirmKeyCoordinator = BackupSaveAndConfirmKeyCoordinator(
             navigationController: navigationController,
         )
-        recordAndConfirmKeyCoordinator.present(
+        saveAndConfirmKeyCoordinator.present(
             aepMode: .current(aep, authSuccess),
             options: [
-                .showConfirmKeyButton(onConfirmed: onConfirmed),
+                .showConfirmKey(onConfirmed: onConfirmed),
             ],
         )
     }
@@ -1404,20 +1404,20 @@ class BackupSettingsViewController:
             return
         }
 
-        let recordAndConfirmKeyCoordinator = BackupRecordAndConfirmKeyCoordinator(
+        let saveAndConfirmKeyCoordinator = BackupSaveAndConfirmKeyCoordinator(
             navigationController: navigationController,
         )
-        recordAndConfirmKeyCoordinator.present(
+        saveAndConfirmKeyCoordinator.present(
             aepMode: .current(aep, authSuccess),
             options: [
-                .showCreateNewKeyButton(onPressed: { recordKeyViewController in
+                .showCreateNewKey(onPressed: { saveKeyViewController in
                     Task { [weak self] in
                         guard let self else { return }
 
                         // If appropriate, the warning sheet will let the user
                         // continue in a "create new AEP" flow.
                         await showCreateNewRecoveryKeyWarningSheet(
-                            fromViewController: recordKeyViewController,
+                            fromViewController: saveKeyViewController,
                         )
                     }
                 }),
@@ -1427,7 +1427,7 @@ class BackupSettingsViewController:
 
     @MainActor
     private func showCreateNewRecoveryKeyWarningSheet(
-        fromViewController: BackupRecordKeyViewController,
+        fromViewController: BackupSaveKeyViewController,
     ) async {
         let (
             currentBackupPlan,
@@ -1511,7 +1511,7 @@ class BackupSettingsViewController:
     }
 
     private func _showCreateNewRecoveryKeyWarningSheet(
-        fromViewController: BackupRecordKeyViewController,
+        fromViewController: BackupSaveKeyViewController,
         currentBackupPlan: BackupPlan,
     ) {
         let primaryButtonTitle: String
@@ -1549,7 +1549,7 @@ class BackupSettingsViewController:
                 action: { sheet in
                     sheet.dismiss(animated: true) { [weak self] in
                         guard let self else { return }
-                        showRecordNewRecoveryKey()
+                        showSaveNewRecoveryKey()
                     }
                 },
             ),
@@ -1562,20 +1562,20 @@ class BackupSettingsViewController:
         fromViewController.present(warningSheet, animated: true)
     }
 
-    private func showRecordNewRecoveryKey() {
+    private func showSaveNewRecoveryKey() {
         guard let navigationController else {
             return
         }
 
         let newCandidateAEP = AccountEntropyPool()
 
-        let recordAndConfirmKeyCoordinator = BackupRecordAndConfirmKeyCoordinator(
+        let saveAndConfirmKeyCoordinator = BackupSaveAndConfirmKeyCoordinator(
             navigationController: navigationController,
         )
-        recordAndConfirmKeyCoordinator.present(
+        saveAndConfirmKeyCoordinator.present(
             aepMode: .newCandidate(newCandidateAEP),
             options: [
-                .showConfirmKeyButton(onConfirmed: { [weak self] in
+                .showConfirmKey(onConfirmed: { [weak self] in
                     guard let self else { return }
 
                     // Pop all the way back to Backup Settings.

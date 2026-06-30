@@ -8,7 +8,7 @@ import SignalServiceKit
 import SignalUI
 import SwiftUI
 
-class BackupRecordKeyViewController: OWSViewController, OWSNavigationChildController {
+class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildController {
     struct BottomButtonConfig {
         enum Style {
             case primary
@@ -17,7 +17,7 @@ class BackupRecordKeyViewController: OWSViewController, OWSNavigationChildContro
 
         let titleText: String
         let style: Style
-        let action: (BackupRecordKeyViewController) -> Void
+        let action: (BackupSaveKeyViewController) -> Void
     }
 
     enum AEPMode {
@@ -34,15 +34,17 @@ class BackupRecordKeyViewController: OWSViewController, OWSNavigationChildContro
         }
     }
 
+    private let aepMode: AEPMode
     private let bottomButtonConfigs: [BottomButtonConfig]
     private let displayableAEP: DisplayableAccountEntropyPool
 
-    /// Initialize a `BackupRecordKeyViewController` with the specified bottom
+    /// Initialize a `BackupSaveKeyViewController` with the specified bottom
     /// buttons.
     init(
         aepMode: AEPMode,
         bottomButtonConfigs: [BottomButtonConfig],
     ) {
+        self.aepMode = aepMode
         self.displayableAEP = DisplayableAccountEntropyPool(aep: aepMode.aep)
         self.bottomButtonConfigs = bottomButtonConfigs
 
@@ -69,15 +71,31 @@ class BackupRecordKeyViewController: OWSViewController, OWSNavigationChildContro
         heroIconView.image = .backupsLock
         heroIconView.contentMode = .scaleAspectFit
 
-        let headlineLabel = UILabel.title1Label(text: OWSLocalizedString(
-            "BACKUP_RECORD_KEY_TITLE",
-            comment: "Title for a view allowing users to record their 'Recovery Key'.",
-        ))
+        let titleText: String
+        let subtitleText: String
+        switch aepMode {
+        case .current:
+            titleText = OWSLocalizedString(
+                "BACKUP_RECORD_KEY_TITLE",
+                comment: "Title for a view allowing users to save their 'Recovery Key'.",
+            )
+            subtitleText = OWSLocalizedString(
+                "BACKUP_RECORD_KEY_SUBTITLE",
+                comment: "Subtitle for a view allowing users to save their 'Recovery Key'.",
+            )
+        case .newCandidate:
+            titleText = OWSLocalizedString(
+                "BACKUP_RECORD_KEY_NEW_TITLE",
+                comment: "Title for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new.",
+            )
+            subtitleText = OWSLocalizedString(
+                "BACKUP_RECORD_KEY_NEW_SUBTITLE",
+                comment: "Subtitle for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new.",
+            )
+        }
 
-        let subheadlineLabel = UILabel.explanationTextLabel(text: OWSLocalizedString(
-            "BACKUP_RECORD_KEY_SUBTITLE",
-            comment: "Subtitle for a view allowing users to record their 'Recovery Key'.",
-        ))
+        let headlineLabel = UILabel.title1Label(text: titleText)
+        let subheadlineLabel = UILabel.explanationTextLabel(text: subtitleText)
 
         let aepTextView = AccountEntropyPoolTextView(mode: .display(displayableAEP))
         aepTextView.backgroundColor = .Signal.secondaryGroupedBackground
@@ -254,12 +272,12 @@ class BackupRecordKeyViewController: OWSViewController, OWSNavigationChildContro
 
 #if DEBUG
 
-private extension BackupRecordKeyViewController {
+private extension BackupSaveKeyViewController {
     static func forPreview(
         aepMode: AEPMode,
         bottomButtonConfigs: [BottomButtonConfig],
-    ) -> BackupRecordKeyViewController {
-        return BackupRecordKeyViewController(
+    ) -> BackupSaveKeyViewController {
+        return BackupSaveKeyViewController(
             aepMode: aepMode,
             bottomButtonConfigs: bottomButtonConfigs,
         )
@@ -268,15 +286,15 @@ private extension BackupRecordKeyViewController {
 
 @available(iOS 17, *)
 #Preview {
-    UINavigationController(rootViewController: BackupRecordKeyViewController.forPreview(
+    UINavigationController(rootViewController: BackupSaveKeyViewController.forPreview(
         aepMode: .newCandidate(AccountEntropyPool()),
         bottomButtonConfigs: [
-            BackupRecordKeyViewController.BottomButtonConfig(
+            BackupSaveKeyViewController.BottomButtonConfig(
                 titleText: "Continue",
                 style: .primary,
                 action: { _ in print("Continue!") },
             ),
-            BackupRecordKeyViewController.BottomButtonConfig(
+            BackupSaveKeyViewController.BottomButtonConfig(
                 titleText: "Create New Key",
                 style: .secondary,
                 action: { _ in print("Create New Key!") },

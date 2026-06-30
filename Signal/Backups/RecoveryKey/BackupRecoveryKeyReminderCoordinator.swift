@@ -35,7 +35,7 @@ class BackupRecoveryKeyReminderCoordinator {
             ReminderEnterRecoveryKeyViewController(
                 aep: aep,
                 onForgotKeyTapped: { [weak self] in
-                    self?.showRecordRecoveryKey()
+                    self?.showSaveRecoveryKey()
                 },
                 onEntryConfirmed: { [weak self] in
                     self?.showKeepKeySafeSheet()
@@ -63,14 +63,14 @@ class BackupRecoveryKeyReminderCoordinator {
         backupKeyReminderNavController?.present(keepKeySafeSheet, animated: true)
     }
 
-    private func showRecordRecoveryKey() {
+    private func showSaveRecoveryKey() {
         Task { @MainActor in
             guard
                 let authSuccess = await LocalDeviceAuthentication().performBiometricAuth(),
                 let backupKeyReminderNavController
             else { return }
 
-            _showRecordRecoveryKey(
+            _showSaveRecoveryKey(
                 backupKeyReminderNavController: backupKeyReminderNavController,
                 localDeviceAuthSuccess: authSuccess,
                 aep: aep,
@@ -78,13 +78,13 @@ class BackupRecoveryKeyReminderCoordinator {
         }
     }
 
-    private func _showRecordRecoveryKey(
+    private func _showSaveRecoveryKey(
         backupKeyReminderNavController: UINavigationController,
         localDeviceAuthSuccess: LocalDeviceAuthentication.AuthSuccess,
         aep: AccountEntropyPool,
     ) {
         backupKeyReminderNavController.pushViewController(
-            BackupRecordKeyViewController(
+            BackupSaveKeyViewController(
                 aepMode: .current(aep, localDeviceAuthSuccess),
                 bottomButtonConfigs: [],
             ),
