@@ -52,13 +52,13 @@ class InternalBackupSettingsViewController: OWSTableViewController2 {
                 return
             }
 
-            BackupRecoveryKeyReminderCoordinator(
+            BackupRecoveryKeyReminderCoordinator().present(
                 aep: aep,
                 fromViewController: self,
                 onSuccess: {
                     self.presentToast(text: "Success!")
                 },
-            ).presentVerifyFlow()
+            )
         })
         section.add(.actionItem(withText: "Backup media integrity check") { [weak self] in
             let vc = InternalListMediaViewController()

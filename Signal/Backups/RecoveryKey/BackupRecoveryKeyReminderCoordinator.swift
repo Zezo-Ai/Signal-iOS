@@ -8,37 +8,40 @@ import SignalServiceKit
 import UIKit
 
 class BackupRecoveryKeyReminderCoordinator {
-    private let aep: AccountEntropyPool
-    private let fromViewController: UIViewController
-    private let onSuccess: () -> Void
-
     private weak var backupKeyReminderNavController: UINavigationController?
 
-    init(
-        aep: AccountEntropyPool,
-        fromViewController: UIViewController,
-        onSuccess: @escaping () -> Void,
-    ) {
-        self.aep = aep
-        self.fromViewController = fromViewController
-        self.onSuccess = onSuccess
+    init() {}
+
+    deinit {
+        Logger.verbose("")
     }
 
-    func presentVerifyFlow() {
+    func present(
+        aep: AccountEntropyPool,
+        fromViewController: UIViewController,
+        onSuccess _onSuccess: @escaping () -> Void,
+    ) {
         let navController = UINavigationController()
         backupKeyReminderNavController = navController
 
-        // Retain ourselves as long as the nav controller is presented.
-        ObjectRetainer.retainObject(self, forLifetimeOf: navController)
+        let onSuccess: () -> Void = { [self] in
+            backupKeyReminderNavController?.dismiss(animated: true)
+            _onSuccess()
+        }
 
         navController.viewControllers = [
             ReminderEnterRecoveryKeyViewController(
                 aep: aep,
-                onForgotKeyTapped: { [weak self] in
-                    self?.showSaveRecoveryKey()
+                onForgotKeyTapped: { [self] in
+                    showSaveAndConfirmRecoveryKey(
+                        aep: aep,
+                        onSuccess: onSuccess,
+                    )
                 },
-                onEntryConfirmed: { [weak self] in
-                    self?.showKeepKeySafeSheet()
+                onEntryConfirmed: { [self] in
+                    showKeepKeySafeSheet(
+                        onSuccess: onSuccess,
+                    )
                 },
             ),
         ]
@@ -46,12 +49,11 @@ class BackupRecoveryKeyReminderCoordinator {
         fromViewController.present(navController, animated: true)
     }
 
-    private func showKeepKeySafeSheet() {
+    private func showKeepKeySafeSheet(
+        onSuccess: @escaping () -> Void,
+    ) {
         let keepKeySafeSheet = BackupKeepKeySafeSheet(
-            onContinue: { [weak self] in
-                guard let self else { return }
-
-                backupKeyReminderNavController?.dismiss(animated: true)
+            onContinue: {
                 onSuccess()
             },
             secondaryButton: .dismissing(
@@ -63,32 +65,44 @@ class BackupRecoveryKeyReminderCoordinator {
         backupKeyReminderNavController?.present(keepKeySafeSheet, animated: true)
     }
 
-    private func showSaveRecoveryKey() {
+    private func showSaveAndConfirmRecoveryKey(
+        aep: AccountEntropyPool,
+        onSuccess: @escaping () -> Void,
+    ) {
         Task { @MainActor in
             guard
-                let authSuccess = await LocalDeviceAuthentication().performBiometricAuth(),
-                let backupKeyReminderNavController
-            else { return }
+                let authSuccess = await LocalDeviceAuthentication().performBiometricAuth()
+            else {
+                return
+            }
 
-            _showSaveRecoveryKey(
-                backupKeyReminderNavController: backupKeyReminderNavController,
-                localDeviceAuthSuccess: authSuccess,
+            _showSaveAndConfirmRecoveryKey(
                 aep: aep,
+                localDeviceAuthSuccess: authSuccess,
+                onSuccess: onSuccess,
             )
         }
     }
 
-    private func _showSaveRecoveryKey(
-        backupKeyReminderNavController: UINavigationController,
-        localDeviceAuthSuccess: LocalDeviceAuthentication.AuthSuccess,
+    private func _showSaveAndConfirmRecoveryKey(
         aep: AccountEntropyPool,
+        localDeviceAuthSuccess: LocalDeviceAuthentication.AuthSuccess,
+        onSuccess: @escaping () -> Void,
     ) {
-        backupKeyReminderNavController.pushViewController(
-            BackupSaveKeyViewController(
-                aepMode: .current(aep, localDeviceAuthSuccess),
-                bottomButtonConfigs: [],
-            ),
-            animated: true,
+        guard let backupKeyReminderNavController else {
+            return
+        }
+
+        let saveAndConfirmKeyCoordinator = BackupSaveAndConfirmKeyCoordinator(
+            navigationController: backupKeyReminderNavController,
+        )
+        saveAndConfirmKeyCoordinator.present(
+            aepMode: .current(aep, localDeviceAuthSuccess),
+            options: [
+                .showConfirmKey(onConfirmed: {
+                    onSuccess()
+                }),
+            ],
         )
     }
 }

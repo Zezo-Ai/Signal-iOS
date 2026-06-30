@@ -81,8 +81,8 @@ class BackupSaveAndConfirmKeyCoordinator {
             onConfirmed: { _ in
                 onConfirmed()
             },
-            onSeeKeyAgain: {
-                navigationController.popViewController(animated: true)
+            onSeeKeyAgain: { [weak navigationController] in
+                navigationController?.popViewController(animated: true)
             },
         )
 

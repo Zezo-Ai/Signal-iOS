@@ -42,7 +42,7 @@ class RecoveryKeyReminderMegaphone: Megaphone {
                 return
             }
 
-            BackupRecoveryKeyReminderCoordinator(
+            BackupRecoveryKeyReminderCoordinator().present(
                 aep: aep,
                 fromViewController: fromViewController,
                 onSuccess: {
@@ -58,7 +58,7 @@ class RecoveryKeyReminderMegaphone: Megaphone {
 
                     NotificationCenter.default.post(name: .megaphoneStateDidChange, object: nil)
                 },
-            ).presentVerifyFlow()
+            )
         }
 
         let secondaryButton = snoozeButton(
