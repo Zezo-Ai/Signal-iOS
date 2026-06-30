@@ -576,6 +576,7 @@ final class BackupSubscriptionManagerImpl: BackupSubscriptionManager {
                 await db.awaitableWrite { tx in
                     setRedemptionAttemptIsNecessary(tx: tx)
                 }
+                logger.info("Successful StoreKit purchase.")
                 return .success
             case .unverified:
                 throw OWSAssertionError(
