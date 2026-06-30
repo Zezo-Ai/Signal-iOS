@@ -1930,7 +1930,7 @@ struct BackupSettingsView: View {
     }
 
     var body: some View {
-        SignalList {
+        SignalList(sectionSpacing: 20) {
             if viewModel.backupSubscriptionAlreadyRedeemed {
                 SignalSection {
                     HStack(alignment: .center, spacing: 16) {
@@ -2141,11 +2141,11 @@ struct BackupSettingsView: View {
                     }
 
                     Text(footerText)
-                        .foregroundStyle(Color.Signal.secondaryLabel)
-                        .font(.caption)
                 }
 
-                SignalSection {
+                // There is a minimum 6 spacing below the footer text, so
+                // 18 here gives us the desired 24 spacing for the section
+                SignalSection(sectionSpacing: 18) {
                     Button {
                         viewModel.disableBackups()
                     } label: {
@@ -2932,38 +2932,78 @@ private struct BackupSubscriptionLoadedView: View {
     let loadedBackupSubscription: BackupSettingsViewModel.BackupSubscriptionLoadingState.LoadedBackupSubscription
     let viewModel: BackupSettingsViewModel
 
-    var body: some View {
+    private var headerLabels: some View {
         VStack(alignment: .leading) {
+            headerView()
+            descriptionView()
+        }
+    }
+
+    private var headerIcon: some View {
+        Group {
+            switch loadedBackupSubscription {
+            case
+                .freeAndEnabled,
+                .freeAndDisabled,
+                .paidButFreeForTesters,
+                .paid,
+                .paidButExpiring,
+                .paidButExpired,
+                .paidButFailedToRenew:
+                Image(.backupsSubscribed).resizable()
+            case .paidButIAPNotFoundLocally:
+                Image(.backupsLogoWarningBadged).resizable()
+            }
+        }
+        .frame(width: 64, height: 64)
+        .padding(.leading, 16)
+    }
+
+    private var hContent: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 16) {
+                headerLabels
+
+                buttonsView()
+            }
+            .padding(.top, 4)
+
+            Spacer()
+
+            headerIcon
+        }
+        .padding(4)
+    }
+
+    private var vContent: some View {
+        VStack(alignment: .leading, spacing: 16) {
             HStack {
-                VStack(alignment: .leading) {
-                    headerView()
-                    descriptionView()
-                }
+                headerLabels
 
                 Spacer()
 
-                Group {
-                    switch loadedBackupSubscription {
-                    case
-                        .freeAndEnabled,
-                        .freeAndDisabled,
-                        .paidButFreeForTesters,
-                        .paid,
-                        .paidButExpiring,
-                        .paidButExpired,
-                        .paidButFailedToRenew:
-                        Image(.backupsSubscribed).resizable()
-                    case .paidButIAPNotFoundLocally:
-                        Image(.backupsLogoWarningBadged).resizable()
-                    }
-                }
-                .frame(width: 64, height: 64)
-                .padding(.leading, 16)
+                headerIcon
             }
 
             buttonsView()
         }
         .padding(4)
+    }
+
+    var body: some View {
+        switch loadedBackupSubscription {
+        case .freeAndEnabled,
+             .freeAndDisabled,
+             .paidButFreeForTesters,
+             .paid,
+             .paidButExpiring,
+             .paidButExpired,
+             .paidButFailedToRenew:
+            hContent
+        case .paidButIAPNotFoundLocally:
+            // Two horizontal buttons need full width available
+            vContent
+        }
     }
 
     @ViewBuilder

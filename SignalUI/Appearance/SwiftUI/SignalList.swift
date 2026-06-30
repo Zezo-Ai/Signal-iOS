@@ -8,9 +8,14 @@ public import SwiftUI
 // MARK: - SignalList
 
 public struct SignalList<Content: View>: View {
+    private let sectionSpacing: CGFloat?
     private var content: Content
 
-    public init(@ViewBuilder content: () -> Content) {
+    public init(
+        sectionSpacing: CGFloat? = nil,
+        @ViewBuilder content: () -> Content,
+    ) {
+        self.sectionSpacing = sectionSpacing
         self.content = content()
     }
 
@@ -31,11 +36,21 @@ public struct SignalList<Content: View>: View {
         .padding(.horizontal, horizontalPadding)
     }
 
+    @available(iOS 16.0, *)
+    private var listWithBackground: some View {
+        self.list
+            .scrollContentBackground(.hidden)
+            .background(Color.Signal.groupedBackground)
+    }
+
     public var body: some View {
         if #available(iOS 16.0, *) {
-            self.list
-                .scrollContentBackground(.hidden)
-                .background(Color.Signal.groupedBackground)
+            if #available(iOS 17, *), let sectionSpacing {
+                listWithBackground
+                    .listSectionSpacing(sectionSpacing)
+            } else {
+                listWithBackground
+            }
         } else {
             self.list
         }
@@ -53,37 +68,60 @@ public struct SignalSection<Content: View, Header: View, Footer: View>: View {
         case content(Content)
     }
 
+    /// Only applies on iOS 17+
+    private let sectionSpacing: CGFloat?
     private let components: Components
 
     public init(
+        sectionSpacing: CGFloat? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder header: () -> Header,
         @ViewBuilder footer: () -> Footer,
     ) {
+        self.sectionSpacing = sectionSpacing
         components = .contentHeaderFooter(content(), header(), footer())
     }
 
     public init(
+        sectionSpacing: CGFloat? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder header: () -> Header,
     ) where Footer == EmptyView {
+        self.sectionSpacing = sectionSpacing
         components = .contentHeader(content(), header())
     }
 
     public init(
+        sectionSpacing: CGFloat? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder footer: () -> Footer,
     ) where Header == EmptyView {
+        self.sectionSpacing = sectionSpacing
         components = .contentFooter(content(), footer())
     }
 
     public init(
+        sectionSpacing: CGFloat? = nil,
         @ViewBuilder content: () -> Content,
     ) where Footer == EmptyView, Header == EmptyView {
+        self.sectionSpacing = sectionSpacing
         components = .content(content())
     }
 
+    private var footerExtraTopPadding: CGFloat = 4
+
+    @ViewBuilder
     public var body: some View {
+        if #available(iOS 17, *), let sectionSpacing {
+            section
+                .listSectionSpacing(sectionSpacing)
+        } else {
+            section
+        }
+    }
+
+    @ViewBuilder
+    private var section: some View {
         switch components {
         case let .contentHeaderFooter(content, header, footer):
             Section {
@@ -96,6 +134,7 @@ public struct SignalSection<Content: View, Header: View, Footer: View>: View {
                 }
             } footer: {
                 footer
+                    .padding(.top, footerExtraTopPadding)
             }
         case let .contentHeader(content, header):
             Section {
@@ -114,6 +153,7 @@ public struct SignalSection<Content: View, Header: View, Footer: View>: View {
                 }
             } footer: {
                 footer
+                    .padding(.top, footerExtraTopPadding)
             }
         case let .content(content):
             Section {
