@@ -840,7 +840,8 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
     /// This operation can be slow, as it involves a potentially-heavy FTS
     /// query. Importantly, this method is `nonisolated` such that it doesn't
     /// inherit the `@MainActor` isolation of `UIViewController`.
-    private nonisolated func findThreadRowIdsMatchingSearchTerm(
+    @concurrent
+    private func findThreadRowIdsMatchingSearchTerm(
         _ searchTerm: String,
     ) async throws(CancellationError) -> [Int64] {
         return try self.deps.databaseStorage.read { tx throws(CancellationError) -> [Int64] in
@@ -1220,7 +1221,8 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
         self.peekAllowance -= peekBatch.count
     }
 
-    private nonisolated static func peekCallLink(rootKey: CallLinkRootKey, deps: Dependencies) async throws {
+    @concurrent
+    private static func peekCallLink(rootKey: CallLinkRootKey, deps: Dependencies) async throws {
         let registeredState = try deps.tsAccountManager.registeredStateWithMaybeSneakyTransaction()
         let authCredential = try await deps.callService.authCredentialManager.fetchCallLinkAuthCredential(
             localIdentifiers: registeredState.localIdentifiers,

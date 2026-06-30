@@ -823,7 +823,8 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
 
         // MARK: Downloading
 
-        private nonisolated func downloadRecord(
+        @concurrent
+        private func downloadRecord(
             _ record: QueuedAttachmentDownloadRecord,
         ) async -> TaskRecordResult {
             guard
@@ -1112,7 +1113,8 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             return .success
         }
 
-        private nonisolated func quoteUnquoteDownloadQuotedReplyFromOriginalStream(
+        @concurrent
+        private func quoteUnquoteDownloadQuotedReplyFromOriginalStream(
             originalAttachmentIdForQuotedReply: Attachment.IDType,
             record: QueuedAttachmentDownloadRecord,
         ) async -> Bool {
@@ -1133,7 +1135,8 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             }
         }
 
-        private nonisolated func quoteUnquoteDownloadStickerFromInstalledPackIfPossible(
+        @concurrent
+        private func quoteUnquoteDownloadStickerFromInstalledPackIfPossible(
             record: QueuedAttachmentDownloadRecord,
         ) async -> Bool {
             let installedSticker: InstalledStickerRecord? = db.read { tx in
@@ -1838,7 +1841,8 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             case estimatedSizeBytes(UInt64)
         }
 
-        private nonisolated func performDownload(
+        @concurrent
+        private func performDownload(
             downloadState: DownloadState,
             progresses: [OWSProgressSink],
             maxDownloadSizeBytes: UInt64,

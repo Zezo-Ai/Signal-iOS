@@ -466,7 +466,8 @@ public class ShareViewController: OWSNavigationController, ShareViewDelegate, SA
         throw ShareViewControllerError.noConformingInputItem
     }
 
-    private nonisolated func buildAttachments(
+    @concurrent
+    private func buildAttachments(
         for itemsAndProgresses: [(TypedItemProvider, Progress)],
         attachmentLimits: OutgoingAttachmentLimits,
     ) async throws -> [TypedItem] {

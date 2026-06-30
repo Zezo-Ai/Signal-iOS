@@ -53,7 +53,8 @@ extension DonationPaymentDetailsViewController {
         }
     }
 
-    private nonisolated func throwIfAlreadySendingGift(threadUniqueId: String) async throws {
+    @concurrent
+    private func throwIfAlreadySendingGift(threadUniqueId: String) async throws {
         try SSKEnvironment.shared.databaseStorageRef.read { transaction in
             try DonationViewsUtil.Gifts.throwIfAlreadySendingGift(
                 threadId: threadUniqueId,

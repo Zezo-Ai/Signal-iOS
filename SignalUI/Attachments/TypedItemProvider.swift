@@ -181,7 +181,8 @@ public struct TypedItemProvider {
 
     // MARK: Methods
 
-    public nonisolated func buildAttachment(
+    @concurrent
+    public func buildAttachment(
         attachmentLimits: OutgoingAttachmentLimits,
         progress: Progress? = nil,
     ) async throws -> TypedItem {
@@ -260,7 +261,8 @@ public struct TypedItemProvider {
         return .other(attachment)
     }
 
-    private nonisolated func buildFileAttachment(
+    @concurrent
+    private func buildFileAttachment(
         mustBeVisualMedia: Bool,
         attachmentLimits: OutgoingAttachmentLimits,
         progress: Progress?,
@@ -295,7 +297,8 @@ public struct TypedItemProvider {
         )
     }
 
-    private nonisolated func loadDataRepresentation(
+    @concurrent
+    private func loadDataRepresentation(
         overrideTypeIdentifier: String? = nil,
     ) async throws -> Data {
         try await withCheckedThrowingContinuation { continuation in
@@ -313,7 +316,8 @@ public struct TypedItemProvider {
         }
     }
 
-    private nonisolated func loadObjectWithKeyedUnarchiverFallback<T>(
+    @concurrent
+    private func loadObjectWithKeyedUnarchiverFallback<T>(
         overrideTypeIdentifier: String? = nil,
         cannotLoadError: ItemProviderError,
         failedLoadError: ItemProviderError,
@@ -403,7 +407,8 @@ public struct TypedItemProvider {
         return (dataSource, dataUTI)
     }
 
-    private nonisolated func _buildFileAttachment(
+    @concurrent
+    private func _buildFileAttachment(
         dataSource: DataSourcePath,
         dataUTI: String,
         mustBeVisualMedia: Bool,

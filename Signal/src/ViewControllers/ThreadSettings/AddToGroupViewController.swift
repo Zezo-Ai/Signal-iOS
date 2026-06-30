@@ -56,7 +56,8 @@ public class AddToGroupViewController: OWSTableViewController2 {
         self.groupThreads = await fetchGroupThreads()
     }
 
-    private nonisolated func fetchGroupThreads() async -> [TSGroupThread] {
+    @concurrent
+    private func fetchGroupThreads() async -> [TSGroupThread] {
         let databaseStorage = SSKEnvironment.shared.databaseStorageRef
         return databaseStorage.read { transaction in
             var result = [TSGroupThread]()

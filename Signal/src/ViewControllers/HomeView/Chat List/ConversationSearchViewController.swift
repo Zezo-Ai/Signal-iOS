@@ -237,7 +237,8 @@ class ConversationSearchViewController: OWSViewController {
         }
     }
 
-    private nonisolated func fetchSearchResults(searchText: String) async throws(CancellationError) -> HomeScreenSearchResultSet {
+    @concurrent
+    private func fetchSearchResults(searchText: String) async throws(CancellationError) -> HomeScreenSearchResultSet {
         if searchText.isEmpty {
             return .empty
         }

@@ -1595,7 +1595,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     // TODO: NSE Lifecycle, is this invoked when the NSE wakes the main app?
-    private nonisolated func processRemoteNotification(_ remoteNotification: [AnyHashable: Any]) async throws {
+    @concurrent
+    private func processRemoteNotification(_ remoteNotification: [AnyHashable: Any]) async throws {
         try await self.appReadiness.waitForAppReady()
         switch try await self.handleSilentPushContent(remoteNotification) {
         case .handled:
@@ -1629,7 +1630,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
-    private nonisolated func handleSilentPushContent(_ remoteNotification: [AnyHashable: Any]) async throws -> HandleSilentPushContentResult {
+    @concurrent
+    private func handleSilentPushContent(_ remoteNotification: [AnyHashable: Any]) async throws -> HandleSilentPushContentResult {
         if let spamChallengeToken = remoteNotification["rateLimitChallenge"] as? String {
             SSKEnvironment.shared.spamChallengeResolverRef.handleIncomingPushChallengeToken(spamChallengeToken)
             // TODO: Wait only until the token has been submitted.

@@ -149,7 +149,8 @@ extension VideoAttachmentPrepViewController: VideoTimelineViewDataSource {
         }
     }
 
-    private nonisolated static func thumbnails(
+    @concurrent
+    private static func thumbnails(
         forVideoAtPath videoPath: String,
         aspectRatio: CGSize,
         thumbnailHeight: CGFloat,

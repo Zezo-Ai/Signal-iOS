@@ -111,7 +111,8 @@ extension ConversationSearchController: UISearchResultsUpdating {
         }
     }
 
-    private nonisolated func performSearch(
+    @concurrent
+    private func performSearch(
         searchText: String,
         threadUniqueId: String,
         isGroupThread: Bool,

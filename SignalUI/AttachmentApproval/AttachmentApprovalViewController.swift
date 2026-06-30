@@ -735,7 +735,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
     }
 
     @concurrent
-    private nonisolated func prepareImageAttachment(
+    private func prepareImageAttachment(
         attachmentApprovalItem: AttachmentApprovalItem,
         imageEditorModel: ImageEditorModel,
     ) async throws -> PreviewableAttachment {

@@ -259,7 +259,8 @@ open class ConversationPickerViewController: OWSTableViewController2 {
         updateUIForCurrentSelection(animated: false)
     }
 
-    private nonisolated func buildSearchResults(searchText: String) async throws(CancellationError) -> RecipientSearchResultSet? {
+    @concurrent
+    private func buildSearchResults(searchText: String) async throws(CancellationError) -> RecipientSearchResultSet? {
         guard searchText.count > 1 else {
             return nil
         }
@@ -458,7 +459,8 @@ open class ConversationPickerViewController: OWSTableViewController2 {
         }
     }
 
-    private nonisolated func buildConversationCollection(sectionOptions: SectionOptions, searchResults: RecipientSearchResultSet?) async -> ConversationCollection {
+    @concurrent
+    private func buildConversationCollection(sectionOptions: SectionOptions, searchResults: RecipientSearchResultSet?) async -> ConversationCollection {
         guard let searchResults else {
             return buildConversationCollection(sectionOptions: sectionOptions)
         }

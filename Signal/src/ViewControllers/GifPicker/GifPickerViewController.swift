@@ -529,7 +529,7 @@ class GifPickerViewController: OWSViewController, UISearchBarDelegate, UISearchR
     }
 
     @concurrent
-    private nonisolated func buildAttachment(
+    private func buildAttachment(
         forAsset asset: ProxiedContentAsset,
         attachmentLimits: OutgoingAttachmentLimits,
     ) async throws -> PreviewableAttachment {

@@ -181,7 +181,8 @@ public class RecipientPickerViewController: OWSViewController, OWSNavigationChil
         }
     }
 
-    private nonisolated func performSearch(
+    @concurrent
+    private func performSearch(
         searchText: String,
         shouldHideLocalRecipient: Bool,
     ) async throws(CancellationError) -> RecipientSearchResultSet {

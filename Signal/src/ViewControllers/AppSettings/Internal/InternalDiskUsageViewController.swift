@@ -49,7 +49,8 @@ class InternalDiskUsageViewController: OWSTableViewController2 {
     let diskUsage: DiskUsage
     let orphanedAttachmentByteCount: UInt64
 
-    nonisolated static func build() async -> InternalDiskUsageViewController {
+    @concurrent
+    static func build() async -> InternalDiskUsageViewController {
         await Task.yield()
         try! await DependenciesBridge.shared.orphanedAttachmentCleaner.runUntilFinished()
         async let orphanedAttachmentByteCount = Self.orphanAttachmentByteCount()
