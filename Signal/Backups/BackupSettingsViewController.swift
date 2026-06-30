@@ -576,28 +576,19 @@ class BackupSettingsViewController:
         authSuccess: LocalDeviceAuthentication.AuthSuccess,
         onConfirmed: @escaping () -> Void,
     ) {
-        let recordRecoveryKeyViewController = BackupRecordKeyViewController(
-            aepMode: .current(aep, authSuccess),
-            options: [.showContinueButton],
-            onContinuePressed: { [weak self] _ in
-                guard let self else { return }
+        guard let navigationController else {
+            return
+        }
 
-                let confirmRecoveryKeyViewController = BackupConfirmKeyViewController(
-                    aep: aep,
-                    onConfirmed: { _ in
-                        onConfirmed()
-                    },
-                    onSeeKeyAgain: { [weak self] in
-                        guard let self else { return }
-                        navigationController?.popViewController(animated: true)
-                    },
-                )
-
-                navigationController?.pushViewController(confirmRecoveryKeyViewController, animated: true)
-            },
+        let recordAndConfirmKeyCoordinator = BackupRecordAndConfirmKeyCoordinator(
+            navigationController: navigationController,
         )
-
-        navigationController?.pushViewController(recordRecoveryKeyViewController, animated: true)
+        recordAndConfirmKeyCoordinator.present(
+            aepMode: .current(aep, authSuccess),
+            options: [
+                .showConfirmKeyButton(onConfirmed: onConfirmed),
+            ],
+        )
     }
 
     @MainActor
@@ -1405,29 +1396,33 @@ class BackupSettingsViewController:
 
     @MainActor
     private func _showViewRecoveryKey() async {
-        guard let aep = db.read(block: { accountKeyStore.getAccountEntropyPool(tx: $0) }) else {
+        guard
+            let navigationController,
+            let authSuccess = await LocalDeviceAuthentication().performBiometricAuth(),
+            let aep = db.read(block: { accountKeyStore.getAccountEntropyPool(tx: $0) })
+        else {
             return
         }
 
-        guard let authSuccess = await LocalDeviceAuthentication().performBiometricAuth() else {
-            return
-        }
-
-        let recordKeyViewController = BackupRecordKeyViewController(
-            aepMode: .current(aep, authSuccess),
-            options: [.showCreateNewKeyButton],
-            onCreateNewKeyPressed: { [weak self] recordKeyViewController in
-                guard let self else { return }
-
-                Task {
-                    // If appropriate, the warning sheet will let the user continue
-                    // in a "create new AEP" flow.
-                    await self.showCreateNewRecoveryKeyWarningSheet(fromViewController: recordKeyViewController)
-                }
-            },
+        let recordAndConfirmKeyCoordinator = BackupRecordAndConfirmKeyCoordinator(
+            navigationController: navigationController,
         )
+        recordAndConfirmKeyCoordinator.present(
+            aepMode: .current(aep, authSuccess),
+            options: [
+                .showCreateNewKeyButton(onPressed: { recordKeyViewController in
+                    Task { [weak self] in
+                        guard let self else { return }
 
-        navigationController?.pushViewController(recordKeyViewController, animated: true)
+                        // If appropriate, the warning sheet will let the user
+                        // continue in a "create new AEP" flow.
+                        await showCreateNewRecoveryKeyWarningSheet(
+                            fromViewController: recordKeyViewController,
+                        )
+                    }
+                }),
+            ],
+        )
     }
 
     @MainActor
@@ -1563,48 +1558,38 @@ class BackupSettingsViewController:
                 style: .secondary,
             ),
         )
+
         fromViewController.present(warningSheet, animated: true)
     }
 
     private func showRecordNewRecoveryKey() {
+        guard let navigationController else {
+            return
+        }
+
         let newCandidateAEP = AccountEntropyPool()
-        let recordKeyViewController = BackupRecordKeyViewController(
+
+        let recordAndConfirmKeyCoordinator = BackupRecordAndConfirmKeyCoordinator(
+            navigationController: navigationController,
+        )
+        recordAndConfirmKeyCoordinator.present(
             aepMode: .newCandidate(newCandidateAEP),
-            options: [.showContinueButton],
-            onContinuePressed: { [weak self] _ in
-                guard let self else { return }
-                showConfirmNewRecoveryKey(newCandidateAEP: newCandidateAEP)
-            },
+            options: [
+                .showConfirmKeyButton(onConfirmed: { [weak self] in
+                    guard let self else { return }
+
+                    // Pop all the way back to Backup Settings.
+                    navigationController.popToViewController(self, animated: true) {
+                        self.finalizeNewRecoveryKey(newCandidateAEP: newCandidateAEP)
+
+                        self.presentToast(text: OWSLocalizedString(
+                            "BACKUP_SETTINGS_CREATE_NEW_KEY_SUCCESS_TOAST",
+                            comment: "Toast shown when a new Recovery Key has been created successfully.",
+                        ))
+                    }
+                }),
+            ],
         )
-
-        navigationController?.pushViewController(recordKeyViewController, animated: true)
-    }
-
-    private func showConfirmNewRecoveryKey(newCandidateAEP: AccountEntropyPool) {
-        let confirmKeyViewController = BackupConfirmKeyViewController(
-            aep: newCandidateAEP,
-            onConfirmed: { [weak self] _ in
-                guard let self else { return }
-
-                // Pop all the way back to Backup Settings.
-                navigationController?.popToViewController(self, animated: true) {
-                    self.finalizeNewRecoveryKey(newCandidateAEP: newCandidateAEP)
-
-                    self.presentToast(text: OWSLocalizedString(
-                        "BACKUP_SETTINGS_CREATE_NEW_KEY_SUCCESS_TOAST",
-                        comment: "Toast shown when a new Recovery Key has been created successfully.",
-                    ))
-                }
-            },
-            onSeeKeyAgain: { [weak self] in
-                guard let self else { return }
-
-                // Popping drops us back on the BackupRecordKeyViewController.
-                navigationController?.popViewController(animated: true)
-            },
-        )
-
-        navigationController?.pushViewController(confirmKeyViewController, animated: true)
     }
 
     private func finalizeNewRecoveryKey(newCandidateAEP: AccountEntropyPool) {

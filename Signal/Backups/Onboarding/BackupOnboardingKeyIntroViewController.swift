@@ -11,16 +11,16 @@ class BackupOnboardingKeyIntroViewController: HostingContainer<BackupOnboardingK
     private let viewModel: BackupsOnboardingKeyIntroViewModel
 
     private let onBackPressed: (BackupOnboardingKeyIntroViewController) -> Void
-    private let onDeviceAuthSucceeded: (LocalDeviceAuthentication.AuthSuccess) -> Void
+    private let _onContinue: (BackupOnboardingKeyIntroViewController) -> Void
 
     init(
         onBackPressed: @escaping (BackupOnboardingKeyIntroViewController) -> Void,
-        onDeviceAuthSucceeded: @escaping (LocalDeviceAuthentication.AuthSuccess) -> Void,
+        onContinue: @escaping (BackupOnboardingKeyIntroViewController) -> Void,
     ) {
         self.viewModel = BackupsOnboardingKeyIntroViewModel()
 
         self.onBackPressed = onBackPressed
-        self.onDeviceAuthSucceeded = onDeviceAuthSucceeded
+        self._onContinue = onContinue
 
         super.init(wrappedView: BackupOnboardingKeyIntroView(viewModel: viewModel))
 
@@ -54,11 +54,7 @@ class BackupOnboardingKeyIntroViewController: HostingContainer<BackupOnboardingK
 
 extension BackupOnboardingKeyIntroViewController: BackupsOnboardingKeyIntroViewModel.ActionsDelegate {
     fileprivate func onContinue() {
-        Task {
-            if let authSuccess = await LocalDeviceAuthentication().performBiometricAuth() {
-                onDeviceAuthSucceeded(authSuccess)
-            }
-        }
+        _onContinue(self)
     }
 }
 

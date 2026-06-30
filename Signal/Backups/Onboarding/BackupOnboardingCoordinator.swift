@@ -46,6 +46,10 @@ class BackupOnboardingCoordinator {
         self.db = db
     }
 
+    deinit {
+        Logger.verbose("")
+    }
+
     /// - Parameter onAppearAction
     /// An on-appear action for Backup Settings, if onboarding is not necessary.
     func prepareForPresentation(
@@ -105,8 +109,8 @@ class BackupOnboardingCoordinator {
                 onBackPressed: { [self] keyIntroViewController in
                     promptToCancelOnboarding(fromViewController: keyIntroViewController)
                 },
-                onDeviceAuthSucceeded: { [self] authSuccess in
-                    showRecordRecoveryKey(localDeviceAuthSuccess: authSuccess)
+                onContinue: { [self] _ in
+                    showRecordAndConfirmKey()
                 },
             ),
             animated: true,
@@ -115,50 +119,46 @@ class BackupOnboardingCoordinator {
 
     // MARK: -
 
-    private func showRecordRecoveryKey(
+    private func showRecordAndConfirmKey() {
+        Task {
+            guard
+                let authSuccess = await LocalDeviceAuthentication().performBiometricAuth(),
+                let aep = db.read(block: { accountKeyStore.getAccountEntropyPool(tx: $0) })
+            else {
+                return
+            }
+
+            _showRecordAndConfirmKey(
+                aep: aep,
+                localDeviceAuthSuccess: authSuccess,
+            )
+        }
+    }
+
+    private func _showRecordAndConfirmKey(
+        aep: AccountEntropyPool,
         localDeviceAuthSuccess: LocalDeviceAuthentication.AuthSuccess,
     ) {
-        guard
-            let onboardingNavController,
-            let aep = db.read(block: { accountKeyStore.getAccountEntropyPool(tx: $0) })
-        else { return }
+        guard let onboardingNavController else {
+            return
+        }
 
-        onboardingNavController.pushViewController(
-            BackupRecordKeyViewController(
-                aepMode: .current(aep, localDeviceAuthSuccess),
-                options: [.showContinueButton],
-                onContinuePressed: { [self] _ in
-                    showConfirmRecoveryKey(aep: aep)
-                },
-            ),
-            animated: true,
+        let recordAndConfirmKeyCoordinator = BackupRecordAndConfirmKeyCoordinator(
+            navigationController: onboardingNavController,
         )
-    }
-
-    // MARK: -
-
-    private func showConfirmRecoveryKey(aep: AccountEntropyPool) {
-        guard let onboardingNavController else { return }
-
-        let confirmKeyViewController = BackupConfirmKeyViewController(
-            aep: aep,
-            onConfirmed: { [self] confirmKeyViewController in
-                Task {
-                    do throws(SheetDisplayableError) {
-                        try await showChooseBackupPlan()
-                    } catch {
-                        error.showSheet(from: confirmKeyViewController)
+        recordAndConfirmKeyCoordinator.present(
+            aepMode: .current(aep, localDeviceAuthSuccess),
+            options: [
+                .showConfirmKeyButton(onConfirmed: { [self] in
+                    Task {
+                        do throws(SheetDisplayableError) {
+                            try await showChooseBackupPlan()
+                        } catch {
+                            error.showSheet(from: onboardingNavController)
+                        }
                     }
-                }
-            },
-            onSeeKeyAgain: {
-                onboardingNavController.popViewController(animated: true)
-            },
-        )
-
-        onboardingNavController.pushViewController(
-            confirmKeyViewController,
-            animated: true,
+                }),
+            ],
         )
     }
 

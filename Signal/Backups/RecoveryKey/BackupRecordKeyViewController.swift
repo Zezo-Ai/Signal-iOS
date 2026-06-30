@@ -9,15 +9,15 @@ import SignalUI
 import SwiftUI
 
 class BackupRecordKeyViewController: OWSViewController, OWSNavigationChildController {
-    struct Option: OptionSet {
-        let rawValue: Int
+    struct BottomButtonConfig {
+        enum Style {
+            case primary
+            case secondary
+        }
 
-        /// Show a "continue" button in the view footer. Not compatible with
-        /// `.showCreateNewKeyButton`.
-        static let showContinueButton = Option(rawValue: 1 << 1)
-        /// Show a "create new key" button in the view footer. Not compatible
-        /// with `.showContinueButton`.
-        static let showCreateNewKeyButton = Option(rawValue: 1 << 2)
+        let titleText: String
+        let style: Style
+        let action: (BackupRecordKeyViewController) -> Void
     }
 
     enum AEPMode {
@@ -26,7 +26,7 @@ class BackupRecordKeyViewController: OWSViewController, OWSNavigationChildContro
         /// A new candidate AEP.
         case newCandidate(AccountEntropyPool)
 
-        fileprivate var aep: AccountEntropyPool {
+        var aep: AccountEntropyPool {
             switch self {
             case .current(let aep, _): return aep
             case .newCandidate(let aep): return aep
@@ -34,27 +34,17 @@ class BackupRecordKeyViewController: OWSViewController, OWSNavigationChildContro
         }
     }
 
+    private let bottomButtonConfigs: [BottomButtonConfig]
     private let displayableAEP: DisplayableAccountEntropyPool
-    private let onContinuePressedBlock: (BackupRecordKeyViewController) -> Void
-    private let onCreateNewKeyPressedBlock: (BackupRecordKeyViewController) -> Void
-    private let options: [Option]
 
-    /// - Parameter onCreateNewKeyPressed
-    /// Called when the user taps the "create new key" button. Only relevant if
-    /// the `.showCreateNewKeyButton` option is passed.
-    /// - Parameter onContinuePressed
-    /// Called when the user taps the "continue" button. Only relevant if the
-    /// `.showContinueButton` option is passed.
+    /// Initialize a `BackupRecordKeyViewController` with the specified bottom
+    /// buttons.
     init(
         aepMode: AEPMode,
-        options: [Option],
-        onCreateNewKeyPressed: @escaping (BackupRecordKeyViewController) -> Void = { _ in },
-        onContinuePressed: @escaping (BackupRecordKeyViewController) -> Void = { _ in },
+        bottomButtonConfigs: [BottomButtonConfig],
     ) {
         self.displayableAEP = DisplayableAccountEntropyPool(aep: aepMode.aep)
-        self.onContinuePressedBlock = onContinuePressed
-        self.onCreateNewKeyPressedBlock = onCreateNewKeyPressed
-        self.options = options
+        self.bottomButtonConfigs = bottomButtonConfigs
 
         super.init()
 
@@ -116,31 +106,21 @@ class BackupRecordKeyViewController: OWSViewController, OWSNavigationChildContro
             topButtons.append(saveToPasswordManagerButton)
         }
 
-        var bottomButtons = [UIButton]()
-        if options.contains(.showCreateNewKeyButton) {
-            let createNewKeyButton = UIButton(
-                configuration: .largeSecondary(title: OWSLocalizedString(
-                    "BACKUP_RECORD_KEY_CREATE_NEW_KEY_BUTTON_TITLE",
-                    comment: "Title for a button allowing users to create a new 'Recovery Key'.",
-                )),
+        let bottomButtons: [UIButton] = bottomButtonConfigs.map { config in
+            return UIButton(
+                configuration: {
+                    switch config.style {
+                    case .primary:
+                        return .largePrimary(title: config.titleText)
+                    case .secondary:
+                        return .largeSecondary(title: config.titleText)
+                    }
+                }(),
                 primaryAction: UIAction { [weak self] _ in
                     guard let self else { return }
-                    onCreateNewKeyPressedBlock(self)
+                    config.action(self)
                 },
             )
-
-            bottomButtons.append(createNewKeyButton)
-        }
-        if options.contains(.showContinueButton) {
-            let continueButton = UIButton(
-                configuration: .largePrimary(title: CommonStrings.continueButton),
-                primaryAction: UIAction { [weak self] _ in
-                    guard let self else { return }
-                    onContinuePressedBlock(self)
-                },
-            )
-
-            bottomButtons.append(continueButton)
         }
 
         let stackView = addStaticContentStackView(
@@ -151,7 +131,7 @@ class BackupRecordKeyViewController: OWSViewController, OWSNavigationChildContro
                 aepTextView,
                 topButtons.enclosedInVerticalStackView(isFullWidthButtons: false),
                 .vStretchingSpacer(),
-                bottomButtons.enclosedInVerticalStackView(isFullWidthButtons: options.contains(.showContinueButton)),
+                bottomButtons.enclosedInVerticalStackView(isFullWidthButtons: true),
             ],
             isScrollable: true,
         )
@@ -277,30 +257,31 @@ class BackupRecordKeyViewController: OWSViewController, OWSNavigationChildContro
 private extension BackupRecordKeyViewController {
     static func forPreview(
         aepMode: AEPMode,
-        options: [Option],
+        bottomButtonConfigs: [BottomButtonConfig],
     ) -> BackupRecordKeyViewController {
         return BackupRecordKeyViewController(
             aepMode: aepMode,
-            options: options,
-            onCreateNewKeyPressed: { _ in print("Create New Key!") },
-            onContinuePressed: { _ in print("Continue!") },
+            bottomButtonConfigs: bottomButtonConfigs,
         )
     }
 }
 
 @available(iOS 17, *)
-#Preview("CreateNewKey") {
+#Preview {
     UINavigationController(rootViewController: BackupRecordKeyViewController.forPreview(
         aepMode: .newCandidate(AccountEntropyPool()),
-        options: [.showCreateNewKeyButton],
-    ))
-}
-
-@available(iOS 17, *)
-#Preview("ContinueButton") {
-    UINavigationController(rootViewController: BackupRecordKeyViewController.forPreview(
-        aepMode: .newCandidate(AccountEntropyPool()),
-        options: [.showContinueButton],
+        bottomButtonConfigs: [
+            BackupRecordKeyViewController.BottomButtonConfig(
+                titleText: "Continue",
+                style: .primary,
+                action: { _ in print("Continue!") },
+            ),
+            BackupRecordKeyViewController.BottomButtonConfig(
+                titleText: "Create New Key",
+                style: .secondary,
+                action: { _ in print("Create New Key!") },
+            ),
+        ],
     ))
 }
 

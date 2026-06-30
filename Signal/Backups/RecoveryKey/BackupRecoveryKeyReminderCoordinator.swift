@@ -86,7 +86,7 @@ class BackupRecoveryKeyReminderCoordinator {
         backupKeyReminderNavController.pushViewController(
             BackupRecordKeyViewController(
                 aepMode: .current(aep, localDeviceAuthSuccess),
-                options: [],
+                bottomButtonConfigs: [],
             ),
             animated: true,
         )
