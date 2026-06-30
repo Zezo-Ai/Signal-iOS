@@ -163,7 +163,7 @@ class SecureValueRecovery2Tests: XCTestCase {
         XCTAssertEqual(newEnclaveRequestCount, 0)
         XCTAssertEqual(oldEnclaveRequestCount, 2)
         db.read { tx in
-            XCTAssertEqual(localStorage.completedBackupStore.allKeys(transaction: tx), [oldEnclave.stringValue])
+            XCTAssertEqual(localStorage.backupAttemptStore.allKeys(transaction: tx), [oldEnclave.stringValue])
         }
 
         // Migrate to the new enclave.
@@ -172,7 +172,7 @@ class SecureValueRecovery2Tests: XCTestCase {
         XCTAssertEqual(newEnclaveRequestCount, 2)
         XCTAssertEqual(oldEnclaveRequestCount, 3)
         db.read { tx in
-            XCTAssertEqual(localStorage.completedBackupStore.allKeys(transaction: tx), [newEnclave.stringValue])
+            XCTAssertEqual(localStorage.backupAttemptStore.allKeys(transaction: tx), [newEnclave.stringValue])
         }
 
         // Migrate again; nothing should change.
@@ -180,7 +180,7 @@ class SecureValueRecovery2Tests: XCTestCase {
         XCTAssertEqual(newEnclaveRequestCount, 2)
         XCTAssertEqual(oldEnclaveRequestCount, 3)
         db.read { tx in
-            XCTAssertEqual(localStorage.completedBackupStore.allKeys(transaction: tx), [newEnclave.stringValue])
+            XCTAssertEqual(localStorage.backupAttemptStore.allKeys(transaction: tx), [newEnclave.stringValue])
         }
     }
 
@@ -286,7 +286,7 @@ class SecureValueRecovery2Tests: XCTestCase {
         XCTAssertEqual(newEnclaveRequestCount, 0)
         XCTAssertEqual(oldEnclaveRequestCount, 2)
         db.read { tx in
-            XCTAssertEqual(localStorage.completedBackupStore.allKeys(transaction: tx), [oldEnclave.stringValue])
+            XCTAssertEqual(localStorage.backupAttemptStore.allKeys(transaction: tx), [oldEnclave.stringValue])
         }
 
         // Migrate to the new enclave.
@@ -295,7 +295,7 @@ class SecureValueRecovery2Tests: XCTestCase {
         XCTAssertEqual(newEnclaveRequestCount, 2)
         XCTAssertEqual(oldEnclaveRequestCount, 2)
         db.read { tx in
-            XCTAssertEqual(localStorage.completedBackupStore.allKeys(transaction: tx), [newEnclave.stringValue])
+            XCTAssertEqual(localStorage.backupAttemptStore.allKeys(transaction: tx), [newEnclave.stringValue])
         }
     }
 }
