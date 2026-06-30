@@ -505,6 +505,8 @@ class MessageReactionPicker: UIStackView {
             label.textAlignment = .center
             label.text = emoji
             addSubview(label)
+
+            self.accessibilityLabel = emoji
         }
 
         required init?(coder: NSCoder) {
