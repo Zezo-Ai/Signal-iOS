@@ -88,8 +88,8 @@ public struct AttachmentApprovalViewControllerOptions: OptionSet {
 // MARK: -
 
 public final class AttachmentApprovalViewController: UIPageViewController, UIPageViewControllerDataSource,
-    UIPageViewControllerDelegate, OWSNavigationChildController, AttachmentPrepViewControllerDelegate,
-    AttachmentTextToolbarDelegate, BodyRangesTextViewDelegate
+    UIPageViewControllerDelegate, OWSNavigationChildController, GalleryRailViewDelegate, ApprovalRailCellViewDelegate,
+    AttachmentPrepViewControllerDelegate, MediaCaptionToolbarDelegate, BodyRangesTextViewDelegate
 {
 
     // MARK: - Properties
@@ -197,8 +197,8 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
 
         // Bottom Bar
         self.galleryRailView.delegate = self
-        self.bottomToolView.attachmentTextToolbarDelegate = self
-        self.attachmentTextToolbar.mentionTextViewDelegate = self
+        self.bottomToolView.captionToolbarDelegate = self
+        self.mediaCaptionToolbar.textViewDelegate = self
 
         observerToken = NotificationCenter.default.addObserver(forName: .OWSApplicationDidBecomeActive, object: nil, queue: .main) { [weak self] _ in
             guard let self else { return }
@@ -249,8 +249,8 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         return bottomToolView.galleryRailView
     }
 
-    var attachmentTextToolbar: AttachmentTextToolbar {
-        return bottomToolView.attachmentTextToolbar
+    var mediaCaptionToolbar: MediaCaptionToolbar {
+        return bottomToolView.mediaCaptionToolbar
     }
 
     private lazy var topBar = AttachmentApprovalTopBar(options: options)
@@ -315,34 +315,57 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         topBar.install(in: view)
 
         // Bottom Bar
-        bottomToolView.buttonAddMedia.addTarget(self, action: #selector(didTapAddMedia), for: .touchUpInside)
-        bottomToolView.buttonViewOnce.addTarget(self, action: #selector(didToggleViewOnce), for: .touchUpInside)
-        bottomToolView.buttonSend.addTarget(self, action: #selector(didTapSend), for: .touchUpInside)
-        bottomToolView.buttonMediaQuality.addTarget(self, action: #selector(didTapMediaQuality), for: .touchUpInside)
-        bottomToolView.buttonSaveMedia.addTarget(self, action: #selector(didTapSave), for: .touchUpInside)
-        bottomToolView.buttonPenTool.addTarget(self, action: #selector(didTapPenTool), for: .touchUpInside)
-        bottomToolView.buttonCropTool.addTarget(self, action: #selector(didTapCropTool), for: .touchUpInside)
+        bottomToolView.buttonProceed.addAction(
+            UIAction { [weak self] _ in self?.didTapProceed() },
+            for: .primaryActionTriggered,
+        )
+        bottomToolView.buttonPenTool.addAction(
+            UIAction { [weak self] _ in self?.didTapPenTool() },
+            for: .primaryActionTriggered,
+        )
+        bottomToolView.buttonCropTool.addAction(
+            UIAction { [weak self] _ in self?.didTapCropTool() },
+            for: .primaryActionTriggered,
+        )
+        bottomToolView.buttonMediaQuality.addAction(
+            UIAction { [weak self] _ in self?.didTapMediaQuality() },
+            for: .primaryActionTriggered,
+        )
+        bottomToolView.buttonSaveMedia.addAction(
+            UIAction { [weak self] _ in self?.didTapSave() },
+            for: .primaryActionTriggered,
+        )
+        bottomToolView.buttonAddMedia.addAction(
+            UIAction { [weak self] _ in self?.didTapAddMedia() },
+            for: .primaryActionTriggered,
+        )
+        bottomToolView.buttonViewOnce.addAction(
+            UIAction { [weak self] _ in self?.didToggleViewOnce() },
+            for: .primaryActionTriggered,
+        )
 
-        let bottomToolViewWidth = view.bounds.width
-        let bottomToolViewHeight = bottomToolView.systemLayoutSizeFitting(view.bounds.size, withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel).height
-        bottomToolView.frame = CGRect(x: 0, y: view.bounds.maxY - bottomToolViewHeight, width: bottomToolViewWidth, height: bottomToolViewHeight)
-        UIView.performWithoutAnimation {
-            bottomToolView.setNeedsLayout()
-            bottomToolView.layoutIfNeeded()
-        }
         view.addSubview(bottomToolView)
         bottomToolView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             bottomToolView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomToolView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomToolView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+
+        // `bottomToolView` is pinned to the bottom of the screen.
+        // However, it's content is re-positioned so that it clears the keyboard.
         if #unavailable(iOS 16) {
-            let constraint = bottomToolView.contentLayoutGuide.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -view.safeAreaInsets.bottom)
+            let constraint = bottomToolView.contentLayoutGuide.bottomAnchor.constraint(
+                equalTo: view.bottomAnchor,
+                constant: -view.safeAreaInsets.bottom,
+            )
             constraint.isActive = true
             iOS15BottomToolviewVerticalPositionConstraint = constraint
         } else {
             NSLayoutConstraint.activate([
-                bottomToolView.contentLayoutGuide.bottomAnchor.constraint(equalTo: view.keyboardLayoutGuide.topAnchor),
+                bottomToolView.contentLayoutGuide.bottomAnchor.constraint(
+                    equalTo: view.keyboardLayoutGuide.topAnchor,
+                ),
             ])
         }
 
@@ -381,6 +404,8 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         }
     }
 
+    // MARK: - UI Updates
+
     private func updateContentLayoutMargins(for viewController: AttachmentPrepViewController) {
         // The goal of all this layout logic is to lay out content in Review screen
         // the same way it will be laid out in Edit mode (drawing etc) so that activating editing tools
@@ -398,7 +423,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
 
         if let mediaEditingToolbarHeight = viewController.mediaEditingToolbarHeight {
             // For images there is an "edit" mode and it is necessary to keep image center the same
-            // when switching to/from "edit" mode. Therefore image is laid out usign bottom inset from "edit" mode screen.
+            // when switching to/from "edit" mode. Therefore image is laid out using bottom inset from "edit" mode screen.
             contentLayoutMargins.bottom = mediaEditingToolbarHeight
         } else {
             // bottomToolView contains UIStackView that doesn't always have a final frame at this point.
@@ -420,8 +445,6 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         updateMediaRail(animated: animated)
     }
 
-    // MARK: - Input Accessory
-
     private func updateControlsVisibility(animated: Bool, completion: ((Bool) -> Void)? = nil) {
         let alpha: CGFloat = shouldHideControls ? 0 : 1
         if animated {
@@ -442,6 +465,40 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         }
     }
 
+    private func updateSupplementaryToolbarView(using viewController: AttachmentPrepViewController, animated: Bool) {
+        if animated {
+            UIView.animate(withDuration: 0.25) {
+                self.bottomToolView.set(supplementaryView: viewController.toolbarSupplementaryView)
+                self.bottomToolView.setNeedsLayout()
+                self.bottomToolView.layoutIfNeeded()
+            }
+        } else {
+            bottomToolView.set(supplementaryView: viewController.toolbarSupplementaryView)
+        }
+    }
+
+    func updateMediaRail(animated: Bool = false) {
+        guard isViewLoaded else { return }
+
+        guard let currentItem else {
+            owsFailDebug("currentItem was unexpectedly nil")
+            return
+        }
+
+        let cellViewBuilder: (GalleryRailItem) -> GalleryRailCellView = { [weak self] _ in
+            let cell = ApprovalRailCellView()
+            cell.approvalRailCellDelegate = self
+            return cell
+        }
+
+        galleryRailView.configureCellViews(
+            itemProvider: attachmentApprovalItemCollection,
+            focusedItem: currentItem,
+            cellViewBuilder: cellViewBuilder,
+            animated: animated,
+        )
+    }
+
     private func updateBottomToolView(animated: Bool) {
         guard let currentPageViewController else { return }
 
@@ -454,7 +511,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
             canToggleViewOnce: options.contains(.canToggleViewOnce),
             canChangeMediaQuality: options.contains(.canChangeQualityLevel),
             canSaveMedia: currentPageViewController.canSaveMedia,
-            doneButtonIcon: isScreenNotFinal ? .next : .send,
+            proceedButtonIcon: isScreenNotFinal ? .next : .send,
         )
         bottomToolView.update(
             currentAttachmentItem: currentPageViewController.attachmentApprovalItem,
@@ -464,14 +521,12 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
     }
 
     public var messageBodyForSending: MessageBody? {
-        return attachmentTextToolbar.messageBodyForSending
+        return mediaCaptionToolbar.messageBodyForSending
     }
 
     public func setMessageBody(_ messageBody: MessageBody?, txProvider: EditableMessageBodyTextStorage.ReadTxProvider) {
-        attachmentTextToolbar.setMessageBody(messageBody, txProvider: txProvider)
+        mediaCaptionToolbar.setMessageBody(messageBody, txProvider: txProvider)
     }
-
-    // MARK: - Control Visibility
 
     public var shouldHideControls: Bool {
         currentPageViewController?.shouldHideControls ?? false
@@ -658,48 +713,6 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         }
     }
 
-    private func updateSupplementaryToolbarView(using viewController: AttachmentPrepViewController, animated: Bool) {
-        if animated {
-            UIView.animate(withDuration: 0.25) {
-                self.bottomToolView.set(supplementaryView: viewController.toolbarSupplementaryView)
-                self.bottomToolView.setNeedsLayout()
-                self.bottomToolView.layoutIfNeeded()
-            }
-        } else {
-            bottomToolView.set(supplementaryView: viewController.toolbarSupplementaryView)
-        }
-    }
-
-    func updateMediaRail(animated: Bool = false) {
-        guard isViewLoaded else { return }
-
-        guard let currentItem else {
-            owsFailDebug("currentItem was unexpectedly nil")
-            return
-        }
-
-        let cellViewBuilder: (GalleryRailItem) -> GalleryRailCellView = { [weak self] railItem in
-            switch railItem {
-            case is AddMoreRailItem:
-                return AddMediaRailCellView()
-            case is AttachmentApprovalItem:
-                let cell = ApprovalRailCellView()
-                cell.approvalRailCellDelegate = self
-                return cell
-            default:
-                owsFailDebug("unexpected rail item type: \(railItem)")
-                return GalleryRailCellView()
-            }
-        }
-
-        galleryRailView.configureCellViews(
-            itemProvider: attachmentApprovalItemCollection,
-            focusedItem: currentItem,
-            cellViewBuilder: cellViewBuilder,
-            animated: animated,
-        )
-    }
-
     var attachmentApprovalItemCollection: AttachmentApprovalItemCollection!
 
     var attachmentApprovalItems: [AttachmentApprovalItem] {
@@ -807,6 +820,41 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         return nextItem
     }
 
+    // MARK: - ApprovalRailCellViewDelegate
+
+    func approvalRailCellView(_ approvalRailCellView: ApprovalRailCellView, didRemoveItem attachmentApprovalItem: AttachmentApprovalItem) {
+        remove(attachmentApprovalItem: attachmentApprovalItem)
+    }
+
+    func canRemoveApprovalRailCellView(_ approvalRailCellView: ApprovalRailCellView) -> Bool {
+        return attachmentApprovalItems.count > 1
+    }
+
+    // MARK: - GalleryRailViewDelegate
+
+    public func galleryRailView(_ galleryRailView: GalleryRailView, didTapItem imageRailItem: GalleryRailItem) {
+        guard let targetItem = imageRailItem as? AttachmentApprovalItem else {
+            owsFailDebug("unexpected imageRailItem: \(imageRailItem)")
+            return
+        }
+
+        guard
+            let currentItem,
+            let currentIndex = attachmentApprovalItems.firstIndex(where: { $0.isIdenticalTo(currentItem) })
+        else {
+            owsFailDebug("currentIndex was unexpectedly nil")
+            return
+        }
+
+        guard let targetIndex = attachmentApprovalItems.firstIndex(where: { $0.isIdenticalTo(targetItem) }) else {
+            owsFailDebug("targetIndex was unexpectedly nil")
+            return
+        }
+
+        let direction: UIPageViewController.NavigationDirection = currentIndex < targetIndex ? .forward : .reverse
+        setCurrentItem(targetItem, direction: direction, animated: true)
+    }
+
     // MARK: - Event Handlers
 
     private func cancelPressed() {
@@ -817,7 +865,6 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         navigationController?.popViewController(animated: true)
     }
 
-    @objc
     private func didTapSave() {
         guard let currentItem else { return }
         Task { @MainActor in
@@ -859,12 +906,10 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         }
     }
 
-    @objc
     private func didTapAddMedia() {
         approvalDelegate?.attachmentApprovalDidTapAddMore(self)
     }
 
-    @objc
     private func didToggleViewOnce() {
         owsAssertDebug(options.contains(.canToggleViewOnce), "Cannot toggle `View Once`")
 
@@ -874,8 +919,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         updateBottomToolView(animated: true)
     }
 
-    @objc
-    private func didTapSend() {
+    private func didTapProceed() {
         // Generate the attachments once, so that any changes we
         // make below are reflected afterwards.
         ModalActivityIndicatorViewController.present(
@@ -888,7 +932,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
                     let attachments = try await self.prepareAttachments()
                     modalVC.dismiss {
                         let isViewOnce = self.options.contains(.canToggleViewOnce) && self.isViewOnceEnabled
-                        let messageBody = self.attachmentTextToolbar.messageBodyForSending
+                        let messageBody = self.mediaCaptionToolbar.messageBodyForSending
                         owsPrecondition(!isViewOnce || messageBody == nil)
                         self.approvalDelegate?.attachmentApproval(
                             self,
@@ -925,17 +969,15 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         )
     }
 
-    @objc
     private func didTapPenTool() {
         currentPageViewController?.activatePenTool()
     }
 
-    @objc
     private func didTapCropTool() {
         currentPageViewController?.activateCropTool()
     }
 
-    // MARK: - AttachmentTextToolbarDelegate {
+    // MARK: - MediaCaptionToolbarDelegate {
 
     private func showContentDimmerView() {
         contentDimmerView.alpha = 0
@@ -966,23 +1008,23 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         _ = bottomToolView.resignFirstResponder()
     }
 
-    func attachmentTextToolbarWillBeginEditing(_ attachmentTextToolbar: AttachmentTextToolbar) {
+    func mediaCaptionToolbarWillBeginEditing(_ mediaCaptionToolbar: MediaCaptionToolbar) {
         startObservingKeyboardNotifications()
     }
 
-    func attachmentTextToolbarDidBeginEditing(_ attachmentTextToolbar: AttachmentTextToolbar) {
+    func mediaCaptionToolbarDidBeginEditing(_ mediaCaptionToolbar: MediaCaptionToolbar) {
         showContentDimmerView()
     }
 
-    func attachmentTextToolbarDidEndEditing(_ attachmentTextToolbar: AttachmentTextToolbar) {
+    func mediaCaptionToolbarDidEndEditing(_ mediaCaptionToolbar: MediaCaptionToolbar) {
         hideContentDimmerView()
     }
 
-    func attachmentTextToolbarDidChange(_ attachmentTextToolbar: AttachmentTextToolbar) {
-        approvalDelegate?.attachmentApproval(self, didChangeMessageBody: attachmentTextToolbar.messageBodyForSending)
+    func mediaCaptionToolbarDidChangeText(_ mediaCaptionToolbar: MediaCaptionToolbar) {
+        approvalDelegate?.attachmentApproval(self, didChangeMessageBody: mediaCaptionToolbar.messageBodyForSending)
     }
 
-    func attachmentTextToolBarDidChangeHeight(_ attachmentTextToolbar: AttachmentTextToolbar) { }
+    func mediaCaptionToolBarDidChangeHeight(_ mediaCaptionToolbar: MediaCaptionToolbar) { }
 
     private func startObservingKeyboardNotifications() {
         guard !observingKeyboardNotifications else { return }
@@ -1297,7 +1339,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
     }
 
     public func textViewMentionPickerReferenceView(_ textView: BodyRangesTextView) -> UIView? {
-        return bottomToolView.attachmentTextToolbar
+        return bottomToolView.mediaCaptionToolbar
     }
 
     public func textViewMentionPickerPossibleAcis(_ textView: BodyRangesTextView, tx: DBReadTransaction) -> [Aci] {
@@ -1326,9 +1368,10 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
     }
 }
 
-// MARK: GalleryRail
+// MARK: -
 
 extension AttachmentApprovalItem: GalleryRailItem {
+
     public func buildRailItemView() -> UIView {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -1341,80 +1384,11 @@ extension AttachmentApprovalItem: GalleryRailItem {
     }
 }
 
-class AddMoreRailItem: GalleryRailItem {
-    func buildRailItemView() -> UIView {
-        let button = RoundMediaButton(
-            image: UIImage(imageLiteralResourceName: "plus-square-28"),
-            backgroundStyle: .blur,
-        )
-        button.isUserInteractionEnabled = false
-        button.layoutMargins = .zero
-        button.ows_contentEdgeInsets = .zero
-        return button
-    }
-
-    func isEqualToGalleryRailItem(_ other: (any GalleryRailItem)?) -> Bool {
-        return other is Self
-    }
-}
-
 // MARK: -
 
 extension AttachmentApprovalItemCollection: GalleryRailItemProvider {
 
-    var railItems: [GalleryRailItem] {
-        if isAddMoreVisible() {
-            return self.attachmentApprovalItems + [AddMoreRailItem()]
-        } else {
-            return self.attachmentApprovalItems
-        }
-    }
-}
-
-// MARK: -
-
-extension AttachmentApprovalViewController: GalleryRailViewDelegate {
-
-    public func galleryRailView(_ galleryRailView: GalleryRailView, didTapItem imageRailItem: GalleryRailItem) {
-        if imageRailItem is AddMoreRailItem {
-            didTapAddMedia()
-            return
-        }
-
-        guard let targetItem = imageRailItem as? AttachmentApprovalItem else {
-            owsFailDebug("unexpected imageRailItem: \(imageRailItem)")
-            return
-        }
-
-        guard
-            let currentItem,
-            let currentIndex = attachmentApprovalItems.firstIndex(where: { $0.isIdenticalTo(currentItem) })
-        else {
-            owsFailDebug("currentIndex was unexpectedly nil")
-            return
-        }
-
-        guard let targetIndex = attachmentApprovalItems.firstIndex(where: { $0.isIdenticalTo(targetItem) }) else {
-            owsFailDebug("targetIndex was unexpectedly nil")
-            return
-        }
-
-        let direction: UIPageViewController.NavigationDirection = currentIndex < targetIndex ? .forward : .reverse
-        setCurrentItem(targetItem, direction: direction, animated: true)
-    }
-}
-
-// MARK: -
-
-extension AttachmentApprovalViewController: ApprovalRailCellViewDelegate {
-
-    func approvalRailCellView(_ approvalRailCellView: ApprovalRailCellView, didRemoveItem attachmentApprovalItem: AttachmentApprovalItem) {
-        remove(attachmentApprovalItem: attachmentApprovalItem)
-    }
-
-    func canRemoveApprovalRailCellView(_ approvalRailCellView: ApprovalRailCellView) -> Bool {
-        return self.attachmentApprovalItems.count > 1
-    }
+    var railItems: [GalleryRailItem] { attachmentApprovalItems }
 }
 
 // MARK: -
@@ -1424,6 +1398,8 @@ private enum SaveableAsset {
     case imageUrl(_ url: URL)
     case videoUrl(_ url: URL)
 }
+
+// MARK: -
 
 private extension SaveableAsset {
     @MainActor

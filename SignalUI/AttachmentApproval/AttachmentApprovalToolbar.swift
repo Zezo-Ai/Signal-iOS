@@ -7,7 +7,7 @@ import Foundation
 import SignalServiceKit
 import UIKit
 
-class AttachmentApprovalToolbar: UIView {
+class AttachmentApprovalToolbar: UIView, MediaCaptionToolbarDelegate {
 
     struct Configuration: Equatable {
         var isAddMoreVisible = true
@@ -17,134 +17,130 @@ class AttachmentApprovalToolbar: UIView {
         var canToggleViewOnce = true
         var canChangeMediaQuality = true
         var canSaveMedia = false
-        var doneButtonIcon: DoneButtonIcon = .send
+        var proceedButtonIcon: ProceedButtonIcon = .send
 
-        enum DoneButtonIcon: String {
-            case send = "send-blue-42-dark"
-            case next = "chevron-right-colored-42"
+        enum ProceedButtonIcon: String {
+            case send = "arrow-up"
+            case next = "chevron-right-26"
         }
     }
 
-    var configuration: Configuration
+    var configuration = Configuration()
 
     let contentLayoutGuide = UILayoutGuide()
 
-    // Only visible when there's one media item and contains "Add Media" and "View Once" buttons.
-    // Displayed in place of galleryRailView.
-    private lazy var singleMediaActionButtonsContainer: UIView = {
-        let view = UIView()
-        view.preservesSuperviewLayoutMargins = true
-        view.layoutMargins.bottom = 0
+    weak var captionToolbarDelegate: MediaCaptionToolbarDelegate?
 
-        view.addSubview(buttonAddMedia)
-        buttonAddMedia.autoPinHeightToSuperviewMargins()
-        buttonAddMedia.layoutMarginsGuide.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor).isActive = true
-
-        view.addSubview(buttonViewOnce)
-        buttonViewOnce.autoPinHeightToSuperviewMargins()
-        buttonViewOnce.layoutMarginsGuide.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor).isActive = true
-
-        return view
+    // Top row: previews of media items. Only shown when there are multiple.
+    lazy var galleryRailView: GalleryRailView = {
+        let galleryRailView = GalleryRailView()
+        galleryRailView.itemSize = 44
+        if #available(iOS 26, *) {
+            // Increase spacing above `mediaToolbar` from default `8`.
+            // Pre-iOS 26 keeps default `8` as padding above the blurred background.
+            galleryRailView.layoutMargins.bottom = 24
+        } else {
+            galleryRailView.scrollFocusMode = .keepWithinBounds
+        }
+        return galleryRailView
     }()
 
-    let buttonAddMedia: UIButton = RoundMediaButton(
-        image: UIImage(imageLiteralResourceName: "plus-square-28"),
-        backgroundStyle: .blur,
-    )
-    let buttonViewOnce: UIButton = RoundMediaButton(
-        image: UIImage(imageLiteralResourceName: "view_once-28"),
-        backgroundStyle: .blur,
-    )
-    // Contains message input field and a button to finish editing.
-    let attachmentTextToolbar: AttachmentTextToolbar
-    weak var attachmentTextToolbarDelegate: AttachmentTextToolbarDelegate?
-    // Shows previews of media object.
-    let galleryRailView: GalleryRailView
-    // Row of buttons at the bottom of the screen.
+    // Middle row: tool bar with buttons.
     private let mediaToolbar = MediaToolbar()
+    // Bottom row: caption input field with the Send button.
+    lazy var mediaCaptionToolbar: MediaCaptionToolbar = {
+        let toolbar = MediaCaptionToolbar()
+        toolbar.setIsViewOnce(
+            enabled: configuration.canToggleViewOnce,
+            on: configuration.isViewOnceOn,
+            animated: false,
+        )
+        toolbar.delegate = self
+        return toolbar
+    }()
 
     private lazy var opaqueContentView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [attachmentTextToolbar, mediaToolbar])
+        let stackView = UIStackView(arrangedSubviews: [mediaToolbar, mediaCaptionToolbar])
         stackView.axis = .vertical
-        stackView.preservesSuperviewLayoutMargins = true
+        stackView.spacing = if #available(iOS 26, *) { 24 } else { 16 }
         return stackView
     }()
 
     private lazy var containerStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [opaqueContentView])
         stackView.axis = .vertical
-        stackView.preservesSuperviewLayoutMargins = true
+        stackView.isLayoutMarginsRelativeArrangement = true
+        stackView.directionalLayoutMargins = .zero // no margins needed by default
+        if #unavailable(iOS 26) {
+            // Padding along the top edge of the blurred background.
+            stackView.directionalLayoutMargins.top = 16
+        }
         return stackView
     }()
 
-    private var viewOnceTooltip: UIView?
-
-    var isEditingMediaMessage: Bool {
-        return attachmentTextToolbar.isEditingText
+    var isEditingCaptionText: Bool {
+        return mediaCaptionToolbar.isEditingText
     }
 
     private var currentAttachmentItem: AttachmentApprovalItem?
 
     override init(frame: CGRect) {
-        configuration = Configuration()
-
-        attachmentTextToolbar = AttachmentTextToolbar()
-        attachmentTextToolbar.setIsViewOnce(enabled: configuration.isViewOnceOn, animated: false)
-
-        galleryRailView = GalleryRailView()
-        galleryRailView.itemSize = 44
-        galleryRailView.scrollFocusMode = .keepWithinBounds
-
         super.init(frame: frame)
 
-        createContents()
+        backgroundColor = .clear
+        tintColor = .Signal.label
+        preservesSuperviewLayoutMargins = true
 
+        // View controller will use this layout guide to position UI elements above the keyboard.
         addLayoutGuide(contentLayoutGuide)
         NSLayoutConstraint.activate([
             contentLayoutGuide.topAnchor.constraint(equalTo: topAnchor),
-            contentLayoutGuide.leadingAnchor.constraint(equalTo: leadingAnchor),
-            contentLayoutGuide.trailingAnchor.constraint(equalTo: trailingAnchor),
-            contentLayoutGuide.bottomAnchor.constraint(equalTo: opaqueContentView.bottomAnchor),
+            contentLayoutGuide.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
+            contentLayoutGuide.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
+            contentLayoutGuide.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor),
+        ])
+
+        // Thumbnail strip is positioned above the protection background (pre-iOS 26), directly over media.
+        addSubview(galleryRailView)
+
+        let visualEffectView: UIVisualEffectView
+        if #available(iOS 26, *) {
+            visualEffectView = UIVisualEffectView(effect: UIGlassContainerEffect())
+        } else {
+            visualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
+        }
+        visualEffectView.preservesSuperviewLayoutMargins = true
+        visualEffectView.contentView.preservesSuperviewLayoutMargins = true
+        addSubview(visualEffectView)
+        visualEffectView.contentView.addSubview(containerStackView)
+
+        galleryRailView.translatesAutoresizingMaskIntoConstraints = false
+        visualEffectView.translatesAutoresizingMaskIntoConstraints = false
+        containerStackView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            galleryRailView.topAnchor.constraint(equalTo: contentLayoutGuide.topAnchor),
+            galleryRailView.leadingAnchor.constraint(equalTo: contentLayoutGuide.leadingAnchor),
+            galleryRailView.trailingAnchor.constraint(equalTo: contentLayoutGuide.trailingAnchor),
+
+            containerStackView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
+            containerStackView.leadingAnchor.constraint(equalTo: contentLayoutGuide.leadingAnchor),
+            containerStackView.trailingAnchor.constraint(equalTo: contentLayoutGuide.trailingAnchor),
+            containerStackView.bottomAnchor.constraint(equalTo: contentLayoutGuide.bottomAnchor),
+
+            visualEffectView.topAnchor.constraint(equalTo: galleryRailView.bottomAnchor),
+            visualEffectView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            visualEffectView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            visualEffectView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
 
-    @available(*, unavailable, message: "Use init(frame:) instead")
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private func createContents() {
-        backgroundColor = .clear
-        layoutMargins.bottom = 0
-        preservesSuperviewLayoutMargins = true
-
-        attachmentTextToolbar.delegate = self
-
-        addSubview(galleryRailView)
-        galleryRailView.autoPinWidthToSuperview()
-        galleryRailView.autoPinEdge(toSuperviewEdge: .top)
-
-        addSubview(singleMediaActionButtonsContainer)
-        singleMediaActionButtonsContainer.autoPinWidthToSuperview()
-        singleMediaActionButtonsContainer.autoPinEdge(.bottom, to: .bottom, of: galleryRailView)
-
-        // Use a background view that extends below the keyboard to avoid animation glitches.
-        let backgroundView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
-        addSubview(backgroundView)
-        backgroundView.autoPinWidthToSuperview()
-        backgroundView.autoPinEdge(.top, to: .bottom, of: galleryRailView)
-        backgroundView.autoPinEdge(toSuperviewEdge: .bottom, withInset: -30)
-
-        addSubview(containerStackView)
-        containerStackView.autoPinEdge(.top, to: .bottom, of: galleryRailView)
-        containerStackView.autoPinWidthToSuperview()
-        // We pin to the superview's _margin_.  Otherwise the notch breaks
-        // the layout if you hide the keyboard in the simulator (or if the
-        // user uses an external keyboard).
-        containerStackView.autoPinEdge(toSuperviewMargin: .bottom)
-    }
-
     private var supplementaryViewContainer: UIView?
+
     func set(supplementaryView: UIView?) {
         if let supplementaryViewContainer {
             supplementaryViewContainer.removeFromSuperview()
@@ -167,33 +163,29 @@ class AttachmentApprovalToolbar: UIView {
 
     private func updateContents(animated: Bool) {
         // Show/hide Gallery Rail.
-        let isGalleryRailViewVisible = configuration.isMediaStripVisible && !isEditingMediaMessage
+        let isGalleryRailViewVisible = configuration.isMediaStripVisible && !isEditingCaptionText
         galleryRailView.setIsHidden(!isGalleryRailViewVisible, animated: animated)
 
-        // Show/hide [+] Add Media button and "View Once" toggle.
-        let isSingleMediaActionsVisible = !configuration.isMediaStripVisible && !isEditingMediaMessage
-        singleMediaActionButtonsContainer.setIsHidden(!isSingleMediaActionsVisible, animated: animated)
+        supplementaryViewContainer?.isHiddenInStackView = isEditingCaptionText
 
-        // [+] Add Media might also be hidden independently of Media Rail and View Once.
-        buttonAddMedia.setIsHidden(!configuration.isAddMoreVisible, animated: animated)
-
-        // Update image and visibility of the "View Once" button.
-        let viewOnceButtonImage = UIImage(imageLiteralResourceName: configuration.isViewOnceOn ? "view_once-28" : "view_once-infinite-28")
-        buttonViewOnce.setImage(viewOnceButtonImage, animated: animated)
-        buttonViewOnce.setIsHidden(!configuration.canToggleViewOnce, animated: animated)
-
-        supplementaryViewContainer?.isHiddenInStackView = isEditingMediaMessage
-
-        attachmentTextToolbar.setIsViewOnce(enabled: configuration.isViewOnceOn, animated: animated)
+        mediaToolbar.setIsMediaQualityHigh(
+            enabled: configuration.isMediaHighQualityEnabled,
+            animated: animated,
+        )
+        mediaCaptionToolbar.setProceedButtonImage(
+            UIImage(imageLiteralResourceName: configuration.proceedButtonIcon.rawValue),
+        )
+        mediaCaptionToolbar.setIsViewOnce(
+            enabled: configuration.canToggleViewOnce,
+            on: configuration.isViewOnceOn,
+            animated: animated,
+        )
 
         // Visibility of bottom buttons only changes when user starts/finishes composing text message.
         // In that case `updateContents(animated:)` is called from within an animation block
         // and since `mediaToolbar` is in a stack view it is necessary to modify `isHiddenInStackView`
         // to get a nice animation.
-        mediaToolbar.isHiddenInStackView = isEditingMediaMessage
-
-        mediaToolbar.sendButton.setImage(UIImage(imageLiteralResourceName: configuration.doneButtonIcon.rawValue), for: .normal)
-        mediaToolbar.setIsMediaQualityHigh(enabled: configuration.isMediaHighQualityEnabled, animated: animated)
+        mediaToolbar.isHiddenInStackView = isEditingCaptionText
 
         let availableButtons: MediaToolbar.AvailableButtons = {
             guard let currentAttachmentItem else {
@@ -224,21 +216,19 @@ class AttachmentApprovalToolbar: UIView {
     }
 
     override func resignFirstResponder() -> Bool {
-        if isEditingMediaMessage {
-            return attachmentTextToolbar.textView.resignFirstResponder()
-        } else {
-            return super.resignFirstResponder()
+        if isEditingCaptionText {
+            return mediaCaptionToolbar.textView.resignFirstResponder()
         }
+        return super.resignFirstResponder()
     }
 
     private func updateFirstResponder() {
         if configuration.isViewOnceOn {
-            if isEditingMediaMessage {
-                _ = attachmentTextToolbar.textView.resignFirstResponder()
+            if isEditingCaptionText {
+                _ = mediaCaptionToolbar.textView.resignFirstResponder()
             }
         }
-        // NOTE: We don't automatically make attachmentTextToolbar.textView
-        // first responder;
+        // NOTE: We don't automatically make mediaCaptionToolbar.textView first responder.
     }
 
     func update(currentAttachmentItem: AttachmentApprovalItem, configuration: Configuration, animated: Bool) {
@@ -259,39 +249,37 @@ class AttachmentApprovalToolbar: UIView {
     override var intrinsicContentSize: CGSize { .zero }
 
     var hasFirstResponder: Bool {
-        return isFirstResponder || attachmentTextToolbar.textView.isFirstResponder
-    }
-}
-
-extension AttachmentApprovalToolbar: AttachmentTextToolbarDelegate {
-
-    func attachmentTextToolbarWillBeginEditing(_ attachmentTextToolbar: AttachmentTextToolbar) {
-        attachmentTextToolbarDelegate?.attachmentTextToolbarWillBeginEditing(attachmentTextToolbar)
+        return isFirstResponder || mediaCaptionToolbar.textView.isFirstResponder
     }
 
-    func attachmentTextToolbarDidBeginEditing(_ attachmentTextToolbar: AttachmentTextToolbar) {
+    // MARK: - AttachmentTextToolbarDelegate
+
+    func mediaCaptionToolbarWillBeginEditing(_ mediaCaptionToolbar: MediaCaptionToolbar) {
+        captionToolbarDelegate?.mediaCaptionToolbarWillBeginEditing(mediaCaptionToolbar)
+    }
+
+    func mediaCaptionToolbarDidBeginEditing(_ mediaCaptionToolbar: MediaCaptionToolbar) {
         updateContents(animated: true)
-        attachmentTextToolbarDelegate?.attachmentTextToolbarDidBeginEditing(attachmentTextToolbar)
+        captionToolbarDelegate?.mediaCaptionToolbarDidBeginEditing(mediaCaptionToolbar)
     }
 
-    func attachmentTextToolbarDidEndEditing(_ attachmentTextToolbar: AttachmentTextToolbar) {
+    func mediaCaptionToolbarDidEndEditing(_ mediaCaptionToolbar: MediaCaptionToolbar) {
         updateContents(animated: true)
-        attachmentTextToolbarDelegate?.attachmentTextToolbarDidEndEditing(attachmentTextToolbar)
+        captionToolbarDelegate?.mediaCaptionToolbarDidEndEditing(mediaCaptionToolbar)
     }
 
-    func attachmentTextToolbarDidChange(_ attachmentTextToolbar: AttachmentTextToolbar) {
-        attachmentTextToolbarDelegate?.attachmentTextToolbarDidChange(attachmentTextToolbar)
+    func mediaCaptionToolbarDidChangeText(_ mediaCaptionToolbar: MediaCaptionToolbar) {
+        captionToolbarDelegate?.mediaCaptionToolbarDidChangeText(mediaCaptionToolbar)
     }
 
-    func attachmentTextToolBarDidChangeHeight(_ attachmentTextToolbar: AttachmentTextToolbar) {
+    func mediaCaptionToolBarDidChangeHeight(_ mediaCaptionToolbar: MediaCaptionToolbar) {
         setNeedsLayout()
         layoutIfNeeded()
     }
-}
 
-// MARK: - View Once Tooltip
+    // MARK: - View Once Tooltip
 
-extension AttachmentApprovalToolbar {
+    private var viewOnceTooltip: UIView?
 
     // The tooltip lies outside this view's bounds, so we
     // need to special-case the hit testing so that it can
@@ -328,7 +316,11 @@ extension AttachmentApprovalToolbar {
             // Already showing the tooltip.
             return
         }
-        let tooltip = ViewOnceTooltip.present(fromView: self, widthReferenceView: self, tailReferenceView: buttonViewOnce) { [weak self] in
+        let tooltip = ViewOnceTooltip.present(
+            fromView: self,
+            widthReferenceView: self,
+            tailReferenceView: mediaCaptionToolbar.viewOnceButton,
+        ) { [weak self] in
             self?.removeViewOnceTooltip()
         }
         viewOnceTooltip = tooltip
@@ -347,14 +339,22 @@ extension AttachmentApprovalToolbar {
         viewOnceTooltip = nil
     }
 
-}
+    // MARK: - Buttons
 
-// MARK: - Bottom Row Buttons
+    var buttonProceed: UIButton {
+        mediaCaptionToolbar.proceedButton
+    }
 
-extension AttachmentApprovalToolbar {
+    var buttonViewOnce: UIButton {
+        mediaCaptionToolbar.viewOnceButton
+    }
 
-    var buttonSend: UIButton {
-        mediaToolbar.sendButton
+    var buttonPenTool: UIButton {
+        mediaToolbar.penToolButton
+    }
+
+    var buttonCropTool: UIButton {
+        mediaToolbar.cropToolButton
     }
 
     var buttonMediaQuality: UIButton {
@@ -365,12 +365,8 @@ extension AttachmentApprovalToolbar {
         mediaToolbar.saveMediaButton
     }
 
-    var buttonPenTool: UIButton {
-        mediaToolbar.penToolButton
-    }
-
-    var buttonCropTool: UIButton {
-        mediaToolbar.cropToolButton
+    var buttonAddMedia: UIButton {
+        mediaToolbar.addMediaButton
     }
 }
 
@@ -381,85 +377,117 @@ private class MediaToolbar: UIView {
 
         static let pen = AvailableButtons(rawValue: 1 << 0)
         static let crop = AvailableButtons(rawValue: 1 << 1)
-        static let save = AvailableButtons(rawValue: 1 << 2)
-        static let mediaQuality = AvailableButtons(rawValue: 1 << 3)
+        static let mediaQuality = AvailableButtons(rawValue: 1 << 2)
+        static let save = AvailableButtons(rawValue: 1 << 3)
+        static let addMedia = AvailableButtons(rawValue: 1 << 4)
 
-        static let all: AvailableButtons = [.pen, .crop, .save, .mediaQuality]
+        static let all: AvailableButtons = [.pen, .crop, .mediaQuality, .save, .addMedia]
     }
 
     func set(availableButtons: AvailableButtons, animated: Bool) {
         penToolButton.setIsHidden(!availableButtons.contains(.pen), animated: animated)
         cropToolButton.setIsHidden(!availableButtons.contains(.crop), animated: animated)
-        saveMediaButton.setIsHidden(!availableButtons.contains(.save), animated: animated)
         mediaQualityButton.setIsHidden(!availableButtons.contains(.mediaQuality), animated: animated)
+        saveMediaButton.setIsHidden(!availableButtons.contains(.save), animated: animated)
+        addMediaButton.setIsHidden(!availableButtons.contains(.addMedia), animated: animated)
     }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-
-        preservesSuperviewLayoutMargins = true
 
         let stackView = UIStackView(arrangedSubviews: [
             penToolButton,
             cropToolButton,
             mediaQualityButton,
             saveMediaButton,
-            UIView.transparentSpacer(),
-            sendButton,
+            addMediaButton,
         ])
-        stackView.spacing = 4
-        addSubview(stackView)
-        stackView.autoPinLeadingToSuperviewMargin(withInset: -penToolButton.layoutMargins.leading)
-        sendButton.layoutMarginsGuide.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor).isActive = true
-        stackView.autoPinEdge(toSuperviewEdge: .top)
-        stackView.autoPinEdge(toSuperviewEdge: .bottom, withInset: UIDevice.current.hasIPhoneXNotch ? 0 : 8)
+        if #available(iOS 26, *) {
+            stackView.spacing = 10
+            stackView.directionalLayoutMargins = .init(top: 0, leading: 2, bottom: 2, trailing: 2)
+            stackView.isLayoutMarginsRelativeArrangement = true
+            stackView.translatesAutoresizingMaskIntoConstraints = false
+
+            let glassEffect = UIGlassEffect(style: .regular)
+            glassEffect.isInteractive = true
+            let glassEffectView = UIVisualEffectView(effect: glassEffect)
+            glassEffectView.cornerConfiguration = .capsule()
+            glassEffectView.clipsToBounds = true
+            glassEffectView.translatesAutoresizingMaskIntoConstraints = false
+            glassEffectView.contentView.addSubview(stackView)
+            addSubview(glassEffectView)
+            NSLayoutConstraint.activate([
+                glassEffectView.topAnchor.constraint(equalTo: topAnchor),
+                glassEffectView.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor),
+                glassEffectView.centerXAnchor.constraint(equalTo: centerXAnchor),
+                glassEffectView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+                // Stack view is horizontally centered.
+                stackView.topAnchor.constraint(equalTo: glassEffectView.topAnchor),
+                stackView.leadingAnchor.constraint(equalTo: glassEffectView.leadingAnchor),
+                stackView.trailingAnchor.constraint(equalTo: glassEffectView.trailingAnchor),
+                stackView.bottomAnchor.constraint(equalTo: glassEffectView.bottomAnchor),
+            ])
+        } else {
+            stackView.spacing = 16
+            stackView.translatesAutoresizingMaskIntoConstraints = false
+
+            // Stack view has leading edge alignment.
+            addSubview(stackView)
+            NSLayoutConstraint.activate([
+                stackView.topAnchor.constraint(equalTo: topAnchor),
+                stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
+                stackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor),
+                stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            ])
+        }
 
         stackView.arrangedSubviews.compactMap { $0 as? UIButton }.forEach { button in
             button.setCompressionResistanceHigh()
         }
     }
 
-    @available(*, unavailable, message: "Use init(frame:) instead")
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
     // MARK: - Layout
 
-    private static let buttonBackgroundColor = RoundMediaButton.defaultBackgroundColor
-    let penToolButton: UIButton = RoundMediaButton(
-        image: UIImage(imageLiteralResourceName: "brush-pen-28"),
-        backgroundStyle: .solid(buttonBackgroundColor),
-    )
-    let cropToolButton: UIButton = RoundMediaButton(
-        image: UIImage(imageLiteralResourceName: "crop-rotate-28"),
-        backgroundStyle: .solid(buttonBackgroundColor),
-    )
-    lazy var mediaQualityButton: UIButton = RoundMediaButton(
-        image: MediaToolbar.imageMediaQualityStandard,
-        backgroundStyle: .solid(MediaToolbar.buttonBackgroundColor),
-    )
-    let saveMediaButton: UIButton = RoundMediaButton(
-        image: UIImage(imageLiteralResourceName: "save-28"),
-        backgroundStyle: .solid(buttonBackgroundColor),
-    )
-    let sendButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(
-            UIImage(imageLiteralResourceName: AttachmentApprovalToolbar.Configuration.DoneButtonIcon.send.rawValue),
-            for: .normal,
-        )
-        button.ows_contentEdgeInsets = UIEdgeInsets(margin: UIDevice.current.isNarrowerThanIPhone6 ? 4 : 8)
-        button.accessibilityLabel = MessageStrings.sendButton
-        button.sizeToFit()
-        return button
-    }()
+    private static func buttonConfiguration(image: UIImage) -> UIButton.Configuration {
+        var configuration: UIButton.Configuration
+        if #available(iOS 26, *) {
+            configuration = .plain()
+        } else {
+            configuration = .bordered()
+            configuration.cornerStyle = .capsule
+            configuration.baseBackgroundColor = .Signal.primaryFill
+        }
+        configuration.image = image
+        configuration.contentInsets = .init(margin: 9) // 42 dp buttons given 24 dp images
+        return configuration
+    }
 
-    private static let imageMediaQualityHigh = UIImage(imageLiteralResourceName: "quality-high")
-    private static let imageMediaQualityStandard = UIImage(imageLiteralResourceName: "quality-standard")
+    lazy var penToolButton = UIButton(configuration: Self.buttonConfiguration(
+        image: UIImage(imageLiteralResourceName: "brush-pen"),
+    ))
+    lazy var cropToolButton = UIButton(configuration: Self.buttonConfiguration(
+        image: UIImage(imageLiteralResourceName: "crop-rotate"),
+    ))
+    lazy var mediaQualityButton = UIButton(configuration: Self.buttonConfiguration(
+        image: MediaToolbar.iconMediaQualityStandard,
+    ))
+    lazy var saveMediaButton = UIButton(configuration: Self.buttonConfiguration(
+        image: UIImage(imageLiteralResourceName: "save"),
+    ))
+    lazy var addMediaButton = UIButton(configuration: Self.buttonConfiguration(
+        image: UIImage(imageLiteralResourceName: "photo-plus"),
+    ))
+
+    private static let iconMediaQualityHigh = UIImage(imageLiteralResourceName: "hd")
+    private static let iconMediaQualityStandard = UIImage(imageLiteralResourceName: "hd-slash")
 
     fileprivate func setIsMediaQualityHigh(enabled: Bool, animated: Bool) {
-        let image = enabled ? MediaToolbar.imageMediaQualityHigh : MediaToolbar.imageMediaQualityStandard
+        let image = enabled ? MediaToolbar.iconMediaQualityHigh : MediaToolbar.iconMediaQualityStandard
         mediaQualityButton.setImage(image, animated: animated)
     }
 }

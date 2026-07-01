@@ -5302,6 +5302,9 @@
 /* nav bar button item */
 "MEDIA_DETAIL_VIEW_ALL_MEDIA_BUTTON" = "All Media";
 
+/* Placeholder for message text input field in media editor. */
+"MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "Message";
+
 /* Title for the button that discards all edits in media editor. */
 "MEDIA_EDITOR_CLEAR_ALL" = "Clear All";
 
@@ -5319,9 +5322,6 @@
 
 /* Tooltip to display above a clock sticker in the media editor saying to tap for more clock styles */
 "MEDIA_EDITOR_TAP_FOR_MORE" = "Tap for more";
-
-/* Placeholder for message text input field in media editor. */
-"MEDIA_EDITOR_TEXT_FIELD_ADD_MESSAGE" = "Add Message";
 
 /* Shown in place of message input text in media editor when 'View Once' is on. */
 "MEDIA_EDITOR_TEXT_FIELD_VIEW_ONCE_MEDIA" = "View Once Media";
