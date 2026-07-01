@@ -413,7 +413,7 @@ open class TSThread: NSObject, SDSCodableModel, InheritableRecord {
         transaction tx: DBWriteTransaction,
     ) {
         anyUpdate(transaction: tx) { thread in
-            thread.shouldThreadBeVisible = true
+            thread.shouldThreadBeVisible = shouldThreadBeVisible
         }
     }
 
