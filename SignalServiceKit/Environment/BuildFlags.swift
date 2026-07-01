@@ -63,7 +63,7 @@ public enum BuildFlags {
         public static let conservativeSelfCheck = build <= .internal
     }
 
-    public static let pollOneOnOneSend = build <= .internal
+    public static let pollOneOnOneSend = true
 
     public enum AdminDelete {
         public static let receive = true
