@@ -1039,6 +1039,8 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
 
         // Zoom control.
         if let cameraZoomControlsView = CameraZoomControlsView(cameraCaptureSession: cameraCaptureSession, axis: .horizontal) {
+            cameraZoomControlsView.frontCameraZoomControl?.delegate = self
+            cameraZoomControlsView.rearCameraZoomControl?.delegate = self
             cameraZoomControlsView.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(cameraZoomControlsView)
 
