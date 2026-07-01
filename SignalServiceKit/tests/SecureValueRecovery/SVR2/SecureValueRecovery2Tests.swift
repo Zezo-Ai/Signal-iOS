@@ -298,6 +298,51 @@ class SecureValueRecovery2Tests: XCTestCase {
             XCTAssertEqual(localStorage.backupAttemptStore.allKeys(transaction: tx), [newEnclave.stringValue])
         }
     }
+
+    /// Tests that backups made prior to the introduction of isBackedUp are
+    /// still classified as having been completed.
+    func testInvalidationMigration() async throws {
+        let mockEnclave = MrEnclave("0000000000000000000000000000000000000000000000000000000000000000")
+
+        let aep = try AccountEntropyPool(key: String(repeating: "A", count: 64))
+        let masterKey = aep.getMasterKey()
+        let pin = "0000"
+
+        db.write { tx in
+            accountKeyStore.setAccountEntropyPool(aep, tx: tx)
+        }
+        mock2FAManager.pinCode = pin
+
+        struct CompletedBackup: Encodable {
+            let masterKey: Data
+            let encryptedMasterKey: Data
+            let encodedPINVerificationString: String
+            var isExposed: Bool
+        }
+        let oldCompletedBackup = CompletedBackup(
+            masterKey: masterKey.rawData,
+            encryptedMasterKey: try MockPinHasher().hashPin(
+                normalizedPin: pin,
+                username: "",
+                mrEnclave: mockEnclave,
+            ).encryptMasterKey(masterKey.rawData),
+            encodedPINVerificationString: try SVRUtil.deriveEncodedPINVerificationString(pin: pin),
+            isExposed: true,
+        )
+        try db.write { tx in
+            try localStorage.backupAttemptStore.setCodable(
+                oldCompletedBackup,
+                key: mockEnclave.stringValue,
+                transaction: tx,
+            )
+        }
+
+        mockTSConstants.svr2Enclaves = [mockEnclave]
+        _ = try await svr.refreshBackupIfNecessary()
+        db.read { tx in
+            XCTAssertEqual(localStorage.backupAttemptStore.allKeys(transaction: tx), [mockEnclave.stringValue])
+        }
+    }
 }
 
 // MARK: -

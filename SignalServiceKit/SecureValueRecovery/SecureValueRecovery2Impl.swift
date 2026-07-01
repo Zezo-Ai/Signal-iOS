@@ -159,8 +159,9 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
         let masterKey: Data
         let encryptedMasterKey: Data
         let encodedPINVerificationString: String
-        // TODO: Remove default value when MrEnclave ced8217b26228e4b210c985786999d095c4958a94faf37b14acaf25c4cbb02a4 doesn't exist.
-        var isBackedUp: Bool = true
+        // TODO: Make non-Optional when MrEnclave ced8217b26228e4b210c985786999d095c4958a94faf37b14acaf25c4cbb02a4 doesn't exist.
+        var isBackedUp: Bool?
+        var isBackedUpOrDefault: Bool { isBackedUp ?? true }
         var isExposed: Bool
 
         func matches(pin: String, masterKey: MasterKey) -> Bool {
@@ -233,7 +234,7 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
         if force {
             // We're forcing a backup, so *nothing* matches.
             priorMatchingBackup = nil
-        } else if let priorBackup, priorBackup.isBackedUp, priorBackup.matches(pin: pin, masterKey: masterKey) {
+        } else if let priorBackup, priorBackup.isBackedUpOrDefault, priorBackup.matches(pin: pin, masterKey: masterKey) {
             // We're trying to back up what's already backed up.
             priorMatchingBackup = priorBackup
         } else {
