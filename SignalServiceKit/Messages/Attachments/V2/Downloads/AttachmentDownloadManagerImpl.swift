@@ -509,10 +509,6 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         source: QueuedAttachmentDownloadRecord.SourceType,
         progress: OWSProgressSink?,
     ) async throws {
-
-        let downloadKey = DownloadQueue.DownloadKey(id: id, source: source)
-        await downloadQueue.clearOldDownloadsAndIncrementProgressID(key: downloadKey)
-
         let downloadWaitingTask = Task {
             try await self.downloadQueue.waitForDownloadOfAttachment(
                 id: id,
@@ -521,6 +517,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             )
         }
 
+        let downloadKey = DownloadQueue.DownloadKey(id: id, source: source)
         do {
             self.beginDownloadingIfNecessary()
             try await downloadWaitingTask.value
@@ -1712,26 +1709,9 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
 
         private var downloadObservers = [DownloadKey: [CheckedContinuation<Void, Error>]]()
         private var downloadProgresses = [DownloadKey: [OWSProgressSink]]()
-        private var finishedOrFailedDownloads = Set<DownloadKey>()
-        private var progressIDs = [DownloadKey: UInt64]()
-
-        func latestProgressID(downloadKey: DownloadKey?) -> UInt64 {
-            guard let downloadKey else {
-                return 0
-            }
-            return progressIDs[downloadKey] ?? 0
-        }
-
-        func clearOldDownloadsAndIncrementProgressID(key: DownloadKey) {
-            finishedOrFailedDownloads.remove(key)
-
-            let oldProgressID = progressIDs[key] ?? 0
-            progressIDs[key] = oldProgressID + 1
-        }
 
         func clearDownloadProgressAndMarkFinished(key: DownloadKey) {
             downloadProgresses.removeValue(forKey: key)
-            finishedOrFailedDownloads.insert(key)
         }
 
         func waitForDownloadOfAttachment(
@@ -1904,28 +1884,11 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     }
                 }
 
-                let k = DownloadQueue.downloadKey(state: downloadState)
-                let wrappedProgressID = await latestProgressID(downloadKey: k)
                 let downloadResponse = try await downloadOperation({ progressUpdate in
-                    if let k, await latestProgressID(downloadKey: k) != wrappedProgressID {
-                        // A new download has started, don't send progress updates or notifications.
-                        return
-                    }
-                    if let k, await finishedOrFailedDownloads.contains(k) {
-                        try cancelDownloadIfNeeded(attachmentId: k.id)
-                        // If we've already finished the download, send the notification so
-                        // handlers can get 100% updates but don't update the progress sources,
-                        // which may be double counting.
-                        await handleDownloadProgress(
-                            attachmentId: k.id,
-                            progressUpdate: progressUpdate,
-                            expectedDownloadSizeBytes: expectedDownloadSizeBytes,
-                        )
-                        return
-                    }
                     for progressSource in progressSources {
                         progressSource.incrementCompletedUnitCount(to: progressUpdate.completedByteCount)
                     }
+                    let k = DownloadQueue.downloadKey(state: downloadState)
                     if let k {
                         try cancelDownloadIfNeeded(attachmentId: k.id)
                         await handleDownloadProgress(
