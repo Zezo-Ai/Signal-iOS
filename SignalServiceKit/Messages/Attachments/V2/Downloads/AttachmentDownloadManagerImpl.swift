@@ -1848,14 +1848,6 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             var headers = downloadState.additionalHeaders()
             headers["Content-Type"] = MimeType.applicationOctetStream.rawValue
 
-            let attachmentId: Attachment.IDType?
-            switch downloadState.type {
-            case .backup, .transientAttachment:
-                attachmentId = nil
-            case .attachment(_, let id):
-                attachmentId = id
-            }
-
             if downloadState.isExpired() {
                 throw AttachmentDownloads.Error.expiredCredentials
             }
@@ -1890,22 +1882,24 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
 
                 let wrappedProgressID = await latestProgressID(downloadKey: DownloadQueue.downloadKey(state: downloadState))
                 let wrappedProgress = OWSProgress.createSink { [weak self] progressValue in
-                    if let k = DownloadQueue.downloadKey(state: downloadState) {
+                    let k = DownloadQueue.downloadKey(state: downloadState)
+                    if let k {
                         if await self?.latestProgressID(downloadKey: k) != wrappedProgressID {
                             // A new download has started, don't send progress updates or notifications.
                             return
                         }
 
                         if let self, await finishedOrFailedDownloads.contains(k) {
+                            if self.cancelDownloadIfNeeded(attachmentId: k.id, downloadTask: downloadTask) {
+                                return
+                            }
                             // If we've already finished the download, send the notification so
                             // handlers can get 100% updates but don't update the progress sources,
                             // which may be double counting.
-                            handleDownloadProgress(
-                                downloadState: downloadState,
-                                task: downloadTask,
+                            self.handleDownloadProgress(
+                                attachmentId: k.id,
                                 progress: progressValue,
                                 expectedDownloadSizeBytes: expectedDownloadSizeBytes,
-                                attachmentId: attachmentId,
                             )
                             return
                         }
@@ -1916,13 +1910,16 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                             progressSource.incrementCompletedUnitCount(by: progressValue.completedUnitCount - progressSource.completedUnitCount)
                         }
                     }
-                    self?.handleDownloadProgress(
-                        downloadState: downloadState,
-                        task: downloadTask,
-                        progress: progressValue,
-                        expectedDownloadSizeBytes: expectedDownloadSizeBytes,
-                        attachmentId: attachmentId,
-                    )
+                    if let k {
+                        if self?.cancelDownloadIfNeeded(attachmentId: k.id, downloadTask: downloadTask) == true {
+                            return
+                        }
+                        self?.handleDownloadProgress(
+                            attachmentId: k.id,
+                            progress: progressValue,
+                            expectedDownloadSizeBytes: expectedDownloadSizeBytes,
+                        )
+                    }
                 }
                 let wrappedProgressSource = wrappedProgress.addSource(
                     withLabel: "source",
@@ -1997,20 +1994,24 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             }
         }
 
+        private nonisolated func cancelDownloadIfNeeded(
+            attachmentId: Attachment.IDType,
+            downloadTask: Task<OWSUrlDownloadResponse, any Error>?,
+        ) -> Bool {
+            guard progressStates.consumeCancellation(of: attachmentId) else {
+                return false
+            }
+            Logger.info("Cancelling download.")
+            // Cancelling will inform the URLSessionTask delegate.
+            downloadTask?.cancel()
+            return true
+        }
+
         private nonisolated func handleDownloadProgress(
-            downloadState: DownloadState,
-            task: Task<OWSUrlDownloadResponse, Error>?,
+            attachmentId: Attachment.IDType,
             progress: OWSProgress,
             expectedDownloadSizeBytes: UInt64?,
-            attachmentId: Attachment.IDType?,
         ) {
-            if let attachmentId, progressStates.consumeCancellation(of: attachmentId) {
-                Logger.info("Cancelling download.")
-                // Cancelling will inform the URLSessionTask delegate.
-                task?.cancel()
-                return
-            }
-
             // Use a slightly non-zero value to ensure that the progress
             // indicator shows up as quickly as possible.
             let progressTheta: Float = 0.001
@@ -2026,19 +2027,14 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 return
             }
 
-            switch downloadState.type {
-            case .backup, .transientAttachment:
-                break
-            case .attachment(_, let attachmentId):
-                NotificationCenter.default.postOnMainThread(
-                    name: AttachmentDownloads.attachmentDownloadProgressNotification,
-                    object: nil,
-                    userInfo: [
-                        AttachmentDownloads.attachmentDownloadProgressKey: fractionCompleted,
-                        AttachmentDownloads.attachmentDownloadAttachmentIDKey: attachmentId,
-                    ],
-                )
-            }
+            NotificationCenter.default.postOnMainThread(
+                name: AttachmentDownloads.attachmentDownloadProgressNotification,
+                object: nil,
+                userInfo: [
+                    AttachmentDownloads.attachmentDownloadProgressKey: fractionCompleted,
+                    AttachmentDownloads.attachmentDownloadAttachmentIDKey: attachmentId,
+                ],
+            )
         }
     }
 
