@@ -144,7 +144,6 @@ public protocol AttachmentDownloadManager {
     func downloadReferencedAttachment(
         referencedAttachment: ReferencedAttachment,
         priority: AttachmentDownloadPriority,
-        progress: OWSProgressSink?,
     ) async throws
 
     func enqueueCopyOfLocalAttachment(

@@ -282,7 +282,6 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
     public func downloadReferencedAttachment(
         referencedAttachment: ReferencedAttachment,
         priority: AttachmentDownloadPriority,
-        progress: OWSProgressSink?,
     ) async throws {
         if CurrentAppContext().isRunningTests {
             // No need to enqueue downloads if we're running tests.
@@ -298,9 +297,6 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             )
             let downloadKey = DownloadTaskRunner.DownloadKey(id: referencedAttachment.attachment.id, source: source)
             let observer = downloadTaskRunner.addObserver(forDownloadKey: downloadKey)
-            if let progress {
-                downloadTaskRunner.registerProgress(progress, forDownloadKey: downloadKey)
-            }
             return observer
         }
         try await _waitForDownloadOfAttachment(observer: observer)

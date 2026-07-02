@@ -78,7 +78,6 @@ open class AttachmentDownloadManagerMock: AttachmentDownloadManager {
     public func downloadReferencedAttachment(
         referencedAttachment: ReferencedAttachment,
         priority: AttachmentDownloadPriority,
-        progress: (any OWSProgressSink)?,
     ) async throws {
         // Do nothing
     }

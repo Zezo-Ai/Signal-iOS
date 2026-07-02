@@ -1079,7 +1079,6 @@ class MediaGallery {
                         try await DependenciesBridge.shared.attachmentDownloadManager.downloadReferencedAttachment(
                             referencedAttachment: item.referencedAttachment,
                             priority: priority,
-                            progress: nil,
                         )
                         let change = MediaGalleryChangeInfo(
                             referenceId: item.referencedAttachment.reference.referenceId,
