@@ -289,20 +289,21 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             return
         }
 
-        let source = try await db.awaitableWrite { tx in
-            try _enqueueDownloadOfReferencedAttachment(
+        let observer = try await db.awaitableWrite { tx in
+            let source = try _enqueueDownloadOfReferencedAttachment(
                 referencedAttachment: referencedAttachment,
                 priority: priority,
                 isThumbnail: false,
                 tx: tx,
             )
+            let downloadKey = DownloadQueue.DownloadKey(id: referencedAttachment.attachment.id, source: source)
+            let observer = downloadQueue.addObserver(forDownloadKey: downloadKey)
+            if let progress {
+                downloadQueue.registerProgress(progress, forDownloadKey: downloadKey)
+            }
+            return observer
         }
-
-        try await _waitForDownloadOfAttachment(
-            id: referencedAttachment.attachment.id,
-            source: source,
-            progress: progress,
-        )
+        try await _waitForDownloadOfAttachment(observer: observer)
     }
 
     public func enqueueDownloadOfReferencedAttachment(
@@ -487,42 +488,31 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             return
         }
 
-        await db.awaitableWrite { tx in
+        let downloadKey = DownloadQueue.DownloadKey(id: id, source: source)
+        let observer = await db.awaitableWrite { tx in
             self.attachmentDownloadStore.enqueueDownloadOfAttachment(
                 withId: id,
                 source: source,
                 priority: priority,
                 tx: tx,
             )
+            let observer = downloadQueue.addObserver(forDownloadKey: downloadKey)
+            if let progress {
+                downloadQueue.registerProgress(progress, forDownloadKey: downloadKey)
+            }
+            return observer
         }
-
-        try await _waitForDownloadOfAttachment(id: id, source: source, progress: progress)
+        try await _waitForDownloadOfAttachment(observer: observer)
     }
 
-    private func _waitForDownloadOfAttachment(
-        id: Attachment.IDType,
-        source: QueuedAttachmentDownloadRecord.SourceType,
-        progress: OWSProgressSink?,
-    ) async throws {
-        let downloadWaitingTask = Task {
-            try await self.downloadQueue.waitForDownloadOfAttachment(
-                id: id,
-                source: source,
-                progress: progress,
-            )
-        }
-
-        let downloadKey = DownloadQueue.DownloadKey(id: id, source: source)
+    private func _waitForDownloadOfAttachment(observer: DeferredContinuation<Void>) async throws {
         do {
             self.beginDownloadingIfNecessary()
-            try await downloadWaitingTask.value
+            try await observer.wait()
         } catch {
-            Logger.error("Error downloading attachment id \(id) from \(source): \(error)")
-            downloadQueue.clearDownloadProgressAndMarkFinished(key: downloadKey)
+            Logger.warn("couldn't download attachment: \(error)")
             throw error
         }
-
-        downloadQueue.clearDownloadProgressAndMarkFinished(key: downloadKey)
     }
 
     public func beginDownloadingIfNecessary() {
@@ -653,7 +643,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             Logger.info("Succeeded download of attachment \(record.record.attachmentId) from \(record.record.sourceType)")
             let downloadKey = DownloadQueue.downloadKey(record: record.record)
             let observers = downloadQueue.consumeObservers(downloadKey: downloadKey)
-            tx.addSyncCompletion { observers.forEach { $0.resume() } }
+            tx.addSyncCompletion { observers.forEach { $0.resume(with: .success(())) } }
         }
 
         func didObsolete(
@@ -663,7 +653,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             Logger.info("Obsoleted download of attachment \(record.record.attachmentId) from \(record.record.sourceType)")
             let downloadKey = DownloadQueue.downloadKey(record: record.record)
             let observers = downloadQueue.consumeObservers(downloadKey: downloadKey)
-            tx.addSyncCompletion { observers.forEach { $0.resume() } }
+            tx.addSyncCompletion { observers.forEach { $0.resume(with: .success(())) } }
         }
 
         func didFail(record: DownloadTaskRecord, error: Error, isRetryable: Bool, tx: DBWriteTransaction) {
@@ -730,7 +720,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     // If we aren't re-enqueuing, tell observers it failed.
                     let downloadKey = DownloadQueue.downloadKey(record: record)
                     let observers = downloadQueue.consumeObservers(downloadKey: downloadKey)
-                    tx.addSyncCompletion { observers.forEach { $0.resume(throwing: error) } }
+                    tx.addSyncCompletion { observers.forEach { $0.resume(with: .failure(error)) } }
                 }
 
                 tx.addSyncCompletion { [weak self] in
@@ -1667,31 +1657,21 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             let source: QueuedAttachmentDownloadRecord.SourceType
         }
 
-        private let downloadObservers = TSMutex<[DownloadKey: [CheckedContinuation<Void, Error>]]>(initialState: [:])
+        private let downloadObservers = TSMutex<[DownloadKey: [DeferredContinuation<Void>]]>(initialState: [:])
         private let downloadProgresses = TSMutex<[DownloadKey: [OWSProgressSink]]>(initialState: [:])
 
-        func clearDownloadProgressAndMarkFinished(key: DownloadKey) {
-            downloadProgresses.withLock {
-                _ = $0.removeValue(forKey: key)
-            }
+        func registerProgress(_ progress: OWSProgressSink, forDownloadKey downloadKey: DownloadKey) {
+            self.downloadProgresses.withLock { $0[downloadKey, default: []].append(progress) }
         }
 
-        func waitForDownloadOfAttachment(
-            id: Attachment.IDType,
-            source: QueuedAttachmentDownloadRecord.SourceType,
-            progress: OWSProgressSink?,
-        ) async throws {
-            if let progress {
-                let key = DownloadKey(id: id, source: source)
-                self.downloadProgresses.withLock { $0[key, default: []].append(progress) }
-            }
-            return try await withCheckedThrowingContinuation { continuation in
-                let key = DownloadKey(id: id, source: source)
-                self.downloadObservers.withLock { $0[key, default: []].append(continuation) }
-            }
+        func addObserver(forDownloadKey downloadKey: DownloadKey) -> DeferredContinuation<Void> {
+            let result = DeferredContinuation<Void>()
+            self.downloadObservers.withLock { $0[downloadKey, default: []].append(result) }
+            return result
         }
 
-        func consumeObservers(downloadKey: DownloadKey) -> [CheckedContinuation<Void, any Error>] {
+        func consumeObservers(downloadKey: DownloadKey) -> [DeferredContinuation<Void>] {
+            self.downloadProgresses.withLock { _ = $0.removeValue(forKey: downloadKey) }
             return self.downloadObservers.withLock { $0.removeValue(forKey: downloadKey) ?? [] }
         }
 
