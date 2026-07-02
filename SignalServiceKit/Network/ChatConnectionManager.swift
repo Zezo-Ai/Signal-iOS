@@ -44,8 +44,7 @@ public protocol ChatConnectionManager {
     /// This method can be called from any thread.
     func withUnauthServiceImpl<Service, Output>(
         _ service: Service,
-        timeout: TimeInterval,
-        do callback: @escaping (Service.Api) async throws -> Output,
+        do callback: (Service.Api) async throws -> Output,
     ) async throws -> Output where Service: UnauthServiceSelector
 
     /// Access a libsignal "service" on the active authenticated connection.
@@ -61,8 +60,7 @@ public protocol ChatConnectionManager {
     /// This method can be called from any thread.
     func withAuthServiceImpl<Service, Output>(
         _ service: Service,
-        timeout: TimeInterval,
-        do callback: @escaping (Service.Api) async throws -> Output,
+        do callback: (Service.Api) async throws -> Output,
     ) async throws -> Output where Service: AuthServiceSelector
 }
 
@@ -76,18 +74,16 @@ extension ChatConnectionManager {
 
     public func withUnauthService<Service, Output>(
         _ service: Service,
-        timeout: TimeInterval = .infinity,
-        do callback: @escaping (Service.Api) async throws -> Output,
+        do callback: (Service.Api) async throws -> Output,
     ) async throws -> Output where Service: UnauthServiceSelector {
-        return try await withUnauthServiceImpl(service, timeout: timeout, do: callback)
+        return try await withUnauthServiceImpl(service, do: callback)
     }
 
     public func withAuthService<Service, Output>(
         _ service: Service,
-        timeout: TimeInterval = .infinity,
-        do callback: @escaping (Service.Api) async throws -> Output,
+        do callback: (Service.Api) async throws -> Output,
     ) async throws -> Output where Service: AuthServiceSelector {
-        return try await withAuthServiceImpl(service, timeout: timeout, do: callback)
+        return try await withAuthServiceImpl(service, do: callback)
     }
 }
 
@@ -205,10 +201,9 @@ public class ChatConnectionManagerImpl: ChatConnectionManager {
     // This method can be called from any thread.
     public func withUnauthServiceImpl<Service, Output>(
         _ service: Service,
-        timeout: TimeInterval,
-        do callback: @escaping (Service.Api) async throws -> Output,
+        do callback: (Service.Api) async throws -> Output,
     ) async throws -> Output where Service: UnauthServiceSelector {
-        try await connectionUnidentified.withLibsignalConnection(timeout: timeout) { connection in
+        try await connectionUnidentified.withLibsignalConnection { connection in
             // This force-cast is guaranteed by UnauthServiceSelector only being provided for valid service protocols.
             try await callback(connection as! Service.Api)
         }
@@ -217,10 +212,9 @@ public class ChatConnectionManagerImpl: ChatConnectionManager {
     // This method can be called from any thread.
     public func withAuthServiceImpl<Service, Output>(
         _ service: Service,
-        timeout: TimeInterval,
-        do callback: @escaping (Service.Api) async throws -> Output,
+        do callback: (Service.Api) async throws -> Output,
     ) async throws -> Output where Service: AuthServiceSelector {
-        try await connectionIdentified.withLibsignalConnection(timeout: timeout) { connection in
+        try await connectionIdentified.withLibsignalConnection { connection in
             // This force-cast is guaranteed by AuthServiceSelector only being provided for valid service protocols.
             try await callback(connection as! Service.Api)
         }
@@ -298,16 +292,14 @@ public class ChatConnectionManagerMock: ChatConnectionManager {
 
     public func withUnauthServiceImpl<Service, Output>(
         _ service: Service,
-        timeout: TimeInterval,
-        do callback: @escaping (Service.Api) async throws -> Output,
+        do callback: (Service.Api) async throws -> Output,
     ) async throws -> Output where Service: UnauthServiceSelector {
         fatalError("must override for tests")
     }
 
     public func withAuthServiceImpl<Service, Output>(
         _ service: Service,
-        timeout: TimeInterval,
-        do callback: @escaping (Service.Api) async throws -> Output,
+        do callback: (Service.Api) async throws -> Output,
     ) async throws -> Output where Service: AuthServiceSelector {
         fatalError("must override for tests")
     }

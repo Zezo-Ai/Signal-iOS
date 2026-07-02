@@ -508,14 +508,8 @@ extension MessageSender {
         auth: MultiRecipientSendAuth,
     ) async throws -> SenderKeySendResult {
         let chatConnectionManager = DependenciesBridge.shared.chatConnectionManager
-        let remoteConfigProvider = SSKEnvironment.shared.remoteConfigManagerRef
         do {
-            let remoteConfig = remoteConfigProvider.currentConfig()
-            let timeout = OWSRequestFactory.sendMessageTimeout(estimatedRequestSize: payload.count + 200)
-            let response = try await chatConnectionManager.withUnauthService(
-                .messages,
-                timeout: remoteConfig.shouldUseDynamicSendMessageTimeout ? timeout : .infinity,
-            ) {
+            let response = try await chatConnectionManager.withUnauthService(.messages) {
                 return try await $0.sendMultiRecipientMessage(
                     payload,
                     timestamp: timestamp,

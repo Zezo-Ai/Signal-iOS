@@ -95,16 +95,6 @@ public enum OWSRequestFactory {
         return request
     }
 
-    static func sendMessageTimeout(estimatedRequestSize: Int) -> TimeInterval {
-        let bandwidthEstimate: Double = 40_000 // kbit/s
-        let transferEstimate = Double(estimatedRequestSize) / (bandwidthEstimate / 8)
-        let latencyEstimate: Double = Self.textSecureHTTPTimeOut
-        let overallEstimate = latencyEstimate + transferEstimate
-        // Limit to 45 seconds (the maximum time allowed by the pinging logic) to
-        // support larger messages.
-        return min(overallEstimate, 45)
-    }
-
     // MARK: - Registration
 
     public static func enableRegistrationLockV2Request(token: RegistrationLock, logger: PrefixedLogger) -> TSRequest {

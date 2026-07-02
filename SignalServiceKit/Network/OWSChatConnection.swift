@@ -805,22 +805,14 @@ class OWSChatConnectionUsingLibSignal<Connection: ChatConnection & Sendable>: OW
     }
 
     func withLibsignalConnection<Output>(
-        timeout: TimeInterval = .infinity,
-        _ callback: @escaping (Connection) async throws -> Output,
+        _ callback: (Connection) async throws -> Output,
     ) async throws -> Output {
         try await waitUntilReadyAndPerformRequest {
             guard let service = await getOpenConnectionAfterHavingWaited() else {
                 throw OWSHTTPError.networkFailure(.genericFailure)
             }
             try Task.checkCancellation()
-            do {
-                return try await withCooperativeTimeout(seconds: timeout) {
-                    return try await callback(service)
-                }
-            } catch is CooperativeTimeoutError {
-                self.handleRequestTimeout(usingChatService: service)
-                throw SignalError.requestTimeoutError("the request timed out")
-            }
+            return try await callback(service)
         }
     }
 }

@@ -101,8 +101,7 @@ class _AttachmentUploadManager_ChatConnectionManagerMock: ChatConnectionManagerM
     var performRequestBlock: (@Sendable () throws -> UploadForm)?
     override func withAuthServiceImpl<Service, Output>(
         _ service: Service,
-        timeout: TimeInterval,
-        do callback: @escaping (Service.Api) async throws -> Output,
+        do callback: (Service.Api) async throws -> Output,
     ) async throws -> Output where Service: AuthServiceSelector {
         let service = MockAuthMessageService(performRequestBlock: performRequestBlock!)
         return try await callback(service as! Service.Api)

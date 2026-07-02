@@ -1815,8 +1815,7 @@ public class MessageSender {
     ) async throws {
         let chatConnectionManager = DependenciesBridge.shared.chatConnectionManager
 
-        let timeout = sendMessageTimeout(contentCounts: sealedMessages.map({ $0.contents.count }))
-        try await chatConnectionManager.withUnauthService(.messages, timeout: timeout) {
+        try await chatConnectionManager.withUnauthService(.messages) {
             try await $0.sendMessage(
                 to: messageSend.serviceId,
                 timestamp: messageSend.message.timestamp,
@@ -1844,8 +1843,7 @@ public class MessageSender {
             }
         }
 
-        let timeout = sendMessageTimeout(contentCounts: unsealedMessages.map({ $0.contents.serialize().count }))
-        try await chatConnectionManager.withAuthService(.attachments, timeout: timeout) {
+        try await chatConnectionManager.withAuthService(.attachments) {
             if messageSend.isSelfSend {
                 try await $0.sendSyncMessage(
                     timestamp: messageSend.message.timestamp,
@@ -1862,19 +1860,6 @@ public class MessageSender {
                 )
             }
         }
-    }
-
-    private func sendMessageTimeout(contentCounts: @autoclosure () -> [Int]) -> TimeInterval {
-        let remoteConfigProvider = SSKEnvironment.shared.remoteConfigManagerRef
-        let remoteConfig = remoteConfigProvider.currentConfig()
-
-        guard remoteConfig.shouldUseDynamicSendMessageTimeout else {
-            return .infinity
-        }
-
-        return OWSRequestFactory.sendMessageTimeout(
-            estimatedRequestSize: contentCounts().reduce(into: 0, { $0 += $1 + 50 }) + 100,
-        )
     }
 
     private func messageSendDidSucceed(

@@ -367,10 +367,6 @@ public class RemoteConfig {
         ))
     }
 
-    public var shouldUseDynamicSendMessageTimeout: Bool {
-        return !isEnabled(.dynamicSendMessageTimeoutKillSwitch)
-    }
-
     public var isRemoteMuteSendEnabled: Bool {
         return !isEnabled(.remoteMuteKillSwitch)
     }
@@ -645,7 +641,6 @@ private enum IsEnabledFlag: String, FlagType {
     case cardMonthlyDonationKillSwitch = "ios.cardMonthlyDonationKillSwitch"
     case cardOneTimeDonationKillSwitch = "ios.cardOneTimeDonationKillSwitch"
     case disappearingCalls = "ios.disappearingCalls"
-    case dynamicSendMessageTimeoutKillSwitch = "ios.dynamicSendMessageTimeoutKillSwitch"
     case enableAutoAPNSRotation = "ios.enableAutoAPNSRotation"
     case enableGifSearch = "global.gifSearch"
     case groupTerminateReceiveKillSwitch = "ios.groupTerminateReceiveKillSwitch"
@@ -675,7 +670,6 @@ private enum IsEnabledFlag: String, FlagType {
         case .cardMonthlyDonationKillSwitch: false
         case .cardOneTimeDonationKillSwitch: false
         case .disappearingCalls: true
-        case .dynamicSendMessageTimeoutKillSwitch: true
         case .enableAutoAPNSRotation: false
         case .enableGifSearch: false
         case .groupTerminateReceiveKillSwitch: true
