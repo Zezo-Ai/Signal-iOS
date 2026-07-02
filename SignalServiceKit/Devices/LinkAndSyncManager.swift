@@ -645,7 +645,6 @@ public class LinkAndSyncManagerImpl: LinkAndSyncManager {
                 cdnNumber: cdnNumber,
                 source: .transitTier(cdnKey: cdnKey),
             ),
-            expectedDownloadSize: nil,
             progress: progress,
         )
     }

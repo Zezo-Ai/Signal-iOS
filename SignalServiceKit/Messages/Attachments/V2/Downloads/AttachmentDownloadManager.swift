@@ -113,14 +113,12 @@ public protocol AttachmentDownloadManager {
 
     func downloadEncryptedTransientAttachment(
         downloadMetadata: AttachmentDownloads.DownloadMetadata,
-        expectedDownloadSize: UInt64?,
         progress: OWSProgressSink?,
     ) async throws -> URL
 
     func downloadTransientAttachment(
         downloadMetadata: AttachmentDownloads.DownloadMetadata,
         decryptionMetadata: DecryptionMetadata,
-        expectedDownloadSize: UInt64?,
         progress: OWSProgressSink?,
     ) async throws -> URL
 
