@@ -1769,27 +1769,42 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             var activeSources = [OWSProgressSource]()
             let k = Self.downloadKey(state: downloadState)
             return try await queue.run {
-                return try await performDownload(
-                    downloadState: downloadState,
-                    maxDownloadSizeBytes: maxDownloadSizeBytes,
-                    progressBlock: { progressUpdate in
-                        if let k, let _pendingSinks = downloadProgresses.removeValue(forKey: k) {
-                            pendingSinks.append(contentsOf: _pendingSinks)
-                        }
-                        if let totalByteCount = progressUpdate.totalByteCount {
-                            for pendingSink in pendingSinks {
-                                activeSources.append(pendingSink.addSource(
-                                    withLabel: AttachmentDownloads.downloadProgressLabel,
-                                    unitCount: totalByteCount,
-                                ))
+                do {
+                    return try await performDownload(
+                        downloadState: downloadState,
+                        maxDownloadSizeBytes: maxDownloadSizeBytes,
+                        progressBlock: { progressUpdate in
+                            if let k, let _pendingSinks = downloadProgresses.removeValue(forKey: k) {
+                                pendingSinks.append(contentsOf: _pendingSinks)
                             }
-                            pendingSinks.removeAll()
-                        }
-                        for activeSource in activeSources {
-                            activeSource.incrementCompletedUnitCount(to: progressUpdate.completedByteCount)
-                        }
-                    },
-                )
+                            if let totalByteCount = progressUpdate.totalByteCount {
+                                for pendingSink in pendingSinks {
+                                    activeSources.append(pendingSink.addSource(
+                                        withLabel: AttachmentDownloads.downloadProgressLabel,
+                                        unitCount: totalByteCount,
+                                    ))
+                                }
+                                pendingSinks.removeAll()
+                            }
+                            for activeSource in activeSources {
+                                activeSource.incrementCompletedUnitCount(to: progressUpdate.completedByteCount)
+                            }
+                        },
+                    )
+                } catch {
+                    if let k {
+                        await { @MainActor () async -> Void in
+                            NotificationCenter.default.post(
+                                name: AttachmentDownloads.attachmentDownloadStoppedNotification,
+                                object: nil,
+                                userInfo: [
+                                    AttachmentDownloads.attachmentDownloadAttachmentIDKey: k.id,
+                                ],
+                            )
+                        }()
+                    }
+                    throw error
+                }
             }
         }
 
@@ -1858,19 +1873,6 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
 
                 if let resumeData = ((error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data)?.nilIfEmpty {
                     await resumeDataCache.set(key: downloadState, value: resumeData)
-                }
-
-                switch downloadState.type {
-                case .backup, .transientAttachment:
-                    break
-                case .attachment(_, let attachmentId):
-                    NotificationCenter.default.postOnMainThread(
-                        name: AttachmentDownloads.attachmentDownloadStoppedNotification,
-                        object: nil,
-                        userInfo: [
-                            AttachmentDownloads.attachmentDownloadAttachmentIDKey: attachmentId,
-                        ],
-                    )
                 }
 
                 if case URLError.cancelled = error {
