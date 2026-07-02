@@ -35,7 +35,7 @@ public final class OWSDecryptionPlaceholderExpirationJob: ExpirationJob<OWSRecov
     }
 
     override public func deleteExpiredElement(_ placeholder: OWSRecoverableDecryptionPlaceholder, tx: DBWriteTransaction) {
-        logger.warn("Replacing decryption placeholder \(placeholder.timestamp) with error.")
+        logger.warn("Replacing decryption placeholder \(placeholder.timestamp), \(placeholder.sqliteRowId ?? -1) with error.")
 
         interactionDeleteManager.delete(placeholder, sideEffects: .default(), tx: tx)
 

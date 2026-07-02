@@ -251,8 +251,11 @@ final class InteractionDeleteManagerImpl: InteractionDeleteManager {
         // Worth using a cached statement here, since we may be deleting a large
         // number of interactions at once here.
         tx.database.executeWithCachedStatement(
-            sql: "DELETE FROM model_TSInteraction WHERE uniqueId = ?",
-            arguments: [interaction.uniqueId],
+            sql: "DELETE FROM model_TSInteraction WHERE id = ?",
+            arguments: [
+                interaction.sqliteRowId
+                    .owsFailUnwrap("Trying to delete interaction missing row ID!"),
+            ],
         )
 
         didRemove(
