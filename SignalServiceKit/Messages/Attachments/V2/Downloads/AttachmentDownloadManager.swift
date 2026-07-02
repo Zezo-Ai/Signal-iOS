@@ -170,6 +170,9 @@ public protocol AttachmentDownloadManager {
     func beginDownloadingIfNecessary()
 
     func cancelDownload(for attachmentId: Attachment.IDType, tx: DBWriteTransaction)
+
+    @MainActor
+    func currentProgress(forAttachmentId attachmentId: Attachment.IDType) -> Float?
 }
 
 extension AttachmentDownloadManager {

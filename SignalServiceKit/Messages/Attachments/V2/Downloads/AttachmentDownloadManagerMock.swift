@@ -103,7 +103,7 @@ open class AttachmentDownloadManagerMock: AttachmentDownloadManager {
         // Do nothing
     }
 
-    open func downloadProgress(for attachmentId: Attachment.IDType, tx: DBReadTransaction) -> CGFloat? {
+    public func currentProgress(forAttachmentId attachmentId: Attachment.IDType) -> Float? {
         return nil
     }
 }

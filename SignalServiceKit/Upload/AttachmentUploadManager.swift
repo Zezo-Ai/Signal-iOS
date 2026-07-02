@@ -52,6 +52,9 @@ public protocol AttachmentUploadManager {
         auth: BackupServiceAuth,
         progressBlock: OWSURLSession.ProgressBlock,
     ) async throws
+
+    @MainActor
+    func currentProgress(forAttachmentId attachmentId: Attachment.IDType) -> Float?
 }
 
 public class AttachmentUploadManagerImpl: AttachmentUploadManager {
@@ -269,13 +272,18 @@ public class AttachmentUploadManagerImpl: AttachmentUploadManager {
         let type = UploadType.transitTier
         let uploadId = UploadId(attachmentId: attachmentId, uploadType: type)
         return try await uploadQueue.run(forKey: uploadId) {
-            return try await _uploadTransitTierAttachment(attachmentId: attachmentId, type: type)
+            let result = await Result(catching: {
+                return try await _uploadTransitTierAttachment(attachmentId: attachmentId, type: type)
+            })
+            await clearProgress(attachmentId: attachmentId)
+            return try result.get()
         }
     }
 
     private func _uploadTransitTierAttachment(attachmentId: Attachment.IDType, type: UploadType) async throws {
         let logger = PrefixedLogger(prefix: "[Upload]", suffix: "[\(attachmentId)]")
 
+        await postProgress(attachmentId: attachmentId, progress: 0)
         let (record, result) = try await _uploadAttachmentId(
             attachmentId,
             type: type,
@@ -284,9 +292,10 @@ public class AttachmentUploadManagerImpl: AttachmentUploadManager {
                 guard let totalByteCount = progressUpdate.totalByteCount else {
                     return
                 }
-                await updateProgress(id: attachmentId, progress: Float(progressUpdate.completedByteCount) / Float(totalByteCount))
+                await postProgress(attachmentId: attachmentId, progress: Float(progressUpdate.completedByteCount) / Float(totalByteCount))
             },
         )
+        await postProgress(attachmentId: attachmentId, progress: 0)
 
         // Update the attachment and associated messages with the success
         // and clean up and left over upload state
@@ -1129,14 +1138,28 @@ public class AttachmentUploadManagerImpl: AttachmentUploadManager {
         return try .validateAndBuild(fileUrl: tmpReencryptedFile, metadata: reencryptedMetadata)
     }
 
+    // MARK: Progress
+
+    private var _currentProgress = [Attachment.IDType: Float]()
+
+    public func currentProgress(forAttachmentId attachmentId: Attachment.IDType) -> Float? {
+        return self._currentProgress[attachmentId]
+    }
+
     @MainActor
-    private func updateProgress(id: Attachment.IDType, progress: Float) {
+    private func clearProgress(attachmentId: Attachment.IDType) {
+        _ = self._currentProgress.removeValue(forKey: attachmentId)
+    }
+
+    @MainActor
+    private func postProgress(attachmentId: Attachment.IDType, progress: Float) {
+        self._currentProgress[attachmentId] = progress
         NotificationCenter.default.post(
             name: Upload.Constants.attachmentUploadProgressNotification,
             object: nil,
             userInfo: [
                 Upload.Constants.uploadProgressKey: progress,
-                Upload.Constants.uploadAttachmentIDKey: id,
+                Upload.Constants.uploadAttachmentIDKey: attachmentId,
             ],
         )
     }

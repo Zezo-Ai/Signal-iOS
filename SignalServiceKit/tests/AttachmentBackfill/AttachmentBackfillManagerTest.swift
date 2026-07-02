@@ -400,6 +400,11 @@ private class MockAttachmentUploadManager: AttachmentUploadManager {
     func uploadMediaTierThumbnailAttachment(attachmentId: Attachment.IDType, uploadEra: String, localAci: Aci, backupKey: MediaRootBackupKey, auth: BackupServiceAuth, progressBlock: OWSURLSession.ProgressBlock) async throws {
         fatalError()
     }
+
+    @MainActor
+    func currentProgress(forAttachmentId attachmentId: Attachment.IDType) -> Float? {
+        return nil
+    }
 }
 
 // MARK: -

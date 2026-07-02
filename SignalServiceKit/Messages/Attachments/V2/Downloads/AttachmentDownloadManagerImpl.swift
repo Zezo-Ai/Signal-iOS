@@ -543,6 +543,11 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         )
     }
 
+    @MainActor
+    public func currentProgress(forAttachmentId attachmentId: Attachment.IDType) -> Float? {
+        return self.downloadTaskRunner.currentProgress[attachmentId]
+    }
+
     // MARK: - Persisted Queue
 
     private struct DownloadTaskRecord: TaskRecord {
@@ -675,7 +680,9 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             loader: TaskQueueLoader<DownloadTaskRunner>,
         ) async -> TaskRecordResult {
             Logger.info("Starting download of attachment \(record.record.attachmentId) from \(record.record.sourceType)")
-            return await self.downloadRecord(record.record)
+            let result = await self.downloadRecord(record.record)
+            await clearDownloadProgress(attachmentId: record.record.attachmentId)
+            return result
         }
 
         func didSucceed(
@@ -1070,6 +1077,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             let downloadedFileUrl: URL
             let downloadKey = Self.downloadKey(record: record)
             do {
+                await postDownloadProgress(attachmentId: attachment.id, progress: 0)
                 var activeSources = [OWSProgressSource]()
                 downloadedFileUrl = try await downloadQueue.enqueueDownload(
                     downloadState: .init(type: .attachment(downloadMetadata, id: attachment.id)),
@@ -1098,6 +1106,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 for activeSource in activeSources {
                     activeSource.complete()
                 }
+                await postDownloadProgress(attachmentId: attachment.id, progress: 1)
             } catch let error {
                 Logger.error("Failed to download: \(error)")
                 await { @MainActor () async -> Void in
@@ -1285,6 +1294,16 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             )
         }
 
+        // MARK: Progress Notifications
+
+        @MainActor
+        private(set) var currentProgress = [Attachment.IDType: Float]()
+
+        @MainActor
+        private func clearDownloadProgress(attachmentId: Attachment.IDType) {
+            _ = currentProgress.removeValue(forKey: attachmentId)
+        }
+
         @MainActor
         private func handleDownloadProgress(
             attachmentId: Attachment.IDType,
@@ -1294,17 +1313,18 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 // Don't do anything until we can estimate the size.
                 return
             }
-
-            // Use a slightly non-zero value to ensure that the progress
-            // indicator shows up as quickly as possible.
-            let progressTheta: Float = 0.001
             let fractionCompleted = Float(progressUpdate.completedByteCount) / Float(totalByteCount)
+            postDownloadProgress(attachmentId: attachmentId, progress: fractionCompleted)
+        }
 
+        @MainActor
+        private func postDownloadProgress(attachmentId: Attachment.IDType, progress: Float) {
+            self.currentProgress[attachmentId] = progress
             NotificationCenter.default.post(
                 name: AttachmentDownloads.attachmentDownloadProgressNotification,
                 object: nil,
                 userInfo: [
-                    AttachmentDownloads.attachmentDownloadProgressKey: max(progressTheta, fractionCompleted),
+                    AttachmentDownloads.attachmentDownloadProgressKey: progress,
                     AttachmentDownloads.attachmentDownloadAttachmentIDKey: attachmentId,
                 ],
             )

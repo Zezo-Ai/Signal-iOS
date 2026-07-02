@@ -177,7 +177,14 @@ class CVAttachmentProgressView: ManualLayoutView {
 
         switch direction {
         case .upload:
-            applyState(.unknownProgress, animated: animateStateChange)
+            let initialState: State
+            let uploadManager = DependenciesBridge.shared.attachmentUploadManager
+            if let initialProgress = uploadManager.currentProgress(forAttachmentId: self.attachmentId) {
+                initialState = .progress(progress: initialProgress)
+            } else {
+                initialState = .unknownProgress
+            }
+            applyState(initialState, animated: animateStateChange)
 
             NotificationCenter.default.addObserver(
                 self,
@@ -187,12 +194,19 @@ class CVAttachmentProgressView: ManualLayoutView {
             )
 
         case .download(_, let downloadState):
+            let initialState: State
             switch downloadState {
             case .none, .failed:
-                applyState(.tapToDownload, animated: animateStateChange)
+                initialState = .tapToDownload
             case .enqueuedOrDownloading:
-                applyState(.unknownProgress, animated: animateStateChange)
+                let downloadManager = DependenciesBridge.shared.attachmentDownloadManager
+                if let initialProgress = downloadManager.currentProgress(forAttachmentId: self.attachmentId) {
+                    initialState = .progress(progress: initialProgress)
+                } else {
+                    initialState = .unknownProgress
+                }
             }
+            applyState(initialState, animated: animateStateChange)
             NotificationCenter.default.addObserver(
                 self,
                 selector: #selector(processDownloadNotification(notification:)),
