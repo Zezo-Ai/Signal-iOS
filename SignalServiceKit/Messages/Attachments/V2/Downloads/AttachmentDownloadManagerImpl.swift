@@ -1875,10 +1875,6 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     await resumeDataCache.set(key: downloadState, value: resumeData)
                 }
 
-                if case URLError.cancelled = error {
-                    throw error
-                }
-
                 let maxAttemptCount = 16
                 guard attemptCount < maxAttemptCount, error.isNetworkFailureOrTimeout else {
                     throw error
