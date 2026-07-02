@@ -17,11 +17,11 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
     private let attachmentStore: AttachmentStore
     private let attachmentUpdater: AttachmentUpdater
     private let backupSettingsStore: BackupSettingsStore
+    private let canceledAttachmentIds: TSMutex<Set<Attachment.IDType>>
     private let db: any DB
     private let decrypter: Decrypter
     private let downloadQueue: DownloadQueue
     private let downloadabilityChecker: DownloadabilityChecker
-    private let progressStates: ProgressStates
     private let queueLoader: TaskQueueLoader<DownloadTaskRunner>
     private let remoteConfigProvider: any RemoteConfigProvider
     private let tsAccountManager: TSAccountManager
@@ -62,9 +62,9 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             attachmentValidator: attachmentValidator,
             stickerManager: stickerManager,
         )
-        self.progressStates = ProgressStates()
+        self.canceledAttachmentIds = TSMutex(initialState: Set())
         self.downloadQueue = DownloadQueue(
-            progressStates: progressStates,
+            canceledAttachmentIds: canceledAttachmentIds,
             signalService: signalService,
         )
         self.attachmentUpdater = AttachmentUpdater(
@@ -518,11 +518,11 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             try await downloadWaitingTask.value
         } catch {
             Logger.error("Error downloading attachment id \(id) from \(source): \(error)")
-            await downloadQueue.clearDownloadProgressAndMarkFinished(key: downloadKey)
+            downloadQueue.clearDownloadProgressAndMarkFinished(key: downloadKey)
             throw error
         }
 
-        await downloadQueue.clearDownloadProgressAndMarkFinished(key: downloadKey)
+        downloadQueue.clearDownloadProgressAndMarkFinished(key: downloadKey)
     }
 
     public func beginDownloadingIfNecessary() {
@@ -539,7 +539,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
     }
 
     public func cancelDownload(for attachmentId: Attachment.IDType, tx: DBWriteTransaction) {
-        progressStates.markDownloadCancelled(for: attachmentId)
+        canceledAttachmentIds.withLock { _ = $0.insert(attachmentId) }
         QueuedAttachmentDownloadRecord.SourceType.allCases.forEach { source in
             attachmentDownloadStore.removeAttachmentFromQueue(
                 withId: attachmentId,
@@ -652,9 +652,8 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         ) throws {
             Logger.info("Succeeded download of attachment \(record.record.attachmentId) from \(record.record.sourceType)")
             let downloadKey = DownloadQueue.downloadKey(record: record.record)
-            Task {
-                await downloadQueue.updateObservers(downloadKey: downloadKey, error: nil)
-            }
+            let observers = downloadQueue.consumeObservers(downloadKey: downloadKey)
+            tx.addSyncCompletion { observers.forEach { $0.resume() } }
         }
 
         func didObsolete(
@@ -663,9 +662,8 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         ) throws {
             Logger.info("Obsoleted download of attachment \(record.record.attachmentId) from \(record.record.sourceType)")
             let downloadKey = DownloadQueue.downloadKey(record: record.record)
-            Task {
-                await downloadQueue.updateObservers(downloadKey: downloadKey, error: nil)
-            }
+            let observers = downloadQueue.consumeObservers(downloadKey: downloadKey)
+            tx.addSyncCompletion { observers.forEach { $0.resume() } }
         }
 
         func didFail(record: DownloadTaskRecord, error: Error, isRetryable: Bool, tx: DBWriteTransaction) {
@@ -729,11 +727,10 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                         tx: tx,
                     )
                 } else {
-                    // If we aren't re-enqueuing, tell observers its failed.
+                    // If we aren't re-enqueuing, tell observers it failed.
                     let downloadKey = DownloadQueue.downloadKey(record: record)
-                    Task {
-                        await downloadQueue.updateObservers(downloadKey: downloadKey, error: error)
-                    }
+                    let observers = downloadQueue.consumeObservers(downloadKey: downloadKey)
+                    tx.addSyncCompletion { observers.forEach { $0.resume(throwing: error) } }
                 }
 
                 tx.addSyncCompletion { [weak self] in
@@ -1645,36 +1642,17 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
 
     }
 
-    private final class ProgressStates: Sendable {
-        private struct States {
-            var states: [Attachment.IDType: Double] = [:]
-            var cancelledAttachmentIds: Set<Attachment.IDType> = []
-        }
+    private class DownloadQueue {
+        private let signalService: OWSSignalServiceProtocol
 
-        private let states = TSMutex(initialState: States())
-
-        func markDownloadCancelled(for attachmentId: Attachment.IDType) {
-            states.withLock {
-                $0.states[attachmentId] = nil
-                $0.cancelledAttachmentIds.insert(attachmentId)
-            }
-        }
-
-        func consumeCancellation(of attachmentId: Attachment.IDType) -> Bool {
-            states.withLock { $0.cancelledAttachmentIds.remove(attachmentId) != nil }
-        }
-    }
-
-    private actor DownloadQueue {
-        private let progressStates: ProgressStates
-        private nonisolated let signalService: OWSSignalServiceProtocol
+        private let canceledAttachmentIds: TSMutex<Set<Attachment.IDType>>
         private let resumeDataCache: LRUCache<DownloadState, Data> = LRUCache(maxSize: 5)
 
         init(
-            progressStates: ProgressStates,
+            canceledAttachmentIds: TSMutex<Set<Attachment.IDType>>,
             signalService: OWSSignalServiceProtocol,
         ) {
-            self.progressStates = progressStates
+            self.canceledAttachmentIds = canceledAttachmentIds
             self.signalService = signalService
         }
 
@@ -1689,11 +1667,13 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             let source: QueuedAttachmentDownloadRecord.SourceType
         }
 
-        private var downloadObservers = [DownloadKey: [CheckedContinuation<Void, Error>]]()
-        private var downloadProgresses = [DownloadKey: [OWSProgressSink]]()
+        private let downloadObservers = TSMutex<[DownloadKey: [CheckedContinuation<Void, Error>]]>(initialState: [:])
+        private let downloadProgresses = TSMutex<[DownloadKey: [OWSProgressSink]]>(initialState: [:])
 
         func clearDownloadProgressAndMarkFinished(key: DownloadKey) {
-            downloadProgresses.removeValue(forKey: key)
+            downloadProgresses.withLock {
+                _ = $0.removeValue(forKey: key)
+            }
         }
 
         func waitForDownloadOfAttachment(
@@ -1701,22 +1681,18 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             source: QueuedAttachmentDownloadRecord.SourceType,
             progress: OWSProgressSink?,
         ) async throws {
+            if let progress {
+                let key = DownloadKey(id: id, source: source)
+                self.downloadProgresses.withLock { $0[key, default: []].append(progress) }
+            }
             return try await withCheckedThrowingContinuation { continuation in
                 let key = DownloadKey(id: id, source: source)
-                self.downloadObservers[key, default: []].append(continuation)
-                if let progress {
-                    self.downloadProgresses[key, default: []].append(progress)
-                }
+                self.downloadObservers.withLock { $0[key, default: []].append(continuation) }
             }
         }
 
-        func updateObservers(downloadKey: DownloadKey, error: Error?) {
-            let observers = self.downloadObservers.removeValue(forKey: downloadKey) ?? []
-            if let error {
-                observers.forEach { $0.resume(throwing: error) }
-            } else {
-                observers.forEach { $0.resume() }
-            }
+        func consumeObservers(downloadKey: DownloadKey) -> [CheckedContinuation<Void, any Error>] {
+            return self.downloadObservers.withLock { $0.removeValue(forKey: downloadKey) ?? [] }
         }
 
         nonisolated static func downloadKey(record: QueuedAttachmentDownloadRecord) -> DownloadKey {
@@ -1774,7 +1750,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                         downloadState: downloadState,
                         maxDownloadSizeBytes: maxDownloadSizeBytes,
                         progressBlock: { progressUpdate in
-                            if let k, let _pendingSinks = downloadProgresses.removeValue(forKey: k) {
+                            if let k, let _pendingSinks = downloadProgresses.withLock({ $0.removeValue(forKey: k) }) {
                                 pendingSinks.append(contentsOf: _pendingSinks)
                             }
                             if let totalByteCount = progressUpdate.totalByteCount {
@@ -1823,7 +1799,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     throw AttachmentDownloads.Error.expiredCredentials
                 }
 
-                let resumeData = await resumeDataCache.object(forKey: downloadState)
+                let resumeData = resumeDataCache.object(forKey: downloadState)
                 let urlSession = await self.signalService.sharedUrlSessionForCdn(cdnNumber: downloadState.cdnNumber())
 
                 let downloadOperation: (OWSURLSession.ProgressBlock) async throws -> OWSUrlDownloadResponse
@@ -1872,7 +1848,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 Logger.warn("Error: \(error)")
 
                 if let resumeData = ((error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data)?.nilIfEmpty {
-                    await resumeDataCache.set(key: downloadState, value: resumeData)
+                    resumeDataCache.set(key: downloadState, value: resumeData)
                 }
 
                 let maxAttemptCount = 16
@@ -1888,7 +1864,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         private nonisolated func cancelDownloadIfNeeded(
             attachmentId: Attachment.IDType,
         ) throws {
-            guard progressStates.consumeCancellation(of: attachmentId) else {
+            guard canceledAttachmentIds.withLock({ $0.remove(attachmentId) != nil }) else {
                 return
             }
             Logger.info("Cancelling download.")
