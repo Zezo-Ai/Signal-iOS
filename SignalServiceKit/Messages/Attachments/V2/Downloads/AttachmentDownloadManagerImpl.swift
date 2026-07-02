@@ -1741,13 +1741,9 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         ) async throws {
             return try await withCheckedThrowingContinuation { continuation in
                 let key = DownloadKey(id: id, source: source)
-                var observers = self.downloadObservers[key] ?? []
-                observers.append(continuation)
-                self.downloadObservers[key] = observers
+                self.downloadObservers[key, default: []].append(continuation)
                 if let progress {
-                    var progresses = downloadProgresses[key] ?? []
-                    progresses.append(progress)
-                    self.downloadProgresses[key] = progresses
+                    self.downloadProgresses[key, default: []].append(progress)
                 }
             }
         }
