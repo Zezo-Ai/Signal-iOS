@@ -67,7 +67,7 @@ class MediaCaptionToolbar: UIView, UITextViewDelegate, BodyRangesTextViewDelegat
         // Specifying autoresizing mask and an intrinsic content size allows proper
         // sizing when used as an input accessory view.
         autoresizingMask = .flexibleHeight
-        preservesSuperviewLayoutMargins = true
+        directionalLayoutMargins = .init(hMargin: 0, vMargin: 8)
         semanticContentAttribute = .forceLeftToRight
 
         // Either Done or Proceed button is visible at a time.
@@ -100,10 +100,10 @@ class MediaCaptionToolbar: UIView, UITextViewDelegate, BodyRangesTextViewDelegat
             buttonWrapper.widthAnchor.constraint(equalToConstant: LayoutMetrics.initialTextBoxHeight),
             buttonWrapper.heightAnchor.constraint(equalToConstant: LayoutMetrics.initialTextBoxHeight),
 
-            contentStack.topAnchor.constraint(equalTo: topAnchor),
-            contentStack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            contentStack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            contentStack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            contentStack.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor),
+            contentStack.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
+            contentStack.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
+            contentStack.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor),
         ])
 
         updateContent(animated: false)

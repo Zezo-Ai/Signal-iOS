@@ -38,7 +38,7 @@ class AttachmentApprovalToolbar: UIView, MediaCaptionToolbarDelegate {
         if #available(iOS 26, *) {
             // Increase spacing above `mediaToolbar` from default `8`.
             // Pre-iOS 26 keeps default `8` as padding above the blurred background.
-            galleryRailView.layoutMargins.bottom = 24
+            galleryRailView.layoutMargins.bottom = 16
         } else {
             galleryRailView.scrollFocusMode = .keepWithinBounds
         }
@@ -62,19 +62,18 @@ class AttachmentApprovalToolbar: UIView, MediaCaptionToolbarDelegate {
     private lazy var opaqueContentView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [mediaToolbar, mediaCaptionToolbar])
         stackView.axis = .vertical
-        stackView.spacing = if #available(iOS 26, *) { 24 } else { 16 }
+        // Both `mediaToolbar` and `mediaCaptionToolbar` have 8 dp of vertical margins in them.
+        // iOS 26 needs more space - 24dp - between rows.
+        stackView.spacing = if #available(iOS 26, *) { 8 } else { 0 }
         return stackView
     }()
 
     private lazy var containerStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [opaqueContentView])
         stackView.axis = .vertical
-        stackView.isLayoutMarginsRelativeArrangement = true
-        stackView.directionalLayoutMargins = .zero // no margins needed by default
-        if #unavailable(iOS 26) {
-            // Padding along the top edge of the blurred background.
-            stackView.directionalLayoutMargins.top = 16
-        }
+        // Each row of controls has 8dp vertical margins.
+        // iOS 26 needs more space - 24dp - between rows.
+        stackView.spacing = if #available(iOS 26, *) { 8 } else { 0 }
         return stackView
     }()
 
@@ -172,21 +171,6 @@ class AttachmentApprovalToolbar: UIView, MediaCaptionToolbarDelegate {
             enabled: configuration.isMediaHighQualityEnabled,
             animated: animated,
         )
-        mediaCaptionToolbar.setProceedButtonImage(
-            UIImage(imageLiteralResourceName: configuration.proceedButtonIcon.rawValue),
-        )
-        mediaCaptionToolbar.setIsViewOnce(
-            enabled: configuration.canToggleViewOnce,
-            on: configuration.isViewOnceOn,
-            animated: animated,
-        )
-
-        // Visibility of bottom buttons only changes when user starts/finishes composing text message.
-        // In that case `updateContents(animated:)` is called from within an animation block
-        // and since `mediaToolbar` is in a stack view it is necessary to modify `isHiddenInStackView`
-        // to get a nice animation.
-        mediaToolbar.isHiddenInStackView = isEditingCaptionText
-
         let availableButtons: MediaToolbar.AvailableButtons = {
             guard let currentAttachmentItem else {
                 return []
@@ -209,6 +193,21 @@ class AttachmentApprovalToolbar: UIView, MediaCaptionToolbarDelegate {
             return buttons
         }()
         mediaToolbar.set(availableButtons: availableButtons, animated: animated)
+
+        // Visibility of bottom buttons only changes when user starts/finishes composing text message.
+        // In that case `updateContents(animated:)` is called from within an animation block
+        // and since `mediaToolbar` is in a stack view it is necessary to modify `isHiddenInStackView`
+        // to get a nice animation.
+        mediaToolbar.isHiddenInStackView = isEditingCaptionText || availableButtons.isEmpty
+
+        mediaCaptionToolbar.setProceedButtonImage(
+            UIImage(imageLiteralResourceName: configuration.proceedButtonIcon.rawValue),
+        )
+        mediaCaptionToolbar.setIsViewOnce(
+            enabled: configuration.canToggleViewOnce,
+            on: configuration.isViewOnceOn,
+            animated: animated,
+        )
 
         updateFirstResponder()
 
@@ -395,6 +394,12 @@ private class MediaToolbar: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
 
+        directionalLayoutMargins = .init(hMargin: 0, vMargin: 8)
+        if #unavailable(iOS 26) {
+            // More space between buttons and the top edge of the blurred background.
+            directionalLayoutMargins.top = 16
+        }
+
         let stackView = UIStackView(arrangedSubviews: [
             penToolButton,
             cropToolButton,
@@ -404,7 +409,7 @@ private class MediaToolbar: UIView {
         ])
         if #available(iOS 26, *) {
             stackView.spacing = 10
-            stackView.directionalLayoutMargins = .init(top: 0, leading: 2, bottom: 2, trailing: 2)
+            stackView.directionalLayoutMargins = .init(hMargin: 2, vMargin: 0)
             stackView.isLayoutMarginsRelativeArrangement = true
             stackView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -417,12 +422,12 @@ private class MediaToolbar: UIView {
             glassEffectView.contentView.addSubview(stackView)
             addSubview(glassEffectView)
             NSLayoutConstraint.activate([
-                glassEffectView.topAnchor.constraint(equalTo: topAnchor),
-                glassEffectView.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor),
-                glassEffectView.centerXAnchor.constraint(equalTo: centerXAnchor),
-                glassEffectView.bottomAnchor.constraint(equalTo: bottomAnchor),
+                // Glass panel wraps around the stack view and is centered horizontally.
+                glassEffectView.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor),
+                glassEffectView.leadingAnchor.constraint(greaterThanOrEqualTo: layoutMarginsGuide.leadingAnchor),
+                glassEffectView.centerXAnchor.constraint(equalTo: layoutMarginsGuide.centerXAnchor),
+                glassEffectView.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor),
 
-                // Stack view is horizontally centered.
                 stackView.topAnchor.constraint(equalTo: glassEffectView.topAnchor),
                 stackView.leadingAnchor.constraint(equalTo: glassEffectView.leadingAnchor),
                 stackView.trailingAnchor.constraint(equalTo: glassEffectView.trailingAnchor),
@@ -435,10 +440,10 @@ private class MediaToolbar: UIView {
             // Stack view has leading edge alignment.
             addSubview(stackView)
             NSLayoutConstraint.activate([
-                stackView.topAnchor.constraint(equalTo: topAnchor),
-                stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-                stackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor),
-                stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
+                stackView.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor),
+                stackView.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
+                stackView.trailingAnchor.constraint(lessThanOrEqualTo: layoutMarginsGuide.trailingAnchor),
+                stackView.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor),
             ])
         }
 
