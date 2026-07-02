@@ -154,10 +154,12 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
         logger: PrefixedLogger,
     ) async throws -> URL {
         let metadata = try await backupRequestManager.fetchBackupRequestMetadata(auth: backupAuth, logger: logger)
+        var source = LazyProgressSource(sink: progress, label: AttachmentDownloads.downloadProgressLabel)
         let tmpFileUrl = try await attachmentDownloadManager.downloadBackup(
             metadata: metadata,
-            progress: progress,
+            progressBlock: { source.handleUpdate($0) },
         )
+        source.complete()
 
         // Once protos calm down, this can be enabled to warn/error on failed validation
         // try await validateBackup(localIdentifiers: localIdentifiers, fileUrl: tmpFileUrl)

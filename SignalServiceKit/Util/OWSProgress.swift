@@ -311,13 +311,35 @@ extension OWSProgressSource {
     }
 }
 
+/// Lazily creates an OWSProgressSource after learning the total byte count.
+struct LazyProgressSource: ~Copyable {
+    private let sink: (any OWSProgressSink)?
+    private let label: String
+    private var source: (any OWSProgressSource)?
+
+    init(sink: (any OWSProgressSink)?, label: String) {
+        self.sink = sink
+        self.label = label
+        self.source = nil
+    }
+
+    mutating func handleUpdate(_ progressUpdate: OWSURLSession.ProgressUpdate) {
+        if let sink, self.source == nil, let totalByteCount = progressUpdate.totalByteCount {
+            self.source = sink.addSource(withLabel: self.label, unitCount: totalByteCount)
+        }
+        self.source?.incrementCompletedUnitCount(to: progressUpdate.completedByteCount)
+    }
+
+    consuming func complete() {
+        self.source?.complete()
+    }
+}
+
 extension OWSProgressSource where Self: Sendable {
 
     func asProgressBlock() -> OWSURLSession.ProgressBlock {
         return { progressUpdate in
-            if self.completedUnitCount < progressUpdate.completedByteCount {
-                self.incrementCompletedUnitCount(by: progressUpdate.completedByteCount - self.completedUnitCount)
-            }
+            self.incrementCompletedUnitCount(to: progressUpdate.completedByteCount)
         }
     }
 

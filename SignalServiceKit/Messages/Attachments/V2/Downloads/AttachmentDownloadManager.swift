@@ -108,18 +108,18 @@ public protocol AttachmentDownloadManager {
 
     func downloadBackup(
         metadata: BackupReadCredential,
-        progress: OWSProgressSink?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> URL
 
     func downloadEncryptedTransientAttachment(
         downloadMetadata: AttachmentDownloads.DownloadMetadata,
-        progress: OWSProgressSink?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> URL
 
     func downloadTransientAttachment(
         downloadMetadata: AttachmentDownloads.DownloadMetadata,
         decryptionMetadata: DecryptionMetadata,
-        progress: OWSProgressSink?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> URL
 
     func enqueueDownloadOfAttachmentsForMessage(

@@ -20,7 +20,7 @@ open class AttachmentDownloadManagerMock: AttachmentDownloadManager {
 
     public func downloadBackup(
         metadata: BackupReadCredential,
-        progress: OWSProgressSink?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> URL {
         try! await Task.sleep(nanoseconds: TimeInterval.infinity.clampedNanoseconds)
         fatalError()
@@ -28,7 +28,7 @@ open class AttachmentDownloadManagerMock: AttachmentDownloadManager {
 
     public func downloadEncryptedTransientAttachment(
         downloadMetadata: AttachmentDownloads.DownloadMetadata,
-        progress: (any OWSProgressSink)?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> URL {
         try! await Task.sleep(nanoseconds: TimeInterval.infinity.clampedNanoseconds)
         fatalError()
@@ -37,7 +37,7 @@ open class AttachmentDownloadManagerMock: AttachmentDownloadManager {
     public func downloadTransientAttachment(
         downloadMetadata: AttachmentDownloads.DownloadMetadata,
         decryptionMetadata: DecryptionMetadata,
-        progress: OWSProgressSink?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> URL {
         try! await Task.sleep(nanoseconds: TimeInterval.infinity.clampedNanoseconds)
         fatalError()

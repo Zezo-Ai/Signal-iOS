@@ -640,13 +640,16 @@ public class LinkAndSyncManagerImpl: LinkAndSyncManager {
         cdnKey: String,
         progress: OWSProgressSink,
     ) async throws -> URL {
-        return try await attachmentDownloadManager.downloadEncryptedTransientAttachment(
+        var source = LazyProgressSource(sink: progress, label: AttachmentDownloads.downloadProgressLabel)
+        let result = try await attachmentDownloadManager.downloadEncryptedTransientAttachment(
             downloadMetadata: AttachmentDownloads.DownloadMetadata(
                 cdnNumber: cdnNumber,
                 source: .transitTier(cdnKey: cdnKey),
             ),
-            progress: progress,
+            progressBlock: { source.handleUpdate($0) },
         )
+        source.complete()
+        return result
     }
 
     private func restoreEphemeralBackup(

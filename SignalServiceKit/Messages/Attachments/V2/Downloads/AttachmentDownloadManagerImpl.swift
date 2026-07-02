@@ -21,6 +21,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
     private let db: any DB
     private let decrypter: Decrypter
     private let downloadQueue: DownloadQueue
+    private let downloadTaskRunner: DownloadTaskRunner
     private let downloadabilityChecker: DownloadabilityChecker
     private let queueLoader: TaskQueueLoader<DownloadTaskRunner>
     private let remoteConfigProvider: any RemoteConfigProvider
@@ -63,10 +64,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             stickerManager: stickerManager,
         )
         self.canceledAttachmentIds = TSMutex(initialState: Set())
-        self.downloadQueue = DownloadQueue(
-            canceledAttachmentIds: canceledAttachmentIds,
-            signalService: signalService,
-        )
+        self.downloadQueue = DownloadQueue(signalService: signalService)
         self.attachmentUpdater = AttachmentUpdater(
             attachmentStore: attachmentStore,
             backupAttachmentUploadScheduler: backupAttachmentUploadScheduler,
@@ -98,6 +96,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             attachmentUpdater: attachmentUpdater,
             attachmentUploadStore: attachmentUploadStore,
             backupRequestManager: backupRequestManager,
+            canceledAttachmentIds: canceledAttachmentIds,
             dateProvider: dateProvider,
             db: db,
             decrypter: decrypter,
@@ -107,6 +106,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             stickerManager: stickerManager,
             tsAccountManager: tsAccountManager,
         )
+        self.downloadTaskRunner = taskRunner
         self.queueLoader = TaskQueueLoader(
             maxConcurrentTasks: 12,
             dateProvider: dateProvider,
@@ -142,14 +142,14 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
 
     public func downloadBackup(
         metadata: BackupReadCredential,
-        progress: OWSProgressSink?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> URL {
         let uuid = UUID()
         let downloadState = DownloadState(type: .backup(metadata: metadata, uuid: uuid))
         return try await self.downloadQueue.enqueueDownload(
             downloadState: downloadState,
             maxDownloadSizeBytes: maxEncryptedBackupDownloadSize(),
-            progress: progress,
+            progressBlock: progressBlock,
         )
     }
 
@@ -192,7 +192,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
 
     public func downloadEncryptedTransientAttachment(
         downloadMetadata: DownloadMetadata,
-        progress: OWSProgressSink?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> URL {
         // We want to avoid large downloads from a compromised or buggy service.
         let maxDownloadSize = self.remoteConfigProvider.currentConfig().attachmentMaxEncryptedReceiveBytes
@@ -200,18 +200,18 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         return try await self.downloadQueue.enqueueDownload(
             downloadState: downloadState,
             maxDownloadSizeBytes: maxDownloadSize,
-            progress: progress,
+            progressBlock: progressBlock,
         )
     }
 
     public func downloadTransientAttachment(
         downloadMetadata: DownloadMetadata,
         decryptionMetadata: DecryptionMetadata,
-        progress: OWSProgressSink?,
+        progressBlock: OWSURLSession.ProgressBlock,
     ) async throws -> URL {
         let encryptedFileUrl = try await downloadEncryptedTransientAttachment(
             downloadMetadata: downloadMetadata,
-            progress: progress,
+            progressBlock: progressBlock,
         )
         return try await self.decrypter.decryptTransientAttachment(
             encryptedFileUrl: encryptedFileUrl,
@@ -296,10 +296,10 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 isThumbnail: false,
                 tx: tx,
             )
-            let downloadKey = DownloadQueue.DownloadKey(id: referencedAttachment.attachment.id, source: source)
-            let observer = downloadQueue.addObserver(forDownloadKey: downloadKey)
+            let downloadKey = DownloadTaskRunner.DownloadKey(id: referencedAttachment.attachment.id, source: source)
+            let observer = downloadTaskRunner.addObserver(forDownloadKey: downloadKey)
             if let progress {
-                downloadQueue.registerProgress(progress, forDownloadKey: downloadKey)
+                downloadTaskRunner.registerProgress(progress, forDownloadKey: downloadKey)
             }
             return observer
         }
@@ -488,7 +488,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             return
         }
 
-        let downloadKey = DownloadQueue.DownloadKey(id: id, source: source)
+        let downloadKey = DownloadTaskRunner.DownloadKey(id: id, source: source)
         let observer = await db.awaitableWrite { tx in
             self.attachmentDownloadStore.enqueueDownloadOfAttachment(
                 withId: id,
@@ -496,9 +496,9 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 priority: priority,
                 tx: tx,
             )
-            let observer = downloadQueue.addObserver(forDownloadKey: downloadKey)
+            let observer = downloadTaskRunner.addObserver(forDownloadKey: downloadKey)
             if let progress {
-                downloadQueue.registerProgress(progress, forDownloadKey: downloadKey)
+                downloadTaskRunner.registerProgress(progress, forDownloadKey: downloadKey)
             }
             return observer
         }
@@ -583,6 +583,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         private let attachmentUpdater: AttachmentUpdater
         private let attachmentUploadStore: AttachmentUploadStore
         private let backupRequestManager: BackupRequestManager
+        private let canceledAttachmentIds: TSMutex<Set<Attachment.IDType>>
         private let dateProvider: DateProvider
         private let db: any DB
         private let decrypter: Decrypter
@@ -600,6 +601,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             attachmentUpdater: AttachmentUpdater,
             attachmentUploadStore: AttachmentUploadStore,
             backupRequestManager: BackupRequestManager,
+            canceledAttachmentIds: TSMutex<Set<Attachment.IDType>>,
             dateProvider: @escaping DateProvider,
             db: any DB,
             decrypter: Decrypter,
@@ -615,6 +617,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             self.attachmentUpdater = attachmentUpdater
             self.attachmentUploadStore = attachmentUploadStore
             self.backupRequestManager = backupRequestManager
+            self.canceledAttachmentIds = canceledAttachmentIds
             self.dateProvider = dateProvider
             self.db = db
             self.decrypter = decrypter
@@ -624,6 +627,45 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             self.stickerManager = stickerManager
             self.store = DownloadTaskRecordStore(store: attachmentDownloadStore)
             self.tsAccountManager = tsAccountManager
+        }
+
+        // MARK: -
+
+        /// Non-transient attachments have an in-memory disconnect from the
+        /// downloadQueue and the actual job runner; they are enqueued to disk and
+        /// then read off disk to be downloaded. In order to get an in-memory object
+        /// like a Continuation or an OWSProgress across, we need to cache them in
+        /// memory using this key. This does not apply to transient downloads since
+        /// they stay in memory the whole time.
+        struct DownloadKey: Hashable {
+            let id: Attachment.IDType
+            let source: QueuedAttachmentDownloadRecord.SourceType
+        }
+
+        private let downloadObservers = TSMutex<[DownloadKey: [DeferredContinuation<Void>]]>(initialState: [:])
+        private let downloadProgresses = TSMutex<[DownloadKey: [any OWSProgressSink]]>(initialState: [:])
+
+        func consumeProgresses(downloadKey: DownloadKey) -> [any OWSProgressSink] {
+            return self.downloadProgresses.withLock { $0.removeValue(forKey: downloadKey) ?? [] }
+        }
+
+        func registerProgress(_ progress: OWSProgressSink, forDownloadKey downloadKey: DownloadKey) {
+            self.downloadProgresses.withLock { $0[downloadKey, default: []].append(progress) }
+        }
+
+        func addObserver(forDownloadKey downloadKey: DownloadKey) -> DeferredContinuation<Void> {
+            let result = DeferredContinuation<Void>()
+            self.downloadObservers.withLock { $0[downloadKey, default: []].append(result) }
+            return result
+        }
+
+        func consumeObservers(downloadKey: DownloadKey) -> [DeferredContinuation<Void>] {
+            self.downloadProgresses.withLock { _ = $0.removeValue(forKey: downloadKey) }
+            return self.downloadObservers.withLock { $0.removeValue(forKey: downloadKey) ?? [] }
+        }
+
+        static func downloadKey(record: QueuedAttachmentDownloadRecord) -> DownloadKey {
+            return DownloadKey(id: record.attachmentId, source: record.sourceType)
         }
 
         // MARK: TaskRecordRunner conformance
@@ -641,8 +683,8 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             tx: DBWriteTransaction,
         ) throws {
             Logger.info("Succeeded download of attachment \(record.record.attachmentId) from \(record.record.sourceType)")
-            let downloadKey = DownloadQueue.downloadKey(record: record.record)
-            let observers = downloadQueue.consumeObservers(downloadKey: downloadKey)
+            let downloadKey = Self.downloadKey(record: record.record)
+            let observers = consumeObservers(downloadKey: downloadKey)
             tx.addSyncCompletion { observers.forEach { $0.resume(with: .success(())) } }
         }
 
@@ -651,8 +693,8 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             tx: DBWriteTransaction,
         ) throws {
             Logger.info("Obsoleted download of attachment \(record.record.attachmentId) from \(record.record.sourceType)")
-            let downloadKey = DownloadQueue.downloadKey(record: record.record)
-            let observers = downloadQueue.consumeObservers(downloadKey: downloadKey)
+            let downloadKey = Self.downloadKey(record: record.record)
+            let observers = consumeObservers(downloadKey: downloadKey)
             tx.addSyncCompletion { observers.forEach { $0.resume(with: .success(())) } }
         }
 
@@ -718,8 +760,8 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     )
                 } else {
                     // If we aren't re-enqueuing, tell observers it failed.
-                    let downloadKey = DownloadQueue.downloadKey(record: record)
-                    let observers = downloadQueue.consumeObservers(downloadKey: downloadKey)
+                    let downloadKey = Self.downloadKey(record: record)
+                    let observers = consumeObservers(downloadKey: downloadKey)
                     tx.addSyncCompletion { observers.forEach { $0.resume(with: .failure(error)) } }
                 }
 
@@ -1026,14 +1068,47 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             }
 
             let downloadedFileUrl: URL
+            let downloadKey = Self.downloadKey(record: record)
             do {
+                var activeSources = [OWSProgressSource]()
                 downloadedFileUrl = try await downloadQueue.enqueueDownload(
                     downloadState: .init(type: .attachment(downloadMetadata, id: attachment.id)),
                     maxDownloadSizeBytes: maxDownloadSizeBytes,
-                    progress: nil,
+                    progressBlock: { progressUpdate in
+                        let pendingSinks = consumeProgresses(downloadKey: downloadKey)
+                        if let totalByteCount = progressUpdate.totalByteCount {
+                            for pendingSink in pendingSinks {
+                                activeSources.append(pendingSink.addSource(
+                                    withLabel: AttachmentDownloads.downloadProgressLabel,
+                                    unitCount: totalByteCount,
+                                ))
+                            }
+                        }
+                        for activeSource in activeSources {
+                            activeSource.incrementCompletedUnitCount(to: progressUpdate.completedByteCount)
+                        }
+                        if canceledAttachmentIds.withLock({ $0.remove(downloadKey.id) != nil }) {
+                            Logger.warn("cancelling download")
+                            // Cancelling will inform the URLSessionTask delegate.
+                            throw URLError(.cancelled)
+                        }
+                        await handleDownloadProgress(attachmentId: downloadKey.id, progressUpdate: progressUpdate)
+                    },
                 )
+                for activeSource in activeSources {
+                    activeSource.complete()
+                }
             } catch let error {
                 Logger.error("Failed to download: \(error)")
+                await { @MainActor () async -> Void in
+                    NotificationCenter.default.post(
+                        name: AttachmentDownloads.attachmentDownloadStoppedNotification,
+                        object: nil,
+                        userInfo: [
+                            AttachmentDownloads.attachmentDownloadAttachmentIDKey: attachment.id,
+                        ],
+                    )
+                }()
                 return wrapDownloadError(
                     error: error,
                     record: record,
@@ -1207,6 +1282,31 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 cdn: Int32(cdn),
                 auth: auth,
                 logger: logger,
+            )
+        }
+
+        @MainActor
+        private func handleDownloadProgress(
+            attachmentId: Attachment.IDType,
+            progressUpdate: OWSURLSession.ProgressUpdate,
+        ) {
+            guard let totalByteCount = progressUpdate.totalByteCount else {
+                // Don't do anything until we can estimate the size.
+                return
+            }
+
+            // Use a slightly non-zero value to ensure that the progress
+            // indicator shows up as quickly as possible.
+            let progressTheta: Float = 0.001
+            let fractionCompleted = Float(progressUpdate.completedByteCount) / Float(totalByteCount)
+
+            NotificationCenter.default.post(
+                name: AttachmentDownloads.attachmentDownloadProgressNotification,
+                object: nil,
+                userInfo: [
+                    AttachmentDownloads.attachmentDownloadProgressKey: max(progressTheta, fractionCompleted),
+                    AttachmentDownloads.attachmentDownloadAttachmentIDKey: attachmentId,
+                ],
             )
         }
     }
@@ -1635,58 +1735,13 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
     private class DownloadQueue {
         private let signalService: OWSSignalServiceProtocol
 
-        private let canceledAttachmentIds: TSMutex<Set<Attachment.IDType>>
         private let resumeDataCache: LRUCache<DownloadState, Data> = LRUCache(maxSize: 5)
 
-        init(
-            canceledAttachmentIds: TSMutex<Set<Attachment.IDType>>,
-            signalService: OWSSignalServiceProtocol,
-        ) {
-            self.canceledAttachmentIds = canceledAttachmentIds
+        init(signalService: OWSSignalServiceProtocol) {
             self.signalService = signalService
         }
 
         private let queue = ConcurrentTaskQueue(concurrentLimit: 12)
-
-        /// Non-transient attachments have an in-memory disconnect from the downloadQueue and the actual job runner;
-        /// they are enqueued to disk and then read off disk to be downloaded. In order to get an in-memory object
-        /// like a Continuation or an OWSProgress across, we need to cache them in memory using this key.
-        /// This does not apply to transient downloads since they stay in memory the whole time.
-        struct DownloadKey: Hashable {
-            let id: Attachment.IDType
-            let source: QueuedAttachmentDownloadRecord.SourceType
-        }
-
-        private let downloadObservers = TSMutex<[DownloadKey: [DeferredContinuation<Void>]]>(initialState: [:])
-        private let downloadProgresses = TSMutex<[DownloadKey: [OWSProgressSink]]>(initialState: [:])
-
-        func registerProgress(_ progress: OWSProgressSink, forDownloadKey downloadKey: DownloadKey) {
-            self.downloadProgresses.withLock { $0[downloadKey, default: []].append(progress) }
-        }
-
-        func addObserver(forDownloadKey downloadKey: DownloadKey) -> DeferredContinuation<Void> {
-            let result = DeferredContinuation<Void>()
-            self.downloadObservers.withLock { $0[downloadKey, default: []].append(result) }
-            return result
-        }
-
-        func consumeObservers(downloadKey: DownloadKey) -> [DeferredContinuation<Void>] {
-            self.downloadProgresses.withLock { _ = $0.removeValue(forKey: downloadKey) }
-            return self.downloadObservers.withLock { $0.removeValue(forKey: downloadKey) ?? [] }
-        }
-
-        nonisolated static func downloadKey(record: QueuedAttachmentDownloadRecord) -> DownloadKey {
-            return DownloadKey(id: record.attachmentId, source: record.sourceType)
-        }
-
-        private nonisolated static func downloadKey(state: DownloadState) -> DownloadKey? {
-            switch state.type {
-            case .backup, .transientAttachment:
-                return nil
-            case .attachment(let downloadMetadata, let id):
-                return DownloadKey(id: id, source: downloadMetadata.source.asQueuedDownloadSource)
-            }
-        }
 
         /// Fetch the first `length` bytes of the object from the CDN, returning the fetched bytes,
         /// (or nil if the response was empty) alongside headers from the response (which are the
@@ -1716,51 +1771,14 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         func enqueueDownload(
             downloadState: DownloadState,
             maxDownloadSizeBytes: UInt64,
-            progress: OWSProgressSink?,
+            progressBlock: OWSURLSession.ProgressBlock,
         ) async throws -> URL {
-            var pendingSinks = [OWSProgressSink]()
-            if let progress {
-                pendingSinks.append(progress)
-            }
-            var activeSources = [OWSProgressSource]()
-            let k = Self.downloadKey(state: downloadState)
             return try await queue.run {
-                do {
-                    return try await performDownload(
-                        downloadState: downloadState,
-                        maxDownloadSizeBytes: maxDownloadSizeBytes,
-                        progressBlock: { progressUpdate in
-                            if let k, let _pendingSinks = downloadProgresses.withLock({ $0.removeValue(forKey: k) }) {
-                                pendingSinks.append(contentsOf: _pendingSinks)
-                            }
-                            if let totalByteCount = progressUpdate.totalByteCount {
-                                for pendingSink in pendingSinks {
-                                    activeSources.append(pendingSink.addSource(
-                                        withLabel: AttachmentDownloads.downloadProgressLabel,
-                                        unitCount: totalByteCount,
-                                    ))
-                                }
-                                pendingSinks.removeAll()
-                            }
-                            for activeSource in activeSources {
-                                activeSource.incrementCompletedUnitCount(to: progressUpdate.completedByteCount)
-                            }
-                        },
-                    )
-                } catch {
-                    if let k {
-                        await { @MainActor () async -> Void in
-                            NotificationCenter.default.post(
-                                name: AttachmentDownloads.attachmentDownloadStoppedNotification,
-                                object: nil,
-                                userInfo: [
-                                    AttachmentDownloads.attachmentDownloadAttachmentIDKey: k.id,
-                                ],
-                            )
-                        }()
-                    }
-                    throw error
-                }
+                return try await performDownload(
+                    downloadState: downloadState,
+                    maxDownloadSizeBytes: maxDownloadSizeBytes,
+                    progressBlock: progressBlock,
+                )
             }
         }
 
@@ -1808,14 +1826,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     }
                 }
 
-                let downloadResponse = try await downloadOperation({ progressUpdate in
-                    try await progressBlock(progressUpdate)
-                    let k = DownloadQueue.downloadKey(state: downloadState)
-                    if let k {
-                        try cancelDownloadIfNeeded(attachmentId: k.id)
-                        await handleDownloadProgress(attachmentId: k.id, progressUpdate: progressUpdate)
-                    }
-                })
+                let downloadResponse = try await downloadOperation(progressBlock)
 
                 let downloadUrl = downloadResponse.downloadUrl
                 let tmpFile = OWSFileSystem.temporaryFileUrl(
@@ -1839,42 +1850,6 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 // Wait briefly before retrying.
                 try await Task.sleep(nanoseconds: 250 * NSEC_PER_MSEC)
             }
-        }
-
-        private nonisolated func cancelDownloadIfNeeded(
-            attachmentId: Attachment.IDType,
-        ) throws {
-            guard canceledAttachmentIds.withLock({ $0.remove(attachmentId) != nil }) else {
-                return
-            }
-            Logger.info("Cancelling download.")
-            // Cancelling will inform the URLSessionTask delegate.
-            throw URLError(.cancelled)
-        }
-
-        @MainActor
-        private func handleDownloadProgress(
-            attachmentId: Attachment.IDType,
-            progressUpdate: OWSURLSession.ProgressUpdate,
-        ) {
-            guard let totalByteCount = progressUpdate.totalByteCount else {
-                // Don't do anything until we can estimate the size.
-                return
-            }
-
-            // Use a slightly non-zero value to ensure that the progress
-            // indicator shows up as quickly as possible.
-            let progressTheta: Float = 0.001
-            let fractionCompleted = Float(progressUpdate.completedByteCount) / Float(totalByteCount)
-
-            NotificationCenter.default.post(
-                name: AttachmentDownloads.attachmentDownloadProgressNotification,
-                object: nil,
-                userInfo: [
-                    AttachmentDownloads.attachmentDownloadProgressKey: max(progressTheta, fractionCompleted),
-                    AttachmentDownloads.attachmentDownloadAttachmentIDKey: attachmentId,
-                ],
-            )
         }
     }
 

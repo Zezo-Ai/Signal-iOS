@@ -104,7 +104,7 @@ private class IncomingContactSyncJobRunner: JobRunner {
             fileUrl = try await DependenciesBridge.shared.attachmentDownloadManager.downloadTransientAttachment(
                 downloadMetadata: downloadMetadata,
                 decryptionMetadata: decryptionMetadata,
-                progress: nil,
+                progressBlock: { _ in },
             )
         }
 
