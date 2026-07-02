@@ -1878,81 +1878,64 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 let resumeData = await resumeDataCache.object(forKey: downloadState)
                 let urlSession = await self.signalService.sharedUrlSessionForCdn(cdnNumber: downloadState.cdnNumber())
 
-                var downloadTask: Task<OWSUrlDownloadResponse, Error>?
-
-                let wrappedProgressID = await latestProgressID(downloadKey: DownloadQueue.downloadKey(state: downloadState))
-                let wrappedProgress = OWSProgress.createSink { [weak self] progressValue in
-                    let k = DownloadQueue.downloadKey(state: downloadState)
-                    if let k {
-                        if await self?.latestProgressID(downloadKey: k) != wrappedProgressID {
-                            // A new download has started, don't send progress updates or notifications.
-                            return
-                        }
-
-                        if let self, await finishedOrFailedDownloads.contains(k) {
-                            if self.cancelDownloadIfNeeded(attachmentId: k.id, downloadTask: downloadTask) {
-                                return
-                            }
-                            // If we've already finished the download, send the notification so
-                            // handlers can get 100% updates but don't update the progress sources,
-                            // which may be double counting.
-                            self.handleDownloadProgress(
-                                attachmentId: k.id,
-                                progress: progressValue,
-                                expectedDownloadSizeBytes: expectedDownloadSizeBytes,
-                            )
-                            return
-                        }
-                    }
-
-                    for progressSource in progressSources {
-                        if progressSource.completedUnitCount < progressValue.completedUnitCount {
-                            progressSource.incrementCompletedUnitCount(by: progressValue.completedUnitCount - progressSource.completedUnitCount)
-                        }
-                    }
-                    if let k {
-                        if self?.cancelDownloadIfNeeded(attachmentId: k.id, downloadTask: downloadTask) == true {
-                            return
-                        }
-                        self?.handleDownloadProgress(
-                            attachmentId: k.id,
-                            progress: progressValue,
-                            expectedDownloadSizeBytes: expectedDownloadSizeBytes,
-                        )
-                    }
-                }
-                let wrappedProgressSource = wrappedProgress.addSource(
-                    withLabel: "source",
-                    unitCount: expectedDownloadSizeBytes,
-                )
-
-                let downloadResponse: OWSUrlDownloadResponse
+                let downloadOperation: (OWSURLSession.ProgressBlock) async throws -> OWSUrlDownloadResponse
                 if let resumeData {
                     let request = try urlSession.endpoint.buildRequest(urlPath, method: .get, headers: headers)
                     guard let requestUrl = request.url else {
                         throw OWSAssertionError("Request missing url.")
                     }
-                    downloadTask = Task {
+                    downloadOperation = {
                         return try await urlSession.performDownload(
                             requestUrl: requestUrl,
                             resumeData: resumeData,
                             maxResponseSize: maxDownloadSizeBytes,
-                            progressBlock: wrappedProgressSource.asProgressBlock(),
+                            progressBlock: $0,
                         )
                     }
-                    downloadResponse = try await downloadTask!.value
                 } else {
-                    downloadTask = Task {
+                    downloadOperation = {
                         return try await urlSession.performDownload(
                             urlPath,
                             method: .get,
                             headers: headers,
                             maxResponseSize: maxDownloadSizeBytes,
-                            progressBlock: wrappedProgressSource.asProgressBlock(),
+                            progressBlock: $0,
                         )
                     }
-                    downloadResponse = try await downloadTask!.value
                 }
+
+                let k = DownloadQueue.downloadKey(state: downloadState)
+                let wrappedProgressID = await latestProgressID(downloadKey: k)
+                let downloadResponse = try await downloadOperation({ progressUpdate in
+                    if let k, await latestProgressID(downloadKey: k) != wrappedProgressID {
+                        // A new download has started, don't send progress updates or notifications.
+                        return
+                    }
+                    if let k, await finishedOrFailedDownloads.contains(k) {
+                        try cancelDownloadIfNeeded(attachmentId: k.id)
+                        // If we've already finished the download, send the notification so
+                        // handlers can get 100% updates but don't update the progress sources,
+                        // which may be double counting.
+                        await handleDownloadProgress(
+                            attachmentId: k.id,
+                            progressUpdate: progressUpdate,
+                            expectedDownloadSizeBytes: expectedDownloadSizeBytes,
+                        )
+                        return
+                    }
+                    for progressSource in progressSources {
+                        progressSource.incrementCompletedUnitCount(to: progressUpdate.completedByteCount)
+                    }
+                    if let k {
+                        try cancelDownloadIfNeeded(attachmentId: k.id)
+                        await handleDownloadProgress(
+                            attachmentId: k.id,
+                            progressUpdate: progressUpdate,
+                            expectedDownloadSizeBytes: expectedDownloadSizeBytes,
+                        )
+                    }
+                })
+
                 let downloadUrl = downloadResponse.downloadUrl
                 let tmpFile = OWSFileSystem.temporaryFileUrl(
                     fileExtension: nil,
@@ -1996,20 +1979,19 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
 
         private nonisolated func cancelDownloadIfNeeded(
             attachmentId: Attachment.IDType,
-            downloadTask: Task<OWSUrlDownloadResponse, any Error>?,
-        ) -> Bool {
+        ) throws {
             guard progressStates.consumeCancellation(of: attachmentId) else {
-                return false
+                return
             }
             Logger.info("Cancelling download.")
             // Cancelling will inform the URLSessionTask delegate.
-            downloadTask?.cancel()
-            return true
+            throw URLError(.cancelled)
         }
 
-        private nonisolated func handleDownloadProgress(
+        @MainActor
+        private func handleDownloadProgress(
             attachmentId: Attachment.IDType,
-            progress: OWSProgress,
+            progressUpdate: OWSURLSession.ProgressUpdate,
             expectedDownloadSizeBytes: UInt64?,
         ) {
             // Use a slightly non-zero value to ensure that the progress
@@ -2017,21 +1999,21 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             let progressTheta: Float = 0.001
 
             let fractionCompleted: Float
-            if progress.completedUnitCount > 0 {
-                fractionCompleted = max(progressTheta, progress.percentComplete)
+            if progressUpdate.completedByteCount > 0, let totalByteCount = progressUpdate.totalByteCount {
+                fractionCompleted = Float(progressUpdate.completedByteCount) / Float(totalByteCount)
             } else if expectedDownloadSizeBytes != nil {
-                fractionCompleted = progressTheta
+                fractionCompleted = 0
             } else {
                 // Don't do anything until we've received at least one byte of data,
                 // or estimated the download size.
                 return
             }
 
-            NotificationCenter.default.postOnMainThread(
+            NotificationCenter.default.post(
                 name: AttachmentDownloads.attachmentDownloadProgressNotification,
                 object: nil,
                 userInfo: [
-                    AttachmentDownloads.attachmentDownloadProgressKey: fractionCompleted,
+                    AttachmentDownloads.attachmentDownloadProgressKey: max(progressTheta, fractionCompleted),
                     AttachmentDownloads.attachmentDownloadAttachmentIDKey: attachmentId,
                 ],
             )
