@@ -605,7 +605,7 @@
 "BACKUP_ONBOARDING_CONFIRM_KEY_SEE_KEY_AGAIN_BUTTON_TITLE" = "की पुन्हा पहा";
 
 /* Subtitle for a view asking users to confirm their 'Recovery Key'. */
-"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "तुम्ही आत्ताच रेकॉर्ड केलेली रिकव्हरी की प्रविष्ट करा";
+"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "Enter the recovery key you just saved.";
 
 /* Title for a view asking users to confirm their 'Recovery Key'. */
 "BACKUP_ONBOARDING_CONFIRM_KEY_TITLE" = "तुमची रीकव्हरी की निश्चित करा";
@@ -670,6 +670,12 @@
 /* Title for a button allowing users to create a new 'Recovery Key'. */
 "BACKUP_RECORD_KEY_CREATE_NEW_KEY_BUTTON_TITLE" = "नवीन की तयार करा";
 
+/* Subtitle for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
+"BACKUP_RECORD_KEY_NEW_SUBTITLE" = "This new key will replace your old one, and will be required to recover your account and data. Store this key somewhere safe. If you lose it, you won’t be able to recover your account.";
+
+/* Title for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
+"BACKUP_RECORD_KEY_NEW_TITLE" = "Save Your New Recovery Key";
+
 /* Title for a button allowing users to save their 'Recovery Key' to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_BUTTON_TITLE" = "पासवर्ड व्यवस्थापकामध्ये जतन करा";
 
@@ -691,11 +697,11 @@
 /* Toast shown after the user successfully saves their 'Recovery Key' to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_SUCCESS_TOAST" = "झाले. पडताळण्यासाठी तुमचा पासवर्ड व्यवस्थापक पाहा.";
 
-/* Subtitle for a view allowing users to record their 'Recovery Key'. */
+/* Subtitle for a view allowing users to save their 'Recovery Key'. */
 "BACKUP_RECORD_KEY_SUBTITLE" = "ही की आपले अकाऊंट आणि डेटा पुर्नप्राप्त करण्यासाठी आवश्यक आहे. ही की कोठेतरी सुरक्षित ठेवा. आपण जी ती गहाळ केल्यास, आपण आपले अकाऊंट पुर्नप्राप्त करू शकणार नाही.";
 
-/* Title for a view allowing users to record their 'Recovery Key'. */
-"BACKUP_RECORD_KEY_TITLE" = "तुमची रीकव्हरी की नोंदवा";
+/* Title for a view allowing users to save their 'Recovery Key'. */
+"BACKUP_RECORD_KEY_TITLE" = "Save Your Recovery Key";
 
 /* Title for a button offering help if the user has forgotten their recovery key. */
 "BACKUP_RECOVERY_KEY_REMINDER_FORGOT_KEY_BUTTON" = "की विसरलात?";
@@ -1013,7 +1019,7 @@
 "BACKUP_SETTINGS_OPTIMIZE_LOCAL_STORAGE_EXPIRING_OFFLOADED_SHEET_GOT_IT_ACTION" = "कळले";
 
 /* Message for a sheet shown after the user enabled Optimize Storage with a soon-expiring subscription, reminding them to download their media before the subscription expires. */
-"BACKUP_SETTINGS_OPTIMIZE_LOCAL_STORAGE_EXPIRING_OFFLOADED_SHEET_MESSAGE" = "Make sure to disable Optimize Storage and download your media before your subscription expires.";
+"BACKUP_SETTINGS_OPTIMIZE_LOCAL_STORAGE_EXPIRING_OFFLOADED_SHEET_MESSAGE" = "तुमचे सदस्यत्व संपण्यापूर्वी साठवण ऑप्टिमाईझ करणे खात्रीने बंद करा आणि तुमचा मीडिया डाऊनलोड करून ठेवा.";
 
 /* Message for a sheet warning the user about enabling Optimize Storage with a soon-expiring subscription. */
 "BACKUP_SETTINGS_OPTIMIZE_LOCAL_STORAGE_EXPIRING_WARNING_SHEET_MESSAGE" = "तुम्हाला नक्की तुमची साठवण ऑप्टिमाईझ सक्रिय करायचे आहे आणि तुमचा मीडिया ऑफलोड करायचा आहे? जर तुमचे सदस्यत्व संपले, तर या डिव्हाईसवर नसलेला कोणताही मीडिया कायमस्वरूपी हटवला जाईल.";
@@ -1199,7 +1205,7 @@
 "BACKUPS_SETTINGS_TITLE" = "बॅकअप्स सुरक्षित करा";
 
 /* Message for an action sheet shown on iPad saying you need to set up backups on your phone */
-"BACKUPS_SETUP_ON_PRIMARY_MESSAGE" = "To configure Backups, open Signal on your primary iPhone or Android and go to Settings > Backups.";
+"BACKUPS_SETUP_ON_PRIMARY_MESSAGE" = "बॅकअप्स तयार करण्यासाठी, तुमच्या मुख्य iPhone वर किंवा Android वर Signal उघडा आणि सेटिंग्ज > बॅकअप्स मध्ये जा.";
 
 /* Body for system notification or megaphone when backups is enabled. Embeds {{ time backups was enabled }} */
 "BACKUPS_TURNED_ON_NOTIFICATION_BODY_FORMAT" = "Signal बॅकअप्स या खात्यासाठी %1$@ येथे चालू झाले होते. पहाण्यासाठी टॅप करा.";
@@ -5296,6 +5302,9 @@
 /* nav bar button item */
 "MEDIA_DETAIL_VIEW_ALL_MEDIA_BUTTON" = "सर्व मिडिया";
 
+/* Placeholder for message text input field in media editor. */
+"MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "Message";
+
 /* Title for the button that discards all edits in media editor. */
 "MEDIA_EDITOR_CLEAR_ALL" = "सर्व साफ करा";
 
@@ -5313,9 +5322,6 @@
 
 /* Tooltip to display above a clock sticker in the media editor saying to tap for more clock styles */
 "MEDIA_EDITOR_TAP_FOR_MORE" = "अधिक करिता टॅप करा";
-
-/* Placeholder for message text input field in media editor. */
-"MEDIA_EDITOR_TEXT_FIELD_ADD_MESSAGE" = "संदेश जोडा";
 
 /* Shown in place of message input text in media editor when 'View Once' is on. */
 "MEDIA_EDITOR_TEXT_FIELD_VIEW_ONCE_MEDIA" = "एकदा मिडिया पहा";
@@ -7739,7 +7745,7 @@
 "REGISTRATION_PHONE_NUMBER_SUBTITLE" = "सुरूवात करण्यासाठी आपला फोन नंबर प्रविष्ट करा.";
 
 /* During re-registration, users are asked to confirm their phone number. This is the subtitle on that screen, which gives users some instructions. */
-"REGISTRATION_PHONE_NUMBER_SUBTITLE_2" = "या नंबरवर एक पडताळणी कोड पाठवला जाईल:";
+"REGISTRATION_PHONE_NUMBER_SUBTITLE_2" = "We may need to send a verification code to this number:";
 
 /* During registration, users are asked to enter their phone number. This is the title on that screen. */
 "REGISTRATION_PHONE_NUMBER_TITLE" = "आपला फोन नंबर";
@@ -7847,10 +7853,10 @@
 "REGISTRATION_VIEW_INVALID_PHONE_NUMBER_ALERT_TITLE" = "अवैध फोन नंबर";
 
 /* Message for confirmation alert during phone number registration. */
-"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_MESSAGE" = "सत्यापन कोड या नंबरावर पाठविण्यात येईल. आपला वरील फोन नंबर बरोबर आहे का?";
+"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_MESSAGE" = "We may need to send a verification code to this number. Is the phone number above correct?";
 
 /* Title for confirmation alert during phone number registration. Embeds {{phone number}}. */
-"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_TITLE_FORMAT" = "नंबरची पुष्टी:%1$@";
+"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_TITLE_FORMAT" = "Phone Number Confirmation: %1$@";
 
 /* A button allowing user to cancel registration and edit a phone number */
 "REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_EDIT_BUTTON" = "संपादन";
@@ -9863,10 +9869,10 @@
 "SUSTAINER_VIEW_PROCESSING_PAYMENT" = "देणगीवर प्रक्रिया करत आहे...";
 
 /* Message for a sheet shown when a donation request is rate-limited. */
-"SUSTAINER_VIEW_RATE_LIMITED_PROCESSING_PAYMENT_MESSAGE" = "Your badge could not be added to your account because you've tried too many times. Please try again later.";
+"SUSTAINER_VIEW_RATE_LIMITED_PROCESSING_PAYMENT_MESSAGE" = "तुमचा बॅज तुमच्या खात्यामध्ये जोडता आला नाही कारण तुम्ही अनेकवेळा प्रयत्न करून झाले आहे. कृपया नंतर पुन्हा प्रयत्न करा.";
 
 /* Title for a sheet shown when a donation request is rate-limited. */
-"SUSTAINER_VIEW_RATE_LIMITED_PROCESSING_PAYMENT_TITLE" = "Couldn't Add Badge";
+"SUSTAINER_VIEW_RATE_LIMITED_PROCESSING_PAYMENT_TITLE" = "बॅज जोडता आला नाही";
 
 /* Renewal date text for sustainer view level, embeds {{renewal date}} */
 "SUSTAINER_VIEW_RENEWAL" = "नूतनीकरणे %1$@";

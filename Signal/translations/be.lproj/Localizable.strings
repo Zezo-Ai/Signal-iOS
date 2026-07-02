@@ -605,7 +605,7 @@
 "BACKUP_ONBOARDING_CONFIRM_KEY_SEE_KEY_AGAIN_BUTTON_TITLE" = "Прагледзець ключ яшчэ раз";
 
 /* Subtitle for a view asking users to confirm their 'Recovery Key'. */
-"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "Увядзіце код для аднаўлення, што вы зараз запісалі";
+"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "Enter the recovery key you just saved.";
 
 /* Title for a view asking users to confirm their 'Recovery Key'. */
 "BACKUP_ONBOARDING_CONFIRM_KEY_TITLE" = "Пацвердзіце свой код для аднаўлення";
@@ -670,6 +670,12 @@
 /* Title for a button allowing users to create a new 'Recovery Key'. */
 "BACKUP_RECORD_KEY_CREATE_NEW_KEY_BUTTON_TITLE" = "Стварыць новы код";
 
+/* Subtitle for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
+"BACKUP_RECORD_KEY_NEW_SUBTITLE" = "This new key will replace your old one, and will be required to recover your account and data. Store this key somewhere safe. If you lose it, you won’t be able to recover your account.";
+
+/* Title for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
+"BACKUP_RECORD_KEY_NEW_TITLE" = "Save Your New Recovery Key";
+
 /* Title for a button allowing users to save their 'Recovery Key' to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_BUTTON_TITLE" = "Захаваць у менеджары пароляў";
 
@@ -691,11 +697,11 @@
 /* Toast shown after the user successfully saves their 'Recovery Key' to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_SUCCESS_TOAST" = "Гатова. Каб пацвердзіць, праверце свой менеджар пароляў.";
 
-/* Subtitle for a view allowing users to record their 'Recovery Key'. */
+/* Subtitle for a view allowing users to save their 'Recovery Key'. */
 "BACKUP_RECORD_KEY_SUBTITLE" = "Гэты ключ патрэбны, каб аднавіць ваш уліковы запіс і вашы даныя. Захоўвайце гэты ключ у бяспечным месцы. Калі вы забудзеце яго, вы больш не зможаце аднавіць свой уліковы запіс.";
 
-/* Title for a view allowing users to record their 'Recovery Key'. */
-"BACKUP_RECORD_KEY_TITLE" = "Запішыце свой код для аднаўлення";
+/* Title for a view allowing users to save their 'Recovery Key'. */
+"BACKUP_RECORD_KEY_TITLE" = "Save Your Recovery Key";
 
 /* Title for a button offering help if the user has forgotten their recovery key. */
 "BACKUP_RECOVERY_KEY_REMINDER_FORGOT_KEY_BUTTON" = "Забылі свой код?";
@@ -1013,7 +1019,7 @@
 "BACKUP_SETTINGS_OPTIMIZE_LOCAL_STORAGE_EXPIRING_OFFLOADED_SHEET_GOT_IT_ACTION" = "Зразумела";
 
 /* Message for a sheet shown after the user enabled Optimize Storage with a soon-expiring subscription, reminding them to download their media before the subscription expires. */
-"BACKUP_SETTINGS_OPTIMIZE_LOCAL_STORAGE_EXPIRING_OFFLOADED_SHEET_MESSAGE" = "Make sure to disable Optimize Storage and download your media before your subscription expires.";
+"BACKUP_SETTINGS_OPTIMIZE_LOCAL_STORAGE_EXPIRING_OFFLOADED_SHEET_MESSAGE" = "Праверце, ці аптымізацыя сховішча адключана, і спампуйце свае медыяфайлы да заканчэння тэрміну дзеяння падпіскі.";
 
 /* Message for a sheet warning the user about enabling Optimize Storage with a soon-expiring subscription. */
 "BACKUP_SETTINGS_OPTIMIZE_LOCAL_STORAGE_EXPIRING_WARNING_SHEET_MESSAGE" = "Вы ўпэўнены, што жадаеце ўключыць аптымізацыю сховішча і выгрузіць свае медыяфайлы? Калі тэрмін дзеяння вашай падпіскі скончыцца, усе медыяфайлы, што не захаваны на гэтай прыладзе, будуць выдалены назаўсёды.";
@@ -1199,7 +1205,7 @@
 "BACKUPS_SETTINGS_TITLE" = "Бяспечнае рэзервовае капіраванне";
 
 /* Message for an action sheet shown on iPad saying you need to set up backups on your phone */
-"BACKUPS_SETUP_ON_PRIMARY_MESSAGE" = "To configure Backups, open Signal on your primary iPhone or Android and go to Settings > Backups.";
+"BACKUPS_SETUP_ON_PRIMARY_MESSAGE" = "Каб наладзіць рэзервовыя копіі, адкрыйце Signal на сваім асноўным iPhone або Android і перайдзіце ў Налады > Рэзервовыя копіі.";
 
 /* Body for system notification or megaphone when backups is enabled. Embeds {{ time backups was enabled }} */
 "BACKUPS_TURNED_ON_NOTIFICATION_BODY_FORMAT" = "Для гэтага ўліковага запісу рэзервовыя копіі Signal былі ўключаны ў %1$@. Націснуць, каб прагледзець.";
@@ -2264,7 +2270,7 @@
 "CONTACT_PERMISSION_ACTION_SHEET_2_STEP_TWO" = "Націсніце «Кантакты»";
 
 /* Title for contact permission action sheet */
-"CONTACT_PERMISSION_ACTION_SHEET_2_TITLE" = "Уключыце доступ да кантактаў";
+"CONTACT_PERMISSION_ACTION_SHEET_2_TITLE" = "Дазвольце доступ да кантактаў";
 
 /* Body for contact permission action sheet */
 "CONTACT_PERMISSION_ACTION_SHEET_BODY" = "Каб убачыць імёны кантактаў і фатаграфіі ў вашых чатах:";
@@ -2285,7 +2291,7 @@
 "CONTACT_PERMISSION_REMINDER_MEGAPHONE_ACTION" = "Дазволіць доступ";
 
 /* Body for contact permission reminder megaphone */
-"CONTACT_PERMISSION_REMINDER_MEGAPHONE_BODY" = "Дайце доступ да вашых кантактаў, каб хутка знайсці іх у Signal.";
+"CONTACT_PERMISSION_REMINDER_MEGAPHONE_BODY" = "Дазвольце доступ да вашых кантактаў, каб хутка знайсці іх у Signal.";
 
 /* Title for contact permission reminder megaphone */
 "CONTACT_PERMISSION_REMINDER_MEGAPHONE_TITLE" = "Знайсці кантакты ў Signal";
@@ -5296,6 +5302,9 @@
 /* nav bar button item */
 "MEDIA_DETAIL_VIEW_ALL_MEDIA_BUTTON" = "Усе медыяфайлы";
 
+/* Placeholder for message text input field in media editor. */
+"MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "Message";
+
 /* Title for the button that discards all edits in media editor. */
 "MEDIA_EDITOR_CLEAR_ALL" = "Ачысціць усе";
 
@@ -5313,9 +5322,6 @@
 
 /* Tooltip to display above a clock sticker in the media editor saying to tap for more clock styles */
 "MEDIA_EDITOR_TAP_FOR_MORE" = "Націснуць, каб убачыць больш";
-
-/* Placeholder for message text input field in media editor. */
-"MEDIA_EDITOR_TEXT_FIELD_ADD_MESSAGE" = "Дадаць паведамленне";
 
 /* Shown in place of message input text in media editor when 'View Once' is on. */
 "MEDIA_EDITOR_TEXT_FIELD_VIEW_ONCE_MEDIA" = "Медыяфайл для аднаразовага прагляду";
@@ -7739,7 +7745,7 @@
 "REGISTRATION_PHONE_NUMBER_SUBTITLE" = "Каб пачаць, увядзіце свой нумар тэлефона.";
 
 /* During re-registration, users are asked to confirm their phone number. This is the subtitle on that screen, which gives users some instructions. */
-"REGISTRATION_PHONE_NUMBER_SUBTITLE_2" = "На гэты нумар будзе адпраўлены праверачны код:";
+"REGISTRATION_PHONE_NUMBER_SUBTITLE_2" = "We may need to send a verification code to this number:";
 
 /* During registration, users are asked to enter their phone number. This is the title on that screen. */
 "REGISTRATION_PHONE_NUMBER_TITLE" = "Ваш нумар тэлефона";
@@ -7847,10 +7853,10 @@
 "REGISTRATION_VIEW_INVALID_PHONE_NUMBER_ALERT_TITLE" = "Несапраўдны нумар тэлефона";
 
 /* Message for confirmation alert during phone number registration. */
-"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_MESSAGE" = "На гэты нумар будзе адпраўлены праверачны код. Ці правільны пазначаны вышэй нумар тэлефона?";
+"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_MESSAGE" = "We may need to send a verification code to this number. Is the phone number above correct?";
 
 /* Title for confirmation alert during phone number registration. Embeds {{phone number}}. */
-"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_TITLE_FORMAT" = "Пацвярджэнне нумара: %1$@";
+"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_TITLE_FORMAT" = "Phone Number Confirmation: %1$@";
 
 /* A button allowing user to cancel registration and edit a phone number */
 "REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_EDIT_BUTTON" = "Рэдагаваць";
@@ -9863,10 +9869,10 @@
 "SUSTAINER_VIEW_PROCESSING_PAYMENT" = "Апрацоўка ахвяравання…";
 
 /* Message for a sheet shown when a donation request is rate-limited. */
-"SUSTAINER_VIEW_RATE_LIMITED_PROCESSING_PAYMENT_MESSAGE" = "Your badge could not be added to your account because you've tried too many times. Please try again later.";
+"SUSTAINER_VIEW_RATE_LIMITED_PROCESSING_PAYMENT_MESSAGE" = "Не атрымалася дадаць ваш значок у ваш уліковы запіс, таму што вы зрабілі занадта шмат спроб. Калі ласка, паўтарыце спробу пазней.";
 
 /* Title for a sheet shown when a donation request is rate-limited. */
-"SUSTAINER_VIEW_RATE_LIMITED_PROCESSING_PAYMENT_TITLE" = "Couldn't Add Badge";
+"SUSTAINER_VIEW_RATE_LIMITED_PROCESSING_PAYMENT_TITLE" = "Не атрымалася дадаць значок";
 
 /* Renewal date text for sustainer view level, embeds {{renewal date}} */
 "SUSTAINER_VIEW_RENEWAL" = "Аднаўленне %1$@";
