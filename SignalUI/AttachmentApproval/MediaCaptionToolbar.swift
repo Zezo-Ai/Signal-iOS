@@ -168,6 +168,10 @@ class MediaCaptionToolbar: UIView, UITextViewDelegate, BodyRangesTextViewDelegat
             ? UIImage(imageLiteralResourceName: "view_once")
             : UIImage(imageLiteralResourceName: "viewonce-slash")
 
+        if isViewOnceOn, isEditingText {
+            _ = textView.resignFirstResponder()
+        }
+
         let hasText = !textView.isEmpty
         textView.setIsHidden(isViewOnceOn, animated: animated)
         placeholderTextView.setIsHidden(hasText || isViewOnceOn, animated: animated)

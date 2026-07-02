@@ -209,31 +209,12 @@ class AttachmentApprovalToolbar: UIView, MediaCaptionToolbarDelegate {
             animated: animated,
         )
 
-        updateFirstResponder()
-
         showViewOnceTooltipIfNecessary()
-    }
-
-    override func resignFirstResponder() -> Bool {
-        if isEditingCaptionText {
-            return mediaCaptionToolbar.textView.resignFirstResponder()
-        }
-        return super.resignFirstResponder()
-    }
-
-    private func updateFirstResponder() {
-        if configuration.isViewOnceOn {
-            if isEditingCaptionText {
-                _ = mediaCaptionToolbar.textView.resignFirstResponder()
-            }
-        }
-        // NOTE: We don't automatically make mediaCaptionToolbar.textView first responder.
     }
 
     func update(currentAttachmentItem: AttachmentApprovalItem, configuration: Configuration, animated: Bool) {
         // De-bounce
         if currentAttachmentItem.isIdenticalTo(self.currentAttachmentItem as AttachmentApprovalItem?), self.configuration == configuration {
-            updateFirstResponder()
             return
         }
 
@@ -246,10 +227,6 @@ class AttachmentApprovalToolbar: UIView, MediaCaptionToolbarDelegate {
     // Since we have `self.autoresizingMask = UIViewAutoresizingFlexibleHeight`, we must specify
     // an intrinsicContentSize. Specifying CGSize.zero causes the height to be determined by autolayout.
     override var intrinsicContentSize: CGSize { .zero }
-
-    var hasFirstResponder: Bool {
-        return isFirstResponder || mediaCaptionToolbar.textView.isFirstResponder
-    }
 
     // MARK: - AttachmentTextToolbarDelegate
 
