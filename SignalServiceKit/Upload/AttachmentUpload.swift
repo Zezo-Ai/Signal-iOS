@@ -153,7 +153,7 @@ public enum AttachmentUpload {
                         totalByteCount: chunkUpdate.totalByteCount != nil ? totalDataLength : nil,
                     )
                     newBytesUploaded = max(newBytesUploaded, overallUpdate.completedByteCount)
-                    await progressBlock(overallUpdate)
+                    try await progressBlock(overallUpdate)
                 },
             )
             attempt.logger.info("Uploaded chunk of \(downloadTimeLogString(newBytesUploaded)) (now complete at \(newBytesUploaded) bytes)")

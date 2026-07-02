@@ -21,7 +21,7 @@ public class OWSURLSession: OWSURLSessionProtocol {
         }
     }
 
-    public typealias ProgressBlock = (ProgressUpdate) async -> Void
+    public typealias ProgressBlock = (ProgressUpdate) async throws -> Void
 
     // MARK: - OWSURLSessionProtocol conformance
 
@@ -550,6 +550,7 @@ public class OWSURLSession: OWSURLSessionProtocol {
                         task.resume()
                     }
                 }
+                var progressError: (any Error)?
                 for await progressUpdate in progressStream {
                     if progressUpdate.completedByteCount == NSURLSessionTransferSizeUnknown {
                         continue
@@ -565,9 +566,22 @@ public class OWSURLSession: OWSURLSessionProtocol {
                         totalByteCount = UInt64(exactly: progressUpdate.totalByteCount)
                         owsAssertDebug(totalByteCount != nil, "couldn't convert total progress to UInt64")
                     }
-                    await progressBlock(ProgressUpdate(completedByteCount: completedByteCount, totalByteCount: totalByteCount))
+                    do {
+                        try await progressBlock(ProgressUpdate(completedByteCount: completedByteCount, totalByteCount: totalByteCount))
+                    } catch {
+                        task.cancel()
+                        progressError = error
+                        break
+                    }
                 }
-                return try await completion.wait()
+                if let progressError {
+                    // Ignore the result (if we get one due to races) or thrown error (which
+                    // happens when we cancel the operation).
+                    _ = try? await completion.wait()
+                    throw progressError
+                } else {
+                    return try await completion.wait()
+                }
             },
             onCancel: {
                 // If the task was already added, cancel it now.

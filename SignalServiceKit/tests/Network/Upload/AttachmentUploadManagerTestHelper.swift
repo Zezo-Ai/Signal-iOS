@@ -350,7 +350,7 @@ class AttachmentUploadManagerMockHelper {
     ) {
         enqueue(auth: auth, request: .uploadTask({ request, url, _, progressBlock in
             if let completedCount {
-                await progressBlock(OWSURLSession.ProgressUpdate(
+                try! await progressBlock(OWSURLSession.ProgressUpdate(
                     completedByteCount: completedCount.completedByteCount,
                     totalByteCount: completedCount.totalByteCount,
                 ))
