@@ -1001,7 +1001,11 @@ public class AttachmentContentValidatorImpl: AttachmentContentValidator {
                     ),
                 )
             } else {
-                let fileHandle = try Cryptography.encryptedFileHandle(at: fileUrl, attachmentKey: inputAttachmentKey)
+                let fileHandle = try Cryptography.encryptedAttachmentFileHandle(
+                    at: fileUrl,
+                    plaintextLength: UInt64(safeCast: plaintextLength),
+                    attachmentKey: inputAttachmentKey,
+                )
                 let outputFile = OWSFileSystem.temporaryFileUrl(
                     fileExtension: nil,
                     isAvailableWhileDeviceLocked: true,
@@ -1010,7 +1014,7 @@ public class AttachmentContentValidatorImpl: AttachmentContentValidator {
                     at: fileHandle,
                     attachmentKey: input.attachmentKey,
                     encryptedOutputUrl: outputFile,
-                    applyExtraPadding: false,
+                    applyExtraPadding: true,
                 )
                 return (
                     PendingFile(
