@@ -1762,20 +1762,33 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             maxDownloadSizeBytes: UInt64,
             progress: OWSProgressSink?,
         ) async throws -> URL {
-            let progresses = (
-                [progress]
-                    + (
-                        Self.downloadKey(state: downloadState)
-                            .map({ self.downloadProgresses[$0] ?? [] })
-                            ?? []
-                    ),
-            ).compacted()
-
+            var pendingSinks = [OWSProgressSink]()
+            if let progress {
+                pendingSinks.append(progress)
+            }
+            var activeSources = [OWSProgressSource]()
+            let k = Self.downloadKey(state: downloadState)
             return try await queue.run {
                 return try await performDownload(
                     downloadState: downloadState,
-                    progresses: progresses,
                     maxDownloadSizeBytes: maxDownloadSizeBytes,
+                    progressBlock: { progressUpdate in
+                        if let k, let _pendingSinks = downloadProgresses.removeValue(forKey: k) {
+                            pendingSinks.append(contentsOf: _pendingSinks)
+                        }
+                        if let totalByteCount = progressUpdate.totalByteCount {
+                            for pendingSink in pendingSinks {
+                                activeSources.append(pendingSink.addSource(
+                                    withLabel: AttachmentDownloads.downloadProgressLabel,
+                                    unitCount: totalByteCount,
+                                ))
+                            }
+                            pendingSinks.removeAll()
+                        }
+                        for activeSource in activeSources {
+                            activeSource.incrementCompletedUnitCount(to: progressUpdate.completedByteCount)
+                        }
+                    },
                 )
             }
         }
@@ -1783,14 +1796,13 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
         @concurrent
         private func performDownload(
             downloadState: DownloadState,
-            progresses: [OWSProgressSink],
             maxDownloadSizeBytes: UInt64,
+            progressBlock: OWSURLSession.ProgressBlock,
         ) async throws -> URL {
             let urlPath = try downloadState.urlPath()
             var headers = downloadState.additionalHeaders()
             headers["Content-Type"] = MimeType.applicationOctetStream.rawValue
 
-            var progressSources: [OWSProgressSource] = []
             return try await Retry.performRepeatedly {
                 if downloadState.isExpired() {
                     throw AttachmentDownloads.Error.expiredCredentials
@@ -1826,18 +1838,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 }
 
                 let downloadResponse = try await downloadOperation({ progressUpdate in
-                    if progressSources.isEmpty, let totalByteCount = progressUpdate.totalByteCount {
-                        for progress in progresses {
-                            progressSources.append(progress.addSource(
-                                withLabel: AttachmentDownloads.downloadProgressLabel,
-                                unitCount: totalByteCount,
-                            ))
-                        }
-                    }
-                    for progressSource in progressSources {
-                        progressSource.incrementCompletedUnitCount(to: progressUpdate.completedByteCount)
-                    }
-
+                    try await progressBlock(progressUpdate)
                     let k = DownloadQueue.downloadKey(state: downloadState)
                     if let k {
                         try cancelDownloadIfNeeded(attachmentId: k.id)
