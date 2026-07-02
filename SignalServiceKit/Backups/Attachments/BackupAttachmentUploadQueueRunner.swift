@@ -503,14 +503,14 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                         localAci: localAci,
                         backupKey: backupKey,
                         auth: backupAuth,
-                        progressBlock: { completedByteCount, totalByteCount in
-                            if completedByteCount == NSURLSessionTransferSizeUnknown || totalByteCount == NSURLSessionTransferSizeUnknown {
+                        progressBlock: { progressUpdate in
+                            guard let totalByteCount = progressUpdate.totalByteCount else {
                                 return
                             }
                             await progress.didUpdateProgressForFullsizeAttachment(
                                 uploadRecord: record.record,
-                                completedByteCount: UInt64(completedByteCount),
-                                totalByteCount: UInt64(totalByteCount),
+                                completedByteCount: progressUpdate.completedByteCount,
+                                totalByteCount: totalByteCount,
                             )
                         },
                     )
@@ -521,7 +521,7 @@ class BackupAttachmentUploadQueueRunnerImpl: BackupAttachmentUploadQueueRunner {
                         localAci: localAci,
                         backupKey: backupKey,
                         auth: backupAuth,
-                        progressBlock: { _, _ in },
+                        progressBlock: { _ in },
                     )
                 }
             } catch let cancellationError as CancellationError {

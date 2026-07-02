@@ -346,11 +346,14 @@ class AttachmentUploadManagerMockHelper {
         auth: String,
         location: String,
         type: UploadResultType,
-        completedCount: (completedByteCount: Int64, totalByteCount: Int64)? = nil,
+        completedCount: (completedByteCount: UInt64, totalByteCount: UInt64?)? = nil,
     ) {
         enqueue(auth: auth, request: .uploadTask({ request, url, _, progressBlock in
             if let completedCount {
-                await progressBlock(completedCount.completedByteCount, completedCount.totalByteCount)
+                await progressBlock(OWSURLSession.ProgressUpdate(
+                    completedByteCount: completedCount.completedByteCount,
+                    totalByteCount: completedCount.totalByteCount,
+                ))
             }
             switch type {
             case .networkTimeout:

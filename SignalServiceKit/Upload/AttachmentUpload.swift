@@ -145,22 +145,15 @@ public enum AttachmentUpload {
             try await attempt.endpoint.performUpload(
                 startPoint: bytesAlreadyUploaded,
                 attempt: attempt,
-                progressBlock: { currentByteCount, totalByteCount in
-                    var currentByteCount = currentByteCount
-                    if currentByteCount != NSURLSessionTransferSizeUnknown {
-                        // We're uploading a chunk starting at bytesAlreadyUploaded, so we need to
-                        // offset the progress we've made by the amount we're skipping.
-                        currentByteCount += Int64(bytesAlreadyUploaded)
-                    }
-                    var totalByteCount = totalByteCount
-                    if totalByteCount != NSURLSessionTransferSizeUnknown {
-                        totalByteCount = Int64(totalDataLength)
-                    }
-
-                    if currentByteCount != NSURLSessionTransferSizeUnknown {
-                        newBytesUploaded = max(newBytesUploaded, UInt64(currentByteCount))
-                    }
-                    await progressBlock(currentByteCount, totalByteCount)
+                progressBlock: { chunkUpdate in
+                    // We're uploading a chunk starting at bytesAlreadyUploaded, so we need to
+                    // offset the progress we've made by the amount we're skipping.
+                    let overallUpdate = OWSURLSession.ProgressUpdate(
+                        completedByteCount: bytesAlreadyUploaded + chunkUpdate.completedByteCount,
+                        totalByteCount: chunkUpdate.totalByteCount != nil ? totalDataLength : nil,
+                    )
+                    newBytesUploaded = max(newBytesUploaded, overallUpdate.completedByteCount)
+                    await progressBlock(overallUpdate)
                 },
             )
             attempt.logger.info("Uploaded chunk of \(downloadTimeLogString(newBytesUploaded)) (now complete at \(newBytesUploaded) bytes)")

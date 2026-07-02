@@ -204,7 +204,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
         let result = try await attachmentUploadManager.uploadBackup(
             localUploadMetadata: metadata,
             form: form,
-            progressBlock: progressSource?.asProgressBlock() ?? { _, _ in },
+            progressBlock: progressSource?.asProgressBlock() ?? { _ in },
         )
         progressSource?.complete()
 

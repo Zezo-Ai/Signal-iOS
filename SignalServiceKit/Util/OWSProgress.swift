@@ -314,9 +314,9 @@ extension OWSProgressSource {
 extension OWSProgressSource where Self: Sendable {
 
     func asProgressBlock() -> OWSURLSession.ProgressBlock {
-        return { completedByteCount, totalByteCount in
-            if self.completedUnitCount < completedByteCount {
-                self.incrementCompletedUnitCount(by: UInt64(completedByteCount) - self.completedUnitCount)
+        return { progressUpdate in
+            if self.completedUnitCount < progressUpdate.completedByteCount {
+                self.incrementCompletedUnitCount(by: progressUpdate.completedByteCount - self.completedUnitCount)
             }
         }
     }

@@ -191,7 +191,7 @@ public extension OWSURLSessionProtocol {
         headers: HttpHeaders = HttpHeaders(),
         requestData: Data,
         maxResponseSize: UInt64,
-        progressBlock: OWSURLSession.ProgressBlock = { _, _ in },
+        progressBlock: OWSURLSession.ProgressBlock = { _ in },
     ) async throws -> HTTPResponse {
         let request = try self.endpoint.buildRequest(urlString, method: method, headers: headers, body: requestData)
         return try await self.performUpload(
@@ -208,7 +208,7 @@ public extension OWSURLSessionProtocol {
         headers: HttpHeaders = HttpHeaders(),
         fileUrl: URL,
         maxResponseSize: UInt64,
-        progressBlock: OWSURLSession.ProgressBlock = { _, _ in },
+        progressBlock: OWSURLSession.ProgressBlock = { _ in },
     ) async throws -> HTTPResponse {
         let request = try self.endpoint.buildRequest(urlString, method: method, headers: headers)
         return try await self.performUpload(
@@ -242,7 +242,7 @@ public extension OWSURLSessionProtocol {
         headers: HttpHeaders = HttpHeaders(),
         body: Data? = nil,
         maxResponseSize: UInt64,
-        progressBlock: OWSURLSession.ProgressBlock = { _, _ in },
+        progressBlock: OWSURLSession.ProgressBlock = { _ in },
     ) async throws -> OWSUrlDownloadResponse {
         let request = try self.endpoint.buildRequest(urlString, method: method, headers: headers, body: body)
         return try await self.performDownload(request: request, maxResponseSize: maxResponseSize, progressBlock: progressBlock)
@@ -262,7 +262,7 @@ extension OWSURLSessionProtocol {
         textParts textPartsDictionary: OrderedDictionary<String, String>,
         maxResponseSize: UInt64,
         ignoreAppExpiry: Bool = false,
-        progressBlock: OWSURLSession.ProgressBlock = { _, _ in },
+        progressBlock: OWSURLSession.ProgressBlock = { _ in },
     ) async throws -> HTTPResponse {
         let multipartBodyFileURL = OWSFileSystem.temporaryFileUrl(
             fileExtension: nil,

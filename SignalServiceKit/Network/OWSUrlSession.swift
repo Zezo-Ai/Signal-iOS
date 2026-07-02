@@ -11,7 +11,17 @@ public enum OWSURLSessionError: Error {
 
 public class OWSURLSession: OWSURLSessionProtocol {
 
-    public typealias ProgressBlock = (_ completedByteCount: Int64, _ totalByteCount: Int64) async -> Void
+    public struct ProgressUpdate {
+        public let completedByteCount: UInt64
+        public let totalByteCount: UInt64?
+
+        public init(completedByteCount: UInt64, totalByteCount: UInt64?) {
+            self.completedByteCount = completedByteCount
+            self.totalByteCount = totalByteCount
+        }
+    }
+
+    public typealias ProgressBlock = (ProgressUpdate) async -> Void
 
     // MARK: - OWSURLSessionProtocol conformance
 
@@ -186,7 +196,7 @@ public class OWSURLSession: OWSURLSessionProtocol {
         let (urlResponse, responseData) = try await runTask(
             task,
             taskState: { DataTaskState(progress: $0, maxResponseSize: maxResponseSize, completion: $1) },
-            progressBlock: { _, _ in },
+            progressBlock: { _ in },
             cancelBlock: { $0.cancel() },
         )
 
@@ -440,7 +450,7 @@ public class OWSURLSession: OWSURLSessionProtocol {
                 request: request,
                 requestData: requestBody,
                 maxResponseSize: rawRequest.maxResponseSize,
-                progressBlock: { _, _ in },
+                progressBlock: { _ in },
             )
             rawRequest.logger.info("HTTP \(response.responseStatusCode) <- \(rawRequest)")
             return response
@@ -541,7 +551,21 @@ public class OWSURLSession: OWSURLSessionProtocol {
                     }
                 }
                 for await progressUpdate in progressStream {
-                    await progressBlock(progressUpdate.completedByteCount, progressUpdate.totalByteCount)
+                    if progressUpdate.completedByteCount == NSURLSessionTransferSizeUnknown {
+                        continue
+                    }
+                    guard let completedByteCount = UInt64(exactly: progressUpdate.completedByteCount) else {
+                        owsFailDebug("couldn't convert completed progress to UInt64")
+                        continue
+                    }
+                    let totalByteCount: UInt64?
+                    if progressUpdate.totalByteCount == NSURLSessionTransferSizeUnknown {
+                        totalByteCount = nil
+                    } else {
+                        totalByteCount = UInt64(exactly: progressUpdate.totalByteCount)
+                        owsAssertDebug(totalByteCount != nil, "couldn't convert total progress to UInt64")
+                    }
+                    await progressBlock(ProgressUpdate(completedByteCount: completedByteCount, totalByteCount: totalByteCount))
                 }
                 return try await completion.wait()
             },

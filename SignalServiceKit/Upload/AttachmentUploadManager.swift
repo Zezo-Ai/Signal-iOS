@@ -200,7 +200,7 @@ public class AttachmentUploadManagerImpl: AttachmentUploadManager {
                 dateProvider: dateProvider,
                 sleepTimer: sleepTimer,
                 // We don't show progress for transient uploads
-                progressBlock: { _, _ in },
+                progressBlock: { _ in },
             )
         } catch {
             if error.isNetworkFailureOrTimeout {
@@ -280,11 +280,11 @@ public class AttachmentUploadManagerImpl: AttachmentUploadManager {
             attachmentId,
             type: type,
             logger: logger,
-            progressBlock: { completedByteCount, totalByteCount in
-                if completedByteCount == NSURLSessionTransferSizeUnknown || totalByteCount == NSURLSessionTransferSizeUnknown {
+            progressBlock: { progressUpdate in
+                guard let totalByteCount = progressUpdate.totalByteCount else {
                     return
                 }
-                await updateProgress(id: attachmentId, progress: Float(completedByteCount) / Float(totalByteCount))
+                await updateProgress(id: attachmentId, progress: Float(progressUpdate.completedByteCount) / Float(totalByteCount))
             },
         )
 
