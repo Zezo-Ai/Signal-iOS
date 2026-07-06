@@ -723,14 +723,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // Note that this does much more than set a flag; it will also run all deferred blocks.
         appReadiness.setAppIsReadyUIStillPending()
 
-        // Start our various expiration jobs. Callers who add a new "expiring
-        // element" should call .restart() on the appropriate job.
-        dependenciesBridge.deletedCallRecordExpirationJob.start()
-        dependenciesBridge.disappearingMessagesExpirationJob.start()
-        dependenciesBridge.decryptionPlaceholderExpirationJob.start()
-        dependenciesBridge.storyMessageExpirationJob.start()
-        dependenciesBridge.pinnedMessageExpirationJob.start()
-
         Task {
             let backgroundTask = OWSBackgroundTask(label: "AppLaunchesAttemptedCleanup")
             defer { backgroundTask.end() }
@@ -1444,6 +1436,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     /// A background fetching task that keeps the web socket open while the app
     /// is in the background.
     private var backgroundFetchHandle: BackgroundTaskHandle?
+    private var expirationJobQueue = SerialTaskQueue()
 
     private func refreshConnection(isAppActive: Bool) {
         let chatConnectionManager = DependenciesBridge.shared.chatConnectionManager
@@ -1457,6 +1450,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             // Start a new Cron task on activate.
             self.startCronTask()
 
+            // Start expiration jobs on activation.
+            expirationJobQueue.enqueueCancellingPrevious(operation: {
+                await self.runExpirationJobs()
+            })
+
             // We're back in the foreground. We've passed off connection management to
             // the foreground logic, so just tear it down without waiting for anything.
             self.backgroundFetchHandle?.interrupt()
@@ -1468,8 +1466,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             let cronTask = self.cronTask.take()
             let startDate = MonotonicDate()
             let isPastRegistration = SignalApp.shared.conversationSplitViewController != nil
+            // Enqueue a barrier job so we know when the current one is done.
+            let expirationJobCompletion = expirationJobQueue.enqueue(operation: {})
             self.backgroundFetchHandle = UIApplication.shared.beginBackgroundTask(
-                backgroundBlock: {
+                backgroundBlock: { [expirationJobQueue] in
                     do {
                         await backgroundFetcher.start()
                         oldActiveConnectionTokens.forEach { $0.releaseConnection() }
@@ -1495,6 +1495,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                         // We were canceled, either because we entered the foreground or our
                         // background execution time expired.
                     }
+                    expirationJobQueue.cancelAll()
                 },
                 completionHandler: { result in
                     switch result {
@@ -1502,9 +1503,30 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                         await backgroundFetcher.reset()
                     case .finished, .expired:
                         await backgroundFetcher.stopAndWaitBeforeSuspending()
+                        try? await expirationJobCompletion.value
                     }
                 },
             )
+        }
+    }
+
+    /// Run our various expiration jobs. Callers who add a new "expiring
+    /// element" should call .restart() on the appropriate job.
+    private func runExpirationJobs() async {
+        let dependenciesBridge = DependenciesBridge.shared
+        do {
+            try await withThrowingTaskGroup { taskGroup in
+                taskGroup.addTask { try await dependenciesBridge.deletedCallRecordExpirationJob.run() }
+                taskGroup.addTask { try await dependenciesBridge.disappearingMessagesExpirationJob.run() }
+                taskGroup.addTask { try await dependenciesBridge.decryptionPlaceholderExpirationJob.run() }
+                taskGroup.addTask { try await dependenciesBridge.storyMessageExpirationJob.run() }
+                taskGroup.addTask { try await dependenciesBridge.pinnedMessageExpirationJob.run() }
+                try await taskGroup.waitForAll()
+            }
+        } catch is CancellationError {
+            // This is expected.
+        } catch {
+            owsFailDebug("expiration jobs must throw CancellationError")
         }
     }
 
