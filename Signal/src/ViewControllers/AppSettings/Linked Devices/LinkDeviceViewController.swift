@@ -108,17 +108,14 @@ class LinkDeviceViewController: OWSViewController {
 
     // MARK: -
 
-    private func confirmProvisioningWithUrl(_ deviceProvisioningUrl: DeviceProvisioningURL) {
+    private func confirmProvisioning(deviceProvisioningUrl: DeviceProvisioningURL) {
         switch deviceProvisioningUrl.linkType {
         case .linkDevice:
-            confirmProvisioning(with: deviceProvisioningUrl)
-        case .quickRestore:
-            // Ignore quick restore URLs in the link device controller
             break
+        case .quickRestore:
+            owsFailDebug("can't link with a quick restore url")
+            return
         }
-    }
-
-    private func confirmProvisioning(with deviceProvisioningUrl: DeviceProvisioningURL) {
         if
             deviceProvisioningUrl.capabilities.contains(.linknsync)
         {
@@ -282,8 +279,8 @@ extension LinkDeviceViewController: QRCodeScanDelegate {
             return .continueScanning
         }
 
-        guard let url = DeviceProvisioningURL(urlString: qrCodeString) else {
-            Logger.error("Unable to parse provisioning params from QRCode: \(qrCodeString)")
+        guard let url = DeviceProvisioningURL(urlString: qrCodeString), url.linkType == .linkDevice else {
+            Logger.warn("couldn't parse device provisioning url from QR code")
 
             let title = NSLocalizedString("LINK_DEVICE_INVALID_CODE_TITLE", comment: "report an invalid linking code")
             let body = NSLocalizedString("LINK_DEVICE_INVALID_CODE_BODY", comment: "report an invalid linking code")
@@ -310,7 +307,7 @@ extension LinkDeviceViewController: QRCodeScanDelegate {
             return .stopScanning
         }
 
-        confirmProvisioningWithUrl(url)
+        confirmProvisioning(deviceProvisioningUrl: url)
 
         return .stopScanning
     }
