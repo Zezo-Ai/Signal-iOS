@@ -13,6 +13,15 @@ public struct IncomingAttachmentLimits {
         return Self(remoteConfig: remoteConfig)
     }
 
+    public static func addingFudgeFactor(toByteCount byteCount: UInt64) -> UInt64? {
+        let fudgeFactor = byteCount / 4
+        let result = byteCount.addingReportingOverflow(fudgeFactor)
+        if result.overflow {
+            return nil
+        }
+        return result.partialValue
+    }
+
     init(remoteConfig: RemoteConfig) {
         self.remoteConfig = remoteConfig
     }

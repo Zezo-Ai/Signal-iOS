@@ -237,7 +237,7 @@ public class RemoteConfig {
         let maxEncryptedBytes = self.attachmentMaxEncryptedBytes
         return min(Self.attachmentHardLimit, getUInt64Value(
             forFlag: .attachmentMaxEncryptedReceiveBytes,
-            defaultValue: maxEncryptedBytes + maxEncryptedBytes / 4,
+            defaultValue: IncomingAttachmentLimits.addingFudgeFactor(toByteCount: maxEncryptedBytes) ?? .max,
         ))
     }
 

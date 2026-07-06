@@ -924,6 +924,7 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             }
 
             let downloadMetadata: DownloadMetadata
+            let minDownloadSizeBytes: UInt64
             let maxDownloadSizeBytes: UInt64
             let validationMetadata: Decrypter.ValidationMetadata
             switch record.sourceType {
@@ -946,12 +947,18 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     integrityCheck: transitTierInfo.integrityCheck,
                 )
                 let attachmentLimits = IncomingAttachmentLimits.currentLimits(remoteConfig: remoteConfigProvider.currentConfig())
+                let globalMaxDownloadSize: UInt64
                 switch attachment.contentType {
                 case .image:
-                    maxDownloadSizeBytes = attachmentLimits.maxEncryptedImageBytes
+                    globalMaxDownloadSize = attachmentLimits.maxEncryptedImageBytes
                 case .audio, .video, .file:
-                    maxDownloadSizeBytes = attachmentLimits.maxEncryptedBytes
+                    globalMaxDownloadSize = attachmentLimits.maxEncryptedBytes
                 }
+                let plaintextSize = UInt64(safeCast: transitTierInfo.unencryptedByteCount)
+                let estimatedEncryptedSize = PaddingBucket.forUnpaddedPlaintextSize(plaintextSize)?.encryptedSize ?? .max
+                let localMaxDownloadSize = IncomingAttachmentLimits.addingFudgeFactor(toByteCount: estimatedEncryptedSize) ?? .max
+                minDownloadSizeBytes = PaddingBucket.addingEncryptionOverhead(to: plaintextSize) ?? .max
+                maxDownloadSizeBytes = min(globalMaxDownloadSize, localMaxDownloadSize)
             case .mediaTierFullsize:
                 let cdnNumber = attachment.mediaTierInfo?.cdnNumber ?? remoteConfigProvider.currentConfig().mediaTierFallbackCdnNumber
                 guard
@@ -994,16 +1001,18 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                         mediaId: outerEncryptionMetadata.mediaId,
                     ),
                 )
+                let plaintextSize = UInt64(safeCast: mediaTierInfo.unencryptedByteCount)
                 validationMetadata = .mediaTier(
                     mimeType: attachment.mimeType,
                     outerAttachmentKey: outerAttachmentKey,
                     innerDecryptionMetadata: DecryptionMetadata(
                         key: attachmentKey,
                         integrityCheck: .plaintextHash(mediaTierInfo.plaintextHash),
-                        plaintextLength: UInt64(safeCast: mediaTierInfo.unencryptedByteCount),
+                        plaintextLength: plaintextSize,
                     ),
                     localAttachmentKey: attachmentKey,
                 )
+                minDownloadSizeBytes = PaddingBucket.addingEncryptionOverhead(to: PaddingBucket.addingEncryptionOverhead(to: plaintextSize) ?? .max) ?? .max
                 maxDownloadSizeBytes = remoteConfigProvider.currentConfig().attachmentMaxEncryptedReceiveBytes
             case .mediaTierThumbnail:
                 let cdnNumber = attachment.thumbnailMediaTierInfo?.cdnNumber ?? remoteConfigProvider.currentConfig().mediaTierFallbackCdnNumber
@@ -1067,7 +1076,17 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     innerDecryptionMetadata: DecryptionMetadata(key: innerAttachmentKey),
                     localAttachmentKey: attachmentKey,
                 )
+                // These don't have a size out of band, so they could theoretically be as small as an empty file.
+                minDownloadSizeBytes = PaddingBucket.addingEncryptionOverhead(to: PaddingBucket.addingEncryptionOverhead(to: 0)!)!
                 maxDownloadSizeBytes = remoteConfigProvider.currentConfig().attachmentMaxEncryptedReceiveBytes
+            }
+
+            // This is the minimum size for a file on a CDN that could be successfully
+            // decrypted. If this is larger than the maximum size we're allowed to
+            // download, we're guaranteed that the download will throw an error if we
+            // attempt it, so there's no point in even attempting it.
+            guard minDownloadSizeBytes <= maxDownloadSizeBytes else {
+                return .unretryableError(OWSGenericError("can't download file that must be larger than the limit"))
             }
 
             let downloadedFileUrl: URL
@@ -1079,6 +1098,14 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                     downloadState: .init(type: .attachment(downloadMetadata, id: attachment.id)),
                     maxDownloadSizeBytes: maxDownloadSizeBytes,
                     progressBlock: { progressUpdate in
+                        if let totalByteCount = progressUpdate.totalByteCount {
+                            if totalByteCount < minDownloadSizeBytes {
+                                throw OWSGenericError("stopping download because file will be too small")
+                            }
+                            if totalByteCount > maxDownloadSizeBytes {
+                                throw OWSGenericError("stopping download because file will be too large")
+                            }
+                        }
                         let pendingSinks = consumeProgresses(downloadKey: downloadKey)
                         if let totalByteCount = progressUpdate.totalByteCount {
                             for pendingSink in pendingSinks {
