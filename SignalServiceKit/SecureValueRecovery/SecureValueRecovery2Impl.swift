@@ -47,8 +47,8 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
     // MARK: - Periodic Backups
 
     public func refreshCredentialsIfNecessary() async throws {
-        let hasBackedUp = self.db.read { tx in self.localStorage.isMasterKeyBackedUp(tx: tx) }
-        guard hasBackedUp else {
+        let shouldBeBackedUp = self.db.read { tx in self.twoFAManager.shouldMasterKeyBeBackedUp(tx: tx) }
+        guard shouldBeBackedUp else {
             // If we've never backed up, don't refresh periodically. (If we eventually
             // perform a backup, we'll cache those credential after fetching them.)
             return

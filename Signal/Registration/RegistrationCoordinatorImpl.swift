@@ -2275,7 +2275,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         // If we have a local master key, theres no need to restore after registration.
         // (we will still back up though)
         inMemoryState.shouldRestoreSVRMasterKeyAfterRegistration = localMasterKey == nil
-        inMemoryState.didHaveSVRBackupsPriorToReg = deps.svrLocalStorage.isMasterKeyBackedUp(tx: tx)
+        inMemoryState.didHaveSVRBackupsPriorToReg = deps.ows2FAManager.shouldMasterKeyBeBackedUp(tx: tx)
     }
 
     // MARK: - SVR Auth Credential Candidates Pathway

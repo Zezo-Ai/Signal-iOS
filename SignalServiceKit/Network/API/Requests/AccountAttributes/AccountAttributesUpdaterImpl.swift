@@ -14,9 +14,9 @@ public class AccountAttributesUpdaterImpl: AccountAttributesUpdater {
     private let kvStore: KeyValueStore
     private let networkManager: NetworkManager
     private let profileManager: ProfileManager
-    private let svrLocalStorage: SVRLocalStorage
     private let syncManager: SyncManagerProtocol
     private let tsAccountManager: TSAccountManager
+    private let twoFactorManager: OWS2FAManager
 
     private enum Constants {
         // We must refresh our registration recovery password periodically. We
@@ -33,9 +33,9 @@ public class AccountAttributesUpdaterImpl: AccountAttributesUpdater {
         db: any DB,
         networkManager: NetworkManager,
         profileManager: ProfileManager,
-        svrLocalStorage: SVRLocalStorage,
         syncManager: SyncManagerProtocol,
         tsAccountManager: TSAccountManager,
+        twoFactorManager: OWS2FAManager,
     ) {
         self.accountAttributesGenerator = accountAttributesGenerator
         self.appReadiness = appReadiness
@@ -45,9 +45,9 @@ public class AccountAttributesUpdaterImpl: AccountAttributesUpdater {
         self.kvStore = KeyValueStore(collection: "AccountAttributesUpdater")
         self.networkManager = networkManager
         self.profileManager = profileManager
-        self.svrLocalStorage = svrLocalStorage
         self.syncManager = syncManager
         self.tsAccountManager = tsAccountManager
+        self.twoFactorManager = twoFactorManager
         self.registerForCron(cron)
     }
 
@@ -135,7 +135,7 @@ public class AccountAttributesUpdaterImpl: AccountAttributesUpdater {
         }
 
         // has non-nil value if isRegistered is true.
-        let hasBackedUpMasterKey = self.svrLocalStorage.isMasterKeyBackedUp(tx: tx)
+        let hasBackedUpMasterKey = self.twoFactorManager.shouldMasterKeyBeBackedUp(tx: tx)
         let capabilities = AccountAttributes.Capabilities(hasSVRBackups: hasBackedUpMasterKey)
         let lastAttributeRequestToken = self.kvStore.getData(Keys.latestUpdateRequestToken, transaction: tx)
 

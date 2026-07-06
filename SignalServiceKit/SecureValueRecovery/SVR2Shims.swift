@@ -20,6 +20,7 @@ extension SVR2 {
 
 public protocol _SVR2_OWS2FAManagerShim {
     func pinCode(transaction: DBReadTransaction) -> String?
+    func shouldMasterKeyBeBackedUp(tx: DBReadTransaction) -> Bool
 }
 
 public class _SVR2_OWS2FAManagerWrapper: SVR2.Shims.OWS2FAManager {
@@ -28,5 +29,9 @@ public class _SVR2_OWS2FAManagerWrapper: SVR2.Shims.OWS2FAManager {
 
     public func pinCode(transaction: DBReadTransaction) -> String? {
         return manager.pinCode(transaction: transaction)
+    }
+
+    public func shouldMasterKeyBeBackedUp(tx: DBReadTransaction) -> Bool {
+        return manager.shouldMasterKeyBeBackedUp(tx: tx)
     }
 }

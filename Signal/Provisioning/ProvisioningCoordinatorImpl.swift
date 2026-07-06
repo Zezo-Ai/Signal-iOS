@@ -25,7 +25,6 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
     private let signalService: OWSSignalServiceProtocol
     private let storageServiceManager: StorageServiceManager
     private let svr: SecureValueRecovery
-    private let svrLocalStorage: SVRLocalStorage
     private let syncManager: SyncManagerProtocol
     private let threadStore: ThreadStore
     private let tsAccountManager: TSAccountManager
@@ -48,7 +47,6 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         signalService: OWSSignalServiceProtocol,
         storageServiceManager: StorageServiceManager,
         svr: SecureValueRecovery,
-        svrLocalStorage: SVRLocalStorage,
         syncManager: SyncManagerProtocol,
         threadStore: ThreadStore,
         tsAccountManager: TSAccountManager,
@@ -70,7 +68,6 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         self.signalService = signalService
         self.storageServiceManager = storageServiceManager
         self.svr = svr
-        self.svrLocalStorage = svrLocalStorage
         self.syncManager = syncManager
         self.threadStore = threadStore
         self.tsAccountManager = tsAccountManager
@@ -469,10 +466,8 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         authedDevice: AuthedDevice.Explicit,
         didLinkNSync: Bool,
     ) async throws(CompleteProvisioningError) {
-        let hasBackedUpMasterKey = self.db.read { tx in
-            self.svrLocalStorage.isMasterKeyBackedUp(tx: tx)
-        }
-        let capabilities = AccountAttributes.Capabilities(hasSVRBackups: hasBackedUpMasterKey)
+        // Linked devices don't have SVR backups.
+        let capabilities = AccountAttributes.Capabilities(hasSVRBackups: false)
         do {
             try await Service.makeUpdateSecondaryDeviceCapabilitiesRequest(
                 capabilities: capabilities,
@@ -693,7 +688,8 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
 
         let phoneNumberDiscoverability = tsAccountManager.phoneNumberDiscoverability(tx: tx)
 
-        let hasSVRBackups = svrLocalStorage.isMasterKeyBackedUp(tx: tx)
+        // Linked devices don't have SVR backups.
+        let capabilities = AccountAttributes.Capabilities(hasSVRBackups: false)
 
         return AccountAttributes(
             isManualMessageFetchEnabled: isManualMessageFetchEnabled,
@@ -705,7 +701,7 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
             registrationRecoveryPassword: registrationRecoveryPassword?.canonicalStringRepresentation,
             encryptedDeviceName: encryptedDeviceName,
             discoverableByPhoneNumber: phoneNumberDiscoverability,
-            capabilities: AccountAttributes.Capabilities(hasSVRBackups: hasSVRBackups),
+            capabilities: capabilities,
         )
     }
 

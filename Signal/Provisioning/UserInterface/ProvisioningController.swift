@@ -51,7 +51,6 @@ class ProvisioningController: NSObject {
             signalService: SSKEnvironment.shared.signalServiceRef,
             storageServiceManager: SSKEnvironment.shared.storageServiceManagerRef,
             svr: DependenciesBridge.shared.svr,
-            svrLocalStorage: DependenciesBridge.shared.svrLocalStorage,
             syncManager: SSKEnvironment.shared.syncManagerRef,
             threadStore: ThreadStoreImpl(),
             tsAccountManager: DependenciesBridge.shared.tsAccountManager,

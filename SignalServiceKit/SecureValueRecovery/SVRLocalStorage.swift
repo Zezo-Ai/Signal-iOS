@@ -8,8 +8,4 @@ import Foundation
 /// Stores state related to SVR; e.g. do we have backups at all, etc.
 public struct SVRLocalStorage {
     let backupAttemptStore = KeyValueStore(collection: "SVR.Completed")
-
-    public func isMasterKeyBackedUp(tx: DBReadTransaction) -> Bool {
-        return !backupAttemptStore.allKeys(transaction: tx).isEmpty
-    }
 }

@@ -185,6 +185,8 @@ public protocol _RegistrationCoordinator_OWS2FAManagerShim {
 
     func pinCode(_ tx: DBReadTransaction) -> String?
 
+    func shouldMasterKeyBeBackedUp(tx: DBReadTransaction) -> Bool
+
     func clearLocalPinCode(_ tx: DBWriteTransaction)
 
     func isReglockEnabled(_ tx: DBReadTransaction) -> Bool
@@ -201,6 +203,10 @@ public class _RegistrationCoordinator_OWS2FAManagerWrapper: _RegistrationCoordin
 
     public func pinCode(_ tx: DBReadTransaction) -> String? {
         return manager.pinCode(transaction: tx)
+    }
+
+    public func shouldMasterKeyBeBackedUp(tx: DBReadTransaction) -> Bool {
+        return manager.shouldMasterKeyBeBackedUp(tx: tx)
     }
 
     public func clearLocalPinCode(_ tx: DBWriteTransaction) {

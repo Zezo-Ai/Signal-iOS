@@ -396,4 +396,10 @@ public class _SVR2_OWS2FAManagerTestMock: SVR2.Shims.OWS2FAManager {
     public func pinCode(transaction: DBReadTransaction) -> String? {
         return pinCode
     }
+
+    public var shouldMasterKeyBeBackedUp: Bool!
+
+    public func shouldMasterKeyBeBackedUp(tx: DBReadTransaction) -> Bool {
+        return shouldMasterKeyBeBackedUp
+    }
 }

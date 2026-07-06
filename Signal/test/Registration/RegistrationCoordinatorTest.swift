@@ -316,6 +316,7 @@ public class RegistrationCoordinatorTest {
 
         // Set a PIN on disk.
         ows2FAManagerMock.pinCodeMock = { Stubs.pinCode }
+        ows2FAManagerMock.shouldMasterKeyBeBackedUpMock = { true }
 
         let aep = buildKeyDataMocks(testCase)
         let initialMasterKey = aep.getMasterKey()
@@ -461,6 +462,7 @@ public class RegistrationCoordinatorTest {
 
         // Set a different PIN on disk.
         ows2FAManagerMock.pinCodeMock = { Stubs.pinCode }
+        ows2FAManagerMock.shouldMasterKeyBeBackedUpMock = { true }
 
         let aep = buildKeyDataMocks(testCase)
         let initialMasterKey = aep.getMasterKey()
@@ -586,6 +588,7 @@ public class RegistrationCoordinatorTest {
 
         // Set a PIN on disk.
         ows2FAManagerMock.pinCodeMock = { Stubs.pinCode }
+        ows2FAManagerMock.shouldMasterKeyBeBackedUpMock = { true }
         var didClearPinCode = false
         ows2FAManagerMock.clearLocalPinCodeMock = { didClearPinCode = true }
 
@@ -678,6 +681,7 @@ public class RegistrationCoordinatorTest {
 
         // Set a PIN on disk.
         ows2FAManagerMock.pinCodeMock = { Stubs.pinCode }
+        ows2FAManagerMock.shouldMasterKeyBeBackedUpMock = { true }
         var didClearPinCode = false
         ows2FAManagerMock.clearLocalPinCodeMock = { didClearPinCode = true }
 
@@ -787,6 +791,7 @@ public class RegistrationCoordinatorTest {
 
         // Set a PIN on disk.
         ows2FAManagerMock.pinCodeMock = { Stubs.pinCode }
+        ows2FAManagerMock.shouldMasterKeyBeBackedUpMock = { true }
 
         let aep = buildKeyDataMocks(testCase)
         let initialMasterKey = aep.getMasterKey()
@@ -964,6 +969,7 @@ public class RegistrationCoordinatorTest {
 
         // Set a PIN on disk.
         ows2FAManagerMock.pinCodeMock = { Stubs.pinCode }
+        ows2FAManagerMock.shouldMasterKeyBeBackedUpMock = { true }
         var didClearPinCode = false
         ows2FAManagerMock.clearLocalPinCodeMock = { didClearPinCode = true }
         ows2FAManagerMock.isReglockEnabledMock = { true }
@@ -1082,6 +1088,7 @@ public class RegistrationCoordinatorTest {
 
         // Set a PIN on disk.
         ows2FAManagerMock.pinCodeMock = { Stubs.pinCode }
+        ows2FAManagerMock.shouldMasterKeyBeBackedUpMock = { true }
         var didClearPinCode = false
         ows2FAManagerMock.clearLocalPinCodeMock = { didClearPinCode = true }
         ows2FAManagerMock.isReglockEnabledMock = { true }
@@ -1287,6 +1294,7 @@ public class RegistrationCoordinatorTest {
 
         // Set a PIN on disk.
         ows2FAManagerMock.pinCodeMock = { Stubs.pinCode }
+        ows2FAManagerMock.shouldMasterKeyBeBackedUpMock = { true }
         var didClearPinCode = false
         ows2FAManagerMock.clearLocalPinCodeMock = { didClearPinCode = true }
         ows2FAManagerMock.isReglockEnabledMock = { true }
@@ -3141,6 +3149,7 @@ public class RegistrationCoordinatorTest {
 
     private func setupDefaultAccountAttributes() {
         ows2FAManagerMock.pinCodeMock = { nil }
+        ows2FAManagerMock.shouldMasterKeyBeBackedUpMock = { false }
         ows2FAManagerMock.isReglockEnabledMock = { false }
 
         tsAccountManagerMock.isManualMessageFetchEnabledMock = { false }

@@ -126,6 +126,12 @@ public class _RegistrationCoordinator_OWS2FAManagerMock: _RegistrationCoordinato
         return pinCodeMock!()
     }
 
+    public var shouldMasterKeyBeBackedUpMock: (() -> Bool)?
+
+    public func shouldMasterKeyBeBackedUp(tx: DBReadTransaction) -> Bool {
+        return shouldMasterKeyBeBackedUpMock!()
+    }
+
     public var clearLocalPinCodeMock: (() -> Void)?
 
     public func clearLocalPinCode(_ tx: SignalServiceKit.DBWriteTransaction) {

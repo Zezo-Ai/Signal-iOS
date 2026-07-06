@@ -425,9 +425,9 @@ extension AppSetup.GlobalsContinuation {
             db: db,
             networkManager: networkManager,
             profileManager: profileManager,
-            svrLocalStorage: svrLocalStorage,
             syncManager: syncManager,
             tsAccountManager: tsAccountManager,
+            twoFactorManager: ows2FAManager,
         )
 
         let phoneNumberDiscoverabilityManager = PhoneNumberDiscoverabilityManagerImpl(

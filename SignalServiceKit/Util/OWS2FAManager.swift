@@ -61,6 +61,10 @@ public class OWS2FAManager {
         return pinCode(transaction: tx) != nil
     }
 
+    public func shouldMasterKeyBeBackedUp(tx: DBReadTransaction) -> Bool {
+        return isPinEnabled(tx: tx)
+    }
+
     public func pinCode(transaction: DBReadTransaction) -> String? {
         return keyValueStore.fetchValue(String.self, forKey: StoreKeys.pinCode, tx: transaction)
     }
