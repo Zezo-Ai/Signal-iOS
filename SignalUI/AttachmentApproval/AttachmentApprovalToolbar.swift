@@ -101,37 +101,40 @@ class AttachmentApprovalToolbar: UIView, MediaCaptionToolbarDelegate {
 
         // Thumbnail strip is positioned above the protection background (pre-iOS 26), directly over media.
         addSubview(galleryRailView)
-
-        let visualEffectView: UIVisualEffectView
-        if #available(iOS 26, *) {
-            visualEffectView = UIVisualEffectView(effect: UIGlassContainerEffect())
-        } else {
-            visualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
-        }
-        visualEffectView.preservesSuperviewLayoutMargins = true
-        visualEffectView.contentView.preservesSuperviewLayoutMargins = true
-        addSubview(visualEffectView)
-        visualEffectView.contentView.addSubview(containerStackView)
-
         galleryRailView.translatesAutoresizingMaskIntoConstraints = false
-        visualEffectView.translatesAutoresizingMaskIntoConstraints = false
-        containerStackView.translatesAutoresizingMaskIntoConstraints = false
-
         NSLayoutConstraint.activate([
             galleryRailView.topAnchor.constraint(equalTo: contentLayoutGuide.topAnchor),
             galleryRailView.leadingAnchor.constraint(equalTo: contentLayoutGuide.leadingAnchor),
             galleryRailView.trailingAnchor.constraint(equalTo: contentLayoutGuide.trailingAnchor),
-
-            containerStackView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
-            containerStackView.leadingAnchor.constraint(equalTo: contentLayoutGuide.leadingAnchor),
-            containerStackView.trailingAnchor.constraint(equalTo: contentLayoutGuide.trailingAnchor),
-            containerStackView.bottomAnchor.constraint(equalTo: contentLayoutGuide.bottomAnchor),
-
-            visualEffectView.topAnchor.constraint(equalTo: galleryRailView.bottomAnchor),
-            visualEffectView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            visualEffectView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            visualEffectView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
+
+        // Pre-iOS 26 has blur background underneath caption input field and buttons.
+        containerStackView.translatesAutoresizingMaskIntoConstraints = false
+        if #unavailable(iOS 26) {
+            let blurBackgroundView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
+            blurBackgroundView.translatesAutoresizingMaskIntoConstraints = false
+            blurBackgroundView.contentView.addSubview(containerStackView)
+            addSubview(blurBackgroundView)
+            NSLayoutConstraint.activate([
+                blurBackgroundView.topAnchor.constraint(equalTo: galleryRailView.bottomAnchor),
+                blurBackgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
+                blurBackgroundView.trailingAnchor.constraint(equalTo: trailingAnchor),
+                blurBackgroundView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+                containerStackView.topAnchor.constraint(equalTo: blurBackgroundView.topAnchor),
+                containerStackView.leadingAnchor.constraint(equalTo: contentLayoutGuide.leadingAnchor),
+                containerStackView.trailingAnchor.constraint(equalTo: contentLayoutGuide.trailingAnchor),
+                containerStackView.bottomAnchor.constraint(equalTo: contentLayoutGuide.bottomAnchor),
+            ])
+        } else {
+            addSubview(containerStackView)
+            NSLayoutConstraint.activate([
+                containerStackView.topAnchor.constraint(equalTo: galleryRailView.bottomAnchor),
+                containerStackView.leadingAnchor.constraint(equalTo: contentLayoutGuide.leadingAnchor),
+                containerStackView.trailingAnchor.constraint(equalTo: contentLayoutGuide.trailingAnchor),
+                containerStackView.bottomAnchor.constraint(equalTo: contentLayoutGuide.bottomAnchor),
+            ])
+        }
     }
 
     required init?(coder: NSCoder) {
