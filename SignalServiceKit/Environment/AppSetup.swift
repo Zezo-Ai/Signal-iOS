@@ -294,7 +294,7 @@ extension AppSetup.GlobalsContinuation {
         let earlyMessageManager = EarlyMessageManager(appReadiness: appReadiness)
         let messageProcessor = MessageProcessor(appReadiness: appReadiness)
 
-        let groupSendEndorsementStore = GroupSendEndorsementStoreImpl()
+        let groupSendEndorsementStore = GroupSendEndorsementStore()
 
         let messageSenderJobQueue = MessageSenderJobQueue(appReadiness: appReadiness)
         let modelReadCaches = ModelReadCaches(

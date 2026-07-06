@@ -119,7 +119,7 @@ public class DependenciesBridge {
     public let groupCallRecordManager: GroupCallRecordManager
     public let groupMemberStore: GroupMemberStore
     public let groupMemberUpdater: GroupMemberUpdater
-    let groupSendEndorsementStore: any GroupSendEndorsementStore
+    let groupSendEndorsementStore: GroupSendEndorsementStore
     public let groupUpdateInfoMessageInserter: GroupUpdateInfoMessageInserter
     public let identityKeyMismatchManager: IdentityKeyMismatchManager
     public let identityManager: OWSIdentityManager
@@ -265,7 +265,7 @@ public class DependenciesBridge {
         groupCallRecordManager: GroupCallRecordManager,
         groupMemberStore: GroupMemberStore,
         groupMemberUpdater: GroupMemberUpdater,
-        groupSendEndorsementStore: any GroupSendEndorsementStore,
+        groupSendEndorsementStore: GroupSendEndorsementStore,
         groupUpdateInfoMessageInserter: GroupUpdateInfoMessageInserter,
         identityKeyMismatchManager: IdentityKeyMismatchManager,
         identityManager: OWSIdentityManager,

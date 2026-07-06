@@ -13,11 +13,11 @@ public class MessageSender {
     private var preKeyManager: PreKeyManager { DependenciesBridge.shared.preKeyManager }
 
     let accountChecker: AccountChecker
-    private let groupSendEndorsementStore: any GroupSendEndorsementStore
+    private let groupSendEndorsementStore: GroupSendEndorsementStore
 
     init(
         accountChecker: AccountChecker,
-        groupSendEndorsementStore: any GroupSendEndorsementStore,
+        groupSendEndorsementStore: GroupSendEndorsementStore,
     ) {
         self.accountChecker = accountChecker
         self.groupSendEndorsementStore = groupSendEndorsementStore

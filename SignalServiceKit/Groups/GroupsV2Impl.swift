@@ -13,13 +13,13 @@ public class GroupsV2Impl: GroupsV2 {
 
     private let authCredentialStore: AuthCredentialStore
     private let authCredentialManager: any AuthCredentialManager
-    private let groupSendEndorsementStore: any GroupSendEndorsementStore
+    private let groupSendEndorsementStore: GroupSendEndorsementStore
 
     init(
         appReadiness: AppReadiness,
         authCredentialStore: AuthCredentialStore,
         authCredentialManager: any AuthCredentialManager,
-        groupSendEndorsementStore: any GroupSendEndorsementStore,
+        groupSendEndorsementStore: GroupSendEndorsementStore,
     ) {
         self.authCredentialStore = authCredentialStore
         self.authCredentialManager = authCredentialManager

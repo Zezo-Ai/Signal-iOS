@@ -7,16 +7,7 @@ import Foundation
 import GRDB
 import LibSignalClient
 
-protocol GroupSendEndorsementStore {
-    func fetchCombinedEndorsement(groupThreadId: Int64, tx: DBReadTransaction) throws -> CombinedGroupSendEndorsementRecord?
-    func fetchIndividualEndorsements(groupThreadId: Int64, tx: DBReadTransaction) throws -> [IndividualGroupSendEndorsementRecord]
-    func fetchIndividualEndorsement(groupThreadId: Int64, recipientId: SignalRecipient.RowId, tx: DBReadTransaction) throws -> IndividualGroupSendEndorsementRecord?
-    func deleteEndorsements(groupThreadId: Int64, tx: DBWriteTransaction)
-    func insertCombinedEndorsement(_ endorsementRecord: CombinedGroupSendEndorsementRecord, tx: DBWriteTransaction)
-    func insertIndividualEndorsement(_ endorsementRecord: IndividualGroupSendEndorsementRecord, tx: DBWriteTransaction)
-}
-
-extension GroupSendEndorsementStore {
+struct GroupSendEndorsementStore {
     func saveEndorsements(
         groupThreadId: Int64,
         expiration: Date,
@@ -38,9 +29,7 @@ extension GroupSendEndorsementStore {
             ), tx: tx)
         }
     }
-}
 
-class GroupSendEndorsementStoreImpl: GroupSendEndorsementStore {
     func fetchCombinedEndorsement(groupThreadId: Int64, tx: DBReadTransaction) throws -> CombinedGroupSendEndorsementRecord? {
         do {
             return try CombinedGroupSendEndorsementRecord.fetchOne(tx.database, key: groupThreadId)
