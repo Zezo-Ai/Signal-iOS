@@ -230,6 +230,10 @@ class AttachmentApprovalToolbar: UIView, MediaCaptionToolbarDelegate {
         updateContents(animated: animated)
     }
 
+    func finishTextEditing() {
+        mediaCaptionToolbar.finishTextEditing()
+    }
+
     // Since we have `self.autoresizingMask = UIViewAutoresizingFlexibleHeight`, we must specify
     // an intrinsicContentSize. Specifying CGSize.zero causes the height to be determined by autolayout.
     override var intrinsicContentSize: CGSize { .zero }

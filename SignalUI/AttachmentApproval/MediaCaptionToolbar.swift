@@ -437,9 +437,13 @@ class MediaCaptionToolbar: UIView, UITextViewDelegate, BodyRangesTextViewDelegat
 
     // MARK: - Actions
 
-    private func didTapFinishEditing() {
+    func finishTextEditing() {
         textView.acceptAutocorrectSuggestion()
         _ = textView.resignFirstResponder()
+    }
+
+    private func didTapFinishEditing() {
+        finishTextEditing()
     }
 
     // MARK: - BodyRangesTextViewDelegate

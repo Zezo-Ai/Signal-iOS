@@ -1008,7 +1008,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
 
     @objc
     func didTapContentDimmerView(gesture: UITapGestureRecognizer) {
-        _ = bottomToolView.resignFirstResponder()
+        bottomToolView.finishTextEditing()
     }
 
     func mediaCaptionToolbarWillBeginEditing(_ mediaCaptionToolbar: MediaCaptionToolbar) {
