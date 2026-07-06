@@ -873,14 +873,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         // so that when we complete the challenge we send the code right away.
         var pendingCodeTransport: Registration.CodeTransport?
 
-        // Every time we go through registration, we should back up our SVR master
-        // secret's random bytes to SVR. Its safer to do this more than it is to do
-        // it less, so keeping this state in memory.
-        var hasBackedUpToSVR = false
-        var didSkipSVRBackup = false
-        var shouldBackUpToSVR: Bool {
-            return !hasBackedUpToSVR && !didSkipSVRBackup
-        }
+        var hasMarkedPinEnabled = false
 
         var backupMetadataHeader: BackupNonce.MetadataHeader?
         var restoreFromBackupProgressSink: OWSSequentialProgressRootSink<BackupRestoreProgressPhase>?
@@ -1428,6 +1421,11 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
             deps.tsAccountManager.setRegistrationId(persistedState.pniRegistrationId, for: .pni, tx: tx)
 
             block(tx)
+
+            // Regardless of whether or not we're going to use a PIN, we want to
+            // reconcile all enclaves. If we are switching devices, the prior device
+            // may have stored something, and we want to ensure we delete or update it.
+            deps.svr.invalidateBackupAttemptForEveryEnclave(tx: tx)
 
             deps.registrationStateChangeManager.didRegisterPrimary(
                 e164: accountIdentity.e164,
@@ -3837,15 +3835,14 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         }
 
         if !persistedState.hasSkippedPinEntry {
-            if inMemoryState.shouldBackUpToSVR {
-                // If we haven't backed up, do so now.
-                return await backupToSVR(
+            if !inMemoryState.hasMarkedPinEnabled {
+                markPinEnabled(
                     pin: pin,
-                    resetPINReminderInterval: resetPINReminderInterval,
+                    resetReminderInterval: resetPINReminderInterval,
                     accountEntropyPool: accountEntropyPool,
-                    accountIdentity: accountIdentity,
-                    failureCount: 0,
                 )
+                inMemoryState.hasMarkedPinEnabled = true
+                return await nextStep()
             }
 
             if self.reglockToken(for: accountIdentity.e164) != nil {
@@ -3948,69 +3945,24 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
     }
 
     @MainActor
-    private func backupToSVR(
+    private func markPinEnabled(
         pin: String,
-        resetPINReminderInterval: Bool,
+        resetReminderInterval: Bool,
         accountEntropyPool: SignalServiceKit.AccountEntropyPool,
-        accountIdentity: AccountIdentity,
-        failureCount: Int,
-    ) async -> RegistrationStep {
-        let maxAutomaticRetries = Constants.networkErrorRetries
-
-        logger.info("")
-
-        let authMethod: SVR.AuthMethod
-        let backupAuthMethod = SVR.AuthMethod.chatServerAuth(accountIdentity.authedAccount)
-        if let svrAuthCredential = inMemoryState.svrAuthCredential {
-            authMethod = .svrAuth(svrAuthCredential, backup: backupAuthMethod)
-        } else {
-            authMethod = backupAuthMethod
-        }
-
+    ) {
+        logger.info("storing pin code")
         let masterKey = accountEntropyPool.getMasterKey()
-        do {
-            try await deps.svr.backupMasterKey(
-                pin: pin,
+        db.write { tx in
+            updateMasterKeyAndLocalState(
                 masterKey: masterKey,
-                force: true,
-                authMethod: authMethod,
+                tx: tx,
             )
-
-            inMemoryState.hasBackedUpToSVR = true
-            await db.awaitableWrite { tx in
-                logger.info("Setting pin code after SVR backup")
-                updateMasterKeyAndLocalState(
-                    masterKey: masterKey,
-                    tx: tx,
-                )
-                deps.ows2FAManager.markPinEnabled(
-                    pin: pin,
-                    resetReminderInterval: resetPINReminderInterval,
-                    tx: tx,
-                )
-            }
-
-            return await nextStep()
-        } catch {
-            if error.isNetworkFailureOrTimeout {
-                if failureCount < maxAutomaticRetries {
-                    let minimumBackoff = OWSOperation.retryIntervalForExponentialBackoff(failureCount: failureCount + 1)
-                    try? await Task.sleep(nanoseconds: minimumBackoff.clampedNanoseconds)
-                    return await backupToSVR(
-                        pin: pin,
-                        resetPINReminderInterval: resetPINReminderInterval,
-                        accountEntropyPool: accountEntropyPool,
-                        accountIdentity: accountIdentity,
-                        failureCount: failureCount + 1,
-                    )
-                }
-                return .showErrorSheet(.networkError)
-            }
-            logger.error("Failed to back up to SVR with error: \(error)")
-            // We want to let people get through registration even if backups
-            // go wrong. Show an error but let the user continue when they try the next step.
-            inMemoryState.didSkipSVRBackup = true
-            return .showErrorSheet(.genericError)
+            // TODO: Persist this in finalize().
+            deps.ows2FAManager.markPinEnabled(
+                pin: pin,
+                resetReminderInterval: resetReminderInterval,
+                tx: tx,
+            )
         }
     }
 
@@ -4940,7 +4892,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         case .registering:
             return
                 inMemoryState.accountEntropyPool != nil
-                    && inMemoryState.hasBackedUpToSVR
+                    && inMemoryState.hasMarkedPinEnabled
                     && inMemoryState.backupRestoreState == .none
                     && !inMemoryState.hasSkippedRestoreFromMessageBackup
         case .changingNumber, .reRegistering:

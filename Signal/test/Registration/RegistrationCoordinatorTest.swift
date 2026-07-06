@@ -214,7 +214,7 @@ public class RegistrationCoordinatorTest {
         case finalizePreKeys
         case rotateOneTimePreKeys
         case restoreStorageService
-        case backupMasterKey
+        case markPinEnabled
         case confirmReservedUsername
         case rotateManifest
         case updateAccountAttribute
@@ -229,7 +229,7 @@ public class RegistrationCoordinatorTest {
             case .finalizePreKeys: return "finalizePreKeys"
             case .rotateOneTimePreKeys: return "rotateOneTimePreKeys"
             case .restoreStorageService: return "restoreStorageService"
-            case .backupMasterKey: return "backupMasterKey"
+            case .markPinEnabled: return "markPinEnabled"
             case .confirmReservedUsername: return "confirmReservedUsername"
             case .rotateManifest: return "rotateManifest"
             case .updateAccountAttribute: return "updateAccountAttribute"
@@ -320,7 +320,6 @@ public class RegistrationCoordinatorTest {
 
         let aep = buildKeyDataMocks(testCase)
         let initialMasterKey = aep.getMasterKey()
-        let finalMasterKey = aep.getMasterKey()
 
         // Give it the pin code, which should make it try and register.
 
@@ -375,14 +374,11 @@ public class RegistrationCoordinatorTest {
         var didMarkReglockEnabled = false
         ows2FAManagerMock.didMarkRegistrationLockEnabled = { didMarkReglockEnabled = true }
 
-        // We haven't done a SVR backup; that should happen now.
-        svr.backupMasterKeyMock = { pin, masterKey, force, authMethod in
+        // We haven't marked the PIN enabled; that should happen now.
+        var didMarkPinEnabled = false
+        ows2FAManagerMock.didMarkPinEnabled = { pin in
             #expect(pin == Stubs.pinCode)
-            #expect(masterKey.rawData == finalMasterKey.rawData)
-            #expect(force)
-            // We don't have a SVR auth credential, it should use chat server creds.
-            #expect(authMethod == .chatServerAuth(expectedAuthedAccount()))
-            return .value(())
+            didMarkPinEnabled = true
         }
 
         // Once we sync push tokens, we should restore from storage service.
@@ -439,6 +435,8 @@ public class RegistrationCoordinatorTest {
 
         // If we had reglock before registration, it should be re-enabled.
         #expect(wasReglockEnabled == didMarkReglockEnabled)
+
+        #expect(didMarkPinEnabled)
     }
 
     @MainActor @Test(arguments: Self.testCases())
@@ -457,7 +455,6 @@ public class RegistrationCoordinatorTest {
 
         let aep = buildKeyDataMocks(testCase)
         let initialMasterKey = aep.getMasterKey()
-        let finalMasterKey = aep.getMasterKey()
 
         // NOTE: We expect to skip opening path steps because
         // if we have a SVR master key locally, this _must_ be
@@ -506,14 +503,11 @@ public class RegistrationCoordinatorTest {
             #expect(auth == expectedAuthedAccount().chatServiceAuth)
         })
 
-        // We haven't done a SVR backup; that should happen now.
-        svr.backupMasterKeyMock = { pin, masterKey, force, authMethod in
+        // We haven't marked the PIN enabled; that should happen now.
+        var didMarkPinEnabled = false
+        ows2FAManagerMock.didMarkPinEnabled = { pin in
             #expect(pin == Stubs.pinCode)
-            #expect(masterKey.rawData == finalMasterKey.rawData)
-            #expect(force)
-            // We don't have a SVR auth credential, it should use chat server creds.
-            #expect(authMethod == .chatServerAuth(expectedAuthedAccount()))
-            return .value(())
+            didMarkPinEnabled = true
         }
 
         // Once we sync push tokens, we should restore from storage service.
@@ -567,6 +561,8 @@ public class RegistrationCoordinatorTest {
 
         // Since we set profile info, we should have scheduled a reupload.
         #expect(profileManagerMock.didScheduleReuploadLocalProfile)
+
+        #expect(didMarkPinEnabled)
     }
 
     @MainActor @Test(arguments: Self.onlyReRegisteringTestCases())
@@ -854,15 +850,10 @@ public class RegistrationCoordinatorTest {
             #expect(auth == expectedAuthedAccount().chatServiceAuth)
         })
 
-        // We haven't done a SVR backup; that should happen.
-        svr.backupMasterKeyMock = { pin, masterKey, force, authMethod in
-            self.testRun.addObservedStep(.backupMasterKey)
+        // We haven't marked the PIN enabled; that should happen.
+        ows2FAManagerMock.didMarkPinEnabled = { pin in
+            self.testRun.addObservedStep(.markPinEnabled)
             #expect(pin == Stubs.pinCode)
-            #expect(masterKey.rawData == finalMasterKey.rawData)
-            #expect(force)
-            // We don't have a SVR auth credential, it should use chat server creds.
-            #expect(authMethod == .chatServerAuth(expectedAuthedAccount()))
-            return .value(())
         }
 
         // Once we back up to svr, we should restore from storage service.
@@ -932,7 +923,7 @@ public class RegistrationCoordinatorTest {
             .createAccount,
             .finalizePreKeys,
             .rotateOneTimePreKeys,
-            .backupMasterKey,
+            .markPinEnabled,
             .restoreStorageService,
             .confirmReservedUsername,
             .rotateManifest,
@@ -1087,11 +1078,9 @@ public class RegistrationCoordinatorTest {
         // Make SVR give us back a reg recovery password.
         let aep = buildKeyDataMocks(testCase)
         let masterKey = aep.getMasterKey()
-        let newMasterKey = aep.getMasterKey()
         let remoteMasterKey = MasterKey()
         // For non-AEP, we will replace the local key with the remote key.
         // For AEP, we'll rotate to a new AEP (or use the existing local AEP if it's present)
-        let finalMasterKey = newMasterKey
 
         // Put some auth credentials in storage.
         let svr2CredentialCandidates: [SVR2AuthCredential] = [
@@ -1191,17 +1180,11 @@ public class RegistrationCoordinatorTest {
         var didMarkReglockEnabled = false
         ows2FAManagerMock.didMarkRegistrationLockEnabled = { didMarkReglockEnabled = true }
 
-        // We haven't done a SVR backup; that should happen now.
-        svr.backupMasterKeyMock = { pin, masterKey, force, authMethod in
+        // We haven't marked the PIN enabled; that should happen now.
+        var didMarkPinEnabled = false
+        ows2FAManagerMock.didMarkPinEnabled = { pin in
             #expect(pin == Stubs.pinCode)
-            #expect(masterKey.rawData == finalMasterKey.rawData)
-            #expect(force)
-            // We don't have a SVR auth credential, it should use chat server creds.
-            #expect(authMethod == .svrAuth(
-                Stubs.svr2AuthCredential,
-                backup: .chatServerAuth(expectedAuthedAccount()),
-            ))
-            return .value(())
+            didMarkPinEnabled = true
         }
 
         // Once we sync push tokens, we should restore from storage service.
@@ -1258,6 +1241,8 @@ public class RegistrationCoordinatorTest {
 
         // If we had reglock before registration, it should be re-enabled.
         #expect(didMarkReglockEnabled)
+
+        #expect(didMarkPinEnabled)
     }
 
     /// Test the path where both local and remote RRP are rejected due to a reglock challenge
@@ -1501,17 +1486,10 @@ public class RegistrationCoordinatorTest {
             #expect(auth == expectedAuthedAccount().chatServiceAuth)
         })
 
-        // Once we create pre-keys, we should back up to svr.
-        svr.backupMasterKeyMock = { pin, masterKey, force, authMethod in
-            self.testRun.addObservedStep(.backupMasterKey)
+        // Once we create pre-keys, we mark the PIN enabled.
+        ows2FAManagerMock.didMarkPinEnabled = { pin in
+            self.testRun.addObservedStep(.markPinEnabled)
             #expect(pin == Stubs.pinCode)
-            #expect(masterKey.rawData == finalMasterKey.rawData)
-            #expect(force)
-            #expect(authMethod == .svrAuth(
-                Stubs.svr2AuthCredential,
-                backup: .chatServerAuth(expectedAuthedAccount()),
-            ))
-            return .value(())
         }
 
         // Once we back up to svr, we should restore from storage service.
@@ -1575,7 +1553,7 @@ public class RegistrationCoordinatorTest {
             .finalizePreKeys,
             .rotateOneTimePreKeys,
             .restoreStorageService,
-            .backupMasterKey,
+            .markPinEnabled,
             .confirmReservedUsername,
             .rotateManifest,
         ]
@@ -1782,12 +1760,10 @@ public class RegistrationCoordinatorTest {
         })
 
         // Finish the validation.
-        svr.backupMasterKeyMock = { pin, masterKey, force, authMethod in
+        var didMarkPinEnabled = false
+        ows2FAManagerMock.didMarkPinEnabled = { pin in
             #expect(pin == Stubs.pinCode)
-            #expect(masterKey.rawData == newMasterKey.rawData)
-            #expect(force)
-            #expect(authMethod == .chatServerAuth(expectedAuthedAccount()))
-            return .value(())
+            didMarkPinEnabled = true
         }
 
         // Once we sync push tokens, we should restore from storage service.
@@ -1841,6 +1817,8 @@ public class RegistrationCoordinatorTest {
 
         // Since we set profile info, we should have scheduled a reupload.
         #expect(profileManagerMock.didScheduleReuploadLocalProfile)
+
+        #expect(didMarkPinEnabled)
     }
 
     @MainActor @Test(arguments: Self.testCases())
@@ -2804,9 +2782,8 @@ public class RegistrationCoordinatorTest {
         })
 
         // When we skip the pin, it should skip any SVR backups.
-        svr.backupMasterKeyMock = { _, _, _, _ in
-            Issue.record("Shouldn't talk to SVR with skipped PIN!")
-            return .value(())
+        ows2FAManagerMock.didMarkPinEnabled = { _ in
+            Issue.record("Shouldn't mark PIN enabled with skipped PIN!")
         }
 
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ _, _ in
@@ -2922,9 +2899,8 @@ public class RegistrationCoordinatorTest {
         })
 
         // When we skip the pin, it should skip any SVR backups.
-        svr.backupMasterKeyMock = { _, _, _, _ in
-            Issue.record("Shouldn't talk to SVR with skipped PIN!")
-            return .value(())
+        ows2FAManagerMock.didMarkPinEnabled = { _ in
+            Issue.record("Shouldn't mark PIN enabled with skipped PIN!")
         }
 
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in

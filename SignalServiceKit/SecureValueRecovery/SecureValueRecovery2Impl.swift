@@ -195,13 +195,21 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
         localStorage.backupAttemptStore.removeValue(forKey: enclave, transaction: tx)
     }
 
-    private func invalidateBackupAttempt(forEnclave enclave: MrEnclave, tx: DBWriteTransaction) {
-        guard var backupAttempt = getBackupAttempt(forEnclave: enclave, tx: tx) else {
-            return
+    public func invalidateBackupAttemptForEveryEnclave(tx: DBWriteTransaction) {
+        for enclave in tsConstants.svr2Enclaves {
+            invalidateBackupAttempt(forEnclave: enclave, tx: tx)
         }
-        backupAttempt.isBackedUp = false
-        backupAttempt.isExposed = false
-        setBackupAttempt(backupAttempt, forEnclave: enclave, tx: tx)
+    }
+
+    private func invalidateBackupAttempt(forEnclave enclave: MrEnclave, tx: DBWriteTransaction) {
+        let invalidBackupAttempt = BackupAttempt(
+            masterKey: Data(),
+            encryptedMasterKey: Data(),
+            encodedPINVerificationString: "",
+            isBackedUp: false,
+            isExposed: false,
+        )
+        setBackupAttempt(invalidBackupAttempt, forEnclave: enclave, tx: tx)
     }
 
     private func doBackupAndExpose(

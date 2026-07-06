@@ -57,6 +57,10 @@ public protocol SecureValueRecovery {
     /// Backs up the user's master key to SVR.
     func backupMasterKey(pin: String, masterKey: MasterKey, force: Bool, authMethod: SVR.AuthMethod) async throws
 
+    /// Invalidates the status of all enclaves, thus ensuring that we'll
+    /// reconcile what's stored in every enclave.
+    func invalidateBackupAttemptForEveryEnclave(tx: DBWriteTransaction)
+
     func storeKeys(
         fromKeysSyncMessage syncMessage: SSKProtoSyncMessageKeys,
         authedDevice: AuthedDevice,
