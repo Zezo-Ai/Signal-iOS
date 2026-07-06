@@ -19,9 +19,6 @@ public protocol PaymentsHelper: AnyObject {
     var isPaymentsVersionOutdated: Bool { get }
     func setPaymentsVersionOutdated(_ value: Bool)
 
-    func setArePaymentsEnabled(for serviceId: ServiceId, hasPaymentsEnabled: Bool, transaction: DBWriteTransaction)
-    func arePaymentsEnabled(for address: SignalServiceAddress, transaction: DBReadTransaction) -> Bool
-
     var arePaymentsEnabled: Bool { get }
     func arePaymentsEnabled(tx: DBReadTransaction) -> Bool
     var paymentsEntropy: Data? { get }
@@ -54,7 +51,8 @@ public protocol PaymentsHelper: AnyObject {
     func processIncomingPaymentsActivatedMessage(
         thread: TSThread,
         senderAci: Aci,
-        transaction: DBWriteTransaction,
+        localIdentifiers: LocalIdentifiers,
+        tx: DBWriteTransaction,
     )
 
     func processReceivedTranscriptPaymentNotification(
@@ -163,14 +161,6 @@ extension MockPaymentsHelper: PaymentsHelperSwift, PaymentsHelper {
 
     public func warmCaches() {}
 
-    public func setArePaymentsEnabled(for serviceId: ServiceId, hasPaymentsEnabled: Bool, transaction: DBWriteTransaction) {
-        // Do nothing.
-    }
-
-    public func arePaymentsEnabled(for address: SignalServiceAddress, transaction: DBReadTransaction) -> Bool {
-        owsFail("Not implemented.")
-    }
-
     public var arePaymentsEnabled: Bool {
         owsFail("Not implemented.")
     }
@@ -237,7 +227,8 @@ extension MockPaymentsHelper: PaymentsHelperSwift, PaymentsHelper {
     public func processIncomingPaymentsActivatedMessage(
         thread: TSThread,
         senderAci: Aci,
-        transaction: DBWriteTransaction,
+        localIdentifiers: LocalIdentifiers,
+        tx: DBWriteTransaction,
     ) {
         owsFail("Not implemented.")
     }

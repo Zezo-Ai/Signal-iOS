@@ -256,10 +256,14 @@ class SendPaymentViewController: OWSViewController, SendPaymentMemoViewDelegate,
             return
         }
 
-        let recipientHasPaymentsEnabled = SSKEnvironment.shared.databaseStorageRef.read { transaction in
-            SSKEnvironment.shared.paymentsHelperRef.arePaymentsEnabled(for: recipientAddress, transaction: transaction)
+        let databaseStorage = SSKEnvironment.shared.databaseStorageRef
+        let profileManager = SSKEnvironment.shared.profileManagerRef
+
+        let recipientProfile = databaseStorage.read { tx in
+            return profileManager.userProfile(for: recipientAddress, tx: tx)
         }
-        if recipientHasPaymentsEnabled {
+
+        if recipientProfile?.hasPaymentAddress == true {
             presentAfterRecipientCheck(
                 presentationMode: presentationMode,
                 delegate: delegate,
@@ -308,10 +312,13 @@ class SendPaymentViewController: OWSViewController, SendPaymentMemoViewDelegate,
         isOutgoingTransfer: Bool,
         mode: SendPaymentMode,
     ) {
-        let recipientHasPaymentsEnabled = SSKEnvironment.shared.databaseStorageRef.read { transaction in
-            SSKEnvironment.shared.paymentsHelperRef.arePaymentsEnabled(for: recipientAddress, transaction: transaction)
+        let databaseStorage = SSKEnvironment.shared.databaseStorageRef
+        let profileManager = SSKEnvironment.shared.profileManagerRef
+
+        let recipientProfile = databaseStorage.read { tx in
+            return profileManager.userProfile(for: recipientAddress, tx: tx)
         }
-        guard recipientHasPaymentsEnabled else {
+        guard recipientProfile?.hasPaymentAddress == true else {
             showRecipientNotEnabledAlert(recipientAddress: recipientAddress)
             return
         }

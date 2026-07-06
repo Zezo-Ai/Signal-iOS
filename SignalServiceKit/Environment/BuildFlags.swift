@@ -58,6 +58,12 @@ public enum BuildFlags {
     // that's now dead because this is false.
     public static let migrateDeprecatedSessions = true
 
+    // Turn this off after all still-registered clients have run this
+    // migration. That should happen about 210 days after the last release
+    // without this change is built. Then, delete all the code that's now dead
+    // because this is false.
+    public static let migrateHasPaymentAddress = true
+
     public enum KeyTransparency {
         public static let enabled = true
         public static let conservativeSelfCheck = build <= .internal

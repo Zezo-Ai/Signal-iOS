@@ -110,6 +110,7 @@ class OWSContactsManagerTest: SignalBaseTest {
             lastFetchDate: nil,
             lastMessagingDate: nil,
             isPhoneNumberShared: nil,
+            hasPaymentAddress: nil,
         )
     }
 

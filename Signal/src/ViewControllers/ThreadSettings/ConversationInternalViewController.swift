@@ -99,7 +99,7 @@ public class ConversationInternalViewController: OWSTableViewController2 {
                     value: identityKey?.hexadecimalString,
                 ))
 
-                let arePaymentsEnabled = SSKEnvironment.shared.paymentsHelperRef.arePaymentsEnabled(for: address, transaction: transaction)
+                let arePaymentsEnabled = userProfile?.hasPaymentAddress == true
                 section.add(.copyableItem(
                     label: "Payments",
                     value: arePaymentsEnabled ? "Yes" : "No",

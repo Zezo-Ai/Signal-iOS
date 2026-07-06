@@ -97,6 +97,14 @@ extension OWSFakeProfileManager: ProfileManager {
     ) {
     }
 
+    func setHasPaymentAddress(
+        aci: Aci,
+        localIdentifiers: LocalIdentifiers,
+        userProfileWriter: UserProfileWriter,
+        tx: DBWriteTransaction,
+    ) {
+    }
+
     func updateLocalProfile(
         profileGivenName: OptionalChange<OWSUserProfile.NameComponent>,
         profileFamilyName: OptionalChange<OWSUserProfile.NameComponent?>,
@@ -156,6 +164,7 @@ extension OWSFakeProfileManager: ProfileManager {
             lastFetchDate: userProfile.lastFetchDate,
             lastMessagingDate: userProfile.lastMessagingDate,
             isPhoneNumberShared: userProfile.isPhoneNumberShared,
+            hasPaymentAddress: userProfile.hasPaymentAddress,
         )
     }
 

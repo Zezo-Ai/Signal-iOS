@@ -302,26 +302,6 @@ public class PaymentsHelperImpl: PaymentsHelperSwift, PaymentsHelper {
         return Self.keyValueStore.getData(Self.lastKnownLocalPaymentAddressProtoDataKey, transaction: transaction)
     }
 
-    // MARK: -
-
-    private static let arePaymentsEnabledForUserStore = KeyValueStore(collection: "arePaymentsEnabledForUserStore")
-
-    public func setArePaymentsEnabled(for serviceId: ServiceId, hasPaymentsEnabled: Bool, transaction tx: DBWriteTransaction) {
-        Self.arePaymentsEnabledForUserStore.setBool(hasPaymentsEnabled, key: serviceId.serviceIdUppercaseString, transaction: tx)
-    }
-
-    public func arePaymentsEnabled(for address: SignalServiceAddress, transaction tx: DBReadTransaction) -> Bool {
-        guard let serviceId = address.serviceId else {
-            Logger.warn("User is missing serviceId.")
-            return false
-        }
-        return Self.arePaymentsEnabledForUserStore.getBool(
-            serviceId.serviceIdUppercaseString,
-            defaultValue: false,
-            transaction: tx,
-        )
-    }
-
     // MARK: - Version Compatibility
 
     private let isPaymentsVersionOutdatedCache = AtomicValue<Bool>(false, lock: .sharedGlobal)
@@ -399,19 +379,22 @@ public class PaymentsHelperImpl: PaymentsHelperSwift, PaymentsHelper {
     public func processIncomingPaymentsActivatedMessage(
         thread: TSThread,
         senderAci: Aci,
-        transaction: DBWriteTransaction,
+        localIdentifiers: LocalIdentifiers,
+        tx: DBWriteTransaction,
     ) {
         Logger.info("")
         let infoMessage: TSInfoMessage = .paymentsActivatedMessage(
             thread: thread,
             senderAci: senderAci,
         )
-        infoMessage.anyInsert(transaction: transaction)
+        infoMessage.anyInsert(transaction: tx)
 
-        setArePaymentsEnabled(
-            for: senderAci,
-            hasPaymentsEnabled: true,
-            transaction: transaction,
+        let profileManager = SSKEnvironment.shared.profileManagerRef
+        profileManager.setHasPaymentAddress(
+            aci: senderAci,
+            localIdentifiers: localIdentifiers,
+            userProfileWriter: .paymentActivation,
+            tx: tx,
         )
     }
 

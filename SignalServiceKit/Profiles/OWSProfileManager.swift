@@ -324,6 +324,7 @@ extension OWSProfileManager: ProfileManager {
         var bioChange: OptionalChange<String?> = .noChange
         var bioEmojiChange: OptionalChange<String?> = .noChange
         var isPhoneNumberSharedChange: OptionalChange<Bool?> = .noChange
+        var hasPaymentAddress: OptionalChange<Bool?> = .noChange
         if let decryptedProfile {
             do {
                 if let nameComponents = try decryptedProfile.nameComponents.get() {
@@ -348,6 +349,11 @@ extension OWSProfileManager: ProfileManager {
             } catch {
                 Logger.warn("Couldn't decrypt phone number sharing: \(error)")
             }
+            do {
+                hasPaymentAddress = .setTo(try decryptedProfile.paymentAddress() != nil)
+            } catch {
+                Logger.warn("Couldn't decrypt/parse payment address: \(error)")
+            }
         }
 
         userProfile.update(
@@ -360,6 +366,25 @@ extension OWSProfileManager: ProfileManager {
             lastFetchDate: .setTo(lastFetchDate),
             badges: .setTo(profileBadges),
             isPhoneNumberShared: isPhoneNumberSharedChange,
+            hasPaymentAddress: hasPaymentAddress,
+            userProfileWriter: userProfileWriter,
+            transaction: tx,
+        )
+    }
+
+    public func setHasPaymentAddress(
+        aci: Aci,
+        localIdentifiers: LocalIdentifiers,
+        userProfileWriter: UserProfileWriter,
+        tx: DBWriteTransaction,
+    ) {
+        let userProfile = OWSUserProfile.getOrBuildUserProfile(
+            for: OWSUserProfile.insertableAddress(serviceId: aci, localIdentifiers: localIdentifiers),
+            userProfileWriter: userProfileWriter,
+            tx: tx,
+        )
+        userProfile.update(
+            hasPaymentAddress: .setTo(true),
             userProfileWriter: userProfileWriter,
             transaction: tx,
         )

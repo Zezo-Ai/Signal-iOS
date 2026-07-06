@@ -1381,7 +1381,12 @@ public final class MessageReceiver {
             case .none, .request:
                 SSKEnvironment.shared.paymentsHelperRef.processIncomingPaymentsActivationRequest(thread: thread, senderAci: envelope.sourceAci, transaction: tx)
             case .activated:
-                SSKEnvironment.shared.paymentsHelperRef.processIncomingPaymentsActivatedMessage(thread: thread, senderAci: envelope.sourceAci, transaction: tx)
+                SSKEnvironment.shared.paymentsHelperRef.processIncomingPaymentsActivatedMessage(
+                    thread: thread,
+                    senderAci: envelope.sourceAci,
+                    localIdentifiers: registeredState.localIdentifiers,
+                    tx: tx,
+                )
             }
             return nil
         }

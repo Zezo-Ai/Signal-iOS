@@ -110,6 +110,7 @@ class UserProfileMergerTest: XCTestCase {
             lastFetchDate: nil,
             lastMessagingDate: nil,
             isPhoneNumberShared: false,
+            hasPaymentAddress: false,
         )
     }
 }

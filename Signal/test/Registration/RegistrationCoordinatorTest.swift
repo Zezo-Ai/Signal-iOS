@@ -3167,6 +3167,7 @@ public class RegistrationCoordinatorTest {
                 lastFetchDate: Date(timeIntervalSince1970: 1735689600),
                 lastMessagingDate: nil,
                 isPhoneNumberShared: false,
+                hasPaymentAddress: false,
             )
         }
     }

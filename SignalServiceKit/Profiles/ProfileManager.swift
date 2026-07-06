@@ -118,6 +118,13 @@ public protocol ProfileManager: ProfileManagerProtocol {
         tx: DBWriteTransaction,
     )
 
+    func setHasPaymentAddress(
+        aci: Aci,
+        localIdentifiers: LocalIdentifiers,
+        userProfileWriter: UserProfileWriter,
+        tx: DBWriteTransaction,
+    )
+
     func updateLocalProfile(
         profileGivenName: OptionalChange<OWSUserProfile.NameComponent>,
         profileFamilyName: OptionalChange<OWSUserProfile.NameComponent?>,

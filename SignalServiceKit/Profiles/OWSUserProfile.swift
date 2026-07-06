@@ -106,6 +106,7 @@ extension UserProfileWriter {
         case .metadataUpdate: fallthrough
         case .storageService: fallthrough
         case .syncMessage: fallthrough
+        case .paymentActivation: fallthrough
         case .tests:
             return false
         case .unknown: fallthrough
@@ -253,6 +254,8 @@ public final class OWSUserProfile: NSObject, SDSCodableModel, Decodable {
     /// never had a profile key for this user, or the value can't be decrypted.
     public private(set) var isPhoneNumberShared: Bool?
 
+    public private(set) var hasPaymentAddress: Bool?
+
     public convenience init(
         address: Address,
         givenName: String? = nil,
@@ -287,6 +290,7 @@ public final class OWSUserProfile: NSObject, SDSCodableModel, Decodable {
             lastFetchDate: nil,
             lastMessagingDate: nil,
             isPhoneNumberShared: nil,
+            hasPaymentAddress: nil,
         )
     }
 
@@ -306,6 +310,7 @@ public final class OWSUserProfile: NSObject, SDSCodableModel, Decodable {
         lastFetchDate: Date?,
         lastMessagingDate: Date?,
         isPhoneNumberShared: Bool?,
+        hasPaymentAddress: Bool?,
     ) {
         self.id = id
         self.uniqueId = uniqueId
@@ -342,6 +347,7 @@ public final class OWSUserProfile: NSObject, SDSCodableModel, Decodable {
             lastFetchDate: lastFetchDate,
             lastMessagingDate: lastMessagingDate,
             isPhoneNumberShared: isPhoneNumberShared,
+            hasPaymentAddress: hasPaymentAddress,
         )
     }
 
@@ -364,6 +370,7 @@ public final class OWSUserProfile: NSObject, SDSCodableModel, Decodable {
         guard lastFetchDate == otherProfile.lastFetchDate else { return false }
         guard lastMessagingDate == otherProfile.lastMessagingDate else { return false }
         guard isPhoneNumberShared == otherProfile.isPhoneNumberShared else { return false }
+        guard hasPaymentAddress == otherProfile.hasPaymentAddress else { return false }
         return true
     }
 
@@ -387,6 +394,7 @@ public final class OWSUserProfile: NSObject, SDSCodableModel, Decodable {
         case canReceiveGiftBadges
         case isPniCapable
         case isPhoneNumberShared
+        case hasPaymentAddress
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -410,6 +418,7 @@ public final class OWSUserProfile: NSObject, SDSCodableModel, Decodable {
         try container.encode(true, forKey: .canReceiveGiftBadges)
         try container.encode(true, forKey: .isPniCapable)
         try container.encodeIfPresent(isPhoneNumberShared, forKey: .isPhoneNumberShared)
+        try container.encodeIfPresent(hasPaymentAddress, forKey: .hasPaymentAddress)
     }
 
     public init(from decoder: Decoder) throws {
@@ -431,6 +440,7 @@ public final class OWSUserProfile: NSObject, SDSCodableModel, Decodable {
         lastFetchDate = try container.decodeIfPresent(Date.self, forKey: .lastFetchDate)
         lastMessagingDate = try container.decodeIfPresent(Date.self, forKey: .lastMessagingDate)
         isPhoneNumberShared = try container.decodeIfPresent(Bool.self, forKey: .isPhoneNumberShared)
+        hasPaymentAddress = try container.decodeIfPresent(Bool.self, forKey: .hasPaymentAddress)
     }
 
     private static func decodeProfileKey(_ profileKeyData: Data) throws -> Aes256Key {
@@ -977,6 +987,7 @@ private struct UserProfileChanges {
     var profileKey: OptionalChange<Aes256Key>
     var badges: OptionalChange<[OWSUserProfileBadgeInfo]>
     var isPhoneNumberShared: OptionalChange<Bool?>
+    var hasPaymentAddress: OptionalChange<Bool?>
 }
 
 // MARK: - Update With... Methods
@@ -1035,6 +1046,7 @@ extension OWSUserProfile {
                     return false
                 case .changePhoneNumber: fallthrough
                 case .systemContactsFetch: fallthrough
+                case .paymentActivation: fallthrough
                 case .unknown: fallthrough
                 @unknown default:
                     owsFailDebug("Invalid userProfileWriter.")
@@ -1074,6 +1086,7 @@ extension OWSUserProfile {
         visibleChangeCount += setIfChanged(changes.badges, keyPath: \.badges)
         visibleChangeCount += setIfChanged(changes.profileKey.map { $0 as Aes256Key? }, keyPath: \.profileKey)
         visibleChangeCount += setIfChanged(changes.isPhoneNumberShared, keyPath: \.isPhoneNumberShared)
+        visibleChangeCount += setIfChanged(changes.hasPaymentAddress, keyPath: \.hasPaymentAddress)
 
         // Some properties are invisible/"polled", so changes don't matter.
         _ = setIfChanged(changes.lastFetchDate.map { $0 as Date? }, keyPath: \.lastFetchDate)
@@ -1354,6 +1367,7 @@ extension OWSUserProfile {
         profileKey: OptionalChange<Aes256Key> = .noChange,
         badges: OptionalChange<[OWSUserProfileBadgeInfo]> = .noChange,
         isPhoneNumberShared: OptionalChange<Bool?> = .noChange,
+        hasPaymentAddress: OptionalChange<Bool?> = .noChange,
         userProfileWriter: UserProfileWriter,
         transaction: DBWriteTransaction,
     ) {
@@ -1370,6 +1384,7 @@ extension OWSUserProfile {
                 profileKey: profileKey,
                 badges: badges,
                 isPhoneNumberShared: isPhoneNumberShared,
+                hasPaymentAddress: hasPaymentAddress,
             ),
             userProfileWriter: userProfileWriter,
             tx: transaction,

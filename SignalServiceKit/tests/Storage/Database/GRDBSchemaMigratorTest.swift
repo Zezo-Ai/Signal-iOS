@@ -1802,4 +1802,90 @@ struct GRDBSchemaMigratorTest {
             #expect((hasEverHadPin == true) == testCase.expectedValue)
         }
     }
+
+    @Test
+    func testMigrateHasPaymentAddress() throws {
+        let localAci = "00000000-0000-4000-8000-000000000099"
+
+        let trueData = Self.keyedArchiverData(rootObject: true as NSNumber)
+        let falseData = Self.keyedArchiverData(rootObject: false as NSNumber)
+
+        let databaseQueue = DatabaseQueue()
+        try databaseQueue.write { db in
+            try db.execute(sql: """
+            CREATE TABLE keyvalue (
+                "collection" TEXT NOT NULL,
+                "key" TEXT NOT NULL,
+                "value" BLOB NOT NULL,
+                PRIMARY KEY ("collection", "key")
+            );
+
+            CREATE TABLE "model_OWSUserProfile" (
+                "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                "recordType" INTEGER NOT NULL,
+                "uniqueId" TEXT NOT NULL UNIQUE,
+                "recipientUUID" TEXT UNIQUE,
+                "recipientPhoneNumber" TEXT UNIQUE
+            );
+
+            INSERT INTO "model_OWSUserProfile" ("recipientUUID", "recordType", "uniqueId") VALUES
+                ('00000000-0000-4000-8000-000000000001', 0, '00000000-0000-4000-8000-00000000000A'),
+                ('00000000-0000-4000-8000-000000000002', 0, '00000000-0000-4000-8000-00000000000B');
+            """)
+
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" ("collection", "key", "value") VALUES (?, ?, ?)
+                """,
+                arguments: ["arePaymentsEnabledForUserStore", "00000000-0000-4000-8000-000000000001", trueData],
+            )
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" ("collection", "key", "value") VALUES (?, ?, ?)
+                """,
+                arguments: ["arePaymentsEnabledForUserStore", "00000000-0000-4000-8000-000000000003", falseData],
+            )
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" ("collection", "key", "value") VALUES (?, ?, ?)
+                """,
+                arguments: ["arePaymentsEnabledForUserStore", "PNI:00000000-0000-4000-8000-000000000004", falseData],
+            )
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" ("collection", "key", "value") VALUES (?, ?, ?)
+                """,
+                arguments: ["arePaymentsEnabledForUserStore", localAci, trueData],
+            )
+
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" ("collection", "key", "value") VALUES (?, ?, ?)
+                """,
+                arguments: ["TSStorageUserAccountCollection", "TSStorageRegisteredUUIDKey", localAci],
+            )
+
+            do {
+                let tx = DBWriteTransaction(database: db)
+                defer { tx.finalizeTransaction() }
+                try GRDBSchemaMigrator.migrateHasPaymentAddress(tx: tx)
+            }
+
+            let userProfileResults = try Row.fetchAll(
+                db,
+                sql: "SELECT recipientUUID, recipientPhoneNumber, hasPaymentAddress FROM model_OWSUserProfile",
+            )
+            let userProfiles = Dictionary(uniqueKeysWithValues: userProfileResults.map({
+                return (($0[0] as String? ?? "") + "/" + ($0[1] as String? ?? ""), $0[2] as Bool?)
+            }))
+
+            let expectedValues: [String: Bool?] = [
+                "00000000-0000-4000-8000-000000000001/": true,
+                "00000000-0000-4000-8000-000000000002/": nil,
+                "00000000-0000-4000-8000-000000000003/": false,
+                "/kLocalProfileUniqueId": true,
+            ]
+            #expect(userProfiles == expectedValues)
+        }
+    }
 }

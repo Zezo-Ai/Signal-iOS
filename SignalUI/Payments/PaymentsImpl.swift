@@ -338,7 +338,7 @@ public extension PaymentsImpl {
         // We don't need to persist this value in the cache; the ProfileFetcher
         // will take care of that.
         guard
-            let paymentAddress = decryptedProfile.paymentAddress(identityKey: fetchedProfile.identityKey),
+            let paymentAddress = try? decryptedProfile.paymentAddress(),
             paymentAddress.isValid,
             paymentAddress.currency == .mobileCoin
         else {

@@ -167,6 +167,7 @@ class GRDBFullTextSearcherTest: SignalBaseTest {
             lastFetchDate: nil,
             lastMessagingDate: nil,
             isPhoneNumberShared: true,
+            hasPaymentAddress: nil,
         )
     }
 

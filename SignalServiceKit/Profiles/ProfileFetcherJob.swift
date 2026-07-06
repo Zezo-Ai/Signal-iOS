@@ -488,13 +488,6 @@ public class ProfileFetcherJob {
 
             let identityManager = DependenciesBridge.shared.identityManager
             identityManager.saveIdentityKey(profile.identityKey, for: serviceId, shouldUpdateStorageService: true, tx: transaction)
-
-            let paymentAddress = fetchedProfile.decryptedProfile?.paymentAddress(identityKey: fetchedProfile.identityKey)
-            self.paymentsHelper.setArePaymentsEnabled(
-                for: serviceId,
-                hasPaymentsEnabled: paymentAddress != nil,
-                transaction: transaction,
-            )
         }
     }
 
@@ -608,6 +601,7 @@ public struct DecryptedProfile {
     public let bio: Result<String?, Error>
     public let bioEmoji: Result<String?, Error>
     public let paymentAddressData: Result<Data?, Error>
+    public let identityKey: IdentityKey
     public let phoneNumberSharing: Result<Bool?, Error>
 }
 
@@ -660,6 +654,7 @@ public struct FetchedProfile {
             bio: bio,
             bioEmoji: bioEmoji,
             paymentAddressData: paymentAddressData,
+            identityKey: profile.identityKey,
             phoneNumberSharing: phoneNumberSharing,
         )
     }
@@ -667,27 +662,20 @@ public struct FetchedProfile {
 
 // MARK: -
 
-public extension DecryptedProfile {
-    func paymentAddress(identityKey: IdentityKey) -> TSPaymentAddress? {
-        do {
-            guard var paymentAddressData = try paymentAddressData.get() else {
-                return nil
-            }
-            guard let (dataLength, dataLengthCount) = UInt32.from(littleEndianData: paymentAddressData) else {
-                owsFailDebug("couldn't find paymentAddressData's length")
-                return nil
-            }
-            paymentAddressData = paymentAddressData.dropFirst(dataLengthCount)
-            paymentAddressData = paymentAddressData.prefix(Int(dataLength))
-            guard paymentAddressData.count == dataLength else {
-                owsFailDebug("paymentAddressData is too short")
-                return nil
-            }
-            let proto = try SSKProtoPaymentAddress(serializedData: paymentAddressData)
-            return try TSPaymentAddress.fromProto(proto, identityKey: identityKey)
-        } catch {
-            owsFailDebug("Error: \(error)")
+extension DecryptedProfile {
+    public func paymentAddress() throws -> TSPaymentAddress? {
+        guard var paymentAddressData = try paymentAddressData.get() else {
             return nil
         }
+        guard let (dataLength, dataLengthCount) = UInt32.from(littleEndianData: paymentAddressData) else {
+            throw OWSGenericError("paymentAddressData doesn't specify a length")
+        }
+        paymentAddressData = paymentAddressData.dropFirst(dataLengthCount)
+        paymentAddressData = paymentAddressData.prefix(Int(dataLength))
+        guard paymentAddressData.count == dataLength else {
+            throw OWSGenericError("paymentAddressData is too short")
+        }
+        let proto = try SSKProtoPaymentAddress(serializedData: paymentAddressData)
+        return try TSPaymentAddress.fromProto(proto, identityKey: identityKey)
     }
 }

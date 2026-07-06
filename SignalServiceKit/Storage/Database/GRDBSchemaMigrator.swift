@@ -342,6 +342,7 @@ public class GRDBSchemaMigrator {
         case zeroOutCallExpirationColumns
         case addReleaseNotesCallToAction
         case completePermasnoozedReminderMegaphones
+        case migrateHasPaymentAddress
 
         // NOTE: Every time we add a migration id, consider
         // incrementing grdbSchemaVersionLatest.
@@ -465,7 +466,7 @@ public class GRDBSchemaMigrator {
     }
 
     public static let grdbSchemaVersionDefault: UInt = 0
-    public static let grdbSchemaVersionLatest: UInt = 151
+    public static let grdbSchemaVersionLatest: UInt = 152
 
     private class DatabaseMigratorWrapper {
         // Run with immediate (or disabled) foreign key checks so that pre-existing
@@ -5324,6 +5325,11 @@ public class GRDBSchemaMigrator {
             return .success(())
         }
 
+        migrator.registerMigration(.migrateHasPaymentAddress) { tx in
+            try migrateHasPaymentAddress(tx: tx)
+            return .success(())
+        }
+
         // MARK: - Schema Migration Insertion Point
     }
 
@@ -6820,6 +6826,52 @@ public class GRDBSchemaMigrator {
         return try String.fetchOne(tx.database, sql: "SELECT uniqueId FROM model_SignalRecipient WHERE id = ?", arguments: [recipientId])
     }
 
+    private static func fetchOrCreateProfile(aci: Aci, localAci: Aci, tx: DBWriteTransaction) throws -> OWSUserProfile.RowId {
+        let db = tx.database
+        let existingProfileId: Int64?
+        if aci == localAci {
+            existingProfileId = try Int64.fetchOne(db, sql: "SELECT id FROM model_OWSUserProfile WHERE recipientPhoneNumber IS ?", arguments: ["kLocalProfileUniqueId"])
+        } else {
+            existingProfileId = try Int64.fetchOne(db, sql: "SELECT id FROM model_OWSUserProfile WHERE recipientUUID IS ?", arguments: [aci.serviceIdUppercaseString])
+        }
+        if let existingProfileId {
+            return existingProfileId
+        }
+        return try createProfile(aci: aci, localAci: localAci, tx: tx)
+    }
+
+    private static func createProfile(aci: Aci, localAci: Aci, tx: DBWriteTransaction) throws -> OWSUserProfile.RowId {
+        let aciString: String?
+        let phoneNumberString: String?
+        if aci == localAci {
+            aciString = nil
+            phoneNumberString = "kLocalProfileUniqueId"
+        } else {
+            aciString = aci.serviceIdUppercaseString
+            phoneNumberString = nil
+        }
+        try tx.database.execute(
+            sql: """
+            INSERT INTO "model_OWSUserProfile" ("recordType", "uniqueId", "recipientUUID", "recipientPhoneNumber") VALUES (0, ?, ?, ?)
+            """,
+            arguments: [
+                UUID().uuidString,
+                aciString,
+                phoneNumberString,
+            ],
+        )
+        return tx.database.lastInsertedRowID
+    }
+
+    private static func fetchLocalAci(tx: DBReadTransaction) throws -> Aci? {
+        let aciString = try String.fetchOne(
+            tx.database,
+            sql: "SELECT value FROM keyvalue WHERE collection = ? AND key = ?",
+            arguments: ["TSStorageUserAccountCollection", "TSStorageRegisteredUUIDKey"],
+        )
+        return try aciString.map(Aci.parseFrom(serviceIdString:))
+    }
+
     static func createCallLinkTable(
         tableName: String,
         rootKeyConstraint: StaticString,
@@ -7905,6 +7957,37 @@ public class GRDBSchemaMigrator {
             SELECT DISTINCT '2FA', 'HasEverHadPin', 1 FROM "keyvalue"
                 WHERE "collection" = '2FA' AND "key" IN ('PinCode', 'LastSuccessfulReminderDate')
         """)
+    }
+
+    static func migrateHasPaymentAddress(tx: DBWriteTransaction) throws {
+        try tx.database.alter(table: "model_OWSUserProfile") { table in
+            table.add(column: "hasPaymentAddress", .boolean)
+        }
+        if BuildFlags.migrateHasPaymentAddress, let localAci = try fetchLocalAci(tx: tx) {
+            let oldRows = try Row.fetchAll(
+                tx.database,
+                sql: "SELECT key, value FROM keyvalue WHERE collection IS ?",
+                arguments: ["arePaymentsEnabledForUserStore"],
+            )
+            for oldRow in oldRows {
+                let serviceIdString = oldRow[0] as String
+                guard let aci = Aci.parseFrom(aciString: serviceIdString) else {
+                    Logger.warn("skipping \(serviceIdString) because it's not an ACI")
+                    continue
+                }
+                let hasPaymentAddress = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSNumber.self, from: oldRow[1])?.boolValue
+                guard let hasPaymentAddress else {
+                    Logger.warn("skipping \(serviceIdString) because we couldn't decode the value")
+                    continue
+                }
+                let userProfileId = try fetchOrCreateProfile(aci: aci, localAci: localAci, tx: tx)
+                try tx.database.execute(
+                    sql: "UPDATE model_OWSUserProfile SET hasPaymentAddress = ? WHERE id = ?",
+                    arguments: [hasPaymentAddress, userProfileId],
+                )
+            }
+        }
+        try tx.database.execute(sql: "DELETE FROM keyvalue WHERE collection IS ?", arguments: ["arePaymentsEnabledForUserStore"])
     }
 
     static func dedupeSignalRecipients(tx: DBWriteTransaction) throws {
