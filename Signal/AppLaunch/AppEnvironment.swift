@@ -38,6 +38,7 @@ public class AppEnvironment: NSObject {
     private(set) var badgeManager: BadgeManager!
     private(set) var callLinkProfileKeySharingManager: CallLinkProfileKeySharingManager!
     private(set) var callService: CallService!
+    private(set) var groupSendEndorsementExpirationJob: GroupSendEndorsementExpirationJob!
     private(set) var outgoingDeviceRestorePresenter: OutgoingDeviceRestorePresenter!
     private(set) var provisioningManager: ProvisioningManager!
     private(set) var quickRestoreManager: QuickRestoreManager!
@@ -125,6 +126,11 @@ public class AppEnvironment: NSObject {
         self.callLinkProfileKeySharingManager = CallLinkProfileKeySharingManager(
             db: DependenciesBridge.shared.db,
             accountManager: DependenciesBridge.shared.tsAccountManager,
+        )
+        self.groupSendEndorsementExpirationJob = GroupSendEndorsementExpirationJob(
+            dateProvider: Date.provider,
+            db: DependenciesBridge.shared.db,
+            groupSendEndorsementStore: DependenciesBridge.shared.groupSendEndorsementStore,
         )
         self.provisioningManager = ProvisioningManager(
             accountKeyStore: DependenciesBridge.shared.accountKeyStore,

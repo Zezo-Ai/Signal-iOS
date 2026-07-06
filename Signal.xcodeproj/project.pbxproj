@@ -840,6 +840,7 @@
 		50BF51102BB2035400C2C309 /* UIStackView+SignalUITest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C45D9329CB93E200B2CD2D /* UIStackView+SignalUITest.swift */; };
 		50C0203C2CA4A61E00BDC4EF /* ConcurrentTaskQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C0203B2CA4A61E00BDC4EF /* ConcurrentTaskQueue.swift */; };
 		50C0203E2CA4A7A500BDC4EF /* Retry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C0203D2CA4A7A500BDC4EF /* Retry.swift */; };
+		50C2B5142FFC348100DEFB25 /* GroupSendEndorsementExpirationJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C2B5132FFC348100DEFB25 /* GroupSendEndorsementExpirationJob.swift */; };
 		50C38CAD2A8EB2610030A731 /* TimeGatedBatchTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C38CAC2A8EB2610030A731 /* TimeGatedBatchTest.swift */; };
 		50C4AEFC2CE6766B005609F6 /* GroupSendEndorsements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C4AEFB2CE6766B005609F6 /* GroupSendEndorsements.swift */; };
 		50C4AEFE2CE6767C005609F6 /* GroupSendFullTokenBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C4AEFD2CE6767C005609F6 /* GroupSendFullTokenBuilder.swift */; };
@@ -5128,6 +5129,7 @@
 		50BE67522CAAF7DF006D7BC7 /* AdHocCallRecordManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdHocCallRecordManager.swift; sourceTree = "<group>"; };
 		50C0203B2CA4A61E00BDC4EF /* ConcurrentTaskQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConcurrentTaskQueue.swift; sourceTree = "<group>"; };
 		50C0203D2CA4A7A500BDC4EF /* Retry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Retry.swift; sourceTree = "<group>"; };
+		50C2B5132FFC348100DEFB25 /* GroupSendEndorsementExpirationJob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupSendEndorsementExpirationJob.swift; sourceTree = "<group>"; };
 		50C38CAC2A8EB2610030A731 /* TimeGatedBatchTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeGatedBatchTest.swift; sourceTree = "<group>"; };
 		50C4AEFB2CE6766B005609F6 /* GroupSendEndorsements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupSendEndorsements.swift; sourceTree = "<group>"; };
 		50C4AEFD2CE6767C005609F6 /* GroupSendFullTokenBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupSendFullTokenBuilder.swift; sourceTree = "<group>"; };
@@ -9936,6 +9938,14 @@
 			path = Sharing;
 			sourceTree = "<group>";
 		};
+		50C2B5122FFC346700DEFB25 /* Groups */ = {
+			isa = PBXGroup;
+			children = (
+				50C2B5132FFC348100DEFB25 /* GroupSendEndorsementExpirationJob.swift */,
+			);
+			path = Groups;
+			sourceTree = "<group>";
+		};
 		50D8394F2F91659100EE009A /* Debugging */ = {
 			isa = PBXGroup;
 			children = (
@@ -12091,6 +12101,7 @@
 				88C4E38124671F9D009C9B97 /* DeviceTransfer */,
 				3428576F26BD8777005A2A96 /* Emoji */,
 				50E7E1CC2BACBDE000A94861 /* Expiration */,
+				50C2B5122FFC346700DEFB25 /* Groups */,
 				88BFD4712335C2A4001797D7 /* Lottie */,
 				88A505F523DBA0C70005C012 /* Megaphones */,
 				50E7E1CE2BACBF3300A94861 /* Notifications */,
@@ -18531,6 +18542,7 @@
 				347B83FD24378DDF0019A52C /* GroupMemberRequestsAndInvitesViewController.swift in Sources */,
 				889DFA10264EE76F00D03921 /* GroupNameViewController.swift in Sources */,
 				88BE44A82615451A00AE8E33 /* GroupPermissionsSettingsViewController.swift in Sources */,
+				50C2B5142FFC348100DEFB25 /* GroupSendEndorsementExpirationJob.swift in Sources */,
 				880FB40428CC251A00FA1C10 /* GroupStorySettingsViewController.swift in Sources */,
 				D9E43C292CC194140001536E /* GroupThreadCall.swift in Sources */,
 				347B83F724367EC10019A52C /* GroupViewHelper+MemberActionSheet.swift in Sources */,

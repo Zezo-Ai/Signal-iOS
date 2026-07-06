@@ -1521,6 +1521,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                 taskGroup.addTask { try await dependenciesBridge.decryptionPlaceholderExpirationJob.run() }
                 taskGroup.addTask { try await dependenciesBridge.storyMessageExpirationJob.run() }
                 taskGroup.addTask { try await dependenciesBridge.pinnedMessageExpirationJob.run() }
+                taskGroup.addTask { try await AppEnvironment.shared.groupSendEndorsementExpirationJob.run() }
                 try await taskGroup.waitForAll()
             }
         } catch is CancellationError {

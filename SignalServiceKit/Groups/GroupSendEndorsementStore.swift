@@ -7,7 +7,7 @@ import Foundation
 import GRDB
 import LibSignalClient
 
-struct GroupSendEndorsementStore {
+public struct GroupSendEndorsementStore {
     func saveEndorsements(
         groupThreadId: Int64,
         expiration: Date,
@@ -36,6 +36,14 @@ struct GroupSendEndorsementStore {
         }
     }
 
+    public func fetchNextExpiringCombinedEndorsement(tx: DBReadTransaction) -> CombinedGroupSendEndorsementRecord? {
+        return failIfThrows {
+            return try CombinedGroupSendEndorsementRecord
+                .order(Column(CombinedGroupSendEndorsementRecord.CodingKeys.expiration).asc)
+                .fetchOne(tx.database)
+        }
+    }
+
     func fetchIndividualEndorsements(groupThreadId: Int64, tx: DBReadTransaction) -> [IndividualGroupSendEndorsementRecord] {
         return failIfThrows {
             return try IndividualGroupSendEndorsementRecord
@@ -53,7 +61,7 @@ struct GroupSendEndorsementStore {
         }
     }
 
-    func deleteEndorsements(groupThreadId: Int64, tx: DBWriteTransaction) {
+    public func deleteEndorsements(groupThreadId: CombinedGroupSendEndorsementRecord.RowId, tx: DBWriteTransaction) {
         failIfThrows {
             try CombinedGroupSendEndorsementRecord.deleteOne(tx.database, key: groupThreadId)
         }

@@ -343,6 +343,7 @@ public class GRDBSchemaMigrator {
         case addReleaseNotesCallToAction
         case completePermasnoozedReminderMegaphones
         case migrateHasPaymentAddress
+        case addCombinedGroupSendEndorsementExpirationIndex
 
         // NOTE: Every time we add a migration id, consider
         // incrementing grdbSchemaVersionLatest.
@@ -5327,6 +5328,15 @@ public class GRDBSchemaMigrator {
 
         migrator.registerMigration(.migrateHasPaymentAddress) { tx in
             try migrateHasPaymentAddress(tx: tx)
+            return .success(())
+        }
+
+        migrator.registerMigration(.addCombinedGroupSendEndorsementExpirationIndex) { tx in
+            try tx.database.create(
+                index: "CombinedGroupSendEndorsement_expiration",
+                on: "CombinedGroupSendEndorsement",
+                columns: ["expiration"],
+            )
             return .success(())
         }
 
