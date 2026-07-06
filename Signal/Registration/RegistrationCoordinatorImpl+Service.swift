@@ -263,22 +263,6 @@ extension RegistrationCoordinatorImpl {
             }
         }
 
-        static func makeEnableReglockRequest(
-            registrationLock: RegistrationLock,
-            auth: ChatServiceAuth,
-            networkManager: any NetworkManagerProtocol,
-            logger: PrefixedLogger,
-        ) async throws {
-            try await Retry.performWithBackoff(
-                maxAttempts: RegistrationCoordinatorImpl.Constants.networkErrorRetries + 1,
-                isRetryable: { $0.isNetworkFailureOrTimeout },
-            ) {
-                var request = OWSRequestFactory.enableRegistrationLockV2Request(token: registrationLock, logger: logger)
-                request.auth = .identified(auth)
-                _ = try await networkManager.asyncRequest(request)
-            }
-        }
-
         enum WhoAmIResponse {
             case success(WhoAmIRequestFactory.Responses.WhoAmI)
             case networkError

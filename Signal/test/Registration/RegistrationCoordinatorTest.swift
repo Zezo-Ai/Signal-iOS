@@ -372,20 +372,8 @@ public class RegistrationCoordinatorTest {
             #expect(auth == expectedAuthedAccount().chatServiceAuth)
         })
 
-        if wasReglockEnabled {
-            // If we had reglock before registration, it should be re-enabled.
-            let expectedReglockRequest = OWSRequestFactory.enableRegistrationLockV2Request(
-                token: finalMasterKey.deriveRegistrationLock(),
-                logger: .empty(),
-            )
-            networkManagerMock.asyncRequestHandlers.append({ request, _ in
-                if request.url == expectedReglockRequest.url {
-                    #expect(finalMasterKey.reglockToken == request.parameters["registrationLock"] as! String)
-                    return HTTPResponse(requestUrl: request.url, status: 200, headers: HttpHeaders(), bodyData: nil)
-                }
-                throw OWSAssertionError("")
-            })
-        }
+        var didMarkReglockEnabled = false
+        ows2FAManagerMock.didMarkRegistrationLockEnabled = { didMarkReglockEnabled = true }
 
         // We haven't done a SVR backup; that should happen now.
         svr.backupMasterKeyMock = { pin, masterKey, force, authMethod in
@@ -448,6 +436,9 @@ public class RegistrationCoordinatorTest {
 
         // Since we set profile info, we should have scheduled a reupload.
         #expect(profileManagerMock.didScheduleReuploadLocalProfile)
+
+        // If we had reglock before registration, it should be re-enabled.
+        #expect(wasReglockEnabled == didMarkReglockEnabled)
     }
 
     @MainActor @Test(arguments: Self.testCases())
@@ -1197,18 +1188,8 @@ public class RegistrationCoordinatorTest {
             #expect(auth == expectedAuthedAccount().chatServiceAuth)
         })
 
-        // If we had reglock before registration, it should be re-enabled.
-        let expectedReglockRequest = OWSRequestFactory.enableRegistrationLockV2Request(
-            token: finalMasterKey.deriveRegistrationLock(),
-            logger: .empty(),
-        )
-        networkManagerMock.asyncRequestHandlers.append({ request, _ in
-            if request.url == expectedReglockRequest.url {
-                #expect(finalMasterKey.reglockToken == request.parameters["registrationLock"] as! String)
-                return HTTPResponse(requestUrl: request.url, status: 200, headers: HttpHeaders(), bodyData: nil)
-            }
-            throw OWSAssertionError("")
-        })
+        var didMarkReglockEnabled = false
+        ows2FAManagerMock.didMarkRegistrationLockEnabled = { didMarkReglockEnabled = true }
 
         // We haven't done a SVR backup; that should happen now.
         svr.backupMasterKeyMock = { pin, masterKey, force, authMethod in
@@ -1274,6 +1255,9 @@ public class RegistrationCoordinatorTest {
         #expect(await coordinator.submitPINCode(Stubs.pinCode).awaitable() == .done)
 
         #expect(!didClearPinCode)
+
+        // If we had reglock before registration, it should be re-enabled.
+        #expect(didMarkReglockEnabled)
     }
 
     /// Test the path where both local and remote RRP are rejected due to a reglock challenge

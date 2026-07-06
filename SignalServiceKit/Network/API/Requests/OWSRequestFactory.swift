@@ -97,7 +97,7 @@ public enum OWSRequestFactory {
 
     // MARK: - Registration
 
-    public static func enableRegistrationLockV2Request(token: RegistrationLock, logger: PrefixedLogger) -> TSRequest {
+    static func enableRegistrationLockV2Request(token: RegistrationLock, logger: PrefixedLogger) -> TSRequest {
         let url = URL(string: textSecureRegistrationLockV2API)!
         return TSRequest(
             url: url,
