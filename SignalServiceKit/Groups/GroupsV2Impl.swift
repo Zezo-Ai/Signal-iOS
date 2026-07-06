@@ -657,7 +657,7 @@ public class GroupsV2Impl: GroupsV2 {
         gseExpiration = databaseStorage.read { tx in
             let groupThread = TSGroupThread.fetch(groupId: groupId, transaction: tx)
             let groupThreadId = groupThread?.sqliteRowId!
-            let endorsementRecord = groupThreadId.flatMap({ try? groupSendEndorsementStore.fetchCombinedEndorsement(groupThreadId: $0, tx: tx) })
+            let endorsementRecord = groupThreadId.flatMap({ groupSendEndorsementStore.fetchCombinedEndorsement(groupThreadId: $0, tx: tx) })
             return endorsementRecord?.expirationTimestamp ?? 0
         }
 
@@ -690,7 +690,7 @@ public class GroupsV2Impl: GroupsV2 {
         (groupModel, gseExpiration) = databaseStorage.read { tx in
             let groupThread = TSGroupThread.fetch(groupId: groupId, transaction: tx)
             let groupThreadId = groupThread?.sqliteRowId!
-            let endorsementRecord = groupThreadId.flatMap({ try? groupSendEndorsementStore.fetchCombinedEndorsement(groupThreadId: $0, tx: tx) })
+            let endorsementRecord = groupThreadId.flatMap({ groupSendEndorsementStore.fetchCombinedEndorsement(groupThreadId: $0, tx: tx) })
             return (
                 groupThread?.groupModel as? TSGroupModelV2,
                 endorsementRecord?.expirationTimestamp ?? 0,

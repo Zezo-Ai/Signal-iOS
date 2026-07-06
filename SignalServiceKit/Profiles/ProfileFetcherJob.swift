@@ -299,14 +299,14 @@ public class ProfileFetcherJob {
             throw OWSAssertionError("Can't access v2 model for group with v2 identifier.")
         }
         let endorsementStore = DependenciesBridge.shared.groupSendEndorsementStore
-        let combinedEndorsement = try endorsementStore.fetchCombinedEndorsement(groupThreadId: groupThread.sqliteRowId!, tx: tx)
+        let combinedEndorsement = endorsementStore.fetchCombinedEndorsement(groupThreadId: groupThread.sqliteRowId!, tx: tx)
         guard let combinedEndorsement else {
             // Perhaps we haven't fetched it or it expired.
             return nil
         }
         guard
             let recipient = recipientDatabaseTable.fetchRecipient(serviceId: aci, transaction: tx),
-            let individualEndorsement = try endorsementStore.fetchIndividualEndorsement(
+            let individualEndorsement = endorsementStore.fetchIndividualEndorsement(
                 groupThreadId: groupThread.sqliteRowId!,
                 recipientId: recipient.id,
                 tx: tx,

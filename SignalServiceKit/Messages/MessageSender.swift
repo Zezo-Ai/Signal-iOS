@@ -997,14 +997,14 @@ public class MessageSender {
     }
 
     private func fetchEndorsements(forThreadId threadId: Int64, secretParams: GroupSecretParams, tx: DBReadTransaction) throws -> GroupSendEndorsements? {
-        let combinedRecord = try groupSendEndorsementStore.fetchCombinedEndorsement(groupThreadId: threadId, tx: tx)
+        let combinedRecord = groupSendEndorsementStore.fetchCombinedEndorsement(groupThreadId: threadId, tx: tx)
         guard let combinedRecord else {
             return nil
         }
         let combinedEndorsement = try GroupSendEndorsement(contents: combinedRecord.endorsement)
 
         var individualEndorsements = [ServiceId: GroupSendEndorsement]()
-        for record in try groupSendEndorsementStore.fetchIndividualEndorsements(groupThreadId: threadId, tx: tx) {
+        for record in groupSendEndorsementStore.fetchIndividualEndorsements(groupThreadId: threadId, tx: tx) {
             let endorsement = try GroupSendEndorsement(contents: record.endorsement)
             let recipient = DependenciesBridge.shared.recipientDatabaseTable.fetchRecipient(rowId: record.recipientId, tx: tx)
             guard let recipient else {

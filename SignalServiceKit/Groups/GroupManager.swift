@@ -632,7 +632,7 @@ public class GroupManager: NSObject {
 
         let groupSendEndorsementStore = DependenciesBridge.shared.groupSendEndorsementStore
         let combinedEndorsement = SSKEnvironment.shared.databaseStorageRef.read { tx in
-            return try? groupSendEndorsementStore.fetchCombinedEndorsement(groupThreadId: threadId, tx: tx)
+            return groupSendEndorsementStore.fetchCombinedEndorsement(groupThreadId: threadId, tx: tx)
         }
         // If we have recent-ish credentials, we don't need to refresh.
         guard GroupSendEndorsements.willExpireSoon(expirationDate: combinedEndorsement?.expiration) else {
