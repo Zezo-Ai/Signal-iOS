@@ -27,32 +27,6 @@ extension DeviceTransferService {
         }
     }
 
-    private enum LegacyRestorationFlags {
-        static let pendingRestoreKey = "DeviceTransferHasPendingRestore"
-        static var hasPendingRestore: Bool {
-            get { CurrentAppContext().appUserDefaults().bool(forKey: Self.pendingRestoreKey) }
-            set {
-                owsAssertDebug(newValue == false) // Future transfers should use the `restorationPhase` key
-                CurrentAppContext().appUserDefaults().set(newValue, forKey: Self.pendingRestoreKey)
-            }
-        }
-
-        static let pendingWasTransferredClearKey = "DeviceTransferPendingWasTransferredClear"
-        static var pendingWasTransferredClear: Bool {
-            get { CurrentAppContext().appUserDefaults().bool(forKey: Self.pendingWasTransferredClearKey) }
-            set { CurrentAppContext().appUserDefaults().set(newValue, forKey: Self.pendingWasTransferredClearKey) }
-        }
-
-        static let pendingPromotionFromHotSwapToPrimaryDatabaseKey = "DeviceTransferPendingPromotionFromHotSwapToPrimaryDatabase"
-        static var pendingPromotionFromHotSwapToPrimaryDatabase: Bool {
-            get { CurrentAppContext().appUserDefaults().bool(forKey: Self.pendingPromotionFromHotSwapToPrimaryDatabaseKey) }
-            set {
-                owsAssertDebug(newValue == false) // Hotswapping databases is deprecated
-                CurrentAppContext().appUserDefaults().set(newValue, forKey: Self.pendingPromotionFromHotSwapToPrimaryDatabaseKey)
-            }
-        }
-    }
-
     func verifyTransferCompletedSuccessfully(receivedFileIds: [String], skippedFileIds: [String]) -> Bool {
         guard let manifest = readManifestFromTransferDirectory() else {
             owsFailDebug("Missing manifest file")
@@ -129,125 +103,6 @@ extension DeviceTransferService {
         return true
     }
 
-    func restoreTransferredDataLegacy() -> Bool {
-        Logger.info("Attempting to restore transferred data.")
-
-        guard LegacyRestorationFlags.hasPendingRestore else {
-            owsFailDebug("Cannot restore data when there was no pending restore")
-            return false
-        }
-
-        guard let manifest = readManifestFromTransferDirectory() else {
-            owsFailDebug("Unexpectedly tried to restore data when there is no valid manifest")
-            return false
-        }
-
-        guard let database = manifest.database else {
-            owsFailDebug("manifest is missing database")
-            return false
-        }
-
-        do {
-            try GRDBKeyFetcher(keychainStorage: keychainStorage).store(data: database.key)
-        } catch {
-            owsFailDebug("failed to restore database key")
-            return false
-        }
-
-        do {
-            try updateUserDefaults(manifest: manifest)
-        } catch {
-            owsFailDebug("Failed to update user defaults: \(error)")
-            return false
-        }
-
-        for file in manifest.files + [database.database, database.wal] {
-            let pendingFilePath = URL(
-                fileURLWithPath: file.identifier,
-                relativeTo: DeviceTransferService.pendingTransferFilesDirectory,
-            ).path
-
-            // We could be receiving a database in any of the directory modes,
-            // so we force the restore path to be the "primary" database since
-            // that is generally what we desire. If we're hotswapping, this
-            // path will be later overridden with the hotswap path.
-            let newFilePath: String
-            if DeviceTransferService.databaseIdentifier == file.identifier {
-                newFilePath = GRDBDatabaseStorageAdapter.databaseFileUrl(directoryMode: .primary).path
-            } else if DeviceTransferService.databaseWALIdentifier == file.identifier {
-                newFilePath = GRDBDatabaseStorageAdapter.databaseWalUrl(directoryMode: .primary).path
-            } else {
-                newFilePath = URL(
-                    fileURLWithPath: file.relativePath,
-                    relativeTo: DeviceTransferService.appSharedDataDirectory,
-                ).path
-            }
-
-            // If we're hot swapping the database, we move the database
-            // files to a special hotswap directory, since the primary
-            // database is already open. Trying to overwrite the file
-            // in situ can result in database corruption if something
-            // tries to perform a write.
-            var hotswapFilePath: String?
-            if DeviceTransferService.databaseIdentifier == file.identifier {
-                hotswapFilePath = GRDBDatabaseStorageAdapter.databaseFileUrl(directoryMode: .hotswapLegacy).path
-            } else if DeviceTransferService.databaseWALIdentifier == file.identifier {
-                hotswapFilePath = GRDBDatabaseStorageAdapter.databaseWalUrl(directoryMode: .hotswapLegacy).path
-            }
-
-            if OWSFileSystem.fileOrFolderExists(atPath: pendingFilePath) {
-                guard OWSFileSystem.deleteFileIfExists(newFilePath) else {
-                    owsFailDebug("Failed to delete existing file.")
-                    return false
-                }
-                do {
-                    try move(pendingFilePath: pendingFilePath, to: newFilePath)
-                } catch {
-                    owsFailDebug("Failed to move file \(file.identifier); \(error.shortDescription)")
-                    return false
-                }
-            } else if let hotswapFilePath, OWSFileSystem.fileOrFolderExists(atPath: hotswapFilePath) {
-                Logger.info("No longer hot swapping, promoting hotswap database to primary database: \(file.identifier)")
-                guard OWSFileSystem.deleteFileIfExists(newFilePath) else {
-                    owsFailDebug("Failed to delete existing file.")
-                    return false
-                }
-                do {
-                    try move(pendingFilePath: hotswapFilePath, to: newFilePath)
-                } catch {
-                    owsFailDebug("Failed to promote hotswap database \(file.identifier); \(error.shortDescription)")
-                    return false
-                }
-            } else if OWSFileSystem.fileOrFolderExists(atPath: newFilePath) {
-                Logger.info("Skipping restoration of file that was already restored: \(file.identifier)")
-            } else if
-                [
-                    DeviceTransferService.databaseIdentifier,
-                    DeviceTransferService.databaseWALIdentifier,
-                ].contains(file.identifier)
-            {
-                owsFailDebug("unable to restore file that is missing")
-                return false
-            } else {
-                // We sometimes don't receive a file because it goes missing on the old
-                // device between when we generate the manifest and when we perform the
-                // restoration. Our verification process ensures that the only files that
-                // could be missing in this way are non-essential files. It's better to
-                // let the user continue than to lock them out of the app in this state.
-                Logger.info("Skipping restoration of missing file: \(file.identifier)")
-                continue
-            }
-        }
-
-        LegacyRestorationFlags.pendingWasTransferredClear = true
-        LegacyRestorationFlags.pendingPromotionFromHotSwapToPrimaryDatabase = false
-        hasBeenRestored = true
-
-        resetTransferDirectory(createNewTransferDirectory: true)
-
-        return true
-    }
-
     func resetTransferDirectory(createNewTransferDirectory: Bool) {
         do {
             try FileManager.default.removeItem(atPath: DeviceTransferService.pendingTransferDirectory.path)
@@ -265,42 +120,11 @@ extension DeviceTransferService {
         case .noCurrentRestoration, .cleanup: break
         default: rawRestorationPhase = RestorationPhase.noCurrentRestoration.rawValue
         }
-        LegacyRestorationFlags.hasPendingRestore = false
     }
 
     private func move(pendingFilePath: String, to newFilePath: String) throws {
         OWSFileSystem.ensureDirectoryExists((newFilePath as NSString).deletingLastPathComponent)
         try OWSFileSystem.moveFilePath(pendingFilePath, toFilePath: newFilePath)
-    }
-
-    private func promoteTransferDatabaseToPrimaryDatabase() -> Bool {
-        Logger.info("Promoting the hotswap database to the primary database")
-
-        let primaryDatabaseDirectoryPath = GRDBDatabaseStorageAdapter.databaseDirUrl(directoryMode: .primary).path
-        let hotswapDatabaseDirectoryPath = GRDBDatabaseStorageAdapter.databaseDirUrl(directoryMode: .hotswapLegacy).path
-
-        if OWSFileSystem.fileOrFolderExists(atPath: hotswapDatabaseDirectoryPath) {
-            guard OWSFileSystem.deleteFileIfExists(primaryDatabaseDirectoryPath) else {
-                owsFailDebug("Failed to delete existing file.")
-                return false
-            }
-            do {
-                try move(pendingFilePath: hotswapDatabaseDirectoryPath, to: primaryDatabaseDirectoryPath)
-            } catch {
-                owsFailDebug("Failed to promote hotswap database to primary database: \(error.shortDescription)")
-                return false
-            }
-        } else {
-            guard OWSFileSystem.fileOrFolderExists(atPath: primaryDatabaseDirectoryPath) else {
-                owsFailDebug("Missing primary and hotswap database directories.")
-                return false
-            }
-            Logger.info("Missing hotswap database, we may have previously restored. Assuming primary database is correct.")
-        }
-
-        LegacyRestorationFlags.pendingPromotionFromHotSwapToPrimaryDatabase = false
-
-        return true
     }
 
     func launchCleanup() -> Bool {
@@ -315,10 +139,6 @@ extension DeviceTransferService {
                 owsFailDebug("Failed to finish restoration: \(error)")
                 success = false
             }
-        } else if LegacyRestorationFlags.hasPendingRestore {
-            success = restoreTransferredDataLegacy()
-        } else if LegacyRestorationFlags.pendingPromotionFromHotSwapToPrimaryDatabase {
-            success = promoteTransferDatabaseToPrimaryDatabase()
         } else {
             success = true
         }
@@ -431,9 +251,6 @@ extension DeviceTransferService {
                     GRDBDatabaseStorageAdapter.DirectoryMode.primaryFolderNameKey,
                     GRDBDatabaseStorageAdapter.DirectoryMode.transferFolderNameKey,
                     DeviceTransferService.hasBeenRestoredKey,
-                    LegacyRestorationFlags.pendingRestoreKey,
-                    LegacyRestorationFlags.pendingPromotionFromHotSwapToPrimaryDatabaseKey,
-                    LegacyRestorationFlags.pendingWasTransferredClearKey,
                 ].contains(userDefault.key) else { continue }
 
             guard let unarchivedValue = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: possibleUserDefaultClasses, from: userDefault.encodedValue) else {
@@ -530,10 +347,9 @@ extension DeviceTransferService {
 
             // Consult both the modern and legacy restoration flag
             let currentPhase = (try? self.restorationPhase) ?? .noCurrentRestoration
-            if currentPhase == .cleanup || LegacyRestorationFlags.pendingWasTransferredClear {
+            if currentPhase == .cleanup {
                 Logger.info("Performing one-time post-restore cleanup...")
                 GRDBDatabaseStorageAdapter.removeOrphanedGRDBDirectories()
-                LegacyRestorationFlags.pendingWasTransferredClear = false
                 self.rawRestorationPhase = RestorationPhase.noCurrentRestoration.rawValue
                 Logger.info("Done!")
             }
