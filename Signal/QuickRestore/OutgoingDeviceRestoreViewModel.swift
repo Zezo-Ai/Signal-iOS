@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import MultipeerConnectivity
 import SignalServiceKit
 
 enum DeviceRestoreError: Error {
@@ -17,7 +16,7 @@ class OutgoingDeviceRestoreViewModel: ObservableObject, DeviceTransferServiceObs
 
     struct RestoreMethodData {
         struct PeerConnectionData {
-            var peerId: MCPeerID
+            var peerId: DeviceTransferPeerID
             var certificateHash: Data
         }
 
@@ -174,7 +173,7 @@ class OutgoingDeviceRestoreViewModel: ObservableObject, DeviceTransferServiceObs
         deviceTransferService.stopListeningForNewDevices()
     }
 
-    func deviceTransferServiceDiscoveredNewDevice(peerId: MCPeerID, discoveryInfo: [String: String]?) {
+    func deviceTransferServiceDiscoveredNewDevice(peerId: DeviceTransferPeerID, discoveryInfo: [String: String]?) {
         deviceConnectedContinuation.update { existingContinuation in
             guard peerId == existingContinuation?.peerConnectionData.peerId else {
                 // Don't resume the continuation if we got a notification for a different peerId

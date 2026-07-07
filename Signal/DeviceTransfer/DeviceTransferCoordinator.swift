@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import MultipeerConnectivity
 import SignalServiceKit
 
 /// DeviceTransferCoordinator manages high-level orchestration of the device transfer flow,
@@ -104,7 +103,7 @@ public class DeviceTransferCoordinator: DeviceTransferServiceObserver, Equatable
         deviceTransferService.stopAcceptingTransfersFromOldDevices()
     }
 
-    func deviceTransferServiceDiscoveredNewDevice(peerId: MCPeerID, discoveryInfo: [String: String]?) {
+    func deviceTransferServiceDiscoveredNewDevice(peerId: DeviceTransferPeerID, discoveryInfo: [String: String]?) {
         transferStatusViewModel.state = .connecting
     }
 

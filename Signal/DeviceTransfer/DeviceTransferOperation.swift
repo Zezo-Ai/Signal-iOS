@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import MultipeerConnectivity
 import SignalServiceKit
 
 // Use the main thread for all MCSession related operations.

@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import MultipeerConnectivity
 import SignalServiceKit
 
 extension DeviceTransferService {
@@ -143,7 +142,7 @@ extension DeviceTransferService {
         return path
     }
 
-    func handleReceivedManifest(at localURL: URL, fromPeer peerId: MCPeerID) {
+    func handleReceivedManifest(at localURL: URL, fromPeer peerId: DeviceTransferPeerID) {
         guard case .idle = transferState else {
             stopTransfer()
             return owsFailDebug("Received manifest in unexpected state \(transferState)")
@@ -249,7 +248,11 @@ extension DeviceTransferService {
 
         let (promise, future) = Promise<Void>.pending()
 
-        session.sendResource(at: manifestFileURL, withName: DeviceTransferService.manifestIdentifier, toPeer: newDevicePeerId) { error in
+        _ = session.sendResource(
+            at: manifestFileURL,
+            withName: DeviceTransferService.manifestIdentifier,
+            toPeer: newDevicePeerId,
+        ) { error in
             if let error {
                 future.reject(error)
             } else {

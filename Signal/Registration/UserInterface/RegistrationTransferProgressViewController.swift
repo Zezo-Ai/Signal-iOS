@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import MultipeerConnectivity
 import SignalServiceKit
 public import SignalUI
 import UIKit
@@ -115,7 +114,7 @@ public class RegistrationTransferProgressViewController: OWSViewController {
 }
 
 extension RegistrationTransferProgressViewController: DeviceTransferServiceObserver {
-    func deviceTransferServiceDiscoveredNewDevice(peerId: MCPeerID, discoveryInfo: [String: String]?) {}
+    func deviceTransferServiceDiscoveredNewDevice(peerId: DeviceTransferPeerID, discoveryInfo: [String: String]?) {}
 
     func deviceTransferServiceDidStartTransfer(progress: Progress) {}
 

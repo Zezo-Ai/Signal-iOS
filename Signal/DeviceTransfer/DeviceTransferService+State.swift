@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import MultipeerConnectivity
 import SignalServiceKit
 
 extension DeviceTransferService {
@@ -20,14 +19,14 @@ extension DeviceTransferService {
     enum TransferState {
         case idle
         case incoming(
-            oldDevicePeerId: MCPeerID,
+            oldDevicePeerId: DeviceTransferPeerID,
             manifest: DeviceTransferProtoManifest,
             receivedFileIds: [String],
             skippedFileIds: [String],
             progress: Progress,
         )
         case outgoing(
-            newDevicePeerId: MCPeerID,
+            newDevicePeerId: DeviceTransferPeerID,
             newDeviceCertificateHash: Data,
             manifest: DeviceTransferProtoManifest,
             transferredFileIds: [String],

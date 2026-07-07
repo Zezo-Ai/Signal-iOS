@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import MultipeerConnectivity
 import SignalServiceKit
 
 extension DeviceTransferService {
@@ -19,7 +18,7 @@ extension DeviceTransferService {
     }
 
     func urlForTransfer(mode: TransferMode) throws -> URL {
-        guard let identity else {
+        guard let identity = session?.identity else {
             throw OWSAssertionError("unexpectedly missing identity")
         }
 
@@ -31,7 +30,7 @@ extension DeviceTransferService {
             throw OWSAssertionError("failed to get base64 certificate hash")
         }
 
-        guard let base64PeerId = try NSKeyedArchiver.archivedData(withRootObject: peerId, requiringSecureCoding: true).base64EncodedString().encodeURIComponent else {
+        guard let base64PeerId = try? session?.peerId.encoded().base64EncodedString().encodeURIComponent else {
             throw OWSAssertionError("failed to get base64 peerId")
         }
 
@@ -47,7 +46,7 @@ extension DeviceTransferService {
         return components.url!
     }
 
-    func parseTransferURL(_ url: URL) throws -> (peerId: MCPeerID, certificateHash: Data) {
+    func parseTransferURL(_ url: URL) throws -> (peerId: DeviceTransferPeerID, certificateHash: Data) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false), let queryItems = components.queryItems else {
             throw OWSAssertionError("Invalid url")
         }
@@ -86,7 +85,7 @@ extension DeviceTransferService {
             let base64PeerId = queryItemsDictionary[DeviceTransferService.peerIdKey],
             let uriDecodedPeerId = base64PeerId.removingPercentEncoding,
             let peerIdData = Data(base64Encoded: uriDecodedPeerId),
-            let peerId = try NSKeyedUnarchiver.unarchivedObject(ofClass: MCPeerID.self, from: peerIdData)
+            let peerId = DeviceTransferPeerID(with: peerIdData)
         else {
             throw OWSAssertionError("failed to decode MCPeerId")
         }

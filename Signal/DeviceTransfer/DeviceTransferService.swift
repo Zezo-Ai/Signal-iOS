@@ -6,11 +6,10 @@
 import CryptoKit
 import Foundation
 import GRDB
-import MultipeerConnectivity
 import SignalServiceKit
 
 protocol DeviceTransferServiceObserver: AnyObject {
-    func deviceTransferServiceDiscoveredNewDevice(peerId: MCPeerID, discoveryInfo: [String: String]?)
+    func deviceTransferServiceDiscoveredNewDevice(peerId: DeviceTransferPeerID, discoveryInfo: [String: String]?)
 
     func deviceTransferServiceDidStartTransfer(progress: Progress)
     func deviceTransferServiceDidEndTransfer(error: DeviceTransferService.Error?)
@@ -18,7 +17,7 @@ protocol DeviceTransferServiceObserver: AnyObject {
     func deviceTransferServiceDidRequestAppRelaunch()
 }
 
-protocol DeviceTransferServiceProtocol: AnyObject {
+protocol DeviceTransferServiceProtocol {
     func startAcceptingTransfersFromOldDevices(mode: DeviceTransferService.TransferMode) throws -> URL
     func addObserver(_ observer: DeviceTransferServiceObserver)
     func removeObserver(_ observer: DeviceTransferServiceObserver)
@@ -76,7 +75,11 @@ protocol DeviceTransferServiceProtocol: AnyObject {
 ///          iv. Move all the received files into place, set the new database key, etc.
 ///          v. Hot-swap the new database into place and present the conversation list
 ///
-class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
+class DeviceTransferService:
+    DeviceTransferServiceProtocol,
+    DeviceTransferSessionDelegate,
+    DeviceTransferServiceBrowserDelegate
+{
 
     static let appSharedDataDirectory = URL(fileURLWithPath: OWSFileSystem.appSharedDataDirectoryPath())
     static let pendingTransferDirectory = URL(fileURLWithPath: "transfer", isDirectory: true, relativeTo: appSharedDataDirectory)
@@ -89,9 +92,6 @@ class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
     static let missingFileData = Data("Missing File".utf8)
     static let missingFileHash = Data(SHA256.hash(data: missingFileData))
 
-    // This must also be updated in the info.plist
-    private static let newDeviceServiceIdentifier = "sgnl-new-device"
-
     private let serialQueue = DispatchQueue(label: "org.signal.device-transfer")
     private var _transferState: TransferState = .idle
     var transferState: TransferState {
@@ -101,27 +101,14 @@ class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
 
     private let sleepBlockObject = DeviceSleepBlockObject(blockReason: "device transfer")
 
-    private(set) var identity: SecIdentity?
-    private(set) var session: MCSession?
-    private(set) lazy var peerId = MCPeerID(displayName: UUID().uuidString)
+    private(set) var session: DeviceTransferSession?
 
-    private lazy var newDeviceServiceBrowser: MCNearbyServiceBrowser = {
-        let browser = MCNearbyServiceBrowser(
-            peer: peerId,
-            serviceType: DeviceTransferService.newDeviceServiceIdentifier,
-        )
-        browser.delegate = self
-        return browser
+    private lazy var newDeviceServiceBrowser = {
+        MPCDeviceTransfer.Browser(peerId: DeviceTransferPeerID(displayName: UUID().uuidString))
     }()
 
-    private lazy var newDeviceServiceAdvertiser: MCNearbyServiceAdvertiser = {
-        let advertiser = MCNearbyServiceAdvertiser(
-            peer: peerId,
-            discoveryInfo: nil,
-            serviceType: DeviceTransferService.newDeviceServiceIdentifier,
-        )
-        advertiser.delegate = self
-        return advertiser
+    private lazy var newDeviceServiceAdvertiser = {
+        MPCDeviceTransfer.Advertiser(peerId: DeviceTransferPeerID(displayName: UUID().uuidString))
     }()
 
     // MARK: -
@@ -134,8 +121,6 @@ class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
         self.appReadiness = appReadiness
         self.deviceSleepManager = deviceSleepManager
         self.keychainStorage = keychainStorage
-
-        super.init()
 
         SwiftSingletons.register(self)
 
@@ -150,26 +135,18 @@ class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
     // MARK: - New Device
 
     func startAcceptingTransfersFromOldDevices(mode: TransferMode) throws -> URL {
-        // Create an identity to use for our TLS sessions, the old device
-        // will verify this identity via the QR code
-        let identity = try SelfSignedIdentity.create(name: "IncomingDeviceTransfer", validForDays: 1)
-        self.identity = identity
-
-        let session = MCSession(peer: peerId, securityIdentity: [identity], encryptionPreference: .required)
-        session.delegate = self
-        self.session = session
-
         Task {
             await self.deviceSleepManager.addBlock(blockObject: sleepBlockObject)
         }
 
-        newDeviceServiceAdvertiser.startAdvertisingPeer()
+        self.session = try newDeviceServiceAdvertiser.startAdvertising()
+        self.session?.delegate = self
 
         return try urlForTransfer(mode: mode)
     }
 
     func stopAcceptingTransfersFromOldDevices() {
-        newDeviceServiceAdvertiser.stopAdvertisingPeer()
+        newDeviceServiceAdvertiser.stopAdvertising()
     }
 
     func cancelTransferFromOldDevice() {
@@ -185,14 +162,15 @@ class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
     // MARK: - Old Device
 
     func startListeningForNewDevices() {
-        newDeviceServiceBrowser.startBrowsingForPeers()
+        newDeviceServiceBrowser.delegate = self
+        newDeviceServiceBrowser.startBrowsing()
     }
 
     func stopListeningForNewDevices() {
-        newDeviceServiceBrowser.stopBrowsingForPeers()
+        newDeviceServiceBrowser.stopBrowsing()
     }
 
-    func transferAccountToNewDevice(with peerId: MCPeerID, certificateHash: Data) throws {
+    func transferAccountToNewDevice(with peerId: DeviceTransferPeerID, certificateHash: Data) throws {
         cancelTransferToNewDevice()
 
         // Marking the transfer as "in progress" does a few things, most notably it:
@@ -217,15 +195,6 @@ class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
         let manifest = try buildManifest()
         let progress = Progress(totalUnitCount: Int64(manifest.estimatedTotalSize))
 
-        // We don't actually need to generate an identity for the old device, the new device
-        // doesn't verify this information. We do it anyway, for consistency.
-        let identity = try SelfSignedIdentity.create(name: "OutgoingDeviceTransfer", validForDays: 1)
-        self.identity = identity
-
-        let session = MCSession(peer: self.peerId, securityIdentity: [identity], encryptionPreference: .required)
-        session.delegate = self
-        self.session = session
-
         Task {
             await self.deviceSleepManager.addBlock(blockObject: sleepBlockObject)
         }
@@ -238,7 +207,8 @@ class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
             progress: progress,
         )
 
-        newDeviceServiceBrowser.invitePeer(peerId, to: session, withContext: nil, timeout: 30)
+        self.session = try newDeviceServiceBrowser.invitePeer(peerId)
+        self.session?.delegate = self
     }
 
     func cancelTransferToNewDevice() {
@@ -281,14 +251,13 @@ class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
         case .outgoing:
             sendTask?.cancel()
         case .incoming:
-            newDeviceServiceAdvertiser.stopAdvertisingPeer()
+            newDeviceServiceAdvertiser.stopAdvertising()
         case .idle:
             break
         }
 
         session?.disconnect()
         session = nil
-        identity = nil
 
         Task {
             await self.deviceSleepManager.removeBlock(blockObject: sleepBlockObject)
@@ -469,7 +438,7 @@ class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
     }
 
     static let doneMessage = Data("Transfer Complete".utf8)
-    func sendDoneMessage(to peerId: MCPeerID) throws {
+    func sendDoneMessage(to peerId: DeviceTransferPeerID) throws {
         Logger.info("Sending done message")
 
         guard let session else {
@@ -480,7 +449,7 @@ class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
     }
 
     static let backgroundAppMessage = Data("App backgrounded".utf8)
-    func sendBackgroundAppMessage(to peerId: MCPeerID) throws {
+    func sendBackgroundAppMessage(to peerId: DeviceTransferPeerID) throws {
         Logger.info("Sending backgrounded message")
 
         guard let session else {
@@ -604,6 +573,363 @@ class DeviceTransferService: NSObject, DeviceTransferServiceProtocol {
         throughputTimer = nil
         previouslyCompletedBytes = 0
         lastWholeNumberProgress = 0
+    }
+
+    // MARK: - DeviceTransferSessionDelegate
+
+    func session(
+        _ session: DeviceTransferSession,
+        peer peerId: DeviceTransferPeerID,
+        didChange state: TransferSessionState,
+    ) {
+        // dispatch to main ASAP to free up the session's private thread to receive more bytes.
+        DispatchQueue.main.async {
+            Logger.debug("Connection to \(peerId) did change: \(state.rawValue)")
+
+            switch self.transferState {
+            case .outgoing(let newDevicePeerId, _, _, let transferredFiles, let progress):
+                // We only care about state changes for the device we're sending to.
+                guard peerId == newDevicePeerId else { return }
+
+                Logger.info("Connection to new device did change: \(state.rawValue)")
+
+                switch state {
+                case .connected:
+                    self.notifyObservers { $0.deviceTransferServiceDidStartTransfer(progress: progress) }
+
+                    // Only send the files if we haven't yet sent the manifest.
+                    guard !transferredFiles.contains(DeviceTransferService.manifestIdentifier) else { return }
+
+                    do {
+                        try self.sendManifest().done {
+                            try self.sendAllFiles()
+                        }.catch { error in
+                            self.failTransfer(.assertion, "Failed to send manifest to new device \(error)")
+                        }
+                    } catch {
+                        self.failTransfer(.assertion, "Failed to send manifest to new device \(error)")
+                    }
+                case .connecting:
+                    break
+                case .notConnected:
+                    self.failTransfer(.assertion, "Lost connection to new device")
+                @unknown default:
+                    self.failTransfer(.assertion, "Unexpected connection state: \(state.rawValue)")
+                }
+            case .incoming(let oldDevicePeerId, _, _, _, _):
+                // We only care about state changes for the device we're receiving from.
+                guard peerId == oldDevicePeerId else { return }
+
+                if state == .notConnected { self.failTransfer(.assertion, "Lost connection to old device") }
+            case .idle:
+                break
+            }
+        }
+    }
+
+    func session(
+        _ session: DeviceTransferSession,
+        didReceive data: Data,
+        fromPeer peerId: DeviceTransferPeerID,
+    ) {
+        switch transferState {
+        case .idle:
+            break
+
+        case .outgoing(let newDevicePeerId, _, _, _, _):
+            guard peerId == newDevicePeerId else {
+                return owsFailDebug("Ignoring data from unexpected peer \(peerId)")
+            }
+
+            switch data {
+            case DeviceTransferService.backgroundAppMessage:
+                return failTransfer(.backgroundedDevice, "Received terminate message")
+            case DeviceTransferService.doneMessage:
+                break
+            default:
+                return failTransfer(.assertion, "Received unexpected data")
+            }
+
+            // Notify the UI that the transfer completed successfully.
+            notifyObservers { $0.deviceTransferServiceDidEndTransfer(error: nil) }
+
+            stopTransfer()
+
+            // When the old device receives the done message from the new device,
+            // it can be confident that the transfer has completed successfully and
+            // clear out all data from this device. This will crash the app.
+            Task { @MainActor in
+                SignalApp.shared.resetAppData(keyFetcher: SSKEnvironment.shared.databaseStorageRef.keyFetcher)
+                SignalApp.shared.showTransferCompleteAndExit()
+            }
+
+        case .incoming(let oldDevicePeerId, _, let receivedFileIds, let skippedFileIds, _):
+            guard peerId == oldDevicePeerId else {
+                return owsFailDebug("Ignoring data from unexpected peer \(peerId)")
+            }
+
+            switch data {
+            case DeviceTransferService.backgroundAppMessage:
+                return failTransfer(.backgroundedDevice, "Received backgrounded message")
+            case DeviceTransferService.doneMessage:
+                break
+            default:
+                return failTransfer(.assertion, "Received unexpected data")
+            }
+
+            stopThroughputCalculation()
+
+            // When the new device receives the done message from the old device,
+            // it indicates that the old device thinks we should have received
+            // everything at this point.
+
+            guard
+                verifyTransferCompletedSuccessfully(
+                    receivedFileIds: receivedFileIds,
+                    skippedFileIds: skippedFileIds,
+                )
+            else {
+                return failTransfer(.assertion, "transfer is missing data")
+            }
+
+            // Record that we have a pending restore, so even if the app exits
+            // we can still know to restore the data that was transferred.
+            let startPhase = RestorationPhase.start
+            Logger.info("Setting restoration phase to: \(startPhase)")
+            rawRestorationPhase = startPhase.rawValue
+
+            // Try and notify the old device that we agree, everything is done.
+            // At this point, we consider the transfer complete regardless of
+            // whether or not this message is received by the old device. If the
+            // old device misses this message (because the app crashes, etc.) it
+            // will continue acting as if it is "unregistered", but it won't delete
+            // all data because it doesn't know for sure if the data was safely
+            // received by the new device.
+            do {
+                try sendDoneMessage(to: oldDevicePeerId)
+            } catch {
+                owsFailDebug("Failed to send done message to old device \(error)")
+            }
+
+            // Notify the UI that the transfer completed successfully.
+            notifyObservers { $0.deviceTransferServiceDidEndTransfer(error: nil) }
+
+            // Try and restore the received data. If for some reason the app exits
+            // or crashes at this point, we will retry the restore when the app next
+            // launches.
+            do {
+                try restoreTransferredData()
+            } catch {
+                owsFail("Restore failed. Will try again on next launch. Error: \(error)")
+            }
+
+            stopTransfer(notifyRegState: false)
+
+            Logger.info("Transfer complete")
+
+            DispatchQueue.main.async {
+                self.notifyObservers { $0.deviceTransferServiceDidRequestAppRelaunch() }
+            }
+        }
+    }
+
+    func session(
+        _ session: DeviceTransferSession,
+        didStartReceivingResourceWithName resourceName: String,
+        fromPeer peerId: DeviceTransferPeerID,
+        with fileProgress: Progress,
+    ) {
+        switch transferState {
+        case .idle:
+            guard resourceName == DeviceTransferService.manifestIdentifier else {
+                return Logger.info("Ignoring unexpected incoming file \(resourceName)")
+            }
+        case .outgoing:
+            owsFailDebug("Unexpectedly received a file on old device \(resourceName)")
+        case .incoming(let oldDevicePeerId, let manifest, let receivedFileIds, let skippedFileIds, let progress):
+            guard peerId == oldDevicePeerId else {
+                return owsFailDebug("Ignoring file from unexpected peer \(peerId)")
+            }
+
+            let nameComponents = resourceName.components(separatedBy: " ")
+
+            guard let fileIdentifier = nameComponents.first, nameComponents.count == 2 else {
+                return owsFailDebug("Received incorrectly formatted resourceName: \(resourceName)")
+            }
+
+            guard !receivedFileIds.contains(fileIdentifier) else {
+                return Logger.info("Ignoring duplicate file: \(fileIdentifier)")
+            }
+
+            guard !skippedFileIds.contains(fileIdentifier) else {
+                return Logger.info("Ignoring previously skipped file: \(fileIdentifier)")
+            }
+
+            guard
+                let file: DeviceTransferProtoFile = {
+                    switch fileIdentifier {
+                    case DeviceTransferService.databaseIdentifier:
+                        return manifest.database?.database
+                    case DeviceTransferService.databaseWALIdentifier:
+                        return manifest.database?.wal
+                    default:
+                        return manifest.files.first(where: { $0.identifier == fileIdentifier })
+                    }
+                }()
+            else {
+                return owsFailDebug("Received unexpected file on new device: \(fileIdentifier)")
+            }
+
+            Logger.info("Receiving file: \(file.identifier), estimatedSize: \(file.estimatedSize)")
+            progress.addChild(fileProgress, withPendingUnitCount: Int64(file.estimatedSize))
+        }
+    }
+
+    func session(
+        _ session: DeviceTransferSession,
+        didFinishReceivingResourceWithName resourceName: String,
+        fromPeer peerId: DeviceTransferPeerID,
+        at localURL: URL?,
+        withError error: Swift.Error?,
+    ) {
+        switch transferState {
+        case .idle:
+            guard resourceName == DeviceTransferService.manifestIdentifier else {
+                return Logger.info("Ignoring unexpected incoming file \(resourceName)")
+            }
+
+            if let error {
+                owsFailDebug("Failed to receive manifest \(error)")
+            } else if let localURL {
+                handleReceivedManifest(at: localURL, fromPeer: peerId)
+            } else {
+                owsFailDebug("Unexpectedly completed transfer of resource with no URL or error")
+            }
+        case .outgoing:
+            owsFailDebug("Unexpectedly received a file on old device \(resourceName)")
+        case .incoming(let oldDevicePeerId, let manifest, let receivedFileIds, let skippedFileIds, _):
+            guard peerId == oldDevicePeerId else {
+                return owsFailDebug("Ignoring file from unexpected peer \(peerId)")
+            }
+
+            let nameComponents = resourceName.components(separatedBy: " ")
+
+            guard let fileIdentifier = nameComponents.first, let fileHash = nameComponents.last, nameComponents.count == 2 else {
+                return owsFailDebug("Received incorrectly formatted resourceName: \(resourceName)")
+            }
+
+            guard !receivedFileIds.contains(fileIdentifier) else {
+                return Logger.info("Ignoring duplicate file: \(fileIdentifier)")
+            }
+
+            guard !skippedFileIds.contains(fileIdentifier) else {
+                return Logger.info("Ignoring previously skipped file: \(fileIdentifier)")
+            }
+
+            guard
+                let file: DeviceTransferProtoFile = {
+                    switch fileIdentifier {
+                    case DeviceTransferService.databaseIdentifier:
+                        return manifest.database?.database
+                    case DeviceTransferService.databaseWALIdentifier:
+                        return manifest.database?.wal
+                    default:
+                        return manifest.files.first(where: { $0.identifier == fileIdentifier })
+                    }
+                }()
+            else {
+                return owsFailDebug("Received unexpected file on new device: \(fileIdentifier)")
+            }
+
+            if let error {
+                failTransfer(.assertion, "Failed to receive file \(file.identifier) \(error)")
+            } else if let localURL {
+                OWSFileSystem.ensureDirectoryExists(DeviceTransferService.pendingTransferFilesDirectory.path)
+
+                guard let computedHash = try? Cryptography.computeSHA256DigestOfFile(at: localURL) else {
+                    return failTransfer(.assertion, "Failed to compute hash for \(file.identifier)")
+                }
+
+                guard computedHash.hexadecimalString == fileHash else {
+                    return failTransfer(.assertion, "Received file with incorrect hash \(file.identifier)")
+                }
+
+                guard computedHash != DeviceTransferService.missingFileHash else {
+                    Logger.warn("Received notification of missing file: \(file.identifier), skipping.")
+                    transferState = transferState.appendingSkippedFileId(file.identifier)
+                    return
+                }
+
+                do {
+                    try OWSFileSystem.moveFilePath(
+                        localURL.path,
+                        toFilePath: URL(
+                            fileURLWithPath: file.identifier,
+                            relativeTo: DeviceTransferService.pendingTransferFilesDirectory,
+                        ).path,
+                    )
+                } catch {
+                    Logger.warn("Couldn't move file: \(error.shortDescription)")
+                    return failTransfer(.assertion, "Failed to move file into place \(file.identifier)")
+                }
+
+                Logger.info("Received file: \(file.identifier)")
+                transferState = transferState.appendingFileId(file.identifier)
+            } else {
+                owsFailDebug("Unexpectedly completed transfer of resource with no URL or error")
+            }
+        }
+    }
+
+    func session(
+        _ session: DeviceTransferSession,
+        didReceiveCertificate certificates: [Any]?,
+        fromPeer peerId: DeviceTransferPeerID,
+        certificateHandler: @escaping (Bool) -> Void,
+    ) {
+        var certificateIsTrusted = false
+
+        defer {
+            certificateHandler(certificateIsTrusted)
+            if !certificateIsTrusted {
+                self.failTransfer(.certificateMismatch, "the received certificate did not match the expected certificate")
+            }
+        }
+
+        guard case .outgoing(let newDevicePeerId, let expectedCertificateHash, _, _, _) = transferState else {
+            // Accept all connections if we're not doing an outgoing transfer AND we aren't yet registered.
+            // Registered devices can only ever perform outgoing transfers.
+            certificateIsTrusted = !DependenciesBridge.shared.tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegistered
+            return
+        }
+
+        // Reject any connections from unexpected devices.
+        guard peerId == newDevicePeerId else { return }
+
+        // Verify the received certificate matches the expected certificate.
+        guard let certificate = certificates?.first else {
+            return owsFailDebug("new connection did not provide any certificate")
+        }
+
+        let certificateData = SecCertificateCopyData(certificate as! SecCertificate) as Data
+
+        // Reject any connections where we can't compute the certificate hash
+        let certificateHash = Data(SHA256.hash(data: certificateData))
+
+        // Reject any connections where the certificate doesn't match the expected certificate
+        guard expectedCertificateHash.ows_constantTimeIsEqual(to: certificateHash) else {
+            return owsFailDebug("connection from known peer \(peerId) using unexpected certificate")
+        }
+
+        Logger.info("Successfully verified new device certificate \(peerId)")
+
+        certificateIsTrusted = true
+    }
+
+    // MARK: - DeviceTransferServiceBrowserDelegate
+
+    func deviceTransferServiceDiscoveredNewDevice(peerId: DeviceTransferPeerID) {
+        notifyObservers { $0.deviceTransferServiceDiscoveredNewDevice(peerId: peerId, discoveryInfo: nil) }
     }
 }
 
