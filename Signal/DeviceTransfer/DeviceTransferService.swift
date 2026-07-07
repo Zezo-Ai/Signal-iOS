@@ -925,6 +925,790 @@ class DeviceTransferService:
     func deviceTransferServiceDiscoveredNewDevice(peerId: DeviceTransferPeerID) {
         notifyObservers { $0.deviceTransferServiceDiscoveredNewDevice(peerId: peerId, discoveryInfo: nil) }
     }
+
+    func buildManifest() throws -> DeviceTransferProtoManifest {
+        var manifestBuilder = DeviceTransferProtoManifest.builder(grdbSchemaVersion: UInt64(GRDBSchemaMigrator.grdbSchemaVersionLatest))
+        var estimatedTotalSize: UInt64 = 0
+
+        // Database
+
+        do {
+            let database: DeviceTransferProtoFile = try {
+                let file = SSKEnvironment.shared.databaseStorageRef.grdbStorage.databaseFilePath
+                let size = try OWSFileSystem.fileSize(ofPath: file)
+                guard size > 0 else {
+                    throw OWSAssertionError("database is empty")
+                }
+                estimatedTotalSize += size
+                let fileBuilder = DeviceTransferProtoFile.builder(
+                    identifier: DeviceTransferService.databaseIdentifier,
+                    relativePath: try pathRelativeToAppSharedDirectory(file),
+                    estimatedSize: size,
+                )
+                return fileBuilder.buildInfallibly()
+            }()
+
+            let wal: DeviceTransferProtoFile = try {
+                let file = SSKEnvironment.shared.databaseStorageRef.grdbStorage.databaseWALFilePath
+                let size = try OWSFileSystem.fileSize(ofPath: file)
+                estimatedTotalSize += size
+                let fileBuilder = DeviceTransferProtoFile.builder(
+                    identifier: DeviceTransferService.databaseWALIdentifier,
+                    relativePath: try pathRelativeToAppSharedDirectory(file),
+                    estimatedSize: size,
+                )
+                return fileBuilder.buildInfallibly()
+            }()
+
+            let databaseBuilder = DeviceTransferProtoDatabase.builder(
+                key: try SSKEnvironment.shared.databaseStorageRef.keyFetcher.fetchData(),
+                database: database,
+                wal: wal,
+            )
+            manifestBuilder.setDatabase(databaseBuilder.buildInfallibly())
+        }
+
+        // Attachments, Avatars, and Stickers
+
+        // TODO: Ideally, these paths would reference constants...
+        let foldersToTransfer = ["Attachments/", "ProfileAvatars/", "GroupAvatars/", "StickerManager/", "Wallpapers/", "Library/Sounds/", "AvatarHistory/", "attachment_files/"]
+        let filesToTransfer = try foldersToTransfer.flatMap { folder -> [String] in
+            let url = URL(fileURLWithPath: folder, relativeTo: DeviceTransferService.appSharedDataDirectory)
+            return try OWSFileSystem.recursiveFilesInDirectory(url.path)
+        }
+
+        for file in filesToTransfer {
+            let size = try OWSFileSystem.fileSize(ofPath: file)
+
+            guard size > 0 else {
+                owsFailDebug("skipping empty file \(file)")
+                continue
+            }
+
+            estimatedTotalSize += size
+            let fileBuilder = DeviceTransferProtoFile.builder(
+                identifier: UUID().uuidString,
+                relativePath: try pathRelativeToAppSharedDirectory(file),
+                estimatedSize: size,
+            )
+            manifestBuilder.addFiles(fileBuilder.buildInfallibly())
+        }
+
+        // Standard Defaults
+        func isAppleKey(_ key: String) -> Bool {
+            return key.starts(with: "NS") || key.starts(with: "Apple")
+        }
+
+        do {
+            for (key, value) in UserDefaults.standard.dictionaryRepresentation() {
+                // Filter out any keys we think are managed by Apple, we don't need to transfer them.
+                guard !isAppleKey(key) else { continue }
+
+                guard let encodedValue = try? NSKeyedArchiver.archivedData(withRootObject: value, requiringSecureCoding: true) else { continue }
+
+                let defaultBuilder = DeviceTransferProtoDefault.builder(
+                    key: key,
+                    encodedValue: encodedValue,
+                )
+                manifestBuilder.addStandardDefaults(defaultBuilder.buildInfallibly())
+            }
+        }
+
+        // App Defaults
+
+        do {
+            for (key, value) in CurrentAppContext().appUserDefaults().dictionaryRepresentation() {
+                // Filter out any keys we think are managed by Apple, we don't need to transfer them.
+                guard !isAppleKey(key) else { continue }
+
+                guard let encodedValue = try? NSKeyedArchiver.archivedData(withRootObject: value, requiringSecureCoding: true) else { continue }
+
+                let defaultBuilder = DeviceTransferProtoDefault.builder(
+                    key: key,
+                    encodedValue: encodedValue,
+                )
+                manifestBuilder.addAppDefaults(defaultBuilder.buildInfallibly())
+            }
+        }
+
+        manifestBuilder.setEstimatedTotalSize(estimatedTotalSize)
+
+        return manifestBuilder.buildInfallibly()
+    }
+
+    func pathRelativeToAppSharedDirectory(_ path: String) throws -> String {
+        guard !path.contains("*") else {
+            throw OWSAssertionError("path contains invalid character: *")
+        }
+
+        let components = path.components(separatedBy: "/")
+
+        guard components.first != "~" else {
+            throw OWSAssertionError("path starts with invalid component: ~")
+        }
+
+        for component in components {
+            guard component != "." else {
+                throw OWSAssertionError("path contains invalid component: .")
+            }
+
+            guard component != ".." else {
+                throw OWSAssertionError("path contains invalid component: ..")
+            }
+        }
+
+        var path = path.replacingOccurrences(of: DeviceTransferService.appSharedDataDirectory.path, with: "")
+        if path.starts(with: "/") { path.removeFirst() }
+        return path
+    }
+
+    func handleReceivedManifest(at localURL: URL, fromPeer peerId: DeviceTransferPeerID) {
+        guard case .idle = transferState else {
+            stopTransfer()
+            return owsFailDebug("Received manifest in unexpected state \(transferState)")
+        }
+        guard let fileSize = (try? OWSFileSystem.fileSize(of: localURL)) else {
+            stopTransfer()
+            return owsFailDebug("Missing manifest file.")
+        }
+        // Not sure why this limit exists in the first place, but 1Gb should be
+        // plenty high for file descriptors.
+        guard fileSize < 1024 * 1024 * 1024 else {
+            stopTransfer()
+            return owsFailDebug("Unexpectedly received a very large manifest \(fileSize)")
+        }
+        guard let data = try? Data(contentsOf: localURL) else {
+            stopTransfer()
+            return owsFailDebug("Failed to read manifest data")
+        }
+        guard let manifest = try? DeviceTransferProtoManifest(serializedData: data) else {
+            stopTransfer()
+            return owsFailDebug("Failed to parse manifest proto")
+        }
+        guard !DependenciesBridge.shared.tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegistered else {
+            stopTransfer()
+            return owsFailDebug("Ignoring incoming transfer to a registered device")
+        }
+
+        resetTransferDirectory(createNewTransferDirectory: true)
+
+        do {
+            try OWSFileSystem.moveFilePath(
+                localURL.path,
+                toFilePath: URL(
+                    fileURLWithPath: DeviceTransferService.manifestIdentifier,
+                    relativeTo: DeviceTransferService.pendingTransferDirectory,
+                ).path,
+            )
+        } catch {
+            owsFailDebug("Failed to move manifest into place: \(error.shortDescription)")
+            return
+        }
+
+        let progress = Progress(totalUnitCount: Int64(manifest.estimatedTotalSize))
+
+        transferState = .incoming(
+            oldDevicePeerId: peerId,
+            manifest: manifest,
+            receivedFileIds: [DeviceTransferService.manifestIdentifier],
+            skippedFileIds: [],
+            progress: progress,
+        )
+
+        DependenciesBridge.shared.db.write { tx in
+            DependenciesBridge.shared.registrationStateChangeManager.setIsTransferInProgress(tx: tx)
+        }
+
+        notifyObservers { $0.deviceTransferServiceDidStartTransfer(progress: progress) }
+
+        startThroughputCalculation()
+
+        // Check if the device has a newer version of the database than we understand
+
+        guard manifest.grdbSchemaVersion <= GRDBSchemaMigrator.grdbSchemaVersionLatest else {
+            return self.failTransfer(.unsupportedVersion, "Ignoring manifest with unsupported schema version")
+        }
+
+        // Check if there is enough space on disk to receive the transfer
+
+        guard
+            let freeSpaceInBytes = try? OWSFileSystem.freeSpaceInBytes(
+                forPath: DeviceTransferService.pendingTransferDirectory,
+            )
+        else {
+            return self.failTransfer(.assertion, "failed to calculate available disk space")
+        }
+
+        guard freeSpaceInBytes > manifest.estimatedTotalSize else {
+            return self.failTransfer(.notEnoughSpace, "not enough free space to receive transfer")
+        }
+    }
+
+    @MainActor
+    func sendManifest(session: DeviceTransferSession) async throws {
+        Logger.info("Sending manifest to new device.")
+
+        guard case .outgoing(let newDevicePeerId, _, let manifest, _, _) = transferState else {
+            throw OWSAssertionError("attempted to send manifest while no active outgoing transfer")
+        }
+
+        resetTransferDirectory(createNewTransferDirectory: true)
+
+        // We write the manifest to a temp file, since MCSession only allows sending "typed"
+        // data when sending files, unless you do your own stream management.
+        let manifestData = try manifest.serializedData()
+        let manifestFileURL = URL(
+            fileURLWithPath: DeviceTransferService.manifestIdentifier,
+            relativeTo: DeviceTransferService.pendingTransferDirectory,
+        )
+        try manifestData.write(to: manifestFileURL, options: .atomic)
+
+        defer {
+            OWSFileSystem.deleteFileIfExists(manifestFileURL.path)
+        }
+
+        try await session.sendResource(
+            url: manifestFileURL,
+            name: DeviceTransferService.manifestIdentifier,
+            to: newDevicePeerId,
+            progressBlock: { _ in },
+        )
+
+        Logger.info("Successfully sent manifest to new device.")
+
+        transferState = self.transferState.appendingFileId(DeviceTransferService.manifestIdentifier)
+        startThroughputCalculation()
+    }
+
+    func readManifestFromTransferDirectory() -> DeviceTransferProtoManifest? {
+        let manifestPath = URL(
+            fileURLWithPath: DeviceTransferService.manifestIdentifier,
+            relativeTo: DeviceTransferService.pendingTransferDirectory,
+        ).path
+        guard OWSFileSystem.fileOrFolderExists(atPath: manifestPath) else { return nil }
+        guard let manifestData = try? Data(contentsOf: URL(fileURLWithPath: manifestPath)) else { return nil }
+        return try? DeviceTransferProtoManifest(serializedData: manifestData)
+    }
+
+    private static let hasBeenRestoredKey = "DeviceTransferHasBeenRestored"
+    var hasBeenRestored: Bool {
+        get { CurrentAppContext().appUserDefaults().bool(forKey: DeviceTransferService.hasBeenRestoredKey) }
+        set { CurrentAppContext().appUserDefaults().set(newValue, forKey: DeviceTransferService.hasBeenRestoredKey) }
+    }
+
+    private static let restorePhaseKey = "DeviceTransferRestorationPhase"
+    var rawRestorationPhase: Int {
+        get { CurrentAppContext().appUserDefaults().integer(forKey: DeviceTransferService.restorePhaseKey) }
+        set { CurrentAppContext().appUserDefaults().set(newValue, forKey: DeviceTransferService.restorePhaseKey) }
+    }
+
+    var restorationPhase: RestorationPhase {
+        get throws {
+            try RestorationPhase(rawValue: rawRestorationPhase) ?? {
+                throw OWSAssertionError("Invalid raw value: \(rawRestorationPhase)")
+            }()
+        }
+    }
+
+    func verifyTransferCompletedSuccessfully(receivedFileIds: [String], skippedFileIds: [String]) -> Bool {
+        guard let manifest = readManifestFromTransferDirectory() else {
+            owsFailDebug("Missing manifest file")
+            return false
+        }
+
+        // Check that there aren't any files that we were
+        // expecting that are missing.
+        for file in manifest.files {
+            guard !skippedFileIds.contains(file.identifier) else { continue }
+
+            guard receivedFileIds.contains(file.identifier) else {
+                owsFailDebug("did not receive file \(file.identifier)")
+                return false
+            }
+            guard
+                OWSFileSystem.fileOrFolderExists(
+                    atPath: URL(
+                        fileURLWithPath: file.identifier,
+                        relativeTo: DeviceTransferService.pendingTransferFilesDirectory,
+                    ).path,
+                )
+            else {
+                owsFailDebug("Missing file \(file.identifier)")
+                return false
+            }
+        }
+
+        // Check that the appropriate database files were received
+        guard let database = manifest.database else {
+            owsFailDebug("missing database proto")
+            return false
+        }
+
+        guard database.key.count == GRDBKeyFetcher.Constants.kSQLCipherKeySpecLength else {
+            owsFailDebug("incorrect database key length")
+            return false
+        }
+
+        guard receivedFileIds.contains(DeviceTransferService.databaseIdentifier) else {
+            owsFailDebug("did not receive database file")
+            return false
+        }
+
+        guard
+            OWSFileSystem.fileOrFolderExists(
+                atPath: URL(
+                    fileURLWithPath: DeviceTransferService.databaseIdentifier,
+                    relativeTo: DeviceTransferService.pendingTransferFilesDirectory,
+                ).path,
+            )
+        else {
+            owsFailDebug("missing database file")
+            return false
+        }
+
+        guard receivedFileIds.contains(DeviceTransferService.databaseWALIdentifier) else {
+            owsFailDebug("did not receive database wal file")
+            return false
+        }
+
+        guard
+            OWSFileSystem.fileOrFolderExists(
+                atPath: URL(
+                    fileURLWithPath: DeviceTransferService.databaseWALIdentifier,
+                    relativeTo: DeviceTransferService.pendingTransferFilesDirectory,
+                ).path,
+            )
+        else {
+            owsFailDebug("missing database wal file")
+            return false
+        }
+
+        return true
+    }
+
+    func resetTransferDirectory(createNewTransferDirectory: Bool) {
+        do {
+            try FileManager.default.removeItem(atPath: DeviceTransferService.pendingTransferDirectory.path)
+        } catch CocoaError.fileReadNoSuchFile, CocoaError.fileNoSuchFile, POSIXError.ENOENT {
+            // it doesn't exist -- this is fine
+        } catch {
+            owsFailDebug("Failed to delete existing transfer directory \(error)")
+        }
+        if createNewTransferDirectory {
+            OWSFileSystem.ensureDirectoryExists(DeviceTransferService.pendingTransferDirectory.path)
+        }
+
+        // If we had a pending restore, we no longer do.
+        switch try? restorationPhase {
+        case .noCurrentRestoration, .cleanup: break
+        default: rawRestorationPhase = RestorationPhase.noCurrentRestoration.rawValue
+        }
+    }
+
+    private func move(pendingFilePath: String, to newFilePath: String) throws {
+        OWSFileSystem.ensureDirectoryExists((newFilePath as NSString).deletingLastPathComponent)
+        try OWSFileSystem.moveFilePath(pendingFilePath, toFilePath: newFilePath)
+    }
+
+    func launchCleanup() -> Bool {
+        Logger.info("hasBeenRestored: \(hasBeenRestored)")
+
+        let success: Bool
+        if hasIncompleteRestoration {
+            do {
+                try restoreTransferredData()
+                success = true
+            } catch {
+                owsFailDebug("Failed to finish restoration: \(error)")
+                success = false
+            }
+        } else {
+            success = true
+        }
+        if success {
+            finalizeRestorationIfNecessary()
+        }
+        return success
+    }
+}
+
+extension DeviceTransferService {
+
+    enum RestorationPhase: Int {
+        // Start/Complete: Nothing to do.
+        case noCurrentRestoration = 0
+
+        // Performed by `restoreTransferredData()`
+        case start
+        case updateUserDefaults
+        case moveManifestFiles
+        case allocateNewDatabaseDirectory
+        case moveDatabaseFiles
+        case updateDatabase
+
+        // This state represents that there's some one-time cleanup that's left to be done
+        // Restoration is complete, but every time the app launches `finalizeRestorationIfNecessary`
+        // will run and transition to `noCurrentRestoration` once successful
+        case cleanup
+
+        var next: RestorationPhase {
+            RestorationPhase(rawValue: rawValue + 1) ?? .noCurrentRestoration
+        }
+    }
+
+    var hasIncompleteRestoration: Bool { rawRestorationPhase > 0 }
+    func restoreTransferredData() throws {
+        do {
+            let manifest: DeviceTransferProtoManifest? = readManifestFromTransferDirectory()
+
+            // Run through the restoration steps. The deal here is:
+            // - The phase we're currently on has not been completed yet
+            // - Each phase must be idempotent and capable of handling arbitrary interruption (i.e. crashes)
+            // - If a phase completes without error, it should be durable
+            // - We return once we've hit `noCurrentRestoration` or `cleanup`
+            var currentPhase = try restorationPhase
+            while currentPhase != .noCurrentRestoration, currentPhase != .cleanup {
+                Logger.info("Performing restoration phase: \(currentPhase)")
+                try performRestorationPhase(currentPhase, manifest: manifest)
+                Logger.info("Completed restoration phase: \(currentPhase)")
+
+                currentPhase = currentPhase.next
+                rawRestorationPhase = currentPhase.rawValue
+            }
+        } catch {
+            owsFailDebug("Hit error during restoration phase \(rawRestorationPhase): \(error)")
+            throw error
+        }
+    }
+
+    private func performRestorationPhase(_ phase: RestorationPhase, manifest: DeviceTransferProtoManifest?) throws {
+        switch phase {
+        case .noCurrentRestoration, .cleanup:
+            owsFailDebug("Unexpected state")
+        case .start:
+            // No-op, having a start case jut makes the logs look nice
+            break
+        case .updateUserDefaults:
+            try updateUserDefaults(manifest: manifest)
+        case .moveManifestFiles:
+            try moveManifestFiles(manifest: manifest)
+        case .allocateNewDatabaseDirectory:
+            allocateNewDatabaseDirectory()
+        case .moveDatabaseFiles:
+            try moveDatabaseFiles(manifest: manifest)
+        case .updateDatabase:
+            try updateCurrentDatabase(manifest: manifest)
+            // At this point, we've restored all of the data we need. Just some bits of cleanup left.
+            hasBeenRestored = true
+        }
+    }
+
+    private func updateUserDefaults(manifest: DeviceTransferProtoManifest?) throws {
+        guard let manifest else {
+            throw OWSAssertionError("No manifest available")
+        }
+
+        let possibleUserDefaultClasses = [
+            NSData.self,
+            NSString.self,
+            NSNumber.self,
+            NSDate.self,
+            NSArray.self,
+            NSDictionary.self,
+        ]
+        // TODO: We should codify how we want to use standardDefaults. Either we should
+        // get rid of them, or expand them to support all of our extensions
+        for userDefault in manifest.standardDefaults {
+            guard let unarchivedValue = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: possibleUserDefaultClasses, from: userDefault.encodedValue) else {
+                owsFailDebug("Failed to unarchive value for key \(userDefault.key)")
+                continue
+            }
+
+            UserDefaults.standard.set(unarchivedValue, forKey: userDefault.key)
+        }
+
+        // TODO: Do we want to transfer all of our app defaults?
+        for userDefault in manifest.appDefaults {
+            guard
+                ![
+                    GRDBDatabaseStorageAdapter.DirectoryMode.primaryFolderNameKey,
+                    GRDBDatabaseStorageAdapter.DirectoryMode.transferFolderNameKey,
+                    DeviceTransferService.hasBeenRestoredKey,
+                ].contains(userDefault.key) else { continue }
+
+            guard let unarchivedValue = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: possibleUserDefaultClasses, from: userDefault.encodedValue) else {
+                owsFailDebug("Failed to unarchive value for key \(userDefault.key)")
+                continue
+            }
+            CurrentAppContext().appUserDefaults().set(unarchivedValue, forKey: userDefault.key)
+        }
+    }
+
+    private func moveManifestFiles(manifest: DeviceTransferProtoManifest?) throws {
+        guard let manifest else {
+            throw OWSAssertionError("No manifest available")
+        }
+        let sourceDir = DeviceTransferService.pendingTransferFilesDirectory
+        let destDir = DeviceTransferService.appSharedDataDirectory
+
+        try manifest.files.forEach { file in
+            let sourceUrl = URL(fileURLWithPath: file.identifier, relativeTo: sourceDir)
+            let destUrl = URL(fileURLWithPath: file.relativePath, relativeTo: destDir)
+
+            do {
+                try move(pendingFilePath: sourceUrl.path, to: destUrl.path)
+            } catch CocoaError.fileWriteFileExists {
+                Logger.info("Skipping restoration of file that was already restored: \(file.identifier)")
+            } catch CocoaError.fileNoSuchFile, CocoaError.fileReadNoSuchFile, POSIXError.ENOENT {
+                // We sometimes don't receive a file because it goes missing on the old
+                // device between when we generate the manifest and when we perform the
+                // restoration. Our verification process ensures that the only files that
+                // could be missing in this way are non-essential files. It's better to
+                // let the user continue than to lock them out of the app in this state.
+                Logger.info("Skipping restoration of missing file: \(file.identifier)")
+            } catch {
+                throw OWSAssertionError("Failed to move file \(file.identifier)")
+            }
+        }
+    }
+
+    // We create the directory but do not touch anything about it until this phase has committed
+    private func allocateNewDatabaseDirectory() {
+        GRDBDatabaseStorageAdapter.createNewTransferDirectory()
+    }
+
+    private func moveDatabaseFiles(manifest: DeviceTransferProtoManifest?) throws {
+        guard let database = manifest?.database else {
+            throw OWSAssertionError("No manifest database available")
+        }
+        let sourceDir = DeviceTransferService.pendingTransferFilesDirectory
+        let databaseSourceFiles = [database.database, database.wal]
+
+        try databaseSourceFiles.forEach { file in
+            let sourceUrl = URL(fileURLWithPath: file.identifier, relativeTo: sourceDir)
+            let destUrl: URL
+            switch file.identifier {
+            case DeviceTransferService.databaseIdentifier:
+                destUrl = GRDBDatabaseStorageAdapter.databaseFileUrl(directoryMode: .transfer)
+            case DeviceTransferService.databaseWALIdentifier:
+                destUrl = GRDBDatabaseStorageAdapter.databaseWalUrl(directoryMode: .transfer)
+            default:
+                throw OWSAssertionError("Unknown file identifier")
+            }
+
+            do {
+                try move(pendingFilePath: sourceUrl.path, to: destUrl.path)
+            } catch CocoaError.fileWriteFileExists {
+                Logger.info("Skipping restoration of database file that was already restored: \(file.identifier)")
+            } catch {
+                throw OWSAssertionError("Failed to move file \(file.identifier); \(error.shortDescription)")
+            }
+        }
+    }
+
+    private func updateCurrentDatabase(manifest: DeviceTransferProtoManifest?) throws {
+        guard let database = manifest?.database else {
+            throw OWSAssertionError("No manifest database available")
+        }
+
+        try GRDBKeyFetcher(keychainStorage: keychainStorage).store(data: database.key)
+        GRDBDatabaseStorageAdapter.promoteTransferDirectoryToPrimary()
+    }
+
+    @discardableResult
+    func finalizeRestorationIfNecessary() -> Guarantee<Void> {
+        resetTransferDirectory(createNewTransferDirectory: false)
+
+        let (promise, future) = Guarantee<Void>.pending()
+        appReadiness.runNowOrWhenAppDidBecomeReadySync {
+            DependenciesBridge.shared.db.write { tx in
+                DependenciesBridge.shared.registrationStateChangeManager.setIsTransferComplete(
+                    sendStateUpdateNotification: true,
+                    tx: tx,
+                )
+            }
+
+            // Consult both the modern and legacy restoration flag
+            let currentPhase = (try? self.restorationPhase) ?? .noCurrentRestoration
+            if currentPhase == .cleanup {
+                Logger.info("Performing one-time post-restore cleanup...")
+                GRDBDatabaseStorageAdapter.removeOrphanedGRDBDirectories()
+                self.rawRestorationPhase = RestorationPhase.noCurrentRestoration.rawValue
+                Logger.info("Done!")
+            }
+
+            future.resolve()
+        }
+        return promise
+    }
+
+    enum Error: Swift.Error {
+        case assertion
+        case cancel
+        case backgroundedDevice
+        case certificateMismatch
+        case modeMismatch
+        case notEnoughSpace
+        case unsupportedVersion
+    }
+
+    enum TransferState {
+        case idle
+        case incoming(
+            oldDevicePeerId: DeviceTransferPeerID,
+            manifest: DeviceTransferProtoManifest,
+            receivedFileIds: [String],
+            skippedFileIds: [String],
+            progress: Progress,
+        )
+        case outgoing(
+            newDevicePeerId: DeviceTransferPeerID,
+            newDeviceCertificateHash: Data,
+            manifest: DeviceTransferProtoManifest,
+            transferredFileIds: [String],
+            progress: Progress,
+        )
+
+        func appendingFileId(_ fileId: String) -> TransferState {
+            switch self {
+            case .incoming(let oldDevicePeerId, let manifest, let receivedFileIds, let skippedFileIds, let progress):
+                return .incoming(
+                    oldDevicePeerId: oldDevicePeerId,
+                    manifest: manifest,
+                    receivedFileIds: receivedFileIds + [fileId],
+                    skippedFileIds: skippedFileIds,
+                    progress: progress,
+                )
+            case .outgoing(let newDevicePeerId, let newDeviceCertificateHash, let manifest, let transferredFileIds, let progress):
+                return .outgoing(
+                    newDevicePeerId: newDevicePeerId,
+                    newDeviceCertificateHash: newDeviceCertificateHash,
+                    manifest: manifest,
+                    transferredFileIds: transferredFileIds + [fileId],
+                    progress: progress,
+                )
+            case .idle:
+                owsFailDebug("unexpectedly tried to append file while idle")
+                return .idle
+            }
+        }
+
+        func appendingSkippedFileId(_ fileId: String) -> TransferState {
+            switch self {
+            case .incoming(let oldDevicePeerId, let manifest, let receivedFileIds, let skippedFileIds, let progress):
+                return .incoming(
+                    oldDevicePeerId: oldDevicePeerId,
+                    manifest: manifest,
+                    receivedFileIds: receivedFileIds,
+                    skippedFileIds: skippedFileIds + [fileId],
+                    progress: progress,
+                )
+            case .outgoing(let newDevicePeerId, let newDeviceCertificateHash, let manifest, let transferredFileIds, let progress):
+                owsFailDebug("unexpectedly tried to append a skipped file on outgoing")
+                return .outgoing(
+                    newDevicePeerId: newDevicePeerId,
+                    newDeviceCertificateHash: newDeviceCertificateHash,
+                    manifest: manifest,
+                    transferredFileIds: transferredFileIds,
+                    progress: progress,
+                )
+            case .idle:
+                owsFailDebug("unexpectedly tried to append a skipped file while idle")
+                return .idle
+            }
+        }
+    }
+
+    enum TransferMode: String {
+        case linked
+        case primary
+    }
+
+    private static let currentTransferVersion = 1
+
+    private static let versionKey = "version"
+    private static let peerIdKey = "peerId"
+    private static let certificateHashKey = "certificateHash"
+    private static let transferModeKey = "transferMode"
+
+    private enum Constants {
+        static let transferHost = "transfer"
+    }
+
+    static func urlForTransfer(
+        session: DeviceTransferSession,
+        mode: TransferMode,
+    ) throws -> URL {
+        var components = URLComponents()
+        components.scheme = UrlOpener.Constants.sgnlPrefix
+        components.host = Constants.transferHost
+
+        guard let base64CertificateHash = try session.identity.computeCertificateHash().base64EncodedString().encodeURIComponent else {
+            throw OWSAssertionError("failed to get base64 certificate hash")
+        }
+
+        guard let base64PeerId = try? session.peerId.encoded().base64EncodedString().encodeURIComponent else {
+            throw OWSAssertionError("failed to get base64 peerId")
+        }
+
+        let queryItems = [
+            DeviceTransferService.versionKey: String(DeviceTransferService.currentTransferVersion),
+            DeviceTransferService.transferModeKey: mode.rawValue,
+            DeviceTransferService.certificateHashKey: base64CertificateHash,
+            DeviceTransferService.peerIdKey: base64PeerId,
+        ]
+
+        components.queryItems = queryItems.map { URLQueryItem(name: $0.key, value: $0.value) }
+
+        return components.url!
+    }
+
+    func parseTransferURL(_ url: URL) throws -> (peerId: DeviceTransferPeerID, certificateHash: Data) {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false), let queryItems = components.queryItems else {
+            throw OWSAssertionError("Invalid url")
+        }
+
+        let queryItemsDictionary = [String: String](uniqueKeysWithValues: queryItems.compactMap { item in
+            guard let value = item.value else { return nil }
+            return (item.name, value)
+        })
+
+        guard
+            let version = queryItemsDictionary[DeviceTransferService.versionKey],
+            Int(version) == DeviceTransferService.currentTransferVersion
+        else {
+            throw Error.unsupportedVersion
+        }
+
+        let currentMode: TransferMode = DependenciesBridge.shared.tsAccountManager
+            .registrationStateWithMaybeSneakyTransaction.isPrimaryDevice == true ? .primary : .linked
+
+        guard
+            let rawMode = queryItemsDictionary[DeviceTransferService.transferModeKey],
+            rawMode == currentMode.rawValue
+        else {
+            throw Error.modeMismatch
+        }
+
+        guard
+            let base64CertificateHash = queryItemsDictionary[DeviceTransferService.certificateHashKey],
+            let uriDecodedHash = base64CertificateHash.removingPercentEncoding,
+            let certificateHash = Data(base64Encoded: uriDecodedHash)
+        else {
+            throw OWSAssertionError("failed to decode certificate hash")
+        }
+
+        guard
+            let base64PeerId = queryItemsDictionary[DeviceTransferService.peerIdKey],
+            let uriDecodedPeerId = base64PeerId.removingPercentEncoding,
+            let peerIdData = Data(base64Encoded: uriDecodedPeerId),
+            let peerId = DeviceTransferPeerID(with: peerIdData)
+        else {
+            throw OWSAssertionError("failed to decode MCPeerId")
+        }
+
+        return (peerId, certificateHash)
+    }
 }
 
 #if TESTABLE_BUILD
