@@ -378,7 +378,6 @@ public class GRDBSchemaMigrator {
         case dataMigration_populateGroupMember
         case dataMigration_cullInvalidIdentityKeySendingErrors
         case dataMigration_moveToThreadAssociatedData
-        case dataMigration_senderKeyStoreKeyIdMigration
         case dataMigration_reindexGroupMembershipAndMigrateLegacyAvatarDataFixed
         case dataMigration_repairAvatar
         case dataMigration_dropEmojiAvailabilityStore
@@ -421,6 +420,7 @@ public class GRDBSchemaMigrator {
         case dataMigration_rotateStorageServiceKeyAndResetLocalDataV3
         case dataMigration_scheduleStorageServiceUpdateForMutedThreads
         case dataMigration_scheduleStorageServiceUpdateForSystemContacts
+        case dataMigration_senderKeyStoreKeyIdMigration
         case dataMigration_syncGroupStories
         case dataMigration_updateStoriesDisabledInAccountRecord
         case experienceUpgradeSnooze
@@ -5521,11 +5521,6 @@ public class GRDBSchemaMigrator {
                 }
             }
             return thrownError.map { .failure($0) } ?? .success(())
-        }
-
-        migrator.registerMigration(.dataMigration_senderKeyStoreKeyIdMigration) { transaction in
-            OldSenderKeyStore.performKeyIdMigration(transaction: transaction)
-            return .success(())
         }
 
         migrator.registerMigration(.dataMigration_reindexGroupMembershipAndMigrateLegacyAvatarDataFixed) { transaction in

@@ -333,27 +333,6 @@ extension OldSenderKeyStore {
         let distributionId = distributionIdForSendingToThreadId(threadId, writeTx: writeTx)
         return Self.buildKeyId(authorAci: localAci, distributionId: distributionId)
     }
-
-    // MARK: Migration
-
-    static func performKeyIdMigration(transaction writeTx: DBWriteTransaction) {
-        let oldKeys = keyMetadataStore.allKeys(transaction: writeTx)
-
-        oldKeys.forEach { oldKey in
-            autoreleasepool {
-                do {
-                    let existingValue: KeyMetadata? = try keyMetadataStore.getCodableValue(forKey: oldKey, transaction: writeTx)
-                    if let existingValue, existingValue.keyId != oldKey {
-                        try keyMetadataStore.setCodable(existingValue, key: existingValue.keyId, transaction: writeTx)
-                        keyMetadataStore.removeValue(forKey: oldKey, transaction: writeTx)
-                    }
-                } catch {
-                    owsFailDebug("Failed to serialize key metadata: \(error)")
-                    keyMetadataStore.removeValue(forKey: oldKey, transaction: writeTx)
-                }
-            }
-        }
-    }
 }
 
 // MARK: - Model
