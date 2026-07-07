@@ -5,7 +5,7 @@
 
 import SignalServiceKit
 
-class ImageAttachmentPrepViewController: AttachmentPrepViewController {
+class ImageAttachmentPrepViewController: AttachmentPrepViewController, ImageEditorViewDelegate {
 
     private let model: ImageEditorModel
     weak var stickerSheetDelegate: StickerPickerSheetDelegate?
@@ -86,11 +86,8 @@ class ImageAttachmentPrepViewController: AttachmentPrepViewController {
         let cropTool = ImageEditorCropViewController(model: model, srcImage: srcImage, previewImage: previewImage)
         presentMediaTool(viewController: cropTool)
     }
-}
 
-// MARK: -
-
-extension ImageAttachmentPrepViewController: ImageEditorViewDelegate {
+    // MARK: - ImageEditorViewDelegate
 
     private func openTextTool(with textItem: ImageEditorTextItem, isNewItem: Bool, editText: Bool) {
         let textEditor = ImageEditorViewController(model: model, stickerSheetDelegate: stickerSheetDelegate)

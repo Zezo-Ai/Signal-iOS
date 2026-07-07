@@ -34,7 +34,7 @@ class ApprovalRailCellView: GalleryRailCellView {
                 self.approvalRailCellDelegate?.approvalRailCellView(self, didRemoveItem: attachmentApprovalItem)
             },
         )
-        button.tintColor = .Signal.label
+        button.tintColor = .white // fixed color
         button.alpha = 0
         return button
     }()

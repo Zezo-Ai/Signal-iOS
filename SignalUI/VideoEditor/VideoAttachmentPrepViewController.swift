@@ -22,7 +22,10 @@ protocol VideoEditorDataSource: AnyObject {
 /**
  * Coordinate data transfer between VideoEditorView and VideoTimelineView
  */
-class VideoAttachmentPrepViewController: AttachmentPrepViewController {
+class VideoAttachmentPrepViewController: AttachmentPrepViewController, VideoEditorDataSource, VideoEditorModelObserver,
+    VideoEditorViewDelegate, VideoPlaybackState, VideoTimelineViewDataSource, VideoTimelineViewDelegate,
+    VideoEditorViewControllerProviding
+{
 
     private let model: VideoEditorModel
 
@@ -73,18 +76,17 @@ class VideoAttachmentPrepViewController: AttachmentPrepViewController {
     }
 
     private(set) var videoThumbnails: [UIImage]?
-    private var shouldResumeVideoPlaybackOnScrubbingEnd = false
-}
 
-extension VideoAttachmentPrepViewController: VideoEditorViewDelegate {
+    private var shouldResumeVideoPlaybackOnScrubbingEnd = false
+
+    // MARK: - VideoEditorViewDelegate
 
     func videoEditorViewPlaybackTimeDidChange(_ videoEditorView: VideoEditorView) {
         timelineView.updateCursorPosition()
         timelineView.updateTimeBubble()
     }
-}
 
-extension VideoAttachmentPrepViewController: VideoEditorDataSource {
+    // MARK: - VideoEditorDataSource
 
     var untrimmedDurationSeconds: TimeInterval {
         return model.untrimmedDurationSeconds
@@ -105,9 +107,8 @@ extension VideoAttachmentPrepViewController: VideoEditorDataSource {
     var isTrimmed: Bool {
         return model.isTrimmed
     }
-}
 
-extension VideoAttachmentPrepViewController: VideoPlaybackState {
+    // MARK: - VideoPlaybackState
 
     var isPlaying: Bool {
         return editorView.isPlaying
@@ -116,9 +117,8 @@ extension VideoAttachmentPrepViewController: VideoPlaybackState {
     var currentTimeSeconds: TimeInterval {
         return editorView.currentTimeSeconds
     }
-}
 
-extension VideoAttachmentPrepViewController: VideoTimelineViewDataSource {
+    // MARK: - VideoTimelineViewDataSource
 
     var videoAspectRatio: CGSize {
         return model.displaySize
@@ -182,9 +182,8 @@ extension VideoAttachmentPrepViewController: VideoTimelineViewDataSource {
         }
         return thumbnails
     }
-}
 
-extension VideoAttachmentPrepViewController: VideoTimelineViewDelegate {
+    // MARK: - VideoTimelineViewDelegate
 
     func videoTimelineViewDidBeginTrimming(_ view: VideoTimelineView) {
         editorView.pauseIfPlaying()
@@ -220,16 +219,14 @@ extension VideoAttachmentPrepViewController: VideoTimelineViewDelegate {
             editorView.playVideo()
         }
     }
-}
 
-extension VideoAttachmentPrepViewController: VideoEditorModelObserver {
+    // MARK: - VideoEditorModelObserver
 
     func videoEditorModelDidChange(_ model: VideoEditorModel) {
         timelineView.updateContents()
     }
-}
 
-extension VideoAttachmentPrepViewController: VideoEditorViewControllerProviding {
+    // MARK: - VideoEditorViewControllerProviding
 
     func viewController(forVideoEditorView videoEditorView: VideoEditorView) -> UIViewController {
         return self

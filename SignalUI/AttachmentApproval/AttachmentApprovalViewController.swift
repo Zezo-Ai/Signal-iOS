@@ -146,8 +146,6 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         fatalError("init(coder:) has not been implemented")
     }
 
-    let kSpacingBetweenItems: CGFloat = 20
-
     private var observerToken: NSObjectProtocol?
 
     private var observingKeyboardNotifications = false
@@ -186,7 +184,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         self.attachmentLimits = attachmentLimits
         self.receivedOptions = options
 
-        let pageOptions: [UIPageViewController.OptionsKey: Any] = [.interPageSpacing: kSpacingBetweenItems]
+        let pageOptions: [UIPageViewController.OptionsKey: Any] = [.interPageSpacing: 20]
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: pageOptions)
 
         let isAddMoreVisibleBlock = { [weak self] in

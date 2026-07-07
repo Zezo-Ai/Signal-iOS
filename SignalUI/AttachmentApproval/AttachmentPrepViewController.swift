@@ -4,9 +4,7 @@
 //
 
 import AVFoundation
-import Foundation
 import SignalServiceKit
-import UIKit
 
 protocol AttachmentPrepViewControllerDelegate: AnyObject {
 
@@ -16,9 +14,7 @@ protocol AttachmentPrepViewControllerDelegate: AnyObject {
     )
 }
 
-// MARK: -
-
-public class AttachmentPrepViewController: OWSViewController {
+public class AttachmentPrepViewController: OWSViewController, UIScrollViewDelegate {
 
     // MARK: - Properties
 
@@ -87,12 +83,12 @@ public class AttachmentPrepViewController: OWSViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .ows_black
+        view.backgroundColor = .Signal.background
 
         // Zoomable scroll view.
         view.addSubview(scrollView)
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        view.addConstraints([scrollViewLeading, scrollViewTop, scrollViewTrailing, scrollViewBottom])
+        NSLayoutConstraint.activate([scrollViewLeading, scrollViewTop, scrollViewTrailing, scrollViewBottom])
 
         // Create full screen container view so the scrollView
         // can compute an appropriate content size in which to center
@@ -100,20 +96,27 @@ public class AttachmentPrepViewController: OWSViewController {
         let containerView = UIView.container()
         containerView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(containerView)
-        scrollView.addConstraints([
+        NSLayoutConstraint.activate([
             containerView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
             containerView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             containerView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
             containerView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+
+            containerView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor),
+            containerView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
         ])
-        containerView.autoMatch(.height, to: .height, of: scrollView)
-        containerView.autoMatch(.width, to: .width, of: scrollView)
 
         let contentView = contentView
         contentView.frame = containerView.bounds
+        contentView.translatesAutoresizingMaskIntoConstraints = false
         prepareContentView()
         containerView.addSubview(contentView)
-        contentView.autoPinEdgesToSuperviewEdges()
+        NSLayoutConstraint.activate([
+            contentView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+        ])
 
         updateMinZoomScaleForSize(view.bounds.size)
     }
@@ -250,9 +253,8 @@ public class AttachmentPrepViewController: OWSViewController {
     func activatePenTool() { }
 
     func activateCropTool() { }
-}
 
-extension AttachmentPrepViewController: UIScrollViewDelegate {
+    // MARK: - UIScrollViewDelegate
 
     public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         guard isZoomable else {

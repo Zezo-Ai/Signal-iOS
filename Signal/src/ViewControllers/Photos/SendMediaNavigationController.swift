@@ -92,6 +92,7 @@ class SendMediaNavigationController: OWSNavigationController, AttachmentApproval
         self.hasQuotedReplyDraft = hasQuotedReplyDraft
         self.attachmentLimits = attachmentLimits
         super.init()
+        overrideUserInterfaceStyle = .dark
     }
 
     // MARK: - Overrides
