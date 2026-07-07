@@ -71,10 +71,10 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
 
     private let backupQueue = ConcurrentTaskQueue(concurrentLimit: 1)
 
-    public func backupMasterKey(pin: String, masterKey: MasterKey, force: Bool, authMethod: SVR.AuthMethod) async throws {
+    public func backUpMasterKey(pin: String, masterKey: MasterKey, authMethod: SVR.AuthMethod) async throws {
         Logger.info("")
         try await backupQueue.run {
-            try await doBackupAndExpose(pin: pin, masterKey: masterKey, force: force, authMethod: authMethod)
+            try await doBackupAndExpose(pin: pin, masterKey: masterKey, authMethod: authMethod)
         }
     }
 
@@ -215,14 +215,12 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
     private func doBackupAndExpose(
         pin: String,
         masterKey: MasterKey,
-        force: Bool,
         authMethod: SVR2.AuthMethod,
     ) async throws {
         for enclave in tsConstants.svr2Enclaves.prefix(tsConstants.activeSvr2EnclaveCount) {
             try await _doBackupAndExpose(
                 pin: pin,
                 masterKey: masterKey,
-                force: force,
                 mrEnclave: enclave,
                 authMethod: authMethod,
             )
@@ -232,17 +230,17 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
     private func _doBackupAndExpose(
         pin: String,
         masterKey: MasterKey,
-        force: Bool,
         mrEnclave: MrEnclave,
         authMethod: SVR2.AuthMethod,
     ) async throws {
         let priorBackup = self.db.read { tx in self.getBackupAttempt(forEnclave: mrEnclave, tx: tx) }
 
         let priorMatchingBackup: BackupAttempt?
-        if force {
-            // We're forcing a backup, so *nothing* matches.
-            priorMatchingBackup = nil
-        } else if let priorBackup, priorBackup.isBackedUpOrDefault, priorBackup.matches(pin: pin, masterKey: masterKey) {
+        if
+            let priorBackup,
+            priorBackup.isBackedUpOrDefault,
+            priorBackup.matches(pin: pin, masterKey: masterKey)
+        {
             // We're trying to back up what's already backed up.
             priorMatchingBackup = priorBackup
         } else {
@@ -587,7 +585,7 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
                 let aep = db.read { tx in accountKeyStore.getAccountEntropyPool(tx: tx) }
                 if let aep {
                     // If a backup isn't needed, this returns a success immediately.
-                    try await doBackupAndExpose(pin: pin, masterKey: aep.getMasterKey(), force: false, authMethod: .implicit)
+                    try await doBackupAndExpose(pin: pin, masterKey: aep.getMasterKey(), authMethod: .implicit)
                 } else {
                     Logger.warn("can't back up master key without master key")
                 }

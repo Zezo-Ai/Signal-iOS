@@ -282,10 +282,9 @@ public class OWS2FAManager {
             throw OWSAssertionError("missing aep")
         }
 
-        try await svr.backupMasterKey(
+        try await svr.backUpMasterKey(
             pin: pin,
             masterKey: aep.getMasterKey(),
-            force: false,
             authMethod: .implicit,
         )
 
