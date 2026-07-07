@@ -388,8 +388,8 @@ private class MediaToolbar: UIView {
         }
 
         let stackView = UIStackView(arrangedSubviews: [
-            penToolButton,
             cropToolButton,
+            penToolButton,
             mediaQualityButton,
             saveMediaButton,
             addMediaButton,
@@ -455,7 +455,7 @@ private class MediaToolbar: UIView {
             configuration.baseBackgroundColor = .Signal.primaryFill
         }
         configuration.image = image
-        configuration.contentInsets = .init(margin: 9) // 42 dp buttons given 24 dp images
+        configuration.contentInsets = .init(margin: 10) // 44 dp buttons given 24 dp images
         return configuration
     }
 
