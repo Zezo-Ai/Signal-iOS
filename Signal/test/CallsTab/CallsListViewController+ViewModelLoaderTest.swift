@@ -53,6 +53,7 @@ final class CallsListViewControllerViewModelLoaderTest: XCTestCase {
         return CallViewModel(
             reference: .callRecords(oldestId: callRecords.last!.id),
             callRecords: callRecords,
+            callExpirations: [:],
             title: "Hey, I just met you, and this is crazy, but here's my number, so call me maybe?",
             recipientType: recipientType,
             direction: direction,

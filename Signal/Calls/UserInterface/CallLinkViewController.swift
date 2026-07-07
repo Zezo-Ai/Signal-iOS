@@ -230,7 +230,10 @@ final class CallLinkViewController: OWSTableViewController2 {
 
         return OWSTableContents(
             sections: [
-                ConversationSettingsViewController.createCallHistorySection(callRecords: callRecords),
+                ConversationSettingsViewController.createCallHistorySection(
+                    callRecords: callRecords,
+                    callExpirations: [:],
+                ),
                 OWSTableSection(items: [callLinkCardItem]),
                 settingSection,
                 sharingSection,

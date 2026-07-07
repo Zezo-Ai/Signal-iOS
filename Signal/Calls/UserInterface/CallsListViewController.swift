@@ -1024,6 +1024,8 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
             return CallViewModel(
                 reference: .callLink(rowId: callLinkRecord.id),
                 callRecords: callRecords,
+                // Call links don't disappear.
+                callExpirations: [:],
                 title: callLinkRecord.state.localizedName,
                 recipientType: .callLink(callLinkRecord.rootKey),
                 direction: .callLink,
@@ -1134,9 +1136,31 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
             owsFail("Can't reach this point because we've already handled Call Links.")
         }
 
+        let callExpirations: [CallRecord.ID: CallViewModel.CallExpiration]
+        callExpirations = callRecords.reduce(into: [:]) { partialResult, callRecord in
+            let interaction: TSInteraction? = switch callRecord.interactionReference {
+            case .thread(_, let interactionRowId):
+                deps.interactionStore.fetchInteraction(rowId: interactionRowId, tx: tx)
+            case .none: nil
+            }
+
+            guard
+                let interaction = interaction as? ExpiringInteraction,
+                interaction.expiresAt > 0,
+                interaction.expiresInSeconds > 0
+            else {
+                return
+            }
+            partialResult[callRecord.id] = CallViewModel.CallExpiration(
+                expiresAtMs: interaction.expiresAt,
+                disappearingMessageInterval: interaction.expiresInSeconds,
+            )
+        }
+
         return CallViewModel(
             reference: .callRecords(oldestId: callRecords.last!.id),
             callRecords: callRecords,
+            callExpirations: callExpirations,
             title: title,
             recipientType: recipientType,
             direction: callDirection,
@@ -1381,6 +1405,11 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
     }
 
     struct CallViewModel {
+        struct CallExpiration {
+            let expiresAtMs: UInt64
+            let disappearingMessageInterval: UInt32
+        }
+
         enum Reference: Hashable {
             case callRecords(oldestId: CallRecord.ID)
             case callLink(rowId: Int64)
@@ -1445,6 +1474,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
 
         let reference: Reference
         let callRecords: [CallRecord]
+        let callExpirations: [CallRecord.ID: CallViewModel.CallExpiration]
 
         let title: String
         let recipientType: RecipientType
@@ -1455,6 +1485,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
         init(
             reference: Reference,
             callRecords: [CallRecord],
+            callExpirations: [CallRecord.ID: CallViewModel.CallExpiration],
             title: String,
             recipientType: RecipientType,
             direction: Direction,
@@ -1463,6 +1494,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
         ) {
             self.reference = reference
             self.callRecords = callRecords
+            self.callExpirations = callExpirations
             self.title = title
             self.recipientType = recipientType
             self.direction = direction
@@ -2155,16 +2187,20 @@ extension CallsListViewController: CallCellDelegate, NewCallViewControllerDelega
 
         switch viewModel.recipientType {
         case .individual(type: _, let thread):
-            showCallInfo(forThread: thread, callRecords: viewModel.callRecords)
+            showCallInfo(forThread: thread, callRecords: viewModel.callRecords, callExpirations: viewModel.callExpirations)
         case .groupThread(let groupId):
             let thread = deps.db.read { tx in deps.threadStore.fetchGroupThread(groupId: groupId, tx: tx)! }
-            showCallInfo(forThread: thread, callRecords: viewModel.callRecords)
+            showCallInfo(forThread: thread, callRecords: viewModel.callRecords, callExpirations: viewModel.callExpirations)
         case .callLink(let rootKey):
             showCallInfo(forRootKey: rootKey, callRecords: viewModel.callRecords)
         }
     }
 
-    private func showCallInfo(forThread thread: TSThread, callRecords: [CallRecord]) {
+    private func showCallInfo(
+        forThread thread: TSThread,
+        callRecords: [CallRecord],
+        callExpirations: [CallRecord.ID: CallViewModel.CallExpiration],
+    ) {
         let (threadViewModel, isSystemContact) = deps.databaseStorage.read { tx in
             let threadViewModel = ThreadViewModel(
                 thread: thread,
@@ -2184,6 +2220,7 @@ extension CallsListViewController: CallCellDelegate, NewCallViewControllerDelega
             // Nothing would have been revealed, so this can be a fresh instance
             spoilerState: SpoilerRenderState(),
             callRecords: callRecords,
+            callExpirations: callExpirations,
             memberLabelCoordinator: nil,
         )
 

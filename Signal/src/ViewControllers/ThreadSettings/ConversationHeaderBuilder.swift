@@ -832,11 +832,10 @@ extension ConversationSettingsViewController: ConversationHeaderDelegate {
             options = [.mute, .search, .noBackground]
         } else if isTerminatedGroup {
             options = [.mute, .search]
-        } else if callRecords.isEmpty {
-            options = [.videoCall, .audioCall, .mute, .search, .renderLocalUserAsNoteToSelf]
-        } else {
-            // Call details
+        } else if isCallDetails {
             options = [.message, .videoCall, .audioCall, .mute]
+        } else {
+            options = [.videoCall, .audioCall, .mute, .search, .renderLocalUserAsNoteToSelf]
         }
 
         return ConversationHeaderBuilder.buildHeader(

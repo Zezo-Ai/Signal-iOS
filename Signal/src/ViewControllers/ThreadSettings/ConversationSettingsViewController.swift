@@ -32,7 +32,10 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
     private(set) var threadViewModel: ThreadViewModel
     private(set) var isSystemContact: Bool
     let spoilerState: SpoilerRenderState
-    let callRecords: [CallRecord]
+    private(set) var callRecords: [CallRecord]
+    typealias CallExpiration = CallsListViewController.CallViewModel.CallExpiration
+    let callExpirations: [CallRecord.ID: CallExpiration]
+    let isCallDetails: Bool
     var memberLabelCoordinator: MemberLabelCoordinator?
 
     let backgroundContainer = CVBackgroundContainer()
@@ -67,12 +70,17 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
         isSystemContact: Bool,
         spoilerState: SpoilerRenderState,
         callRecords: [CallRecord] = [],
+        callExpirations: [CallRecord.ID: CallExpiration] = [:],
         memberLabelCoordinator: MemberLabelCoordinator?,
     ) {
         self.threadViewModel = threadViewModel
         self.isSystemContact = isSystemContact
         self.spoilerState = spoilerState
         self.callRecords = callRecords
+        self.callExpirations = callExpirations
+        // Set this now because it's still a call details page
+        // even if the calls disappear while it's open.
+        self.isCallDetails = !callRecords.isEmpty
         self.memberLabelCoordinator = memberLabelCoordinator
         groupViewHelper = GroupViewHelper(threadViewModel: threadViewModel, memberLabelCoordinator: memberLabelCoordinator)
 
@@ -174,8 +182,10 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
 
         observeNotifications()
 
-        updateRecentAttachments()
-        updateMutualGroupThreads()
+        DependenciesBridge.shared.db.read { tx in
+            updateRecentAttachments(tx: tx)
+            updateMutualGroupThreads(tx: tx)
+        }
         reloadThreadAndUpdateContent()
 
         updateNavigationBar()
@@ -231,7 +241,9 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
         }
 
         if shouldRefreshAttachmentsOnReappear {
-            updateRecentAttachments()
+            DependenciesBridge.shared.db.read { tx in
+                updateRecentAttachments(tx: tx)
+            }
         }
         updateTableContents()
     }
@@ -905,10 +917,8 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
         filter: .defaultMediaType(for: AllMediaCategory.defaultValue),
     )
 
-    func updateRecentAttachments() {
-        let recentAttachments = SSKEnvironment.shared.databaseStorageRef.read { transaction in
-            mediaGalleryFinder.recentMediaAttachments(limit: maximumRecentMedia, tx: transaction)
-        }
+    func updateRecentAttachments(tx: DBReadTransaction) {
+        let recentAttachments = mediaGalleryFinder.recentMediaAttachments(limit: maximumRecentMedia, tx: tx)
         recentMedia = recentAttachments.reduce(into: OrderedDictionary(), { result, attachment in
             let imageView = UIImageView()
             imageView.clipsToBounds = true
@@ -937,15 +947,13 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
         didSet { AssertIsOnMainThread() }
     }
 
-    func updateMutualGroupThreads() {
+    func updateMutualGroupThreads(tx: DBReadTransaction) {
         guard let contactThread = thread as? TSContactThread else { return }
-        SSKEnvironment.shared.databaseStorageRef.read { transaction in
-            self.hasGroupThreads = ThreadFinder().existsGroupThread(transaction: transaction)
-            self.mutualGroupThreads = TSGroupThread.groupThreads(
-                with: contactThread.contactAddress,
-                transaction: transaction,
-            ).filter { $0.groupModel.groupMembership.isLocalUserFullMember && $0.shouldThreadBeVisible && !$0.isTerminatedGroup }
-        }
+        self.hasGroupThreads = ThreadFinder().existsGroupThread(transaction: tx)
+        self.mutualGroupThreads = TSGroupThread.groupThreads(
+            with: contactThread.contactAddress,
+            transaction: tx,
+        ).filter { $0.groupModel.groupMembership.isLocalUserFullMember && $0.shouldThreadBeVisible && !$0.isTerminatedGroup }
     }
 
     func tappedConversationSearch() {
@@ -1022,7 +1030,9 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
             // If we're currently hidden (in particular, behind the All Media view), defer this update.
             shouldRefreshAttachmentsOnReappear = true
         } else {
-            updateRecentAttachments()
+            DependenciesBridge.shared.db.read { tx in
+                updateRecentAttachments(tx: tx)
+            }
             updateTableContents()
         }
     }
@@ -1141,23 +1151,71 @@ extension ConversationSettingsViewController: GroupPermissionsSettingsDelegate {
 extension ConversationSettingsViewController: DatabaseChangeDelegate {
 
     func databaseChangesDidUpdate(databaseChanges: DatabaseChanges) {
-        if databaseChanges.didUpdate(tableName: TSGroupMember.databaseTableName) || databaseChanges.didUpdateThreads {
-            updateMutualGroupThreads()
+        let didUpdateGroupsOrThreads = databaseChanges.didUpdate(tableName: TSGroupMember.databaseTableName) || databaseChanges.didUpdateThreads
+
+        let shouldCheckForDisappearedCalls = databaseChanges.didUpdateInteractions && !callRecords.isEmpty
+
+        var callRecordsDidChange = false
+        if didUpdateGroupsOrThreads || shouldCheckForDisappearedCalls {
+            DependenciesBridge.shared.db.read { tx in
+                if didUpdateGroupsOrThreads {
+                    updateMutualGroupThreads(tx: tx)
+                }
+                if shouldCheckForDisappearedCalls {
+                    callRecordsDidChange = removeDisappearedCalls(tx: tx)
+                }
+            }
+        }
+
+        if didUpdateGroupsOrThreads {
             updateTableContents()
             reloadThreadAndUpdateContent()
+        } else if callRecordsDidChange {
+            updateTableContents()
         }
     }
 
     func databaseChangesDidUpdateExternally() {
-        updateRecentAttachments()
-        updateMutualGroupThreads()
+        DependenciesBridge.shared.db.read { tx in
+            updateRecentAttachments(tx: tx)
+            updateMutualGroupThreads(tx: tx)
+            removeDisappearedCalls(tx: tx)
+        }
         updateTableContents()
     }
 
     func databaseChangesDidReset() {
-        updateRecentAttachments()
-        updateMutualGroupThreads()
+        DependenciesBridge.shared.db.read { tx in
+            updateRecentAttachments(tx: tx)
+            updateMutualGroupThreads(tx: tx)
+            removeDisappearedCalls(tx: tx)
+        }
         updateTableContents()
+    }
+
+    /// Returns `true` if any call records were removed
+    @discardableResult
+    private func removeDisappearedCalls(tx: DBReadTransaction) -> Bool {
+        guard !callRecords.isEmpty else { return false }
+
+        let callRecordStore = DependenciesBridge.shared.callRecordStore
+        let callRecords: [CallRecord] = self.callRecords.compactMap { callRecord -> CallRecord? in
+            switch callRecord.interactionReference {
+            case .thread(_, let interactionRowId):
+                // Optional return of a call record that may be disappeared
+                callRecordStore.fetch(interactionRowId: interactionRowId, tx: tx)
+            case .none:
+                // Call link
+                callRecord
+            }
+        }
+
+        if callRecords.count < self.callRecords.count {
+            self.callRecords = callRecords
+            return true
+        }
+
+        return false
     }
 }
 

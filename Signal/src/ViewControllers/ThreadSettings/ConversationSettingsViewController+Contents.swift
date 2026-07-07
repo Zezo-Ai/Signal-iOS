@@ -190,10 +190,16 @@ extension ConversationSettingsViewController {
     // MARK: Calls section
 
     private func createCallSection() -> OWSTableSection? {
-        return Self.createCallHistorySection(callRecords: callRecords)
+        return Self.createCallHistorySection(
+            callRecords: callRecords,
+            callExpirations: callExpirations,
+        )
     }
 
-    static func createCallHistorySection(callRecords: [CallRecord]) -> OWSTableSection? {
+    static func createCallHistorySection(
+        callRecords: [CallRecord],
+        callExpirations: [CallRecord.ID: CallExpiration],
+    ) -> OWSTableSection? {
         guard let callRecord = callRecords.first else {
             return nil
         }
@@ -212,7 +218,12 @@ extension ConversationSettingsViewController {
         stackView.addArrangedSubview(dateLabel)
         stackView.setCustomSpacing(10, after: dateLabel)
 
-        typealias CallRow = (icon: ThemeIcon, description: String, timestamp: String)
+        typealias CallRow = (
+            icon: ThemeIcon,
+            description: String,
+            timestamp: String,
+            expiration: CallExpiration?,
+        )
         let callRows: [CallRow] = callRecords.map { callRecord in
             let icon: ThemeIcon = {
                 switch callRecord.callType {
@@ -282,7 +293,9 @@ extension ConversationSettingsViewController {
             }()
 
             let timestamp = DateUtil.formatDateAsTime(callRecord.callBeganDate)
-            return (icon, description, timestamp)
+            let expiration = callExpirations[callRecord.id]
+
+            return (icon, description, timestamp, expiration)
         }
 
         for callRow in callRows {
@@ -290,24 +303,37 @@ extension ConversationSettingsViewController {
                 let hStack = UIStackView()
                 hStack.axis = .horizontal
                 hStack.spacing = 6
+                hStack.alignment = .center
                 hStack.addArrangedSubview(UIImageView.withTemplateIcon(
                     callRow.icon,
-                    tintColor: Theme.primaryTextColor,
+                    tintColor: .Signal.label,
                     constrainedTo: .square(16),
                 ))
-                hStack.tintColor = Theme.primaryTextColor
+                hStack.tintColor = .Signal.label
 
                 let descriptionLabel = UILabel()
                 descriptionLabel.font = .dynamicTypeSubheadline
-                descriptionLabel.textColor = Theme.primaryTextColor
+                descriptionLabel.textColor = .Signal.label
                 descriptionLabel.text = callRow.description
                 hStack.addArrangedSubview(descriptionLabel)
+
+                if let expiration = callRow.expiration {
+                    let timerView = MessageTimerView()
+                    timerView.shouldDeactivateConstraints = false
+                    timerView.configure(
+                        expirationTimestampMs: expiration.expiresAtMs,
+                        disappearingMessageInterval: expiration.disappearingMessageInterval,
+                        tintColor: .Signal.label,
+                    )
+                    timerView.autoSetDimensions(to: MessageTimerView.measureSize)
+                    hStack.addArrangedSubview(timerView)
+                }
 
                 hStack.addArrangedSubview(UIView.hStretchingSpacer())
 
                 let timestampLabel = UILabel()
                 timestampLabel.font = .dynamicTypeSubheadline
-                timestampLabel.textColor = Theme.secondaryTextAndIconColor
+                timestampLabel.textColor = .Signal.secondaryLabel
                 timestampLabel.text = callRow.timestamp
                 hStack.addArrangedSubview(timestampLabel)
 
