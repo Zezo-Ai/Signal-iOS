@@ -12,7 +12,10 @@ extension TSMessage {
     /// There are some exceptions to this, such as mock messages we insert for purely UI previewing purposes.
     public func hasRenderableContent(tx: DBReadTransaction) -> Bool {
         guard let rowId = self.sqliteRowId else {
-            owsAssertDebug(((self as? MockIncomingMessage) != nil) || ((self as? MockOutgoingMessage) != nil), "Checking renderable content for uninserted message")
+            owsAssertDebug(
+                self is MockIncomingMessage || self is MockOutgoingMessage,
+                "Checking renderable content for uninserted message",
+            )
             return TSMessageBuilder.hasRenderableContent(
                 hasNonemptyBody: body?.nilIfEmpty != nil,
                 hasBodyAttachmentsOrOversizeText: false,
