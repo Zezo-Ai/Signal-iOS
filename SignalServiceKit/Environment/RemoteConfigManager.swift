@@ -379,7 +379,7 @@ public class RemoteConfig {
     }
 
     public var disappearingCalls: Bool {
-        return isEnabled(.disappearingCalls, defaultValue: false)
+        return isEnabled(.disappearingCalls, defaultValue: false) || BuildFlags.isPrerelease
     }
 
     // MARK: - RingRTC
