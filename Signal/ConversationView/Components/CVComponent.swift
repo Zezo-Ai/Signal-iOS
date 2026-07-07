@@ -298,19 +298,9 @@ extension CVComponentBase: CVNode {
     }
 
     public var isBorderless: Bool {
-        if componentState.isBorderlessJumbomojiMessage {
-            return true
-        }
-        if componentState.isBorderlessBodyMediaMessage {
-            return true
-        }
-
-        switch messageCellType {
-        case .stickerMessage:
-            return true
-        default:
-            return false
-        }
+        componentState.isBorderlessJumbomojiMessage
+            || componentState.isBorderlessBodyMediaMessage
+            || componentState.isBorderlessStickerMessage
     }
 }
 

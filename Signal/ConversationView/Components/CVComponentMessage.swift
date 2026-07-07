@@ -181,7 +181,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         if wasRemotelyDeleted {
             return false
         }
-        if componentState.shouldRenderAsSticker {
+        if componentState.isBorderlessStickerMessage {
             return true
         }
         return isBorderless
@@ -488,9 +488,9 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             componentDelegate: componentDelegate,
         )
 
-        // No bubbles for stickers.
+        // No bubbles for borderless stickers.
         var outerBubbleView: (CVDimmableView & OWSBubbleViewHost)?
-        if nil == subcomponent(forKey: .sticker) {
+        if !componentState.isBorderlessStickerMessage {
             let bubbleConfiguration = BubbleConfiguration(
                 corners: .segmented(
                     sharpCorners: sharpCorners,
@@ -896,8 +896,6 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         componentDelegate: CVComponentDelegate,
     ) -> ManualLayoutView {
 
-        let stickerOverlaySubcomponent = subcomponent(forKey: .sticker)
-
         func configureStackView(
             _ stackView: ManualStackView,
             stackConfig: CVStackViewConfig,
@@ -916,8 +914,8 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             return stackView
         }
 
-        if nil != stickerOverlaySubcomponent {
-            // Sticker message.
+        if componentState.isBorderlessStickerMessage {
+            // Borderless sticker message.
             //
             // Stack is borderless.
             //
@@ -1027,6 +1025,7 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
         .quotedReply,
         .linkPreview,
         .bodyMedia,
+        .sticker,
     ] }
     private static var bottomNestedShareCVComponentKeys: [CVComponentKey] { [
         .viewOnce,
@@ -1823,10 +1822,8 @@ public class CVComponentMessage: CVComponentBase, CVRootComponent {
             return stackMeasurement.measuredSize
         }
 
-        let stickerOverlaySubcomponent = subcomponent(forKey: .sticker)
-
-        if nil != stickerOverlaySubcomponent {
-            // Sticker message.
+        if componentState.isBorderlessStickerMessage {
+            // Borderless sticker message.
             //
             // Stack is borderless.
             // Optional footer.

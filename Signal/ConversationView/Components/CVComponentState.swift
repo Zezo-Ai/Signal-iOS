@@ -868,8 +868,8 @@ public struct CVComponentState: Equatable {
 
     // MARK: - Convenience
 
-    var shouldRenderAsSticker: Bool {
-        sticker != nil
+    var isBorderlessStickerMessage: Bool {
+        sticker != nil && quotedReply == nil
     }
 
     var activeComponentStateKeys: Set<CVComponentKey> {
@@ -1269,13 +1269,13 @@ private extension CVComponentState.Builder {
             return try buildContact(message: message, contact: contact)
         }
 
-        if let messageSticker = message.messageSticker {
-            return try buildSticker(message: message, messageSticker: messageSticker)
-        }
-
         // Check for quoted replies _before_ media album handling,
         // since that logic may exit early.
         buildQuotedReply(message: message, revealedSpoilerIdsSnapshot: revealedSpoilerIdsSnapshot)
+
+        if let messageSticker = message.messageSticker {
+            return try buildSticker(message: message, messageSticker: messageSticker)
+        }
 
         try buildBodyText(message: message)
 
