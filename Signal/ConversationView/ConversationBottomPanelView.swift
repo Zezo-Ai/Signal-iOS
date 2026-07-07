@@ -162,7 +162,7 @@ class ConversationBottomPanelView: UIView {
 
         backgroundViewLeading.constant = margin
         backgroundViewTrailing.constant = -margin
-        backgroundViewBottom.constant = safeAreaInsets.bottom > 0 ? 0 : margin
+        backgroundViewBottom.constant = safeAreaInsets.bottom > 0 ? 0 : -margin
     }
 
     required init?(coder: NSCoder) {
