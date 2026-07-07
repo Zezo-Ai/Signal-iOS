@@ -10,8 +10,10 @@ import SignalServiceKit
 @MainActor
 class DeviceTransferOperation: NSObject {
     let file: DeviceTransferProtoFile
+    let session: DeviceTransferSession
 
-    init(file: DeviceTransferProtoFile) {
+    init(session: DeviceTransferSession, file: DeviceTransferProtoFile) {
+        self.session = session
         self.file = file
     }
 
@@ -63,9 +65,6 @@ class DeviceTransferOperation: NSObject {
             throw OWSAssertionError("Failed to calculate sha256 for file")
         }
 
-        guard let session = AppEnvironment.shared.deviceTransferServiceRef.session else {
-            throw OWSAssertionError("Tried to transfer file with no active session")
-        }
         let fileProgress = AtomicValue<Progress?>(nil, lock: .init())
         defer {
             fileProgress.update { $0?.removeObserver(self, forKeyPath: "fractionCompleted") }

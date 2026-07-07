@@ -225,15 +225,11 @@ extension DeviceTransferService {
     }
 
     @MainActor
-    func sendManifest() async throws {
+    func sendManifest(session: DeviceTransferSession) async throws {
         Logger.info("Sending manifest to new device.")
 
         guard case .outgoing(let newDevicePeerId, _, let manifest, _, _) = transferState else {
             throw OWSAssertionError("attempted to send manifest while no active outgoing transfer")
-        }
-
-        guard let session else {
-            throw OWSAssertionError("attempted to send manifest without an available session")
         }
 
         resetTransferDirectory(createNewTransferDirectory: true)

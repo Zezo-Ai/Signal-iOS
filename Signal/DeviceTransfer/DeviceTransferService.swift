@@ -101,8 +101,6 @@ class DeviceTransferService:
 
     private let sleepBlockObject = DeviceSleepBlockObject(blockReason: "device transfer")
 
-    private(set) var session: DeviceTransferSession?
-
     private lazy var newDeviceServiceBrowser = {
         MPCDeviceTransfer.Browser(peerId: DeviceTransferPeerID(displayName: UUID().uuidString))
     }()
@@ -139,10 +137,10 @@ class DeviceTransferService:
             await self.deviceSleepManager.addBlock(blockObject: sleepBlockObject)
         }
 
-        self.session = try newDeviceServiceAdvertiser.startAdvertising()
-        self.session?.delegate = self
+        var session = try newDeviceServiceAdvertiser.startAdvertising()
+        session.delegate = self
 
-        return try urlForTransfer(mode: mode)
+        return try DeviceTransferService.urlForTransfer(session: session, mode: mode)
     }
 
     func stopAcceptingTransfersFromOldDevices() {
@@ -207,8 +205,8 @@ class DeviceTransferService:
             progress: progress,
         )
 
-        self.session = try newDeviceServiceBrowser.invitePeer(peerId)
-        self.session?.delegate = self
+        var session = try newDeviceServiceBrowser.invitePeer(peerId)
+        session.delegate = self
     }
 
     func cancelTransferToNewDevice() {
@@ -250,14 +248,12 @@ class DeviceTransferService:
         switch transferState {
         case .outgoing:
             sendTask?.cancel()
+            stopListeningForNewDevices()
         case .incoming:
-            newDeviceServiceAdvertiser.stopAdvertising()
+            stopAcceptingTransfersFromOldDevices()
         case .idle:
             break
         }
-
-        session?.disconnect()
-        session = nil
 
         Task {
             await self.deviceSleepManager.removeBlock(blockObject: sleepBlockObject)
@@ -293,10 +289,14 @@ class DeviceTransferService:
         case .idle:
             break
         case .incoming(let oldDevicePeerId, _, _, _, _):
-            try? sendBackgroundAppMessage(to: oldDevicePeerId)
+            if let session = newDeviceServiceBrowser.session {
+                try? sendBackgroundAppMessage(to: oldDevicePeerId, session: session)
+            }
             notifyObservers { $0.deviceTransferServiceDidEndTransfer(error: .backgroundedDevice) }
         case .outgoing(let newDevicePeerId, _, _, _, _):
-            try? sendBackgroundAppMessage(to: newDevicePeerId)
+            if let session = newDeviceServiceBrowser.session {
+                try? sendBackgroundAppMessage(to: newDevicePeerId, session: session)
+            }
             notifyObservers { $0.deviceTransferServiceDidEndTransfer(error: .backgroundedDevice) }
         }
         stopTransfer()
@@ -305,10 +305,10 @@ class DeviceTransferService:
     // MARK: - Sending
 
     private var sendTask: Task<Void, any Swift.Error>?
-    func sendAllFiles() throws {
+    func sendAllFiles(session: DeviceTransferSession) throws {
         self.sendTask = Task {
             do {
-                try await self._sendAllFiles()
+                try await self._sendAllFiles(session: session)
             } catch is CancellationError {
                 // Nothing to do.
             } catch {
@@ -318,7 +318,7 @@ class DeviceTransferService:
     }
 
     @MainActor
-    private func _sendAllFiles() async throws {
+    private func _sendAllFiles(session: DeviceTransferSession) async throws {
         guard case .outgoing(let newDevicePeerId, _, let manifest, _, _) = transferState else {
             throw OWSAssertionError("Attempted to send files while no transfer in progress")
         }
@@ -362,7 +362,10 @@ class DeviceTransferService:
                     }
                 }
                 for databaseFile in [dbCopy.db, dbCopy.wal] {
-                    try await DeviceTransferOperation(file: databaseFile).run()
+                    try await DeviceTransferOperation(
+                        session: session,
+                        file: databaseFile,
+                    ).run()
                 }
             }
             for (index, file) in manifest.files.enumerated() {
@@ -371,7 +374,10 @@ class DeviceTransferService:
                     try await taskGroup.next()
                 }
                 taskGroup.addTask {
-                    try await DeviceTransferOperation(file: file).run()
+                    try await DeviceTransferOperation(
+                        session: session,
+                        file: file,
+                    ).run()
                 }
             }
             // Make sure to wait for whatever's left at the end.
@@ -381,7 +387,8 @@ class DeviceTransferService:
         await DependenciesBridge.shared.db.awaitableWrite { tx in
             DependenciesBridge.shared.registrationStateChangeManager.setWasTransferred(tx: tx)
         }
-        try self.sendDoneMessage(to: newDevicePeerId)
+
+        try self.sendDoneMessage(to: newDevicePeerId, session: session)
     }
 
     private static let dbCopyFilename = "db_copy_for_transfer"
@@ -438,24 +445,14 @@ class DeviceTransferService:
     }
 
     static let doneMessage = Data("Transfer Complete".utf8)
-    func sendDoneMessage(to peerId: DeviceTransferPeerID) throws {
+    func sendDoneMessage(to peerId: DeviceTransferPeerID, session: DeviceTransferSession) throws {
         Logger.info("Sending done message")
-
-        guard let session else {
-            throw OWSAssertionError("attempted to send done message without an available session")
-        }
-
         try session.send(DeviceTransferService.doneMessage, toPeers: [peerId], with: .reliable)
     }
 
     static let backgroundAppMessage = Data("App backgrounded".utf8)
-    func sendBackgroundAppMessage(to peerId: DeviceTransferPeerID) throws {
+    func sendBackgroundAppMessage(to peerId: DeviceTransferPeerID, session: DeviceTransferSession) throws {
         Logger.info("Sending backgrounded message")
-
-        guard let session else {
-            throw OWSAssertionError("attempted to send backgrounded message without an available session")
-        }
-
         try session.send(DeviceTransferService.backgroundAppMessage, toPeers: [peerId], with: .unreliable)
     }
 
@@ -601,8 +598,8 @@ class DeviceTransferService:
                     guard !transferredFiles.contains(DeviceTransferService.manifestIdentifier) else { return }
 
                     do {
-                        try await self.sendManifest()
-                        try self.sendAllFiles()
+                        try await self.sendManifest(session: session)
+                        try self.sendAllFiles(session: session)
                     } catch {
                         self.failTransfer(.assertion, "Failed to send manifest to new device \(error)")
                     }
@@ -703,7 +700,7 @@ class DeviceTransferService:
             // all data because it doesn't know for sure if the data was safely
             // received by the new device.
             do {
-                try sendDoneMessage(to: oldDevicePeerId)
+                try sendDoneMessage(to: oldDevicePeerId, session: session)
             } catch {
                 owsFailDebug("Failed to send done message to old device \(error)")
             }

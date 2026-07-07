@@ -17,20 +17,19 @@ extension DeviceTransferService {
         static let transferHost = "transfer"
     }
 
-    func urlForTransfer(mode: TransferMode) throws -> URL {
-        guard let identity = session?.identity else {
-            throw OWSAssertionError("unexpectedly missing identity")
-        }
-
+    static func urlForTransfer(
+        session: DeviceTransferSession,
+        mode: TransferMode,
+    ) throws -> URL {
         var components = URLComponents()
         components.scheme = UrlOpener.Constants.sgnlPrefix
         components.host = Constants.transferHost
 
-        guard let base64CertificateHash = try identity.computeCertificateHash().base64EncodedString().encodeURIComponent else {
+        guard let base64CertificateHash = try session.identity.computeCertificateHash().base64EncodedString().encodeURIComponent else {
             throw OWSAssertionError("failed to get base64 certificate hash")
         }
 
-        guard let base64PeerId = try? session?.peerId.encoded().base64EncodedString().encodeURIComponent else {
+        guard let base64PeerId = try? session.peerId.encoded().base64EncodedString().encodeURIComponent else {
             throw OWSAssertionError("failed to get base64 peerId")
         }
 

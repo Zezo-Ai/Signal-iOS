@@ -167,6 +167,7 @@ enum MPCDeviceTransfer {
         let browser: MCNearbyServiceBrowser
         weak var delegate: DeviceTransferServiceBrowserDelegate?
         let peerId: DeviceTransferPeerID
+        var session: DeviceTransferSession?
 
         init(peerId: DeviceTransferPeerID) {
             browser = MCNearbyServiceBrowser(
@@ -186,6 +187,7 @@ enum MPCDeviceTransfer {
                 withContext: nil,
                 timeout: 30,
             )
+            self.session = session
             return session
         }
 
@@ -194,6 +196,7 @@ enum MPCDeviceTransfer {
         }
 
         func stopBrowsing() {
+            session?.disconnect()
             browser.stopBrowsingForPeers()
         }
 
@@ -242,6 +245,7 @@ enum MPCDeviceTransfer {
         }
 
         func stopAdvertising() {
+            session?.disconnect()
             advertiser.stopAdvertisingPeer()
         }
 
