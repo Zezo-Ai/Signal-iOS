@@ -977,7 +977,12 @@ extension ConversationSettingsViewController {
                 comment: "Format for the section title of the 'members' section in conversation settings view. Embeds: {{ the number of group members }}.",
             )
         }
-        section.headerTitle = String.localizedStringWithFormat(format, totalMemberCount)
+        let headerTitle = String.localizedStringWithFormat(format, totalMemberCount)
+        if groupModel is TSGroupModelV2 {
+            section.customHeaderView = buildGroupMembershipSectionHeader(title: headerTitle)
+        } else {
+            section.headerTitle = headerTitle
+        }
 
         var membersToRender = sortedGroupMembers
 
@@ -1017,69 +1022,22 @@ extension ConversationSettingsViewController {
                     owsFailDebug("Missing self")
                     return OWSTableItem.newCell()
                 }
-                let tableView = self.tableView
-                guard let cell = tableView.dequeueReusableCell(withIdentifier: ContactTableViewCell.reuseIdentifier) as? ContactTableViewCell else {
+                guard let cell = self.tableView.dequeueReusableCell(withIdentifier: ContactTableViewCell.reuseIdentifier) as? ContactTableViewCell else {
                     owsFailDebug("Missing cell.")
                     return UITableViewCell()
                 }
 
+                cell.selectionStyle = isLocalUser ? .none : .default
+
                 SSKEnvironment.shared.databaseStorageRef.read { transaction in
-                    var configuration = ContactCellView.Configuration(address: memberAddress, localUserDisplayMode: .asLocalUser)
-                    let isGroupAdmin = groupMembership.isFullMemberAndAdministrator(memberAddress)
-                    let isVerified = verificationState == .verified
-                    let isNoLongerVerified = verificationState == .noLongerVerified
-                    let isBlocked = SSKEnvironment.shared.blockingManagerRef.isAddressBlocked(memberAddress, transaction: transaction)
-                    if isGroupAdmin {
-                        configuration.accessoryMessage = OWSLocalizedString(
-                            "GROUP_MEMBER_ADMIN_INDICATOR",
-                            comment: "Label indicating that a group member is an admin.",
-                        )
-                    } else if isNoLongerVerified {
-                        configuration.accessoryMessage = OWSLocalizedString(
-                            "CONTACT_CELL_IS_NO_LONGER_VERIFIED",
-                            comment: "An indicator that a contact is no longer verified.",
-                        )
-                    } else if isBlocked {
-                        configuration.accessoryMessage = MessageStrings.conversationIsBlocked
-                    }
-
-                    if isLocalUser {
-                        cell.selectionStyle = .none
-                    } else {
-                        cell.selectionStyle = .default
-                    }
-
-                    if let memberLabel {
-                        configuration.memberLabel = memberLabel
-                    }
-
-                    if showAddMemberLabel {
-                        configuration.attributedSubtitle = NSAttributedString(
-                            string: OWSLocalizedString(
-                                "MEMBER_LABEL_ADD_CSVC",
-                                comment: "Label that shows up under a local user's row in contacts prompting them to add a member label",
-                            ),
-                            attributes: [.font: UIFont.dynamicTypeCaption1Clamped.medium()],
-                        ) + SignalSymbol.chevronRight.attributedString(
-                            dynamicTypeBaseSize: 10,
-                            weight: .bold,
-                            leadingCharacter: .space,
-                            attributes: [.foregroundColor: UIColor.Signal.secondaryLabel],
-                        )
-                    } else if isVerified {
-                        configuration.useVerifiedSubtitle()
-                    } else if
-                        !memberAddress.isLocalAddress,
-                        let bioForDisplay = SSKEnvironment.shared.profileManagerImplRef.userProfile(for: memberAddress, tx: transaction)?.bioForDisplay
-                    {
-                        configuration.attributedSubtitle = NSAttributedString(string: bioForDisplay)
-                    } else {
-                        owsAssertDebug(configuration.attributedSubtitle == nil)
-                    }
-
-                    let isSystemContact = SSKEnvironment.shared.contactManagerRef.fetchSignalAccount(for: memberAddress, transaction: transaction) != nil
-                    configuration.shouldShowContactIcon = isSystemContact
-
+                    let configuration = ContactCellView.Configuration.groupMember(
+                        address: memberAddress,
+                        groupMembership: groupMembership,
+                        verificationState: verificationState,
+                        memberLabel: memberLabel,
+                        showAddMemberLabel: showAddMemberLabel,
+                        tx: transaction,
+                    )
                     cell.configure(configuration: configuration, transaction: transaction)
                 }
 
@@ -1139,6 +1097,43 @@ extension ConversationSettingsViewController {
         }
 
         return section
+    }
+
+    private func buildGroupMembershipSectionHeader(title: String) -> UIView {
+        let headerView = UIStackView()
+        headerView.axis = .horizontal
+        headerView.alignment = .center
+        headerView.isLayoutMarginsRelativeArrangement = true
+        headerView.layoutMargins = UIEdgeInsets(
+            top: (defaultSpacingBetweenSections ?? 0) + 12,
+            leading: Self.cellHInnerMargin * 0.5,
+            bottom: 10,
+            trailing: Self.cellHInnerMargin * 0.5,
+        )
+        headerView.layoutMargins.left += tableView.safeAreaInsets.left
+        headerView.layoutMargins.right += tableView.safeAreaInsets.right
+
+        let titleLabel = UILabel()
+        titleLabel.text = title
+        titleLabel.textColor = UIColor.Signal.label
+        titleLabel.font = .dynamicTypeHeadlineClamped
+        titleLabel.numberOfLines = 0
+        headerView.addArrangedSubview(titleLabel)
+
+        headerView.addArrangedSubview(.hStretchingSpacer())
+
+        let searchButton = UIButton(primaryAction: UIAction { [weak self] _ in
+            self?.showGroupMemberSearch()
+        })
+        searchButton.setImage(UIImage(resource: .search), for: .normal)
+        searchButton.tintColor = UIColor.Signal.label
+        searchButton.accessibilityLabel = OWSLocalizedString(
+            "GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL",
+            comment: "Accessibility label for the button that opens the group member search sheet.",
+        )
+        headerView.addArrangedSubview(searchButton)
+
+        return headerView
     }
 
     private func buildGroupSettingsSection(

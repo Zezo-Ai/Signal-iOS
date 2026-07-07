@@ -1773,6 +1773,7 @@
 		B93296652BB5CF3200B8BD39 /* NicknameRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93296642BB5CF3200B8BD39 /* NicknameRecord.swift */; };
 		B93296672BB5CF7500B8BD39 /* NicknameRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93296662BB5CF7500B8BD39 /* NicknameRecordStore.swift */; };
 		B93296692BBB3FF200B8BD39 /* ProfileName.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95BBAC12BB36025009EFB4A /* ProfileName.swift */; };
+		B9418CC62FF4EBB5007E3787 /* GroupMemberSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9418CC52FF4EBB5007E3787 /* GroupMemberSearchViewController.swift */; };
 		B9488E752CDED27200C1294B /* ScrollOffset.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9488E742CDED27200C1294B /* ScrollOffset.swift */; };
 		B94E48012D385D7800128318 /* linear_indeterminate.json in Resources */ = {isa = PBXBuildFile; fileRef = B94E48002D385D7800128318 /* linear_indeterminate.json */; };
 		B94E922D2E381478007BA81B /* ContextualActionBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B94E922C2E381478007BA81B /* ContextualActionBuilder.swift */; };
@@ -6067,6 +6068,7 @@
 		B9327B3D2BBCC2EB00CCDBBA /* MockNicknameManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockNicknameManager.swift; sourceTree = "<group>"; };
 		B93296642BB5CF3200B8BD39 /* NicknameRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NicknameRecord.swift; sourceTree = "<group>"; };
 		B93296662BB5CF7500B8BD39 /* NicknameRecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NicknameRecordStore.swift; sourceTree = "<group>"; };
+		B9418CC52FF4EBB5007E3787 /* GroupMemberSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupMemberSearchViewController.swift; sourceTree = "<group>"; };
 		B9488E742CDED27200C1294B /* ScrollOffset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollOffset.swift; sourceTree = "<group>"; };
 		B94E48002D385D7800128318 /* linear_indeterminate.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = linear_indeterminate.json; sourceTree = "<group>"; };
 		B94E922C2E381478007BA81B /* ContextualActionBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextualActionBuilder.swift; sourceTree = "<group>"; };
@@ -8776,6 +8778,7 @@
 				34B14D8E24F41C4200CC3A9A /* GroupLinkQRCodeViewController.swift */,
 				34B14D8C24F02A9500CC3A9A /* GroupLinkViewController.swift */,
 				347B83FC24378DDE0019A52C /* GroupMemberRequestsAndInvitesViewController.swift */,
+				B9418CC52FF4EBB5007E3787 /* GroupMemberSearchViewController.swift */,
 				889DFA0F264EE76F00D03921 /* GroupNameViewController.swift */,
 				88BE44A72615451A00AE8E33 /* GroupPermissionsSettingsViewController.swift */,
 				347B83F624367EC00019A52C /* GroupViewHelper+MemberActionSheet.swift */,
@@ -18523,6 +18526,7 @@
 				34B14D8F24F41C4300CC3A9A /* GroupLinkQRCodeViewController.swift in Sources */,
 				34B14D8D24F02A9600CC3A9A /* GroupLinkViewController.swift in Sources */,
 				347B83FD24378DDF0019A52C /* GroupMemberRequestsAndInvitesViewController.swift in Sources */,
+				B9418CC62FF4EBB5007E3787 /* GroupMemberSearchViewController.swift in Sources */,
 				889DFA10264EE76F00D03921 /* GroupNameViewController.swift in Sources */,
 				88BE44A82615451A00AE8E33 /* GroupPermissionsSettingsViewController.swift in Sources */,
 				50C2B5142FFC348100DEFB25 /* GroupSendEndorsementExpirationJob.swift in Sources */,

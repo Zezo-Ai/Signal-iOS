@@ -15,6 +15,8 @@ public class OWSTableViewDiffableDataSource<
     ItemIdentifier,
 > {
 
+    // MARK: Move rows
+
     public var canMoveRow: ((_ indexPath: IndexPath) -> Bool)?
     public var didMoveRow: ((_ sourceIndexPath: IndexPath, _ destinationIndexPath: IndexPath) -> Void)?
 
@@ -31,5 +33,30 @@ public class OWSTableViewDiffableDataSource<
         to destinationIndexPath: IndexPath,
     ) {
         didMoveRow?(sourceIndexPath, destinationIndexPath)
+    }
+
+    // MARK: Section index
+
+    public var sectionIndexTitlesProvider: (() -> [String]?)?
+    public var sectionForSectionIndexTitleProvider: ((_ title: String, _ index: Int) -> Int)?
+
+    override public func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+        if let sectionIndexTitlesProvider {
+            sectionIndexTitlesProvider()
+        } else {
+            super.sectionIndexTitles(for: tableView)
+        }
+    }
+
+    override public func tableView(
+        _ tableView: UITableView,
+        sectionForSectionIndexTitle title: String,
+        at index: Int,
+    ) -> Int {
+        if let sectionForSectionIndexTitleProvider {
+            sectionForSectionIndexTitleProvider(title, index)
+        } else {
+            super.tableView(tableView, sectionForSectionIndexTitle: title, at: index)
+        }
     }
 }

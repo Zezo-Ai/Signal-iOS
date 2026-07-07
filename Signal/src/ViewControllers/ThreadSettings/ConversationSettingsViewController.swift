@@ -520,6 +520,23 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
         navigationController?.pushViewController(addGroupMembersViewController, animated: true)
     }
 
+    func showGroupMemberSearch() {
+        guard let groupModel = currentGroupModel as? TSGroupModelV2 else {
+            owsFailDebug("Invalid group model.")
+            return
+        }
+        let viewController = GroupMemberSearchViewController(
+            groupModel: groupModel,
+            thread: thread,
+            groupViewHelper: groupViewHelper,
+            spoilerState: spoilerState,
+            canEditConversationMembership: canEditConversationMembership,
+            isTerminatedGroup: isTerminatedGroup,
+            delegate: self,
+        )
+        presentFormSheet(OWSNavigationController(rootViewController: viewController), animated: true)
+    }
+
     func showAddToGroupView() {
         guard let thread = thread as? TSContactThread else {
             return owsFailDebug("Tried to present for unexpected thread")
@@ -1075,6 +1092,22 @@ extension ConversationSettingsViewController: GroupAttributesViewControllerDeleg
 extension ConversationSettingsViewController: AddGroupMembersViewControllerDelegate {
     func addGroupMembersViewDidUpdate() {
         reloadThreadAndUpdateContent()
+    }
+}
+
+// MARK: - GroupMemberSearchViewControllerDelegate
+
+extension ConversationSettingsViewController: GroupMemberSearchViewControllerDelegate {
+    func groupMemberSearchViewControllerRequestAddMembers(_ viewController: GroupMemberSearchViewController) {
+        dismiss(animated: true) { [weak self] in
+            self?.showAddMembersView()
+        }
+    }
+
+    func groupMemberSearchViewControllerRequestShareGroupLink(_ viewController: GroupMemberSearchViewController) {
+        dismiss(animated: true) { [weak self] in
+            self?.showGroupLinkView()
+        }
     }
 }
 
