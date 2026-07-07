@@ -92,7 +92,7 @@ extension AppSetup {
         let dateProvider: DateProvider?
         let groupV2Updates: (any GroupV2Updates)?
         let groupsV2: (any GroupsV2)?
-        let messageSender: (AccountChecker) -> MessageSender?
+        let messageSender: (any MessageSender)?
         let networkManager: NetworkManager?
         let paymentsCurrencies: (any PaymentsCurrenciesSwift)?
         let paymentsHelper: (any PaymentsHelperSwift)?
@@ -113,7 +113,7 @@ extension AppSetup {
             dateProvider: DateProvider? = nil,
             groupV2Updates: (any GroupV2Updates)? = nil,
             groupsV2: (any GroupsV2)? = nil,
-            messageSender: @escaping ((AccountChecker) -> MessageSender?) = { _ in nil },
+            messageSender: (any MessageSender)? = nil,
             networkManager: NetworkManager? = nil,
             paymentsCurrencies: (any PaymentsCurrenciesSwift)? = nil,
             paymentsHelper: (any PaymentsHelperSwift)? = nil,
@@ -1185,14 +1185,15 @@ extension AppSetup.GlobalsContinuation {
             chatConnectionManager: chatConnectionManager,
         )
 
-        let messageSender = testDependencies.messageSender(accountChecker) ?? MessageSender(
+        let messageSenderImpl = MessageSenderImpl(
             accountChecker: accountChecker,
             groupSendEndorsementStore: groupSendEndorsementStore,
         )
+        let messageSender = testDependencies.messageSender ?? messageSenderImpl
 
         let pniDistributionParameterBuilder = PniDistributionParameterBuilderImpl(
             db: db,
-            messageSender: PniDistributionParameterBuilderImpl.Wrappers.MessageSender(messageSender),
+            deviceMessageBuilder: messageSenderImpl,
             pniKyberPreKeyStore: pniProtocolStore.kyberPreKeyStore,
             registrationIdGenerator: RegistrationIdGenerator(),
         )
@@ -1806,6 +1807,7 @@ extension AppSetup.GlobalsContinuation {
             localUsernameManager: localUsernameManager,
             lowDiskSpaceWarningManager: lowDiskSpaceWarningManager,
             mediaBandwidthPreferenceStore: mediaBandwidthPreferenceStore,
+            messageSender: messageSender,
             messageStickerManager: messageStickerManager,
             nicknameManager: nicknameManager,
             orphanedAttachmentCleaner: orphanedAttachmentCleaner,

@@ -7,10 +7,6 @@ import XCTest
 @testable import SignalServiceKit
 
 class MessageSenderJobQueueTest: SSKBaseTest {
-    private var fakeMessageSender: FakeMessageSender {
-        SSKEnvironment.shared.messageSenderRef as! FakeMessageSender
-    }
-
     func test_messageIsSent() async throws {
         let jobQueue = MessageSenderJobQueue(appReadiness: AppReadinessMock())
         let (message, promise) = try await SSKEnvironment.shared.databaseStorageRef.awaitableWrite { tx in

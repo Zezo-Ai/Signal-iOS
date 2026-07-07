@@ -9,14 +9,16 @@ public import XCTest
 
 public class SSKBaseTest: XCTestCase {
     private var oldContext: (any AppContext)!
+    private(set) var fakeMessageSender: FakeMessageSender!
 
     @MainActor
     override public func setUp() {
         DDLog.add(DDTTYLogger.sharedInstance!)
         let setupExpectation = expectation(description: "mock ssk environment setup completed")
         self.oldContext = CurrentAppContext()
+        self.fakeMessageSender = FakeMessageSender()
         Task {
-            await MockSSKEnvironment.activate()
+            await MockSSKEnvironment.activate(messageSender: fakeMessageSender)
             setupExpectation.fulfill()
         }
         waitForExpectations(timeout: 30)

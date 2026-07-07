@@ -21,10 +21,6 @@ class MessageDecryptionTest: SSKBaseTest {
 
     let sealedSenderTrustRoot = IdentityKeyPair.generate()
 
-    private var fakeMessageSender: FakeMessageSender {
-        SSKEnvironment.shared.messageSenderRef as! FakeMessageSender
-    }
-
     // MARK: - Hooks
 
     override func setUp() {

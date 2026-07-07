@@ -9,7 +9,7 @@ import XCTest
 @testable import SignalServiceKit
 
 class PniDistributionParameterBuilderTest: XCTestCase {
-    private var messageSenderMock: MessageSenderMock!
+    private var deviceMessageBuilderMock: DeviceMessageBuilderMock!
     private var pniKyberPreKeyStoreMock: KyberPreKeyStoreImpl!
     private var registrationIdGeneratorMock: MockRegistrationIdGenerator!
 
@@ -21,14 +21,14 @@ class PniDistributionParameterBuilderTest: XCTestCase {
     override func setUp() {
         dateProvider = { Date() }
         db = InMemoryDB()
-        messageSenderMock = .init(db: db)
+        deviceMessageBuilderMock = DeviceMessageBuilderMock(db: db)
         let preKeyStore = SignalServiceKit.PreKeyStore()
         pniKyberPreKeyStoreMock = KyberPreKeyStoreImpl(for: .pni, dateProvider: dateProvider, preKeyStore: preKeyStore)
         registrationIdGeneratorMock = .init()
 
         pniDistributionParameterBuilder = PniDistributionParameterBuilderImpl(
             db: db,
-            messageSender: messageSenderMock,
+            deviceMessageBuilder: deviceMessageBuilderMock,
             pniKyberPreKeyStore: pniKyberPreKeyStoreMock,
             registrationIdGenerator: registrationIdGeneratorMock,
         )
@@ -50,7 +50,7 @@ class PniDistributionParameterBuilderTest: XCTestCase {
             self.pniKyberPreKeyStoreMock.generateLastResortKyberPreKeyForChangeNumber(signedBy: pniKeyPair.keyPair.privateKey)
         }
 
-        messageSenderMock.deviceMessagesMocks.update {
+        deviceMessageBuilderMock.deviceMessagesMocks.update {
             $0.append(.success([
                 buildDeviceMessage(deviceId: DeviceId(validating: 123)!, registrationId: 456),
             ]))
@@ -78,7 +78,7 @@ class PniDistributionParameterBuilderTest: XCTestCase {
         XCTAssertEqual(parameters.deviceMessages.first?.deviceId, DeviceId(validating: 123)!)
         XCTAssertEqual(parameters.deviceMessages.first?.registrationId, 456)
 
-        XCTAssertTrue(messageSenderMock.deviceMessagesMocks.get().isEmpty)
+        XCTAssertTrue(deviceMessageBuilderMock.deviceMessagesMocks.get().isEmpty)
     }
 
     func testBuildParametersWithError() async {
@@ -89,7 +89,7 @@ class PniDistributionParameterBuilderTest: XCTestCase {
             self.pniKyberPreKeyStoreMock.generateLastResortKyberPreKeyForChangeNumber(signedBy: pniKeyPair.keyPair.privateKey)
         }
 
-        messageSenderMock.deviceMessagesMocks.update {
+        deviceMessageBuilderMock.deviceMessagesMocks.update {
             $0.append(.failure(OWSGenericError("Arbitrary failure.")))
         }
 
@@ -105,7 +105,7 @@ class PniDistributionParameterBuilderTest: XCTestCase {
 
         XCTAssertThrowsError(try result.get())
         XCTAssertEqual(registrationIdGeneratorMock.generatedRegistrationIds.count, 1)
-        XCTAssert(messageSenderMock.deviceMessagesMocks.get().isEmpty)
+        XCTAssert(deviceMessageBuilderMock.deviceMessagesMocks.get().isEmpty)
     }
 
     // MARK: Helpers
@@ -136,7 +136,7 @@ class PniDistributionParameterBuilderTest: XCTestCase {
 
 // MARK: - MessageSender
 
-private class MessageSenderMock: PniDistributionParameterBuilderImpl.Shims.MessageSender {
+private class DeviceMessageBuilderMock: DeviceMessageBuilder {
     private let db: any DB
     init(db: any DB) {
         self.db = db

@@ -21,13 +21,11 @@ public class SSKEnvironment: NSObject {
 
 #if TESTABLE_BUILD
     public private(set) var contactManagerRef: any ContactManager
-    public private(set) var messageSenderRef: MessageSender
     public private(set) var networkManagerRef: NetworkManager
     public private(set) var paymentsHelperRef: PaymentsHelperSwift
     public private(set) var groupsV2Ref: GroupsV2
 #else
     public let contactManagerRef: any ContactManager
-    public let messageSenderRef: MessageSender
     public let networkManagerRef: NetworkManager
     public let paymentsHelperRef: PaymentsHelperSwift
     public let groupsV2Ref: GroupsV2
@@ -161,7 +159,6 @@ public class SSKEnvironment: NSObject {
         profileFetcher: any ProfileFetcher,
     ) {
         self.contactManagerRef = contactManager
-        self.messageSenderRef = messageSender
         self.pendingReceiptRecorderRef = pendingReceiptRecorder
         self.profileManagerRef = profileManager
         self.networkManagerRef = networkManager
@@ -320,10 +317,6 @@ public class SSKEnvironment: NSObject {
 
     public func setContactManagerForUnitTests(_ contactManager: any ContactManager) {
         self.contactManagerRef = contactManager
-    }
-
-    public func setMessageSenderForUnitTests(_ messageSender: MessageSender) {
-        self.messageSenderRef = messageSender
     }
 
     public func setNetworkManagerForUnitTests(_ networkManager: NetworkManager) {

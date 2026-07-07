@@ -6,9 +6,26 @@
 import Foundation
 import LibSignalClient
 
-// MARK: - MessageSender
+public protocol MessageSender {
+    func sendMessage(
+        _ preparedOutgoingMessage: PreparedOutgoingMessage,
+    ) async -> SendMessageResult
+}
 
-public class MessageSender {
+protocol DeviceMessageBuilder {
+    func buildDeviceMessages(
+        serviceId: ServiceId,
+        isSelfSend: Bool,
+        encryptionStyle: EncryptionStyle,
+        buildPlaintextContent: (DeviceId, DBWriteTransaction) throws -> Data,
+        isTransient: Bool,
+        sealedSenderParameters: SealedSenderParameters?,
+        localAci: Aci,
+        localDeviceId: DeviceId,
+    ) async throws -> [DeviceMessage]
+}
+
+public class MessageSenderImpl: MessageSender, DeviceMessageBuilder {
 
     private var preKeyManager: PreKeyManager { DependenciesBridge.shared.preKeyManager }
 
@@ -356,28 +373,7 @@ public class MessageSender {
 
     // MARK: - Constructing Message Sends
 
-    enum SendResult {
-        case success
-
-        /// Something happened before[^1] we branched based on ServiceIds, so the
-        /// same Error applies to the entire attempt to send the message.
-        ///
-        /// [^1]: If we try to send to a group and every group member is
-        /// unregistered, this is treated as an overall failure. There is an
-        /// argument that this shouldn't be an error at all or should be
-        /// per-recipient "recipients don't exist" errors.
-        case overallFailure(any Error)
-
-        /// We reached a point where we may have a different error for every
-        /// recipient. It will often be the case that many recipients encounter the
-        /// "same" error. (For example, we may use the multi-recipient endpoint and
-        /// then copy the same Error object for every recipient, but we also may fan
-        /// out to individual recipients, and they all may encounter their own
-        /// equivalent network failure error.)
-        case recipientsFailure(SendMessageFailure)
-    }
-
-    func sendMessage(_ preparedOutgoingMessage: PreparedOutgoingMessage) async -> SendResult {
+    public func sendMessage(_ preparedOutgoingMessage: PreparedOutgoingMessage) async -> SendMessageResult {
         let sendFailure: SendMessageFailure?
         do {
             Logger.info("Sending \(preparedOutgoingMessage)")
@@ -641,7 +637,7 @@ public class MessageSender {
 
         /// There's nothing to be sent; return an early result. NOTE: We might still
         /// need to send a sync transcript.
-        case skipSend(SendMessageResult)
+        case skipSend(SendPreparedMessageResult)
 
         /// Fetch a new set of GSEs & then try sending again.
         case fetchGroupSendEndorsementsAndTryAgain(GroupSecretParams)
@@ -681,7 +677,7 @@ public class MessageSender {
         }
     }
 
-    private struct SendMessageResult {
+    private struct SendPreparedMessageResult {
         let isNoteToSelf: Bool
         let sendMessageFailure: SendMessageFailure?
     }
@@ -692,7 +688,7 @@ public class MessageSender {
         senderCertificates: SenderCertificates,
         localIdentifiers: LocalIdentifiers,
         localDeviceId: DeviceId,
-    ) async throws -> SendMessageResult {
+    ) async throws -> SendPreparedMessageResult {
         let databaseStorage = SSKEnvironment.shared.databaseStorageRef
         let nextAction = try await databaseStorage.awaitableWrite { tx -> SendMessageNextAction in
             guard let thread = message.thread(tx: tx) else {
@@ -729,12 +725,12 @@ public class MessageSender {
             {
                 owsAssertDebug(serviceIds.count == 1)
                 // Don't mark self-sent messages as read (or sent) until the sync transcript is sent.
-                return .skipSend(SendMessageResult(isNoteToSelf: true, sendMessageFailure: nil))
+                return .skipSend(SendPreparedMessageResult(isNoteToSelf: true, sendMessageFailure: nil))
             }
 
             if serviceIds.isEmpty {
                 // All recipients are already sent or can be skipped.
-                return .skipSend(SendMessageResult(isNoteToSelf: false, sendMessageFailure: nil))
+                return .skipSend(SendPreparedMessageResult(isNoteToSelf: false, sendMessageFailure: nil))
             }
 
             let serializedMessage = try self.buildAndRecordMessage(message, in: thread, tx: tx)
@@ -875,7 +871,7 @@ public class MessageSender {
                     break
                 }
             }
-            return SendMessageResult(isNoteToSelf: false, sendMessageFailure: sendMessageFailure)
+            return SendPreparedMessageResult(isNoteToSelf: false, sendMessageFailure: sendMessageFailure)
         }
 
         return try await sendPreparedMessage(
@@ -1150,7 +1146,7 @@ public class MessageSender {
     // TODO: Remove Result<...> from the sendResult parameter.
     private func handleMessageSentLocally(
         _ message: any SendableMessage,
-        sendResult: Result<SendMessageResult, any Error>,
+        sendResult: Result<SendPreparedMessageResult, any Error>,
         localIdentifiers: LocalIdentifiers,
         localDeviceId: DeviceId,
     ) async throws {
@@ -1247,7 +1243,7 @@ public class MessageSender {
     // TODO: Remove this method; it won't be necessary with modern receipts.
     private func markNoteToSelfMessageAsReadAndViewedIfNecessary(
         _ message: any SendableMessage,
-        sendResult: SendMessageResult,
+        sendResult: SendPreparedMessageResult,
     ) async {
         // Non-TSOutgoingMessage/"normal" messages never have receipts and thus
         // never need to be marked as read/viewed. However, some transient messages

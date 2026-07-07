@@ -208,8 +208,8 @@ extension TSOutgoingMessage {
         _ recipientErrors: some Sequence<(serviceId: ServiceId, error: Error)>,
         tx: DBWriteTransaction,
     ) {
-        let fatalErrors = recipientErrors.filter { !MessageSender.isRetryableError($0.error) }
-        let retryableErrors = recipientErrors.filter { MessageSender.isRetryableError($0.error) }
+        let fatalErrors = recipientErrors.filter { !MessageSenderImpl.isRetryableError($0.error) }
+        let retryableErrors = recipientErrors.filter { MessageSenderImpl.isRetryableError($0.error) }
 
         if fatalErrors.isEmpty {
             Logger.warn("Couldn't send \(self.timestamp), but all errors are retryable: \(retryableErrors)")
@@ -223,7 +223,7 @@ extension TSOutgoingMessage {
                     owsFailDebug("Missing recipient state for \(serviceId)")
                     continue
                 }
-                if MessageSender.isRetryableError(error), recipientState.status == .sending {
+                if MessageSenderImpl.isRetryableError(error), recipientState.status == .sending {
                     // For retryable errors, we can just set the error code and leave the
                     // state set as Sending
                 } else if error is SpamChallengeRequiredError {

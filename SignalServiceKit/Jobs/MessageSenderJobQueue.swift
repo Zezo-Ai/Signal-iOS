@@ -500,7 +500,7 @@ public class MessageSenderJobQueue {
         while true {
             assert(!Task.isCancelled, "Cancellation isn't supported.")
             operation.clearExternalRetryTriggers()
-            let result = await SSKEnvironment.shared.messageSenderRef.sendMessage(operation.message)
+            let result = await DependenciesBridge.shared.messageSender.sendMessage(operation.message)
             let errors: [any Error]
             let arbitraryError: any Error
             switch result {
@@ -526,7 +526,7 @@ public class MessageSenderJobQueue {
                 }
                 // Keep track of the first retryable error we encounter -- we'd prefer to
                 // throw a retryable error rather than one that's not retryable.
-                if MessageSender.isRetryableError(error) {
+                if MessageSenderImpl.isRetryableError(error) {
                     retryableError = retryableError ?? error
                 }
                 // If there's a network failure, this is an external error, so we want to

@@ -102,18 +102,18 @@ final class PniDistributionParameterBuilderImpl: PniDistributionParamaterBuilder
     private let logger = PrefixedLogger(prefix: "PDPBI")
 
     private let db: any DB
-    private let messageSender: Shims.MessageSender
+    private let deviceMessageBuilder: any DeviceMessageBuilder
     private let pniKyberPreKeyStore: KyberPreKeyStoreImpl
     private let registrationIdGenerator: RegistrationIdGenerator
 
     init(
         db: any DB,
-        messageSender: Shims.MessageSender,
+        deviceMessageBuilder: any DeviceMessageBuilder,
         pniKyberPreKeyStore: KyberPreKeyStoreImpl,
         registrationIdGenerator: RegistrationIdGenerator,
     ) {
         self.db = db
-        self.messageSender = messageSender
+        self.deviceMessageBuilder = deviceMessageBuilder
         self.pniKyberPreKeyStore = pniKyberPreKeyStore
         self.registrationIdGenerator = registrationIdGenerator
     }
@@ -178,7 +178,7 @@ final class PniDistributionParameterBuilderImpl: PniDistributionParamaterBuilder
         var syncMessages = [DeviceId: PniDistributionSyncMessage]()
 
         let identityKey = pniIdentityKeyPair.identityKeyPair.privateKey
-        let deviceMessages = try await self.messageSender.buildDeviceMessages(
+        let deviceMessages = try await self.deviceMessageBuilder.buildDeviceMessages(
             serviceId: localAci,
             isSelfSend: true,
             encryptionStyle: .whisper,
@@ -215,62 +215,5 @@ final class PniDistributionParameterBuilderImpl: PniDistributionParamaterBuilder
                 deviceMessage: $0,
             )
         }
-    }
-}
-
-// MARK: - Shims
-
-extension PniDistributionParameterBuilderImpl {
-    enum Shims {
-        typealias MessageSender = _PniDistributionParameterBuilder_MessageSender_Shim
-    }
-
-    enum Wrappers {
-        typealias MessageSender = _PniDistributionParameterBuilder_MessageSender_Wrapper
-    }
-}
-
-// MARK: MessageSender
-
-protocol _PniDistributionParameterBuilder_MessageSender_Shim {
-    func buildDeviceMessages(
-        serviceId: ServiceId,
-        isSelfSend: Bool,
-        encryptionStyle: EncryptionStyle,
-        buildPlaintextContent: (DeviceId, DBWriteTransaction) throws -> Data,
-        isTransient: Bool,
-        sealedSenderParameters: SealedSenderParameters?,
-        localAci: Aci,
-        localDeviceId: DeviceId,
-    ) async throws -> [DeviceMessage]
-}
-
-class _PniDistributionParameterBuilder_MessageSender_Wrapper: _PniDistributionParameterBuilder_MessageSender_Shim {
-    private let messageSender: MessageSender
-
-    init(_ messageSender: MessageSender) {
-        self.messageSender = messageSender
-    }
-
-    func buildDeviceMessages(
-        serviceId: ServiceId,
-        isSelfSend: Bool,
-        encryptionStyle: EncryptionStyle,
-        buildPlaintextContent: (DeviceId, DBWriteTransaction) throws -> Data,
-        isTransient: Bool,
-        sealedSenderParameters: SealedSenderParameters?,
-        localAci: Aci,
-        localDeviceId: DeviceId,
-    ) async throws -> [DeviceMessage] {
-        try await messageSender.buildDeviceMessages(
-            serviceId: serviceId,
-            isSelfSend: isSelfSend,
-            encryptionStyle: encryptionStyle,
-            buildPlaintextContent: buildPlaintextContent,
-            isTransient: isTransient,
-            sealedSenderParameters: sealedSenderParameters,
-            localAci: localAci,
-            localDeviceId: localDeviceId,
-        )
     }
 }

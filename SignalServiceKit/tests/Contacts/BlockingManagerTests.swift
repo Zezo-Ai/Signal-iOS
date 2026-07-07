@@ -220,11 +220,10 @@ class BlockingManagerTests: SSKBaseTest {
 
         SSKEnvironment.shared.messageSenderJobQueueRef.setUp()
 
-        let messageSender = SSKEnvironment.shared.messageSenderRef as! FakeMessageSender
-        messageSender.stubbedFailingErrors = [nil]
+        fakeMessageSender.stubbedFailingErrors = [nil]
 
         await withCheckedContinuation { continuation in
-            messageSender.sendMessageWasCalledBlock = { _ in continuation.resume() }
+            fakeMessageSender.sendMessageWasCalledBlock = { _ in continuation.resume() }
             // Test
             SSKEnvironment.shared.databaseStorageRef.write { tx in
                 blockingManager.addBlockedAci(Aci.randomForTesting(), blockMode: .local, tx: tx)
@@ -232,7 +231,7 @@ class BlockingManagerTests: SSKBaseTest {
         }
 
         // Verify
-        XCTAssertEqual(messageSender.sentMessages.count, 1)
-        XCTAssert(messageSender.sentMessages.first! is OutgoingBlockedSyncMessage)
+        XCTAssertEqual(fakeMessageSender.sentMessages.count, 1)
+        XCTAssert(fakeMessageSender.sentMessages.first! is OutgoingBlockedSyncMessage)
     }
 }

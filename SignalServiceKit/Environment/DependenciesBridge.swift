@@ -143,6 +143,7 @@ public class DependenciesBridge {
     public let localUsernameManager: LocalUsernameManager
     public let lowDiskSpaceWarningManager: LowDiskSpaceWarningManager
     public let mediaBandwidthPreferenceStore: MediaBandwidthPreferenceStore
+    public let messageSender: any MessageSender
     public let messageStickerManager: MessageStickerManager
     public let nicknameManager: any NicknameManager
     public let orphanedAttachmentCleaner: OrphanedAttachmentCleaner
@@ -289,6 +290,7 @@ public class DependenciesBridge {
         localUsernameManager: LocalUsernameManager,
         lowDiskSpaceWarningManager: LowDiskSpaceWarningManager,
         mediaBandwidthPreferenceStore: MediaBandwidthPreferenceStore,
+        messageSender: any MessageSender,
         messageStickerManager: MessageStickerManager,
         nicknameManager: any NicknameManager,
         orphanedAttachmentCleaner: OrphanedAttachmentCleaner,
@@ -434,6 +436,7 @@ public class DependenciesBridge {
         self.localUsernameManager = localUsernameManager
         self.lowDiskSpaceWarningManager = lowDiskSpaceWarningManager
         self.mediaBandwidthPreferenceStore = mediaBandwidthPreferenceStore
+        self.messageSender = messageSender
         self.messageStickerManager = messageStickerManager
         self.nicknameManager = nicknameManager
         self.orphanedAttachmentCleaner = orphanedAttachmentCleaner

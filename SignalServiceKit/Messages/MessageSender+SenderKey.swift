@@ -5,7 +5,7 @@
 
 import LibSignalClient
 
-extension MessageSender {
+extension MessageSenderImpl {
     private struct Recipient {
         let serviceId: ServiceId
         let deviceIds: [DeviceId]
@@ -16,17 +16,6 @@ extension MessageSender {
         init(serviceId: ServiceId, deviceIds: [DeviceId]) {
             self.serviceId = serviceId
             self.deviceIds = deviceIds
-        }
-    }
-
-    enum SenderKeyError: Error, IsRetryableProvider, UserErrorDescriptionProvider {
-        case invalidAuthHeader
-        case mismatchedDevices
-
-        var isRetryableProvider: Bool { true }
-
-        var localizedDescription: String {
-            return OWSLocalizedString("ERROR_DESCRIPTION_CLIENT_SENDING_FAILURE", comment: "Generic notice when message failed to send.")
         }
     }
 
@@ -587,5 +576,18 @@ extension MessageSender {
 
     private static func isValidRegistrationId(_ registrationId: UInt32) -> Bool {
         return (registrationId & RegistrationIdGenerator.Constants.maximumRegistrationId) == registrationId
+    }
+}
+
+// MARK: -
+
+enum SenderKeyError: Error, IsRetryableProvider, UserErrorDescriptionProvider {
+    case invalidAuthHeader
+    case mismatchedDevices
+
+    var isRetryableProvider: Bool { true }
+
+    var localizedDescription: String {
+        return OWSLocalizedString("ERROR_DESCRIPTION_CLIENT_SENDING_FAILURE", comment: "Generic notice when message failed to send.")
     }
 }
