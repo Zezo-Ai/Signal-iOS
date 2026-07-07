@@ -224,7 +224,8 @@ extension DeviceTransferService {
         }
     }
 
-    func sendManifest() throws -> Promise<Void> {
+    @MainActor
+    func sendManifest() async throws {
         Logger.info("Sending manifest to new device.")
 
         guard case .outgoing(let newDevicePeerId, _, let manifest, _, _) = transferState else {
@@ -246,28 +247,21 @@ extension DeviceTransferService {
         )
         try manifestData.write(to: manifestFileURL, options: .atomic)
 
-        let (promise, future) = Promise<Void>.pending()
-
-        _ = session.sendResource(
-            at: manifestFileURL,
-            withName: DeviceTransferService.manifestIdentifier,
-            toPeer: newDevicePeerId,
-        ) { error in
-            if let error {
-                future.reject(error)
-            } else {
-                future.resolve()
-
-                Logger.info("Successfully sent manifest to new device.")
-
-                self.transferState = self.transferState.appendingFileId(DeviceTransferService.manifestIdentifier)
-                self.startThroughputCalculation()
-            }
-
+        defer {
             OWSFileSystem.deleteFileIfExists(manifestFileURL.path)
         }
 
-        return promise
+        try await session.sendResource(
+            url: manifestFileURL,
+            name: DeviceTransferService.manifestIdentifier,
+            to: newDevicePeerId,
+            progressBlock: { _ in },
+        )
+
+        Logger.info("Successfully sent manifest to new device.")
+
+        transferState = self.transferState.appendingFileId(DeviceTransferService.manifestIdentifier)
+        startThroughputCalculation()
     }
 
     func readManifestFromTransferDirectory() -> DeviceTransferProtoManifest? {

@@ -70,22 +70,22 @@ class DeviceTransferOperation: NSObject {
         defer {
             fileProgress.update { $0?.removeObserver(self, forKeyPath: "fractionCompleted") }
         }
-        try await withCheckedThrowingContinuation { continuation in
-            fileProgress.update {
-                let _fileProgress = session.sendResource(
-                    at: url,
-                    withName: file.identifier + " " + sha256Digest.hexadecimalString,
-                    toPeer: newDevicePeerId,
-                    withCompletionHandler: { error in
-                        continuation.resume(with: error.map({ .failure(OWSGenericError("Transferring file \(self.file.identifier) failed \($0)")) }) ?? .success(()))
-                    },
-                )
-                if let _fileProgress {
-                    progress.addChild(_fileProgress, withPendingUnitCount: Int64(file.estimatedSize))
-                    _fileProgress.addObserver(self, forKeyPath: "fractionCompleted", options: .initial, context: nil)
-                    $0 = _fileProgress
+        do {
+            try await session.sendResource(
+                url: url,
+                name: file.identifier + " " + sha256Digest.hexadecimalString,
+                to: newDevicePeerId,
+            ) { _fileProgress in
+                fileProgress.update {
+                    if let _fileProgress {
+                        progress.addChild(_fileProgress, withPendingUnitCount: Int64(self.file.estimatedSize))
+                        _fileProgress.addObserver(self, forKeyPath: "fractionCompleted", options: .initial, context: nil)
+                        $0 = _fileProgress
+                    }
                 }
             }
+        } catch {
+            throw OWSGenericError("Transferring file \(self.file.identifier) failed \(error)")
         }
         try Task.checkCancellation()
 

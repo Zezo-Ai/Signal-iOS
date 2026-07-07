@@ -47,11 +47,11 @@ protocol DeviceTransferSession {
     ) throws
 
     func sendResource(
-        at resourceURL: URL,
-        withName resourceName: String,
-        toPeer peerID: DeviceTransferPeerID,
-        withCompletionHandler: (((any Error)?) -> Void)?,
-    ) -> Progress?
+        url: URL,
+        name: String,
+        to peer: DeviceTransferPeerID,
+        progressBlock: ((Progress?) -> Void),
+    ) async throws
 }
 
 protocol DeviceTransferServiceBrowser {
@@ -297,13 +297,20 @@ enum MPCDeviceTransfer {
         }
 
         func sendResource(
-            at resourceURL: URL,
-            withName resourceName: String,
-            toPeer peerID: DeviceTransferPeerID,
-            withCompletionHandler: (((any Error)?) -> Void)?,
-        ) -> Progress? {
-            return session.sendResource(at: resourceURL, withName: resourceName, toPeer: peerID.mcPeerID) { error in
-                withCompletionHandler?(error)
+            url: URL,
+            name: String,
+            to peer: DeviceTransferPeerID,
+            progressBlock: ((Progress?) -> Void),
+        ) async throws {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
+                let progress = session.sendResource(at: url, withName: name, toPeer: peer.mcPeerID) { error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume()
+                    }
+                }
+                progressBlock(progress)
             }
         }
 

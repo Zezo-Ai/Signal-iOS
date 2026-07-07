@@ -583,7 +583,7 @@ class DeviceTransferService:
         didChange state: TransferSessionState,
     ) {
         // dispatch to main ASAP to free up the session's private thread to receive more bytes.
-        DispatchQueue.main.async {
+        Task { @MainActor in
             Logger.debug("Connection to \(peerId) did change: \(state.rawValue)")
 
             switch self.transferState {
@@ -601,11 +601,8 @@ class DeviceTransferService:
                     guard !transferredFiles.contains(DeviceTransferService.manifestIdentifier) else { return }
 
                     do {
-                        try self.sendManifest().done {
-                            try self.sendAllFiles()
-                        }.catch { error in
-                            self.failTransfer(.assertion, "Failed to send manifest to new device \(error)")
-                        }
+                        try await self.sendManifest()
+                        try self.sendAllFiles()
                     } catch {
                         self.failTransfer(.assertion, "Failed to send manifest to new device \(error)")
                     }
