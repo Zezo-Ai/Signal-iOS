@@ -31,6 +31,12 @@ public class CVBackgroundContainer: ManualLayoutViewWithLayer {
         self.isUserInteractionEnabled = false
         // Render all background views behind the collection view.
         self.layer.zPosition = -1
+
+        // Wallpaper blocks voiceover's ability to focus on the
+        // correct message when a user opens a conversation since it
+        // appears later in the subview array than the message collection view.
+        // Hide it from the accessibility tree so voiceover users can read messages properly.
+        self.accessibilityElementsHidden = true
     }
 
     public func set(wallpaperView: WallpaperView?) {
