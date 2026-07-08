@@ -78,7 +78,7 @@ public enum BuildFlags {
 
     public enum GroupTerminate {
         public static let receive = true
-        public static let send = build <= .internal
+        public static let send = true
     }
 
     public static let collapsingChatEvents = true
