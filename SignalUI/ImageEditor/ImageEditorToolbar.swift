@@ -7,16 +7,22 @@ import SignalServiceKit
 
 class ImageEditorTopBar: MediaTopBar {
 
-    let undoButton = RoundMediaButton(
-        image: UIImage(imageLiteralResourceName: "undo-28"),
-        backgroundStyle: .blur,
+    let undoButton = UIButton(
+        configuration: .roundMedia(image: UIImage(imageLiteralResourceName: "undo-28"), size: 44),
     )
+
     var isUndoButtonHidden: Bool {
         get { undoButton.alpha == 0 }
         set { undoButton.alpha = newValue ? 0 : 1 }
     }
 
-    let clearAllButton = RoundMediaButton(image: nil, backgroundStyle: .blur)
+    let clearAllButton = UIButton(configuration: .capsuleMedia(
+        title: OWSLocalizedString(
+            "MEDIA_EDITOR_BUTTON_CLEAR",
+            comment: "Title for the button that discards all edits in media editor.",
+        ),
+        buttonHeight: 44,
+    ))
     var isClearAllButtonHidden: Bool {
         get { clearAllButton.alpha == 0 }
         set { clearAllButton.alpha = newValue ? 0 : 1 }
@@ -25,33 +31,18 @@ class ImageEditorTopBar: MediaTopBar {
     override init(frame: CGRect) {
         super.init(frame: frame)
 
-        let clearAllButtonTitle =
-            OWSLocalizedString(
-                "MEDIA_EDITOR_CLEAR_ALL",
-                comment: "Title for the button that discards all edits in media editor.",
-            )
-        clearAllButton.setTitle(clearAllButtonTitle, for: .normal)
-        clearAllButton.ows_contentEdgeInsets = UIEdgeInsets(hMargin: 26, vMargin: 15)
-
         let stackView = UIStackView(arrangedSubviews: [undoButton, UIView.hStretchingSpacer(), clearAllButton])
-        for button in stackView.arrangedSubviews {
-            button.setContentHuggingPriority(.defaultHigh, for: .vertical)
-            button.setCompressionResistanceVerticalHigh()
-        }
         stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .horizontal
         stackView.alignment = .center
-        stackView.isOpaque = false
         addSubview(stackView)
-        addConstraints([
-            undoButton.layoutMarginsGuide.leadingAnchor.constraint(equalTo: controlsLayoutGuide.leadingAnchor),
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: controlsLayoutGuide.leadingAnchor),
             stackView.topAnchor.constraint(equalTo: controlsLayoutGuide.topAnchor),
             stackView.bottomAnchor.constraint(equalTo: controlsLayoutGuide.bottomAnchor),
             stackView.trailingAnchor.constraint(equalTo: controlsLayoutGuide.trailingAnchor),
         ])
     }
 
-    @available(*, unavailable, message: "Use init(frame:)")
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
