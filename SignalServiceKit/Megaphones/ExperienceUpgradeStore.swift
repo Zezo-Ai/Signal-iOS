@@ -100,7 +100,7 @@ public struct ExperienceUpgradeStore {
              .inactivePrimaryDeviceReminder,
              .pinReminder,
              .contactPermissionReminder,
-             .backupKeyReminder,
+             .recoveryKeyReminder,
              .backupsUpsellReminder,
              .backupsEnabledRecentlyNotification,
              .unrecognized:

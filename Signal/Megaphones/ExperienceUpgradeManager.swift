@@ -171,7 +171,7 @@ class ExperienceUpgradeManager {
                             fromViewController: fromViewController,
                         )
                     }
-                case .backupKeyReminder:
+                case .recoveryKeyReminder:
                     if checkPreconditionsForRecoveryKeyReminder(tx: tx) {
                         nextMegaphone = RecoveryKeyReminderMegaphone(
                             experienceUpgrade: upgrade,

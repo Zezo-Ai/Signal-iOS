@@ -61,11 +61,16 @@ class RecoveryKeyReminderMegaphone: Megaphone {
             )
         }
 
-        let secondaryButton = snoozeButton(
-            fromViewController: fromViewController,
-            snoozeTitle: secondaryButtonTitle,
-        )
+        // Only allow snoozing on the first appearance.
+        if experienceUpgrade.snoozeCount == 0 {
+            let secondaryButton = snoozeButton(
+                fromViewController: fromViewController,
+                snoozeTitle: secondaryButtonTitle,
+            )
 
-        buttons = [primaryButton, secondaryButton]
+            buttons = [primaryButton, secondaryButton]
+        } else {
+            buttons = [primaryButton]
+        }
     }
 }

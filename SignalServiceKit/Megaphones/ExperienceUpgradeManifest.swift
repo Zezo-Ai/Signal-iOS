@@ -50,7 +50,7 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
     case contactPermissionReminder
 
     /// Prompts the user to enter their recovery key, to help ensure they remember it.
-    case backupKeyReminder
+    case recoveryKeyReminder
 
     /// Prompts the user to enable backups.
     case backupsUpsellReminder
@@ -123,8 +123,8 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
                 return .pinReminder
             case Self.contactPermissionReminder.uniqueId:
                 return .contactPermissionReminder
-            case Self.backupKeyReminder.uniqueId:
-                return .backupKeyReminder
+            case Self.recoveryKeyReminder.uniqueId:
+                return .recoveryKeyReminder
             case Self.backupsUpsellReminder.uniqueId:
                 return .backupsUpsellReminder
             case Self.backupsEnabledRecentlyNotification.uniqueId:
@@ -156,7 +156,7 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
         .inactivePrimaryDeviceReminder,
         .pinReminder,
         .contactPermissionReminder,
-        .backupKeyReminder,
+        .recoveryKeyReminder,
         .backupsUpsellReminder,
         .backupsEnabledRecentlyNotification,
     ]
@@ -186,7 +186,7 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
             return "pinReminder"
         case .contactPermissionReminder:
             return "contactPermissionReminder"
-        case .backupKeyReminder:
+        case .recoveryKeyReminder:
             return "backupKeyReminder"
         case .backupsUpsellReminder:
             return "enableBackupsReminder"
@@ -237,7 +237,7 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
             return (5, 0)
         case .inactivePrimaryDeviceReminder:
             return (6, 0)
-        case .backupKeyReminder:
+        case .recoveryKeyReminder:
             return (7, 0)
         case .backupsUpsellReminder:
             return (8, 0)
@@ -294,7 +294,7 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
              .inactiveLinkedDeviceReminder:
             return 3 * .day
         case .inactivePrimaryDeviceReminder,
-             .backupKeyReminder:
+             .recoveryKeyReminder:
             return .week
         case .backupsUpsellReminder:
             return snoozeCount == 1 ? 60 * .day : 120 * .day
@@ -351,7 +351,7 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
             .inactivePrimaryDeviceReminder,
             .pinReminder,
             .contactPermissionReminder,
-            .backupKeyReminder,
+            .recoveryKeyReminder,
             .backupsUpsellReminder,
             .backupsEnabledRecentlyNotification:
             return Int.max
@@ -394,7 +394,7 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
             }
         case .pinReminder:
             return 8 * .hour
-        case .backupKeyReminder:
+        case .recoveryKeyReminder:
             return 8 * .hour
         case .backupsUpsellReminder:
             return 7 * .day
@@ -415,7 +415,7 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
             .inactivePrimaryDeviceReminder,
             .pinReminder,
             .contactPermissionReminder,
-            .backupKeyReminder,
+            .recoveryKeyReminder,
             .backupsUpsellReminder,
             .backupsEnabledRecentlyNotification:
             return Date.distantFuture
@@ -435,7 +435,7 @@ public enum ExperienceUpgradeManifest: Codable, Equatable, Hashable {
             .pinReminder,
             .inactiveLinkedDeviceReminder,
             .contactPermissionReminder,
-            .backupKeyReminder,
+            .recoveryKeyReminder,
             .backupsUpsellReminder,
             .backupsEnabledRecentlyNotification,
             .unrecognized:
