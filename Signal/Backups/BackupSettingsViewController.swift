@@ -690,19 +690,23 @@ class BackupSettingsViewController:
                     toggle = nil
                 }
 
+                var bodyElements: [HeroSheetViewController.Body.Element] = [
+                    .text(.plain(OWSLocalizedString(
+                        "BACKUP_SETTINGS_WELCOME_TO_BACKUPS_SHEET_MESSAGE",
+                        comment: "Message for a sheet shown after the user enables backups.",
+                    ))),
+                ]
+                if let toggle {
+                    bodyElements.append(.toggle(toggle))
+                }
+
                 super.init(
                     hero: .image(.backupsSubscribed),
                     title: OWSLocalizedString(
                         "BACKUP_SETTINGS_WELCOME_TO_BACKUPS_SHEET_TITLE",
                         comment: "Title for a sheet shown after the user enables backups.",
                     ),
-                    body: HeroSheetViewController.Body(
-                        textContent: .plain(OWSLocalizedString(
-                            "BACKUP_SETTINGS_WELCOME_TO_BACKUPS_SHEET_MESSAGE",
-                            comment: "Message for a sheet shown after the user enables backups.",
-                        )),
-                        toggle: toggle,
-                    ),
+                    body: HeroSheetViewController.Body(bodyElements),
                     primary: .button(HeroSheetViewController.Button(
                         title: OWSLocalizedString(
                             "BACKUP_SETTINGS_WELCOME_TO_BACKUPS_SHEET_BUTTON_TITLE",

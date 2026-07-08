@@ -11,7 +11,7 @@ import SignalServiceKit
 open class HeroSheetViewController: StackSheetViewController {
     public enum Hero {
         /// Scaled image to display at the top of the sheet
-        case image(UIImage, tintColor: UIColor? = nil)
+        case image(UIImage, tintColor: UIColor? = nil, height: CGFloat? = nil)
         /// Lottie name and height to display at the top of the sheet
         case animation(named: String, height: CGFloat)
         case circleIcon(
@@ -31,12 +31,22 @@ open class HeroSheetViewController: StackSheetViewController {
         }
 
         public struct BulletPoint {
-            public let icon: UIImage
+            public enum Style {
+                case image(UIImage)
+                case dot
+                case dash
+            }
+
+            public let style: Style
             public let text: String
 
-            public init(icon: UIImage, text: String) {
-                self.icon = icon
+            public init(style: Style, text: String) {
+                self.style = style
                 self.text = text
+            }
+
+            public init(icon: UIImage, text: String) {
+                self.init(style: .image(icon), text: text)
             }
         }
 
@@ -59,24 +69,29 @@ open class HeroSheetViewController: StackSheetViewController {
             }
         }
 
-        public let textContent: TextContent
-        public let textAlignment: NSTextAlignment
-        public let textColor: UIColor
-        public let bulletPoints: [BulletPoint]
-        public let toggle: Toggle?
+        public enum Element {
+            case text(
+                TextContent,
+                alignment: NSTextAlignment = .center,
+                color: UIColor = .Signal.secondaryLabel,
+            )
+            case bullets(
+                color: UIColor = .Signal.label,
+                spacing: CGFloat = 12,
+                hMargin: CGFloat = 24,
+                _ points: [BulletPoint],
+            )
+            case toggle(Toggle)
+            case customSpacing(CGFloat)
+        }
 
-        public init(
-            textContent: TextContent,
-            textAlignment: NSTextAlignment = .center,
-            textColor: UIColor = .Signal.secondaryLabel,
-            bulletPoints: [BulletPoint] = [],
-            toggle: Toggle? = nil,
-        ) {
-            self.textContent = textContent
-            self.textAlignment = textAlignment
-            self.textColor = textColor
-            self.bulletPoints = bulletPoints
-            self.toggle = toggle
+        public let elements: [Element]
+        /// Font used for elements (other than attributed text)
+        public let font: UIFont
+
+        public init(font: UIFont = .dynamicTypeSubheadline, _ elements: [Element]) {
+            self.font = font
+            self.elements = elements
         }
     }
 
@@ -148,7 +163,7 @@ open class HeroSheetViewController: StackSheetViewController {
     ) {
         self.hero = hero
         self.titleText = title
-        self.body = Body(textContent: .plain(body))
+        self.body = Body([.text(.plain(body))])
         self.primary = primaryButton.map { .button($0) }
         self.secondary = secondaryButton.map { .button($0) }
         super.init()
@@ -201,33 +216,33 @@ open class HeroSheetViewController: StackSheetViewController {
             titleLabel.textAlignment = .center
         }
 
-        // Use a text view so embedded links in attributed bodies are tappable.
-        let bodyTextView = LinkingTextView()
-        self.stackView.addArrangedSubview(bodyTextView)
-        self.stackView.setCustomSpacing(32, after: bodyTextView)
-        switch body.textContent {
-        case .plain(let text):
-            bodyTextView.text = text
-            bodyTextView.font = .dynamicTypeSubheadline
-        case .attributed(let attributedText):
-            bodyTextView.attributedText = attributedText
-        }
-        bodyTextView.textColor = body.textColor
-        bodyTextView.textAlignment = body.textAlignment
+        // Reference so `.customSpacing` can adjust the spacing after it.
+        var previousBodyView: UIView?
 
-        for bodyBullet in body.bulletPoints {
-            let bulletView = viewForBulletPoint(
-                bodyBullet,
-                textColor: body.textColor,
-            )
-            self.stackView.addArrangedSubview(bulletView)
-            self.stackView.setCustomSpacing(32, after: bulletView)
-        }
-
-        if let toggle = body.toggle {
-            let toggleView = viewForToggle(toggle)
-            self.stackView.addArrangedSubview(toggleView)
-            self.stackView.setCustomSpacing(32, after: toggleView)
+        for element in body.elements {
+            switch element {
+            case let .text(content, alignment, color):
+                let textView = viewForText(content, alignment: alignment, color: color, font: body.font)
+                self.stackView.addArrangedSubview(textView)
+                self.stackView.setCustomSpacing(32, after: textView)
+                previousBodyView = textView
+            case let .bullets(color, spacing, hMargin, bulletPoints):
+                for bulletPoint in bulletPoints {
+                    let bulletView = viewForBulletPoint(bulletPoint, textColor: color, font: body.font, hMargin: hMargin)
+                    self.stackView.addArrangedSubview(bulletView)
+                    self.stackView.setCustomSpacing(spacing, after: bulletView)
+                    previousBodyView = bulletView
+                }
+            case let .toggle(toggle):
+                let toggleView = viewForToggle(toggle, font: body.font)
+                self.stackView.addArrangedSubview(toggleView)
+                self.stackView.setCustomSpacing(32, after: toggleView)
+                previousBodyView = toggleView
+            case let .customSpacing(spacing):
+                if let previousBodyView {
+                    self.stackView.setCustomSpacing(spacing, after: previousBodyView)
+                }
+            }
         }
 
         if let primary {
@@ -245,12 +260,18 @@ open class HeroSheetViewController: StackSheetViewController {
     private func viewForHero(_ hero: Hero) -> UIView {
         let heroView: UIView
         switch hero {
-        case let .image(image, tintColor):
-            heroView = UIImageView(image: image)
-            heroView.contentMode = .center
-            if let tintColor {
-                heroView.tintColor = tintColor
+        case let .image(image, tintColor, height):
+            let imageView = UIImageView(image: image)
+            if let height {
+                imageView.contentMode = .scaleAspectFit
+                imageView.autoSetDimension(.height, toSize: height)
+            } else {
+                imageView.contentMode = .center
             }
+            if let tintColor {
+                imageView.tintColor = tintColor
+            }
+            heroView = imageView
         case let .animation(lottieName, height):
             let lottieView = LottieAnimationView(name: lottieName)
             lottieView.autoSetDimension(.height, toSize: height)
@@ -278,41 +299,89 @@ open class HeroSheetViewController: StackSheetViewController {
         return heroView
     }
 
+    private func viewForText(
+        _ content: Body.TextContent,
+        alignment: NSTextAlignment,
+        color: UIColor,
+        font: UIFont,
+    ) -> UIView {
+        // Use a text view so embedded links in attributed bodies are tappable.
+        let textView = LinkingTextView()
+        switch content {
+        case .plain(let text):
+            textView.text = text
+            textView.font = font
+        case .attributed(let attributedText):
+            textView.attributedText = attributedText
+        }
+        textView.textColor = color
+        textView.textAlignment = alignment
+        return textView
+    }
+
     private func viewForBulletPoint(
         _ bulletPoint: Body.BulletPoint,
         textColor: UIColor,
+        font: UIFont,
+        hMargin: CGFloat,
     ) -> UIView {
         let bulletContainer = UIView()
-        bulletContainer.layoutMargins = UIEdgeInsets(hMargin: 24, vMargin: 0)
-
-        let iconImageView = UIImageView()
-        bulletContainer.addSubview(iconImageView)
-        iconImageView.image = bulletPoint.icon
-        iconImageView.tintColor = .Signal.secondaryLabel
+        bulletContainer.layoutMargins = UIEdgeInsets(hMargin: hMargin, vMargin: 0)
 
         let bulletLabel = UILabel()
         bulletContainer.addSubview(bulletLabel)
-        bulletLabel.font = .dynamicTypeSubheadline
+        bulletLabel.font = font
         bulletLabel.textColor = textColor
         bulletLabel.numberOfLines = 0
         bulletLabel.textAlignment = .left
         bulletLabel.text = bulletPoint.text
 
-        iconImageView.autoSetDimensions(to: .square(24))
-        iconImageView.autoPinEdge(toSuperviewMargin: .leading)
-        iconImageView.autoVCenterInSuperview()
-
-        iconImageView.autoPinEdge(.trailing, to: .leading, of: bulletLabel, withOffset: -12)
-
         bulletLabel.autoPinEdges(toSuperviewMarginsExcludingEdge: .leading)
+
+        switch bulletPoint.style {
+        case .image(let icon):
+            let iconImageView = UIImageView(image: icon)
+            iconImageView.tintColor = .Signal.secondaryLabel
+            bulletContainer.addSubview(iconImageView)
+
+            iconImageView.autoSetDimensions(to: .square(24))
+            iconImageView.autoPinEdge(toSuperviewMargin: .leading)
+            iconImageView.autoVCenterInSuperview()
+            iconImageView.autoPinEdge(.trailing, to: .leading, of: bulletLabel, withOffset: -12)
+
+        case .dot:
+            let dotLabel = UILabel()
+            dotLabel.text = "•"
+            dotLabel.font = bulletLabel.font
+            dotLabel.textColor = textColor
+            dotLabel.setContentHuggingHigh()
+            dotLabel.setCompressionResistanceHigh()
+            bulletContainer.addSubview(dotLabel)
+
+            dotLabel.autoPinEdge(toSuperviewMargin: .leading)
+            // Align the dot with the first line of text rather than centering.
+            dotLabel.autoPinEdge(.top, to: .top, of: bulletLabel)
+            dotLabel.autoPinEdge(.trailing, to: .leading, of: bulletLabel, withOffset: -8)
+
+        case .dash:
+            let dashView = UIView()
+            dashView.backgroundColor = .Signal.tertiaryLabel
+            dashView.layer.cornerRadius = 2
+            bulletContainer.addSubview(dashView)
+
+            dashView.autoSetDimensions(to: CGSize(width: 4, height: 14))
+            dashView.autoPinEdge(toSuperviewMargin: .leading)
+            dashView.autoVCenterInSuperview()
+            dashView.autoPinEdge(.trailing, to: .leading, of: bulletLabel, withOffset: -8)
+        }
 
         return bulletContainer
     }
 
-    private func viewForToggle(_ toggle: Body.Toggle) -> UIView {
+    private func viewForToggle(_ toggle: Body.Toggle, font: UIFont) -> UIView {
         let titleLabel = UILabel()
         titleLabel.text = toggle.title
-        titleLabel.font = .dynamicTypeSubheadline
+        titleLabel.font = font
         titleLabel.textAlignment = .natural
         titleLabel.numberOfLines = 0
         titleLabel.textColor = .Signal.label
@@ -321,11 +390,8 @@ open class HeroSheetViewController: StackSheetViewController {
         toggleSwitch.setCompressionResistanceHigh()
         toggleSwitch.isOn = toggle.isOn
         toggleSwitch.addAction(
-            UIAction { [weak self] action in
-                guard
-                    let toggle = self?.body.toggle,
-                    let toggleSwitch = action.sender as? UISwitch
-                else {
+            UIAction { action in
+                guard let toggleSwitch = action.sender as? UISwitch else {
                     return
                 }
                 toggle.onValueChanged(toggleSwitch.isOn)
@@ -416,11 +482,13 @@ open class HeroSheetViewController: StackSheetViewController {
     SheetPreviewViewController(sheet: HeroSheetViewController(
         hero: .image(UIImage(named: "sustainer-heart")!),
         title: nil,
-        body: HeroSheetViewController.Body(
-            textContent: .plain("As an independent nonprofit, Signal is committed to private messaging and calls. No ads, no trackers, no surveillance. Donate today to support Signal."),
-            textAlignment: .left,
-            textColor: .Signal.label,
-            bulletPoints: [
+        body: HeroSheetViewController.Body([
+            .text(
+                .plain("As an independent nonprofit, Signal is committed to private messaging and calls. No ads, no trackers, no surveillance. Donate today to support Signal."),
+                alignment: .left,
+                color: .Signal.label,
+            ),
+            .bullets(spacing: 32, [
                 HeroSheetViewController.Body.BulletPoint(
                     icon: UIImage(named: "badge-multi")!,
                     text: "Get an optional badge on your profile when you donate",
@@ -433,8 +501,50 @@ open class HeroSheetViewController: StackSheetViewController {
                     icon: UIImage(named: "heart")!,
                     text: "Signal is a 501c3 nonprofit. US donations are tax deductible.",
                 ),
-            ],
-        ),
+            ]),
+        ]),
+        primary: nil,
+        secondary: nil,
+    ))
+}
+
+@available(iOS 17, *)
+#Preview("Body w/ text around bullets") {
+    SheetPreviewViewController(sheet: HeroSheetViewController(
+        hero: .image(UIImage(named: "sustainer-heart")!),
+        title: nil,
+        body: HeroSheetViewController.Body([
+            .text(.plain("Signal is committed to private messaging and calls, because:"), alignment: .left, color: .Signal.label),
+            .customSpacing(20),
+            .bullets([
+                HeroSheetViewController.Body.BulletPoint(style: .dash, text: "No ads, no trackers, no surveillance."),
+                HeroSheetViewController.Body.BulletPoint(style: .dash, text: "Everything is end-to-end encrypted."),
+            ]),
+            .customSpacing(20),
+            .text(.plain("Donate today to support Signal."), alignment: .left, color: .Signal.label),
+        ]),
+        primary: nil,
+        secondary: nil,
+    ))
+}
+
+@available(iOS 17, *)
+#Preview("Body w/ dot bullets") {
+    SheetPreviewViewController(sheet: HeroSheetViewController(
+        hero: .image(UIImage(named: "sustainer-heart")!),
+        title: nil,
+        body: HeroSheetViewController.Body([
+            .text(
+                .plain("Signal is committed to private messaging and calls."),
+                alignment: .left,
+                color: .Signal.label,
+            ),
+            .bullets([
+                HeroSheetViewController.Body.BulletPoint(style: .dot, text: "No ads, no trackers, no surveillance."),
+                HeroSheetViewController.Body.BulletPoint(style: .dot, text: "An independent nonprofit whose mission is your privacy."),
+                HeroSheetViewController.Body.BulletPoint(style: .dot, text: "Signal is a 501c3 nonprofit. US donations are tax deductible."),
+            ]),
+        ]),
         primary: nil,
         secondary: nil,
     ))
@@ -445,17 +555,17 @@ open class HeroSheetViewController: StackSheetViewController {
     SheetPreviewViewController(sheet: HeroSheetViewController(
         hero: .image(UIImage(named: "toggle-32")!),
         title: "Feeding Boots the cat",
-        body: HeroSheetViewController.Body(
-            textContent: .plain(#"Give Boots extra dinner? He'd like you to know he's "extra hungry" tonight."#),
-            toggle: HeroSheetViewController.Body.Toggle(
+        body: HeroSheetViewController.Body([
+            .text(.plain(#"Give Boots extra dinner? He'd like you to know he's "extra hungry" tonight."#)),
+            .toggle(HeroSheetViewController.Body.Toggle(
                 title: "Extra dinner?",
                 footer: "Side effects may include sleepiness and increased insistence that he receive extra food in the future.",
                 isOn: true,
                 onValueChanged: { enabled in
                     print(enabled ? "😸" : "😾")
                 },
-            ),
-        ),
+            )),
+        ]),
         primary: .button(.dismissing(title: "Order Up")),
         secondary: nil,
     ))
@@ -466,17 +576,17 @@ open class HeroSheetViewController: StackSheetViewController {
     SheetPreviewViewController(sheet: HeroSheetViewController(
         hero: .image(UIImage(named: "toggle-32")!),
         title: "Feeding Boots the Cat",
-        body: HeroSheetViewController.Body(
-            textContent: .plain(#"Give Boots extra dinner? He'd like you to know he's "extra hungry" tonight."#),
-            toggle: HeroSheetViewController.Body.Toggle(
+        body: HeroSheetViewController.Body([
+            .text(.plain(#"Give Boots extra dinner? He'd like you to know he's "extra hungry" tonight."#)),
+            .toggle(HeroSheetViewController.Body.Toggle(
                 title: "Give Boots extra dinner? Side effects may include sleepiness and increased insistence that he receive extra food in the future.",
                 footer: nil,
                 isOn: true,
                 onValueChanged: { enabled in
                     print(enabled ? "😸" : "😾")
                 },
-            ),
-        ),
+            )),
+        ]),
         primary: .button(.dismissing(title: "Order Up")),
         secondary: nil,
     ))
@@ -499,7 +609,7 @@ open class HeroSheetViewController: StackSheetViewController {
     SheetPreviewViewController(sheet: HeroSheetViewController(
         hero: .image(UIImage(named: "avatar_football")!),
         title: "Do Not Share Recovery Key",
-        body: HeroSheetViewController.Body(textContent: .attributed(bodyText)),
+        body: HeroSheetViewController.Body([.text(.attributed(bodyText))]),
         primary: .button(.dismissing(title: "Do Not Share Key")),
         secondary: .button(HeroSheetViewController.Button(
             title: LocalizationNotNeeded("Share Key"),
@@ -540,7 +650,7 @@ open class HeroSheetViewController: StackSheetViewController {
     SheetPreviewViewController(sheet: HeroSheetViewController(
         hero: .image(UIImage(named: "transfer_complete")!),
         title: LocalizationNotNeeded("Continue on your other device"),
-        body: HeroSheetViewController.Body(textContent: .plain(LocalizationNotNeeded("Continue transferring your account on your other device."))),
+        body: HeroSheetViewController.Body([.text(.plain(LocalizationNotNeeded("Continue transferring your account on your other device.")))]),
         primary: .hero(.animation(named: "circular_indeterminate", height: 60)),
         secondary: nil,
     ))

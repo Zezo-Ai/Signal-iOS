@@ -11,14 +11,16 @@ final class DonationReadMoreSheetViewController: HeroSheetViewController {
         super.init(
             hero: .image(.sustainerHeart),
             title: nil,
-            body: HeroSheetViewController.Body(
-                textContent: .plain(OWSLocalizedString(
-                    "DONATION_READ_MORE_SHEET_BODY",
-                    comment: "Body text for a sheet discussing donating to Signal.",
-                )),
-                textAlignment: .left,
-                textColor: .Signal.label,
-                bulletPoints: [
+            body: HeroSheetViewController.Body([
+                .text(
+                    .plain(OWSLocalizedString(
+                        "DONATION_READ_MORE_SHEET_BODY",
+                        comment: "Body text for a sheet discussing donating to Signal.",
+                    )),
+                    alignment: .left,
+                    color: .Signal.label,
+                ),
+                .bullets(spacing: 32, [
                     HeroSheetViewController.Body.BulletPoint(
                         icon: .badgeMulti,
                         text: OWSLocalizedString(
@@ -40,8 +42,8 @@ final class DonationReadMoreSheetViewController: HeroSheetViewController {
                             comment: "Bullet point for a sheet discussing donating to Signal. For non-English languages, skip the word 501c3, and skip the language about US donations being tax deductible.",
                         ),
                     ),
-                ],
-            ),
+                ]),
+            ]),
             primary: nil,
             secondary: nil,
         )

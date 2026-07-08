@@ -37,9 +37,7 @@ final class BackupNeverShareRecoveryKeySheet: HeroSheetViewController {
                 "BACKUP_NEVER_SHARE_RECOVERY_KEY_SHEET_TITLE",
                 comment: "Title for a warning sheet shown to discourage the user from sharing their 'Recovery Key'.",
             ),
-            body: HeroSheetViewController.Body(
-                textContent: .attributed(bodyText),
-            ),
+            body: HeroSheetViewController.Body([.text(.attributed(bodyText))]),
             primary: .button(primaryButton),
             secondary: secondaryButton.map { .button($0) },
         )

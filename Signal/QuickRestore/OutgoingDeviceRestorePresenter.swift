@@ -73,10 +73,10 @@ class OutgoingDeviceRestorePresenter: OutgoingDeviceRestoreInitialPresenter {
                 "OUTGOING_DEVICE_RESTORE_CONTINUE_ON_OTHER_DEVICE_TITLE",
                 comment: "Title of prompt notifying that action is necessary on the other device.",
             ),
-            body: HeroSheetViewController.Body(textContent: .plain(OWSLocalizedString(
+            body: HeroSheetViewController.Body([.text(.plain(OWSLocalizedString(
                 "OUTGOING_DEVICE_RESTORE_CONTINUE_ON_OTHER_DEVICE_BODY",
                 comment: "Body of prompt notifying that action is necessary on the other device.",
-            ))),
+            )))]),
             primary: .hero(.animation(named: "circular_indeterminate", height: 60)),
             secondary: nil,
         )
