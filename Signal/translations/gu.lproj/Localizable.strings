@@ -605,7 +605,7 @@
 "BACKUP_ONBOARDING_CONFIRM_KEY_SEE_KEY_AGAIN_BUTTON_TITLE" = "કી ફરીથી જુઓ";
 
 /* Subtitle for a view asking users to confirm their 'Recovery Key'. */
-"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "Enter the recovery key you just saved.";
+"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "તમે હમણાં જ સેવ કરી તે રિકવરી કી દાખલ કરો.";
 
 /* Title for a view asking users to confirm their 'Recovery Key'. */
 "BACKUP_ONBOARDING_CONFIRM_KEY_TITLE" = "તમારી રિકવરી કી કન્ફર્મ કરો";
@@ -671,10 +671,10 @@
 "BACKUP_RECORD_KEY_CREATE_NEW_KEY_BUTTON_TITLE" = "નવી કી બનાવો";
 
 /* Subtitle for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
-"BACKUP_RECORD_KEY_NEW_SUBTITLE" = "This new key will replace your old one, and will be required to recover your account and data. Store this key somewhere safe. If you lose it, you won’t be able to recover your account.";
+"BACKUP_RECORD_KEY_NEW_SUBTITLE" = "આ નવી કી તમારી જૂની કીને બદલશે અને તમારા એકાઉન્ટ અને ડેટાને રિકવરી કરવા માટે તેની જરૂર પડશે. આ કીને કોઈ સુરક્ષિત જગ્યાએ સ્ટોર કરો. જો તમે તેને ગુમાવો છો, તો તમે તમારું એકાઉન્ટ રિકવર કરી શકશો નહીં.";
 
 /* Title for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
-"BACKUP_RECORD_KEY_NEW_TITLE" = "Save Your New Recovery Key";
+"BACKUP_RECORD_KEY_NEW_TITLE" = "નવી રિકવરી કી સેવ કરો";
 
 /* Title for a button allowing users to save their 'Recovery Key' to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_BUTTON_TITLE" = "પાસવર્ડ મેનેજરમાં સેવ કરો";
@@ -701,7 +701,7 @@
 "BACKUP_RECORD_KEY_SUBTITLE" = "તમારા એકાઉન્ટ અને ડેટાને રિકવર કરવા માટે આ કી જરૂરી છે. આ કીને કોઈ સુરક્ષિત જગ્યાએ સ્ટોર કરો. જો તમે તેને ગુમાવો છો, તો તમે તમારું એકાઉન્ટ રિકવર કરી શકશો નહીં.";
 
 /* Title for a view allowing users to save their 'Recovery Key'. */
-"BACKUP_RECORD_KEY_TITLE" = "Save Your Recovery Key";
+"BACKUP_RECORD_KEY_TITLE" = "તમારી રિકવરી કી સેવ કરો";
 
 /* Title for a button offering help if the user has forgotten their recovery key. */
 "BACKUP_RECOVERY_KEY_REMINDER_FORGOT_KEY_BUTTON" = "કી ભૂલી ગયા?";
@@ -4441,6 +4441,36 @@
 /* Label indicating that a group member is an admin. */
 "GROUP_MEMBER_ADMIN_INDICATOR" = "એડમિન";
 
+/* Accessibility label for the button that opens the group member search sheet. */
+"GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL" = "Search members";
+
+/* Accessibility label for the filter button in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_ACCESSIBILITY_LABEL" = "Filter members";
+
+/* Title for the filter option that shows only admins in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_ADMINS" = "Admins";
+
+/* Title for the filter option that shows all members in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_ALL" = "All Members";
+
+/* Title for the filter option that shows only members who are in the user's system contacts, in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_CONTACTS" = "Contacts";
+
+/* Title for the filter menu in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_MENU_TITLE" = "Filter";
+
+/* Label for the 'invite via group link' button in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_INVITE_VIA_GROUP_LINK" = "Invite Via Group Link";
+
+/* Message shown when a group member search returns no results. Embeds {{ the search query }}. */
+"GROUP_MEMBER_SEARCH_NO_RESULTS_FORMAT" = "No results for “%1$@”";
+
+/* Section header shown above the results in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_RESULTS_SECTION_TITLE" = "Search Results";
+
+/* Placeholder text for the search bar in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_SEARCH_BAR_PLACEHOLDER" = "Search";
+
 /* Label indicating that a new group has no other members. */
 "GROUP_MEMBERS_NO_OTHER_MEMBERS" = "આ ગ્રુપ બનાવ્યા બાદ તમે તમારા મિત્રોને ઉમેરી શકો છો અથવા આમંત્રિત કરી શકો છો.";
 
@@ -5303,7 +5333,7 @@
 "MEDIA_DETAIL_VIEW_ALL_MEDIA_BUTTON" = "બધા મીડિયા";
 
 /* Placeholder for message text input field in media editor. */
-"MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "Message";
+"MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "મેસેજ";
 
 /* Title for the button that discards all edits in media editor. */
 "MEDIA_EDITOR_CLEAR_ALL" = "બધું સાફ કરો";
@@ -7733,7 +7763,7 @@
 "REGISTRATION_NO_BACKUP_KEY_BUTTON_TITLE" = "નવી રિકવરી કી?";
 
 /* Body text on a sheet with info for what to do if you don't have a recovery key */
-"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "બેકઅપ તેમના 64-અક્ષરના રિકવરી કોડ વિના રિકવર કરી શકાતા નથી. જો તમે તમારી બેકઅપ કી ગુમાવી દીધી હોય તો Signal તમારા બેકઅપને રિસ્ટોર કરવામાં મદદ કરી શકશે નહીં.\n\nજો તમારી પાસે જૂનું ડિવાઇસ હોય, તો તમે સેટિંગ્સ > ચેટ > બેકઅપમાં તમારી રિકવરી કી જોઈ શકો છો. પછી રિકવરી કી જુઓ પર ટેપ કરો.";
+"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "Backups can’t be recovered without their 64-character recovery code. If you’ve lost your recovery key, Signal can’t help restore your backup.\n\nIf you have your old device, you can view your recovery key in Settings > Backups. Then tap View Recovery Key.";
 
 /* Title for sheet with info for what to do if you don't have a recovery key */
 "REGISTRATION_NO_BACKUP_KEY_SHEET_TITLE" = "નવી રિકવરી કી?";
@@ -7745,7 +7775,7 @@
 "REGISTRATION_PHONE_NUMBER_SUBTITLE" = "શરુ કરવા માટે તમારો ફોન નંબર દાખલ કરો.";
 
 /* During re-registration, users are asked to confirm their phone number. This is the subtitle on that screen, which gives users some instructions. */
-"REGISTRATION_PHONE_NUMBER_SUBTITLE_2" = "We may need to send a verification code to this number:";
+"REGISTRATION_PHONE_NUMBER_SUBTITLE_2" = "અમને આ નંબર પર એક વેરિફિકેશન કોડ મોકલવાની જરૂર પડી શકે છે:";
 
 /* During registration, users are asked to enter their phone number. This is the title on that screen. */
 "REGISTRATION_PHONE_NUMBER_TITLE" = "તમારો ફોન નંબર";
@@ -7853,10 +7883,10 @@
 "REGISTRATION_VIEW_INVALID_PHONE_NUMBER_ALERT_TITLE" = "અમાન્ય ફોન નંબર";
 
 /* Message for confirmation alert during phone number registration. */
-"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_MESSAGE" = "We may need to send a verification code to this number. Is the phone number above correct?";
+"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_MESSAGE" = "અમને આ નંબર પર એક વેરિફિકેશન કોડ મોકલવાની જરૂર પડી શકે છે. શું ઉપરોક્ત ફોન નંબર સાચો છે?";
 
 /* Title for confirmation alert during phone number registration. Embeds {{phone number}}. */
-"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_TITLE_FORMAT" = "Phone Number Confirmation: %1$@";
+"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_TITLE_FORMAT" = "ફોન નંબરની ખાતરી: %1$@";
 
 /* A button allowing user to cancel registration and edit a phone number */
 "REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_EDIT_BUTTON" = "ફેરફાર કરો";
@@ -8486,7 +8516,7 @@
 "SETTINGS_BLOCK_LIST_NO_CONTACTS" = "તમારી પાસે Signal પર કોઈ સંપર્કો નથી.";
 
 /* A label that indicates the user's search has no matching results. */
-"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "કોઈ શોધ પરિણામ નથી";
+"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "No Results";
 
 /* Label for the block list section of the settings view */
 "SETTINGS_BLOCK_LIST_TITLE" = "બ્લૉક કર્યા";

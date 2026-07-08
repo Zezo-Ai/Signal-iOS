@@ -605,7 +605,7 @@
 "BACKUP_ONBOARDING_CONFIRM_KEY_SEE_KEY_AGAIN_BUTTON_TITLE" = "کیی کو دوبارہ دیکھیں";
 
 /* Subtitle for a view asking users to confirm their 'Recovery Key'. */
-"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "Enter the recovery key you just saved.";
+"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "وہ بحالی کی کیی درج کریں جو آپ نے ابھی محفوظ کی ہے۔";
 
 /* Title for a view asking users to confirm their 'Recovery Key'. */
 "BACKUP_ONBOARDING_CONFIRM_KEY_TITLE" = "اپنی ریکوری کیی کی تصدیق کریں";
@@ -671,10 +671,10 @@
 "BACKUP_RECORD_KEY_CREATE_NEW_KEY_BUTTON_TITLE" = "نئی کیی تخلیق کریں";
 
 /* Subtitle for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
-"BACKUP_RECORD_KEY_NEW_SUBTITLE" = "This new key will replace your old one, and will be required to recover your account and data. Store this key somewhere safe. If you lose it, you won’t be able to recover your account.";
+"BACKUP_RECORD_KEY_NEW_SUBTITLE" = "یہ نئی کیی آپ کی پرانی کیی کو تبدیل کر دے گی، اور آپ کے اکاؤنٹ اور ڈیٹا کو بحال کرنے کے لیے درکار ہو گی۔ اس کیی کو کسی محفوظ جگہ پر اسٹور کریں۔ اگر آپ اسے کھو دیتے ہیں، تو آپ اپنا اکاؤنٹ بحال نہیں کر سکیں گے۔";
 
 /* Title for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
-"BACKUP_RECORD_KEY_NEW_TITLE" = "Save Your New Recovery Key";
+"BACKUP_RECORD_KEY_NEW_TITLE" = "اپنی نئی بحالی کی کیی کو محفوظ کریں";
 
 /* Title for a button allowing users to save their 'Recovery Key' to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_BUTTON_TITLE" = "پاسورڈ مینیجر میں محفوظ کریں";
@@ -701,7 +701,7 @@
 "BACKUP_RECORD_KEY_SUBTITLE" = "یہ کیی آپ کے اکاؤنٹ اور ڈیٹا کو بحال کرنے کے لیے درکار ہوتی ہے۔ اس کیی کو کسی محفوظ جگہ پر اسٹور کریں۔ اگر آپ اسے کھو دیتے ہیں، تو آپ اپنا اکاؤنٹ بحال نہیں کر سکیں گے۔";
 
 /* Title for a view allowing users to save their 'Recovery Key'. */
-"BACKUP_RECORD_KEY_TITLE" = "Save Your Recovery Key";
+"BACKUP_RECORD_KEY_TITLE" = "اپنی بحالی کی کیی محفوظ کریں";
 
 /* Title for a button offering help if the user has forgotten their recovery key. */
 "BACKUP_RECOVERY_KEY_REMINDER_FORGOT_KEY_BUTTON" = "کیی بھول گئے ہیں؟";
@@ -4441,6 +4441,36 @@
 /* Label indicating that a group member is an admin. */
 "GROUP_MEMBER_ADMIN_INDICATOR" = "ایڈمن";
 
+/* Accessibility label for the button that opens the group member search sheet. */
+"GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL" = "Search members";
+
+/* Accessibility label for the filter button in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_ACCESSIBILITY_LABEL" = "Filter members";
+
+/* Title for the filter option that shows only admins in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_ADMINS" = "Admins";
+
+/* Title for the filter option that shows all members in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_ALL" = "All Members";
+
+/* Title for the filter option that shows only members who are in the user's system contacts, in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_CONTACTS" = "Contacts";
+
+/* Title for the filter menu in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_MENU_TITLE" = "Filter";
+
+/* Label for the 'invite via group link' button in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_INVITE_VIA_GROUP_LINK" = "Invite Via Group Link";
+
+/* Message shown when a group member search returns no results. Embeds {{ the search query }}. */
+"GROUP_MEMBER_SEARCH_NO_RESULTS_FORMAT" = "No results for “%1$@”";
+
+/* Section header shown above the results in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_RESULTS_SECTION_TITLE" = "Search Results";
+
+/* Placeholder text for the search bar in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_SEARCH_BAR_PLACEHOLDER" = "Search";
+
 /* Label indicating that a new group has no other members. */
 "GROUP_MEMBERS_NO_OTHER_MEMBERS" = "آپ اس گروپ کو بنانے کے بعد دوستوں کو شامل یا مدعو کرسکتے ہیں۔";
 
@@ -5303,7 +5333,7 @@
 "MEDIA_DETAIL_VIEW_ALL_MEDIA_BUTTON" = "تمام میڈیا";
 
 /* Placeholder for message text input field in media editor. */
-"MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "Message";
+"MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "پیغام";
 
 /* Title for the button that discards all edits in media editor. */
 "MEDIA_EDITOR_CLEAR_ALL" = "سب صاف کریں";
@@ -7733,7 +7763,7 @@
 "REGISTRATION_NO_BACKUP_KEY_BUTTON_TITLE" = "کوئی ریکوری کیی نہیں ہے؟";
 
 /* Body text on a sheet with info for what to do if you don't have a recovery key */
-"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "بیک اپس کو ان کے 64 ہندسوں پر مشتمل ریکوری کوڈ کے بغیر بحال نہیں کیا جا سکتا۔ اگر آپ سے اپنی ریکوری کیی گم ہو گئی ہے، تو Signal آپ کے بیک اپ کو ری اسٹور کرنے میں مدد نہیں کر سکتا۔\n\nاگر آپ کے پاس اپنی پرانی ڈیوائس موجود ہے، تو آپ سیٹنگز > چیٹس > بیک اپس میں اپنی ریکوری کیی دیکھ سکتے ہیں۔ اس کے بعد ریکوری کیی دیکھیں پر ٹیپ کریں۔";
+"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "Backups can’t be recovered without their 64-character recovery code. If you’ve lost your recovery key, Signal can’t help restore your backup.\n\nIf you have your old device, you can view your recovery key in Settings > Backups. Then tap View Recovery Key.";
 
 /* Title for sheet with info for what to do if you don't have a recovery key */
 "REGISTRATION_NO_BACKUP_KEY_SHEET_TITLE" = "کوئی ریکوری کیی نہیں ہے؟";
@@ -7745,7 +7775,7 @@
 "REGISTRATION_PHONE_NUMBER_SUBTITLE" = "شروع کرنے کے لیے اپنا فون نمبر درج کریں۔";
 
 /* During re-registration, users are asked to confirm their phone number. This is the subtitle on that screen, which gives users some instructions. */
-"REGISTRATION_PHONE_NUMBER_SUBTITLE_2" = "We may need to send a verification code to this number:";
+"REGISTRATION_PHONE_NUMBER_SUBTITLE_2" = "ہمیں آپ کو اس نمبر پر ایک تصدیقی کوڈ بھیجنے کی ضرورت پڑ سکتی ہے:";
 
 /* During registration, users are asked to enter their phone number. This is the title on that screen. */
 "REGISTRATION_PHONE_NUMBER_TITLE" = "آپ کا فون نمبر";
@@ -7853,10 +7883,10 @@
 "REGISTRATION_VIEW_INVALID_PHONE_NUMBER_ALERT_TITLE" = "غلط فون نمبر";
 
 /* Message for confirmation alert during phone number registration. */
-"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_MESSAGE" = "We may need to send a verification code to this number. Is the phone number above correct?";
+"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_MESSAGE" = "ہمیں اس نمبر پر ایک تصدیقی کوڈ بھیجنے کی ضرورت پڑ سکتی ہے۔ کیا مذکورہ بالا نمبر درست ہے؟";
 
 /* Title for confirmation alert during phone number registration. Embeds {{phone number}}. */
-"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_TITLE_FORMAT" = "Phone Number Confirmation: %1$@";
+"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_TITLE_FORMAT" = "فون نمبر کی تصدیق: %1$@";
 
 /* A button allowing user to cancel registration and edit a phone number */
 "REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_EDIT_BUTTON" = "ترتیب دیں";
@@ -8486,7 +8516,7 @@
 "SETTINGS_BLOCK_LIST_NO_CONTACTS" = "آپ Signal پر کوئی رابطہ نہیں رکھتے۔";
 
 /* A label that indicates the user's search has no matching results. */
-"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "کوئی نتیجہ تلاش نہیں ہوا";
+"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "No Results";
 
 /* Label for the block list section of the settings view */
 "SETTINGS_BLOCK_LIST_TITLE" = "بلاک کر دیا گیا";

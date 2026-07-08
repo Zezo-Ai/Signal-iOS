@@ -605,7 +605,7 @@
 "BACKUP_ONBOARDING_CONFIRM_KEY_SEE_KEY_AGAIN_BUTTON_TITLE" = "'কি'-টি আবার দেখুন";
 
 /* Subtitle for a view asking users to confirm their 'Recovery Key'. */
-"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "Enter the recovery key you just saved.";
+"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "আপনার মাত্র সেভ করা পুনরুদ্ধার 'কি'-টি লিখুন।";
 
 /* Title for a view asking users to confirm their 'Recovery Key'. */
 "BACKUP_ONBOARDING_CONFIRM_KEY_TITLE" = "আপনার পুনরুদ্ধার 'কি' নিশ্চিত করুন";
@@ -671,10 +671,10 @@
 "BACKUP_RECORD_KEY_CREATE_NEW_KEY_BUTTON_TITLE" = "নতুন 'কি' তৈরি করুন";
 
 /* Subtitle for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
-"BACKUP_RECORD_KEY_NEW_SUBTITLE" = "This new key will replace your old one, and will be required to recover your account and data. Store this key somewhere safe. If you lose it, you won’t be able to recover your account.";
+"BACKUP_RECORD_KEY_NEW_SUBTITLE" = "পুরোনোটির পরিবর্তে আপনার এই নতুন 'কি'-টি কার্যকর হবে এবং আপনার অ্যাকাউন্ট ও ডেটা পুনরুদ্ধার করার জন্য এটি প্রয়োজন হবে। এই 'কি'-টি নিরাপদ কোথাও সংরক্ষণ করুন। এটি হারিয়ে ফেললে, আপনি আপনার অ্যাকাউন্টের ব্যাকআপ পুনরুদ্ধার করতে পারবেন না।";
 
 /* Title for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
-"BACKUP_RECORD_KEY_NEW_TITLE" = "Save Your New Recovery Key";
+"BACKUP_RECORD_KEY_NEW_TITLE" = "আপনার নতুন পুনরুদ্ধার 'কি' সেভ করুন";
 
 /* Title for a button allowing users to save their 'Recovery Key' to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_BUTTON_TITLE" = "পাসওয়ার্ড ম্যানেজারে সেভ করুন";
@@ -701,7 +701,7 @@
 "BACKUP_RECORD_KEY_SUBTITLE" = "আপনার অ্যাকাউন্ট এবং ডেটা পুনরুদ্ধার করতে এই 'কি' প্রয়োজন। এই 'কি'-টি নিরাপদ কোথাও সংরক্ষণ করুন। এটি হারিয়ে ফেললে, আপনি আপনার অ্যাকাউন্টের ব্যাকআপ পুনরুদ্ধার করতে পারবেন না।";
 
 /* Title for a view allowing users to save their 'Recovery Key'. */
-"BACKUP_RECORD_KEY_TITLE" = "Save Your Recovery Key";
+"BACKUP_RECORD_KEY_TITLE" = "আপনার পুনরুদ্ধার 'কি' সেভ করুন";
 
 /* Title for a button offering help if the user has forgotten their recovery key. */
 "BACKUP_RECOVERY_KEY_REMINDER_FORGOT_KEY_BUTTON" = "'কি' ভুলে গেছেন?";
@@ -4441,6 +4441,36 @@
 /* Label indicating that a group member is an admin. */
 "GROUP_MEMBER_ADMIN_INDICATOR" = "অ্যাডমিন";
 
+/* Accessibility label for the button that opens the group member search sheet. */
+"GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL" = "Search members";
+
+/* Accessibility label for the filter button in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_ACCESSIBILITY_LABEL" = "Filter members";
+
+/* Title for the filter option that shows only admins in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_ADMINS" = "Admins";
+
+/* Title for the filter option that shows all members in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_ALL" = "All Members";
+
+/* Title for the filter option that shows only members who are in the user's system contacts, in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_CONTACTS" = "Contacts";
+
+/* Title for the filter menu in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_MENU_TITLE" = "Filter";
+
+/* Label for the 'invite via group link' button in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_INVITE_VIA_GROUP_LINK" = "Invite Via Group Link";
+
+/* Message shown when a group member search returns no results. Embeds {{ the search query }}. */
+"GROUP_MEMBER_SEARCH_NO_RESULTS_FORMAT" = "No results for “%1$@”";
+
+/* Section header shown above the results in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_RESULTS_SECTION_TITLE" = "Search Results";
+
+/* Placeholder text for the search bar in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_SEARCH_BAR_PLACEHOLDER" = "Search";
+
 /* Label indicating that a new group has no other members. */
 "GROUP_MEMBERS_NO_OTHER_MEMBERS" = "এই গ্রুপটি তৈরি করার পরে আপনি বন্ধুদের আমন্ত্রণ জানাতে অথবা যোগ করতে পারবেন।";
 
@@ -5303,7 +5333,7 @@
 "MEDIA_DETAIL_VIEW_ALL_MEDIA_BUTTON" = "সকল মিডিয়া";
 
 /* Placeholder for message text input field in media editor. */
-"MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "Message";
+"MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "ম্যাসেজ";
 
 /* Title for the button that discards all edits in media editor. */
 "MEDIA_EDITOR_CLEAR_ALL" = "সব মুছুন";
@@ -7733,7 +7763,7 @@
 "REGISTRATION_NO_BACKUP_KEY_BUTTON_TITLE" = "কোনো পুনরুদ্ধার 'কি' নেই?";
 
 /* Body text on a sheet with info for what to do if you don't have a recovery key */
-"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "ব্যাকআপগুলো তাদের 64-ক্যারেক্টারের পুনর্বহাল কোড ছাড়া পুনর্বহাল করা যাবে না। আপনি যদি আপনার পুনর্বহাল 'কি' হারিয়ে ফেলেন তবে Signal আপনার ব্যাকআপ পুনর্বহাল করতে সাহায্য করতে সক্ষম হবে না।\n\nযদি আপনার পুরনো ডিভাইস থাকে, তাহলে আপনি সেটিংস > চ্যাট > ব্যাকআপ থেকে আপনার পুনর্বহাল 'কি' দেখতে পারবেন। তারপর 'পুনর্বহাল 'কি' দেখুন'-এ ট্যাপ করুন।";
+"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "Backups can’t be recovered without their 64-character recovery code. If you’ve lost your recovery key, Signal can’t help restore your backup.\n\nIf you have your old device, you can view your recovery key in Settings > Backups. Then tap View Recovery Key.";
 
 /* Title for sheet with info for what to do if you don't have a recovery key */
 "REGISTRATION_NO_BACKUP_KEY_SHEET_TITLE" = "কোনো পুনরুদ্ধার 'কি' নেই?";
@@ -7745,7 +7775,7 @@
 "REGISTRATION_PHONE_NUMBER_SUBTITLE" = "শুরু করতে আপনার ফোন নম্বর লিখুন।";
 
 /* During re-registration, users are asked to confirm their phone number. This is the subtitle on that screen, which gives users some instructions. */
-"REGISTRATION_PHONE_NUMBER_SUBTITLE_2" = "We may need to send a verification code to this number:";
+"REGISTRATION_PHONE_NUMBER_SUBTITLE_2" = "এই নম্বরে আমাদের একটি যাচাইকরণ কোড পাঠাতে হতে পারে:";
 
 /* During registration, users are asked to enter their phone number. This is the title on that screen. */
 "REGISTRATION_PHONE_NUMBER_TITLE" = "আপনার ফোন নম্বর";
@@ -7853,10 +7883,10 @@
 "REGISTRATION_VIEW_INVALID_PHONE_NUMBER_ALERT_TITLE" = "ভুল ফোন নম্বর";
 
 /* Message for confirmation alert during phone number registration. */
-"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_MESSAGE" = "We may need to send a verification code to this number. Is the phone number above correct?";
+"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_MESSAGE" = "এই নম্বরে আমাদের একটি যাচাইকরণ কোড পাঠাতে হতে পারে। উপরের এই ফোন নম্বরটি কি ঠিক আছে?";
 
 /* Title for confirmation alert during phone number registration. Embeds {{phone number}}. */
-"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_TITLE_FORMAT" = "Phone Number Confirmation: %1$@";
+"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_TITLE_FORMAT" = "ফোন নম্বর নিশ্চিতকরণ: %1$@";
 
 /* A button allowing user to cancel registration and edit a phone number */
 "REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_EDIT_BUTTON" = "সম্পাদনা করুন";
@@ -8486,7 +8516,7 @@
 "SETTINGS_BLOCK_LIST_NO_CONTACTS" = "আপনার পরিচিতি গুলির কারও Signal নেই।";
 
 /* A label that indicates the user's search has no matching results. */
-"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "অনুসন্ধানের ফলাফল শুন্য";
+"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "No Results";
 
 /* Label for the block list section of the settings view */
 "SETTINGS_BLOCK_LIST_TITLE" = "ব্লক করা হয়েছে";

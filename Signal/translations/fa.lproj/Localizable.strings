@@ -605,7 +605,7 @@
 "BACKUP_ONBOARDING_CONFIRM_KEY_SEE_KEY_AGAIN_BUTTON_TITLE" = "مشاهده دوباره کلید";
 
 /* Subtitle for a view asking users to confirm their 'Recovery Key'. */
-"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "Enter the recovery key you just saved.";
+"BACKUP_ONBOARDING_CONFIRM_KEY_SUBTITLE" = "رمز بازیابی که همین حالا ذخیره کردید را وارد کنید.";
 
 /* Title for a view asking users to confirm their 'Recovery Key'. */
 "BACKUP_ONBOARDING_CONFIRM_KEY_TITLE" = "رمز بازیابی خود را تأیید کنید";
@@ -671,10 +671,10 @@
 "BACKUP_RECORD_KEY_CREATE_NEW_KEY_BUTTON_TITLE" = "ایجاد رمز جدید";
 
 /* Subtitle for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
-"BACKUP_RECORD_KEY_NEW_SUBTITLE" = "This new key will replace your old one, and will be required to recover your account and data. Store this key somewhere safe. If you lose it, you won’t be able to recover your account.";
+"BACKUP_RECORD_KEY_NEW_SUBTITLE" = "این رمز جدید جایگزین رمز قدیمی شما خواهد شد و برای بازیابی حساب و داده‌هایتان الزامی خواهد بود. این رمز را در مکان امنی نگهداری کنید. اگر آن را گم کنید، نمی‌توانید حسابتان را بازیابی کنید.";
 
 /* Title for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
-"BACKUP_RECORD_KEY_NEW_TITLE" = "Save Your New Recovery Key";
+"BACKUP_RECORD_KEY_NEW_TITLE" = "رمز بازیابی جدیدتان را ذخیره کنید";
 
 /* Title for a button allowing users to save their 'Recovery Key' to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_BUTTON_TITLE" = "ذخیره در مدیر رمز عبور";
@@ -701,7 +701,7 @@
 "BACKUP_RECORD_KEY_SUBTITLE" = "این کلید برای بازیابی حساب و اطلاعات شما ضروری است. این کلید را در مکانی امن نگهداری کنید. اگر آن را گم کنید، نمی‌توانید حساب خود را بازیابی کنید.";
 
 /* Title for a view allowing users to save their 'Recovery Key'. */
-"BACKUP_RECORD_KEY_TITLE" = "Save Your Recovery Key";
+"BACKUP_RECORD_KEY_TITLE" = "رمز بازیابی خود را ذخیره کنید";
 
 /* Title for a button offering help if the user has forgotten their recovery key. */
 "BACKUP_RECOVERY_KEY_REMINDER_FORGOT_KEY_BUTTON" = "رمز را فراموش کردید؟";
@@ -4441,6 +4441,36 @@
 /* Label indicating that a group member is an admin. */
 "GROUP_MEMBER_ADMIN_INDICATOR" = "مدیر";
 
+/* Accessibility label for the button that opens the group member search sheet. */
+"GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL" = "Search members";
+
+/* Accessibility label for the filter button in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_ACCESSIBILITY_LABEL" = "Filter members";
+
+/* Title for the filter option that shows only admins in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_ADMINS" = "Admins";
+
+/* Title for the filter option that shows all members in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_ALL" = "All Members";
+
+/* Title for the filter option that shows only members who are in the user's system contacts, in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_CONTACTS" = "Contacts";
+
+/* Title for the filter menu in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_FILTER_MENU_TITLE" = "Filter";
+
+/* Label for the 'invite via group link' button in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_INVITE_VIA_GROUP_LINK" = "Invite Via Group Link";
+
+/* Message shown when a group member search returns no results. Embeds {{ the search query }}. */
+"GROUP_MEMBER_SEARCH_NO_RESULTS_FORMAT" = "No results for “%1$@”";
+
+/* Section header shown above the results in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_RESULTS_SECTION_TITLE" = "Search Results";
+
+/* Placeholder text for the search bar in the group member search sheet. */
+"GROUP_MEMBER_SEARCH_SEARCH_BAR_PLACEHOLDER" = "Search";
+
 /* Label indicating that a new group has no other members. */
 "GROUP_MEMBERS_NO_OTHER_MEMBERS" = "می‌توانید دوستان را بعد از ایجاد این گروه دعوت یا اضافه کنید.";
 
@@ -5303,7 +5333,7 @@
 "MEDIA_DETAIL_VIEW_ALL_MEDIA_BUTTON" = "تمام رسانه‌ها";
 
 /* Placeholder for message text input field in media editor. */
-"MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "Message";
+"MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "پیام";
 
 /* Title for the button that discards all edits in media editor. */
 "MEDIA_EDITOR_CLEAR_ALL" = "پاک کردن همه";
@@ -7733,7 +7763,7 @@
 "REGISTRATION_NO_BACKUP_KEY_BUTTON_TITLE" = "رمز بازیابی ندارید؟";
 
 /* Body text on a sheet with info for what to do if you don't have a recovery key */
-"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "نسخه‌های پشتیبان بدون کد بازیابی ۶۴ نویسه‌ای قابل‌بازیابی نیستند. اگر رمز بازیابی‌تان را گم کرده‌اید، سیگنال نمی‌تواند به بازیابی نسخه پشتیبان شما کمک کند.\n\nاگر دستگاه قدیمی‌تان را دارید، می‌توانید رمز بازیابی‌تان را در «تنظیمات > گفتگوها > نسخه‌های پشتیبان» مشاهده کنید. سپس روی«مشاهده رمز بازیابی» ضربه بزنید.";
+"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "Backups can’t be recovered without their 64-character recovery code. If you’ve lost your recovery key, Signal can’t help restore your backup.\n\nIf you have your old device, you can view your recovery key in Settings > Backups. Then tap View Recovery Key.";
 
 /* Title for sheet with info for what to do if you don't have a recovery key */
 "REGISTRATION_NO_BACKUP_KEY_SHEET_TITLE" = "رمز بازیابی ندارید؟";
@@ -7745,7 +7775,7 @@
 "REGISTRATION_PHONE_NUMBER_SUBTITLE" = "برای شروع، شماره تلفن خود را وارد کنید.";
 
 /* During re-registration, users are asked to confirm their phone number. This is the subtitle on that screen, which gives users some instructions. */
-"REGISTRATION_PHONE_NUMBER_SUBTITLE_2" = "We may need to send a verification code to this number:";
+"REGISTRATION_PHONE_NUMBER_SUBTITLE_2" = "ممکن است لازم باشد کد تأیید را به این شماره ارسال کنیم:";
 
 /* During registration, users are asked to enter their phone number. This is the title on that screen. */
 "REGISTRATION_PHONE_NUMBER_TITLE" = "شماره تلفن شما";
@@ -7853,10 +7883,10 @@
 "REGISTRATION_VIEW_INVALID_PHONE_NUMBER_ALERT_TITLE" = "شماره تلفن معتبر نیست";
 
 /* Message for confirmation alert during phone number registration. */
-"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_MESSAGE" = "We may need to send a verification code to this number. Is the phone number above correct?";
+"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_MESSAGE" = "شاید لازم باشد کد تأیید را به این شماره ارسال کنیم. شماره تلفن بالا صحیح است؟";
 
 /* Title for confirmation alert during phone number registration. Embeds {{phone number}}. */
-"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_TITLE_FORMAT" = "Phone Number Confirmation: %1$@";
+"REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_ALERT_TITLE_FORMAT" = "تأیید شماره تلفن:‏ ‎%1$@‎";
 
 /* A button allowing user to cancel registration and edit a phone number */
 "REGISTRATION_VIEW_PHONE_NUMBER_CONFIRMATION_EDIT_BUTTON" = "ویرایش";
@@ -8486,7 +8516,7 @@
 "SETTINGS_BLOCK_LIST_NO_CONTACTS" = "هیچ کدام از مخاطبین شما سیگنال را نصب نکرده‌اند.";
 
 /* A label that indicates the user's search has no matching results. */
-"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "نتیجه‌ای یافت نشد.";
+"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "No Results";
 
 /* Label for the block list section of the settings view */
 "SETTINGS_BLOCK_LIST_TITLE" = "مسدودشده";
