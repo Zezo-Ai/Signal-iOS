@@ -322,15 +322,17 @@ public extension RemoteAnnouncementModel.Manifest {
         return try individualAnnouncements.compactMap { announcementObject throws -> Self? in
             let announcementParser = ParamParser(announcementObject)
 
-            guard
-                let iosMinVersionString: String = try announcementParser.optional(key: Self.iosMinVersionKey),
-                let iosMinVersion = try? AppVersionNumber4(AppVersionNumber(iosMinVersionString))
-            else {
-                Logger.warn("Invalid or missing iosMinVersion in remote announcement manifest")
+            let uuid: String = try announcementParser.required(key: Self.uuidKey)
+
+            guard let iosMinVersionString: String = try announcementParser.optional(key: Self.iosMinVersionKey) else {
+                Logger.info("Missing iosMinVersion in remote announcement manifest: \(uuid)")
                 return nil
             }
 
-            let uuid: String = try announcementParser.required(key: Self.uuidKey)
+            guard let iosMinVersion = try? AppVersionNumber4(AppVersionNumber(iosMinVersionString)) else {
+                owsFailDebug("Invalid iosMinVersion in remote announcement manifest: \(uuid)")
+                return nil
+            }
 
             let countries: String? = try announcementParser.optional(key: Self.countriesKey)
             let link: String? = try announcementParser.optional(key: Self.link)
