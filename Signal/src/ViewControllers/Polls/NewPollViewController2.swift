@@ -187,6 +187,8 @@ class NewPollViewController2: OWSViewController, UITableViewDelegate, OWSNavigat
         dataSource.didMoveRow = { [weak self, weak dataSource] sourceIndexPath, destinationIndexPath in
             guard let self, let dataSource else { return }
 
+            self.tableView.endEditing(true)
+
             let movedRow = optionRows.remove(at: sourceIndexPath.row)
             optionRows.insert(movedRow, at: destinationIndexPath.row)
             applyOptionRowsToSnapshot(optionRowIDsToReconfigure: [])
