@@ -38,6 +38,7 @@ public class AppEnvironment: NSObject {
     private(set) var badgeManager: BadgeManager!
     private(set) var callLinkProfileKeySharingManager: CallLinkProfileKeySharingManager!
     private(set) var callService: CallService!
+    private(set) var experienceUpgradeManager: ExperienceUpgradeManager!
     private(set) var groupSendEndorsementExpirationJob: GroupSendEndorsementExpirationJob!
     private(set) var outgoingDeviceRestorePresenter: OutgoingDeviceRestorePresenter!
     private(set) var provisioningManager: ProvisioningManager!
@@ -58,7 +59,8 @@ public class AppEnvironment: NSObject {
     }
 
     func setUp(appReadiness: AppReadiness, callService: CallService) {
-        let cron = DependenciesBridge.shared.cron
+
+        // MARK: Set up singletons
 
         let authCredentialStore = AuthCredentialStore()
         let backupAttachmentUploadEraStore = BackupAttachmentUploadEraStore()
@@ -79,10 +81,12 @@ public class AppEnvironment: NSObject {
         )
 
         self.appIconBadgeUpdater = AppIconBadgeUpdater(badgeManager: badgeManager)
+
         self.avatarHistoryManager = AvatarHistoryManager(
             appReadiness: appReadiness,
             db: DependenciesBridge.shared.db,
         )
+
         self.backupAttachmentDownloadTracker = BackupAttachmentDownloadTracker(
             backupAttachmentDownloadQueueStatusManager: DependenciesBridge.shared.backupAttachmentDownloadQueueStatusManager,
             backupAttachmentDownloadProgress: DependenciesBridge.shared.backupAttachmentDownloadProgress,
@@ -91,7 +95,6 @@ public class AppEnvironment: NSObject {
             backupAttachmentUploadQueueStatusManager: DependenciesBridge.shared.backupAttachmentUploadQueueStatusManager,
             backupAttachmentUploadProgress: DependenciesBridge.shared.backupAttachmentUploadProgress,
         )
-        self.badgeManager = badgeManager
         self.backupDisablingManager = BackupDisablingManager(
             accountEntropyPoolManager: DependenciesBridge.shared.accountEntropyPoolManager,
             authCredentialStore: authCredentialStore,
@@ -122,16 +125,50 @@ public class AppEnvironment: NSObject {
             tsAccountManager: DependenciesBridge.shared.tsAccountManager,
             notificationPresenter: SSKEnvironment.shared.notificationPresenterRef,
         )
+
+        self.badgeManager = badgeManager
+
         self.callService = callService
         self.callLinkProfileKeySharingManager = CallLinkProfileKeySharingManager(
             db: DependenciesBridge.shared.db,
             accountManager: DependenciesBridge.shared.tsAccountManager,
         )
+
+        self.experienceUpgradeManager = ExperienceUpgradeManager(
+            attachmentStore: AttachmentStore(),
+            backupSettingsStore: backupSettingsStore,
+            db: DependenciesBridge.shared.db,
+            deviceStore: DependenciesBridge.shared.deviceStore,
+            donationReceiptCredentialResultStore: DependenciesBridge.shared.donationReceiptCredentialResultStore,
+            experienceUpgradeStore: ExperienceUpgradeStore(),
+            inactiveLinkedDeviceFinder: DependenciesBridge.shared.inactiveLinkedDeviceFinder,
+            inactivePrimaryDeviceStore: DependenciesBridge.shared.inactivePrimaryDeviceStore,
+            localUsernameManager: DependenciesBridge.shared.localUsernameManager,
+            networkManager: SSKEnvironment.shared.networkManagerRef,
+            ows2FAManager: SSKEnvironment.shared.ows2FAManagerRef,
+            profileManager: SSKEnvironment.shared.profileManagerRef,
+            reachabilityManager: SSKEnvironment.shared.reachabilityManagerRef,
+            remoteConfigManager: SSKEnvironment.shared.remoteConfigManagerRef,
+            storageServiceManager: SSKEnvironment.shared.storageServiceManagerRef,
+            subscriptionConfigManager: DependenciesBridge.shared.subscriptionConfigManager,
+            tsAccountManager: DependenciesBridge.shared.tsAccountManager,
+            usernameEducationManager: DependenciesBridge.shared.usernameEducationManager,
+        )
+
         self.groupSendEndorsementExpirationJob = GroupSendEndorsementExpirationJob(
             dateProvider: Date.provider,
             db: DependenciesBridge.shared.db,
             groupSendEndorsementStore: DependenciesBridge.shared.groupSendEndorsementStore,
         )
+
+        self.outgoingDeviceRestorePresenter = OutgoingDeviceRestorePresenter(
+            dateProvider: Date.provider,
+            db: DependenciesBridge.shared.db,
+            backupSettingsStore: BackupSettingsStore(),
+            deviceTransferService: deviceTransferServiceRef,
+            quickRestoreManager: quickRestoreManager,
+        )
+
         self.provisioningManager = ProvisioningManager(
             accountKeyStore: DependenciesBridge.shared.accountKeyStore,
             db: DependenciesBridge.shared.db,
@@ -143,6 +180,7 @@ public class AppEnvironment: NSObject {
             receiptManager: ProvisioningManager.Wrappers.ReceiptManager(SSKEnvironment.shared.receiptManagerRef),
             tsAccountManager: DependenciesBridge.shared.tsAccountManager,
         )
+
         self.quickRestoreManager = QuickRestoreManager(
             accountKeyStore: DependenciesBridge.shared.accountKeyStore,
             backupNonceStore: backupNonceStore,
@@ -154,6 +192,16 @@ public class AppEnvironment: NSObject {
             tsAccountManager: DependenciesBridge.shared.tsAccountManager,
         )
 
+        self.registrationIdMismatchManager = RegistrationIdMismatchManagerImpl(
+            db: DependenciesBridge.shared.db,
+            tsAccountManager: DependenciesBridge.shared.tsAccountManager,
+            udManager: SSKEnvironment.shared.udManagerRef,
+        )
+
+        // MARK: Set up Cron jobs
+
+        let cron = DependenciesBridge.shared.cron
+
         let usernameValidationManager = DependenciesBridge.shared.usernameValidationManager
         cron.schedulePeriodically(
             uniqueKey: .checkUsername,
@@ -161,20 +209,6 @@ public class AppEnvironment: NSObject {
             mustBeRegistered: true,
             mustBeConnected: true,
             operation: { _ = try await usernameValidationManager.validateUsername() },
-        )
-
-        self.outgoingDeviceRestorePresenter = OutgoingDeviceRestorePresenter(
-            dateProvider: Date.provider,
-            db: DependenciesBridge.shared.db,
-            backupSettingsStore: BackupSettingsStore(),
-            deviceTransferService: deviceTransferServiceRef,
-            quickRestoreManager: quickRestoreManager,
-        )
-
-        self.registrationIdMismatchManager = RegistrationIdMismatchManagerImpl(
-            db: DependenciesBridge.shared.db,
-            tsAccountManager: DependenciesBridge.shared.tsAccountManager,
-            udManager: SSKEnvironment.shared.udManagerRef,
         )
 
         let inactiveLinkedDeviceFinder = DependenciesBridge.shared.inactiveLinkedDeviceFinder
@@ -247,6 +281,8 @@ public class AppEnvironment: NSObject {
                 }
             },
         )
+
+        // MARK: Set up non-Cron on-launch jobs
 
         appReadiness.runNowOrWhenAppWillBecomeReady {
             self.badgeManager.startObservingChanges(in: DependenciesBridge.shared.databaseChangeObserver)

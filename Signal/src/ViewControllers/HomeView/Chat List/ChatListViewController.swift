@@ -364,7 +364,8 @@ public class ChatListViewController: OWSViewController, HomeTabViewController {
 
     @objc
     func reconcileExperienceUpgrades() {
-        ExperienceUpgradeManager.reconcilePresentedExperienceUpgrade(fromViewController: self)
+        let experienceUpgradeManager = AppEnvironment.shared.experienceUpgradeManager!
+        experienceUpgradeManager.reconcilePresentedExperienceUpgrade(fromViewController: self)
     }
 
     // MARK: - Disk Space

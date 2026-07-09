@@ -13,44 +13,73 @@ class ExperienceUpgradeManager {
         static let lastMegaphoneDismissDate = "lastExperienceUpgradeDismissDate"
     }
 
-    private static var lastPresentedMegaphone: Megaphone?
-    private static var lastPresentedMegaphoneView: MegaphoneView?
+    private let attachmentStore: AttachmentStore
+    private let backupSettingsStore: BackupSettingsStore
+    private let db: DB
+    private let deviceStore: OWSDeviceStore
+    private let donationReceiptCredentialResultStore: DonationReceiptCredentialResultStore
+    private let experienceUpgradeStore: ExperienceUpgradeStore
+    private let inactiveLinkedDeviceFinder: InactiveLinkedDeviceFinder
+    private let inactivePrimaryDeviceStore: InactivePrimaryDeviceStore
+    private let keyValueStore: NewKeyValueStore
+    private let localUsernameManager: LocalUsernameManager
+    private let networkManager: NetworkManager
+    private let ows2FAManager: OWS2FAManager
+    private let profileManager: ProfileManager
+    private let reachabilityManager: SSKReachabilityManager
+    private let remoteConfigManager: RemoteConfigManager
+    private let storageServiceManager: StorageServiceManager
+    private let subscriptionConfigManager: SubscriptionConfigManager
+    private let tsAccountManager: TSAccountManager
+    private let usernameEducationManager: UsernameEducationManager
 
-    private static var accountKeyStore: AccountKeyStore { DependenciesBridge.shared.accountKeyStore }
-    private static let attachmentStore = AttachmentStore()
-    private static let backupSettingsStore = BackupSettingsStore()
-    private static let dateProvider: DateProvider = { Date() }
-    private static var db: DB { DependenciesBridge.shared.db }
-    private static var deviceStore: OWSDeviceStore { DependenciesBridge.shared.deviceStore }
-    private static var donationReceiptCredentialResultStore: DonationReceiptCredentialResultStore { DependenciesBridge.shared.donationReceiptCredentialResultStore }
-    private static let experienceUpgradeStore = ExperienceUpgradeStore()
-    private static var inactiveLinkedDeviceFinder: InactiveLinkedDeviceFinder { DependenciesBridge.shared.inactiveLinkedDeviceFinder }
-    private static var inactivePrimaryDeviceStore: InactivePrimaryDeviceStore { DependenciesBridge.shared.inactivePrimaryDeviceStore }
-    private static let keyValueStore = NewKeyValueStore(collection: "ExperienceUpgradeManager")
-    private static var localUsernameManager: LocalUsernameManager { DependenciesBridge.shared.localUsernameManager }
-    private static var networkManager: NetworkManager { SSKEnvironment.shared.networkManagerRef }
-    private static var ows2FAManager: OWS2FAManager { SSKEnvironment.shared.ows2FAManagerRef }
-    private static var profileManager: ProfileManager { SSKEnvironment.shared.profileManagerRef }
-    private static var reachabilityManager: SSKReachabilityManager { SSKEnvironment.shared.reachabilityManagerRef }
-    private static var remoteConfigManager: RemoteConfigManager { SSKEnvironment.shared.remoteConfigManagerRef }
-    private static var storageServiceManager: StorageServiceManager { SSKEnvironment.shared.storageServiceManagerRef }
-    private static var subscriptionConfigManager: SubscriptionConfigManager { DependenciesBridge.shared.subscriptionConfigManager }
-    private static var usernameEducationManager: UsernameEducationManager { DependenciesBridge.shared.usernameEducationManager }
-    private static var tsAccountManager: TSAccountManager { DependenciesBridge.shared.tsAccountManager }
-    private static var usernameSelectionCoordinator: UsernameSelectionCoordinator {
-        UsernameSelectionCoordinator(
-            currentUsername: nil,
-            context: UsernameSelectionCoordinator.Context(
-                databaseStorage: db,
-                networkManager: networkManager,
-                storageServiceManager: storageServiceManager,
-                usernameEducationManager: usernameEducationManager,
-                localUsernameManager: localUsernameManager,
-            ),
-        )
+    private var lastPresentedMegaphone: Megaphone?
+    private var lastPresentedMegaphoneView: MegaphoneView?
+
+    init(
+        attachmentStore: AttachmentStore,
+        backupSettingsStore: BackupSettingsStore,
+        db: DB,
+        deviceStore: OWSDeviceStore,
+        donationReceiptCredentialResultStore: DonationReceiptCredentialResultStore,
+        experienceUpgradeStore: ExperienceUpgradeStore,
+        inactiveLinkedDeviceFinder: InactiveLinkedDeviceFinder,
+        inactivePrimaryDeviceStore: InactivePrimaryDeviceStore,
+        localUsernameManager: LocalUsernameManager,
+        networkManager: NetworkManager,
+        ows2FAManager: OWS2FAManager,
+        profileManager: ProfileManager,
+        reachabilityManager: SSKReachabilityManager,
+        remoteConfigManager: RemoteConfigManager,
+        storageServiceManager: StorageServiceManager,
+        subscriptionConfigManager: SubscriptionConfigManager,
+        tsAccountManager: TSAccountManager,
+        usernameEducationManager: UsernameEducationManager,
+    ) {
+        self.attachmentStore = attachmentStore
+        self.backupSettingsStore = backupSettingsStore
+        self.db = db
+        self.deviceStore = deviceStore
+        self.donationReceiptCredentialResultStore = donationReceiptCredentialResultStore
+        self.experienceUpgradeStore = experienceUpgradeStore
+        self.inactiveLinkedDeviceFinder = inactiveLinkedDeviceFinder
+        self.inactivePrimaryDeviceStore = inactivePrimaryDeviceStore
+        self.keyValueStore = NewKeyValueStore(collection: "ExperienceUpgradeManager")
+        self.localUsernameManager = localUsernameManager
+        self.networkManager = networkManager
+        self.ows2FAManager = ows2FAManager
+        self.profileManager = profileManager
+        self.reachabilityManager = reachabilityManager
+        self.remoteConfigManager = remoteConfigManager
+        self.storageServiceManager = storageServiceManager
+        self.subscriptionConfigManager = subscriptionConfigManager
+        self.tsAccountManager = tsAccountManager
+        self.usernameEducationManager = usernameEducationManager
     }
 
-    static func reconcilePresentedExperienceUpgrade(fromViewController: UIViewController) {
+    // MARK: -
+
+    func reconcilePresentedExperienceUpgrade(fromViewController: UIViewController) {
         let now = Date()
         var shouldClearNewDeviceNotification = false
         var shouldClearBackupsEnabledDetails = false
@@ -122,6 +151,17 @@ class ExperienceUpgradeManager {
                     }
                 case .createUsernameReminder:
                     if checkPreconditionsForCreateUsernameReminder(tx: tx) {
+                        let usernameSelectionCoordinator = UsernameSelectionCoordinator(
+                            currentUsername: nil,
+                            context: UsernameSelectionCoordinator.Context(
+                                databaseStorage: db,
+                                networkManager: networkManager,
+                                storageServiceManager: storageServiceManager,
+                                usernameEducationManager: usernameEducationManager,
+                                localUsernameManager: localUsernameManager,
+                            ),
+                        )
+
                         nextMegaphone = CreateUsernameMegaphone(
                             usernameSelectionCoordinator: usernameSelectionCoordinator,
                             experienceUpgrade: upgrade,
@@ -285,7 +325,7 @@ class ExperienceUpgradeManager {
     /// Returns an array of all recognized ``ExperienceUpgrade``s. Contains the
     /// persisted record if one exists and is applicable, and an in-memory
     /// model otherwise.
-    private static func allKnownExperienceUpgrades(
+    private func allKnownExperienceUpgrades(
         tx: DBReadTransaction,
     ) -> [ExperienceUpgrade] {
         var experienceUpgrades = [ExperienceUpgrade]()
@@ -313,7 +353,7 @@ class ExperienceUpgradeManager {
 
     /// - Returns
     /// Whether or not we dismissed a megaphone.
-    private static func dismissLastPresented(now: Date) -> Bool {
+    private func dismissLastPresented(now: Date) -> Bool {
         guard lastPresentedMegaphone != nil, let lastPresentedMegaphoneView else {
             return false
         }
@@ -334,7 +374,7 @@ class ExperienceUpgradeManager {
 
     // MARK: - Megaphone Preconditions
 
-    private static func checkPreconditionsForIntroducingPins(
+    private func checkPreconditionsForIntroducingPins(
         tx: DBReadTransaction,
     ) -> Bool {
         // The PIN setup flow requires an internet connection and you to not already have a PIN
@@ -349,7 +389,7 @@ class ExperienceUpgradeManager {
         return false
     }
 
-    private static func checkPreconditionsForNotificationsPermissionsReminder() -> Bool {
+    private func checkPreconditionsForNotificationsPermissionsReminder() -> Bool {
         let (promise, future) = Promise<Bool>.pending()
 
         DispatchQueue.global(qos: .userInitiated).async {
@@ -377,7 +417,7 @@ class ExperienceUpgradeManager {
         case clearNotification
     }
 
-    private static func checkPreconditionsForNewLinkedDeviceNotification(
+    private func checkPreconditionsForNewLinkedDeviceNotification(
         tx: DBReadTransaction,
     ) -> NewLinkedDeviceNotificationResult {
         guard
@@ -403,7 +443,7 @@ class ExperienceUpgradeManager {
         case clearStoredDetails
     }
 
-    private static func checkPreconditionsForBackupsEnabledRecentlyNotification(
+    private func checkPreconditionsForBackupsEnabledRecentlyNotification(
         now: Date,
         tx: DBReadTransaction,
     ) -> BackupsEnabledRecentlyNotificationResult {
@@ -425,7 +465,7 @@ class ExperienceUpgradeManager {
         }
     }
 
-    private static func checkPreconditionsForCreateUsernameReminder(
+    private func checkPreconditionsForCreateUsernameReminder(
         tx: DBReadTransaction,
     ) -> Bool {
         guard
@@ -454,25 +494,25 @@ class ExperienceUpgradeManager {
         return timeIntervalSinceDisabledDiscovery > requiredDelayAfterDisablingDiscovery
     }
 
-    private static func checkPreconditionsForInactiveLinkedDeviceReminder(
+    private func checkPreconditionsForInactiveLinkedDeviceReminder(
         tx: DBReadTransaction,
     ) -> InactiveLinkedDevice? {
         return inactiveLinkedDeviceFinder.findLeastActiveLinkedDevice(tx: tx)
     }
 
-    private static func checkPreconditionsForInactivePrimaryDeviceReminder(
+    private func checkPreconditionsForInactivePrimaryDeviceReminder(
         tx: DBReadTransaction,
     ) -> Bool {
         return inactivePrimaryDeviceStore.valueForInactivePrimaryDeviceAlert(transaction: tx)
     }
 
-    private static func checkPreconditionsForPinReminder(
+    private func checkPreconditionsForPinReminder(
         tx: DBReadTransaction,
     ) -> Bool {
         return ows2FAManager.isDueForV2Reminder(transaction: tx)
     }
 
-    private static func checkPreconditionsForContactsPermissionReminder() -> Bool {
+    private func checkPreconditionsForContactsPermissionReminder() -> Bool {
         switch CNContactStore.authorizationStatus(for: .contacts) {
         case .authorized, .limited:
             return false
@@ -486,7 +526,7 @@ class ExperienceUpgradeManager {
         }
     }
 
-    private static func checkPreconditionsForRecoveryKeyReminder(
+    private func checkPreconditionsForRecoveryKeyReminder(
         tx: DBReadTransaction,
     ) -> Bool {
         guard tsAccountManager.registrationState(tx: tx).isRegisteredPrimaryDevice else {
@@ -524,7 +564,7 @@ class ExperienceUpgradeManager {
         case saveSpace(areBackupsEnabled: Bool)
     }
 
-    private static func checkPreconditionsForBackupsUpsellReminder(
+    private func checkPreconditionsForBackupsUpsellReminder(
         experienceUpgrade: ExperienceUpgrade,
         tx: DBReadTransaction,
     ) -> BackupsUpsellResult? {
@@ -575,7 +615,7 @@ class ExperienceUpgradeManager {
 
     // MARK: Remote megaphone
 
-    private static func checkPreconditionsForRemoteMegaphone(
+    private func checkPreconditionsForRemoteMegaphone(
         remoteMegaphoneModel: RemoteMegaphoneModel,
         now: Date,
         tx: DBReadTransaction,
@@ -637,7 +677,7 @@ class ExperienceUpgradeManager {
         return true
     }
 
-    private static func validateRemoteMegaphone(
+    private func validateRemoteMegaphone(
         conditionalCheck: RemoteMegaphoneModel.Manifest.ConditionalCheck?,
         tx: DBReadTransaction,
     ) -> Bool {
@@ -670,7 +710,7 @@ class ExperienceUpgradeManager {
         }
     }
 
-    private static func validateRemoteMegaphone(
+    private func validateRemoteMegaphone(
         action: RemoteMegaphoneModel.Manifest.Action?,
         withText text: String?,
     ) -> Bool {
