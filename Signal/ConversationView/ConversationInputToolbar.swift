@@ -234,6 +234,15 @@ public class ConversationInputToolbar: UIView, QuotedReplyPreviewDelegate {
 
     private var iOS26Layout = false
 
+    private lazy var usesOpaqueBottomBackground: Bool = {
+        guard #available(iOS 26, *) else { return false }
+        // For some reason, the scroll edge effect on iOS 26+ on rectangular-
+        // screen phones with Reduce Transparency on ends up too tall and cuts
+        // off content. In that case, add our own opaque background instead.
+        guard UIAccessibility.isReduceTransparencyEnabled else { return false }
+        return (CurrentAppContext().mainWindow?.safeAreaInsets.bottom ?? 0) <= 0
+    }()
+
     private enum Buttons {
         private static func compactButton(
             buttonImage: UIImage,
@@ -540,6 +549,7 @@ public class ConversationInputToolbar: UIView, QuotedReplyPreviewDelegate {
 
     @available(iOS 26, *)
     func setScrollEdgeElementContainerInteraction(_ interaction: UIInteraction) {
+        guard !usesOpaqueBottomBackground else { return }
         owsAssertBeta(glassContainerView != nil)
         glassContainerView?.addInteraction(interaction)
     }
@@ -558,6 +568,20 @@ public class ConversationInputToolbar: UIView, QuotedReplyPreviewDelegate {
         let contentViewSuperview: UIView
         if #available(iOS 26, *) {
             iOS26Layout = true
+
+            if usesOpaqueBottomBackground {
+                let opaqueBackground = UIView()
+                opaqueBackground.backgroundColor = .Signal.background
+                addSubview(opaqueBackground)
+                opaqueBackground.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([
+                    opaqueBackground.topAnchor.constraint(equalTo: topAnchor),
+                    opaqueBackground.leadingAnchor.constraint(equalTo: leadingAnchor),
+                    opaqueBackground.trailingAnchor.constraint(equalTo: trailingAnchor),
+                    // Extend below to cover the rounded corners around the top of the keyboard
+                    opaqueBackground.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 200),
+                ])
+            }
 
             // Glass Container.
             let glassContainerView = UIVisualEffectView(effect: UIGlassContainerEffect())
