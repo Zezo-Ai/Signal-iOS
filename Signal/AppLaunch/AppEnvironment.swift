@@ -161,14 +161,6 @@ public class AppEnvironment: NSObject {
             groupSendEndorsementStore: DependenciesBridge.shared.groupSendEndorsementStore,
         )
 
-        self.outgoingDeviceRestorePresenter = OutgoingDeviceRestorePresenter(
-            dateProvider: Date.provider,
-            db: DependenciesBridge.shared.db,
-            backupSettingsStore: BackupSettingsStore(),
-            deviceTransferService: deviceTransferServiceRef,
-            quickRestoreManager: quickRestoreManager,
-        )
-
         self.provisioningManager = ProvisioningManager(
             accountKeyStore: DependenciesBridge.shared.accountKeyStore,
             db: DependenciesBridge.shared.db,
@@ -190,6 +182,14 @@ public class AppEnvironment: NSObject {
             identityManager: DependenciesBridge.shared.identityManager,
             networkManager: SSKEnvironment.shared.networkManagerRef,
             tsAccountManager: DependenciesBridge.shared.tsAccountManager,
+        )
+
+        self.outgoingDeviceRestorePresenter = OutgoingDeviceRestorePresenter(
+            dateProvider: Date.provider,
+            db: DependenciesBridge.shared.db,
+            backupSettingsStore: BackupSettingsStore(),
+            deviceTransferService: deviceTransferServiceRef,
+            quickRestoreManager: quickRestoreManager,
         )
 
         self.registrationIdMismatchManager = RegistrationIdMismatchManagerImpl(
