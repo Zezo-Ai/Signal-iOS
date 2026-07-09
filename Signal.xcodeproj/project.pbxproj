@@ -1794,6 +1794,7 @@
 		B985D29E2EEA913000E3BF5F /* CallQualitySurvey.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B985D29D2EEA913000E3BF5F /* CallQualitySurvey.pb.swift */; };
 		B9921F882CC6FDB200AB667F /* HeroSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9921F872CC6FDB200AB667F /* HeroSheetViewController.swift */; };
 		B99287FB2CF0FE8D000D62C4 /* LinkedDevicesEducationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99287FA2CF0FE8D000D62C4 /* LinkedDevicesEducationSheet.swift */; };
+		B9AA11012FEA08010017C2E8 /* LinkedDeviceInfoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9AA11002FEA08010017C2E8 /* LinkedDeviceInfoSheet.swift */; };
 		B99288002CF124AC000D62C4 /* Text+Links.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99287FF2CF124AC000D62C4 /* Text+Links.swift */; };
 		B995C2362D669FA3001EE321 /* NameEducationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B995C2352D669FA3001EE321 /* NameEducationSheet.swift */; };
 		B99B155D2A71BA5200E26DAC /* StoryContextViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99B155C2A71BA5200E26DAC /* StoryContextViewState.swift */; };
@@ -6096,6 +6097,7 @@
 		B985D29D2EEA913000E3BF5F /* CallQualitySurvey.pb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallQualitySurvey.pb.swift; sourceTree = "<group>"; };
 		B9921F872CC6FDB200AB667F /* HeroSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroSheetViewController.swift; sourceTree = "<group>"; };
 		B99287FA2CF0FE8D000D62C4 /* LinkedDevicesEducationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedDevicesEducationSheet.swift; sourceTree = "<group>"; };
+		B9AA11002FEA08010017C2E8 /* LinkedDeviceInfoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedDeviceInfoSheet.swift; sourceTree = "<group>"; };
 		B99287FF2CF124AC000D62C4 /* Text+Links.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Text+Links.swift"; sourceTree = "<group>"; };
 		B995C2352D669FA3001EE321 /* NameEducationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameEducationSheet.swift; sourceTree = "<group>"; };
 		B99B155C2A71BA5200E26DAC /* StoryContextViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryContextViewState.swift; sourceTree = "<group>"; };
@@ -11449,6 +11451,7 @@
 			children = (
 				B9A53B902CF507FB0000578B /* BackupRestoreProgressModal.swift */,
 				505C2ED32997015800C23FB2 /* LinkDeviceViewController.swift */,
+				B9AA11002FEA08010017C2E8 /* LinkedDeviceInfoSheet.swift */,
 				B99287FA2CF0FE8D000D62C4 /* LinkedDevicesEducationSheet.swift */,
 				B9E322E82CD191CF006DAF3B /* LinkedDevicesView.swift */,
 				B9A53B942CF799590000578B /* LinkOrSyncPickerSheet.swift */,
@@ -18579,6 +18582,7 @@
 				66F98DE82DBBF25A009F1A86 /* LineWrappingStackViewTestController.swift in Sources */,
 				660FA9112CE58CD7006F9C34 /* LinkAndSyncProvisioningProgressViewController.swift in Sources */,
 				505C2ED42997015800C23FB2 /* LinkDeviceViewController.swift in Sources */,
+				B9AA11012FEA08010017C2E8 /* LinkedDeviceInfoSheet.swift in Sources */,
 				B99287FB2CF0FE8D000D62C4 /* LinkedDevicesEducationSheet.swift in Sources */,
 				B9E322E92CD191CF006DAF3B /* LinkedDevicesView.swift in Sources */,
 				B9A53B952CF799590000578B /* LinkOrSyncPickerSheet.swift in Sources */,

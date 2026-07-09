@@ -18,10 +18,13 @@ class AccountSettingsViewController: OWSTableViewController2 {
         super.init()
     }
 
+    private let accountSettingsTitle = OWSLocalizedString("SETTINGS_ACCOUNT", comment: "Title for the 'account' link in settings.")
+    private let proceedTitle = OWSLocalizedString("PROCEED_BUTTON", comment: "")
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = OWSLocalizedString("SETTINGS_ACCOUNT", comment: "Title for the 'account' link in settings.")
+        title = self.accountSettingsTitle
 
         updateTableContents()
     }
@@ -121,17 +124,16 @@ class AccountSettingsViewController: OWSTableViewController2 {
             contents.add(advancedSection)
         }
 
-        let accountSection = OWSTableSection()
-        accountSection.headerTitle = OWSLocalizedString("SETTINGS_ACCOUNT", comment: "Title for the 'account' link in settings.")
-
         let tsRegistrationState = DependenciesBridge.shared.tsAccountManager.registrationStateWithMaybeSneakyTransaction
+
         if tsRegistrationState.isDeregistered {
+            let accountSection = OWSTableSection()
+            accountSection.headerTitle = accountSettingsTitle
             accountSection.add(.actionItem(
                 withText: tsRegistrationState.isPrimaryDevice ?? true
                     ? OWSLocalizedString("SETTINGS_REREGISTER_BUTTON", comment: "Label for re-registration button.")
                     : OWSLocalizedString("SETTINGS_RELINK_BUTTON", comment: "Label for re-link button."),
                 textColor: .ows_accentBlue,
-                accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "reregister"),
                 actionBlock: { [weak self] in
                     self?.reregisterUser()
                 },
@@ -142,12 +144,14 @@ class AccountSettingsViewController: OWSTableViewController2 {
                     comment: "Label for 'delete data' button.",
                 ),
                 textColor: .ows_accentRed,
-                accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "delete_data"),
                 actionBlock: { [weak self] in
                     self?.deleteUnregisteredUserData()
                 },
             ))
+            contents.add(accountSection)
         } else if tsRegistrationState.isRegisteredPrimaryDevice {
+            let accountSection = OWSTableSection()
+            accountSection.headerTitle = accountSettingsTitle
             switch self.changeNumberState() {
             case .disallowed:
                 break
@@ -191,23 +195,95 @@ class AccountSettingsViewController: OWSTableViewController2 {
                     self?.unregisterUser()
                 },
             ))
+            contents.add(accountSection)
         } else {
-            accountSection.add(.actionItem(
-                withText: OWSLocalizedString(
-                    "SETTINGS_DELETE_DATA_BUTTON",
-                    comment: "Label for 'delete data' button.",
-                ),
-                textColor: .ows_accentRed,
-                accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "delete_data"),
-                actionBlock: { [weak self] in
-                    self?.deleteLinkedData()
-                },
-            ))
+            if tsRegistrationState.isRegistered {
+                let cardSection = OWSTableSection()
+                cardSection.add(OWSTableItem(customCellBlock: { [weak self] in
+                    guard let self else { return UITableViewCell() }
+                    return self.linkedDeviceCardCell()
+                }))
+                contents.add(cardSection)
+            }
+
+            addDeleteLocalDataSection(to: contents)
         }
 
-        contents.add(accountSection)
-
         self.contents = contents
+    }
+
+    // MARK: - Section contents
+
+    private func addDeleteLocalDataSection(to contents: OWSTableContents) {
+        let deleteSection = OWSTableSection()
+        deleteSection.add(.actionItem(
+            withText: OWSLocalizedString(
+                "SETTINGS_LINKED_DEVICE_DELETE_DATA_BUTTON",
+                comment: "Label for a button that deletes all Signal data from a linked device.",
+            ),
+            textColor: .Signal.red,
+            accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "delete_data"),
+            actionBlock: { [weak self] in
+                self?.deleteLinkedData()
+            },
+        ))
+        deleteSection.footerTitle = OWSLocalizedString(
+            "SETTINGS_LINKED_DEVICE_DELETE_DATA_FOOTER",
+            comment: "Footer below the 'delete app data' button, shown on a linked device's account settings.",
+        )
+        contents.add(deleteSection)
+    }
+
+    private func linkedDeviceCardCell() -> UITableViewCell {
+        let cell = OWSTableItem.newCell()
+        cell.selectionStyle = .none
+
+        let iconImageView = UIImageView(image: .devices)
+        iconImageView.tintColor = .Signal.label
+        iconImageView.setContentHuggingHigh()
+        iconImageView.setCompressionResistanceHigh()
+
+        let titleLabel = UILabel()
+        titleLabel.text = OWSLocalizedString(
+            "SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_TITLE",
+            comment: "Title of a card on a linked device's account settings, indicating that this is a linked device.",
+        )
+        titleLabel.font = .dynamicTypeBody
+        titleLabel.textColor = .Signal.label
+        titleLabel.numberOfLines = 0
+
+        let subtitleLabel = UILabel()
+        subtitleLabel.text = OWSLocalizedString(
+            "SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_SUBTITLE",
+            comment: "Subtitle of a card on a linked device's account settings, explaining that account settings are managed on the primary device.",
+        )
+        subtitleLabel.font = .dynamicTypeSubheadline
+        subtitleLabel.textColor = .Signal.secondaryLabel
+        subtitleLabel.numberOfLines = 0
+
+        let learnMoreButton = UIButton(
+            configuration: .smallSecondary(title: CommonStrings.learnMore),
+            primaryAction: UIAction { [weak self] _ in
+                self?.present(LinkedDeviceInfoSheet(), animated: true)
+            },
+        )
+
+        let buttonRow = UIStackView(arrangedSubviews: [learnMoreButton, .hStretchingSpacer()])
+        buttonRow.axis = .horizontal
+
+        let vStack = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel, buttonRow])
+        vStack.axis = .vertical
+        vStack.spacing = 4
+        vStack.setCustomSpacing(20, after: subtitleLabel)
+
+        let hStack = UIStackView(arrangedSubviews: [iconImageView, vStack])
+        hStack.axis = .horizontal
+        hStack.spacing = 12
+        hStack.alignment = .top
+        cell.contentView.addSubview(hStack)
+        hStack.autoPinEdgesToSuperviewMargins()
+
+        return cell
     }
 
     // MARK: - Account
@@ -220,7 +296,7 @@ class AccountSettingsViewController: OWSTableViewController2 {
         OWSActionSheets.showConfirmationAlert(
             title: OWSLocalizedString("CONFIRM_DELETE_LINKED_DATA_TITLE", comment: ""),
             message: OWSLocalizedString("CONFIRM_DELETE_LINKED_DATA_TEXT", comment: ""),
-            proceedTitle: OWSLocalizedString("PROCEED_BUTTON", comment: ""),
+            proceedTitle: proceedTitle,
             proceedStyle: .destructive,
             proceedAction: { _ in
                 let localDeviceId = DependenciesBridge.shared.tsAccountManager.storedDeviceIdWithMaybeTransaction
@@ -251,7 +327,7 @@ class AccountSettingsViewController: OWSTableViewController2 {
         OWSActionSheets.showConfirmationAlert(
             title: OWSLocalizedString("CONFIRM_DELETE_DATA_TITLE", comment: ""),
             message: OWSLocalizedString("CONFIRM_DELETE_DATA_TEXT", comment: ""),
-            proceedTitle: OWSLocalizedString("PROCEED_BUTTON", comment: ""),
+            proceedTitle: proceedTitle,
             proceedStyle: .destructive,
             proceedAction: { _ in
                 ModalActivityIndicatorViewController.present(
