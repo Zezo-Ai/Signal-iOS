@@ -70,11 +70,6 @@ protocol DeviceTransferServiceAdvertiser {
     func stopAdvertising()
 }
 
-private enum DeviceTransferConstants {
-    // This must also be updated in the info.plist
-    fileprivate static let newDeviceServiceIdentifier = "sgnl-new-device"
-}
-
 enum TransferSessionState: String {
     case notConnected
     case connecting
@@ -116,7 +111,7 @@ protocol DeviceTransferSessionDelegate: AnyObject {
 
     func session(
         _ session: DeviceTransferSession,
-        didReceiveCertificate certificates: [Any]?,
+        didReceiveCertificates certificates: [Any]?,
         fromPeer peerId: DeviceTransferPeerID,
         certificateHandler: @escaping (Bool) -> Void,
     )
@@ -172,7 +167,7 @@ enum MPCDeviceTransfer {
         init(peerId: DeviceTransferPeerID) {
             browser = MCNearbyServiceBrowser(
                 peer: peerId.mcPeerID,
-                serviceType: DeviceTransferConstants.newDeviceServiceIdentifier,
+                serviceType: DeviceTransfer.Constants.newDeviceServiceIdentifier,
             )
             self.peerId = peerId
             super.init()
@@ -232,7 +227,7 @@ enum MPCDeviceTransfer {
             advertiser = MCNearbyServiceAdvertiser(
                 peer: peerId.mcPeerID,
                 discoveryInfo: nil,
-                serviceType: DeviceTransferConstants.newDeviceServiceIdentifier,
+                serviceType: DeviceTransfer.Constants.newDeviceServiceIdentifier,
             )
             super.init()
             advertiser.delegate = self
@@ -247,6 +242,35 @@ enum MPCDeviceTransfer {
         func stopAdvertising() {
             session?.disconnect()
             advertiser.stopAdvertisingPeer()
+        }
+
+        static func urlForTransfer(
+            identity: SecIdentity,
+            localPeerId: DeviceTransferPeerID,
+            mode: DeviceTransfer.Mode,
+        ) throws -> URL {
+            var components = URLComponents()
+            components.scheme = UrlOpener.Constants.sgnlPrefix
+            components.host = DeviceTransfer.UrlConstants.transferHost
+
+            guard let base64CertificateHash = try identity.computeCertificateHash().base64EncodedString().encodeURIComponent else {
+                throw OWSAssertionError("failed to get base64 certificate hash")
+            }
+
+            guard let base64PeerId = try? localPeerId.encoded().base64EncodedString().encodeURIComponent else {
+                throw OWSAssertionError("failed to get base64 peerId")
+            }
+
+            let queryItems = [
+                DeviceTransfer.UrlConstants.versionKey: String(DeviceTransfer.UrlConstants.currentTransferVersion),
+                DeviceTransfer.UrlConstants.transferModeKey: mode.rawValue,
+                DeviceTransfer.UrlConstants.certificateHashKey: base64CertificateHash,
+                DeviceTransfer.UrlConstants.peerIdKey: base64PeerId,
+            ]
+
+            components.queryItems = queryItems.map { URLQueryItem(name: $0.key, value: $0.value) }
+
+            return components.url!
         }
 
         func advertiser(
@@ -389,7 +413,7 @@ enum MPCDeviceTransfer {
         ) {
             delegate?.session(
                 self,
-                didReceiveCertificate: certificates,
+                didReceiveCertificates: certificates,
                 fromPeer: DeviceTransferPeerID(mcPeerID: peerId),
                 certificateHandler: certificateHandler,
             )

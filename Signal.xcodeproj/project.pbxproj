@@ -1650,6 +1650,7 @@
 		887B381325F0681400685845 /* AdvancedPrivacySettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887B381225F0681400685845 /* AdvancedPrivacySettingsViewController.swift */; };
 		887B6DC925F6C3E900E677D4 /* DeleteAccountConfirmationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887B6DC825F6C3E900E677D4 /* DeleteAccountConfirmationViewController.swift */; };
 		887CD4772472FEA500FDD265 /* DeviceTransferOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887CD4762472FEA500FDD265 /* DeviceTransferOperation.swift */; };
+		887CD47F247307D900FDD265 /* DeviceTransferRestore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887CD47E247307D900FDD265 /* DeviceTransferRestore.swift */; };
 		887CD48A24735D4200FDD265 /* launchApp-iPhone.json in Resources */ = {isa = PBXBuildFile; fileRef = 887CD48824735D4200FDD265 /* launchApp-iPhone.json */; };
 		887CD48B24735D4200FDD265 /* launchApp-iPad.json in Resources */ = {isa = PBXBuildFile; fileRef = 887CD48924735D4200FDD265 /* launchApp-iPad.json */; };
 		887EEC1F23F0B20600F8C26D /* PinReminderMegaphone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887EEC1E23F0B20600F8C26D /* PinReminderMegaphone.swift */; };
@@ -1851,6 +1852,7 @@
 		C14EC1A22BA891D200A4D064 /* TransformingInputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = C14EC1A12BA891D200A4D064 /* TransformingInputStream.swift */; };
 		C14EC1A92BAA4B5F00A4D064 /* StreamTransformTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C14EC1A82BAA4B5F00A4D064 /* StreamTransformTests.swift */; };
 		C14EC1AB2BAB57B900A4D064 /* DecryptingStreamTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = C14EC1AA2BAB57B900A4D064 /* DecryptingStreamTransform.swift */; };
+		C14FB7D62EF21DDE00850EC5 /* DeviceTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C14FB7D52EF21DDE00850EC5 /* DeviceTransfer.swift */; };
 		C150D6452D70AD9400DA119B /* LinkingProvisioningMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C150D6442D70AD9400DA119B /* LinkingProvisioningMessage.swift */; };
 		C154CB942E0C6607009F878C /* RegistrationCoordinatorBackupErrorPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C154CB932E0C6607009F878C /* RegistrationCoordinatorBackupErrorPresenter.swift */; };
 		C15837EF29A592BA00176927 /* UsernameValidationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15837EE29A592BA00176927 /* UsernameValidationManager.swift */; };
@@ -5880,6 +5882,7 @@
 		887B381225F0681400685845 /* AdvancedPrivacySettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPrivacySettingsViewController.swift; sourceTree = "<group>"; };
 		887B6DC825F6C3E900E677D4 /* DeleteAccountConfirmationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAccountConfirmationViewController.swift; sourceTree = "<group>"; };
 		887CD4762472FEA500FDD265 /* DeviceTransferOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceTransferOperation.swift; sourceTree = "<group>"; };
+		887CD47E247307D900FDD265 /* DeviceTransferRestore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceTransferRestore.swift; sourceTree = "<group>"; };
 		887CD48824735D4200FDD265 /* launchApp-iPhone.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "launchApp-iPhone.json"; sourceTree = "<group>"; };
 		887CD48924735D4200FDD265 /* launchApp-iPad.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "launchApp-iPad.json"; sourceTree = "<group>"; };
 		887EEC1E23F0B20600F8C26D /* PinReminderMegaphone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinReminderMegaphone.swift; sourceTree = "<group>"; };
@@ -6150,6 +6153,7 @@
 		C14EC1A12BA891D200A4D064 /* TransformingInputStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingInputStream.swift; sourceTree = "<group>"; };
 		C14EC1A82BAA4B5F00A4D064 /* StreamTransformTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamTransformTests.swift; sourceTree = "<group>"; };
 		C14EC1AA2BAB57B900A4D064 /* DecryptingStreamTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecryptingStreamTransform.swift; sourceTree = "<group>"; };
+		C14FB7D52EF21DDE00850EC5 /* DeviceTransfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceTransfer.swift; sourceTree = "<group>"; };
 		C150D6442D70AD9400DA119B /* LinkingProvisioningMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkingProvisioningMessage.swift; sourceTree = "<group>"; };
 		C154CB932E0C6607009F878C /* RegistrationCoordinatorBackupErrorPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationCoordinatorBackupErrorPresenter.swift; sourceTree = "<group>"; };
 		C15837EE29A592BA00176927 /* UsernameValidationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameValidationManager.swift; sourceTree = "<group>"; };
@@ -11630,12 +11634,15 @@
 		88C4E38124671F9D009C9B97 /* DeviceTransfer */ = {
 			isa = PBXGroup;
 			children = (
+				C14FB7D52EF21DDE00850EC5 /* DeviceTransfer.swift */,
 				C12DB5E62DD39051005039FE /* DeviceTransferCoordinator.swift */,
 				887CD4762472FEA500FDD265 /* DeviceTransferOperation.swift */,
+				887CD47E247307D900FDD265 /* DeviceTransferRestore.swift */,
 				88C4E37F24635337009C9B97 /* DeviceTransferService.swift */,
 				C147C1712D9C58D60026952D /* DeviceTransferStatusViewController.swift */,
 				C1D615E52FC887560069089E /* MPCDeviceTransfer.swift */,
 				88C659AF24688335002AC115 /* SelfSignedIdentity.swift */,
+				C109A8432FDB62790065225E /* ThroughputMonitor.swift */,
 				C109A8432FDB62790065225E /* ThroughputMonitor.swift */,
 				C1868F812DBAD04400DA512A /* TransferStatusState.swift */,
 			);
@@ -18437,8 +18444,10 @@
 				66F98DE22DB71220009F1A86 /* DeviceBatteryLevelManagerImpl.swift in Sources */,
 				C17A54982D7B3DCD00E1D267 /* DeviceProvisioningURL.swift in Sources */,
 				505347F92DA08548004AF0B5 /* DeviceSleepManagerImpl.swift in Sources */,
+				C14FB7D62EF21DDE00850EC5 /* DeviceTransfer.swift in Sources */,
 				C12DB5E72DD39051005039FE /* DeviceTransferCoordinator.swift in Sources */,
 				887CD4772472FEA500FDD265 /* DeviceTransferOperation.swift in Sources */,
+				887CD47F247307D900FDD265 /* DeviceTransferRestore.swift in Sources */,
 				88C4E38024635337009C9B97 /* DeviceTransferService.swift in Sources */,
 				C147C1722D9C58D60026952D /* DeviceTransferStatusViewController.swift in Sources */,
 				D900E6FF2DE143F9004D01A1 /* DisappearingMessagesCustomTimePickerViewController.swift in Sources */,

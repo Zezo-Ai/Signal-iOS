@@ -13,7 +13,7 @@ enum TransferState {
     case transferring(Double)
     case done
     case cancelled
-    case error(DeviceTransferService.Error)
+    case error(Error)
 }
 
 class TransferStatusViewModel: ObservableObject {

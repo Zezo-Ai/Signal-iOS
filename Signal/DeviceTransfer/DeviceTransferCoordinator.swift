@@ -15,7 +15,7 @@ public class DeviceTransferCoordinator: DeviceTransferServiceObserver, Equatable
     private let deviceTransferService: any DeviceTransferServiceProtocol
     private let quickRestoreManager: QuickRestoreManager
     private let restoreMethodToken: String
-    private let restoreMode: DeviceTransferService.TransferMode
+    private let restoreMode: DeviceTransfer.Mode
 
     public var confirmCancellation: () async -> Bool {
         get { transferStatusViewModel.confirmCancellation }
@@ -70,7 +70,7 @@ public class DeviceTransferCoordinator: DeviceTransferServiceObserver, Equatable
         deviceTransferService: DeviceTransferServiceProtocol,
         quickRestoreManager: QuickRestoreManager,
         restoreMethodToken: String,
-        restoreMode: DeviceTransferService.TransferMode,
+        restoreMode: DeviceTransfer.Mode,
     ) {
         self.deviceTransferService = deviceTransferService
         self.quickRestoreManager = quickRestoreManager
@@ -117,7 +117,7 @@ public class DeviceTransferCoordinator: DeviceTransferServiceObserver, Equatable
         }
     }
 
-    func deviceTransferServiceDidEndTransfer(error: DeviceTransferService.Error?) {
+    func deviceTransferServiceDidEndTransfer(error: DeviceTransfer.Error?) {
         if let error {
             transferStatusViewModel.state = .error(error)
         } else {

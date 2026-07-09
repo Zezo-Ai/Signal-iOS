@@ -35,13 +35,13 @@ class DeviceTransferOperation: NSObject {
             return
         }
 
-        var url = URL(fileURLWithPath: file.relativePath, relativeTo: DeviceTransferService.appSharedDataDirectory)
+        var url = URL(fileURLWithPath: file.relativePath, relativeTo: DeviceTransfer.Constants.appSharedDataDirectory)
 
         if !OWSFileSystem.fileOrFolderExists(url: url) {
             guard
                 ![
-                    DeviceTransferService.databaseWALIdentifier,
-                    DeviceTransferService.databaseIdentifier,
+                    DeviceTransfer.Constants.databaseWALIdentifier,
+                    DeviceTransfer.Constants.databaseIdentifier,
                 ].contains(file.identifier)
             else {
                 throw OWSAssertionError("Mandatory database file is missing for transfer")
@@ -53,7 +53,7 @@ class DeviceTransferOperation: NSObject {
             guard
                 FileManager.default.createFile(
                     atPath: url.path,
-                    contents: DeviceTransferService.missingFileData,
+                    contents: DeviceTransfer.Constants.missingFileData,
                     attributes: nil,
                 )
             else {

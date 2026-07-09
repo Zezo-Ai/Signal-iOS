@@ -196,7 +196,7 @@ class OutgoingDeviceRestoreViewModel: ObservableObject, DeviceTransferServiceObs
         }
     }
 
-    func deviceTransferServiceDidEndTransfer(error: DeviceTransferService.Error?) {
+    func deviceTransferServiceDidEndTransfer(error: DeviceTransfer.Error?) {
         stopListeningForTransfer()
         finishTransferContinuation.update { continuation in
             if let error {

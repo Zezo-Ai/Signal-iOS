@@ -159,9 +159,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let deviceSleepManager = DeviceSleepManagerImpl()
         let keychainStorage = KeychainStorageImpl(isUsingProductionService: TSConstants.isUsingProductionService)
+        let deviceTransferRestore = DeviceTransferRestoreImpl(appReadiness: appReadiness, keychainStorage: keychainStorage)
         let deviceTransferService = DeviceTransferService(
             appReadiness: appReadiness,
             deviceSleepManager: deviceSleepManager,
+            deviceTransferRestore: deviceTransferRestore,
             keychainStorage: keychainStorage,
         )
 
@@ -174,12 +176,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // since we may be in a state where the database has been partially
         // restored from transfer (e.g. the key was replaced, but the database
         // files haven't been moved into place)
-        let didDeviceTransferRestoreSucceed = Bench(
-            title: "Slow device transfer service launch",
-            logIfLongerThan: 0.01,
-            logInProduction: true,
-            block: { deviceTransferService.launchCleanup() },
-        )
+        let didDeviceTransferRestoreSucceed = deviceTransferRestore.launchCleanup()
 
         let databaseStorage: SDSDatabaseStorage
         do {
