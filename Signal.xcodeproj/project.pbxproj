@@ -1794,7 +1794,6 @@
 		B985D29E2EEA913000E3BF5F /* CallQualitySurvey.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B985D29D2EEA913000E3BF5F /* CallQualitySurvey.pb.swift */; };
 		B9921F882CC6FDB200AB667F /* HeroSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9921F872CC6FDB200AB667F /* HeroSheetViewController.swift */; };
 		B99287FB2CF0FE8D000D62C4 /* LinkedDevicesEducationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99287FA2CF0FE8D000D62C4 /* LinkedDevicesEducationSheet.swift */; };
-		B9AA11012FEA08010017C2E8 /* LinkedDeviceInfoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9AA11002FEA08010017C2E8 /* LinkedDeviceInfoSheet.swift */; };
 		B99288002CF124AC000D62C4 /* Text+Links.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99287FF2CF124AC000D62C4 /* Text+Links.swift */; };
 		B995C2362D669FA3001EE321 /* NameEducationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B995C2352D669FA3001EE321 /* NameEducationSheet.swift */; };
 		B99B155D2A71BA5200E26DAC /* StoryContextViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99B155C2A71BA5200E26DAC /* StoryContextViewState.swift */; };
@@ -1808,6 +1807,7 @@
 		B9A53B992D0250FC0000578B /* EditCallLinkNameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A53B982D0250FC0000578B /* EditCallLinkNameViewController.swift */; };
 		B9A87A362A9D1D25009FCA13 /* EditorSticker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A87A352A9D1D25009FCA13 /* EditorSticker.swift */; };
 		B9A87A382A9E34BD009FCA13 /* Hatsuishi-UPM800.otf in Resources */ = {isa = PBXBuildFile; fileRef = B9A87A372A9E34BD009FCA13 /* Hatsuishi-UPM800.otf */; };
+		B9AA11012FEA08010017C2E8 /* LinkedDeviceInfoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9AA11002FEA08010017C2E8 /* LinkedDeviceInfoSheet.swift */; };
 		B9AAC9512D5A6FA900E223C0 /* CVComponentUndownloadableAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9AAC9502D5A6FA900E223C0 /* CVComponentUndownloadableAttachment.swift */; };
 		B9B2AA942BC598B60060B56C /* ContactNoteSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B2AA932BC598B60060B56C /* ContactNoteSheet.swift */; };
 		B9B432262FD37E9B0059FCB9 /* ExpiringInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B432252FD37E9B0059FCB9 /* ExpiringInteraction.swift */; };
@@ -6097,7 +6097,6 @@
 		B985D29D2EEA913000E3BF5F /* CallQualitySurvey.pb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallQualitySurvey.pb.swift; sourceTree = "<group>"; };
 		B9921F872CC6FDB200AB667F /* HeroSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroSheetViewController.swift; sourceTree = "<group>"; };
 		B99287FA2CF0FE8D000D62C4 /* LinkedDevicesEducationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedDevicesEducationSheet.swift; sourceTree = "<group>"; };
-		B9AA11002FEA08010017C2E8 /* LinkedDeviceInfoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedDeviceInfoSheet.swift; sourceTree = "<group>"; };
 		B99287FF2CF124AC000D62C4 /* Text+Links.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Text+Links.swift"; sourceTree = "<group>"; };
 		B995C2352D669FA3001EE321 /* NameEducationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameEducationSheet.swift; sourceTree = "<group>"; };
 		B99B155C2A71BA5200E26DAC /* StoryContextViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryContextViewState.swift; sourceTree = "<group>"; };
@@ -6110,6 +6109,7 @@
 		B9A53B982D0250FC0000578B /* EditCallLinkNameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditCallLinkNameViewController.swift; sourceTree = "<group>"; };
 		B9A87A352A9D1D25009FCA13 /* EditorSticker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorSticker.swift; sourceTree = "<group>"; };
 		B9A87A372A9E34BD009FCA13 /* Hatsuishi-UPM800.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Hatsuishi-UPM800.otf"; sourceTree = "<group>"; };
+		B9AA11002FEA08010017C2E8 /* LinkedDeviceInfoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedDeviceInfoSheet.swift; sourceTree = "<group>"; };
 		B9AAC9502D5A6FA900E223C0 /* CVComponentUndownloadableAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CVComponentUndownloadableAttachment.swift; sourceTree = "<group>"; };
 		B9B2AA932BC598B60060B56C /* ContactNoteSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactNoteSheet.swift; sourceTree = "<group>"; };
 		B9B432252FD37E9B0059FCB9 /* ExpiringInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpiringInteraction.swift; sourceTree = "<group>"; };
@@ -11645,7 +11645,6 @@
 				C147C1712D9C58D60026952D /* DeviceTransferStatusViewController.swift */,
 				C1D615E52FC887560069089E /* MPCDeviceTransfer.swift */,
 				88C659AF24688335002AC115 /* SelfSignedIdentity.swift */,
-				C109A8432FDB62790065225E /* ThroughputMonitor.swift */,
 				C109A8432FDB62790065225E /* ThroughputMonitor.swift */,
 				C1868F812DBAD04400DA512A /* TransferStatusState.swift */,
 			);
