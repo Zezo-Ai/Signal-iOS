@@ -36,7 +36,7 @@ open class OWSTableSheetViewController: InteractiveSheetViewController {
         // `maximumHeight` prevents the view's height from extending into top safe area.)
         return tableView.contentSize.height
             + tableView.contentInset.totalHeight
-            + (tableViewController.bottomFooter?.height ?? 0)
+            + tableViewController.bottomFooterHeight
             + bottomSafeAreaContentPadding
     }
 

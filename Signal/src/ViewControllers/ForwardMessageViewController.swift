@@ -244,8 +244,8 @@ extension ForwardMessageViewController: UISheetPresentationControllerDelegate {
         // wrong after swiping between detents.
         DispatchQueue.main.async {
             sheetPresentationController.animateChanges {
-                self.pickerVC.bottomFooter?.setNeedsLayout()
-                self.pickerVC.bottomFooter?.layoutIfNeeded()
+                self.pickerVC.view.setNeedsLayout()
+                self.pickerVC.view.layoutIfNeeded()
             }
         }
     }

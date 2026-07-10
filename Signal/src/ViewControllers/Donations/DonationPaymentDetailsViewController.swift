@@ -734,10 +734,7 @@ class DonationPaymentDetailsViewController: OWSTableViewController2 {
         return view
     }()
 
-    override open var bottomFooter: UIView? {
-        get { bottomFooterContainer }
-        set {}
-    }
+    override func bottomFooter() -> UIView? { bottomFooterContainer }
 }
 
 // MARK: - UITextViewDelegate

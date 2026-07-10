@@ -113,7 +113,6 @@ open class ConversationPickerViewController: OWSTableViewController2 {
         }
         self.navigationItem.hidesSearchBarWhenScrolling = false
 
-        self.bottomFooter = footerView
         selection.delegate = self
         SUIEnvironment.shared.contactsViewHelperRef.addObserver(self)
     }
@@ -226,6 +225,8 @@ open class ConversationPickerViewController: OWSTableViewController2 {
         super.themeDidChange()
         updateTableContents(shouldReload: false)
     }
+
+    override open func bottomFooter() -> UIView? { footerView }
 
     /// Manually observe `UITraitCollection` changes to manage `Theme`. This is
     /// typically done by `OWSWindow`, but in the Share Extension we don't have

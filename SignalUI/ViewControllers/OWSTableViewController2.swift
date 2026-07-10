@@ -43,21 +43,15 @@ open class OWSTableViewController2: OWSViewController, OWSNavigationChildControl
     // * The top header view appears above the table and _does not_
     //   scroll with its content.
     // * The top header view's edge align with the edges of the cells.
-    open var topHeader: UIView? {
-        willSet {
-            if isViewLoaded {
-                owsFailBeta("Cannot assign header if the view is already loaded.")
-            }
-        }
-    }
+    private lazy var topHeaderView = topHeader()
 
-    open var bottomFooter: UIView? {
-        willSet {
-            if isViewLoaded {
-                owsFailBeta("Cannot assign footer if the view is already loaded.")
-            }
-        }
-    }
+    open func topHeader() -> UIView? { nil }
+
+    private lazy var bottomFooterView = bottomFooter()
+
+    public final var bottomFooterHeight: CGFloat { bottomFooterView?.height ?? 0 }
+
+    open func bottomFooter() -> UIView? { nil }
 
     public var forceDarkMode = false {
         didSet {
@@ -119,16 +113,16 @@ open class OWSTableViewController2: OWSViewController, OWSNavigationChildControl
         view.addSubview(tableView)
 
         // Pin top edge of tableView.
-        if let topHeader {
-            view.addSubview(topHeader)
-            topHeader.autoPin(toTopLayoutGuideOf: self, withInset: 0)
-            topHeader.autoPinEdge(toSuperviewSafeArea: .leading)
-            topHeader.autoPinEdge(toSuperviewSafeArea: .trailing)
+        if let topHeaderView {
+            view.addSubview(topHeaderView)
+            topHeaderView.autoPin(toTopLayoutGuideOf: self, withInset: 0)
+            topHeaderView.autoPinEdge(toSuperviewSafeArea: .leading)
+            topHeaderView.autoPinEdge(toSuperviewSafeArea: .trailing)
 
-            tableView.autoPinEdge(.top, to: .bottom, of: topHeader)
+            tableView.autoPinEdge(.top, to: .bottom, of: topHeaderView)
 
-            topHeader.setContentHuggingVerticalHigh()
-            topHeader.setCompressionResistanceVerticalHigh()
+            topHeaderView.setContentHuggingVerticalHigh()
+            topHeaderView.setCompressionResistanceVerticalHigh()
         } else {
             tableView.autoPinEdge(toSuperviewEdge: .top)
         }
@@ -140,13 +134,13 @@ open class OWSTableViewController2: OWSViewController, OWSNavigationChildControl
         tableView.setCompressionResistanceVerticalLow()
 
         // Pin bottom edge of tableView.
-        if let bottomFooter {
-            view.addSubview(bottomFooter)
-            bottomFooter.autoPinEdge(.top, to: .bottom, of: tableView)
-            bottomFooter.autoPinEdge(toSuperviewSafeArea: .leading)
-            bottomFooter.autoPinEdge(toSuperviewSafeArea: .trailing)
-            bottomFooter.setContentHuggingVerticalHigh()
-            bottomFooter.setCompressionResistanceVerticalHigh()
+        if let bottomFooterView {
+            view.addSubview(bottomFooterView)
+            bottomFooterView.autoPinEdge(.top, to: .bottom, of: tableView)
+            bottomFooterView.autoPinEdge(toSuperviewSafeArea: .leading)
+            bottomFooterView.autoPinEdge(toSuperviewSafeArea: .trailing)
+            bottomFooterView.setContentHuggingVerticalHigh()
+            bottomFooterView.setCompressionResistanceVerticalHigh()
         }
 
         updateBottomConstraint()
@@ -227,11 +221,11 @@ open class OWSTableViewController2: OWSViewController, OWSNavigationChildControl
 
         // Pin bottom edge of tableView.
         let bottomFooterConstraint: NSLayoutConstraint
-        if !shouldHideBottomFooter, let bottomFooter {
+        if !shouldHideBottomFooter, let bottomFooterView {
             if shouldAvoidKeyboard {
-                bottomFooterConstraint = bottomFooter.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
+                bottomFooterConstraint = bottomFooterView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
             } else {
-                bottomFooterConstraint = bottomFooter.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                bottomFooterConstraint = bottomFooterView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
             }
         } else if shouldAvoidKeyboard {
             bottomFooterConstraint = tableView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
@@ -240,7 +234,7 @@ open class OWSTableViewController2: OWSViewController, OWSNavigationChildControl
         }
         NSLayoutConstraint.activate([bottomFooterConstraint])
 
-        bottomFooter?.isHidden = shouldHideBottomFooter
+        bottomFooterView?.isHidden = shouldHideBottomFooter
         self.bottomFooterConstraint = bottomFooterConstraint
 
         guard hasViewAppeared else {
@@ -259,8 +253,8 @@ open class OWSTableViewController2: OWSViewController, OWSNavigationChildControl
             views.map { ViewFrame(view: $0, frame: $0.frame) }
         }
         var animatedViews: [UIView] = [tableView]
-        if let bottomFooter {
-            animatedViews.append(bottomFooter)
+        if let bottomFooterView {
+            animatedViews.append(bottomFooterView)
         }
         let viewFramesBefore = viewFrames(for: animatedViews)
         self.view.layoutIfNeeded()

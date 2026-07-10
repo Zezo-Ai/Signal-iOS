@@ -67,8 +67,8 @@ class AvatarSettingsViewController: OWSTableViewController2 {
         self.context = context
         self.state = .original(currentAvatarImage)
         self.avatarChangeCallback = avatarChangeCallback
+
         super.init()
-        createTopHeader()
 
         // We only support portrait on non-iPad devices, but if we're
         // already in landscape we need to force the device to rotate.
@@ -94,8 +94,10 @@ class AvatarSettingsViewController: OWSTableViewController2 {
         }
 
         view.backgroundColor = .Signal.groupedBackground
+
         updateTableContents()
         updateNavigation()
+        updateHeaderView()
     }
 
     override func themeDidChange() {
@@ -133,35 +135,32 @@ class AvatarSettingsViewController: OWSTableViewController2 {
         }
     }
 
-    private let headerImageView = AvatarImageView()
-    private let topHeaderStack = UIStackView()
-    private func createTopHeader() {
+    override func topHeader() -> UIView? { topHeaderStack }
+
+    private let avatarImageView = AvatarImageView()
+
+    private lazy var topHeaderStack: UIView = {
+        let topHeaderStack = UIStackView(arrangedSubviews: [avatarImageView, headerButtonStack])
         topHeaderStack.isLayoutMarginsRelativeArrangement = true
         topHeaderStack.axis = .vertical
         topHeaderStack.alignment = .center
         topHeaderStack.spacing = 24
 
-        headerImageView.autoSetDimensions(to: CGSize(square: Self.headerAvatarSize))
-        topHeaderStack.addArrangedSubview(headerImageView)
+        avatarImageView.autoSetDimensions(to: CGSize(square: Self.headerAvatarSize))
 
-        headerButtonStack.axis = .vertical
-        headerButtonStack.alignment = .center
-        headerButtonStack.spacing = 8
-        topHeaderStack.addArrangedSubview(headerButtonStack)
+        topHeaderStack.addSubview(clearButton)
+        clearButton.autoPinEdge(.trailing, to: .trailing, of: avatarImageView, withOffset: -8)
+        clearButton.autoPinEdge(.top, to: .top, of: avatarImageView, withOffset: 8)
 
-        createClearButton()
+        return topHeaderStack
+    }()
 
-        topHeader = topHeaderStack
-
-        updateHeaderView()
-    }
-
-    private lazy var clearButton = UIView()
-    private let xImageView = UIImageView()
-    private func createClearButton() {
+    private lazy var clearButton: UIView = {
+        let clearButton = UIView()
+        clearButton.backgroundColor = UIColor(light: UIColor(rgbHex: 0xf8f9f9), dark: .ows_gray15)
         clearButton.autoSetDimensions(to: CGSize.square(32))
-        clearButton.layer.cornerRadius = 16
 
+        clearButton.layer.cornerRadius = 16
         clearButton.layer.shadowColor = UIColor.black.cgColor
         clearButton.layer.shadowOpacity = 0.2
         clearButton.layer.shadowRadius = 4
@@ -176,19 +175,18 @@ class AvatarSettingsViewController: OWSTableViewController2 {
         clearButton.addSubview(secondaryShadowView)
         secondaryShadowView.autoPinEdgesToSuperviewEdges()
 
-        xImageView.image = UIImage(imageLiteralResourceName: "x-20")
+        let xImageView = UIImageView(image: UIImage(resource: .x20))
+        xImageView.tintColor = UIColor(light: .black, dark: .ows_gray80)
         xImageView.autoSetDimensions(to: CGSize.square(20))
         xImageView.contentMode = .scaleAspectFit
 
         clearButton.addSubview(xImageView)
         xImageView.autoCenterInSuperview()
 
-        topHeaderStack.addSubview(clearButton)
-        clearButton.autoPinEdge(.trailing, to: .trailing, of: headerImageView, withOffset: -8)
-        clearButton.autoPinEdge(.top, to: .top, of: headerImageView, withOffset: 8)
-
         clearButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapClear)))
-    }
+
+        return clearButton
+    }()
 
     @objc
     private func didTapClear() {
@@ -315,18 +313,18 @@ class AvatarSettingsViewController: OWSTableViewController2 {
         case .new(let model):
             if let model {
                 clearButton.isHidden = false
-                headerImageView.image = SSKEnvironment.shared.avatarBuilderRef.avatarImage(model: model, diameterPoints: UInt(Self.headerAvatarSize))
+                avatarImageView.image = SSKEnvironment.shared.avatarBuilderRef.avatarImage(model: model, diameterPoints: UInt(Self.headerAvatarSize))
             } else {
                 clearButton.isHidden = true
-                headerImageView.image = defaultAvatarImage
+                avatarImageView.image = defaultAvatarImage
             }
         case .original(let image):
             if let image {
                 clearButton.isHidden = false
-                headerImageView.image = image
+                avatarImageView.image = image
             } else {
                 clearButton.isHidden = true
-                headerImageView.image = defaultAvatarImage
+                avatarImageView.image = defaultAvatarImage
             }
         }
 
@@ -352,7 +350,13 @@ class AvatarSettingsViewController: OWSTableViewController2 {
 
     // MARK: - Header Buttons
 
-    private let headerButtonStack = UIStackView()
+    private let headerButtonStack: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.spacing = 8
+        return stackView
+    }()
 
     private func buildHeaderButtons() -> [UIView] {
         return [
@@ -415,9 +419,6 @@ class AvatarSettingsViewController: OWSTableViewController2 {
     }
 
     private func updateHeaderButtons() {
-        clearButton.backgroundColor = Theme.isDarkThemeEnabled ? .ows_gray15 : UIColor(rgbHex: 0xf8f9f9)
-        xImageView.tintColor = Theme.isDarkThemeEnabled ? .ows_gray80 : .ows_black
-
         headerButtonStack.removeAllSubviews()
         let headerButtons = buildHeaderButtons()
 

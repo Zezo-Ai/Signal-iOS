@@ -311,10 +311,7 @@ public class BadgeGiftingChooseBadgeViewController: OWSTableViewController2 {
 
     // MARK: - Footer contents
 
-    override open var bottomFooter: UIView? {
-        get { bottomFooterContainer }
-        set {}
-    }
+    override public func bottomFooter() -> UIView? { bottomFooterContainer }
 
     private lazy var nextButton = UIButton(
         configuration: .largePrimary(title: CommonStrings.nextButton),

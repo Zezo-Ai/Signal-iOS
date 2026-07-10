@@ -126,10 +126,7 @@ class DonationReceiptViewController: OWSTableViewController2 {
 
     // MARK: - Share button
 
-    override open var bottomFooter: UIView? {
-        get { shareReceiptButtonContainer }
-        set {}
-    }
+    override open func bottomFooter() -> UIView? { shareReceiptButtonContainer }
 
     private func showShareReceiptActivity() {
         ShareActivityUtil.present(

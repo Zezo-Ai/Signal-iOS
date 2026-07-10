@@ -185,10 +185,7 @@ class BankTransferMandateViewController: OWSTableViewController2 {
         isScrolledCloseToBottom = tableView.contentOffset.y >= tableViewBottom - 56
     }
 
-    override var bottomFooter: UIView? {
-        get { bottomFooterContainer }
-        set {}
-    }
+    override func bottomFooter() -> UIView? { bottomFooterContainer }
 
     private lazy var bottomFooterButton = UIButton(
         configuration: .largePrimary(title: ""),

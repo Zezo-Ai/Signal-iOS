@@ -265,10 +265,7 @@ class BadgeGiftingConfirmationViewController: OWSTableViewController2 {
 
     // MARK: - Footer
 
-    override open var bottomFooter: UIView? {
-        get { bottomFooterContainer }
-        set {}
-    }
+    override func bottomFooter() -> UIView? { bottomFooterContainer }
 
     private lazy var bottomFooterContainer: UIView = {
         let amountView: UIStackView = {

@@ -97,8 +97,6 @@ class CustomColorViewController: OWSTableViewController2 {
 
         super.init()
 
-        topHeader = OWSTableViewController2.buildTopHeader(forView: modeControl, vMargin: 10)
-
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(updateTableContents),
@@ -132,6 +130,10 @@ class CustomColorViewController: OWSTableViewController2 {
         wallpaperViewBuilder = SSKEnvironment.shared.databaseStorageRef.read { tx in Wallpaper.viewBuilder(for: thread, tx: tx) }
 
         updateTableContents()
+    }
+
+    override func topHeader() -> UIView? {
+        OWSTableViewController2.buildTopHeader(forView: modeControl, vMargin: 10)
     }
 
     private func createSubviews() {

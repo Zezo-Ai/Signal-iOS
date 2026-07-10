@@ -55,12 +55,6 @@ class PaymentsHistoryViewController: OWSTableViewController2, PaymentsHistoryDat
     private let dataSource = PaymentsHistoryDataSource()
     private var notificationObserver: NotificationCenter.Observer?
 
-    override init() {
-        super.init()
-
-        topHeader = OWSTableViewController2.buildTopHeader(forView: modeControl, vMargin: 10)
-    }
-
     deinit {
         if let notificationObserver {
             NotificationCenter.default.removeObserver(notificationObserver)
@@ -86,6 +80,10 @@ class PaymentsHistoryViewController: OWSTableViewController2, PaymentsHistoryDat
         ) { [weak self] _ in
             self?.updateTableContents()
         }
+    }
+
+    override func topHeader() -> UIView? {
+        OWSTableViewController2.buildTopHeader(forView: modeControl, vMargin: 10)
     }
 
     private func updateTableContents() {

@@ -42,6 +42,8 @@ class PaymentsSettingsViewController: OWSTableViewController2, PaymentsHistoryDa
         return result
     }()
 
+    override func topHeader() -> UIView? { topHeaderStackView }
+
     private var outdatedClientReminderView: ReminderView?
 
     private var observations = [NotificationCenter.Observer]()
@@ -54,8 +56,6 @@ class PaymentsSettingsViewController: OWSTableViewController2, PaymentsHistoryDa
         self.appReadiness = appReadiness
 
         super.init()
-
-        self.topHeader = topHeaderStackView
 
         // Add placeholder view to stackview so it always has an calculable height.
         let placeholderView = UIView()
