@@ -5,13 +5,30 @@
 
 import SignalServiceKit
 
-// MARK: - Sticker
+// MARK: - Stickers
 
 extension ImageEditorViewController {
+
     func selectStickerItem(_ stickerItem: ImageEditorStickerItem) {
         mode = .sticker
         model.append(item: stickerItem)
         imageEditorView.selectedTransformableItemID = stickerItem.itemId
+    }
+
+    // MARK: - StoryStickerPickerDelegate
+
+    func didSelect(storySticker: EditorSticker.StorySticker) {
+        let stickerItem = imageEditorView.createNewStickerItem(with: .story(storySticker))
+        selectStickerItem(stickerItem)
+        dismiss(animated: true)
+    }
+
+    // MARK: - StickerPickerDelegate
+
+    func didSelectSticker(_ stickerInfo: StickerInfo) {
+        let stickerItem = imageEditorView.createNewStickerItem(with: .regular(stickerInfo))
+        selectStickerItem(stickerItem)
+        dismiss(animated: true)
     }
 }
 
@@ -83,8 +100,14 @@ extension ImageEditorViewController {
             textViewContainer.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor),
         ])
 
-        textViewContainer.addGestureRecognizer(ImageEditorPinchGestureRecognizer(target: self, action: #selector(handleTextPinchGesture(_:))))
-        textViewContainer.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapDimmerView(_:))))
+        textViewContainer.addGestureRecognizer(ImageEditorPinchGestureRecognizer(
+            target: self,
+            action: #selector(handleTextPinchGesture(_:)),
+        ))
+        textViewContainer.addGestureRecognizer(UITapGestureRecognizer(
+            target: self,
+            action: #selector(didTapDimmerView(_:)),
+        ))
 
         UIView.performWithoutAnimation {
             self.view.setNeedsLayout()
@@ -266,15 +289,13 @@ extension ImageEditorViewController {
         finishTextEditing()
     }
 
-    @objc
-    func didTapTextStyleButton(sender: UIButton) {
+    func didTapTextStyleButton() {
         let textStyle = textViewAccessoryToolbar.textStyle.next()
         textViewAccessoryToolbar.textStyle = textStyle
         updateTextViewAttributes(using: textViewAccessoryToolbar)
     }
 
-    @objc
-    func didTapDecorationStyleButton(sender: UIButton) {
+    func didTapDecorationStyleButton() {
         var decorationStyle = textViewAccessoryToolbar.decorationStyle.next()
         if decorationStyle == .outline {
             decorationStyle = .none
@@ -283,15 +304,18 @@ extension ImageEditorViewController {
         updateTextViewAttributes(using: textViewAccessoryToolbar)
     }
 
-    @objc
-    func didTapTextEditingDoneButton(sender: UIButton) {
+    func didTapTextEditingDoneButton() {
         finishTextEditing()
     }
-}
 
-// MARK: - UITextViewDelegate
+    func textColorDidChange(newColor: ColorPickerBarColor) {
+        imageEditorView.updateSelectedTextItem(withColor: newColor)
+        if textView.isFirstResponder {
+            updateTextViewAttributes(using: textViewAccessoryToolbar)
+        }
+    }
 
-extension ImageEditorViewController: UITextViewDelegate {
+    // MARK: - UITextViewDelegate
 
     func textViewDidBeginEditing(_ textView: UITextView) {
         // Reset each time user starts editing text.
@@ -315,11 +339,8 @@ extension ImageEditorViewController: UITextViewDelegate {
 
         currentTextItem = nil
     }
-}
 
-// MARK: - ImageEditorViewDelegate
-
-extension ImageEditorViewController: ImageEditorViewDelegate {
+    // MARK: - ImageEditorViewDelegate
 
     func imageEditorView(_ imageEditorView: ImageEditorView, didRequestAddTextItem textItem: ImageEditorTextItem) {
         // No adding text via tap on image in this view controller.

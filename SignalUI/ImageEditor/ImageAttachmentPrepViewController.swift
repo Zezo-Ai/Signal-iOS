@@ -48,7 +48,7 @@ class ImageAttachmentPrepViewController: AttachmentPrepViewController, ImageEdit
      * Bottom toolbar in edit mode is always the same height and can be cached.
      */
     private static let editModeToolbarHeight: CGFloat = {
-        let toolbar = ImageEditorBottomBar(buttonProvider: nil)
+        let toolbar = ImageEditorToolbar(tools: [])
         let size = toolbar.systemLayoutSizeFitting(
             CGSize(width: UIView.noIntrinsicMetric, height: .greatestFiniteMagnitude),
             withHorizontalFittingPriority: .fittingSizeLevel,

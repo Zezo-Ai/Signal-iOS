@@ -2106,11 +2106,22 @@ private class TextStoryComposerView: TextAttachmentView, UITextViewDelegate {
 
     private lazy var textViewAccessoryToolbar: TextStylingToolbar = {
         let toolbar = TextStylingToolbar()
-        toolbar.preservesSuperviewLayoutMargins = true
-        toolbar.addTarget(self, action: #selector(didChangeTextColor), for: .valueChanged)
-        toolbar.textStyleButton.addTarget(self, action: #selector(didTapTextStyleButton), for: .touchUpInside)
-        toolbar.decorationStyleButton.addTarget(self, action: #selector(didTapDecorationStyleButton), for: .touchUpInside)
-        toolbar.doneButton.addTarget(self, action: #selector(didTapTextViewDoneButton), for: .touchUpInside)
+        toolbar.addAction(
+            UIAction { [weak self] _ in self?.didChangeTextColor() },
+            for: .valueChanged,
+        )
+        toolbar.textStyleButton.addAction(
+            UIAction { [weak self] _ in self?.didTapTextStyleButton() },
+            for: .primaryActionTriggered,
+        )
+        toolbar.decorationStyleButton.addAction(
+            UIAction { [weak self] _ in self?.didTapDecorationStyleButton() },
+            for: .primaryActionTriggered,
+        )
+        toolbar.doneButton.addAction(
+            UIAction { [weak self] _ in self?.didTapTextViewDoneButton() },
+            for: .primaryActionTriggered,
+        )
         return toolbar
     }()
 
@@ -2193,7 +2204,6 @@ private class TextStoryComposerView: TextAttachmentView, UITextViewDelegate {
         }
     }
 
-    @objc
     private func didTapTextStyleButton() {
         let textStyle = textViewAccessoryToolbar.textStyle.next()
         textViewAccessoryToolbar.textStyle = textStyle
@@ -2211,7 +2221,6 @@ private class TextStoryComposerView: TextAttachmentView, UITextViewDelegate {
         updateTextViewAttributes()
     }
 
-    @objc
     private func didTapDecorationStyleButton() {
         // "Underline" and "Outline" are not available in text story composer.
         var decorationStyle = textViewAccessoryToolbar.decorationStyle.next()
@@ -2228,7 +2237,6 @@ private class TextStoryComposerView: TextAttachmentView, UITextViewDelegate {
         updateTextViewAttributes()
     }
 
-    @objc
     private func didChangeTextColor() {
         // Depending on text decoration style color picker changes either color of the text or background color.
         // That's why we need to update both.
@@ -2239,7 +2247,6 @@ private class TextStoryComposerView: TextAttachmentView, UITextViewDelegate {
         updateTextViewAttributes()
     }
 
-    @objc
     private func didTapTextViewDoneButton() {
         textView.acceptAutocorrectSuggestion()
         textView.resignFirstResponder()

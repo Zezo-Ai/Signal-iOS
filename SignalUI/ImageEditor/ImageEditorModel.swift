@@ -59,7 +59,7 @@ class ImageEditorModel: NSObject {
 
     var blurredSourceImage: CGImage?
 
-    var color = ColorPickerBarColor.defaultColor()
+    var color = ColorPickerBarColor.defaultColor
 
     init(normalizedImage: NormalizedImage) throws {
         self.srcImage = normalizedImage

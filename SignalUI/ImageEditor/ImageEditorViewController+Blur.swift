@@ -6,8 +6,6 @@
 import SignalServiceKit
 import Vision
 
-// MARK: - Blur Tool
-
 extension ImageEditorViewController {
 
     private func initializeBlurToolUIIfNecessary() {
@@ -44,7 +42,6 @@ extension ImageEditorViewController {
         }
     }
 
-    @objc
     func didToggleAutoBlur(sender: UISwitch) {
         if let currentAutoBlurItem {
             model.remove(item: currentAutoBlurItem)

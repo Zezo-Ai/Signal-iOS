@@ -189,6 +189,31 @@ public extension UIButton.Configuration {
         return configuration
     }
 
+    static func tintedRoundMedia(
+        image: UIImage,
+        tintColor: UIColor = .Signal.accent,
+        foregroundColor: UIColor = .white,
+        size: CGFloat? = nil,
+    ) -> Self {
+        var configuration: UIButton.Configuration
+        if #available(iOS 26, *) {
+            configuration = .prominentGlass()
+        } else {
+            configuration = .bordered()
+        }
+        configuration.image = image
+        configuration.baseForegroundColor = foregroundColor
+        configuration.baseBackgroundColor = tintColor
+        configuration.cornerStyle = .capsule
+        if let size {
+            configuration.contentInsets = .init(
+                hMargin: 0.5 * (size - image.size.width),
+                vMargin: 0.5 * (size - image.size.height),
+            )
+        }
+        return configuration
+    }
+
     static func capsuleMedia(
         title: String,
         buttonHeight: CGFloat,

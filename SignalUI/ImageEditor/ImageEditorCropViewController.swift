@@ -97,43 +97,43 @@ class ImageEditorCropViewController: OWSViewController {
     )
 
     // Controls.
-    private lazy var resetButton: UIButton = {
-        let button = RoundMediaButton(image: nil, backgroundStyle: .blur)
-        let buttonTitle = OWSLocalizedString("MEDIA_EDITOR_RESET", comment: "Title for the button that resets photo to its initial state.")
-        button.setTitle(buttonTitle, for: .normal)
-        button.ows_contentEdgeInsets = UIEdgeInsets(hMargin: 26, vMargin: 15) // Make button 36pts tall at default text size.
-        button.addTarget(self, action: #selector(didTapReset), for: .touchUpInside)
-        return button
-    }()
+    private let resetButton = UIButton(configuration: .capsuleMedia(
+        title: OWSLocalizedString(
+            "MEDIA_EDITOR_RESET",
+            comment: "Title for the button that resets photo to its initial state.",
+        ),
+        buttonHeight: 44,
+    ))
 
+    // Contains rotation control and toolbar.
     private lazy var footerView: UIView = {
         let footerView = UIView()
         footerView.preservesSuperviewLayoutMargins = true
-        if UIDevice.current.hasIPhoneXNotch {
-            // No additional bottom margin if there's non-zero safe area.
-            footerView.layoutMargins.bottom = 0
-        }
 
+        rotationControl.translatesAutoresizingMaskIntoConstraints = false
         footerView.addSubview(rotationControl)
-        rotationControl.autoPinTopToSuperviewMargin()
-        rotationControl.autoHCenterInSuperview()
-        rotationControl.autoPinEdge(.leading, to: .leading, of: footerView, withOffset: 0, relation: .greaterThanOrEqual)
 
-        footerView.addSubview(bottomBar)
-        bottomBar.autoPinWidthToSuperview()
-        bottomBar.autoPinEdge(toSuperviewEdge: .bottom)
-        bottomBar.autoPinEdge(.top, to: .bottom, of: rotationControl, withOffset: 18)
+        toolbar.translatesAutoresizingMaskIntoConstraints = false
+        footerView.addSubview(toolbar)
+
+        NSLayoutConstraint.activate([
+            rotationControl.topAnchor.constraint(equalTo: footerView.layoutMarginsGuide.topAnchor),
+            rotationControl.leadingAnchor.constraint(greaterThanOrEqualTo: footerView.leadingAnchor),
+            rotationControl.centerXAnchor.constraint(equalTo: footerView.centerXAnchor),
+
+            toolbar.topAnchor.constraint(equalTo: rotationControl.bottomAnchor, constant: 18),
+            toolbar.leadingAnchor.constraint(equalTo: footerView.leadingAnchor),
+            toolbar.trailingAnchor.constraint(equalTo: footerView.trailingAnchor),
+            toolbar.bottomAnchor.constraint(equalTo: footerView.bottomAnchor),
+        ])
 
         return footerView
     }()
 
     private lazy var rotationControl = RotationControl()
-    private lazy var bottomBar: ImageEditorBottomBar = {
-        let bottomBar = ImageEditorBottomBar(buttonProvider: self)
-        bottomBar.cancelButton.addTarget(self, action: #selector(didTapCancel), for: .touchUpInside)
-        bottomBar.doneButton.addTarget(self, action: #selector(didTapDone), for: .touchUpInside)
-        return bottomBar
-    }()
+
+    // Contains Cancel, Rotate, Flip, Aspect Ratio and Done buttons.
+    private let toolbar = ImageEditorToolbar(tools: [.rotate, .flip, .aspectRatio])
 
     init(model: ImageEditorModel, srcImage: UIImage, previewImage: UIImage) {
         self.model = model
@@ -149,7 +149,7 @@ class ImageEditorCropViewController: OWSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .black
+        view.backgroundColor = .Signal.background
 
         // MARK: - Clip view & content.
 
@@ -178,12 +178,10 @@ class ImageEditorCropViewController: OWSViewController {
         // Visible crop frame is constrained to clipView using auto layout.
         view.addConstraints([cropViewFrameLeading, cropViewFrameTop, cropViewFrameTrailing, cropViewFrameBottom])
 
-        // MARK: - Footer
-
+        // Footer
         view.addSubview(footerView)
         footerView.autoPinWidthToSuperview()
         footerView.autoPinEdge(toSuperviewEdge: .bottom)
-        setupRotationControlActions()
 
         // MARK: - Layout guides for clip view
 
@@ -200,7 +198,7 @@ class ImageEditorCropViewController: OWSViewController {
             topConstraint,
             initialStateContentLayoutGuide.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             initialStateContentLayoutGuide.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            initialStateContentLayoutGuide.bottomAnchor.constraint(equalTo: bottomBar.topAnchor),
+            initialStateContentLayoutGuide.bottomAnchor.constraint(equalTo: toolbar.topAnchor),
         ])
 
         finalStateContentLayoutGuide.identifier = "Content - Final State"
@@ -212,8 +210,7 @@ class ImageEditorCropViewController: OWSViewController {
             finalStateContentLayoutGuide.bottomAnchor.constraint(equalTo: footerView.topAnchor),
         ])
 
-        // MARK: - Reset Button
-
+        // Reset Button - top right corner.
         resetButton.translatesAutoresizingMaskIntoConstraints = false
         let mediaTopBar = MediaTopBar()
         mediaTopBar.addSubview(resetButton)
@@ -223,7 +220,48 @@ class ImageEditorCropViewController: OWSViewController {
             resetButton.bottomAnchor.constraint(equalTo: mediaTopBar.controlsLayoutGuide.bottomAnchor),
         ])
         mediaTopBar.install(in: view)
-        updateResetButtonAppearance(animated: false)
+        updateResetButtonVisibility(animated: false)
+
+        // Configure actions.
+        resetButton.addAction(
+            UIAction { [weak self] _ in self?.didTapReset() },
+            for: .primaryActionTriggered,
+        )
+        toolbar.cancelButton.addAction(
+            UIAction { [weak self] _ in self?.didTapCancel() },
+            for: .primaryActionTriggered,
+        )
+        toolbar.doneButton.addAction(
+            UIAction { [weak self] _ in self?.didTapDone() },
+            for: .primaryActionTriggered,
+        )
+        toolbar.addAction(
+            UIAction { [weak self] _ in self?.didTapRotateImage() },
+            for: .rotate,
+        )
+        toolbar.addAction(
+            UIAction { [weak self] _ in self?.didTapFlipImage() },
+            for: .flip,
+        )
+        toolbar.addAction(
+            UIAction { [weak self] _ in self?.didTapAspectRatio() },
+            for: .aspectRatio,
+        )
+        rotationControl.addAction(
+            UIAction { [weak self] action in
+                guard let self, let rotationControl = action.sender as? RotationControl else { return }
+                self.rotationControlAngleChanged(angleInDegress: rotationControl.angle)
+            },
+            for: .valueChanged,
+        )
+        rotationControl.addAction(
+            UIAction { [weak self] _ in self?.rotationControlDidBeginEditing() },
+            for: .editingDidBegin,
+        )
+        rotationControl.addAction(
+            UIAction { [weak self] _ in self?.rotationControlDidEndEditing() },
+            for: .editingDidEnd,
+        )
 
         transitionUI(toState: .initial, animated: false)
 
@@ -244,7 +282,7 @@ class ImageEditorCropViewController: OWSViewController {
 
     // MARK: - Layout
 
-    private func updateResetButtonAppearance(animated: Bool) {
+    private func updateResetButtonVisibility(animated: Bool) {
         if transform.isNonDefault {
             resetButton.setIsHidden(false, animated: animated)
             return
@@ -330,7 +368,7 @@ class ImageEditorCropViewController: OWSViewController {
                 self.updateClipViewAspectRatio()
                 self.resetCropFrameInsets()
                 self.updateImageViewTransform()
-                self.updateResetButtonAppearance(animated: false)
+                self.updateResetButtonVisibility(animated: false)
             },
             completion: completion,
         )
@@ -339,7 +377,7 @@ class ImageEditorCropViewController: OWSViewController {
     private func applyTransformHidingCropFrame(_ transform: ImageEditorTransform) {
         cropView.setIsHidden(true, animated: true) { _ in
             self.applyTransformWithAnimation(transform) { _ in
-                self.updateResetButtonAppearance(animated: true)
+                self.updateResetButtonVisibility(animated: true)
                 self.cropView.setIsHidden(false, animated: true)
             }
         }
@@ -435,7 +473,7 @@ class ImageEditorCropViewController: OWSViewController {
             let alpha: CGFloat = hideControls ? 0 : 1
             self.footerView.alpha = alpha
             self.cropView.setState(state == .initial ? .initial : .normal, animated: false)
-            self.bottomBar.setControls(hidden: hideControls)
+            self.toolbar.setControlsHidden(hideControls)
         }
 
         let animationDuration: TimeInterval = 0.15
@@ -547,7 +585,7 @@ class ImageEditorCropViewController: OWSViewController {
                 isFlipped: gestureStartTransform.isFlipped,
             )
             applyTransformWithoutAnimation(newTransform.normalize(srcImageSizePixels: model.srcImageSizePixels))
-            updateResetButtonAppearance(animated: true)
+            updateResetButtonVisibility(animated: true)
 
         default:
             break
@@ -800,7 +838,7 @@ class ImageEditorCropViewController: OWSViewController {
         )
 
         applyTransformWithoutAnimation(newTransform.normalize(srcImageSizePixels: model.srcImageSizePixels))
-        updateResetButtonAppearance(animated: true)
+        updateResetButtonVisibility(animated: true)
     }
 
     private func cropRegion(forGestureRecognizer gestureRecognizer: ImageEditorPanGestureRecognizer) -> CropRegion? {
@@ -842,38 +880,8 @@ class ImageEditorCropViewController: OWSViewController {
             }
         }
     }
-}
 
-// MARK: - ImageEditorBottomBarButtonProvider
-
-extension ImageEditorCropViewController: ImageEditorBottomBarButtonProvider {
-
-    var middleButtons: [UIButton] {
-        let rotateButton = RoundMediaButton(
-            image: UIImage(imageLiteralResourceName: "rotate-28"),
-            backgroundStyle: .none,
-        )
-        rotateButton.addTarget(self, action: #selector(didTapRotateImage), for: .touchUpInside)
-
-        let flipButton = RoundMediaButton(
-            image: UIImage(imageLiteralResourceName: "flip-28"),
-            backgroundStyle: .none,
-        )
-        flipButton.addTarget(self, action: #selector(didTapFlipImage), for: .touchUpInside)
-
-        let aspectRatioButton = RoundMediaButton(
-            image: UIImage(imageLiteralResourceName: "ratio-28"),
-            backgroundStyle: .none,
-        )
-        aspectRatioButton.addTarget(self, action: #selector(didTapChooseAspectRatio), for: .touchUpInside)
-
-        return [rotateButton, flipButton, aspectRatioButton]
-    }
-}
-
-// MARK: - Aspect Ratio
-
-extension ImageEditorCropViewController {
+    // MARK: - Aspect Ratio
 
     enum AspectRatio: CaseIterable {
         case original
@@ -986,13 +994,9 @@ extension ImageEditorCropViewController {
             }
         }
     }
-}
 
-// MARK: - Events
+    // MARK: - Events
 
-extension ImageEditorCropViewController {
-
-    @objc
     private func didTapCancel() {
         transitionUI(toState: .initial, animated: true) { finished in
             guard finished else { return }
@@ -1000,7 +1004,6 @@ extension ImageEditorCropViewController {
         }
     }
 
-    @objc
     private func didTapDone() {
         model.replace(transform: transform)
         transitionUI(toState: .initial, animated: true) { finished in
@@ -1009,7 +1012,6 @@ extension ImageEditorCropViewController {
         }
     }
 
-    @objc
     private func didTapRotateImage() {
         let outputSizePixels = CGSize(width: transform.outputSizePixels.height, height: transform.outputSizePixels.width)
         let rotationRadians = transform.rotationRadians - CGFloat.pi / 2
@@ -1023,7 +1025,6 @@ extension ImageEditorCropViewController {
         applyTransformHidingCropFrame(newTransform.normalize(srcImageSizePixels: model.srcImageSizePixels))
     }
 
-    @objc
     private func didTapFlipImage() {
         let newTransform = ImageEditorTransform(
             outputSizePixels: transform.outputSizePixels,
@@ -1035,14 +1036,12 @@ extension ImageEditorCropViewController {
         applyTransformHidingCropFrame(newTransform.normalize(srcImageSizePixels: model.srcImageSizePixels))
     }
 
-    @objc
     private func didTapReset() {
         let newTransform = ImageEditorTransform.defaultTransform(srcImageSizePixels: model.srcImageSizePixels)
         applyTransformWithAnimation(newTransform)
     }
 
-    @objc
-    private func didTapChooseAspectRatio() {
+    private func didTapAspectRatio() {
         let actionSheet = ActionSheetController()
         actionSheet.overrideUserInterfaceStyle = .dark
         for aspectRatio in AspectRatio.allCases {
@@ -1061,21 +1060,11 @@ extension ImageEditorCropViewController {
         actionSheet.addAction(ActionSheetAction(title: CommonStrings.cancelButton, style: .cancel))
         presentActionSheet(actionSheet)
     }
-}
 
-// MARK: - Rotation Control
+    // MARK: - Rotation Control
 
-extension ImageEditorCropViewController {
-
-    private func setupRotationControlActions() {
-        rotationControl.addTarget(self, action: #selector(rotationControlValueChanged), for: .valueChanged)
-        rotationControl.addTarget(self, action: #selector(rotationControlDidBeginEditing), for: .editingDidBegin)
-        rotationControl.addTarget(self, action: #selector(rotationControlDidEndEditing), for: .editingDidEnd)
-    }
-
-    @objc
-    private func rotationControlValueChanged(_ sender: RotationControl) {
-        let newAngle = sender.angle.degreesToRadians
+    private func rotationControlAngleChanged(angleInDegress: CGFloat) {
+        let newAngle = angleInDegress.degreesToRadians
         let newTransform = ImageEditorTransform(
             outputSizePixels: transform.outputSizePixels,
             unitTranslation: transform.unitTranslation,
@@ -1084,16 +1073,14 @@ extension ImageEditorCropViewController {
             isFlipped: transform.isFlipped,
         )
         applyTransformWithoutAnimation(newTransform.normalize(srcImageSizePixels: model.srcImageSizePixels))
-        updateResetButtonAppearance(animated: true)
+        updateResetButtonVisibility(animated: true)
     }
 
-    @objc
-    private func rotationControlDidBeginEditing(_ sender: RotationControl) {
+    private func rotationControlDidBeginEditing() {
         setCropFrameGridLines(hidden: false, animated: true)
     }
 
-    @objc
-    private func rotationControlDidEndEditing(_ sender: RotationControl) {
+    private func rotationControlDidEndEditing() {
         setCropFrameGridLines(hidden: true, animated: true, afterDelay: 0.2)
     }
 }

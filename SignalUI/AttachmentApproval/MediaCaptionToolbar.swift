@@ -389,24 +389,9 @@ class MediaCaptionToolbar: UIView, UITextViewDelegate, BodyRangesTextViewDelegat
         return textViewContainer
     }()
 
-    private func createBlueButtonConfiguration(buttonImage: UIImage) -> UIButton.Configuration {
-        var configuration: UIButton.Configuration
-        if #available(iOS 26, *) {
-            configuration = .prominentGlass()
-        } else {
-            configuration = .bordered()
-        }
-        configuration.image = buttonImage
-        configuration.baseForegroundColor = .white
-        configuration.baseBackgroundColor = .Signal.accent
-        configuration.cornerStyle = .capsule
-        return configuration
-    }
-
     lazy var doneButton: UIButton = {
-        let buttonImage = Theme.iconImage(.checkmark)
         let button = UIButton(
-            configuration: createBlueButtonConfiguration(buttonImage: buttonImage),
+            configuration: .tintedRoundMedia(image: Theme.iconImage(.checkmark)),
             primaryAction: UIAction { [weak self] _ in
                 self?.didTapFinishEditing()
             },
@@ -416,8 +401,9 @@ class MediaCaptionToolbar: UIView, UITextViewDelegate, BodyRangesTextViewDelegat
     }()
 
     lazy var proceedButton: UIButton = {
-        let buttonImage = UIImage(imageLiteralResourceName: "arrow-up") // will be updated later by AttachmentApprovalToolbar
-        let button = UIButton(configuration: createBlueButtonConfiguration(buttonImage: buttonImage))
+        let button = UIButton(configuration: .tintedRoundMedia(
+            image: UIImage(imageLiteralResourceName: "arrow-up"), // will be updated later by AttachmentApprovalToolbar
+        ))
         button.accessibilityLabel = CommonStrings.nextButton
         return button
     }()

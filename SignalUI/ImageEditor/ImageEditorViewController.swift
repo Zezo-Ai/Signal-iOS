@@ -8,8 +8,9 @@ import UIKit
 
 // Base class for all tool view controllers.
 
-class ImageEditorViewController: OWSViewController {
-
+class ImageEditorViewController: OWSViewController, UIGestureRecognizerDelegate, UITextViewDelegate,
+    ImageEditorModelObserver, ImageEditorViewDelegate, StickerPickerDelegate, StoryStickerPickerDelegate
+{
     let model: ImageEditorModel
     private weak var stickerSheetDelegate: StickerPickerSheetDelegate?
 
@@ -22,7 +23,7 @@ class ImageEditorViewController: OWSViewController {
 
     let topBar = ImageEditorTopBar()
 
-    lazy var bottomBar: ImageEditorBottomBar = ImageEditorBottomBar(buttonProvider: self)
+    lazy var bottomBar = ImageEditorToolbar(tools: [.draw, .text, .sticker, .blur])
 
     enum Mode: Int {
         case draw = 1
@@ -58,11 +59,21 @@ class ImageEditorViewController: OWSViewController {
 
     // Pen Tool UI
     var drawToolUIInitialized = false
+
     lazy var drawToolbar: DrawToolbar = {
         let toolbar = DrawToolbar(currentColor: model.color)
         toolbar.preservesSuperviewLayoutMargins = true
-        toolbar.colorPickerView.delegate = self
-        toolbar.strokeTypeButton.addTarget(self, action: #selector(strokeTypeButtonTapped(sender:)), for: .touchUpInside)
+        toolbar.colorPickerBar.addAction(
+            UIAction { [weak self] action in
+                guard let self, let colorPickerView = action.sender as? ColorPickerBar else { return }
+                self.colorPickerBarValueChanged(color: colorPickerView.color)
+            },
+            for: .valueChanged,
+        )
+        toolbar.strokeTypeButton.addAction(
+            UIAction { [weak self] _ in self?.didTapStrokeTypeButton() },
+            for: .primaryActionTriggered,
+        )
         return toolbar
     }()
 
@@ -76,10 +87,11 @@ class ImageEditorViewController: OWSViewController {
 
     // Blur Tool UI
     var blurToolUIInitialized = false
+
     lazy var blurToolbar: UIStackView = {
         let drawAnywhereHint = UILabel()
         drawAnywhereHint.font = .dynamicTypeCaption1
-        drawAnywhereHint.textColor = Theme.darkThemePrimaryColor
+        drawAnywhereHint.textColor = .Signal.label
         drawAnywhereHint.textAlignment = .center
         drawAnywhereHint.numberOfLines = 0
         drawAnywhereHint.lineBreakMode = .byWordWrapping
@@ -114,7 +126,7 @@ class ImageEditorViewController: OWSViewController {
             comment: "The image editor setting to blur faces",
         )
         autoBlurLabel.font = .dynamicTypeSubheadlineClamped
-        autoBlurLabel.textColor = Theme.darkThemePrimaryColor
+        autoBlurLabel.textColor = .Signal.label
 
         let stackView = UIStackView(arrangedSubviews: [autoBlurLabel, faceBlurSwitch])
         stackView.spacing = 12
@@ -128,7 +140,13 @@ class ImageEditorViewController: OWSViewController {
 
     lazy var faceBlurSwitch: UISwitch = {
         let faceBlurSwitch = UISwitch()
-        faceBlurSwitch.addTarget(self, action: #selector(didToggleAutoBlur), for: .valueChanged)
+        faceBlurSwitch.addAction(
+            UIAction { [weak self] action in
+                guard let self, let uiSwitch = action.sender as? UISwitch else { return }
+                self.didToggleAutoBlur(sender: uiSwitch)
+            },
+            for: .valueChanged,
+        )
         faceBlurSwitch.isOn = currentAutoBlurItem != nil
         return faceBlurSwitch
     }()
@@ -155,17 +173,28 @@ class ImageEditorViewController: OWSViewController {
         slider.maximumValue = 2
         slider.value = 1
         slider.addTarget(self, action: #selector(handleSliderTouchEvents(slider:)), for: .allTouchEvents)
-        slider.addTarget(self, action: #selector(handleSliderValueChanged(slider:)), for: .valueChanged)
+        slider.addAction(
+            UIAction { [weak self] action in
+                guard let self, let slider = action.sender as? UISlider else { return }
+                self.handleSliderValueChanged(value: slider.value)
+            },
+            for: .valueChanged,
+        )
         return slider
     }()
 
     lazy var strokeWidthSliderContainer = UIView()
     lazy var strokeWidthPreviewDot: UIView = {
         let view = CircleView()
+        view.translatesAutoresizingMaskIntoConstraints = false
         view.layer.borderColor = UIColor.white.cgColor
         view.layer.borderWidth = 2
-        strokeWidthPreviewDotSize = view.autoSetDimension(.width, toSize: 20)
-        view.autoPinToSquareAspectRatio()
+        let widthConstraint = view.widthAnchor.constraint(equalToConstant: 20)
+        NSLayoutConstraint.activate([
+            widthConstraint,
+            view.widthAnchor.constraint(equalTo: view.heightAnchor),
+        ])
+        strokeWidthPreviewDotSize = widthConstraint
         return view
     }()
 
@@ -222,11 +251,25 @@ class ImageEditorViewController: OWSViewController {
     lazy var textViewBackgroundView = UIView()
     lazy var textViewAccessoryToolbar: TextStylingToolbar = {
         let toolbar = TextStylingToolbar(currentColor: currentTextItem?.textItem.color)
-        toolbar.preservesSuperviewLayoutMargins = true
-        toolbar.addTarget(self, action: #selector(textColorDidChange), for: .valueChanged)
-        toolbar.textStyleButton.addTarget(self, action: #selector(didTapTextStyleButton(sender:)), for: .touchUpInside)
-        toolbar.decorationStyleButton.addTarget(self, action: #selector(didTapDecorationStyleButton(sender:)), for: .touchUpInside)
-        toolbar.doneButton.addTarget(self, action: #selector(didTapTextEditingDoneButton(sender:)), for: .touchUpInside)
+        toolbar.addAction(
+            UIAction { [weak self] action in
+                guard let self, let textStylingToolbar = action.sender as? TextStylingToolbar else { return }
+                self.textColorDidChange(newColor: textStylingToolbar.currentColorPickerValue)
+            },
+            for: .valueChanged,
+        )
+        toolbar.textStyleButton.addAction(
+            UIAction { [weak self] _ in self?.didTapTextStyleButton() },
+            for: .primaryActionTriggered,
+        )
+        toolbar.decorationStyleButton.addAction(
+            UIAction { [weak self] _ in self?.didTapDecorationStyleButton() },
+            for: .primaryActionTriggered,
+        )
+        toolbar.doneButton.addAction(
+            UIAction { [weak self] _ in self?.didTapTextEditingDoneButton() },
+            for: .primaryActionTriggered,
+        )
         return toolbar
     }()
 
@@ -244,26 +287,31 @@ class ImageEditorViewController: OWSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .black
+        view.backgroundColor = .Signal.background
 
+        // Image editor.
         imageEditorView.configureSubviews()
+        imageEditorView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(imageEditorView)
-        imageEditorView.autoPinWidthToSuperview()
-        imageEditorView.autoPinEdge(toSuperviewSafeArea: .top)
 
         // Top toolbar
         updateTopBar()
-        topBar.undoButton.addTarget(self, action: #selector(didTapUndo(sender:)), for: .touchUpInside)
-        topBar.clearAllButton.addTarget(self, action: #selector(didTapClearAll(sender:)), for: .touchUpInside)
         topBar.install(in: view)
 
         // Bottom toolbar
+        bottomBar.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(bottomBar)
-        bottomBar.autoPinWidthToSuperview()
-        bottomBar.autoPinEdge(toSuperviewEdge: .bottom)
-        bottomBar.autoPinEdge(.top, to: .bottom, of: imageEditorView)
-        bottomBar.cancelButton.addTarget(self, action: #selector(didTapCancel(sender:)), for: .touchUpInside)
-        bottomBar.doneButton.addTarget(self, action: #selector(didTapDone(sender:)), for: .touchUpInside)
+
+        NSLayoutConstraint.activate([
+            imageEditorView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            imageEditorView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            imageEditorView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+
+            bottomBar.topAnchor.constraint(equalTo: imageEditorView.bottomAnchor),
+            bottomBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bottomBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
 
         // Stroke width slider
         strokeWidthSliderContainer.addSubview(strokeWidthSlider)
@@ -275,6 +323,40 @@ class ImageEditorViewController: OWSViewController {
         strokeWidthSliderPosition = strokeWidthSliderContainer.centerXAnchor.constraint(equalTo: view.leadingAnchor)
         strokeWidthSliderPosition?.autoInstall()
         strokeWidthSliderContainer.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleSliderContainerTap(_:))))
+
+        // Connect button actions.
+        topBar.undoButton.addAction(
+            UIAction { [weak self] _ in self?.didTapUndo() },
+            for: .primaryActionTriggered,
+        )
+        topBar.clearButton.addAction(
+            UIAction { [weak self] _ in self?.didTapClear() },
+            for: .primaryActionTriggered,
+        )
+        bottomBar.cancelButton.addAction(
+            UIAction { [weak self] _ in self?.didTapCancel() },
+            for: .primaryActionTriggered,
+        )
+        bottomBar.doneButton.addAction(
+            UIAction { [weak self] _ in self?.didTapDone() },
+            for: .primaryActionTriggered,
+        )
+        bottomBar.addAction(
+            UIAction { [weak self] _ in self?.didTapDraw() },
+            for: .draw,
+        )
+        bottomBar.addAction(
+            UIAction { [weak self] _ in self?.didTapAddText() },
+            for: .text,
+        )
+        bottomBar.addAction(
+            UIAction { [weak self] _ in self?.didTapAddSticker() },
+            for: .sticker,
+        )
+        bottomBar.addAction(
+            UIAction { [weak self] _ in self?.didTapBlur() },
+            for: .blur,
+        )
 
         updateUIForCurrentMode()
     }
@@ -300,7 +382,8 @@ class ImageEditorViewController: OWSViewController {
     }
 
     override var prefersStatusBarHidden: Bool {
-        !UIDevice.current.hasIPhoneXNotch && !UIDevice.current.isIPad && !DependenciesBridge.shared.currentCallProvider.hasCurrentCall
+        guard DependenciesBridge.shared.currentCallProvider.hasCurrentCall == false else { return false }
+        return (UIDevice.current.hasIPhoneXNotch == false) && (UIDevice.current.isIPad == false)
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -320,13 +403,16 @@ class ImageEditorViewController: OWSViewController {
             imageEditorView.textInteractionModes = .all
         }
 
+        bottomBar.selectedToolButton = switch mode {
+        case .draw: .draw
+        case .blur: .blur
+        case .text: .text
+        case .sticker: .sticker
+        }
+
         updateDrawToolUIVisibility()
         updateBlurToolUIVisibility()
         updateTextUIVisibility()
-
-        for button in bottomBar.buttons {
-            button.isSelected = mode.rawValue == button.tag
-        }
     }
 
     private func updateTopBar() {
@@ -379,7 +465,7 @@ class ImageEditorViewController: OWSViewController {
         topBar.alpha = alpha
         bottomBar.alpha = alpha
         if slideButtonsInOut {
-            bottomBar.setControls(hidden: hidden)
+            bottomBar.setControlsHidden(hidden)
         }
 
         switch mode {
@@ -420,11 +506,8 @@ class ImageEditorViewController: OWSViewController {
             model.undo()
         }
     }
-}
 
-// MARK: - Presenting / Dismissing {
-
-extension ImageEditorViewController {
+    // MARK: - Presenting / Dismissing
 
     private func prepareToDismiss(completion: ((Bool) -> Void)?) {
         if mode == .text {
@@ -497,118 +580,49 @@ extension ImageEditorViewController {
         setControls(hidden: state == .initial, animated: animated, slideButtonsInOut: true, completion: completion)
         imageEditorView.setHasRoundCorners(state == .initial, animationDuration: animated ? 0.15 : 0)
     }
-}
 
-// MARK: - Actions
+    // MARK: - Actions
 
-extension ImageEditorViewController {
-
-    @objc
-    private func didTapUndo(sender: UIButton) {
+    private func didTapUndo() {
         undo()
     }
 
-    @objc
-    private func didTapClearAll(sender: UIButton) {
+    private func didTapClear() {
         askToDiscardAllChanges(nil)
     }
 
-    @objc
-    private func didTapCancel(sender: UIButton) {
+    private func didTapCancel() {
         discardAndDismiss()
     }
 
-    @objc
-    private func didTapDone(sender: UIButton) {
+    private func didTapDone() {
         completeAndDismiss()
     }
 
-    @objc
-    private func didTapPen(sender: UIButton) {
+    private func didTapDraw() {
         // Second tap on Pen icon switches editor to "text" mode.
         mode = (mode == .draw) ? .text : .draw
     }
 
-    @objc
-    private func didTapAddText(sender: UIButton) {
+    private func didTapAddText() {
         let decorationStyle = textViewAccessoryToolbar.decorationStyle
         let textColor = textViewAccessoryToolbar.currentColorPickerValue
         let textItem = imageEditorView.createNewTextItem(withColor: textColor, decorationStyle: decorationStyle)
         selectTextItem(textItem, isNewItem: true, startEditing: true)
     }
 
-    @objc
-    private func didTapAddSticker(sender: UIButton) {
+    private func didTapAddSticker() {
         let stickerPicker = StickerPickerSheet(pickerDelegate: self)
         stickerPicker.sheetDelegate = stickerSheetDelegate
         present(stickerPicker, animated: true)
     }
 
-    @objc
-    private func didTapBlur(sender: UIButton) {
+    private func didTapBlur() {
         // Second tap on Blur icon switches editor to "text" mode.
         mode = (mode == .blur) ? .text : .blur
     }
 
-    @objc
-    private func textColorDidChange(sender: TextStylingToolbar) {
-        let textItemColor = sender.currentColorPickerValue
-        imageEditorView.updateSelectedTextItem(withColor: textItemColor)
-        if textView.isFirstResponder {
-            updateTextViewAttributes(using: textViewAccessoryToolbar)
-        }
-    }
-}
-
-// MARK: - Bottom Bar
-
-extension ImageEditorViewController: ImageEditorBottomBarButtonProvider {
-
-    var middleButtons: [UIButton] {
-        let penButton = RoundMediaButton(
-            image: UIImage(imageLiteralResourceName: "edit-28"),
-            backgroundStyle: .solid(.clear),
-        )
-        penButton.tag = Mode.draw.rawValue
-        penButton.addTarget(self, action: #selector(didTapPen(sender:)), for: .touchUpInside)
-
-        let textButton = RoundMediaButton(
-            image: UIImage(imageLiteralResourceName: "text-28"),
-            backgroundStyle: .solid(.clear),
-        )
-        textButton.addTarget(self, action: #selector(didTapAddText(sender:)), for: .touchUpInside)
-
-        let stickerButton = RoundMediaButton(
-            image: UIImage(imageLiteralResourceName: "sticker-smiley-28"),
-            backgroundStyle: .solid(.clear),
-        )
-        stickerButton.addTarget(self, action: #selector(didTapAddSticker(sender:)), for: .touchUpInside)
-
-        let blurButton = RoundMediaButton(
-            image: UIImage(imageLiteralResourceName: "blur-28"),
-            backgroundStyle: .solid(.clear),
-        )
-        blurButton.tag = Mode.blur.rawValue
-        blurButton.addTarget(self, action: #selector(didTapBlur(sender:)), for: .touchUpInside)
-
-        let buttons = [penButton, textButton, stickerButton, blurButton]
-        for button in buttons {
-            button.setBackgroundColor(.ows_white, for: .highlighted)
-            button.setBackgroundColor(.ows_white, for: .selected)
-            if let image = button.image(for: .normal) {
-                let tintedImage = image.withTintColor(.ows_black, renderingMode: .alwaysOriginal)
-                button.setImage(tintedImage, for: .highlighted)
-                button.setImage(tintedImage, for: .selected)
-            }
-        }
-
-        return buttons
-    }
-}
-
-// MARK: - UIGestureRecognizerDelegate
-
-extension ImageEditorViewController: UIGestureRecognizerDelegate {
+    // MARK: - UIGestureRecognizerDelegate
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
         // Ignore touches that begin inside the control areas.
@@ -629,11 +643,8 @@ extension ImageEditorViewController: UIGestureRecognizerDelegate {
             return true
         }
     }
-}
 
-// MARK: - ImageEditorModelObserver
-
-extension ImageEditorViewController: ImageEditorModelObserver {
+    // MARK: - ImageEditorModelObserver
 
     func imageEditorModelDidChange(before: ImageEditorContents, after: ImageEditorContents) {
         modelDidChange()
@@ -642,13 +653,10 @@ extension ImageEditorViewController: ImageEditorModelObserver {
     func imageEditorModelDidChange(changedItemIds: [String]) {
         modelDidChange()
     }
-}
 
-// MARK: - ImageEditorPaletteViewDelegate
+    // MARK: - ColorPickerBarViewDelegate
 
-extension ImageEditorViewController: ColorPickerBarViewDelegate {
-
-    func colorPickerBarView(_ pickerView: ColorPickerBarView, didSelectColor color: ColorPickerBarColor) {
+    func colorPickerBarValueChanged(color: ColorPickerBarColor) {
         switch mode {
         case .draw:
             model.color = color
@@ -657,25 +665,5 @@ extension ImageEditorViewController: ColorPickerBarViewDelegate {
         default:
             owsAssertDebug(false, "Invalid mode [\(mode)]")
         }
-    }
-}
-
-// MARK: - StickerPickerDelegate
-
-extension ImageEditorViewController: StickerPickerDelegate {
-
-    func didSelectSticker(_ stickerInfo: StickerInfo) {
-        let stickerItem = imageEditorView.createNewStickerItem(with: .regular(stickerInfo))
-        selectStickerItem(stickerItem)
-        dismiss(animated: true)
-    }
-}
-
-extension ImageEditorViewController: StoryStickerPickerDelegate {
-
-    func didSelect(storySticker: EditorSticker.StorySticker) {
-        let stickerItem = imageEditorView.createNewStickerItem(with: .story(storySticker))
-        selectStickerItem(stickerItem)
-        dismiss(animated: true)
     }
 }
