@@ -83,7 +83,7 @@ public class AttachmentPrepViewController: OWSViewController, UIScrollViewDelega
     override public func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .Signal.background
+        view.backgroundColor = .Signal.mediaBackground
 
         // Zoomable scroll view.
         view.addSubview(scrollView)

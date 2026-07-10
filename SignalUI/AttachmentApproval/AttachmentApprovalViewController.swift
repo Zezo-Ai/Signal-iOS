@@ -264,7 +264,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
 
     lazy var contentDimmerView: UIView = {
         let dimmerView = UIView()
-        dimmerView.backgroundColor = .Signal.background.withAlphaComponent(0.4)
+        dimmerView.backgroundColor = .Signal.mediaBackground.withAlphaComponent(0.4)
         return dimmerView
     }()
 
@@ -289,7 +289,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         definesPresentationContext = true
         overrideUserInterfaceStyle = .dark
 
-        view.backgroundColor = .Signal.background
+        view.backgroundColor = .Signal.mediaBackground
 
         // avoid an unpleasant "bounce" which doesn't make sense in the context of a single item.
         pagerScrollView?.isScrollEnabled = attachmentApprovalItems.count > 1

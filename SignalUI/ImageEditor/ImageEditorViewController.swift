@@ -287,7 +287,7 @@ class ImageEditorViewController: OWSViewController, UIGestureRecognizerDelegate,
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .Signal.background
+        view.backgroundColor = .Signal.mediaBackground
 
         // Image editor.
         imageEditorView.configureSubviews()

@@ -208,6 +208,12 @@ extension UIColor.Signal {
         )
     }
 
+    /// Background for all media content. Black in dark mode and white in light mode.
+    /// Unlike `background` this color does not have "elevated" colors.
+    public static var mediaBackground: UIColor {
+        return UIColor(light: .white, dark: .black)
+    }
+
     public static var secondaryBackground: UIColor {
         guard #available(iOS 16.0, *) else {
             return .secondarySystemBackground

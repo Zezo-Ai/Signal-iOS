@@ -114,7 +114,7 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         overrideUserInterfaceStyle = .dark
         layout = layoutForCurrentViewState()
 
-        view.backgroundColor = .Signal.background
+        view.backgroundColor = .Signal.mediaBackground
         view.preservesSuperviewLayoutMargins = true
 
         initializeUI()
@@ -1640,7 +1640,7 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
 
     func interactiveDismissDidCancel(_ interactiveDismiss: UIPercentDrivenInteractiveTransition) {
         // Undo changes potentially made in `interactiveDismissDidBegin()`.
-        view.backgroundColor = .Signal.background
+        view.backgroundColor = .Signal.mediaBackground
     }
 
     // MARK: - CameraZoomSelectionControlDelegate

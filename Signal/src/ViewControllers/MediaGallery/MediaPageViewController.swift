@@ -148,7 +148,7 @@ class MediaPageViewController: UIPageViewController {
             overrideUserInterfaceStyle = .dark
         }
 
-        view.backgroundColor = .Signal.background
+        view.backgroundColor = .Signal.mediaBackground
 
         mediaInteractiveDismiss.addGestureRecognizer(to: view)
 
@@ -352,7 +352,7 @@ class MediaPageViewController: UIPageViewController {
         topPanel.setIsHidden(shouldHideToolbars, animated: animated)
         bottomMediaPanel.setIsHidden(shouldHideToolbars || bottomMediaPanel.shouldBeHidden, animated: animated)
         if #available(iOS 26, *) {
-            let targetColor = shouldHideToolbars ? UIColor.black : UIColor.Signal.background
+            let targetColor: UIColor = shouldHideToolbars ? .black : .Signal.mediaBackground
             if animated {
                 let animator = UIViewPropertyAnimator(duration: 0.2, curve: .easeInOut)
                 animator.addAnimations {
@@ -962,7 +962,7 @@ extension MediaPageViewController: MediaPresentationContextProvider {
 
         view.layoutIfNeeded()
 
-        let backgroundColor: UIColor = if #available(iOS 26, *) { .Signal.background } else { .black }
+        let backgroundColor: UIColor = if #available(iOS 26, *) { .Signal.mediaBackground } else { .black }
         return MediaPresentationContext(
             mediaView: mediaView,
             presentationFrame: mediaView.frame,
@@ -975,7 +975,7 @@ extension MediaPageViewController: MediaPresentationContextProvider {
     }
 
     func mediaDidPresent(toContext: MediaPresentationContext) {
-        view.backgroundColor = .Signal.background
+        view.backgroundColor = .Signal.mediaBackground
     }
 
     func mediaWillDismiss(fromContext: MediaPresentationContext) {
@@ -983,7 +983,7 @@ extension MediaPageViewController: MediaPresentationContextProvider {
     }
 
     func mediaDidDismiss(fromContext: MediaPresentationContext) {
-        view.backgroundColor = .Signal.background
+        view.backgroundColor = .Signal.mediaBackground
     }
 }
 

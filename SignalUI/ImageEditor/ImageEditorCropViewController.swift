@@ -149,7 +149,7 @@ class ImageEditorCropViewController: OWSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .Signal.background
+        view.backgroundColor = .Signal.mediaBackground
 
         // MARK: - Clip view & content.
 

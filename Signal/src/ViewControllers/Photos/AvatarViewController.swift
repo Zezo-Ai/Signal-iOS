@@ -28,14 +28,7 @@ class AvatarViewController: OWSViewController, InteractivelyDismissableViewContr
 
     private var navigationBarTopLayoutConstraint: NSLayoutConstraint?
 
-    private var backgroundColor: UIColor {
-        // Not using UIColor.Signal.background here because this VC is presented modally
-        // but we need `base` background color and not `elevated`.
-        UIColor(
-            light: Theme.lightThemeBackgroundColor,
-            dark: Theme.darkThemeBackgroundColor,
-        )
-    }
+    private var backgroundColor: UIColor { .Signal.mediaBackground }
 
     init?(thread: TSThread, renderLocalUserAsNoteToSelf: Bool, readTx: DBReadTransaction) {
         let localUserDisplayMode: LocalUserDisplayMode = (
