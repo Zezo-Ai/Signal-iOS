@@ -3222,6 +3222,7 @@
 		D9C544292B8578B50036F274 /* CallRecord+CallStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C544282B8578B50036F274 /* CallRecord+CallStatus.swift */; };
 		D9C5442B2B8578F30036F274 /* CallRecordMissedCallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C5442A2B8578F30036F274 /* CallRecordMissedCallManager.swift */; };
 		D9C5634F2EB438500001626A /* OWSByteCountFormatStyleTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C5634D2EB438300001626A /* OWSByteCountFormatStyleTest.swift */; };
+		D9C667232FFB24F40085EE9D /* PasswordManagerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C667222FFB24DE0085EE9D /* PasswordManagerManager.swift */; };
 		D9C7CEB428EB8495001E87B6 /* ExperienceUpgrade.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C7CEB328EB8495001E87B6 /* ExperienceUpgrade.swift */; };
 		D9C7CECB28EBC09C001E87B6 /* ExperienceUpgradeManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C7CECA28EBC09C001E87B6 /* ExperienceUpgradeManifest.swift */; };
 		D9C7CECF28ECC043001E87B6 /* NSAttributedString+SSK.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C7CECE28ECC043001E87B6 /* NSAttributedString+SSK.swift */; };
@@ -7538,6 +7539,7 @@
 		D9C544282B8578B50036F274 /* CallRecord+CallStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallRecord+CallStatus.swift"; sourceTree = "<group>"; };
 		D9C5442A2B8578F30036F274 /* CallRecordMissedCallManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallRecordMissedCallManager.swift; sourceTree = "<group>"; };
 		D9C5634D2EB438300001626A /* OWSByteCountFormatStyleTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OWSByteCountFormatStyleTest.swift; sourceTree = "<group>"; };
+		D9C667222FFB24DE0085EE9D /* PasswordManagerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerManager.swift; sourceTree = "<group>"; };
 		D9C7CEB328EB8495001E87B6 /* ExperienceUpgrade.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExperienceUpgrade.swift; sourceTree = "<group>"; };
 		D9C7CECA28EBC09C001E87B6 /* ExperienceUpgradeManifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExperienceUpgradeManifest.swift; sourceTree = "<group>"; };
 		D9C7CECE28ECC043001E87B6 /* NSAttributedString+SSK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+SSK.swift"; sourceTree = "<group>"; };
@@ -13974,6 +13976,7 @@
 				D98CA2B22DF2450E0060370E /* BackupSaveKeyViewController.swift */,
 				D92812DD2FA94B6E00667DCF /* DisplayableAccountEntropyPool.swift */,
 				D98CA2BD2DF398DF0060370E /* EnterAccountEntropyPoolViewController.swift */,
+				D9C667222FFB24DE0085EE9D /* PasswordManagerManager.swift */,
 			);
 			path = RecoveryKey;
 			sourceTree = "<group>";
@@ -18666,6 +18669,7 @@
 				C1A136C52DB044A20049CD05 /* OutgoingDeviceRestoreViewModel.swift in Sources */,
 				34A6C28021E503E700B5B12E /* OWSImagePickerController.swift in Sources */,
 				5011D9722A04720E000FE8E5 /* OWSOrphanDataCleaner.swift in Sources */,
+				D9C667232FFB24F40085EE9D /* PasswordManagerManager.swift in Sources */,
 				50EA76E52EEA1C6000DA8CD0 /* PasteboardAttachment.swift in Sources */,
 				F93461B9291ED28A00366682 /* PaymentDetailsValidity.swift in Sources */,
 				C1661A1E2C3D942300AB887F /* PaymentHistoryItem.swift in Sources */,

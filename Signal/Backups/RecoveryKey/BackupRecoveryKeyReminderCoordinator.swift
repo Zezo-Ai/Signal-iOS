@@ -7,6 +7,7 @@ import Foundation
 import SignalServiceKit
 import UIKit
 
+@MainActor
 class BackupRecoveryKeyReminderCoordinator {
     private weak var backupKeyReminderNavController: UINavigationController?
 
@@ -99,9 +100,8 @@ class BackupRecoveryKeyReminderCoordinator {
         saveAndConfirmKeyCoordinator.present(
             aepMode: .current(aep, localDeviceAuthSuccess),
             options: [
-                .showConfirmKey(onConfirmed: {
-                    onSuccess()
-                }),
+                .showSaveKeyToPasswordManager(onConfirmed: onSuccess),
+                .showSaveKeyManually(onConfirmed: onSuccess),
             ],
         )
     }

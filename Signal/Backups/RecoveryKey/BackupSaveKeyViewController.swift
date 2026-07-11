@@ -32,6 +32,10 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
             case .newCandidate(let aep): return aep
             }
         }
+
+        var displayableAEP: DisplayableAccountEntropyPool {
+            aep.forDisplay
+        }
     }
 
     private let aepMode: AEPMode
@@ -39,8 +43,14 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
     private let bottomButtonConfigs: [BottomButtonConfig]
     private let displayableAEP: DisplayableAccountEntropyPool
 
-    /// Initialize a `BackupSaveKeyViewController` with the specified bottom
-    /// buttons.
+    /// A view that displays an AEP the user is expected to "save".
+    ///
+    /// - Parameter aepMode
+    /// Context on what kind of AEP is being saved.
+    /// - Parameter aepStartsCollapsed
+    /// Whether or not the displayed AEP should be "collapsed" initially.
+    /// - Parameter bottomButtonConfigs
+    /// Describes the bottom buttons to be shown below the displayed AEP.
     init(
         aepMode: AEPMode,
         aepStartsCollapsed: Bool,
@@ -68,9 +78,9 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
         return textView
     }()
 
-    /// Overlaid on `aepTextView` while it shows just the first row of the key.
-    /// Shows the whole key when tapped.
-    private lazy var seeFullKeyButton = FadeUnderlayButton(
+    /// Overlaid on `aepTextView` while it is collapsed. Un-collapses it when
+    /// tapped.
+    private lazy var uncollapseAepTextViewButton = FadeUnderlayButton(
         title: OWSLocalizedString(
             "BACKUP_KEY_SEE_FULL_KEY_BUTTON_TITLE",
             comment: "Title for a button that lets the user see their whole Recovery Key, from a preview.",
@@ -80,6 +90,23 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
         onTap: { [weak self] in
             self?.showFullKey()
         },
+    )
+
+    /// Accessory buttons shown with the `aepTextView` when it is uncollapsed.
+    private lazy var uncollapsedAepTextViewAccessoryButtonStack = UIStackView.verticalButtonStack(
+        buttons: [
+            // Copy to Clipboard
+            UIButton(
+                configuration: .smallSecondary(title: OWSLocalizedString(
+                    "BACKUP_RECORD_KEY_COPY_TO_CLIPBOARD_BUTTON_TITLE",
+                    comment: "Title for a button allowing users to copy their 'Recovery Key' to the clipboard.",
+                )),
+                primaryAction: UIAction { [weak self] _ in
+                    self?.copyToClipboardWithConfirmation()
+                },
+            ),
+        ],
+        isFullWidthButtons: false,
     )
 
     // MARK: -
@@ -122,43 +149,6 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
         let headlineLabel = UILabel.title1Label(text: titleText)
         let subheadlineLabel = UILabel.explanationTextLabel(text: subtitleText)
 
-        if aepIsCollapsed {
-            aepTextView.visibleRowCount = 1
-
-            // Overlay the button on the whole collapsed text view, so any taps on
-            // it trigger the button. Note that the button fades out content below
-            // its title label.
-            //
-            // The text view has a corner radius, so clip the button as well.
-            aepTextView.addSubview(seeFullKeyButton)
-            aepTextView.clipsToBounds = true
-            seeFullKeyButton.autoPinEdgesToSuperviewEdges()
-        }
-
-        var topButtons: [UIButton] = [
-            UIButton(
-                configuration: .smallSecondary(title: OWSLocalizedString(
-                    "BACKUP_RECORD_KEY_COPY_TO_CLIPBOARD_BUTTON_TITLE",
-                    comment: "Title for a button allowing users to copy their 'Recovery Key' to the clipboard.",
-                )),
-                primaryAction: UIAction { [weak self] _ in
-                    self?.copyToClipboardWithConfirmation()
-                },
-            ),
-        ]
-        if #available(iOS 26.2, *) {
-            let saveToPasswordManagerButton = UIButton(
-                configuration: .smallSecondary(title: OWSLocalizedString(
-                    "BACKUP_RECORD_KEY_PASSWORD_MANAGER_BUTTON_TITLE",
-                    comment: "Title for a button allowing users to save their 'Recovery Key' to a password manager.",
-                )),
-                primaryAction: UIAction { [weak self] _ in
-                    self?.saveToPasswordManagerWithConfirmation()
-                },
-            )
-            topButtons.append(saveToPasswordManagerButton)
-        }
-
         let bottomButtons: [UIButton] = bottomButtonConfigs.map { config in
             return UIButton(
                 configuration: {
@@ -182,14 +172,29 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
                 headlineLabel,
                 subheadlineLabel,
                 aepTextView,
-                topButtons.enclosedInVerticalStackView(isFullWidthButtons: false),
+                uncollapsedAepTextViewAccessoryButtonStack,
                 .vStretchingSpacer(),
                 bottomButtons.enclosedInVerticalStackView(isFullWidthButtons: true),
             ],
             isScrollable: true,
         )
         stackView.spacing = 24
-        stackView.setCustomSpacing(32, after: aepTextView)
+
+        if aepIsCollapsed {
+            aepTextView.visibleRowCount = 1
+
+            // Overlay the button on the whole collapsed text view, so any taps on
+            // it trigger the button. Note that the button fades out content below
+            // its title label.
+            //
+            // The text view has a corner radius, so clip the button as well.
+            aepTextView.addSubview(uncollapseAepTextViewButton)
+            aepTextView.clipsToBounds = true
+            uncollapseAepTextViewButton.autoPinEdgesToSuperviewEdges()
+
+            // Hide the accessory buttons while collapsed.
+            uncollapsedAepTextViewAccessoryButtonStack.alpha = 0
+        }
     }
 
     private func showFullKey() {
@@ -207,12 +212,13 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
             delay: 0,
             usingSpringWithDamping: 1,
             initialSpringVelocity: 0,
-            animations: {
-                self.seeFullKeyButton.alpha = 0
-                self.view.layoutIfNeeded()
+            animations: { [self] in
+                uncollapseAepTextViewButton.alpha = 0
+                uncollapsedAepTextViewAccessoryButtonStack.alpha = 1
+                view.layoutIfNeeded()
             },
-            completion: { _ in
-                self.seeFullKeyButton.removeFromSuperview()
+            completion: { [self] _ in
+                uncollapseAepTextViewButton.removeFromSuperview()
             },
         )
     }
@@ -251,80 +257,6 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
             image: .copy,
         )
         toast.presentToastView(from: .bottom, of: view, inset: view.safeAreaInsets.bottom + 8)
-    }
-
-    @available(iOS 26.2, *)
-    private func saveToPasswordManagerWithConfirmation() {
-        guard let window = view.window else {
-            owsFailDebug("Missing window!")
-            return
-        }
-
-        let actionSheet = ActionSheetController(
-            title: OWSLocalizedString(
-                "BACKUP_RECORD_KEY_PASSWORD_MANAGER_CONFIRM_TITLE",
-                comment: "Title for a confirmation sheet shown before saving the user's 'Recovery Key' to a password manager.",
-            ),
-            message: OWSLocalizedString(
-                "BACKUP_RECORD_KEY_PASSWORD_MANAGER_CONFIRM_MESSAGE",
-                comment: "Message for a confirmation sheet shown before saving the user's 'Recovery Key' to a password manager, advising them to only use a password manager they trust.",
-            ),
-        )
-        actionSheet.addAction(ActionSheetAction(
-            title: CommonStrings.continueButton,
-            handler: { [self] _ in
-                Task {
-                    await _saveToPasswordManager(window: window)
-                }
-            },
-        ))
-        actionSheet.addAction(.cancel)
-
-        presentActionSheet(actionSheet)
-    }
-
-    @available(iOS 26.2, *)
-    private func _saveToPasswordManager(window: ASPresentationAnchor) async {
-        do {
-            let credentialDataManager = ASCredentialDataManager()
-            let credentialName = OWSLocalizedString(
-                "BACKUP_RECORD_KEY_PASSWORD_MANAGER_CREDENTIAL_NAME",
-                comment: "Name used as both the username and title for the user's 'Recovery Key' credential when saving it to a password manager.",
-            )
-            let password = ASPasswordCredential(
-                user: credentialName,
-                password: displayableAEP.displayString,
-            )
-            let scope = ASAutoFillURLScope(host: "signal.org")
-
-            try await credentialDataManager.save(
-                password: password,
-                for: scope,
-                title: credentialName,
-                anchor: window,
-            )
-
-            presentToast(text: OWSLocalizedString(
-                "BACKUP_RECORD_KEY_PASSWORD_MANAGER_SUCCESS_TOAST",
-                comment: "Toast shown after the user successfully saves their 'Recovery Key' to a password manager.",
-            ))
-        } catch {
-            Logger.warn("Failed to save to password manager! \(error)")
-
-            let actionSheet = ActionSheetController(
-                title: OWSLocalizedString(
-                    "BACKUP_RECORD_KEY_PASSWORD_MANAGER_ERROR_TITLE",
-                    comment: "Title for an error sheet shown when saving the user's 'Recovery Key' to a password manager fails.",
-                ),
-                message: OWSLocalizedString(
-                    "BACKUP_RECORD_KEY_PASSWORD_MANAGER_ERROR_MESSAGE",
-                    comment: "Message for an error sheet shown when saving the user's 'Recovery Key' to a password manager fails, suggesting that they may not have a supported password manager configured.",
-                ),
-            )
-            actionSheet.addAction(.ok)
-
-            presentActionSheet(actionSheet)
-        }
     }
 }
 
@@ -436,16 +368,31 @@ private extension BackupSaveKeyViewController {
 }
 
 @available(iOS 17, *)
-#Preview {
+#Preview("Collapsed") {
     UINavigationController(rootViewController: BackupSaveKeyViewController.forPreview(
         aepMode: .newCandidate(AccountEntropyPool()),
         aepStartsCollapsed: true,
         bottomButtonConfigs: [
             BackupSaveKeyViewController.BottomButtonConfig(
-                titleText: "Continue",
+                titleText: "Save to Password Manager",
                 style: .primary,
-                action: { _ in print("Continue!") },
+                action: { _ in print("Save to Password Manager!") },
             ),
+            BackupSaveKeyViewController.BottomButtonConfig(
+                titleText: "Save Manually",
+                style: .primary,
+                action: { _ in print("Save Manually!") },
+            ),
+        ],
+    ))
+}
+
+@available(iOS 17, *)
+#Preview("Uncollapsed") {
+    UINavigationController(rootViewController: BackupSaveKeyViewController.forPreview(
+        aepMode: .newCandidate(AccountEntropyPool()),
+        aepStartsCollapsed: false,
+        bottomButtonConfigs: [
             BackupSaveKeyViewController.BottomButtonConfig(
                 titleText: "Create New Key",
                 style: .secondary,

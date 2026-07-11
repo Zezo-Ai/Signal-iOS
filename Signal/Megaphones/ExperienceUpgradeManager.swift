@@ -79,6 +79,7 @@ class ExperienceUpgradeManager {
 
     // MARK: -
 
+    @MainActor
     func reconcilePresentedExperienceUpgrade(fromViewController: UIViewController) {
         let now = Date()
         var shouldClearNewDeviceNotification = false

@@ -41,6 +41,7 @@ public class AppEnvironment: NSObject {
     private(set) var experienceUpgradeManager: ExperienceUpgradeManager!
     private(set) var groupSendEndorsementExpirationJob: GroupSendEndorsementExpirationJob!
     private(set) var outgoingDeviceRestorePresenter: OutgoingDeviceRestorePresenter!
+    private(set) var passwordManagerManager: PasswordManagerManager!
     private(set) var provisioningManager: ProvisioningManager!
     private(set) var quickRestoreManager: QuickRestoreManager!
     private var registrationIdMismatchManager: RegistrationIdMismatchManager!
@@ -160,6 +161,8 @@ public class AppEnvironment: NSObject {
             db: DependenciesBridge.shared.db,
             groupSendEndorsementStore: DependenciesBridge.shared.groupSendEndorsementStore,
         )
+
+        self.passwordManagerManager = PasswordManagerManager()
 
         self.provisioningManager = ProvisioningManager(
             accountKeyStore: DependenciesBridge.shared.accountKeyStore,

@@ -7,6 +7,7 @@ import Lottie
 import SignalServiceKit
 import SignalUI
 
+@MainActor
 class Megaphone {
     struct Button {
         let title: String

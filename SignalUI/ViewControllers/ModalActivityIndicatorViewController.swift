@@ -143,6 +143,7 @@ public class ModalActivityIndicatorViewController: OWSViewController {
         title: String? = nil,
         canCancel: Bool = false,
         presentationDelay: TimeInterval = Constants.defaultPresentationDelay,
+        minimumPresentationDuration: TimeInterval = 0,
         wrappedAsyncBlock: @escaping () async throws(E) -> T,
     ) async throws(E) -> T {
         let result: Result<T, E> = await withCheckedContinuation { continuation in
@@ -152,7 +153,10 @@ public class ModalActivityIndicatorViewController: OWSViewController {
                 canCancel: canCancel,
                 presentationDelay: presentationDelay,
                 asyncBlock: { modal in
+                    async let delay = Task.sleep(nanoseconds: minimumPresentationDuration.clampedNanoseconds)
                     let result = await Result(catching: wrappedAsyncBlock)
+                    _ = try? await delay
+
                     modal.dismiss {
                         continuation.resume(returning: result)
                     }

@@ -143,21 +143,24 @@ class BackupOnboardingCoordinator {
             return
         }
 
+        let onConfirmed: () -> Void = { [self] in
+            Task {
+                do throws(SheetDisplayableError) {
+                    try await showChooseBackupPlan()
+                } catch {
+                    error.showSheet(from: onboardingNavController)
+                }
+            }
+        }
+
         let saveAndConfirmKeyCoordinator = BackupSaveAndConfirmKeyCoordinator(
             navigationController: onboardingNavController,
         )
         saveAndConfirmKeyCoordinator.present(
             aepMode: .current(aep, localDeviceAuthSuccess),
             options: [
-                .showConfirmKey(onConfirmed: { [self] in
-                    Task {
-                        do throws(SheetDisplayableError) {
-                            try await showChooseBackupPlan()
-                        } catch {
-                            error.showSheet(from: onboardingNavController)
-                        }
-                    }
-                }),
+                .showSaveKeyToPasswordManager(onConfirmed: onConfirmed),
+                .showSaveKeyManually(onConfirmed: onConfirmed),
             ],
         )
     }

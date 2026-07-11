@@ -586,7 +586,8 @@ class BackupSettingsViewController:
         saveAndConfirmKeyCoordinator.present(
             aepMode: .current(aep, authSuccess),
             options: [
-                .showConfirmKey(onConfirmed: onConfirmed),
+                .showSaveKeyToPasswordManager(onConfirmed: onConfirmed),
+                .showSaveKeyManually(onConfirmed: onConfirmed),
             ],
         )
     }
@@ -1414,6 +1415,19 @@ class BackupSettingsViewController:
         saveAndConfirmKeyCoordinator.present(
             aepMode: .current(aep, authSuccess),
             options: [
+                .showSaveKeyToPasswordManager(onConfirmed: { [weak self, weak navigationController] in
+                    guard let self, let navigationController else { return }
+
+                    navigationController.popToViewController(self, animated: true) {
+                        self.presentToast(
+                            text: OWSLocalizedString(
+                                "BACKUP_SETTINGS_CONFIRM_KEY_SUCCESS_TOAST",
+                                comment: "Toast shown when the user's Recovery Key has been confirmed successfully.",
+                            ),
+                            image: .checkCircle,
+                        )
+                    }
+                }),
                 .showCreateNewKey(onPressed: { saveKeyViewController in
                     Task { [weak self] in
                         guard let self else { return }
@@ -1572,6 +1586,19 @@ class BackupSettingsViewController:
         }
 
         let newCandidateAEP = AccountEntropyPool()
+        let onNewCandidateConfirmed = { [weak self] in
+            guard let self else { return }
+
+            // Pop all the way back to Backup Settings.
+            navigationController.popToViewController(self, animated: true) {
+                self.finalizeNewRecoveryKey(newCandidateAEP: newCandidateAEP)
+
+                self.presentToast(text: OWSLocalizedString(
+                    "BACKUP_SETTINGS_CREATE_NEW_KEY_SUCCESS_TOAST",
+                    comment: "Toast shown when a new Recovery Key has been created successfully.",
+                ))
+            }
+        }
 
         let saveAndConfirmKeyCoordinator = BackupSaveAndConfirmKeyCoordinator(
             navigationController: navigationController,
@@ -1579,19 +1606,8 @@ class BackupSettingsViewController:
         saveAndConfirmKeyCoordinator.present(
             aepMode: .newCandidate(newCandidateAEP),
             options: [
-                .showConfirmKey(onConfirmed: { [weak self] in
-                    guard let self else { return }
-
-                    // Pop all the way back to Backup Settings.
-                    navigationController.popToViewController(self, animated: true) {
-                        self.finalizeNewRecoveryKey(newCandidateAEP: newCandidateAEP)
-
-                        self.presentToast(text: OWSLocalizedString(
-                            "BACKUP_SETTINGS_CREATE_NEW_KEY_SUCCESS_TOAST",
-                            comment: "Toast shown when a new Recovery Key has been created successfully.",
-                        ))
-                    }
-                }),
+                .showSaveKeyToPasswordManager(onConfirmed: onNewCandidateConfirmed),
+                .showSaveKeyManually(onConfirmed: onNewCandidateConfirmed),
             ],
         )
     }
