@@ -19,26 +19,36 @@ class AccountEntropyPoolTextView: UIView, TextViewWithPlaceholderDelegate {
     }
 
     private enum Constants {
+        static let layoutMargins = UIEdgeInsets(hMargin: 36, vMargin: 18)
+        static let cornerRadius: CGFloat = 26
+
+        static let referenceFontSizePts: CGFloat = 17
+        static let lineSpacing: CGFloat = 18
+
         static let chunkSize = 4
         static let chunksPerRow = 4
         static let rowCount = 4
-        static let spacesBetweenChunks = 4
+        static let spacesBetweenChunks = 2
 
-        static var charactersPerRow: Int {
+        static func charactersPerRow(includingSpaces: Bool) -> Int {
             let chunkChars = Constants.chunkSize * Constants.chunksPerRow
-            let spaceChars = Constants.spacesBetweenChunks * (Constants.chunksPerRow - 1)
 
-            return chunkChars + spaceChars
+            if includingSpaces {
+                let spaceChars = Constants.spacesBetweenChunks * (Constants.chunksPerRow - 1)
+                return chunkChars + spaceChars
+            } else {
+                return chunkChars
+            }
         }
 
-        private static let aepLengthPrecondition: Void = {
+        static let aepLengthPrecondition: Void = {
             let characterCount = chunkSize * chunksPerRow * rowCount
             owsPrecondition(characterCount == AccountEntropyPool.Constants.byteLength)
         }()
     }
 
     private let textView = TextViewWithPlaceholder()
-    private lazy var heightConstraint = textView.autoSetDimension(.height, toSize: 400)
+    private lazy var textViewHeightConstraint = textView.autoSetDimension(.height, toSize: 400)
 
     private let mode: Mode
 
@@ -66,10 +76,12 @@ class AccountEntropyPoolTextView: UIView, TextViewWithPlaceholderDelegate {
     init(mode: Mode) {
         self.mode = mode
 
+        _ = Constants.aepLengthPrecondition
+
         super.init(frame: .zero)
 
-        layer.cornerRadius = 10
-        layoutMargins = .init(hMargin: 24, vMargin: 14)
+        layer.cornerRadius = Constants.cornerRadius
+        layoutMargins = Constants.layoutMargins
 
         addSubview(textView)
         textView.delegate = self
@@ -77,13 +89,14 @@ class AccountEntropyPoolTextView: UIView, TextViewWithPlaceholderDelegate {
         textView.autocorrectionType = .no
         textView.textContainerInset = .zero
         textView.keyboardType = .asciiCapable
-        textView.autoPinEdgesToSuperviewMargins()
         textView.placeholderText = OWSLocalizedString(
             "BACKUP_KEY_PLACEHOLDER",
             comment: "Text used as placeholder in recovery key text view.",
         )
         textView.setSecureTextEntry(val: true)
         textView.setTextContentType(val: .password)
+
+        textView.autoPinEdgesToSuperviewMargins()
 
         switch mode {
         case .display(let displayableAEP):
@@ -103,29 +116,60 @@ class AccountEntropyPoolTextView: UIView, TextViewWithPlaceholderDelegate {
 
     // MARK: -
 
+    /// The number of rows the text view displays when the entire contents is
+    /// visible.
+    var rowCount: Int {
+        Constants.rowCount
+    }
+
+    /// The number of rows the text view displays. Defaults to "all rows".
+    ///
+    /// In `display` mode, callers may set to have the text view display a
+    /// truncated AEP. Setting this calls `setNeedsLayout`, so callers may
+    /// animate sizing changes using `layoutIfNeeded`.
+    var visibleRowCount: Int = Constants.rowCount {
+        didSet {
+            owsPrecondition((1...Constants.rowCount).contains(visibleRowCount))
+
+            switch mode {
+            case .display(let displayableAEP):
+                textView.text = String(displayableAEP.displayString.prefix(
+                    Constants.charactersPerRow(includingSpaces: false) * visibleRowCount,
+                ))
+                setNeedsLayout()
+            case .entry:
+                owsFail("Visible rows may only be changed in display mode!")
+            }
+        }
+    }
+
+    // MARK: -
+
     override func layoutSubviews() {
         super.layoutSubviews()
 
         let width = self.width - self.layoutMargins.totalWidth
 
-        let referenceFontSizePts: CGFloat = 17
         // Any character will do because font is monospaced.
         let referenceFontSize = "0".size(withAttributes: [
             .font: UIFont.monospacedSystemFont(
-                ofSize: referenceFontSizePts,
+                ofSize: Constants.referenceFontSizePts,
                 weight: .regular,
             ),
         ])
 
-        let characterWidth = width / CGFloat(Constants.charactersPerRow)
-        let fontSize = (characterWidth / referenceFontSize.width) * referenceFontSizePts
+        let characterWidth = width / CGFloat(Constants.charactersPerRow(includingSpaces: true))
+        let fontSize = (characterWidth / referenceFontSize.width) * Constants.referenceFontSizePts
 
         let font = UIFont.monospacedSystemFont(ofSize: fontSize, weight: .regular)
         self.textView.editorFont = font
 
-        let sizingString = Array(repeating: "0", count: Constants.rowCount).joined(separator: "\n")
-        let sizingAttributedString = self.attributedString(for: sizingString)
-        self.heightConstraint.constant = sizingAttributedString.boundingRect(
+        textViewHeightConstraint.constant = textHeight(forRowCount: visibleRowCount, width: width)
+    }
+
+    private func textHeight(forRowCount rowCount: Int, width: CGFloat) -> CGFloat {
+        let sizingString = Array(repeating: "0", count: rowCount).joined(separator: "\n")
+        return attributedString(for: sizingString).boundingRect(
             with: CGSize(width: width, height: .greatestFiniteMagnitude),
             options: [.usesLineFragmentOrigin, .usesFontLeading],
             context: nil,
@@ -133,15 +177,22 @@ class AccountEntropyPoolTextView: UIView, TextViewWithPlaceholderDelegate {
     }
 
     private func attributedString(for string: String) -> NSAttributedString {
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = 14
+        var attributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: UIColor.Signal.label,
+            .paragraphStyle: {
+                let paragraphStyle = NSMutableParagraphStyle()
+                paragraphStyle.lineSpacing = Constants.lineSpacing
+                return paragraphStyle
+            }(),
+        ]
+
+        if let editorFont = textView.editorFont {
+            attributes[.font] = editorFont
+        }
+
         return NSAttributedString(
             string: string,
-            attributes: [
-                .font: textView.editorFont ?? UIFont.monospacedDigitFont(ofSize: 17),
-                .foregroundColor: UIColor.Signal.label,
-                .paragraphStyle: paragraphStyle,
-            ],
+            attributes: attributes,
         )
     }
 
@@ -155,7 +206,7 @@ class AccountEntropyPoolTextView: UIView, TextViewWithPlaceholderDelegate {
         if
             let t = textView.text,
             !t.isEmpty,
-            t.count > Constants.spacesBetweenChunks,
+            t.count > Constants.chunkSize,
             !t.contains(formattedSpace)
         {
             textView.reformatText(replacementText: t)
@@ -227,8 +278,10 @@ private class AEPPreviewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        view.backgroundColor = .Signal.groupedBackground
+
         let textView = AccountEntropyPoolTextView(mode: mode)
-        textView.backgroundColor = .Signal.secondaryBackground
+        textView.backgroundColor = .Signal.background
         view.addSubview(textView)
         textView.autoPinEdge(toSuperviewMargin: .leading)
         textView.autoPinEdge(toSuperviewMargin: .trailing)

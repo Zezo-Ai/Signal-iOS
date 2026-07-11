@@ -35,6 +35,7 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
     }
 
     private let aepMode: AEPMode
+    private var aepIsCollapsed: Bool
     private let bottomButtonConfigs: [BottomButtonConfig]
     private let displayableAEP: DisplayableAccountEntropyPool
 
@@ -42,9 +43,11 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
     /// buttons.
     init(
         aepMode: AEPMode,
+        aepStartsCollapsed: Bool,
         bottomButtonConfigs: [BottomButtonConfig],
     ) {
         self.aepMode = aepMode
+        self.aepIsCollapsed = aepStartsCollapsed
         self.displayableAEP = DisplayableAccountEntropyPool(aep: aepMode.aep)
         self.bottomButtonConfigs = bottomButtonConfigs
 
@@ -56,6 +59,28 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
     var navbarBackgroundColorOverride: UIColor? {
         .Signal.groupedBackground
     }
+
+    // MARK: -
+
+    private lazy var aepTextView: AccountEntropyPoolTextView = {
+        let textView = AccountEntropyPoolTextView(mode: .display(displayableAEP))
+        textView.backgroundColor = .Signal.secondaryGroupedBackground
+        return textView
+    }()
+
+    /// Overlaid on `aepTextView` while it shows just the first row of the key.
+    /// Shows the whole key when tapped.
+    private lazy var seeFullKeyButton = FadeUnderlayButton(
+        title: OWSLocalizedString(
+            "BACKUP_KEY_SEE_FULL_KEY_BUTTON_TITLE",
+            comment: "Title for a button that lets the user see their whole Recovery Key, from a preview.",
+        ),
+        image: .tapHand,
+        fadeColor: .Signal.secondaryGroupedBackground,
+        onTap: { [weak self] in
+            self?.showFullKey()
+        },
+    )
 
     // MARK: -
 
@@ -97,8 +122,18 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
         let headlineLabel = UILabel.title1Label(text: titleText)
         let subheadlineLabel = UILabel.explanationTextLabel(text: subtitleText)
 
-        let aepTextView = AccountEntropyPoolTextView(mode: .display(displayableAEP))
-        aepTextView.backgroundColor = .Signal.secondaryGroupedBackground
+        if aepIsCollapsed {
+            aepTextView.visibleRowCount = 1
+
+            // Overlay the button on the whole collapsed text view, so any taps on
+            // it trigger the button. Note that the button fades out content below
+            // its title label.
+            //
+            // The text view has a corner radius, so clip the button as well.
+            aepTextView.addSubview(seeFullKeyButton)
+            aepTextView.clipsToBounds = true
+            seeFullKeyButton.autoPinEdgesToSuperviewEdges()
+        }
 
         var topButtons: [UIButton] = [
             UIButton(
@@ -155,6 +190,31 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
         )
         stackView.spacing = 24
         stackView.setCustomSpacing(32, after: aepTextView)
+    }
+
+    private func showFullKey() {
+        guard aepIsCollapsed else {
+            return
+        }
+
+        aepIsCollapsed = false
+
+        // Populate the whole key, and re-layout with animation.
+        aepTextView.visibleRowCount = aepTextView.rowCount
+
+        UIView.animate(
+            withDuration: 0.3,
+            delay: 0,
+            usingSpringWithDamping: 1,
+            initialSpringVelocity: 0,
+            animations: {
+                self.seeFullKeyButton.alpha = 0
+                self.view.layoutIfNeeded()
+            },
+            completion: { _ in
+                self.seeFullKeyButton.removeFromSuperview()
+            },
+        )
     }
 
     private func copyToClipboardWithConfirmation() {
@@ -270,15 +330,106 @@ class BackupSaveKeyViewController: OWSViewController, OWSNavigationChildControll
 
 // MARK: -
 
+/// A button that underlays a fade layer below its content, such that any
+/// content below the button's content is obscured.
+///
+/// Responsive to LTR and RTL layouts.
+private class FadeUnderlayButton: UIButton {
+    private let fadeView: GradientView
+
+    init(
+        title: String,
+        image: UIImage,
+        fadeColor: UIColor,
+        onTap: @escaping () -> Void,
+    ) {
+        self.fadeView = GradientView(from: fadeColor, to: fadeColor.withAlphaComponent(0))
+        self.fadeView.isUserInteractionEnabled = false
+
+        super.init(frame: .zero)
+
+        var configuration = UIButton.Configuration.plain()
+        configuration.title = title
+        configuration.image = image
+            .resized(maxDimensionPoints: 20)?
+            .withRenderingMode(.alwaysTemplate)
+        configuration.imagePadding = 6
+        configuration.baseForegroundColor = .Signal.label
+        configuration.titleTextAttributesTransformer = .defaultFont(.dynamicTypeFootnote.semibold())
+        configuration.contentInsets = NSDirectionalEdgeInsets(hMargin: 24, vMargin: 0)
+        self.configuration = configuration
+
+        contentHorizontalAlignment = .trailing
+
+        addAction(UIAction(handler: { _ in onTap() }), for: .primaryActionTriggered)
+
+        insertSubview(fadeView, at: 0)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        updateFade()
+    }
+
+    private func updateFade() {
+        fadeView.frame = bounds
+        let width = bounds.width
+
+        // Get a frame for the image and titleLabel, so the fade covers both.
+        var contentFrame = CGRect.null
+        if let titleFrame = titleLabel?.frame, titleFrame.width > 0 {
+            contentFrame = contentFrame.union(titleFrame)
+        }
+        if let imageFrame = imageView?.frame, imageFrame.width > 0 {
+            contentFrame = contentFrame.union(imageFrame)
+        }
+
+        guard
+            width > 0,
+            !contentFrame.isNull,
+            contentFrame.width > 0
+        else {
+            fadeView.isHidden = true
+            return
+        }
+        fadeView.isHidden = false
+
+        let opaqueWidth: CGFloat = contentFrame.width + 36
+        let fadeWidth: CGFloat = 148
+
+        // Layer locations are percentages, so convert points to percentages.
+        let opaqueStart = opaqueWidth / width
+        let fadeStart = opaqueStart + fadeWidth / width
+
+        // locations must stay within [0, 1], and the fade may extend past.
+        let locations = [opaqueStart, fadeStart].map { max(0, min(1, $0)) }
+
+        fadeView.locations = locations
+        if CurrentAppContext().isRTL {
+            fadeView.setAngle(90)
+        } else {
+            fadeView.setAngle(270)
+        }
+    }
+}
+
+// MARK: -
+
 #if DEBUG
 
 private extension BackupSaveKeyViewController {
     static func forPreview(
         aepMode: AEPMode,
+        aepStartsCollapsed: Bool,
         bottomButtonConfigs: [BottomButtonConfig],
     ) -> BackupSaveKeyViewController {
         return BackupSaveKeyViewController(
             aepMode: aepMode,
+            aepStartsCollapsed: aepStartsCollapsed,
             bottomButtonConfigs: bottomButtonConfigs,
         )
     }
@@ -288,6 +439,7 @@ private extension BackupSaveKeyViewController {
 #Preview {
     UINavigationController(rootViewController: BackupSaveKeyViewController.forPreview(
         aepMode: .newCandidate(AccountEntropyPool()),
+        aepStartsCollapsed: true,
         bottomButtonConfigs: [
             BackupSaveKeyViewController.BottomButtonConfig(
                 titleText: "Continue",

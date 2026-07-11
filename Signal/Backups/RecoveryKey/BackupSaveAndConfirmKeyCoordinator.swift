@@ -33,6 +33,7 @@ class BackupSaveAndConfirmKeyCoordinator {
 
         let saveKeyViewController = BackupSaveKeyViewController(
             aepMode: aepMode,
+            aepStartsCollapsed: true,
             bottomButtonConfigs: options.compactMap { option in
                 switch option {
                 case .showConfirmKey(let onConfirmed):

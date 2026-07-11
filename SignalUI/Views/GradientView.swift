@@ -39,6 +39,12 @@ public class GradientView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        // CGColors don't react to light/dark changes, so re-resolve them.
+        updateGradientColors()
+    }
+
     private func updateGradientColors() {
         guard gradientWithinPerformanceLimits() else { return }
         gradientLayer.colors = colors.map { $0.cgColor }
