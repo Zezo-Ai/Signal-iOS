@@ -62,9 +62,9 @@ public extension HydratedMessageBody.DisplayConfiguration {
     static func composingAttachment() -> Self {
         return .init(
             baseFont: .defaultBaseFont,
-            baseTextColor: .fixed(Theme.darkThemePrimaryColor),
-            mentionBackgroundColor: .fixed(.ows_gray75),
-            revealedSpoilerBgColor: .fixed(.ows_gray75),
+            baseTextColor: .fixed(.Signal.label),
+            mentionBackgroundColor: .fixed(.Signal.secondaryLabel),
+            revealedSpoilerBgColor: .fixed(.Signal.secondaryLabel),
             revealAllSpoilers: true,
         )
     }

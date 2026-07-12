@@ -107,6 +107,18 @@ class MediaCaptionToolbar: UIView, UITextViewDelegate, BodyRangesTextViewDelegat
         ])
 
         updateContent(animated: false)
+
+        if #available(iOS 17, *) {
+            registerForTraitChanges(
+                [UITraitUserInterfaceStyle.self],
+                handler: { (view: UITraitEnvironment, _) in
+                    guard let view = view as? MediaCaptionToolbar else { return }
+                    // This will cause `BodyRangesTextView` to update attributes
+                    // even though the color doesn't actually change.
+                    view.textView.textColor = .Signal.label
+                },
+            )
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -191,7 +203,7 @@ class MediaCaptionToolbar: UIView, UITextViewDelegate, BodyRangesTextViewDelegat
 
         let contentSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .greatestFiniteMagnitude))
         let newHeight = CGFloat.clamp(
-            contentSize.height,
+            contentSize.height.rounded(.up),
             min: LayoutMetrics.minTextViewHeight,
             max: LayoutMetrics.maxTextViewHeight,
         )
@@ -412,11 +424,11 @@ class MediaCaptionToolbar: UIView, UITextViewDelegate, BodyRangesTextViewDelegat
         proceedButton.configuration?.image = buttonImage
     }
 
-    private func buildTextView() -> AttachmentTextView {
-        let textView = AttachmentTextView()
+    private func buildTextView() -> MediaCaptionTextView {
+        let textView = MediaCaptionTextView()
         textView.backgroundColor = .clear
         textView.font = .dynamicTypeBodyClamped
-        textView.textColor = .Signal.label
+        textView.keyboardAppearance = Theme.forceDarkThemeForMedia ? .dark : .default
         textView.tintColor = .Signal.label
         return textView
     }
@@ -511,7 +523,7 @@ class MediaCaptionToolbar: UIView, UITextViewDelegate, BodyRangesTextViewDelegat
     }
 }
 
-private class AttachmentTextView: BodyRangesTextView {
+private class MediaCaptionTextView: BodyRangesTextView {
 
     private var textIsChanging = false
 
@@ -526,6 +538,6 @@ private class AttachmentTextView: BodyRangesTextView {
     }
 
     override func isEditableMessageBodyDarkThemeEnabled() -> Bool {
-        return true
+        Theme.forceDarkThemeForMedia || Theme.isDarkThemeEnabled
     }
 }
