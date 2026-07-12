@@ -387,7 +387,7 @@ class ImageEditorViewController: OWSViewController, UIGestureRecognizerDelegate,
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
-        .lightContent
+        Theme.forceDarkThemeForMedia ? .lightContent : .default
     }
 
     // MARK: -
@@ -560,7 +560,9 @@ class ImageEditorViewController: OWSViewController, UIGestureRecognizerDelegate,
             comment: "Media Editor: Title for the button in 'Discard Changes' confirmation prompt.",
         )
         let actionSheet = ActionSheetController(title: actionSheetTitle, message: actionSheetMessage)
-        actionSheet.overrideUserInterfaceStyle = .dark
+        if Theme.forceDarkThemeForMedia {
+            actionSheet.overrideUserInterfaceStyle = .dark
+        }
         actionSheet.addAction(ActionSheetAction(title: discardChangesButton, style: .destructive, handler: { _ in
             self.clearAll()
             if let completionHandler {

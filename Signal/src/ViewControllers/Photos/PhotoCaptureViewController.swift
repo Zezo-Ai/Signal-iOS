@@ -111,11 +111,10 @@ class PhotoCaptureViewController: OWSViewController, OWSNavigationChildControlle
         super.viewDidLoad()
 
         definesPresentationContext = true
-        overrideUserInterfaceStyle = .dark
+        overrideUserInterfaceStyle = .dark // always dark
         layout = layoutForCurrentViewState()
 
         view.backgroundColor = .Signal.mediaBackground
-        view.preservesSuperviewLayoutMargins = true
 
         initializeUI()
 

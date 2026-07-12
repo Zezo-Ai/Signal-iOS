@@ -72,6 +72,9 @@ class AvatarViewController: OWSViewController, InteractivelyDismissableViewContr
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        if Theme.forceDarkThemeForMedia {
+            overrideUserInterfaceStyle = .dark
+        }
         view.backgroundColor = backgroundColor
 
         imageView.image = avatarImage
@@ -116,17 +119,15 @@ class AvatarViewController: OWSViewController, InteractivelyDismissableViewContr
             navigationBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             navigationBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
+        if Theme.forceDarkThemeForMedia {
+            navigationBar.tintColor = Theme.darkThemeNavbarIconColor
+        }
 
         let navigationItem = UINavigationItem(title: "")
         navigationItem.leftBarButtonItem = .closeButton { [weak self] in
             self?.performInteractiveDismissal(animated: true)
         }
         navigationBar.setItems([navigationItem], animated: false)
-
-        if #unavailable(iOS 26) {
-            overrideUserInterfaceStyle = .dark
-            navigationBar.tintColor = Theme.darkThemeNavbarIconColor
-        }
 
         interactiveDismissal.addGestureRecognizer(to: view)
     }

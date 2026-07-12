@@ -82,7 +82,7 @@ class ViewOnceMessageViewController: OWSViewController {
 
         view.backgroundColor = .Signal.background
 
-        if #unavailable(iOS 26) {
+        if Theme.forceDarkThemeForMedia {
             overrideUserInterfaceStyle = .dark
         }
 
@@ -100,15 +100,13 @@ class ViewOnceMessageViewController: OWSViewController {
 
         // Toolbar at the top.
         let toolbar = if #available(iOS 26, *) { UIToolbar() } else { UIToolbar.clear() }
+        toolbar.tintColor = .Signal.label
         toolbar.items = [
             .closeButton { [weak self] in
                 self?.dismissButtonPressed()
             },
             .flexibleSpace(),
         ]
-        if #unavailable(iOS 26) {
-            toolbar.tintColor = Theme.darkThemeLegacyPrimaryIconColor
-        }
         view.addSubview(toolbar)
         toolbar.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([

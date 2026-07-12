@@ -41,15 +41,15 @@ public class MediaTextView: UITextView {
 
     override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
-        self.disableAiWritingTools()
+
+        disableAiWritingTools()
 
         backgroundColor = .clear
         isOpaque = false
         isScrollEnabled = false
-        keyboardAppearance = .dark
         scrollsToTop = false
         textAlignment = .center
-        tintColor = .white
+        tintColor = .Signal.label
         self.textContainer.lineFragmentPadding = 0
 
         kvoObservation = observe(\.contentSize, options: [.new]) { [weak self] _, _ in

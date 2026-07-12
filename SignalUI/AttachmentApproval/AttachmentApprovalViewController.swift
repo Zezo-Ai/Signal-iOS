@@ -276,7 +276,7 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
     }
 
     override public var preferredStatusBarStyle: UIStatusBarStyle {
-        .lightContent
+        Theme.forceDarkThemeForMedia ? .lightContent : .default
     }
 
     public var prefersNavigationBarHidden: Bool {
@@ -287,8 +287,6 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         super.viewDidLoad()
 
         definesPresentationContext = true
-        overrideUserInterfaceStyle = .dark
-
         view.backgroundColor = .Signal.mediaBackground
 
         // avoid an unpleasant "bounce" which doesn't make sense in the context of a single item.
@@ -960,7 +958,9 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
                                     ?? OWSLocalizedString("ATTACHMENT_APPROVAL_FAILED_TO_EXPORT", comment: "Error that outgoing attachments could not be exported."),
                             ),
                         )
-                        actionSheet.overrideUserInterfaceStyle = .dark
+                        if Theme.forceDarkThemeForMedia {
+                            actionSheet.overrideUserInterfaceStyle = .dark
+                        }
                         actionSheet.addAction(ActionSheetAction(title: CommonStrings.okButton, style: .default))
 
                         self.present(actionSheet, animated: true)

@@ -34,8 +34,17 @@ private class CropCornerView: UIView {
         super.init(frame: .zero)
 
         isUserInteractionEnabled = false
-        shapeLayer?.fillColor = UIColor.white.cgColor
 
+        updateColor()
+        if Theme.forceDarkThemeForMedia == false, #available(iOS 17, *) {
+            registerForTraitChanges(
+                [UITraitUserInterfaceStyle.self],
+                handler: { (view: UIView, _) in
+                    guard let view = view as? CropCornerView else { return }
+                    view.updateColor()
+                },
+            )
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -58,6 +67,10 @@ private class CropCornerView: UIView {
                 updatePath()
             }
         }
+    }
+
+    private func updateColor() {
+        shapeLayer?.fillColor = UIColor.Signal.label.cgColor
     }
 
     private func updatePath() {
@@ -130,7 +143,7 @@ private class CropBackgroundView: UIView {
     private let blurView = UIVisualEffectView()
     private let darkeningView: UIView = {
         let view = UIView()
-        view.backgroundColor = .black
+        view.backgroundColor = .Signal.mediaBackground
         return view
     }()
 
@@ -160,7 +173,7 @@ private class CropBackgroundView: UIView {
         switch style {
         case .blur:
             darkeningView.alpha = 0
-            blurView.effect = UIBlurEffect(style: .dark)
+            blurView.effect = UIBlurEffect(style: .regular)
 
         case .darkening:
             darkeningView.alpha = 0.5
@@ -213,11 +226,7 @@ final class CropView: UIView {
 
     private lazy var backgroundView = CropBackgroundView(style: CropView.backgroundStyle(forState: state))
 
-    private let cropFrameView: UIView = {
-        let view = UIView()
-        view.addBorder(with: .white)
-        return view
-    }()
+    private let cropFrameView = UIView()
 
     private let cropCornerViews: [CropCornerView] = [
         CropCornerView(cropRegion: .topLeft),
@@ -302,7 +311,7 @@ final class CropView: UIView {
 
         // Grid Lines
         for (index, line) in verticalGridLines.enumerated() {
-            line.backgroundColor = .Signal.label
+            line.backgroundColor = .white // fixed color by design
             line.translatesAutoresizingMaskIntoConstraints = false
             cropFrameView.addSubview(line)
             NSLayoutConstraint.activate([
@@ -321,7 +330,7 @@ final class CropView: UIView {
             ])
         }
         for (index, line) in horizontalGridLines.enumerated() {
-            line.backgroundColor = .Signal.label
+            line.backgroundColor = .white // fixed color by design
             line.translatesAutoresizingMaskIntoConstraints = false
             cropFrameView.addSubview(line)
             NSLayoutConstraint.activate([
@@ -340,6 +349,17 @@ final class CropView: UIView {
             ])
         }
         setState(.initial, animated: false)
+
+        cropFrameView.layer.borderWidth = 1
+        cropFrameView.layer.borderColor = UIColor.Signal.label.cgColor
+        if Theme.forceDarkThemeForMedia == false, #available(iOS 17, *) {
+            cropFrameView.registerForTraitChanges(
+                [UITraitUserInterfaceStyle.self],
+                handler: { (view: UIView, _) in
+                    view.layer.borderColor = UIColor.Signal.label.cgColor
+                },
+            )
+        }
     }
 
     required init(coder: NSCoder) {

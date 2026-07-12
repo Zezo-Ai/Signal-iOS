@@ -81,6 +81,8 @@ public final class Theme {
 
     public static var isDarkThemeEnabled: Bool { shared.isDarkThemeEnabled }
 
+    public static var forceDarkThemeForMedia: Bool { if #available(iOS 26, *) { false } else { true } }
+
     public class func getOrFetchCurrentMode() -> ThemeDataStore.Appearance {
         return shared.getOrFetchCurrentMode()
     }

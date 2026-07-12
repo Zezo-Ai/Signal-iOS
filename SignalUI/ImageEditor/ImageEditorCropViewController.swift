@@ -278,7 +278,9 @@ class ImageEditorCropViewController: OWSViewController {
         !UIDevice.current.hasIPhoneXNotch && !UIDevice.current.isIPad && !DependenciesBridge.shared.currentCallProvider.hasCurrentCall
     }
 
-    override var preferredStatusBarStyle: UIStatusBarStyle { .lightContent }
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        Theme.forceDarkThemeForMedia ? .lightContent : .default
+    }
 
     // MARK: - Layout
 
@@ -1043,7 +1045,9 @@ class ImageEditorCropViewController: OWSViewController {
 
     private func didTapAspectRatio() {
         let actionSheet = ActionSheetController()
-        actionSheet.overrideUserInterfaceStyle = .dark
+        if Theme.forceDarkThemeForMedia {
+            actionSheet.overrideUserInterfaceStyle = .dark
+        }
         for aspectRatio in AspectRatio.allCases {
             guard isCurrentImageCompatibleWith(aspectRatio: aspectRatio) else { continue }
             actionSheet.addAction(

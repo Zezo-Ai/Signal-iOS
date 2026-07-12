@@ -91,8 +91,13 @@ class SendMediaNavigationController: OWSNavigationController, AttachmentApproval
     fileprivate init(hasQuotedReplyDraft: Bool, attachmentLimits: OutgoingAttachmentLimits) {
         self.hasQuotedReplyDraft = hasQuotedReplyDraft
         self.attachmentLimits = attachmentLimits
+
         super.init()
-        overrideUserInterfaceStyle = .dark
+
+        // Do this instead of overriding each possible view controller.
+        if Theme.forceDarkThemeForMedia {
+            overrideUserInterfaceStyle = .dark
+        }
     }
 
     // MARK: - Overrides
@@ -249,7 +254,9 @@ class SendMediaNavigationController: OWSNavigationController, AttachmentApproval
             self.sendMediaNavDelegate?.sendMediaNavDidCancel(self)
         } else {
             let alert = ActionSheetController()
-            alert.overrideUserInterfaceStyle = .dark
+            if Theme.forceDarkThemeForMedia || viewControllers.last is PhotoCaptureViewController {
+                alert.overrideUserInterfaceStyle = .dark
+            }
 
             let confirmAbandonText = OWSLocalizedString(
                 "SEND_MEDIA_CONFIRM_ABANDON_ALBUM",
@@ -357,7 +364,9 @@ class SendMediaNavigationController: OWSNavigationController, AttachmentApproval
             comment: "In-app camera: confirmation button in the prompt to turn off multi-mode.",
         )
         let actionSheet = ActionSheetController(title: title, message: message)
-        actionSheet.overrideUserInterfaceStyle = .dark
+        if Theme.forceDarkThemeForMedia || viewControllers.last is PhotoCaptureViewController {
+            actionSheet.overrideUserInterfaceStyle = .dark
+        }
         actionSheet.addAction(ActionSheetAction(title: buttonTitle, style: .destructive) { _ in
             self.pendingAttachments.removeAll()
             completion(true)

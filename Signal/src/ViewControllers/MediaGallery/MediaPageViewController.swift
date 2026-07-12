@@ -70,7 +70,6 @@ class MediaPageViewController: UIPageViewController {
         )
     }
 
-    @available(*, unavailable, message: "Unimplemented")
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -110,9 +109,7 @@ class MediaPageViewController: UIPageViewController {
     // MARK: UIViewController
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
-        guard #unavailable(iOS 26) else {
-            return super.preferredStatusBarStyle
-        }
+        guard Theme.forceDarkThemeForMedia else { return .default }
 
         if Theme.isDarkThemeEnabled {
             return .lightContent
@@ -144,10 +141,9 @@ class MediaPageViewController: UIPageViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if #unavailable(iOS 26) {
+        if Theme.forceDarkThemeForMedia {
             overrideUserInterfaceStyle = .dark
         }
-
         view.backgroundColor = .Signal.mediaBackground
 
         mediaInteractiveDismiss.addGestureRecognizer(to: view)
