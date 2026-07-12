@@ -6,7 +6,7 @@
 import SignalServiceKit
 import UIKit
 
-class RotationControl: UIControl {
+final class RotationControl: UIControl, UIScrollViewDelegate {
 
     private var previousAngle: CGFloat = 0
     private var _angle: CGFloat = 0
@@ -68,15 +68,18 @@ class RotationControl: UIControl {
         super.init(frame: .zero)
 
         layoutMargins = .zero
-        tintColor = .ows_white
+        tintColor = .Signal.label
 
         // Text Label
+        textLabel.isUserInteractionEnabled = true
         textLabel.setCompressionResistanceVerticalHigh()
         textLabel.setContentHuggingVerticalHigh()
+        textLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(textLabel)
-        textLabel.autoPinTopToSuperviewMargin()
-        textLabel.autoHCenterInSuperview()
-        textLabel.isUserInteractionEnabled = true
+        NSLayoutConstraint.activate([
+            textLabel.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor),
+            textLabel.centerXAnchor.constraint(equalTo: layoutMarginsGuide.centerXAnchor),
+        ])
         textLabel.addGestureRecognizer({
             let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
             gestureRecognizer.numberOfTapsRequired = 2
@@ -84,27 +87,42 @@ class RotationControl: UIControl {
         }())
 
         // Band
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(scrollView)
-        scrollView.autoSetDimension(.height, toSize: Constants.bandHeight)
-        scrollView.autoPinWidthToSuperviewMargins()
-        scrollView.autoPinEdge(.top, to: .bottom, of: textLabel, withOffset: 8)
-        scrollView.autoPinBottomToSuperviewMargin()
+        NSLayoutConstraint.activate([
+            scrollView.frameLayoutGuide.topAnchor.constraint(equalTo: textLabel.bottomAnchor, constant: 8),
+            scrollView.frameLayoutGuide.heightAnchor.constraint(equalToConstant: Constants.bandHeight),
+            scrollView.frameLayoutGuide.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
+            scrollView.frameLayoutGuide.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
+            scrollView.frameLayoutGuide.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor),
+        ])
         initializeRuler()
 
         // Current Value Marking
         currentValueMark.backgroundColor = UIColor(rgbHex: 0x62E87A)
+        currentValueMark.translatesAutoresizingMaskIntoConstraints = false
         addSubview(currentValueMark)
-        currentValueMark.autoSetDimension(.width, toSize: Constants.markingWidth)
-        currentValueMark.autoPinEdge(.top, to: .top, of: scrollView)
-        currentValueMark.autoPinEdge(.bottom, to: .bottom, of: scrollView)
-        currentValueMark.autoHCenterInSuperview()
+        NSLayoutConstraint.activate([
+            currentValueMark.topAnchor.constraint(equalTo: scrollView.frameLayoutGuide.topAnchor),
+            currentValueMark.widthAnchor.constraint(equalToConstant: Constants.markingWidth),
+            currentValueMark.centerXAnchor.constraint(equalTo: layoutMarginsGuide.centerXAnchor),
+            currentValueMark.bottomAnchor.constraint(equalTo: scrollView.frameLayoutGuide.bottomAnchor),
+        ])
 
         updateFont()
+        if #available(iOS 17, *) {
+            registerForTraitChanges(
+                [UITraitPreferredContentSizeCategory.self],
+                handler: { (view: UIView, _) in
+                    guard let view = view as? RotationControl else { return }
+                    view.updateFont()
+                },
+            )
+        }
         updateColors()
         updateAppearance()
     }
 
-    @available(*, unavailable, message: "Use init()")
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -118,6 +136,8 @@ class RotationControl: UIControl {
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
+
+        guard #unavailable(iOS 17) else { return }
         if traitCollection.preferredContentSizeCategory != previousTraitCollection?.preferredContentSizeCategory {
             updateFont()
         }
@@ -193,11 +213,8 @@ class RotationControl: UIControl {
             self.sendActions(for: .valueChanged)
         }
     }
-}
 
-// MARK: - Scroll View
-
-extension RotationControl: UIScrollViewDelegate {
+    // MARK: - Scroll View
 
     private func initializeRuler() {
         scrollView.delegate = self
@@ -211,7 +228,7 @@ extension RotationControl: UIScrollViewDelegate {
         let markingOriginY = rulerView.bounds.height - markingSize.height
         for i in 0...numberOfSteps {
             let marking = UIView(frame: CGRect(origin: .zero, size: markingSize))
-            marking.backgroundColor = .ows_white
+            marking.backgroundColor = .Signal.label
             marking.alpha = i % 5 == 0 ? 1 : 0.5
             rulerView.addSubview(marking)
             marking.frame.origin = CGPoint(
