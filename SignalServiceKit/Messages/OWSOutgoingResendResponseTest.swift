@@ -25,7 +25,7 @@ final class OWSOutgoingResendResponseTest: SSKBaseTest {
             "d/rq8//fR4RzhvN3G9KcKlQoj7cguQFjTOqLV6JUSbo=",
         )
         XCTAssertEqual(resendResponse.contentHint, .resendable)
-        XCTAssertEqual(resendResponse.didAppendSKDM, false)
+        XCTAssertEqual(resendResponse.senderKeyId, nil)
         XCTAssertEqual(resendResponse.uniqueId, "00000000-0000-4000-8000-00000000000B")
         XCTAssertEqual(resendResponse.uniqueThreadId, "00000000-0000-4000-8000-00000000000A")
     }

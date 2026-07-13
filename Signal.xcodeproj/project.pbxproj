@@ -617,6 +617,8 @@
 		5003BB43299F034D0037159B /* E164.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5003BB42299F034D0037159B /* E164.swift */; };
 		500824CE292737FC005A5DC0 /* WebSocketPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500824CD292737FC005A5DC0 /* WebSocketPromise.swift */; };
 		500824D0292741D5005A5DC0 /* ContactDiscoveryV2OperationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500824CF292741D5005A5DC0 /* ContactDiscoveryV2OperationTest.swift */; };
+		50085DB62EFAED0400E6CC0F /* SenderKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50085DB52EFAED0400E6CC0F /* SenderKeyStore.swift */; };
+		50085DB82EFAED0D00E6CC0F /* SenderKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50085DB72EFAED0D00E6CC0F /* SenderKeyManager.swift */; };
 		5008672F2B91432F00E34B5F /* SearchableNameIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5008672E2B91432F00E34B5F /* SearchableNameIndexer.swift */; };
 		50086B9E29DF606E00F9C072 /* TSGroupThread+ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50086B9D29DF606E00F9C072 /* TSGroupThread+ViewModel.swift */; };
 		500876142BF7B32A00D6F615 /* Preconditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A76F522AF565AC00FCF02D /* Preconditions.swift */; };
@@ -658,6 +660,8 @@
 		501631CA2EA03615006F9B0E /* ImageMetadataTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501631C92EA03615006F9B0E /* ImageMetadataTest.swift */; };
 		50169695291B0627007AD709 /* ContactDiscoveryManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50169694291B0627007AD709 /* ContactDiscoveryManagerTest.swift */; };
 		5018B9DD2ADF4157001DFB12 /* AuthedDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5018B9DC2ADF4157001DFB12 /* AuthedDevice.swift */; };
+		501A6C262FFEA7CB0099D9E1 /* SenderKeyStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501A6C252FFEA7CB0099D9E1 /* SenderKeyStoreTest.swift */; };
+		501A6C282FFEB4510099D9E1 /* SenderKeyManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501A6C272FFEB4510099D9E1 /* SenderKeyManagerTest.swift */; };
 		501AD1C42AF17A16001B796A /* ECKeyPairTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501AD1C32AF17A16001B796A /* ECKeyPairTest.swift */; };
 		501DAB1C2EBBCB5B00636157 /* Cron.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501DAB1A2EBBB48800636157 /* Cron.swift */; };
 		501E4DAB2D133F4400D883C7 /* CompletionSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501E4DAA2D133F4400D883C7 /* CompletionSerializer.swift */; };
@@ -4899,6 +4903,8 @@
 		5003BB42299F034D0037159B /* E164.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = E164.swift; sourceTree = "<group>"; };
 		500824CD292737FC005A5DC0 /* WebSocketPromise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketPromise.swift; sourceTree = "<group>"; };
 		500824CF292741D5005A5DC0 /* ContactDiscoveryV2OperationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDiscoveryV2OperationTest.swift; sourceTree = "<group>"; };
+		50085DB52EFAED0400E6CC0F /* SenderKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SenderKeyStore.swift; sourceTree = "<group>"; };
+		50085DB72EFAED0D00E6CC0F /* SenderKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SenderKeyManager.swift; sourceTree = "<group>"; };
 		5008672E2B91432F00E34B5F /* SearchableNameIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchableNameIndexer.swift; sourceTree = "<group>"; };
 		50086B9B29DF5CB100F9C072 /* NameResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameResolver.swift; sourceTree = "<group>"; };
 		50086B9D29DF606E00F9C072 /* TSGroupThread+ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TSGroupThread+ViewModel.swift"; sourceTree = "<group>"; };
@@ -4944,6 +4950,8 @@
 		501631C92EA03615006F9B0E /* ImageMetadataTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageMetadataTest.swift; sourceTree = "<group>"; };
 		50169694291B0627007AD709 /* ContactDiscoveryManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDiscoveryManagerTest.swift; sourceTree = "<group>"; };
 		5018B9DC2ADF4157001DFB12 /* AuthedDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthedDevice.swift; sourceTree = "<group>"; };
+		501A6C252FFEA7CB0099D9E1 /* SenderKeyStoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SenderKeyStoreTest.swift; sourceTree = "<group>"; };
+		501A6C272FFEB4510099D9E1 /* SenderKeyManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SenderKeyManagerTest.swift; sourceTree = "<group>"; };
 		501AD1C32AF17A16001B796A /* ECKeyPairTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ECKeyPairTest.swift; sourceTree = "<group>"; };
 		501D64FA28C027BA008D5993 /* OWSPaymentsLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OWSPaymentsLock.swift; sourceTree = "<group>"; };
 		501DAB1A2EBBB48800636157 /* Cron.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cron.swift; sourceTree = "<group>"; };
@@ -9714,6 +9722,15 @@
 				5013365E2B2BC2EF004119F1 /* ZkParamsMigrator.swift */,
 			);
 			path = ZeroKnowledge;
+			sourceTree = "<group>";
+		};
+		501A6C242FFEA7B00099D9E1 /* Axolotl */ = {
+			isa = PBXGroup;
+			children = (
+				501A6C272FFEB4510099D9E1 /* SenderKeyManagerTest.swift */,
+				501A6C252FFEA7CB0099D9E1 /* SenderKeyStoreTest.swift */,
+			);
+			path = Axolotl;
 			sourceTree = "<group>";
 		};
 		501AD1C22AF17A0B001B796A /* Cryptography */ = {
@@ -14756,6 +14773,7 @@
 				F94261FF289B1B5400460798 /* Account */,
 				D92EFDED2F69B9D00031D257 /* AttachmentBackfill */,
 				50ED28002F0EDAFB00E57C54 /* Attachments */,
+				501A6C242FFEA7B00099D9E1 /* Axolotl */,
 				50DAF7E12FD87BFD00BE7430 /* Backups */,
 				F945FE4B298481D800C835C7 /* Calls */,
 				D985D86229B91C2B0087C90C /* ChangePhoneNumber */,
@@ -15367,6 +15385,8 @@
 				D94AEB3B2D28940500B03D7A /* PreKeyTaskAPIClient.swift */,
 				C1ED5CA02A72E3D5009AD3FC /* PreKeyTaskManager.swift */,
 				6659A0302A7C5B9700066AB7 /* PreKeyUploadBundle.swift */,
+				50085DB72EFAED0D00E6CC0F /* SenderKeyManager.swift */,
+				50085DB52EFAED0400E6CC0F /* SenderKeyStore.swift */,
 				501050BA2EB959A4005161CA /* SessionStore.swift */,
 				F9C5CA56289453B100548EEE /* SignalProtocolStore.swift */,
 				F9C5CA55289453B100548EEE /* SignedPreKeyStoreImpl.swift */,
@@ -19914,6 +19934,8 @@
 				662C440B2A156DF7001F83E2 /* SecureValueRecovery2Impl.swift in Sources */,
 				6691E7F72996EAD70032A68A /* SecureValueRecoveryMock.swift in Sources */,
 				500CC1E52F15661A001A86F7 /* SendableMessage.swift in Sources */,
+				50085DB82EFAED0D00E6CC0F /* SenderKeyManager.swift in Sources */,
+				50085DB62EFAED0400E6CC0F /* SenderKeyStore.swift in Sources */,
 				725465392BA01FAA00EABFD2 /* SendGiftBadgeJobQueue.swift in Sources */,
 				D9AE0AD5291877600063488B /* SendGiftBadgeJobRecord.swift in Sources */,
 				504F98B32EB0270A00DF465B /* SendMessageFailure.swift in Sources */,
@@ -20386,6 +20408,8 @@
 				F942624B289B1B5500460798 /* SDSDatabaseStorageTest.swift in Sources */,
 				F942624A289B1B5500460798 /* SDSKeyValueStoreTest.swift in Sources */,
 				662C44172A1D21D7001F83E2 /* SecureValueRecovery2Tests.swift in Sources */,
+				501A6C282FFEB4510099D9E1 /* SenderKeyManagerTest.swift in Sources */,
+				501A6C262FFEA7CB0099D9E1 /* SenderKeyStoreTest.swift in Sources */,
 				6605B98A2B211BD500E8A68A /* SerialTaskQueueTest.swift in Sources */,
 				503158F22B57B0010023A5DB /* ServiceIdTest.swift in Sources */,
 				5AA002E62CA24566002D1CC2 /* SessionStoreTest.swift in Sources */,

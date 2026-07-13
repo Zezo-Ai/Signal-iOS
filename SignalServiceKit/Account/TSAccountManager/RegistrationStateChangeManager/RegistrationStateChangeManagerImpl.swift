@@ -27,7 +27,7 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
     private let paymentsEvents: PaymentsEvents
     private let recipientManager: any SignalRecipientManager
     private let recipientMerger: RecipientMerger
-    private let senderKeyStore: OldSenderKeyStore
+    private let senderKeyManager: SenderKeyManager
     private let signalProtocolStoreManager: SignalProtocolStoreManager
     private let storageServiceManager: StorageServiceManager
     private let tsAccountManager: TSAccountManager
@@ -52,7 +52,7 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
         paymentsEvents: PaymentsEvents,
         recipientManager: any SignalRecipientManager,
         recipientMerger: RecipientMerger,
-        senderKeyStore: OldSenderKeyStore,
+        senderKeyManager: SenderKeyManager,
         signalProtocolStoreManager: SignalProtocolStoreManager,
         storageServiceManager: StorageServiceManager,
         tsAccountManager: TSAccountManager,
@@ -76,7 +76,7 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
         self.paymentsEvents = paymentsEvents
         self.recipientManager = recipientManager
         self.recipientMerger = recipientMerger
-        self.senderKeyStore = senderKeyStore
+        self.senderKeyManager = senderKeyManager
         self.signalProtocolStoreManager = signalProtocolStoreManager
         self.storageServiceManager = storageServiceManager
         self.tsAccountManager = tsAccountManager
@@ -231,7 +231,7 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
         )
 
         signalProtocolStoreManager.sessionStore.deleteAllSessions(tx: tx)
-        senderKeyStore.resetSenderKeyStore(transaction: tx)
+        senderKeyManager.resetAll(tx: tx)
         udManager.removeSenderCertificates(tx: tx)
         versionedProfiles.clearProfileKeyCredentials(tx: tx)
         authCredentialStore.removeAllGroupAuthCredentials(tx: tx)

@@ -193,6 +193,10 @@ public struct SignalRecipient: FetchableRecord, PersistableRecord, Codable {
     public var isPhoneNumberDiscoverable: Bool {
         return isRegistered && phoneNumber?.isDiscoverable == true
     }
+
+    func canSendToPni() -> Bool {
+        return self.aciString == nil
+    }
 }
 
 // MARK: - SignalRecipientManagerImpl

@@ -64,11 +64,11 @@ public final class RecipientIdFinder {
         return validateRecipient(recipient, for: serviceId)
     }
 
-    private func validateRecipient(
+    func validateRecipient(
         _ recipient: SignalRecipient,
         for serviceId: ServiceId?,
     ) -> Result<SignalRecipient, RecipientIdError> {
-        if serviceId is Pni, recipient.aciString != nil {
+        if serviceId is Pni, !recipient.canSendToPni() {
             return .failure(.mustNotUsePniBecauseAciExists)
         }
         return .success(recipient)

@@ -334,3 +334,66 @@ public class SessionManagerForIdentity: LibSignalClient.SessionStore {
         }
     }
 }
+
+#if TESTABLE_BUILD
+
+enum MockSessionStore {
+    static func processPreKeyBundle(
+        localAddress: ProtocolAddress = ProtocolAddress(
+            Aci.constantForTesting("00000000-0000-4000-8000-0000000000A0"),
+            deviceId: .primary,
+        ),
+        theirAddress: ProtocolAddress = ProtocolAddress(
+            Aci.constantForTesting("00000000-0000-4000-8000-0000000000B0"),
+            deviceId: .primary,
+        ),
+        theirIdentityKey: IdentityKeyPair = .generate(),
+        theirRegistrationId: UInt32 = RegistrationIdGenerator.generate(),
+        theirPreKeyId: UInt32 = PreKeyId.random(),
+        theirSignedPreKeyId: UInt32 = PreKeyId.random(),
+        theirKyberPreKeyId: UInt32 = PreKeyId.random(),
+        now: Date = Date(),
+        sessionStore: any LibSignalClient.SessionStore,
+        identityStore: any LibSignalClient.IdentityKeyStore,
+        context: any StoreContext = NullContext(),
+    ) throws {
+        let alice_address = localAddress
+        let bob_address = theirAddress
+
+        let bob_pre_key = PrivateKey.generate()
+        let bob_signed_pre_key = PrivateKey.generate()
+        let bob_signed_pre_key_public = bob_signed_pre_key.publicKey.serialize()
+        let bob_kyber_pre_key = KEMKeyPair.generate()
+        let bob_kyber_pre_key_public = bob_kyber_pre_key.publicKey.serialize()
+        let bob_identity_key = theirIdentityKey
+        let bob_signed_pre_key_signature = bob_identity_key.privateKey.generateSignature(message: bob_signed_pre_key_public)
+        let bob_kyber_pre_key_signature = bob_identity_key.privateKey.generateSignature(message: bob_kyber_pre_key_public)
+
+        let bob_bundle = try LibSignalClient.PreKeyBundle(
+            registrationId: theirRegistrationId,
+            deviceId: bob_address.deviceId,
+            prekeyId: theirPreKeyId,
+            prekey: bob_pre_key.publicKey,
+            signedPrekeyId: theirSignedPreKeyId,
+            signedPrekey: bob_signed_pre_key.publicKey,
+            signedPrekeySignature: bob_signed_pre_key_signature,
+            identity: bob_identity_key.identityKey,
+            kyberPrekeyId: theirKyberPreKeyId,
+            kyberPrekey: bob_kyber_pre_key.publicKey,
+            kyberPrekeySignature: bob_kyber_pre_key_signature,
+        )
+
+        // Alice processes the bundle:
+        try LibSignalClient.processPreKeyBundle(
+            bob_bundle,
+            for: bob_address,
+            ourAddress: alice_address,
+            sessionStore: sessionStore,
+            identityStore: identityStore,
+            now: now,
+            context: context,
+        )
+    }
+}
+
+#endif

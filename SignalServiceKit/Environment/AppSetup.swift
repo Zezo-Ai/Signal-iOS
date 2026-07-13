@@ -319,7 +319,6 @@ extension AppSetup.GlobalsContinuation {
         )
 
         let receiptManager = OWSReceiptManager(appReadiness: appReadiness, databaseStorage: databaseStorage, messageSenderJobQueue: messageSenderJobQueue, notificationPresenter: notificationPresenter)
-        let senderKeyStore = OldSenderKeyStore()
         let signalProtocolStoreManager = SignalProtocolStoreManager(
             aciProtocolStore: aciProtocolStore,
             pniProtocolStore: pniProtocolStore,
@@ -1044,6 +1043,18 @@ extension AppSetup.GlobalsContinuation {
 
         let keyTransparencyStore = KeyTransparencyStore()
 
+        let senderKeyManager = SenderKeyManager(
+            oldSenderKeyStore: OldSenderKeyStore(),
+            recipientFetcher: recipientFetcher,
+            recipientStore: recipientDatabaseTable,
+            senderKeyStore: SenderKeyStore(),
+            sessionStore: sessionStore,
+        )
+        let senderKeySendingManager = SenderKeySendingManager(
+            senderKeyManager: senderKeyManager,
+            dateProvider: dateProvider,
+        )
+
         let registrationStateChangeManager = RegistrationStateChangeManagerImpl(
             authCredentialStore: authCredentialStore,
             backupAttachmentUploadEraStore: backupAttachmentUploadEraStore,
@@ -1062,7 +1073,7 @@ extension AppSetup.GlobalsContinuation {
             paymentsEvents: paymentsEvents,
             recipientManager: recipientManager,
             recipientMerger: recipientMerger,
-            senderKeyStore: senderKeyStore,
+            senderKeyManager: senderKeyManager,
             signalProtocolStoreManager: signalProtocolStoreManager,
             storageServiceManager: storageServiceManager,
             tsAccountManager: tsAccountManager,
@@ -1188,6 +1199,7 @@ extension AppSetup.GlobalsContinuation {
         let messageSenderImpl = MessageSenderImpl(
             accountChecker: accountChecker,
             groupSendEndorsementStore: groupSendEndorsementStore,
+            senderKeySendingManager: senderKeySendingManager,
         )
         let messageSender = testDependencies.messageSender ?? messageSenderImpl
 
@@ -1833,6 +1845,7 @@ extension AppSetup.GlobalsContinuation {
             registrationStateChangeManager: registrationStateChangeManager,
             remoteReleaseNotesService: remoteReleaseNotesService,
             searchableNameIndexer: searchableNameIndexer,
+            senderKeySendingManager: senderKeySendingManager,
             sentMessageTranscriptReceiver: sentMessageTranscriptReceiver,
             signalProtocolStoreManager: signalProtocolStoreManager,
             storageServiceRecordIkmMigrator: storageServiceRecordIkmMigrator,
@@ -1874,8 +1887,12 @@ extension AppSetup.GlobalsContinuation {
             deleteForMeSyncMessageReceiver: DeleteForMeSyncMessageReceiverImpl(
                 deleteForMeIncomingSyncMessageManager: deleteForMeIncomingSyncMessageManager,
             ),
+            senderKeyManager: senderKeyManager,
         )
-        let messageDecrypter = OWSMessageDecrypter(appReadiness: appReadiness)
+        let messageDecrypter = OWSMessageDecrypter(
+            appReadiness: appReadiness,
+            senderKeyManager: senderKeyManager,
+        )
         let stickerManager = StickerManager(
             appReadiness: appReadiness,
             dateProvider: dateProvider,
@@ -1960,7 +1977,6 @@ extension AppSetup.GlobalsContinuation {
             paymentsLock: paymentsLock,
             mobileCoinHelper: mobileCoinHelper,
             spamChallengeResolver: spamChallengeResolver,
-            senderKeyStore: senderKeyStore,
             phoneNumberUtil: phoneNumberUtil,
             webSocketFactory: webSocketFactory,
             systemStoryManager: systemStoryManager,

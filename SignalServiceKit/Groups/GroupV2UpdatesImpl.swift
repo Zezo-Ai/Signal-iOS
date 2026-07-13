@@ -136,8 +136,12 @@ public class GroupV2UpdatesImpl: GroupV2Updates {
         guard let groupThread = TSGroupThread.fetch(forGroupId: groupId, tx: transaction) else {
             throw OWSAssertionError("Missing groupThread.")
         }
-        guard let localIdentifiers = DependenciesBridge.shared.tsAccountManager.localIdentifiers(tx: transaction) else {
-            throw OWSAssertionError("Not registered.")
+        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+        guard let localIdentifiers = tsAccountManager.localIdentifiers(tx: transaction) else {
+            throw OWSAssertionError("Never registered.")
+        }
+        guard let localDeviceId = tsAccountManager.storedDeviceId(tx: transaction).ifValid else {
+            throw OWSAssertionError("Never registered.")
         }
         let changedGroupModel = try GroupsV2IncomingChanges.applyChangesToGroupModel(
             groupThread: groupThread,
@@ -160,6 +164,7 @@ public class GroupV2UpdatesImpl: GroupV2Updates {
             newlyLearnedPniToAciAssociations: changedGroupModel.newlyLearnedPniToAciAssociations,
             groupUpdateSource: changedGroupModel.updateSource,
             localIdentifiers: localIdentifiers,
+            localDeviceId: localDeviceId,
             spamReportingMetadata: spamReportingMetadata,
             updatedLastVerifiedGroupNameHash: updatedLastVerifiedGroupNameHash,
             transaction: transaction,
@@ -457,12 +462,8 @@ public extension GroupV2UpdatesImpl {
         groupSendEndorsementsResponse: GroupSendEndorsementsResponse?,
         options: TSGroupModelOptions,
     ) async throws {
-        guard
-            let localIdentifiers = SSKEnvironment.shared.databaseStorageRef.read(block: { tx in
-                let tsAccountManager = DependenciesBridge.shared.tsAccountManager
-                return tsAccountManager.localIdentifiers(tx: tx)
-            })
-        else {
+        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+        guard let localIdentifiers = tsAccountManager.localIdentifiersWithMaybeSneakyTransaction else {
             throw OWSAssertionError("Missing localIdentifiers.")
         }
 
@@ -482,6 +483,13 @@ public extension GroupV2UpdatesImpl {
             )
         }
         try await SSKEnvironment.shared.databaseStorageRef.awaitableWrite { transaction in
+            guard let localIdentifiers = tsAccountManager.localIdentifiers(tx: transaction) else {
+                throw OWSAssertionError("Missing localIdentifiers.")
+            }
+            guard let localDeviceId = tsAccountManager.storedDeviceId(tx: transaction).ifValid else {
+                throw OWSAssertionError("Missing localDeviceId.")
+            }
+
             var localUserWasAddedBy: GroupUpdateSource?
             let groupThread: TSGroupThread
             if let existingThread = TSGroupThread.fetch(forGroupId: groupId, tx: transaction) {
@@ -495,6 +503,7 @@ public extension GroupV2UpdatesImpl {
                     groupChanges: groupChanges,
                     groupModelOptions: options,
                     localIdentifiers: localIdentifiers,
+                    localDeviceId: localDeviceId,
                     lastVerifiedGroupNameHash: lastVerifiedGroupNameHash,
                     transaction: transaction,
                 )
@@ -512,6 +521,7 @@ public extension GroupV2UpdatesImpl {
                         profileKeysByAci: &profileKeysByAci,
                         authoritativeProfileKeysByAci: &authoritativeProfileKeysByAci,
                         localIdentifiers: localIdentifiers,
+                        localDeviceId: localDeviceId,
                         spamReportingMetadata: spamReportingMetadata,
                         transaction: transaction,
                     )
@@ -603,6 +613,7 @@ public extension GroupV2UpdatesImpl {
         groupChanges: [GroupV2Change],
         groupModelOptions: TSGroupModelOptions,
         localIdentifiers: LocalIdentifiers,
+        localDeviceId: DeviceId,
         lastVerifiedGroupNameHash: Data?,
         transaction: DBWriteTransaction,
     ) throws -> (TSGroupThread, addedToNewThreadBy: GroupUpdateSource?) {
@@ -645,6 +656,7 @@ public extension GroupV2UpdatesImpl {
             didAddLocalUserToV2Group: didAddLocalUserToV2Group,
             infoMessagePolicy: .insert,
             localIdentifiers: localIdentifiers,
+            localDeviceId: localDeviceId,
             spamReportingMetadata: spamReportingMetadata,
             updatedLastVerifiedGroupNameHash: lastVerifiedGroupNameHash,
             transaction: transaction,
@@ -673,6 +685,7 @@ public extension GroupV2UpdatesImpl {
         profileKeysByAci: inout [Aci: Data],
         authoritativeProfileKeysByAci: inout [Aci: Data],
         localIdentifiers: LocalIdentifiers,
+        localDeviceId: DeviceId,
         spamReportingMetadata: GroupUpdateSpamReportingMetadata,
         transaction: DBWriteTransaction,
     ) throws -> ApplySingleChangeFromServiceResult? {
@@ -744,6 +757,7 @@ public extension GroupV2UpdatesImpl {
             newlyLearnedPniToAciAssociations: newlyLearnedPniToAciAssociations,
             groupUpdateSource: groupUpdateSource,
             localIdentifiers: localIdentifiers,
+            localDeviceId: localDeviceId,
             spamReportingMetadata: spamReportingMetadata,
             updatedLastVerifiedGroupNameHash: nil, // Nothing to update.
             transaction: transaction,
@@ -792,10 +806,14 @@ public extension GroupV2UpdatesImpl {
         }
 
         try await SSKEnvironment.shared.databaseStorageRef.awaitableWrite { transaction in
-            guard let localIdentifiers = DependenciesBridge.shared.tsAccountManager.localIdentifiers(tx: transaction) else {
+            let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+            guard let localIdentifiers = tsAccountManager.localIdentifiers(tx: transaction) else {
                 throw OWSAssertionError("Missing localIdentifiers.")
             }
             let localAci = localIdentifiers.aci
+            guard let localDeviceId = tsAccountManager.storedDeviceId(tx: transaction).ifValid else {
+                throw OWSAssertionError("Missing localDeviceId.")
+            }
 
             let profileManager = SSKEnvironment.shared.profileManagerRef
             let localProfileKey = profileManager.localUserProfile(tx: transaction)?.profileKey
@@ -829,6 +847,7 @@ public extension GroupV2UpdatesImpl {
                 didAddLocalUserToV2Group: false,
                 infoMessagePolicy: .insert,
                 localIdentifiers: localIdentifiers,
+                localDeviceId: localDeviceId,
                 spamReportingMetadata: spamReportingMetadata,
                 updatedLastVerifiedGroupNameHash: nil,
                 transaction: transaction,

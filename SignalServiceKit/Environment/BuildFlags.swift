@@ -64,6 +64,10 @@ public enum BuildFlags {
     // because this is false.
     public static let migrateHasPaymentAddress = true
 
+    // Turn this off 14 days after the last release without this change
+    // expires. Then, delete all the code that's now dead.
+    public static let decodeOldSenderKeys = true
+
     public enum KeyTransparency {
         public static let enabled = true
         public static let conservativeSelfCheck = build <= .internal

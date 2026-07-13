@@ -31,13 +31,16 @@ public class MessageSenderImpl: MessageSender, DeviceMessageBuilder {
 
     let accountChecker: AccountChecker
     private let groupSendEndorsementStore: GroupSendEndorsementStore
+    let senderKeySendingManager: SenderKeySendingManager
 
     init(
         accountChecker: AccountChecker,
         groupSendEndorsementStore: GroupSendEndorsementStore,
+        senderKeySendingManager: SenderKeySendingManager,
     ) {
         self.accountChecker = accountChecker
         self.groupSendEndorsementStore = groupSendEndorsementStore
+        self.senderKeySendingManager = senderKeySendingManager
 
         SwiftSingletons.register(self)
     }
@@ -2079,7 +2082,7 @@ public class MessageSenderImpl: MessageSender, DeviceMessageBuilder {
                 signedPreKeyStore: preKeyStore,
                 kyberPreKeyStore: preKeyStore,
                 identityStore: try identityManager.libSignalStore(for: .aci, tx: transaction),
-                senderKeyStore: SSKEnvironment.shared.senderKeyStoreRef,
+                senderKeyStore: senderKeySendingManager,
             )
 
             let serializedMessage = try secretCipher.encryptMessage(

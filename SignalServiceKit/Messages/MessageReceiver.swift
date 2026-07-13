@@ -62,13 +62,16 @@ public enum SealedSenderContentHint: Int, Codable, CustomStringConvertible {
 public final class MessageReceiver {
     private let callMessageHandler: any CallMessageHandler
     private let deleteForMeSyncMessageReceiver: any DeleteForMeSyncMessageReceiver
+    private let senderKeyManager: SenderKeyManager
 
     init(
         callMessageHandler: any CallMessageHandler,
         deleteForMeSyncMessageReceiver: any DeleteForMeSyncMessageReceiver,
+        senderKeyManager: SenderKeyManager,
     ) {
         self.callMessageHandler = callMessageHandler
         self.deleteForMeSyncMessageReceiver = deleteForMeSyncMessageReceiver
+        self.senderKeyManager = senderKeyManager
     }
 
     private static let pendingTasks = PendingTasks()
@@ -1837,7 +1840,15 @@ public final class MessageReceiver {
             let sourceAci = decryptedEnvelope.sourceAci
             let sourceDeviceId = decryptedEnvelope.sourceDeviceId
             let protocolAddress = ProtocolAddress(sourceAci, deviceId: sourceDeviceId)
-            try processSenderKeyDistributionMessage(skdm, from: protocolAddress, store: SSKEnvironment.shared.senderKeyStoreRef, context: tx)
+            try processSenderKeyDistributionMessage(
+                skdm,
+                from: protocolAddress,
+                store: SenderKeyReceivingManager(
+                    senderKeyManager: senderKeyManager,
+                    shouldUpdateInsertedAtDate: true,
+                ),
+                context: tx,
+            )
 
             Logger.info("Processed incoming sender key distribution message from \(sourceAci).\(sourceDeviceId)")
 

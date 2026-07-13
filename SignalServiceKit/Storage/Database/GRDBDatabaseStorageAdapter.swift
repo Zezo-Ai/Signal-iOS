@@ -959,6 +959,9 @@ extension GRDBDatabaseStorageAdapter {
 
 // MARK: -
 
+public struct ConstraintError: Error {
+}
+
 extension GRDB.DatabaseError {
     public var forLogging: Self {
         // DatabaseError.description includes the arguments.

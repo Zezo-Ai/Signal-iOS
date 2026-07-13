@@ -345,6 +345,7 @@ public class GRDBSchemaMigrator {
         case migrateHasPaymentAddress
         case addCombinedGroupSendEndorsementExpirationIndex
         case migrateGroupKeyValueStores
+        case addSenderKey
 
         // NOTE: Every time we add a migration id, consider
         // incrementing grdbSchemaVersionLatest.
@@ -468,7 +469,7 @@ public class GRDBSchemaMigrator {
     }
 
     public static let grdbSchemaVersionDefault: UInt = 0
-    public static let grdbSchemaVersionLatest: UInt = 153
+    public static let grdbSchemaVersionLatest: UInt = 154
 
     private class DatabaseMigratorWrapper {
         // Run with immediate (or disabled) foreign key checks so that pre-existing
@@ -5386,6 +5387,48 @@ public class GRDBSchemaMigrator {
                 let migrator = KeyValueStoreMigrator(collection: "Wallpaper+Dimming")
                 try migrator.fetchKeys(tx: tx).forEach { try migrator.migrateBool($0, tx: tx) }
             }
+            return .success(())
+        }
+
+        migrator.registerMigration(.addSenderKey) { tx in
+            try tx.database.create(table: "SenderKey") {
+                // Must be AUTOINCREMENT because we pass IDs across transactions.
+                $0.column("id", .integer).primaryKey(autoincrement: true).notNull()
+                $0.column("ownerRecipientId", .integer).notNull()
+                    .references("model_SignalRecipient", column: "id", onDelete: .cascade, onUpdate: .cascade)
+                $0.column("ownerDeviceId", .integer).notNull()
+                $0.column("distributionId", .blob).notNull()
+                $0.column("deletionType", .integer).notNull()
+                $0.column("insertedAt", .date).notNull()
+                $0.column("serializedRecord", .blob).notNull()
+            }
+            try tx.database.create(
+                index: "SenderKey_Unique",
+                on: "SenderKey",
+                columns: ["ownerRecipientId", "ownerDeviceId", "distributionId"],
+                options: [.unique],
+            )
+            // For deleting expired Sender Keys.
+            try tx.database.create(
+                index: "SenderKey_Expiration",
+                on: "SenderKey",
+                columns: ["deletionType", "insertedAt"],
+            )
+            try tx.database.create(table: "SenderKeySentToDevice", options: [.withoutRowID]) {
+                $0.column("senderKeyId", .integer).notNull()
+                    .references("SenderKey", column: "id", onDelete: .cascade, onUpdate: .cascade)
+                $0.column("recipientId", .integer).notNull()
+                    .references("model_SignalRecipient", column: "id", onDelete: .cascade, onUpdate: .cascade)
+                $0.column("deviceId", .integer).notNull()
+                $0.column("registrationId", .integer).notNull()
+                $0.primaryKey(["senderKeyId", "recipientId", "deviceId"])
+            }
+            // For the FOREIGN KEY to Recipient.
+            try tx.database.create(
+                index: "SenderKeySentToDevice_recipientId",
+                on: "SenderKeySentToDevice",
+                columns: ["recipientId"],
+            )
             return .success(())
         }
 

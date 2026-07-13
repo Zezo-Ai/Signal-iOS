@@ -205,8 +205,12 @@ public class GroupManager: NSObject {
         transaction: DBWriteTransaction,
     ) throws -> TSGroupThread {
 
-        guard let localIdentifiers = DependenciesBridge.shared.tsAccountManager.localIdentifiers(tx: transaction) else {
+        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+        guard let localIdentifiers = tsAccountManager.localIdentifiers(tx: transaction) else {
             throw OWSAssertionError("Missing localIdentifiers.")
+        }
+        guard let localDeviceId = tsAccountManager.storedDeviceId(tx: transaction).ifValid else {
+            throw OWSAssertionError("Missing localDeviceId.")
         }
 
         let secretParams = try GroupSecretParams.generate()
@@ -224,6 +228,7 @@ public class GroupManager: NSObject {
             groupUpdateSource: .localUser(originalSource: .aci(localIdentifiers.aci)),
             infoMessagePolicy: shouldInsertInfoMessage ? .insert : .doNotInsert,
             localIdentifiers: localIdentifiers,
+            localDeviceId: localDeviceId,
             transaction: transaction,
         )
     }
@@ -235,6 +240,7 @@ public class GroupManager: NSObject {
         groupUpdateSource: GroupUpdateSource,
         infoMessagePolicy: InfoMessagePolicy = .insert,
         localIdentifiers: LocalIdentifiers,
+        localDeviceId: DeviceId,
         transaction: DBWriteTransaction,
     ) -> TSGroupThread {
         return self.tryToUpsertExistingGroupThreadInDatabaseAndCreateInfoMessage(
@@ -245,6 +251,7 @@ public class GroupManager: NSObject {
             didAddLocalUserToV2Group: false,
             infoMessagePolicy: infoMessagePolicy,
             localIdentifiers: localIdentifiers,
+            localDeviceId: localDeviceId,
             spamReportingMetadata: .unreportable,
             updatedLastVerifiedGroupNameHash: nil,
             transaction: transaction,
@@ -690,6 +697,10 @@ public class GroupManager: NSObject {
                 owsFailDebug("Missing localIdentifiers.")
                 return
             }
+            guard let localDeviceId = tsAccountManager.storedDeviceId(tx: tx).ifValid else {
+                owsFailDebug("Missing localDeviceId.")
+                return
+            }
             guard let groupThread = TSGroupThread.fetch(forGroupId: groupId, tx: tx) else {
                 owsFailDebug("Couldn't fetch thread that's guaranteed to exist.")
                 return
@@ -723,6 +734,7 @@ public class GroupManager: NSObject {
                     groupUpdateSource: .unknown,
                     infoMessagePolicy: .insert,
                     localIdentifiers: localIdentifiers,
+                    localDeviceId: localDeviceId,
                     spamReportingMetadata: .createdByLocalAction,
                     updatedLastVerifiedGroupNameHash: nil,
                     transaction: tx,
@@ -905,6 +917,7 @@ public class GroupManager: NSObject {
         didAddLocalUserToV2Group: Bool,
         infoMessagePolicy: InfoMessagePolicy,
         localIdentifiers: LocalIdentifiers,
+        localDeviceId: DeviceId,
         spamReportingMetadata: GroupUpdateSpamReportingMetadata,
         updatedLastVerifiedGroupNameHash: Data?,
         transaction: DBWriteTransaction,
@@ -923,6 +936,7 @@ public class GroupManager: NSObject {
                 groupUpdateSource: groupUpdateSource,
                 infoMessagePolicy: infoMessagePolicy,
                 localIdentifiers: localIdentifiers,
+                localDeviceId: localDeviceId,
                 spamReportingMetadata: spamReportingMetadata,
                 updatedLastVerifiedGroupNameHash: updatedLastVerifiedGroupNameHash,
                 transaction: transaction,
@@ -983,6 +997,7 @@ public class GroupManager: NSObject {
         groupUpdateSource: GroupUpdateSource,
         infoMessagePolicy: InfoMessagePolicy = .insert,
         localIdentifiers: LocalIdentifiers,
+        localDeviceId: DeviceId,
         spamReportingMetadata: GroupUpdateSpamReportingMetadata,
         updatedLastVerifiedGroupNameHash: Data?,
         transaction: DBWriteTransaction,
@@ -1038,7 +1053,13 @@ public class GroupManager: NSObject {
             // If somebody else was removed, reset the sender key session.
             let removedMembers = oldMembers.subtracting(newMembers)
             if !removedMembers.subtracting([localIdentifiers.aci]).isEmpty {
-                SSKEnvironment.shared.senderKeyStoreRef.resetSenderKeySession(for: groupThread, transaction: transaction)
+                let senderKeySendingManager = DependenciesBridge.shared.senderKeySendingManager
+                senderKeySendingManager.deleteSenderKey(
+                    forThreadUniqueId: groupThread.uniqueId,
+                    localAci: localIdentifiers.aci,
+                    localDeviceId: localDeviceId,
+                    tx: transaction,
+                )
             }
 
             if

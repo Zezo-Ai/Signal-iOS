@@ -43,7 +43,7 @@ public class SSKEnvironment: NSObject {
     public let blockingManagerRef: BlockingManager
     public let remoteConfigManagerRef: RemoteConfigManager
     public let udManagerRef: OWSUDManager
-    public let messageDecrypterRef: OWSMessageDecrypter
+    let messageDecrypterRef: OWSMessageDecrypter
     public let groupMessageProcessorManagerRef: GroupMessageProcessorManager
     public let ows2FAManagerRef: OWS2FAManager
     @objc
@@ -74,7 +74,6 @@ public class SSKEnvironment: NSObject {
     public let owsPaymentsLockRef: OWSPaymentsLock
     public let mobileCoinHelperRef: MobileCoinHelper
     public let spamChallengeResolverRef: SpamChallengeResolver
-    public let senderKeyStoreRef: OldSenderKeyStore
     public let phoneNumberUtilRef: PhoneNumberUtil
     public let webSocketFactoryRef: WebSocketFactory
     public let systemStoryManagerRef: SystemStoryManagerProtocol
@@ -139,7 +138,6 @@ public class SSKEnvironment: NSObject {
         paymentsLock: OWSPaymentsLock,
         mobileCoinHelper: MobileCoinHelper,
         spamChallengeResolver: SpamChallengeResolver,
-        senderKeyStore: OldSenderKeyStore,
         phoneNumberUtil: PhoneNumberUtil,
         webSocketFactory: WebSocketFactory,
         systemStoryManager: SystemStoryManagerProtocol,
@@ -197,7 +195,6 @@ public class SSKEnvironment: NSObject {
         self.owsPaymentsLockRef = paymentsLock
         self.mobileCoinHelperRef = mobileCoinHelper
         self.spamChallengeResolverRef = spamChallengeResolver
-        self.senderKeyStoreRef = senderKeyStore
         self.phoneNumberUtilRef = phoneNumberUtil
         self.webSocketFactoryRef = webSocketFactory
         self.systemStoryManagerRef = systemStoryManager

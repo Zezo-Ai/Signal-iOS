@@ -5,11 +5,17 @@
 
 import LibSignalClient
 
-public class OWSMessageDecrypter {
+class OWSMessageDecrypter {
 
     private let senderIdsResetDuringCurrentBatch = AtomicValue<Set<String>>(Set(), lock: .init())
+    private let senderKeyManager: SenderKeyManager
 
-    public init(appReadiness: AppReadiness) {
+    init(
+        appReadiness: AppReadiness,
+        senderKeyManager: SenderKeyManager,
+    ) {
+        self.senderKeyManager = senderKeyManager
+
         SwiftSingletons.register(self)
 
         appReadiness.runNowOrWhenAppDidBecomeReadySync {
@@ -441,7 +447,7 @@ public class OWSMessageDecrypter {
                 plaintext = try groupDecrypt(
                     encryptedData,
                     from: protocolAddress,
-                    store: SSKEnvironment.shared.senderKeyStoreRef,
+                    store: SenderKeyReceivingManager(senderKeyManager: senderKeyManager, shouldUpdateInsertedAtDate: false),
                     context: transaction,
                 )
             case .plaintext:
@@ -554,7 +560,7 @@ public class OWSMessageDecrypter {
             signedPreKeyStore: preKeyStore,
             kyberPreKeyStore: preKeyStore,
             identityStore: identityManager.libSignalStore(for: localIdentity, tx: transaction),
-            senderKeyStore: SSKEnvironment.shared.senderKeyStoreRef,
+            senderKeyStore: SenderKeyReceivingManager(senderKeyManager: senderKeyManager, shouldUpdateInsertedAtDate: false),
         )
 
         let decryptResult: SMKDecryptResult

@@ -10,51 +10,17 @@ import XCTest
 
 class SessionStoreTest2: XCTestCase {
     func testMaxUnacknowledgedSessionAge() throws {
-        let alice_aci = Aci.constantForTesting("00000000-0000-4000-8000-0000000000A0")
-        let alice_address = ProtocolAddress(alice_aci, deviceId: 1)
-
-        let bob_aci = Aci.constantForTesting("00000000-0000-4000-8000-0000000000B0")
-        let bob_address = ProtocolAddress(bob_aci, deviceId: 1)
-
         let alice_store = InMemorySignalProtocolStore()
-        let bob_store = InMemorySignalProtocolStore()
-
-        let bob_pre_key = PrivateKey.generate()
-        let bob_signed_pre_key = PrivateKey.generate()
-        let bob_signed_pre_key_public = bob_signed_pre_key.publicKey.serialize()
-        let bob_kyber_pre_key = KEMKeyPair.generate()
-        let bob_kyber_pre_key_public = bob_kyber_pre_key.publicKey.serialize()
-        let bob_identity_key = try! bob_store.identityKeyPair(context: NullContext())
-        let bob_signed_pre_key_signature = bob_identity_key.privateKey.generateSignature(message: bob_signed_pre_key_public)
-        let bob_kyber_pre_key_signature = bob_identity_key.privateKey.generateSignature(message: bob_kyber_pre_key_public)
-
-        let prekey_id: UInt32 = 4570
-        let signed_prekey_id: UInt32 = 3006
-        let kyber_prekey_id: UInt32 = 7777
-
-        let bob_bundle = try PreKeyBundle(
-            registrationId: bob_store.localRegistrationId(context: NullContext()),
-            deviceId: 9,
-            prekeyId: prekey_id,
-            prekey: bob_pre_key.publicKey,
-            signedPrekeyId: signed_prekey_id,
-            signedPrekey: bob_signed_pre_key.publicKey,
-            signedPrekeySignature: bob_signed_pre_key_signature,
-            identity: bob_identity_key.identityKey,
-            kyberPrekeyId: kyber_prekey_id,
-            kyberPrekey: bob_kyber_pre_key.publicKey,
-            kyberPrekeySignature: bob_kyber_pre_key_signature,
+        let bob_address = ProtocolAddress(
+            Aci.constantForTesting("00000000-0000-4000-8000-0000000000B0"),
+            deviceId: .primary,
         )
 
-        // Alice processes the bundle:
-        try processPreKeyBundle(
-            bob_bundle,
-            for: bob_address,
-            ourAddress: alice_address,
+        try MockSessionStore.processPreKeyBundle(
+            theirAddress: bob_address,
+            now: Date(timeIntervalSinceReferenceDate: 0),
             sessionStore: alice_store,
             identityStore: alice_store,
-            now: Date(timeIntervalSinceReferenceDate: 0),
-            context: NullContext(),
         )
 
         // If these assertions fail, it likely means that

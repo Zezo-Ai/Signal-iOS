@@ -346,6 +346,7 @@ public enum DatabaseRecovery {
             AttachmentBackfillInboundRequestRecord.databaseTableName,
             SignalServiceKit.SessionRecord.databaseTableName,
             StoredReleaseNote.databaseTableName,
+            SignalServiceKit.SenderKeyRecord.databaseTableName,
         ]
 
         private static func prepareToCopyTablesWithBestEffort(
@@ -545,6 +546,7 @@ public enum DatabaseRecovery {
             // Can be easily re-created.
             CombinedGroupSendEndorsementRecord.databaseTableName,
             IndividualGroupSendEndorsementRecord.databaseTableName,
+            SenderKeySentToDeviceRecord.databaseTableName,
         ]
 
         /// Log the tables we're explicitly skipping.

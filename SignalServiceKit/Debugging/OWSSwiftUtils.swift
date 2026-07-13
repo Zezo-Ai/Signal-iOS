@@ -98,6 +98,22 @@ public func failIfThrows<T>(
     }
 }
 
+@discardableResult
+public func failIfThrowsUnlessConstraintError<T>(
+    block: () throws -> T,
+    file: String = #fileID,
+    function: String = #function,
+    line: Int = #line,
+) throws(ConstraintError) -> T {
+    do {
+        return try block()
+    } catch DatabaseError.SQLITE_CONSTRAINT {
+        throw ConstraintError()
+    } catch {
+        return failIfThrows(block: { throw error }, file: file, function: function, line: line)
+    }
+}
+
 @inlinable
 public func owsAssertDebug(
     _ condition: Bool,
