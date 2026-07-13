@@ -541,11 +541,18 @@ public class GroupsV2OutgoingChanges {
                 // We don't treat that as a conflict.
                 continue
             }
-            var actionBuilder = GroupsProtoGroupChangeActionsModifyMemberRoleAction.builder()
             let userId = try groupV2Params.userId(for: aci)
-            actionBuilder.setUserID(userId)
-            actionBuilder.setRole(newRole.asProtoRole)
-            actionsBuilder.addModifyMemberRoles(actionBuilder.buildInfallibly())
+            do {
+                var actionBuilder = GroupsProtoGroupChangeActionsModifyMemberRoleAction.builder()
+                actionBuilder.setUserID(userId)
+                actionBuilder.setRole(newRole.asProtoRole)
+                actionsBuilder.addModifyMemberRoles(actionBuilder.buildInfallibly())
+            }
+            if newRole != .administrator, currentGroupModel.access.memberLabels == .administrator {
+                var actionBuilder = GroupsProtoGroupChangeActionsModifyMemberLabelAction.builder()
+                actionBuilder.setUserID(userId)
+                actionsBuilder.addModifyMemberLabel(actionBuilder.buildInfallibly())
+            }
             didChange = true
         }
 
@@ -604,6 +611,16 @@ public class GroupsV2OutgoingChanges {
                 actionBuilder.setMemberLabelAccess(access.protoAccess)
                 actionsBuilder.setModifyMemberLabelAccess(actionBuilder.buildInfallibly())
                 didChange = true
+
+                if access == .administrator {
+                    for fullMember in currentGroupMembership.fullMembers.compactMap(\.aci) {
+                        if currentGroupMembership.role(for: fullMember) != .administrator {
+                            var actionBuilder = GroupsProtoGroupChangeActionsModifyMemberLabelAction.builder()
+                            actionBuilder.setUserID(try groupV2Params.userId(for: fullMember))
+                            actionsBuilder.addModifyMemberLabel(actionBuilder.buildInfallibly())
+                        }
+                    }
+                }
             }
         }
 
