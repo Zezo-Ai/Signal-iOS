@@ -294,7 +294,7 @@ public class AttachmentUploadManagerImpl: AttachmentUploadManager {
                 await postProgress(attachmentId: attachmentId, progress: Float(progressUpdate.completedByteCount) / Float(totalByteCount))
             },
         )
-        await postProgress(attachmentId: attachmentId, progress: 0)
+        await postProgress(attachmentId: attachmentId, progress: 1)
 
         // Update the attachment and associated messages with the success
         // and clean up and left over upload state
