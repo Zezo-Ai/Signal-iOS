@@ -470,7 +470,7 @@ extension EditHistoryTableSheetViewController: CVComponentDelegate {
 
     func didTapGroupMigrationLearnMore() {}
 
-    func didTapGroupInviteLinkPromotion(groupModel: TSGroupModel) {}
+    func didTapGroupInviteLinkPromotion() {}
 
     func didTapViewGroupDescription(newGroupDescription: String) {}
 

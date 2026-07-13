@@ -99,18 +99,13 @@ extension TSInfoMessage.PersistableGroupUpdateItem {
                 tx: tx,
             )
         case .inviteFriendsToNewlyCreatedGroup:
-            // We should use the latest group model, not the one from the time
-            // the info message was made.
-            guard let thread = groupThread() else {
-                return nil
-            }
             return Action(
                 title: OWSLocalizedString(
                     "GROUPS_INVITE_FRIENDS_BUTTON",
                     comment: "Label for 'invite friends to group' button.",
                 ),
                 accessibilityIdentifier: "group_invite_friends",
-                action: .didTapGroupInviteLinkPromotion(groupModel: thread.groupModel),
+                action: .didTapGroupInviteLinkPromotion,
             )
         case .wasMigrated:
             return Action(

@@ -228,7 +228,7 @@ public protocol CVComponentDelegate: AnyObject, AudioMessageViewDelegate, CVPoll
 
     func didTapGroupMigrationLearnMore()
 
-    func didTapGroupInviteLinkPromotion(groupModel: TSGroupModel)
+    func didTapGroupInviteLinkPromotion()
 
     func didTapViewGroupDescription(newGroupDescription: String)
 
@@ -300,7 +300,7 @@ struct CVMessageAction: Equatable {
         case didTapResendGroupUpdate(errorMessage: TSErrorMessage)
         case didTapGroupMigrationLearnMore
         case didTapViewGroupDescription(newGroupDescription: String)
-        case didTapGroupInviteLinkPromotion(groupModel: TSGroupModel)
+        case didTapGroupInviteLinkPromotion
         case didTapShowConversationSettingsAndShowMemberRequests
         case didTapBlockRequest(groupModel: TSGroupModelV2, requesterName: String, requesterAci: Aci)
         case didTapShowUpgradeAppUI
@@ -342,8 +342,8 @@ struct CVMessageAction: Equatable {
                 delegate.didTapGroupMigrationLearnMore()
             case .didTapViewGroupDescription(let newGroupDescription):
                 delegate.didTapViewGroupDescription(newGroupDescription: newGroupDescription)
-            case .didTapGroupInviteLinkPromotion(let groupModel):
-                delegate.didTapGroupInviteLinkPromotion(groupModel: groupModel)
+            case .didTapGroupInviteLinkPromotion:
+                delegate.didTapGroupInviteLinkPromotion()
             case .didTapShowConversationSettingsAndShowMemberRequests:
                 delegate.didTapShowConversationSettingsAndShowMemberRequests()
             case .didTapBlockRequest(let groupModel, let requesterName, let requesterAci):

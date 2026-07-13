@@ -1026,7 +1026,7 @@ extension ConversationViewController: CVComponentDelegate {
         LegacyGroupLearnMoreUI.presentActionSheet(for: .explainNewGroups, from: self)
     }
 
-    public func didTapGroupInviteLinkPromotion(groupModel: TSGroupModel) {
+    public func didTapGroupInviteLinkPromotion() {
         AssertIsOnMainThread()
 
         showGroupLinkPromotionActionSheet()

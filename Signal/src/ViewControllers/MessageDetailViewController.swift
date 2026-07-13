@@ -1285,7 +1285,7 @@ extension MessageDetailViewController: CVComponentDelegate {
     // TODO:
     func didTapGroupMigrationLearnMore() {}
 
-    func didTapGroupInviteLinkPromotion(groupModel: TSGroupModel) {}
+    func didTapGroupInviteLinkPromotion() {}
 
     func didTapViewGroupDescription(newGroupDescription: String) {}
 
