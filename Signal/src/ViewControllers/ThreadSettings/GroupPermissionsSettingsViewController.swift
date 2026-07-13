@@ -374,26 +374,26 @@ class GroupPermissionsSettingsViewController: OWSTableViewController2 {
 
                 if self.newAccessMembers != self.oldAccessMembers {
                     try await GroupManager.changeGroupMembershipAccessV2(
-                        groupModel: self.groupModelV2,
+                        secretParams: self.groupModelV2.secretParams(),
                         access: self.newAccessMembers,
                     )
                 }
                 if self.newAccessAttributes != self.oldAccessAttributes {
                     try await GroupManager.changeGroupAttributesAccessV2(
-                        groupModel: self.groupModelV2,
+                        secretParams: self.groupModelV2.secretParams(),
                         access: self.newAccessAttributes,
                     )
                 }
                 if self.newIsAnnouncementsOnly != self.oldIsAnnouncementsOnly {
                     try await GroupManager.setIsAnnouncementsOnly(
-                        groupModel: self.groupModelV2,
+                        secretParams: self.groupModelV2.secretParams(),
                         isAnnouncementsOnly: self.newIsAnnouncementsOnly,
                     )
                 }
 
                 if self.newAccessMemberLabels != self.oldAccessMemberLabels {
                     try await GroupManager.changeGroupMemberLabelsAccessV2(
-                        groupModel: self.groupModelV2,
+                        secretParams: self.groupModelV2.secretParams(),
                         access: self.newAccessMemberLabels,
                     )
                 }

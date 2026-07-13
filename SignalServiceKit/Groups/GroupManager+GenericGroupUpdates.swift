@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import LibSignalClient
+public import LibSignalClient
 
 extension GroupManager {
     // Serialize group updates by group ID
@@ -52,12 +52,11 @@ extension GroupManager {
     /// Each Promise represents sending a message to one or more recipients.
     @discardableResult
     public static func updateGroupV2(
-        groupModel: TSGroupModelV2,
+        secretParams: GroupSecretParams,
         description: String,
         isDeletingAccount: Bool = false,
         changesBlock: @escaping (GroupsV2OutgoingChanges) -> Void,
     ) async throws -> [Promise<Void>] {
-        let secretParams = try groupModel.secretParams()
         let groupId = try secretParams.getPublicParams().getGroupIdentifier()
         return try await groupUpdateQueues.run(forKey: groupId) {
             return try await GenericGroupUpdateOperation.run(

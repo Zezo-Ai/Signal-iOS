@@ -205,7 +205,7 @@ public class GroupLinkPromotionActionSheet: UIView {
             approveNewMembers: approveNewMembers,
         )
         GroupLinkViewUtils.updateLinkMode(
-            groupModelV2: groupModelV2,
+            secretParams: Result(catching: { try groupModelV2.secretParams() }),
             linkMode: linkMode,
             fromViewController: actionSheetController,
             completion: { [weak self] in

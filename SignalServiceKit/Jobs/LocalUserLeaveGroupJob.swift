@@ -74,7 +74,7 @@ private class LocalUserLeaveGroupJobRunner: JobRunner {
         }
 
         let sendPromises = try await GroupManager.updateGroupV2(
-            groupModel: groupModel,
+            secretParams: groupModel.secretParams(),
             description: #fileID,
             isDeletingAccount: isDeletingAccount,
         ) { groupChangeSet in

@@ -18,15 +18,13 @@ public class AddGroupMembersViewController: BaseGroupMemberViewController {
     weak var addGroupMembersViewControllerDelegate: AddGroupMembersViewControllerDelegate?
 
     private let groupThread: TSGroupThread
-    private let oldGroupModel: TSGroupModel
+    private let oldGroupModel: TSGroupModelV2
 
     private var newRecipientSet = OrderedSet<PickedRecipient>()
 
-    public init(groupThread: TSGroupThread) {
-        owsAssertDebug(groupThread.isGroupV2Thread, "Can't add members to v1 threads.")
-
+    public init(groupThread: TSGroupThread, groupModel: TSGroupModelV2) {
         self.groupThread = groupThread
-        self.oldGroupModel = groupThread.groupModel
+        self.oldGroupModel = groupModel
 
         super.init()
 
@@ -151,8 +149,8 @@ private extension AddGroupMembersViewController {
             fromViewController: self,
             updateBlock: {
                 try await GroupManager.addOrInvite(
+                    secretParams: self.oldGroupModel.secretParams(),
                     serviceIds: newServiceIds,
-                    toExistingGroup: self.oldGroupModel,
                 )
             },
             completion: dismissAndUpdateDelegate,

@@ -1770,14 +1770,14 @@ public class GroupsV2Impl: GroupsV2 {
             // We're already invited by ACI; try to join by accepting the invite.
             // That will make us a full member; requesting to join via
             // the invite link might make us a requesting member.
-            try await GroupManager.localAcceptInviteToGroupV2(groupModel: groupModelV2)
+            try await GroupManager.localAcceptInviteToGroupV2(secretParams: groupModelV2.secretParams())
             return
         }
         if let pni = localIdentifiers.pni, groupMembership.isInvitedMember(pni) {
             // We're already invited by PNI; try to join by accepting the invite.
             // That will make us a full member; requesting to join via
             // the invite link might make us a requesting member.
-            try await GroupManager.localAcceptInviteToGroupV2(groupModel: groupModelV2)
+            try await GroupManager.localAcceptInviteToGroupV2(secretParams: groupModelV2.secretParams())
             return
         }
         throw GroupsV2Error.localUserNotInGroup

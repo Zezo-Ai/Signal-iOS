@@ -560,7 +560,7 @@ private extension GroupMemberRequestsAndInvitesViewController {
         GroupViewUtils.updateGroupWithActivityIndicator(
             fromViewController: self,
             updateBlock: {
-                try await GroupManager.removeFromGroupOrRevokeInviteV2(groupModel: groupModelV2, serviceIds: serviceIds)
+                try await GroupManager.removeFromGroupOrRevokeInviteV2(secretParams: groupModelV2.secretParams(), serviceIds: serviceIds)
             },
             completion: { [weak self] in
                 self?.reloadContent()
@@ -577,7 +577,7 @@ private extension GroupMemberRequestsAndInvitesViewController {
         GroupViewUtils.updateGroupWithActivityIndicator(
             fromViewController: self,
             updateBlock: {
-                try await GroupManager.revokeInvalidInvites(groupModel: groupModelV2)
+                try await GroupManager.revokeInvalidInvites(secretParams: groupModelV2.secretParams())
             },
             completion: { [weak self] in
                 self?.reloadContent()
@@ -643,7 +643,7 @@ private extension GroupMemberRequestsAndInvitesViewController {
         GroupViewUtils.updateGroupWithActivityIndicator(
             fromViewController: self,
             updateBlock: {
-                try await GroupManager.acceptOrDenyMemberRequestsV2(groupModel: groupModelV2, aci: aci, shouldAccept: shouldAccept)
+                try await GroupManager.acceptOrDenyMemberRequestsV2(secretParams: groupModelV2.secretParams(), aci: aci, shouldAccept: shouldAccept)
             },
             completion: { [weak self] in
                 guard let self else { return }

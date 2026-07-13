@@ -1110,7 +1110,7 @@ extension ConversationViewController: CVComponentDelegate {
                             // If the user in question has canceled their request,
                             // this call will still block them.
                             try await GroupManager.acceptOrDenyMemberRequestsV2(
-                                groupModel: groupModel,
+                                secretParams: groupModel.secretParams(),
                                 aci: requesterAci,
                                 shouldAccept: false,
                             )

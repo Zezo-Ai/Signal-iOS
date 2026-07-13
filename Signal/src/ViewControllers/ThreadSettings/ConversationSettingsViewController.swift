@@ -511,11 +511,14 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
             owsFailDebug("Can't edit membership.")
             return
         }
-        guard let groupThread = thread as? TSGroupThread else {
+        guard
+            let groupThread = thread as? TSGroupThread,
+            let groupModel = groupThread.groupModel as? TSGroupModelV2
+        else {
             owsFailDebug("Invalid thread.")
             return
         }
-        let addGroupMembersViewController = AddGroupMembersViewController(groupThread: groupThread)
+        let addGroupMembersViewController = AddGroupMembersViewController(groupThread: groupThread, groupModel: groupModel)
         addGroupMembersViewController.addGroupMembersViewControllerDelegate = self
         navigationController?.pushViewController(addGroupMembersViewController, animated: true)
     }

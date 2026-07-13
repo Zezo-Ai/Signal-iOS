@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
+import LibSignalClient
 public import SignalServiceKit
 public import SignalUI
 
@@ -268,7 +269,7 @@ public class GroupLinkViewUtils {
 
     @MainActor
     static func updateLinkMode(
-        groupModelV2: TSGroupModelV2,
+        secretParams: Result<GroupSecretParams, any Error>,
         linkMode: GroupsV2LinkMode,
         fromViewController: UIViewController,
         completion: @escaping () -> Void,
@@ -276,7 +277,7 @@ public class GroupLinkViewUtils {
         GroupViewUtils.updateGroupWithActivityIndicator(
             fromViewController: fromViewController,
             updateBlock: {
-                try await GroupManager.updateLinkModeV2(groupModel: groupModelV2, linkMode: linkMode)
+                try await GroupManager.updateLinkModeV2(secretParams: secretParams.get(), linkMode: linkMode)
             },
             completion: completion,
         )
@@ -418,7 +419,7 @@ private extension GroupLinkViewController {
 
     func updateLinkMode(linkMode: GroupsV2LinkMode) {
         GroupLinkViewUtils.updateLinkMode(
-            groupModelV2: groupModelV2,
+            secretParams: Result(catching: { try groupModelV2.secretParams() }),
             linkMode: linkMode,
             fromViewController: self,
             completion: { [weak self] in self?.updateView() },
@@ -429,7 +430,7 @@ private extension GroupLinkViewController {
         GroupViewUtils.updateGroupWithActivityIndicator(
             fromViewController: self,
             updateBlock: {
-                try await GroupManager.resetLinkV2(groupModel: self.groupModelV2)
+                try await GroupManager.resetLinkV2(secretParams: self.groupModelV2.secretParams())
             },
             completion: { [weak self] in self?.updateView() },
         )

@@ -22,7 +22,7 @@ extension GroupViewHelper {
         message: String?,
         actionTitle: String,
         updateDescription: String,
-        updateBlock: @escaping (TSGroupModelV2, T) async throws -> Void,
+        updateBlock: @escaping (GroupSecretParams, T) async throws -> Void,
     ) {
         guard
             let fromViewController,
@@ -33,11 +33,12 @@ extension GroupViewHelper {
             GroupViewUtils.showUpdateErrorUI(error: OWSAssertionError("Invalid parameters for update: \(updateDescription)"))
             return
         }
+        let secretParams = Result(catching: { try oldGroupModel.secretParams() })
 
         let actionBlock = { @MainActor in
             GroupViewUtils.updateGroupWithActivityIndicator(
                 fromViewController: fromViewController,
-                updateBlock: { try await updateBlock(oldGroupModel, serviceId) },
+                updateBlock: { try await updateBlock(secretParams.get(), serviceId) },
                 completion: { [weak self] in
                     self?.delegate?.groupViewHelperDidUpdateGroup()
                 },
@@ -92,8 +93,8 @@ extension GroupViewHelper {
             message: nil,
             actionTitle: actionTitle,
             updateDescription: "Make group admin",
-            updateBlock: { (oldGroupModel, aci: Aci) in
-                try await GroupManager.changeMemberRoleV2(groupModel: oldGroupModel, aci: aci, role: .administrator)
+            updateBlock: { (secretParams, aci: Aci) in
+                try await GroupManager.changeMemberRoleV2(secretParams: secretParams, aci: aci, role: .administrator)
             },
         )
     }
@@ -146,8 +147,8 @@ extension GroupViewHelper {
             message: message,
             actionTitle: actionTitle,
             updateDescription: "Revoke group admin",
-            updateBlock: { (oldGroupModel, aci: Aci) in
-                try await GroupManager.changeMemberRoleV2(groupModel: oldGroupModel, aci: aci, role: .normal)
+            updateBlock: { (secretParams, aci: Aci) in
+                try await GroupManager.changeMemberRoleV2(secretParams: secretParams, aci: aci, role: .normal)
             },
         )
     }
@@ -192,8 +193,8 @@ extension GroupViewHelper {
             message: nil,
             actionTitle: actionTitle,
             updateDescription: "Remove user from group",
-            updateBlock: { (oldGroupModel, serviceId: ServiceId) in
-                try await GroupManager.removeFromGroupOrRevokeInviteV2(groupModel: oldGroupModel, serviceIds: [serviceId])
+            updateBlock: { (secretParams, serviceId: ServiceId) in
+                try await GroupManager.removeFromGroupOrRevokeInviteV2(secretParams: secretParams, serviceIds: [serviceId])
             },
         )
     }

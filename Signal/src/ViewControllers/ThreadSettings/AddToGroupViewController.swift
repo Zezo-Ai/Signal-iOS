@@ -137,20 +137,19 @@ public class AddToGroupViewController: OWSTableViewController2 {
     private func addToGroup(_ groupThread: TSGroupThread, shortName: String) {
         AssertIsOnMainThread()
         owsPrecondition(groupThread.isGroupV2Thread) // non-gv2 filtered above when fetching groups
+        let oldGroupModel = groupThread.groupModel as! TSGroupModelV2
 
         guard let serviceId = self.address.serviceId else {
             GroupViewUtils.showInvalidGroupMemberAlert(fromViewController: self)
             return
         }
 
-        let oldGroupModel = groupThread.groupModel
-
         GroupViewUtils.updateGroupWithActivityIndicator(
             fromViewController: self,
             updateBlock: {
                 try await GroupManager.addOrInvite(
+                    secretParams: oldGroupModel.secretParams(),
                     serviceIds: [serviceId],
-                    toExistingGroup: oldGroupModel,
                 )
             },
             completion: { [weak self] in

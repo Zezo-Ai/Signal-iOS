@@ -191,7 +191,7 @@ public final class MemberLabelCoordinator: NSObject, UIAdaptivePresentationContr
                         title: CommonStrings.updatingModal,
                         wrappedAsyncBlock: {
                             try await GroupManager.changeMemberLabel(
-                                groupModel: self.groupModel,
+                                secretParams: self.groupModel.secretParams(),
                                 aci: self.localIdentifiers.aci,
                                 label: memberLabel,
                             )

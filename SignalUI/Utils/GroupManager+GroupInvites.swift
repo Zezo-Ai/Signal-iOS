@@ -66,7 +66,7 @@ public extension GroupManager {
                 }
 
                 try await self.localAcceptInviteToGroupV2(
-                    groupModel: groupModelV2,
+                    secretParams: groupModelV2.secretParams(),
                     waitForMessageProcessing: true,
                 )
             }

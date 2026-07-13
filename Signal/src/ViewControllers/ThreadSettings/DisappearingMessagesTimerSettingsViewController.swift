@@ -129,7 +129,7 @@ class DisappearingMessagesTimerSettingsViewController: HostingController<Disappe
         } else if let groupThread = thread as? TSGroupThread {
             if let groupV2Model = groupThread.groupModel as? TSGroupModelV2 {
                 try await GroupManager.updateGroupV2(
-                    groupModel: groupV2Model,
+                    secretParams: groupV2Model.secretParams(),
                     description: "Update disappearing messages",
                 ) { changeSet in
                     changeSet.setNewDisappearingMessageToken(newToken.unversioned)

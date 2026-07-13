@@ -289,6 +289,6 @@ class GroupsV2ProfileKeyUpdater {
 
         Logger.info("Updating profile key for group.")
         try Task.checkCancellation()
-        return try await GroupManager.updateLocalProfileKey(groupModel: groupModel)
+        return try await GroupManager.updateLocalProfileKey(secretParams: secretParams)
     }
 }
