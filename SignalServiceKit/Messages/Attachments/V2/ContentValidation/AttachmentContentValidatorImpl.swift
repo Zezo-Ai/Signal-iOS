@@ -371,7 +371,7 @@ public class AttachmentContentValidatorImpl: AttachmentContentValidator {
             let imageData = stream
                 .thumbnailImageSync(quality: .small)?
                 .resized(maxDimensionPoints: AttachmentThumbnailQuality.thumbnailDimensionPointsForQuotedReply)?
-                .jpegData(compressionQuality: 0.8)
+                .jpegDataSafe(compressionQuality: 0.8)
         else {
             throw OWSAssertionError("Unable to create thumbnail")
         }
@@ -599,7 +599,7 @@ public class AttachmentContentValidatorImpl: AttachmentContentValidator {
         let stillFramePendingFile: PendingFile? = try thumbnailImage
             // Don't compress; we already size-limited this thumbnail, it already has whatever
             // compression applied to the source video, and we want a high fidelity still frame.
-            .jpegData(compressionQuality: 1)
+            .jpegDataSafe(compressionQuality: 1)
             .map { thumbnailData in
                 let thumbnailTmpFile = OWSFileSystem.temporaryFileUrl(
                     fileExtension: nil,

@@ -60,7 +60,7 @@ public class OWSProfileManager: ProfileManagerProtocol {
             image = image.resizedImage(toFillPixelSize: .init(width: CGFloat(maxAvatarDiameterPixels), height: CGFloat(maxAvatarDiameterPixels)))
         }
 
-        guard let data = image.jpegData(compressionQuality: 0.95) else {
+        guard let data = image.jpegDataSafe(compressionQuality: 0.95) else {
             return nil
         }
         if data.count > maxAvatarBytes {

@@ -428,7 +428,7 @@ extension TSGroupModel {
         // image is still too large.
         let kMaxQuality = 0.6 as CGFloat
         for targetQuality in stride(from: kMaxQuality, through: 0, by: -0.1) {
-            let avatarData = image.jpegData(compressionQuality: targetQuality)
+            let avatarData = image.jpegDataSafe(compressionQuality: targetQuality)
 
             guard let avatarData else {
                 owsFailDebug("Failed to generate jpeg representation with quality \(targetQuality)")

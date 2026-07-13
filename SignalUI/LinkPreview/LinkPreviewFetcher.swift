@@ -276,7 +276,7 @@ public class LinkPreviewFetcherImpl: LinkPreviewFetcher {
             }
             return PreviewThumbnail(imageData: dstData, mimetype: MimeType.imagePng.rawValue)
         } else {
-            guard let dstData = UIImage(cgImage: dstImage).jpegData(compressionQuality: 0.8) else {
+            guard let dstData = UIImage(cgImage: dstImage).jpegDataSafe(compressionQuality: 0.8) else {
                 owsFailDebug("Could not write resized image to JPEG.")
                 return nil
             }

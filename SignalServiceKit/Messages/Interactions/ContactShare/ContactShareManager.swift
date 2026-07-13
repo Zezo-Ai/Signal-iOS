@@ -118,7 +118,7 @@ class ContactShareManagerImpl: ContactShareManager {
                 )
             } else if let avatarImage = draft.avatarImage {
                 // TODO: Use NormalizedImage.
-                guard let imageData = avatarImage.jpegData(compressionQuality: 0.9) else {
+                guard let imageData = avatarImage.jpegDataSafe(compressionQuality: 0.9) else {
                     throw OWSAssertionError("Failed to get JPEG")
                 }
                 guard imageData.count <= OWSMediaUtils.kMaxFileSizeImage else {

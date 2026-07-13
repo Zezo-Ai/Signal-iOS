@@ -1649,7 +1649,7 @@ public class ImageFactory {
     }
 
     public func buildJPGData() -> Data {
-        guard let data = build().jpegData(compressionQuality: 0.9) else {
+        guard let data = build().jpegDataSafe(compressionQuality: 0.9) else {
             owsFailDebug("data was unexpectedly nil")
             return Data()
         }

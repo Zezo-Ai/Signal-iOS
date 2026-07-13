@@ -98,7 +98,14 @@ public extension UIImage {
             }
         }
 
-        return avatarImage.jpegData(compressionQuality: 0.9)
+        return avatarImage.jpegDataSafe(compressionQuality: 0.9)
+    }
+
+    private static let _jpegDataLock = UnfairLock()
+    func jpegDataSafe(compressionQuality: CGFloat) -> Data? {
+        Self._jpegDataLock.withLock {
+            jpegData(compressionQuality: compressionQuality)
+        }
     }
 
     func resizedImage(toFillPixelSize dstSize: CGSize) -> UIImage {

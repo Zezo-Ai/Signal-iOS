@@ -109,7 +109,7 @@ public class WallpaperImageStoreImpl: WallpaperImageStore {
     private func dataSource(wallpaperImage photo: UIImage) async throws -> AttachmentDataSource {
         let mimeType = MimeType.imageJpeg.rawValue
         guard
-            let imageData = photo.jpegData(compressionQuality: 0.8)
+            let imageData = photo.jpegDataSafe(compressionQuality: 0.8)
         else {
             throw OWSAssertionError("Failed to get jpg data for wallpaper photo")
         }

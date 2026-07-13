@@ -237,7 +237,7 @@ public class AttachmentThumbnailServiceImpl: AttachmentThumbnailService {
             case MimeType.imagePng.rawValue:
                 imageData = thumbnail.pngData()
             case MimeType.imageJpeg.rawValue:
-                imageData = thumbnail.jpegData(compressionQuality: 0.85)
+                imageData = thumbnail.jpegDataSafe(compressionQuality: 0.85)
             case MimeType.imageWebp.rawValue where quality == .backupThumbnail:
                 imageData = try? backupThumbnailData(image: thumbnail)
             default:
