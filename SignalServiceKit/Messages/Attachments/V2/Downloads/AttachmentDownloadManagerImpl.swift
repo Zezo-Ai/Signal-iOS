@@ -1092,7 +1092,6 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
             let downloadedFileUrl: URL
             let downloadKey = Self.downloadKey(record: record)
             do {
-                await postDownloadProgress(attachmentId: attachment.id, progress: 0)
                 var activeSources = [OWSProgressSource]()
                 downloadedFileUrl = try await downloadQueue.enqueueDownload(
                     downloadState: .init(type: .attachment(downloadMetadata, id: attachment.id)),

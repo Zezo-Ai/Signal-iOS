@@ -283,7 +283,6 @@ public class AttachmentUploadManagerImpl: AttachmentUploadManager {
     private func _uploadTransitTierAttachment(attachmentId: Attachment.IDType, type: UploadType) async throws {
         let logger = PrefixedLogger(prefix: "[Upload]", suffix: "[\(attachmentId)]")
 
-        await postProgress(attachmentId: attachmentId, progress: 0)
         let (record, result) = try await _uploadAttachmentId(
             attachmentId,
             type: type,

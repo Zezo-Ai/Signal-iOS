@@ -125,6 +125,14 @@ public enum AttachmentUpload {
             throw Upload.Error.uploadFailure(recovery: .restart(.afterBackoff))
         }
 
+        // If we're resuming an upload, we want the first progress update to
+        // contain what we've already uploaded. If we're starting a new upload,
+        // this will be zero.
+        try await progressBlock(OWSURLSession.ProgressUpdate(
+            completedByteCount: bytesAlreadyUploaded,
+            totalByteCount: totalDataLength,
+        ))
+
         func downloadTimeLogString(_ bytesUploaded: UInt64) -> String {
             let totalTime = CACurrentMediaTime() - startTime
             guard totalTime > 0 else { return "" }
