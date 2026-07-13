@@ -66,8 +66,8 @@ public class OWSContactsManager: NSObject, ContactsManagerProtocol {
     private let intersectionQueue = DispatchQueue(label: "org.signal.contacts.intersection")
 
     private let keyValueStore = KeyValueStore(collection: "OWSContactsManagerCollection")
-    private let serviceIdsExplicitlyAllowingAvatarDownloadsStore = KeyValueStore(collection: "OWSContactsManager.skipContactAvatarBlurByUuidStore")
-    private let groupIdsExplicitlyAllowingAvatarDownloadsStore = KeyValueStore(collection: "OWSContactsManager.skipGroupAvatarBlurByGroupIdStore")
+    private let serviceIdsExplicitlyAllowingAvatarDownloadsStore = NewKeyValueStore(collection: "OWSContactsManager.skipContactAvatarBlurByUuidStore")
+    private let groupIdsExplicitlyAllowingAvatarDownloadsStore = NewKeyValueStore(collection: "OWSContactsManager.skipGroupAvatarBlurByGroupIdStore")
 
     private let avatarAddressesBeingDownloaded = AtomicSet<SignalServiceAddress>(lock: .init())
     private let avatarGroupIdsBeingDownloaded = AtomicSet<Data>(lock: .init())
@@ -448,11 +448,11 @@ extension OWSContactsManager: ContactManager {
 
         if
             let storeKey = address.serviceId?.serviceIdUppercaseString,
-            serviceIdsExplicitlyAllowingAvatarDownloadsStore.getBool(
-                storeKey,
-                defaultValue: false,
-                transaction: tx,
-            )
+            serviceIdsExplicitlyAllowingAvatarDownloadsStore.fetchValue(
+                Bool.self,
+                forKey: storeKey,
+                tx: tx,
+            ) == true
         {
             addressesAllowingAvatarDownloadCache.insert(address)
             return false
@@ -507,11 +507,11 @@ extension OWSContactsManager: ContactManager {
 
         // Allow downloads if the user has tapped to unblur
         if
-            groupIdsExplicitlyAllowingAvatarDownloadsStore.getBool(
-                groupThread.groupId.hexadecimalString,
-                defaultValue: false,
-                transaction: tx,
-            )
+            groupIdsExplicitlyAllowingAvatarDownloadsStore.fetchValue(
+                Bool.self,
+                forKey: groupThread.groupId.hexadecimalString,
+                tx: tx,
+            ) == true
         {
             groupIdsAllowingAvatarDownloadCache.insert(groupThread.groupId)
             return false
@@ -531,12 +531,12 @@ extension OWSContactsManager: ContactManager {
             return
         }
         let storeKey = serviceId.serviceIdUppercaseString
-        let shouldSkipBlur = serviceIdsExplicitlyAllowingAvatarDownloadsStore.getBool(storeKey, defaultValue: false, transaction: tx)
-        guard !shouldSkipBlur else {
+        let shouldSkipBlur = serviceIdsExplicitlyAllowingAvatarDownloadsStore.fetchValue(Bool.self, forKey: storeKey, tx: tx)
+        if shouldSkipBlur == true {
             owsFailDebug("Value did not change.")
             return
         }
-        serviceIdsExplicitlyAllowingAvatarDownloadsStore.setBool(true, key: storeKey, transaction: tx)
+        serviceIdsExplicitlyAllowingAvatarDownloadsStore.writeValue(true, forKey: storeKey, tx: tx)
         if let contactThread = TSContactThread.getWithContactAddress(address, transaction: tx) {
             SSKEnvironment.shared.databaseStorageRef.touch(thread: contactThread, shouldReindex: false, tx: tx)
         }
@@ -558,20 +558,20 @@ extension OWSContactsManager: ContactManager {
     private func doNotBlurGroupAvatar(groupThread: TSGroupThread, transaction: DBWriteTransaction) {
         let groupId = groupThread.groupId
         let groupUniqueId = groupThread.uniqueId
-        guard
-            !groupIdsExplicitlyAllowingAvatarDownloadsStore.getBool(
-                groupId.hexadecimalString,
-                defaultValue: false,
-                transaction: transaction,
-            )
-        else {
+        if
+            groupIdsExplicitlyAllowingAvatarDownloadsStore.fetchValue(
+                Bool.self,
+                forKey: groupId.hexadecimalString,
+                tx: transaction,
+            ) == true
+        {
             owsFailDebug("Value did not change.")
             return
         }
-        groupIdsExplicitlyAllowingAvatarDownloadsStore.setBool(
+        groupIdsExplicitlyAllowingAvatarDownloadsStore.writeValue(
             true,
-            key: groupId.hexadecimalString,
-            transaction: transaction,
+            forKey: groupId.hexadecimalString,
+            tx: transaction,
         )
         SSKEnvironment.shared.databaseStorageRef.touch(thread: groupThread, shouldReindex: false, tx: transaction)
 

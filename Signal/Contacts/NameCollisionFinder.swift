@@ -177,7 +177,7 @@ public class GroupMembershipNameCollisionFinder: NameCollisionFinder {
         // Early-exit to avoid fetching unnecessary profile update messages
         // Move our start search pointer to try and proactively reduce our future interaction search space
         if allCollisions.isEmpty {
-            setRecentProfileUpdateSearchStartIdToMax(transaction: transaction)
+            setRecentProfileUpdateSearchStartIdToMax()
             return []
         }
 
@@ -268,18 +268,18 @@ public class GroupMembershipNameCollisionFinder: NameCollisionFinder {
 
     // MARK: Storage
 
-    private static var keyValueStore = KeyValueStore(collection: "GroupThreadCollisionFinder")
+    private static let keyValueStore = NewKeyValueStore(collection: "GroupThreadCollisionFinder")
 
     private func recentProfileUpdateSearchStartId(transaction: DBReadTransaction) -> UInt64? {
-        Self.keyValueStore.getUInt64(groupThread.uniqueId, transaction: transaction)
+        Self.keyValueStore.fetchValue(UInt64.self, forKey: groupThread.uniqueId, tx: transaction)
     }
 
     private func setRecentProfileUpdateSearchStartId(newValue: UInt64, transaction: DBWriteTransaction) {
         let existingValue = recentProfileUpdateSearchStartId(transaction: transaction) ?? 0
-        Self.keyValueStore.setUInt64(max(newValue, existingValue), key: groupThread.uniqueId, transaction: transaction)
+        Self.keyValueStore.writeValue(max(newValue, existingValue), forKey: groupThread.uniqueId, tx: transaction)
     }
 
-    private func setRecentProfileUpdateSearchStartIdToMax(transaction: DBReadTransaction) {
+    private func setRecentProfileUpdateSearchStartIdToMax() {
         // This is a perf optimization to proactively reduce our search space, so it doesn't need to be exact.
         // `lastInteractionRowId` is the current latest interaction on the thread when we checked for collisions.
         //
@@ -291,7 +291,7 @@ public class GroupMembershipNameCollisionFinder: NameCollisionFinder {
         // on our search space.
         // - In our searchStartId cache, we always set the max(currentValue, newValue). So even if maxInteractionId
         // is unset or invalid, we'll never mistakenly grow our search space by setting the startId to a smaller value.
-        let maxInteractionId = UInt64(thread.lastInteractionRowId)
+        let maxInteractionId = thread.lastInteractionRowId
         SSKEnvironment.shared.databaseStorageRef.asyncWrite { writeTx in
             self.setRecentProfileUpdateSearchStartId(newValue: maxInteractionId, transaction: writeTx)
         }

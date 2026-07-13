@@ -7,16 +7,16 @@ import Foundation
 import LibSignalClient
 
 public class AuthCredentialStore {
-    private let callLinkAuthCredentialStore: KeyValueStore
-    private let groupAuthCredentialStore: KeyValueStore
-    private let backupMessagesAuthCredentialStore: KeyValueStore
-    private let backupMediaAuthCredentialStore: KeyValueStore
+    private let callLinkAuthCredentialStore: NewKeyValueStore
+    private let groupAuthCredentialStore: NewKeyValueStore
+    private let backupMessagesAuthCredentialStore: NewKeyValueStore
+    private let backupMediaAuthCredentialStore: NewKeyValueStore
 
     public init() {
-        self.callLinkAuthCredentialStore = KeyValueStore(collection: "CallLinkAuthCredential")
-        self.groupAuthCredentialStore = KeyValueStore(collection: "GroupsV2Impl.authCredentialStoreStore")
-        self.backupMessagesAuthCredentialStore = KeyValueStore(collection: "BackupAuthCredential")
-        self.backupMediaAuthCredentialStore = KeyValueStore(collection: "MediaAuthCredential")
+        self.callLinkAuthCredentialStore = NewKeyValueStore(collection: "CallLinkAuthCredential")
+        self.groupAuthCredentialStore = NewKeyValueStore(collection: "GroupsV2Impl.authCredentialStoreStore")
+        self.backupMessagesAuthCredentialStore = NewKeyValueStore(collection: "BackupAuthCredential")
+        self.backupMediaAuthCredentialStore = NewKeyValueStore(collection: "MediaAuthCredential")
     }
 
     private static func callLinkAuthCredentialKey(for redemptionTime: UInt64) -> String {
@@ -37,9 +37,10 @@ public class AuthCredentialStore {
         for redemptionTime: UInt64,
         tx: DBReadTransaction,
     ) throws -> LibSignalClient.CallLinkAuthCredential? {
-        return try callLinkAuthCredentialStore.getData(
-            Self.callLinkAuthCredentialKey(for: redemptionTime),
-            transaction: tx,
+        return try callLinkAuthCredentialStore.fetchValue(
+            Data.self,
+            forKey: Self.callLinkAuthCredentialKey(for: redemptionTime),
+            tx: tx,
         ).map {
             return try LibSignalClient.CallLinkAuthCredential(contents: $0)
         }
@@ -50,15 +51,15 @@ public class AuthCredentialStore {
         for redemptionTime: UInt64,
         tx: DBWriteTransaction,
     ) {
-        callLinkAuthCredentialStore.setData(
+        callLinkAuthCredentialStore.writeValue(
             credential.serialize(),
-            key: Self.callLinkAuthCredentialKey(for: redemptionTime),
-            transaction: tx,
+            forKey: Self.callLinkAuthCredentialKey(for: redemptionTime),
+            tx: tx,
         )
     }
 
     func removeAllCallLinkAuthCredentials(tx: DBWriteTransaction) {
-        callLinkAuthCredentialStore.removeAll(transaction: tx)
+        callLinkAuthCredentialStore.removeAll(tx: tx)
     }
 
     // MARK: -
@@ -67,9 +68,10 @@ public class AuthCredentialStore {
         for redemptionTime: UInt64,
         tx: DBReadTransaction,
     ) throws -> AuthCredentialWithPni? {
-        return try groupAuthCredentialStore.getData(
-            Self.groupAuthCredentialKey(for: redemptionTime),
-            transaction: tx,
+        return try groupAuthCredentialStore.fetchValue(
+            Data.self,
+            forKey: Self.groupAuthCredentialKey(for: redemptionTime),
+            tx: tx,
         ).map {
             return try AuthCredentialWithPni(contents: $0)
         }
@@ -80,15 +82,15 @@ public class AuthCredentialStore {
         for redemptionTime: UInt64,
         tx: DBWriteTransaction,
     ) {
-        groupAuthCredentialStore.setData(
+        groupAuthCredentialStore.writeValue(
             credential.serialize(),
-            key: Self.groupAuthCredentialKey(for: redemptionTime),
-            transaction: tx,
+            forKey: Self.groupAuthCredentialKey(for: redemptionTime),
+            tx: tx,
         )
     }
 
     func removeAllGroupAuthCredentials(tx: DBWriteTransaction) {
-        groupAuthCredentialStore.removeAll(transaction: tx)
+        groupAuthCredentialStore.removeAll(tx: tx)
     }
 
     // MARK: -
@@ -98,15 +100,16 @@ public class AuthCredentialStore {
         redemptionTime: UInt64,
         tx: DBReadTransaction,
     ) -> BackupAuthCredential? {
-        let store: KeyValueStore = switch credentialType {
+        let store: NewKeyValueStore = switch credentialType {
         case .media: backupMediaAuthCredentialStore
         case .messages: backupMessagesAuthCredentialStore
         }
 
         do {
-            return try store.getData(
-                Self.backupAuthCredentialKey(for: redemptionTime),
-                transaction: tx,
+            return try store.fetchValue(
+                Data.self,
+                forKey: Self.backupAuthCredentialKey(for: redemptionTime),
+                tx: tx,
             ).map {
                 return try BackupAuthCredential(contents: $0)
             }
@@ -122,25 +125,25 @@ public class AuthCredentialStore {
         redemptionTime: UInt64,
         tx: DBWriteTransaction,
     ) {
-        let store: KeyValueStore = switch credentialType {
+        let store: NewKeyValueStore = switch credentialType {
         case .media: backupMediaAuthCredentialStore
         case .messages: backupMessagesAuthCredentialStore
         }
 
-        store.setData(
+        store.writeValue(
             credential.serialize(),
-            key: Self.backupAuthCredentialKey(for: redemptionTime),
-            transaction: tx,
+            forKey: Self.backupAuthCredentialKey(for: redemptionTime),
+            tx: tx,
         )
     }
 
     func removeAllBackupAuthCredentials(ofType credentialType: BackupAuthCredentialType, tx: DBWriteTransaction) {
-        let store: KeyValueStore = switch credentialType {
+        let store: NewKeyValueStore = switch credentialType {
         case .media: backupMediaAuthCredentialStore
         case .messages: backupMessagesAuthCredentialStore
         }
 
-        store.removeAll(transaction: tx)
+        store.removeAll(tx: tx)
     }
 
     public func removeAllBackupAuthCredentials(tx: DBWriteTransaction) {

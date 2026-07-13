@@ -20,10 +20,10 @@ public class LastVisibleInteractionStore {
 
     public typealias LastVisibleInteraction = TSThread.LastVisibleInteraction
 
-    private let kvStore: KeyValueStore
+    private let kvStore: NewKeyValueStore
 
     public init() {
-        self.kvStore = KeyValueStore(collection: "lastVisibleInteractionStore")
+        self.kvStore = NewKeyValueStore(collection: "lastVisibleInteractionStore")
     }
 
     public func hasLastVisibleInteraction(for thread: TSThread, tx: DBReadTransaction) -> Bool {
@@ -31,7 +31,7 @@ public class LastVisibleInteractionStore {
     }
 
     public func lastVisibleInteraction(for thread: TSThread, tx: DBReadTransaction) -> LastVisibleInteraction? {
-        guard let data = kvStore.getData(thread.uniqueId, transaction: tx) else {
+        guard let data = kvStore.fetchValue(Data.self, forKey: thread.uniqueId, tx: tx) else {
             return nil
         }
         do {
@@ -52,7 +52,7 @@ public class LastVisibleInteractionStore {
         tx: DBWriteTransaction,
     ) {
         guard let lastVisibleInteraction else {
-            kvStore.removeValue(forKey: thread.uniqueId, transaction: tx)
+            kvStore.removeValue(forKey: thread.uniqueId, tx: tx)
             return
         }
         let data: Data
@@ -60,10 +60,10 @@ public class LastVisibleInteractionStore {
             data = try JSONEncoder().encode(lastVisibleInteraction)
         } catch {
             owsFailDebug("Error: \(error)")
-            kvStore.removeValue(forKey: thread.uniqueId, transaction: tx)
+            kvStore.removeValue(forKey: thread.uniqueId, tx: tx)
             return
         }
-        kvStore.setData(data, key: thread.uniqueId, transaction: tx)
+        kvStore.writeValue(data, forKey: thread.uniqueId, tx: tx)
     }
 }
 

@@ -17,7 +17,7 @@ public class OWSProfileManager: ProfileManagerProtocol {
     public static let notificationKeyUserProfileWriter = "kNSNotificationKey_UserProfileWriter"
 
     private let metadataStore = KeyValueStore(collection: "kOWSProfileManager_Metadata")
-    private let whitelistedGroupsStore = KeyValueStore(collection: "kOWSProfileManager_GroupWhitelistCollection")
+    private let whitelistedGroupsStore = NewKeyValueStore(collection: "kOWSProfileManager_GroupWhitelistCollection")
     private let settingsStore = KeyValueStore(collection: "kOWSProfileManager_SettingsStore")
 
     private let pendingUpdateRequests = AtomicValue<[OWSProfileManager.ProfileUpdateRequest]>([], lock: .init())
@@ -162,7 +162,7 @@ public class OWSProfileManager: ProfileManagerProtocol {
     public func addGroupId(toProfileWhitelist groupId: Data, userProfileWriter: UserProfileWriter, transaction: DBWriteTransaction) {
         owsAssertDebug(!groupId.isEmpty)
         let groupIdKey = groupKey(groupId: groupId)
-        if !whitelistedGroupsStore.hasValue(groupIdKey, transaction: transaction) {
+        if whitelistedGroupsStore.fetchValue(Bool.self, forKey: groupIdKey, tx: transaction) == nil {
             addConfirmedUnwhitelistedGroupId(groupId, userProfileWriter: userProfileWriter, transaction: transaction)
         }
     }
@@ -170,7 +170,7 @@ public class OWSProfileManager: ProfileManagerProtocol {
     public func removeGroupId(fromProfileWhitelist groupId: Data, userProfileWriter: UserProfileWriter, transaction: DBWriteTransaction) {
         owsAssertDebug(!groupId.isEmpty)
         let groupIdKey = groupKey(groupId: groupId)
-        if whitelistedGroupsStore.hasValue(groupIdKey, transaction: transaction) {
+        if whitelistedGroupsStore.fetchValue(Bool.self, forKey: groupIdKey, tx: transaction) != nil {
             removeConfirmedWhitelistedGroupId(groupId, userProfileWriter: userProfileWriter, transaction: transaction)
         }
     }
@@ -178,14 +178,14 @@ public class OWSProfileManager: ProfileManagerProtocol {
     private func removeConfirmedWhitelistedGroupId(_ groupId: Data, userProfileWriter: UserProfileWriter, transaction: DBWriteTransaction) {
         owsAssertDebug(!groupId.isEmpty)
         let groupIdKey = groupKey(groupId: groupId)
-        whitelistedGroupsStore.removeValue(forKey: groupIdKey, transaction: transaction)
+        whitelistedGroupsStore.removeValue(forKey: groupIdKey, tx: transaction)
         groupIdWhitelistWasUpdated(groupId, userProfileWriter: userProfileWriter, transaction: transaction)
     }
 
     private func addConfirmedUnwhitelistedGroupId(_ groupId: Data, userProfileWriter: UserProfileWriter, transaction: DBWriteTransaction) {
         owsAssertDebug(!groupId.isEmpty)
         let groupIdKey = groupKey(groupId: groupId)
-        whitelistedGroupsStore.setBool(true, key: groupIdKey, transaction: transaction)
+        whitelistedGroupsStore.writeValue(true, forKey: groupIdKey, tx: transaction)
         groupIdWhitelistWasUpdated(groupId, userProfileWriter: userProfileWriter, transaction: transaction)
     }
 
@@ -224,7 +224,7 @@ public class OWSProfileManager: ProfileManagerProtocol {
             return false
         }
         let groupIdKey = groupKey(groupId: groupId)
-        return whitelistedGroupsStore.hasValue(groupIdKey, transaction: transaction)
+        return whitelistedGroupsStore.fetchValue(Bool.self, forKey: groupIdKey, tx: transaction) != nil
     }
 
     // MARK: Other User's Profiles
@@ -692,10 +692,9 @@ extension OWSProfileManager: ProfileManager {
             recipient.status = .unspecified
             recipientStore.updateRecipient(recipient, transaction: tx)
         }
-        self.whitelistedGroupsStore.removeValues(
-            forKeys: trigger.groupIds.map { self.groupKey(groupId: $0) },
-            transaction: tx,
-        )
+        trigger.groupIds.forEach { groupId in
+            self.whitelistedGroupsStore.removeValue(forKey: self.groupKey(groupId: groupId), tx: tx)
+        }
     }
 
     // Returns true if the trigger was cleared.
@@ -719,7 +718,7 @@ extension OWSProfileManager: ProfileManager {
     }
 
     private func blockedGroupIDsInWhitelist(tx: DBReadTransaction) -> [Data] {
-        let allWhitelistedGroupKeys = whitelistedGroupsStore.allKeys(transaction: tx)
+        let allWhitelistedGroupKeys = whitelistedGroupsStore.fetchKeys(tx: tx)
 
         return allWhitelistedGroupKeys.lazy
             .compactMap { self.groupIdForGroupKey($0) }

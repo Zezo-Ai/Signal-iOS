@@ -19,7 +19,7 @@ public extension TSGroupThread {
     static let groupThreadUniqueIdPrefix = "g"
 
     @nonobjc
-    private static let uniqueIdMappingStore = KeyValueStore(collection: "TSGroupThread.uniqueIdMappingStore")
+    private static let uniqueIdMappingStore = NewKeyValueStore(collection: "TSGroupThread.uniqueIdMappingStore")
 
     private static func mappingKey(forGroupId groupId: Data) -> String {
         groupId.hexadecimalString
@@ -32,7 +32,7 @@ public extension TSGroupThread {
         owsAssertDebug(!groupId.isEmpty)
 
         let mappingKey = self.mappingKey(forGroupId: groupId)
-        return uniqueIdMappingStore.getString(mappingKey, transaction: transaction)
+        return uniqueIdMappingStore.fetchValue(String.self, forKey: mappingKey, tx: transaction)
     }
 
     /// Returns the uniqueId for the ``TSGroupThread`` with the given group ID,
@@ -115,7 +115,7 @@ public extension TSGroupThread {
         tx: DBWriteTransaction,
     ) {
         let mappingKey = mappingKey(forGroupId: groupId)
-        uniqueIdMappingStore.setString(threadUniqueId, key: mappingKey, transaction: tx)
+        uniqueIdMappingStore.writeValue(threadUniqueId, forKey: mappingKey, tx: tx)
     }
 
     // MARK: -

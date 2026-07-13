@@ -13,24 +13,24 @@ public extension GroupsV2Impl {
     // A list of all groups we've learned of from the storage service.
     //
     // Values are irrelevant (bools).
-    private static let allStorageServiceGroupMasterKeys = KeyValueStore(collection: "GroupsV2Impl.groupsFromStorageService_All")
+    private static let allStorageServiceGroupMasterKeys = NewKeyValueStore(collection: "GroupsV2Impl.groupsFromStorageService_All")
 
     // A list of the groups we need to try to restore. Values are serialized GroupV2Records.
-    private static let storageServiceGroupsToRestore = KeyValueStore(collection: "GroupsV2Impl.groupsFromStorageService_EnqueuedRecordForRestore")
+    private static let storageServiceGroupsToRestore = NewKeyValueStore(collection: "GroupsV2Impl.groupsFromStorageService_EnqueuedRecordForRestore")
 
     // A deprecated list of the groups we need to restore. Values are master keys.
-    private static let legacyStorageServiceGroupsToRestore = KeyValueStore(collection: "GroupsV2Impl.groupsFromStorageService_EnqueuedForRestore")
+    private static let legacyStorageServiceGroupsToRestore = NewKeyValueStore(collection: "GroupsV2Impl.groupsFromStorageService_EnqueuedForRestore")
 
     // A list of the groups we failed to restore.
     //
     // Values are irrelevant (bools).
-    private static let failedStorageServiceGroupMasterKeys = KeyValueStore(collection: "GroupsV2Impl.groupsFromStorageService_Failed")
+    private static let failedStorageServiceGroupMasterKeys = NewKeyValueStore(collection: "GroupsV2Impl.groupsFromStorageService_Failed")
 
     static func isGroupKnownToStorageService(groupModel: TSGroupModelV2, transaction: DBReadTransaction) -> Bool {
         do {
             let masterKeyData = try groupModel.masterKey().serialize()
             let key = restoreGroupKey(forMasterKeyData: masterKeyData)
-            return allStorageServiceGroupMasterKeys.hasValue(key, transaction: transaction)
+            return allStorageServiceGroupMasterKeys.fetchValue(Bool.self, forKey: key, tx: transaction) != nil
         } catch {
             owsFailDebug("Error: \(error)")
             return false
@@ -42,7 +42,7 @@ public extension GroupsV2Impl {
         transaction: DBReadTransaction,
     ) -> StorageServiceProtoGroupV2Record? {
         let key = restoreGroupKey(forMasterKeyData: masterKeyData)
-        guard let recordData = storageServiceGroupsToRestore.getData(key, transaction: transaction) else {
+        guard let recordData = storageServiceGroupsToRestore.fetchValue(Data.self, forKey: key, tx: transaction) else {
             return nil
         }
         return try? .init(serializedData: recordData)
@@ -60,11 +60,11 @@ public extension GroupsV2Impl {
 
         let key = restoreGroupKey(forMasterKeyData: groupRecord.masterKey)
 
-        if !allStorageServiceGroupMasterKeys.hasValue(key, transaction: transaction) {
-            allStorageServiceGroupMasterKeys.setBool(true, key: key, transaction: transaction)
+        if allStorageServiceGroupMasterKeys.fetchValue(Bool.self, forKey: key, tx: transaction) == nil {
+            allStorageServiceGroupMasterKeys.writeValue(true, forKey: key, tx: transaction)
         }
 
-        guard !failedStorageServiceGroupMasterKeys.hasValue(key, transaction: transaction) else {
+        guard failedStorageServiceGroupMasterKeys.fetchValue(Bool.self, forKey: key, tx: transaction) == nil else {
             // Past restore attempts failed in an unrecoverable way.
             return
         }
@@ -75,10 +75,10 @@ public extension GroupsV2Impl {
         }
 
         // Clear any legacy restore info.
-        legacyStorageServiceGroupsToRestore.removeValue(forKey: key, transaction: transaction)
+        legacyStorageServiceGroupsToRestore.removeValue(forKey: key, tx: transaction)
 
         // Store the record for restoration.
-        storageServiceGroupsToRestore.setData(serializedData, key: key, transaction: transaction)
+        storageServiceGroupsToRestore.writeValue(serializedData, forKey: key, tx: transaction)
 
         transaction.addSyncCompletion {
             self.enqueueRestoreGroupPass(authedAccount: account)
@@ -154,7 +154,10 @@ public extension GroupsV2Impl {
     }
 
     private static func anyEnqueuedGroupRecord(transaction: DBReadTransaction) -> StorageServiceProtoGroupV2Record? {
-        guard let serializedData = storageServiceGroupsToRestore.anyDataValue(transaction: transaction) else {
+        guard
+            let randomKey = storageServiceGroupsToRestore.fetchKeys(tx: transaction).randomElement(),
+            let serializedData = storageServiceGroupsToRestore.fetchValue(Data.self, forKey: randomKey, tx: transaction)
+        else {
             return nil
         }
         return try? .init(serializedData: serializedData)
@@ -173,9 +176,14 @@ public extension GroupsV2Impl {
         let (masterKeyData, groupRecord) = SSKEnvironment.shared.databaseStorageRef.read { transaction -> (Data?, StorageServiceProtoGroupV2Record?) in
             if let groupRecord = self.anyEnqueuedGroupRecord(transaction: transaction) {
                 return (groupRecord.masterKey, groupRecord)
-            } else {
+            } else if
                 // Make sure we don't have any legacy master key only enqueued groups
-                return (legacyStorageServiceGroupsToRestore.anyDataValue(transaction: transaction), nil)
+                let randomKey = legacyStorageServiceGroupsToRestore.fetchKeys(tx: transaction).randomElement(),
+                let legacyMasterKey = legacyStorageServiceGroupsToRestore.fetchValue(Data.self, forKey: randomKey, tx: transaction)
+            {
+                return (legacyMasterKey, nil)
+            } else {
+                return (nil, nil)
             }
         }
 
@@ -189,9 +197,9 @@ public extension GroupsV2Impl {
         // that we stop retrying until storage service asks us to try again.
         let markAsFailed = {
             await SSKEnvironment.shared.databaseStorageRef.awaitableWrite { transaction in
-                self.storageServiceGroupsToRestore.removeValue(forKey: key, transaction: transaction)
-                self.legacyStorageServiceGroupsToRestore.removeValue(forKey: key, transaction: transaction)
-                self.failedStorageServiceGroupMasterKeys.setBool(true, key: key, transaction: transaction)
+                self.storageServiceGroupsToRestore.removeValue(forKey: key, tx: transaction)
+                self.legacyStorageServiceGroupsToRestore.removeValue(forKey: key, tx: transaction)
+                self.failedStorageServiceGroupMasterKeys.writeValue(true, forKey: key, tx: transaction)
             }
         }
 
@@ -222,8 +230,8 @@ public extension GroupsV2Impl {
                     _ = recordUpdater.mergeRecord(groupRecord, transaction: tx)
                 }
 
-                self.storageServiceGroupsToRestore.removeValue(forKey: key, transaction: tx)
-                self.legacyStorageServiceGroupsToRestore.removeValue(forKey: key, transaction: tx)
+                self.storageServiceGroupsToRestore.removeValue(forKey: key, tx: tx)
+                self.legacyStorageServiceGroupsToRestore.removeValue(forKey: key, tx: tx)
             }
         }
 

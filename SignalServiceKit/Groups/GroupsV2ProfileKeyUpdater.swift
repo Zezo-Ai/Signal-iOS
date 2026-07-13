@@ -57,7 +57,7 @@ class GroupsV2ProfileKeyUpdater {
     // MARK: -
 
     // Stores the list of v2 groups that we need to update with our latest profile key.
-    private let keyValueStore = KeyValueStore(collection: "GroupsV2ProfileKeyUpdater")
+    private let keyValueStore = NewKeyValueStore(collection: "GroupsV2ProfileKeyUpdater")
 
     private func key(for groupId: Data) -> String {
         return groupId.hexadecimalString
@@ -107,7 +107,7 @@ class GroupsV2ProfileKeyUpdater {
         }
         let groupId = groupThread.groupModel.groupId
         let key = self.key(for: groupId)
-        self.keyValueStore.setData(groupId, key: key, transaction: transaction)
+        self.keyValueStore.writeValue(groupId, forKey: key, tx: transaction)
     }
 
     func processProfileKeyUpdates() {
@@ -170,7 +170,7 @@ class GroupsV2ProfileKeyUpdater {
 
             do {
                 let databaseStorage = SSKEnvironment.shared.databaseStorageRef
-                let groupIdKeys = databaseStorage.read(block: { self.keyValueStore.allKeys(transaction: $0) })
+                let groupIdKeys = databaseStorage.read(block: { tx in self.keyValueStore.fetchKeys(tx: tx) })
                 let taskQueue = ConcurrentTaskQueue(concurrentLimit: 16)
                 try await withThrowingTaskGroup(of: Void.self) { taskGroup in
                     for groupIdKey in groupIdKeys {
@@ -193,7 +193,7 @@ class GroupsV2ProfileKeyUpdater {
 
     private func _tryToUpdateNext(groupIdKey: String) async throws {
         let databaseStorage = SSKEnvironment.shared.databaseStorageRef
-        guard let groupId = databaseStorage.read(block: { tx in keyValueStore.getData(groupIdKey, transaction: tx) }) else {
+        guard let groupId = databaseStorage.read(block: { tx in keyValueStore.fetchValue(Data.self, forKey: groupIdKey, tx: tx) }) else {
             return
         }
         let sendPromises: [Promise<Void>]
@@ -243,7 +243,7 @@ class GroupsV2ProfileKeyUpdater {
 
     private func markAsComplete(groupIdKey: String) async {
         await SSKEnvironment.shared.databaseStorageRef.awaitableWrite { transaction in
-            self.keyValueStore.removeValue(forKey: groupIdKey, transaction: transaction)
+            self.keyValueStore.removeValue(forKey: groupIdKey, tx: transaction)
         }
     }
 

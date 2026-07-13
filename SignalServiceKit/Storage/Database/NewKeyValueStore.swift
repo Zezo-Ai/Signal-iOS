@@ -261,6 +261,14 @@ struct KeyValueStoreMigrator {
         self.collection = collection
     }
 
+    func fetchKeys(tx: DBReadTransaction) throws -> [String] {
+        return try String.fetchAll(
+            tx.database,
+            sql: "SELECT key FROM keyvalue WHERE collection = ?",
+            arguments: [collection],
+        )
+    }
+
     /// Migrate a single NSKeyedArchiver-encoded value.
     ///
     /// If an error occurs fetching from/writing to the database, that error is rethrown.
@@ -323,6 +331,10 @@ struct KeyValueStoreMigrator {
 
     func migrateUInt32(_ key: String, tx: DBWriteTransaction) throws {
         return try migrateKey(key, withValueOfType: NSNumber.self, toNewValue: { Int64($0.uint32Value) }, tx: tx)
+    }
+
+    func migrateUInt64(_ key: String, tx: DBWriteTransaction) throws {
+        return try migrateKey(key, withValueOfType: NSNumber.self, toNewValue: { Int64(bitPattern: $0.uint64Value) }, tx: tx)
     }
 
     func migrateBool(_ key: String, tx: DBWriteTransaction) throws {

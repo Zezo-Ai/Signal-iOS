@@ -10,7 +10,7 @@ public class GroupV2UpdatesImpl: GroupV2Updates {
 
     // This tracks the last time that groups were updated to the current
     // revision.
-    private static let groupRefreshStore = KeyValueStore(collection: "groupRefreshStore")
+    private static let groupRefreshStore = NewKeyValueStore(collection: "groupRefreshStore")
 
     private var lastSuccessfulRefreshMap = LRUCache<GroupIdentifier, Date>(maxSize: 256)
 
@@ -81,9 +81,10 @@ public class GroupV2UpdatesImpl: GroupV2Updates {
 
                 let storeKey = groupId.serialize().toHex()
                 guard
-                    let lastRefreshDate: Date = Self.groupRefreshStore.getDate(
-                        storeKey,
-                        transaction: transaction,
+                    let lastRefreshDate: Date = Self.groupRefreshStore.fetchValue(
+                        Date.self,
+                        forKey: storeKey,
+                        tx: transaction,
                     )
                 else {
                     // If we find a group that we have no record of refreshing,
@@ -261,7 +262,7 @@ public class GroupV2UpdatesImpl: GroupV2Updates {
     private func didUpdateGroupToLatestRevision(groupId: GroupIdentifier) async {
         lastSuccessfulRefreshMap[groupId] = Date()
         await SSKEnvironment.shared.databaseStorageRef.awaitableWrite { tx in
-            Self.groupRefreshStore.setDate(Date(), key: groupId.serialize().hexadecimalString, transaction: tx)
+            Self.groupRefreshStore.writeValue(Date(), forKey: groupId.serialize().hexadecimalString, tx: tx)
         }
     }
 

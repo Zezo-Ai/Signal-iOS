@@ -255,18 +255,24 @@ struct NewKeyValueStoreTest {
             oldStore.setString("Hello", key: "C", transaction: tx)
             oldStore.setDate(Date(timeIntervalSince1970: 1234567890.5), key: "D", transaction: tx)
             oldStore.setObject(Date(timeIntervalSince1970: 1234567890.5) as NSDate, key: "E", transaction: tx)
+            oldStore.setUInt32(.max, key: "F", transaction: tx)
+            oldStore.setUInt64(.max, key: "G", transaction: tx)
 
             try migrator.migrateBool("A", tx: tx)
             try migrator.migrateUInt32("B", tx: tx)
             try migrator.migrateString("C", tx: tx)
             try migrator.migrateDate("D", tx: tx)
             try migrator.migrateDate("E", tx: tx)
+            try migrator.migrateUInt32("F", tx: tx)
+            try migrator.migrateUInt64("G", tx: tx)
 
             #expect(newStore.fetchValue(Bool.self, forKey: "A", tx: tx) == true)
             #expect(newStore.fetchValue(Int64.self, forKey: "B", tx: tx) == 123)
             #expect(newStore.fetchValue(String.self, forKey: "C", tx: tx) == "Hello")
             #expect(newStore.fetchValue(TimeInterval.self, forKey: "D", tx: tx) == 1234567890.5)
             #expect(newStore.fetchValue(TimeInterval.self, forKey: "E", tx: tx) == 1234567890.5)
+            #expect(newStore.fetchValue(Int64.self, forKey: "F", tx: tx) == Int64(UInt32.max))
+            #expect(newStore.fetchValue(UInt64.self, forKey: "G", tx: tx) == .max)
         }
     }
 

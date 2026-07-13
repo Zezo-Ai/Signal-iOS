@@ -344,6 +344,7 @@ public class GRDBSchemaMigrator {
         case completePermasnoozedReminderMegaphones
         case migrateHasPaymentAddress
         case addCombinedGroupSendEndorsementExpirationIndex
+        case migrateGroupKeyValueStores
 
         // NOTE: Every time we add a migration id, consider
         // incrementing grdbSchemaVersionLatest.
@@ -467,7 +468,7 @@ public class GRDBSchemaMigrator {
     }
 
     public static let grdbSchemaVersionDefault: UInt = 0
-    public static let grdbSchemaVersionLatest: UInt = 152
+    public static let grdbSchemaVersionLatest: UInt = 153
 
     private class DatabaseMigratorWrapper {
         // Run with immediate (or disabled) foreign key checks so that pre-existing
@@ -5337,6 +5338,54 @@ public class GRDBSchemaMigrator {
                 on: "CombinedGroupSendEndorsement",
                 columns: ["expiration"],
             )
+            return .success(())
+        }
+
+        migrator.registerMigration(.migrateGroupKeyValueStores) { tx in
+            do {
+                let migrator = KeyValueStoreMigrator(collection: "TSGroupThread.uniqueIdMappingStore")
+                try migrator.fetchKeys(tx: tx).forEach { try migrator.migrateString($0, tx: tx) }
+            }
+            do {
+                let migrator = KeyValueStoreMigrator(collection: "GroupThreadCollisionFinder")
+                try migrator.fetchKeys(tx: tx).forEach { try migrator.migrateUInt64($0, tx: tx) }
+            }
+            do {
+                let migrator = KeyValueStoreMigrator(collection: "OWSContactsManager.skipContactAvatarBlurByUuidStore")
+                try migrator.fetchKeys(tx: tx).forEach { try migrator.migrateBool($0, tx: tx) }
+            }
+            do {
+                let migrator = KeyValueStoreMigrator(collection: "OWSContactsManager.skipGroupAvatarBlurByGroupIdStore")
+                try migrator.fetchKeys(tx: tx).forEach { try migrator.migrateBool($0, tx: tx) }
+            }
+            do {
+                let migrator = KeyValueStoreMigrator(collection: "GroupsV2Impl.groupsFromStorageService_All")
+                try migrator.fetchKeys(tx: tx).forEach { try migrator.migrateBool($0, tx: tx) }
+            }
+            do {
+                let migrator = KeyValueStoreMigrator(collection: "GroupsV2Impl.groupsFromStorageService_Failed")
+                try migrator.fetchKeys(tx: tx).forEach { try migrator.migrateBool($0, tx: tx) }
+            }
+            do {
+                let migrator = KeyValueStoreMigrator(collection: "groupRefreshStore")
+                try migrator.fetchKeys(tx: tx).forEach { try migrator.migrateDate($0, tx: tx) }
+            }
+            do {
+                let migrator = KeyValueStoreMigrator(collection: "kOWSProfileManager_GroupWhitelistCollection")
+                try migrator.fetchKeys(tx: tx).forEach { try migrator.migrateBool($0, tx: tx) }
+            }
+            do {
+                let migrator = KeyValueStoreMigrator(collection: "chatColorSettingStore")
+                try migrator.fetchKeys(tx: tx).forEach { try migrator.migrateString($0, tx: tx) }
+            }
+            do {
+                let migrator = KeyValueStoreMigrator(collection: "Wallpaper+Enum")
+                try migrator.fetchKeys(tx: tx).forEach { try migrator.migrateString($0, tx: tx) }
+            }
+            do {
+                let migrator = KeyValueStoreMigrator(collection: "Wallpaper+Dimming")
+                try migrator.fetchKeys(tx: tx).forEach { try migrator.migrateBool($0, tx: tx) }
+            }
             return .success(())
         }
 

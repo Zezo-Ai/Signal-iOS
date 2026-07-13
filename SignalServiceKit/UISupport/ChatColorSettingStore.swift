@@ -11,7 +11,7 @@ import Foundation
 /// The keys in this store are thread unique ids _OR_ "defaultKey". The
 /// values are either `PaletteChatColor.rawValue` or `CustomChatColor.Key`.
 public class ChatColorSettingStore {
-    private let settingStore: KeyValueStore
+    private let settingStore: NewKeyValueStore
     /// The keys in this store are `CustomChatColor.Key`. The values are
     /// `CustomChatColor`s.
     private let customColorsStore: KeyValueStore
@@ -21,25 +21,25 @@ public class ChatColorSettingStore {
     public init(
         wallpaperStore: WallpaperStore,
     ) {
-        self.settingStore = KeyValueStore(collection: "chatColorSettingStore")
+        self.settingStore = NewKeyValueStore(collection: "chatColorSettingStore")
         self.customColorsStore = KeyValueStore(collection: "customColorsStore.3")
         self.wallpaperStore = wallpaperStore
     }
 
     public func fetchAllScopeKeys(tx: DBReadTransaction) -> [String] {
-        return settingStore.allKeys(transaction: tx)
+        return settingStore.fetchKeys(tx: tx)
     }
 
     public func fetchRawSetting(for scopeKey: String, tx: DBReadTransaction) -> String? {
-        return settingStore.getString(scopeKey, transaction: tx)
+        return settingStore.fetchValue(String.self, forKey: scopeKey, tx: tx)
     }
 
     public func setRawSetting(_ rawValue: String?, for scopeKey: String, tx: DBWriteTransaction) {
-        settingStore.setString(rawValue, key: scopeKey, transaction: tx)
+        settingStore.writeValue(rawValue, forKey: scopeKey, tx: tx)
     }
 
     public func resetAllSettings(tx: DBWriteTransaction) {
-        settingStore.removeAll(transaction: tx)
+        settingStore.removeAll(tx: tx)
         postChatColorsDidChangeNotification(for: nil, tx: tx)
     }
 
