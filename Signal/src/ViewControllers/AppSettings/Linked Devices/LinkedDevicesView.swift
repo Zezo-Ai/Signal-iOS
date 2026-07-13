@@ -904,19 +904,47 @@ struct LinkedDevicesView: View {
 
         private var lastSeenDateString: String {
             guard let device else { return " " }
-            return dateFormattedString(
-                format: OWSLocalizedString(
-                    "DEVICE_LAST_ACTIVE_AT_LABEL",
-                    comment: "{{Short Date}} when device last communicated with Signal Server.",
-                ),
-                // lastSeenAt is stored at day granularity. At midnight UTC.
-                // Making it likely that when you first link a device it will
-                // be "last seen" the day before it was created, which looks broken.
-                date: max(
-                    device.device.createdAt,
-                    device.device.lastSeenAt,
-                ),
+
+            // lastSeenAt is stored with day granularity (midnight UTC), which
+            // means a recently-linked device could have a lastSeenAt that's
+            // before its createdAt, for some time zones. Avoid that by taking
+            // whichever is more recent.
+            let lastSeenDate = max(
+                device.device.createdAt,
+                device.device.lastSeenAt,
             )
+            let now = Date()
+
+            // Since lastSeenAt is truncated to midnight UTC, avoid time-zone-aware
+            // comparisons (such as using Calendar). There's fuzziness in these
+            // comparisons, but at least its only fuzziness coming from the
+            // truncation.
+            let timeIntervalSinceLastSeen = now.timeIntervalSince(lastSeenDate)
+            switch timeIntervalSinceLastSeen {
+            case ..<(2 * .day):
+                return OWSLocalizedString(
+                    "DEVICE_LAST_ACTIVE_PAST_DAY",
+                    comment: "Label indicating a linked device was last active within the past day.",
+                )
+            case (2 * .day)..<(3 * .day):
+                return OWSLocalizedString(
+                    "DEVICE_LAST_ACTIVE_PAST_TWO_DAYS",
+                    comment: "Label indicating a linked device was last active within the past two days.",
+                )
+            case (3 * .day)..<(4 * .day):
+                return OWSLocalizedString(
+                    "DEVICE_LAST_ACTIVE_ABOUT_THREE_DAYS_AGO",
+                    comment: "Label indicating a linked device was last active about three days ago.",
+                )
+            default:
+                return dateFormattedString(
+                    format: OWSLocalizedString(
+                        "DEVICE_LAST_ACTIVE_AT_LABEL",
+                        comment: "{{Short Date}} when device last communicated with Signal Server.",
+                    ),
+                    date: lastSeenDate,
+                )
+            }
         }
 
         var body: some View {
