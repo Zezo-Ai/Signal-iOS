@@ -209,10 +209,6 @@ public class GroupManager: NSObject {
             throw OWSAssertionError("Missing localIdentifiers.")
         }
 
-        // GroupsV2 TODO: Elaborate tests to include admins, pending members, etc.
-        // GroupsV2 TODO: Let tests specify access levels.
-        // GroupsV2 TODO: Fill in avatarUrlPath when we test v2 groups.
-
         let secretParams = try GroupSecretParams.generate()
         var builder = TSGroupModelBuilder(secretParams: secretParams)
         builder.name = name
