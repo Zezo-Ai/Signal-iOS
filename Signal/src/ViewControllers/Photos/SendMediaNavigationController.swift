@@ -93,11 +93,6 @@ class SendMediaNavigationController: OWSNavigationController, AttachmentApproval
         self.attachmentLimits = attachmentLimits
 
         super.init()
-
-        // Do this instead of overriding each possible view controller.
-        if Theme.forceDarkThemeForMedia {
-            overrideUserInterfaceStyle = .dark
-        }
     }
 
     // MARK: - Overrides

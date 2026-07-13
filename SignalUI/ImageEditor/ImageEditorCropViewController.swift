@@ -142,6 +142,10 @@ class ImageEditorCropViewController: OWSViewController {
         self.transform = model.currentTransform()
 
         super.init()
+
+        if Theme.forceDarkThemeForMedia {
+            overrideUserInterfaceStyle = .dark
+        }
     }
 
     // MARK: - UIViewController

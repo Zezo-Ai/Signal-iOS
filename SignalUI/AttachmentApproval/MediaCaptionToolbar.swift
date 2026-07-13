@@ -111,11 +111,10 @@ class MediaCaptionToolbar: UIView, UITextViewDelegate, BodyRangesTextViewDelegat
         if #available(iOS 17, *) {
             registerForTraitChanges(
                 [UITraitUserInterfaceStyle.self],
-                handler: { (view: UITraitEnvironment, _) in
-                    guard let view = view as? MediaCaptionToolbar else { return }
+                handler: { (self: Self, _) in
                     // This will cause `BodyRangesTextView` to update attributes
                     // even though the color doesn't actually change.
-                    view.textView.textColor = .Signal.label
+                    self.textView.textColor = .Signal.label
                 },
             )
         }
@@ -145,6 +144,14 @@ class MediaCaptionToolbar: UIView, UITextViewDelegate, BodyRangesTextViewDelegat
                     self.frame = frame
                 }
             }
+        }
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if #unavailable(iOS 17), traitCollection.userInterfaceStyle != previousTraitCollection?.userInterfaceStyle {
+            textView.textColor = .Signal.label
         }
     }
 

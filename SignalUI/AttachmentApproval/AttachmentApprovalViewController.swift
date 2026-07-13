@@ -187,6 +187,10 @@ public final class AttachmentApprovalViewController: UIPageViewController, UIPag
         let pageOptions: [UIPageViewController.OptionsKey: Any] = [.interPageSpacing: 20]
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: pageOptions)
 
+        if Theme.forceDarkThemeForMedia {
+            overrideUserInterfaceStyle = .dark
+        }
+
         let isAddMoreVisibleBlock = { [weak self] in
             return self?.isAddMoreVisible ?? false
         }

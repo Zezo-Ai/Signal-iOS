@@ -35,15 +35,13 @@ private class CropCornerView: UIView {
 
         isUserInteractionEnabled = false
 
+        // We need to track `UITraitUserInterfaceStyle` on all iOS versions because
+        // the view wouldn't receive it's final interface style until after being added to the superview.
         updateColor()
-        if Theme.forceDarkThemeForMedia == false, #available(iOS 17, *) {
-            registerForTraitChanges(
-                [UITraitUserInterfaceStyle.self],
-                handler: { (view: UIView, _) in
-                    guard let view = view as? CropCornerView else { return }
-                    view.updateColor()
-                },
-            )
+        if #available(iOS 17, *) {
+            registerForTraitChanges([UITraitUserInterfaceStyle.self], handler: { (self: Self, _) in
+                self.updateColor()
+            })
         }
     }
 
@@ -66,6 +64,14 @@ private class CropCornerView: UIView {
             if bounds != oldValue {
                 updatePath()
             }
+        }
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if #unavailable(iOS 17), traitCollection.userInterfaceStyle != previousTraitCollection?.userInterfaceStyle {
+            updateColor()
         }
     }
 
@@ -351,19 +357,24 @@ final class CropView: UIView {
         setState(.initial, animated: false)
 
         cropFrameView.layer.borderWidth = 1
-        cropFrameView.layer.borderColor = UIColor.Signal.label.cgColor
-        if Theme.forceDarkThemeForMedia == false, #available(iOS 17, *) {
-            cropFrameView.registerForTraitChanges(
-                [UITraitUserInterfaceStyle.self],
-                handler: { (view: UIView, _) in
-                    view.layer.borderColor = UIColor.Signal.label.cgColor
-                },
-            )
+        updateFrameColor()
+        if #available(iOS 17, *) {
+            registerForTraitChanges([UITraitUserInterfaceStyle.self], handler: { (self: Self, _) in
+                self.updateFrameColor()
+            })
         }
     }
 
     required init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if #unavailable(iOS 17), traitCollection.userInterfaceStyle != previousTraitCollection?.userInterfaceStyle {
+            updateFrameColor()
+        }
     }
 
     override func layoutSubviews() {
@@ -413,6 +424,10 @@ final class CropView: UIView {
             height: min(cropFrameView.frame.size.height * 0.5, CropView.desiredCornerSize),
         )
         cropCornerViews.forEach { $0.size = cornerSize }
+    }
+
+    private func updateFrameColor() {
+        cropFrameView.layer.borderColor = UIColor.Signal.label.cgColor
     }
 }
 

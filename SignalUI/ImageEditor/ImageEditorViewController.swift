@@ -287,6 +287,10 @@ class ImageEditorViewController: OWSViewController, UIGestureRecognizerDelegate,
 
         super.init()
 
+        if Theme.forceDarkThemeForMedia {
+            overrideUserInterfaceStyle = .dark
+        }
+
         model.add(observer: self)
     }
 
