@@ -1299,7 +1299,7 @@ extension MessageDetailViewController: CVComponentDelegate {
 
     // TODO:
     func didTapBlockRequest(
-        groupModel: TSGroupModelV2,
+        secretParams: GroupSecretParams,
         requesterName: String,
         requesterAci: Aci,
     ) {}

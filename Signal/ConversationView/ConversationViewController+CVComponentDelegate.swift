@@ -1071,7 +1071,7 @@ extension ConversationViewController: CVComponentDelegate {
     }
 
     public func didTapBlockRequest(
-        groupModel: TSGroupModelV2,
+        secretParams: GroupSecretParams,
         requesterName: String,
         requesterAci: Aci,
     ) {
@@ -1110,7 +1110,7 @@ extension ConversationViewController: CVComponentDelegate {
                             // If the user in question has canceled their request,
                             // this call will still block them.
                             try await GroupManager.acceptOrDenyMemberRequestsV2(
-                                secretParams: groupModel.secretParams(),
+                                secretParams: secretParams,
                                 aci: requesterAci,
                                 shouldAccept: false,
                             )

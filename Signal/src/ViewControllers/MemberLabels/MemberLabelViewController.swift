@@ -766,7 +766,7 @@ extension MemberLabelViewController: CVComponentDelegate {
     func didTapShowConversationSettingsAndShowMemberRequests() {}
 
     func didTapBlockRequest(
-        groupModel: TSGroupModelV2,
+        secretParams: GroupSecretParams,
         requesterName: String,
         requesterAci: Aci,
     ) {}

@@ -147,7 +147,8 @@ private extension CVComponentSystemMessage.Action {
         guard isTail else { return nil }
 
         guard
-            let mostRecentGroupModel = groupThread()?.groupModel as? TSGroupModelV2
+            let mostRecentGroupModel = groupThread()?.groupModel as? TSGroupModelV2,
+            let secretParams = try? mostRecentGroupModel.secretParams()
         else {
             owsFailDebug("Missing group thread for join request sequence")
             return nil
@@ -171,12 +172,14 @@ private extension CVComponentSystemMessage.Action {
             ),
             accessibilityIdentifier: "block_join_request_button",
             action: .didTapBlockRequest(
-                groupModel: mostRecentGroupModel,
-                requesterName: contactsManager.displayName(
-                    for: SignalServiceAddress(requester),
-                    tx: tx,
-                ).resolvedValue(useShortNameIfAvailable: true),
-                requesterAci: requester,
+                CVMessageAction.Action.BlockGroupRequest(
+                    secretParams: secretParams,
+                    requesterAci: requester,
+                    requesterName: contactsManager.displayName(
+                        for: SignalServiceAddress(requester),
+                        tx: tx,
+                    ).resolvedValue(useShortNameIfAvailable: true),
+                ),
             ),
         )
     }

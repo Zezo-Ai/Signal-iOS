@@ -238,7 +238,7 @@ public protocol CVComponentDelegate: AnyObject, AudioMessageViewDelegate, CVPoll
 
     func didTapShowConversationSettingsAndShowMemberRequests()
 
-    func didTapBlockRequest(groupModel: TSGroupModelV2, requesterName: String, requesterAci: Aci)
+    func didTapBlockRequest(secretParams: GroupSecretParams, requesterName: String, requesterAci: Aci)
 
     func didTapShowUpgradeAppUI()
 
@@ -302,7 +302,7 @@ struct CVMessageAction: Equatable {
         case didTapViewGroupDescription(newGroupDescription: String)
         case didTapGroupInviteLinkPromotion
         case didTapShowConversationSettingsAndShowMemberRequests
-        case didTapBlockRequest(groupModel: TSGroupModelV2, requesterName: String, requesterAci: Aci)
+        case didTapBlockRequest(BlockGroupRequest)
         case didTapShowUpgradeAppUI
         case didTapUpdateSystemContact(address: SignalServiceAddress, newNameComponents: PersonNameComponents)
         case didTapPhoneNumberChange(aci: Aci, phoneNumberOld: String, phoneNumberNew: String)
@@ -326,6 +326,20 @@ struct CVMessageAction: Equatable {
         case didTapViewPinnedMessage(pinnedMessageUniqueId: String)
         case didTapReleaseNotesAnnouncementAction(action: RemoteAnnouncementModel.Manifest.Action)
 
+        struct BlockGroupRequest: Equatable {
+            var secretParams: GroupSecretParams
+            var requesterAci: Aci
+            var requesterName: String
+
+            static func ==(lhs: Self, rhs: Self) -> Bool {
+                return (
+                    lhs.secretParams.serialize() == rhs.secretParams.serialize()
+                        && lhs.requesterAci == rhs.requesterAci
+                        && lhs.requesterName == rhs.requesterName,
+                )
+            }
+        }
+
         func perform(delegate: CVComponentDelegate) {
             switch self {
             case .none:
@@ -346,8 +360,8 @@ struct CVMessageAction: Equatable {
                 delegate.didTapGroupInviteLinkPromotion()
             case .didTapShowConversationSettingsAndShowMemberRequests:
                 delegate.didTapShowConversationSettingsAndShowMemberRequests()
-            case .didTapBlockRequest(let groupModel, let requesterName, let requesterAci):
-                delegate.didTapBlockRequest(groupModel: groupModel, requesterName: requesterName, requesterAci: requesterAci)
+            case .didTapBlockRequest(let blockRequest):
+                delegate.didTapBlockRequest(secretParams: blockRequest.secretParams, requesterName: blockRequest.requesterName, requesterAci: blockRequest.requesterAci)
             case .didTapShowUpgradeAppUI:
                 delegate.didTapShowUpgradeAppUI()
             case .didTapUpdateSystemContact(let address, let newNameComponents):
