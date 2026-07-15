@@ -146,10 +146,7 @@ public class TextStylingToolbar: UIControl {
         set { colorPickerBar.color = newValue }
     }
 
-    public let textStyleButton = UIButton(configuration: .roundMedia(
-        image: TextStylingToolbar.buttonImage(forTextStyle: .regular),
-        size: 44,
-    ))
+    public let textStyleButton: UIButton
 
     public var textStyle: MediaTextView.TextStyle = .regular {
         didSet {
@@ -194,10 +191,7 @@ public class TextStylingToolbar: UIControl {
         }
     }
 
-    public let decorationStyleButton = UIButton(configuration: .roundMedia(
-        image: UIImage(imageLiteralResourceName: "text_effects"),
-        size: 44,
-    ))
+    public let decorationStyleButton: UIButton
 
     public var decorationStyle: MediaTextView.DecorationStyle = .none {
         didSet {
@@ -207,7 +201,7 @@ public class TextStylingToolbar: UIControl {
     }
 
     public let doneButton: UIButton = UIButton(
-        configuration: .tintedRoundMedia(
+        configuration: .roundMedia(
             image: UIImage(imageLiteralResourceName: "check"),
             size: 44,
         ),
@@ -216,15 +210,51 @@ public class TextStylingToolbar: UIControl {
     public private(set) var contentWidthConstraint: NSLayoutConstraint?
 
     private lazy var stackView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [textStyleButton, decorationStyleButton, colorPickerBar, doneButton])
+        let stackView: UIStackView
+        if #available(iOS 26, *) {
+            let buttonStack = UIStackView(arrangedSubviews: [textStyleButton, decorationStyleButton])
+            buttonStack.spacing = 8
+            buttonStack.directionalLayoutMargins = .init(hMargin: 2, vMargin: 0)
+            buttonStack.isLayoutMarginsRelativeArrangement = true
+            buttonStack.translatesAutoresizingMaskIntoConstraints = false
+            let glassEffect = UIGlassEffect(style: .regular)
+            glassEffect.isInteractive = true
+            let glassPanel = UIVisualEffectView(effect: glassEffect)
+            glassPanel.clipsToBounds = true
+            glassPanel.cornerConfiguration = .capsule()
+            glassPanel.contentView.addSubview(buttonStack)
+            NSLayoutConstraint.activate([
+                buttonStack.topAnchor.constraint(equalTo: glassPanel.topAnchor),
+                buttonStack.leadingAnchor.constraint(equalTo: glassPanel.leadingAnchor),
+                buttonStack.trailingAnchor.constraint(equalTo: glassPanel.trailingAnchor),
+                buttonStack.bottomAnchor.constraint(equalTo: glassPanel.bottomAnchor),
+            ])
+            stackView = UIStackView(arrangedSubviews: [glassPanel, colorPickerBar, doneButton])
+        } else {
+            stackView = UIStackView(arrangedSubviews: [textStyleButton, decorationStyleButton, colorPickerBar, doneButton])
+            stackView.setCustomSpacing(8, after: textStyleButton)
+        }
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.alignment = .center
-        stackView.spacing = 8
+        stackView.spacing = 20
         return stackView
     }()
 
     public init(currentColor: ColorPickerBarColor? = nil) {
         colorPickerBar = ColorPickerBar(color: currentColor ?? ColorPickerBarColor.white)
+
+        // No background for leading buttons on iOS 26 because they are placed onto a glass panel together.
+        let useBackgroundForLeadingEdgeButtons = if #available(iOS 26, *) { false } else { true }
+        textStyleButton = UIButton(configuration: .roundMedia(
+            image: TextStylingToolbar.buttonImage(forTextStyle: .regular),
+            size: 44,
+            withBackground: useBackgroundForLeadingEdgeButtons,
+        ))
+        decorationStyleButton = UIButton(configuration: .roundMedia(
+            image: UIImage(imageLiteralResourceName: "text_effects"),
+            size: 44,
+            withBackground: useBackgroundForLeadingEdgeButtons,
+        ))
 
         super.init(frame: .zero)
 
@@ -243,19 +273,19 @@ public class TextStylingToolbar: UIControl {
         decorationStyleButton.setCompressionResistanceHigh()
         doneButton.setCompressionResistanceHigh()
 
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stackView)
+
         let contentWidthConstraint = stackView.widthAnchor.constraint(
             equalToConstant: ImageEditorViewController.preferredToolbarContentWidth,
         )
         contentWidthConstraint.priority = .defaultHigh
         self.contentWidthConstraint = contentWidthConstraint
-
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stackView)
         addConstraints([
             stackView.centerXAnchor.constraint(equalTo: layoutMarginsGuide.centerXAnchor),
             stackView.leadingAnchor.constraint(greaterThanOrEqualTo: layoutMarginsGuide.leadingAnchor),
             stackView.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor),
-            stackView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -2),
+            stackView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -8),
             contentWidthConstraint,
         ])
     }
