@@ -666,23 +666,22 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
                     }
                     return sgxConnection
                 } catch {
-                    Logger.error("Failed to open websocket connection and complete handshake")
-
-                    // if we fail to connect for any reason, assume the credential we tried to use was bad.
-                    // clear it out, and if we have a backup, try again with that.
-                    switch config.authMethod {
-                    case .svrAuth(let attemptedCredential, let backup):
-                        await self.db.awaitableWrite { tx in
-                            self.credentialManager.deleteInvalidCredentials([attemptedCredential].compacted(), tx)
+                    Logger.warn("couldn't open web socket: \(error)")
+                    if case WebSocketError.httpError(statusCode: 401, retryAfter: _) = error {
+                        // If the credential isn't valid, clear it out and try with a backup.
+                        switch config.authMethod {
+                        case .svrAuth(let attemptedCredential, let backup):
+                            await self.db.awaitableWrite { tx in
+                                self.credentialManager.deleteInvalidCredentials([attemptedCredential].compacted(), tx)
+                            }
+                            if let backup {
+                                config.authMethod = backup
+                                continue
+                            }
+                        case .chatServerAuth, .implicit:
+                            break
                         }
-                        if let backup {
-                            config.authMethod = backup
-                            continue
-                        }
-                    case .chatServerAuth, .implicit:
-                        break
                     }
-
                     throw error
                 }
             }
