@@ -64,20 +64,11 @@ class MediaItemViewController: OWSViewController, VideoPlaybackStatusProvider {
             return
         }
 
-        var buttonConfiguration: UIButton.Configuration
-        if #available(iOS 26, *) {
-            buttonConfiguration = .glass()
-            buttonConfiguration.baseForegroundColor = .Signal.label
-        } else {
-            buttonConfiguration = .borderedProminent()
-            buttonConfiguration.baseForegroundColor = .black
-            buttonConfiguration.baseBackgroundColor = UIColor(white: 1, alpha: 0.75)
-        }
-        buttonConfiguration.cornerStyle = .capsule
-        buttonConfiguration.image = UIImage(named: "play-fill-48")
-        buttonConfiguration.contentInsets = .init(margin: 22) // 92 pt button size
-
         if galleryItem.isVideoReadyToPlay {
+            let buttonConfiguration = UIButton.Configuration.roundMedia(
+                image: UIImage(imageLiteralResourceName: "play-fill-48"),
+                size: 92,
+            )
             let button = UIButton(
                 configuration: buttonConfiguration,
                 primaryAction: UIAction { [weak self] _ in
