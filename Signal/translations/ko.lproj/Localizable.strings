@@ -547,6 +547,30 @@
 /* return to the previous screen */
 "BACK_BUTTON" = "뒤로";
 
+/* Message for an error sheet shown when confirming the user's Recovery Key via their password manager fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_MESSAGE" = "Your recovery key could not be confirmed. Make sure you've saved it in your password manager, or save it manually.";
+
+/* Title for a button that begins saving the user's Recovery Key manually, in an error sheet shown when confirming it via their password manager fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_SAVE_MANUALLY_BUTTON_TITLE" = "Save Key Manually";
+
+/* Title for a button that retries saving the user's Recovery Key to their password manager, in an error sheet shown when confirming it fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_SAVE_TO_PW_MGR_BUTTON_TITLE" = "Save to Password Manager";
+
+/* Title for an error sheet shown when confirming the user's Recovery Key via their password manager fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_TITLE" = "Error Confirming Recovery Key";
+
+/* Title for a button that begins confirming the user's Recovery Key, in a sheet shown after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_CONFIRM_BUTTON_TITLE" = "Confirm Recovery Key";
+
+/* Message for a sheet shown to confirm the user's Recovery Key after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_MESSAGE" = "Confirm that your recovery key was recorded correctly. You will be prompted to sign in with your saved password in the next step.";
+
+/* Title for a button that returns the user to view their Recovery Key, in a sheet shown after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_SEE_KEY_AGAIN_BUTTON_TITLE" = "See Key Again";
+
+/* Title for a sheet shown to confirm the user's Recovery Key after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_TITLE" = "Confirm Your Recovery Key";
+
 /* Action text for Recovery Key reminder megaphone */
 "BACKUP_ENABLEMENT_REMINDER_MEGAPHONE_ACTION" = "켜기";
 
@@ -579,6 +603,9 @@
 
 /* Toast indicating that the Recovery Key was correct. */
 "BACKUP_KEY_REMINDER_SUCCESSFUL_TOAST" = "복구 키가 맞습니다. 키를 안전하게 보관하세요.";
+
+/* Title for a button that lets the user see their whole Recovery Key, from a preview. */
+"BACKUP_KEY_SEE_FULL_KEY_BUTTON_TITLE" = "See Full Key";
 
 /* Body for a warning sheet shown to discourage the user from sharing their 'Recovery Key', warning them not to share it with anyone. */
 "BACKUP_NEVER_SHARE_RECOVERY_KEY_SHEET_BODY" = "다른 사람과 복구 키를 공유하지 마세요. 복구 키를 공유하면 다른 사람이 내 계정을 탈취할 수 있습니다. Signal은 사용자에게 복구 키를 요구하는 메시지를 <bold>절대</bold> 보내지 않습니다. Signal을 사칭하는 채팅에 절대 답장하지 마세요.";
@@ -676,26 +703,8 @@
 /* Title for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
 "BACKUP_RECORD_KEY_NEW_TITLE" = "새 복구 키를 저장하세요";
 
-/* Title for a button allowing users to save their 'Recovery Key' to a password manager. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_BUTTON_TITLE" = "비밀번호 관리자에 저장";
-
-/* Message for a confirmation sheet shown before saving the user's 'Recovery Key' to a password manager, advising them to only use a password manager they trust. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_CONFIRM_MESSAGE" = "복구 키는 안전하다고 신뢰할 수 있는 비밀번호 관리자에만 저장하세요. Signal은 특정 비밀번호 관리자를 별도로 추천하지 않습니다.";
-
-/* Title for a confirmation sheet shown before saving the user's 'Recovery Key' to a password manager. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_CONFIRM_TITLE" = "비밀번호 관리자에 저장할까요?";
-
 /* Name used as both the username and title for the user's 'Recovery Key' credential when saving it to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_CREDENTIAL_NAME" = "Signal 복구 키";
-
-/* Message for an error sheet shown when saving the user's 'Recovery Key' to a password manager fails, suggesting that they may not have a supported password manager configured. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_ERROR_MESSAGE" = "비밀번호 관리자를 설정하지 않았거나, 사용 중인 비밀번호 관리자가 지원되지 않습니다. 휴대폰 설정에서 원하는 비밀번호 관리자를 선택해 주세요.";
-
-/* Title for an error sheet shown when saving the user's 'Recovery Key' to a password manager fails. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_ERROR_TITLE" = "비밀번호 관리자에 저장할 수 없어요";
-
-/* Toast shown after the user successfully saves their 'Recovery Key' to a password manager. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_SUCCESS_TOAST" = "설정 완료! 비밀번호 관리자를 확인하여 인증해 주세요.";
 
 /* Subtitle for a view allowing users to save their 'Recovery Key'. */
 "BACKUP_RECORD_KEY_SUBTITLE" = "이 키는 계정과 데이터를 복원하는 데 필요합니다. 안전한 곳에 보관해 두세요. 키를 분실하면 계정을 복원할 수 없습니다.";
@@ -720,6 +729,24 @@
 
 /* Title for a progress spinner on a modal when restoring messages */
 "BACKUP_RESTORE_MODAL_TITLE" = "메시지를 복원하는 중...";
+
+/* Message for a confirmation sheet shown before saving the user's Recovery Key to their password manager. */
+"BACKUP_SAVE_KEY_PW_MGR_CONFIRM_SHEET_MESSAGE" = "Only store your recovery key in a password manager that you trust is secure. Signal does not make a recommendation on which password manager is right for you.";
+
+/* Title for a confirmation sheet shown before saving the user's Recovery Key to their password manager. */
+"BACKUP_SAVE_KEY_PW_MGR_CONFIRM_SHEET_TITLE" = "Save to password manager?";
+
+/* Message for an error sheet shown when saving the user's Recovery Key to their password manager fails. */
+"BACKUP_SAVE_KEY_PW_MGR_ERROR_SHEET_MESSAGE" = "You may not have a password manager set up, or the password manager you're using may not be supported. You can choose your preferred password manager in your phone's settings.";
+
+/* Title for an error sheet shown when saving the user's Recovery Key to their password manager fails. */
+"BACKUP_SAVE_KEY_PW_MGR_ERROR_SHEET_TITLE" = "Can't save to password manager";
+
+/* Title for a button that begins saving the user's Recovery Key manually. */
+"BACKUP_SAVE_KEY_SAVE_MANUALLY_BUTTON_TITLE" = "Save Manually";
+
+/* Title for a button that begins saving the user's Recovery Key to their password manager. */
+"BACKUP_SAVE_KEY_SAVE_TO_PW_MGR_BUTTON_TITLE" = "Save to Password Manager";
 
 /* Message describing that the Background App Refresh permission is disabled for Signal. \"Background App Refresh\" should be localized the same way it is in iOS Settings app permissions. */
 "BACKUP_SETTINGS_BACKGROUND_APP_REFRESH_DISABLED_MESSAGE" = "자동 백업을 비활성화했습니다. Signal의 사용 권한을 업데이트하여 자동 백업을 활성화하세요.";
@@ -870,6 +897,9 @@
 
 /* Header for a menu section related to settings for when Backups are enabled. */
 "BACKUP_SETTINGS_BACKUPS_ENABLED_SECTION_HEADER" = "백업 세부 정보";
+
+/* Toast shown when the user's Recovery Key has been confirmed successfully. */
+"BACKUP_SETTINGS_CONFIRM_KEY_SUCCESS_TOAST" = "Recovery Key Confirmed";
 
 /* Message shown in an action sheet when the user tries to create a new Recovery Key, but is not registered. */
 "BACKUP_SETTINGS_CREATE_NEW_KEY_ERROR_NOT_REGISTERED" = "새 복구 키를 만들려면 사용자 등록이 되어 있어야 합니다.";
@@ -2995,8 +3025,17 @@
 /* If the user has been deregistered, they'll see a warning. This is This is the call to action on that warning. */
 "DEREGISTRATION_WARNING_ACTION_TITLE" = "기기 다시 등록";
 
+/* Label indicating a linked device was last active about three days ago. */
+"DEVICE_LAST_ACTIVE_ABOUT_THREE_DAYS_AGO" = "Last active about three days ago";
+
 /* {{Short Date}} when device last communicated with Signal Server. */
-"DEVICE_LAST_ACTIVE_AT_LABEL" = "마지막 활성화 시간 %1$@";
+"DEVICE_LAST_ACTIVE_AT_LABEL" = "Last active around %1$@";
+
+/* Label indicating a linked device was last active within the past day. */
+"DEVICE_LAST_ACTIVE_PAST_DAY" = "Last active in the past day";
+
+/* Label indicating a linked device was last active within the past two days. */
+"DEVICE_LAST_ACTIVE_PAST_TWO_DAYS" = "Last active in the past two days";
 
 /* {{Short Date}} when device was linked. */
 "DEVICE_LINKED_AT_LABEL" = "연결 %1$@";
@@ -4442,34 +4481,34 @@
 "GROUP_MEMBER_ADMIN_INDICATOR" = "관리자";
 
 /* Accessibility label for the button that opens the group member search sheet. */
-"GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL" = "Search members";
+"GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL" = "멤버 검색";
 
 /* Accessibility label for the filter button in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_ACCESSIBILITY_LABEL" = "Filter members";
+"GROUP_MEMBER_SEARCH_FILTER_ACCESSIBILITY_LABEL" = "멤버 필터링";
 
 /* Title for the filter option that shows only admins in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_ADMINS" = "Admins";
+"GROUP_MEMBER_SEARCH_FILTER_ADMINS" = "관리자";
 
 /* Title for the filter option that shows all members in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_ALL" = "All Members";
+"GROUP_MEMBER_SEARCH_FILTER_ALL" = "모든 멤버";
 
 /* Title for the filter option that shows only members who are in the user's system contacts, in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_CONTACTS" = "Contacts";
+"GROUP_MEMBER_SEARCH_FILTER_CONTACTS" = "연락처";
 
 /* Title for the filter menu in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_MENU_TITLE" = "Filter";
+"GROUP_MEMBER_SEARCH_FILTER_MENU_TITLE" = "필터";
 
 /* Label for the 'invite via group link' button in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_INVITE_VIA_GROUP_LINK" = "Invite Via Group Link";
+"GROUP_MEMBER_SEARCH_INVITE_VIA_GROUP_LINK" = "그룹 링크로 초대하기";
 
 /* Message shown when a group member search returns no results. Embeds {{ the search query }}. */
-"GROUP_MEMBER_SEARCH_NO_RESULTS_FORMAT" = "No results for “%1$@”";
+"GROUP_MEMBER_SEARCH_NO_RESULTS_FORMAT" = "“%1$@” 검색 결과 없음";
 
 /* Section header shown above the results in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_RESULTS_SECTION_TITLE" = "Search Results";
+"GROUP_MEMBER_SEARCH_RESULTS_SECTION_TITLE" = "검색 결과";
 
 /* Placeholder text for the search bar in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_SEARCH_BAR_PLACEHOLDER" = "Search";
+"GROUP_MEMBER_SEARCH_SEARCH_BAR_PLACEHOLDER" = "검색";
 
 /* Label indicating that a new group has no other members. */
 "GROUP_MEMBERS_NO_OTHER_MEMBERS" = "그룹을 만든 후에 친구들을 추가하거나 초대할 수 있습니다.";
@@ -4858,11 +4897,11 @@
 /* Message confirming recurring donation with bank. This message confirms with the user that they will see a small confirmation charge with their bank before the donation. Embeds 1:{{ 0.01 euro, as a localized string }}, 2:{{ the amount of their donation, as a localized string }}. */
 "IDEAL_DONATION_CONFIRM_DONATION_WITH_BANK_MESSAGE" = "정기후원을 설정하려면 '계속'을 탭하여 은행을 통해 %1$@ 청구를 확인해 주세요. 확인이 완료되면 청구 금액은 자동으로 환불되며, 내 계좌에서 월 %2$@ 정기후원이 승인됩니다.";
 
+/* The image editor tool (on/off switch) that detects and blurs faces in the photo. */
+"IMAGE_EDITOR_BLUR_FACES" = "Blur Faces";
+
 /* The image editor hint that you can draw blur */
 "IMAGE_EDITOR_BLUR_HINT" = "원하는 곳을 그려서 흐림 처리하세요";
-
-/* The image editor setting to blur faces */
-"IMAGE_EDITOR_BLUR_SETTING" = "얼굴 가리기";
 
 /* A toast indicating that you can blur more faces after detection */
 "IMAGE_EDITOR_BLUR_TOAST" = "다른 얼굴 또는 영역을 그려서 흐림 처리하세요";
@@ -5224,6 +5263,18 @@
 /* Shown in an alert when trying to edit a contact. */
 "LINKED_DEVICE_CONTACTS_NOT_ALLOWED" = "iPad에서는 더 이상 휴대폰 연락처 관리 기능을 사용할 수 없습니다. 휴대폰 연락처에 Signal 커넥션을 추가하려면 휴대폰에서 Signal을 여세요.";
 
+/* Bullet point on the linked devices info sheet, describing what can be linked. */
+"LINKED_DEVICE_INFO_SHEET_BULLET_1" = "You can link a desktop, tablet or additional phone.";
+
+/* Bullet point on the linked devices info sheet, describing that the primary device manages linking. */
+"LINKED_DEVICE_INFO_SHEET_BULLET_2" = "Your primary device manages what's linked, you can link up to 5 devices.";
+
+/* Bullet point on the linked devices info sheet, describing that some settings are primary-only. */
+"LINKED_DEVICE_INFO_SHEET_BULLET_3" = "Some account settings are managed on your primary device only, including account settings and backups.";
+
+/* Lead paragraph for a sheet explaining linked devices. The text within the <bold></bold> tags is styled bold. */
+"LINKED_DEVICE_INFO_SHEET_HEADER" = "<bold>Linked Devices</bold> let you access your Signal account and messages securely on any of your additional devices.";
+
 /* Shown in a banner when you tap the 'New Chat' icon at the top of the list of chats. */
 "LINKED_DEVICE_MANAGE_CONTACTS_BANNER" = "iPad에서는 더 이상 휴대폰 연락처 관리 기능이 지원되지 않습니다. 이 기기는 휴대폰의 Signal에 적용되는 모든 변경 내용을 계속해서 동기화합니다.";
 
@@ -5332,11 +5383,11 @@
 /* nav bar button item */
 "MEDIA_DETAIL_VIEW_ALL_MEDIA_BUTTON" = "모든 미디어";
 
+/* Title for the button that discards all edits in media editor. */
+"MEDIA_EDITOR_BUTTON_CLEAR" = "Clear";
+
 /* Placeholder for message text input field in media editor. */
 "MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "메시지";
-
-/* Title for the button that discards all edits in media editor. */
-"MEDIA_EDITOR_CLEAR_ALL" = "모두 지우기";
 
 /* Media Editor: Title for the button in 'Discard Changes' confirmation prompt. */
 "MEDIA_EDITOR_DISCARD_ALL_BUTTON" = "변경 내용 취소";
@@ -7235,7 +7286,7 @@
 "POLL_END_CONFIRMATION" = "투표를 종료하시겠어요?";
 
 /* Message for an action sheet confirming the user wants to end a poll. */
-"POLL_END_CONFIRMATION_MESSAGE" = "그룹 멤버들이 더 이상 이 투표에 참여할 수 없게 됩니다.";
+"POLL_END_CONFIRMATION_MESSAGE" = "Members of this chat will no longer be able to vote in this poll.";
 
 /* Shown when another user ends a poll. Embeds {{ another user }} and {{ poll question }}. */
 "POLL_ENDED_BY_OTHER_CHAT_LIST_UPDATE" = "%1$@ 님이 \"%2$@\" 투표를 종료했습니다.";
@@ -7763,7 +7814,7 @@
 "REGISTRATION_NO_BACKUP_KEY_BUTTON_TITLE" = "복구 키가 없으신가요?";
 
 /* Body text on a sheet with info for what to do if you don't have a recovery key */
-"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "Backups can’t be recovered without their 64-character recovery code. If you’ve lost your recovery key, Signal can’t help restore your backup.\n\nIf you have your old device, you can view your recovery key in Settings > Backups. Then tap View Recovery Key.";
+"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "64자 복구 코드 없이는 백업을 복구할 수 없습니다. 복구 키를 분실한 경우 Signal 측에서도 백업을 복구해 드릴 수 없습니다.\n\n이전에 사용하던 기기를 가지고 있다면 '설정 > 백업'에서 '복구 키 보기'를 탭하여 키를 확인하실 수 있습니다.";
 
 /* Title for sheet with info for what to do if you don't have a recovery key */
 "REGISTRATION_NO_BACKUP_KEY_SHEET_TITLE" = "복구 키가 없으신가요?";
@@ -8516,7 +8567,7 @@
 "SETTINGS_BLOCK_LIST_NO_CONTACTS" = "Signal에 연락처가 없습니다.";
 
 /* A label that indicates the user's search has no matching results. */
-"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "No Results";
+"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "결과 없음";
 
 /* Label for the block list section of the settings view */
 "SETTINGS_BLOCK_LIST_TITLE" = "차단 목록";
@@ -8679,6 +8730,18 @@
 
 /* Footer for setting for enabling & disabling link previews. */
 "SETTINGS_LINK_PREVIEWS_FOOTER" = "보내는 메시지에 포함된 링크의 미리보기를 해당 웹사이트에서 직접 가져옵니다.";
+
+/* Subtitle of a card on a linked device's account settings, explaining that account settings are managed on the primary device. */
+"SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_SUBTITLE" = "To manage your account settings, open Signal on your primary device.";
+
+/* Title of a card on a linked device's account settings, indicating that this is a linked device. */
+"SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_TITLE" = "This is a Linked Device";
+
+/* Label for a button that deletes all Signal data from a linked device. */
+"SETTINGS_LINKED_DEVICE_DELETE_DATA_BUTTON" = "Delete App Data";
+
+/* Footer below the 'delete app data' button, shown on a linked device's account settings. */
+"SETTINGS_LINKED_DEVICE_DELETE_DATA_FOOTER" = "This will remove all data from the Signal app on this device.";
 
 /* Label for the 'never' media attachment download behavior in the media download settings. */
 "SETTINGS_MEDIA_DOWNLOAD_CONDITION_NEVER" = "없음";

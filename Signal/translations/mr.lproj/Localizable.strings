@@ -547,6 +547,30 @@
 /* return to the previous screen */
 "BACK_BUTTON" = "मागे";
 
+/* Message for an error sheet shown when confirming the user's Recovery Key via their password manager fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_MESSAGE" = "Your recovery key could not be confirmed. Make sure you've saved it in your password manager, or save it manually.";
+
+/* Title for a button that begins saving the user's Recovery Key manually, in an error sheet shown when confirming it via their password manager fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_SAVE_MANUALLY_BUTTON_TITLE" = "Save Key Manually";
+
+/* Title for a button that retries saving the user's Recovery Key to their password manager, in an error sheet shown when confirming it fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_SAVE_TO_PW_MGR_BUTTON_TITLE" = "Save to Password Manager";
+
+/* Title for an error sheet shown when confirming the user's Recovery Key via their password manager fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_TITLE" = "Error Confirming Recovery Key";
+
+/* Title for a button that begins confirming the user's Recovery Key, in a sheet shown after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_CONFIRM_BUTTON_TITLE" = "Confirm Recovery Key";
+
+/* Message for a sheet shown to confirm the user's Recovery Key after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_MESSAGE" = "Confirm that your recovery key was recorded correctly. You will be prompted to sign in with your saved password in the next step.";
+
+/* Title for a button that returns the user to view their Recovery Key, in a sheet shown after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_SEE_KEY_AGAIN_BUTTON_TITLE" = "See Key Again";
+
+/* Title for a sheet shown to confirm the user's Recovery Key after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_TITLE" = "Confirm Your Recovery Key";
+
 /* Action text for Recovery Key reminder megaphone */
 "BACKUP_ENABLEMENT_REMINDER_MEGAPHONE_ACTION" = "चालू करा";
 
@@ -579,6 +603,9 @@
 
 /* Toast indicating that the Recovery Key was correct. */
 "BACKUP_KEY_REMINDER_SUCCESSFUL_TOAST" = "रीकव्हरी की बरोबर आहे. आपली की सुरक्षित ठेवा.";
+
+/* Title for a button that lets the user see their whole Recovery Key, from a preview. */
+"BACKUP_KEY_SEE_FULL_KEY_BUTTON_TITLE" = "See Full Key";
 
 /* Body for a warning sheet shown to discourage the user from sharing their 'Recovery Key', warning them not to share it with anyone. */
 "BACKUP_NEVER_SHARE_RECOVERY_KEY_SHEET_BODY" = "तुमची रीकव्हरी की कोणालाही देऊ नका. असे केल्यास त्यांना तुमच्या खात्याचा ताबा घेता येईल. <bold>Signal कधीही तुमची रीकव्हरी की मागण्यासाठी</bold> तुम्हाला संदेश पाठवणार नाही. Signal असल्याची बतावणी करणाऱ्या कोणत्याही चॅटला उत्तर देऊ नका.";
@@ -676,26 +703,8 @@
 /* Title for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
 "BACKUP_RECORD_KEY_NEW_TITLE" = "तुमची नवीन रीकव्हरी की जतन करा";
 
-/* Title for a button allowing users to save their 'Recovery Key' to a password manager. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_BUTTON_TITLE" = "पासवर्ड व्यवस्थापकामध्ये जतन करा";
-
-/* Message for a confirmation sheet shown before saving the user's 'Recovery Key' to a password manager, advising them to only use a password manager they trust. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_CONFIRM_MESSAGE" = "तुमची रीकव्हरी की अशा पासवर्ड व्यवस्थापकामध्ये जतन करा ज्याच्या सुरक्षिततेवर तुमचा विश्वास आहे. तुमच्यासाठी कोणता पासवर्ड व्यवस्थापक योग्य आहे याबाबत Signal कोणतीही शिफारस करत नाही.";
-
-/* Title for a confirmation sheet shown before saving the user's 'Recovery Key' to a password manager. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_CONFIRM_TITLE" = "पासवर्ड व्यवस्थापकामध्ये जतन करायची?";
-
 /* Name used as both the username and title for the user's 'Recovery Key' credential when saving it to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_CREDENTIAL_NAME" = "Signal रीकव्हरी की";
-
-/* Message for an error sheet shown when saving the user's 'Recovery Key' to a password manager fails, suggesting that they may not have a supported password manager configured. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_ERROR_MESSAGE" = "तुम्ही पासवर्ड व्यवस्थापक अजून सेट अप केला नसेल, किंवा तुम्ही वापरत असलेला पासवर्ड व्यवस्थापक सपोर्टेड नसेल. तुम्ही तुमच्या फोनच्या सेटिंग्जमधून तुमच्या पसंतीचा पासवर्ड व्यवस्थापक निवडू शकता.";
-
-/* Title for an error sheet shown when saving the user's 'Recovery Key' to a password manager fails. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_ERROR_TITLE" = "पासवर्ड व्यवस्थापकामध्ये जतन करता येत नाही";
-
-/* Toast shown after the user successfully saves their 'Recovery Key' to a password manager. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_SUCCESS_TOAST" = "झाले. पडताळण्यासाठी तुमचा पासवर्ड व्यवस्थापक पाहा.";
 
 /* Subtitle for a view allowing users to save their 'Recovery Key'. */
 "BACKUP_RECORD_KEY_SUBTITLE" = "ही की आपले अकाऊंट आणि डेटा पुर्नप्राप्त करण्यासाठी आवश्यक आहे. ही की कोठेतरी सुरक्षित ठेवा. आपण जी ती गहाळ केल्यास, आपण आपले अकाऊंट पुर्नप्राप्त करू शकणार नाही.";
@@ -720,6 +729,24 @@
 
 /* Title for a progress spinner on a modal when restoring messages */
 "BACKUP_RESTORE_MODAL_TITLE" = "संदेश पुर्नस्थापित करत आहे…";
+
+/* Message for a confirmation sheet shown before saving the user's Recovery Key to their password manager. */
+"BACKUP_SAVE_KEY_PW_MGR_CONFIRM_SHEET_MESSAGE" = "Only store your recovery key in a password manager that you trust is secure. Signal does not make a recommendation on which password manager is right for you.";
+
+/* Title for a confirmation sheet shown before saving the user's Recovery Key to their password manager. */
+"BACKUP_SAVE_KEY_PW_MGR_CONFIRM_SHEET_TITLE" = "Save to password manager?";
+
+/* Message for an error sheet shown when saving the user's Recovery Key to their password manager fails. */
+"BACKUP_SAVE_KEY_PW_MGR_ERROR_SHEET_MESSAGE" = "You may not have a password manager set up, or the password manager you're using may not be supported. You can choose your preferred password manager in your phone's settings.";
+
+/* Title for an error sheet shown when saving the user's Recovery Key to their password manager fails. */
+"BACKUP_SAVE_KEY_PW_MGR_ERROR_SHEET_TITLE" = "Can't save to password manager";
+
+/* Title for a button that begins saving the user's Recovery Key manually. */
+"BACKUP_SAVE_KEY_SAVE_MANUALLY_BUTTON_TITLE" = "Save Manually";
+
+/* Title for a button that begins saving the user's Recovery Key to their password manager. */
+"BACKUP_SAVE_KEY_SAVE_TO_PW_MGR_BUTTON_TITLE" = "Save to Password Manager";
 
 /* Message describing that the Background App Refresh permission is disabled for Signal. \"Background App Refresh\" should be localized the same way it is in iOS Settings app permissions. */
 "BACKUP_SETTINGS_BACKGROUND_APP_REFRESH_DISABLED_MESSAGE" = "ऑटोमॅटिक बॅकअप्स बंद केले आहेत. Signalच्या परवानग्या अद्ययावत करून ऑटोमॅटिक बॅकअप्स चालू करा.";
@@ -870,6 +897,9 @@
 
 /* Header for a menu section related to settings for when Backups are enabled. */
 "BACKUP_SETTINGS_BACKUPS_ENABLED_SECTION_HEADER" = "बॅकअप तपशील";
+
+/* Toast shown when the user's Recovery Key has been confirmed successfully. */
+"BACKUP_SETTINGS_CONFIRM_KEY_SUCCESS_TOAST" = "Recovery Key Confirmed";
 
 /* Message shown in an action sheet when the user tries to create a new Recovery Key, but is not registered. */
 "BACKUP_SETTINGS_CREATE_NEW_KEY_ERROR_NOT_REGISTERED" = "नवीन रीकव्हरी की तयार करण्यासाठी तुम्ही नोंदणी केलेली असणे आवश्यक आहे.";
@@ -2995,8 +3025,17 @@
 /* If the user has been deregistered, they'll see a warning. This is This is the call to action on that warning. */
 "DEREGISTRATION_WARNING_ACTION_TITLE" = "डिव्हाईस चे पुन्हा नोंदणीकरण करा";
 
+/* Label indicating a linked device was last active about three days ago. */
+"DEVICE_LAST_ACTIVE_ABOUT_THREE_DAYS_AGO" = "Last active about three days ago";
+
 /* {{Short Date}} when device last communicated with Signal Server. */
-"DEVICE_LAST_ACTIVE_AT_LABEL" = "%1$@ ला शेवटचा सक्रिय";
+"DEVICE_LAST_ACTIVE_AT_LABEL" = "Last active around %1$@";
+
+/* Label indicating a linked device was last active within the past day. */
+"DEVICE_LAST_ACTIVE_PAST_DAY" = "Last active in the past day";
+
+/* Label indicating a linked device was last active within the past two days. */
+"DEVICE_LAST_ACTIVE_PAST_TWO_DAYS" = "Last active in the past two days";
 
 /* {{Short Date}} when device was linked. */
 "DEVICE_LINKED_AT_LABEL" = "%1$@ ला लिंक केले";
@@ -4442,34 +4481,34 @@
 "GROUP_MEMBER_ADMIN_INDICATOR" = "प्रशासक";
 
 /* Accessibility label for the button that opens the group member search sheet. */
-"GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL" = "Search members";
+"GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL" = "सदस्य शोधा";
 
 /* Accessibility label for the filter button in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_ACCESSIBILITY_LABEL" = "Filter members";
+"GROUP_MEMBER_SEARCH_FILTER_ACCESSIBILITY_LABEL" = "सदस्य फिल्टर";
 
 /* Title for the filter option that shows only admins in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_ADMINS" = "Admins";
+"GROUP_MEMBER_SEARCH_FILTER_ADMINS" = "प्रशासक";
 
 /* Title for the filter option that shows all members in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_ALL" = "All Members";
+"GROUP_MEMBER_SEARCH_FILTER_ALL" = "सर्व सदस्य";
 
 /* Title for the filter option that shows only members who are in the user's system contacts, in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_CONTACTS" = "Contacts";
+"GROUP_MEMBER_SEARCH_FILTER_CONTACTS" = "संपर्क";
 
 /* Title for the filter menu in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_MENU_TITLE" = "Filter";
+"GROUP_MEMBER_SEARCH_FILTER_MENU_TITLE" = "फिल्टर";
 
 /* Label for the 'invite via group link' button in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_INVITE_VIA_GROUP_LINK" = "Invite Via Group Link";
+"GROUP_MEMBER_SEARCH_INVITE_VIA_GROUP_LINK" = "गट लिंकद्वारे बोलवा";
 
 /* Message shown when a group member search returns no results. Embeds {{ the search query }}. */
-"GROUP_MEMBER_SEARCH_NO_RESULTS_FORMAT" = "No results for “%1$@”";
+"GROUP_MEMBER_SEARCH_NO_RESULTS_FORMAT" = "“%1$@” साठी कोणतेही परिणाम नाहीत";
 
 /* Section header shown above the results in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_RESULTS_SECTION_TITLE" = "Search Results";
+"GROUP_MEMBER_SEARCH_RESULTS_SECTION_TITLE" = "शोध परिणाम";
 
 /* Placeholder text for the search bar in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_SEARCH_BAR_PLACEHOLDER" = "Search";
+"GROUP_MEMBER_SEARCH_SEARCH_BAR_PLACEHOLDER" = "शोध";
 
 /* Label indicating that a new group has no other members. */
 "GROUP_MEMBERS_NO_OTHER_MEMBERS" = "हा गट तयार केल्यानंतर आपण मित्रांना जोडू किंवा आमंत्रित करू शकता.";
@@ -4858,11 +4897,11 @@
 /* Message confirming recurring donation with bank. This message confirms with the user that they will see a small confirmation charge with their bank before the donation. Embeds 1:{{ 0.01 euro, as a localized string }}, 2:{{ the amount of their donation, as a localized string }}. */
 "IDEAL_DONATION_CONFIRM_DONATION_WITH_BANK_MESSAGE" = "आपली पुनरावर्ती देणगी प्रस्थापित करण्यासाठी, आपल्या बॅंकेकडे %1$@ शुल्काची पुष्टी करण्यासाठी सुरू ठेवा वर टॅप करा. हे आपोआप परत केले जाईल आणि आपली %2$@/महिना देणगी आपल्या खाते मधून डेबिट करण्याची अनुमती दिली जाईल.";
 
+/* The image editor tool (on/off switch) that detects and blurs faces in the photo. */
+"IMAGE_EDITOR_BLUR_FACES" = "Blur Faces";
+
 /* The image editor hint that you can draw blur */
 "IMAGE_EDITOR_BLUR_HINT" = "अस्पष्ट करण्यासाठी कुठेही रेखाटा";
-
-/* The image editor setting to blur faces */
-"IMAGE_EDITOR_BLUR_SETTING" = "चेहरे अस्पष्ट करा";
 
 /* A toast indicating that you can blur more faces after detection */
 "IMAGE_EDITOR_BLUR_TOAST" = "अतिरिक्त चेहरे किंवा क्षेत्र अस्पष्ट करण्यासाठी रेखाटा";
@@ -5224,6 +5263,18 @@
 /* Shown in an alert when trying to edit a contact. */
 "LINKED_DEVICE_CONTACTS_NOT_ALLOWED" = "iPad वर फोन संपर्क व्यवस्थापित करणे यापुढे उपलब्ध असणार नाही. आपल्या फोन संपर्कांमध्ये Signal कनेक्शन्स जोडण्यासाठी आपल्या फोनवर Signal उघडा.";
 
+/* Bullet point on the linked devices info sheet, describing what can be linked. */
+"LINKED_DEVICE_INFO_SHEET_BULLET_1" = "You can link a desktop, tablet or additional phone.";
+
+/* Bullet point on the linked devices info sheet, describing that the primary device manages linking. */
+"LINKED_DEVICE_INFO_SHEET_BULLET_2" = "Your primary device manages what's linked, you can link up to 5 devices.";
+
+/* Bullet point on the linked devices info sheet, describing that some settings are primary-only. */
+"LINKED_DEVICE_INFO_SHEET_BULLET_3" = "Some account settings are managed on your primary device only, including account settings and backups.";
+
+/* Lead paragraph for a sheet explaining linked devices. The text within the <bold></bold> tags is styled bold. */
+"LINKED_DEVICE_INFO_SHEET_HEADER" = "<bold>Linked Devices</bold> let you access your Signal account and messages securely on any of your additional devices.";
+
 /* Shown in a banner when you tap the 'New Chat' icon at the top of the list of chats. */
 "LINKED_DEVICE_MANAGE_CONTACTS_BANNER" = "iPad वर फोन संपर्क व्यवस्थापित करण्यास यापुढे समर्थन केले जाणार नाही. हे डिव्हाइस Signal कडून आपल्या संपर्क सूचीमधील कोणत्याही बदलांना आपल्या फोनवर सिंक करणे पुढे सुरू ठेवेल.";
 
@@ -5332,11 +5383,11 @@
 /* nav bar button item */
 "MEDIA_DETAIL_VIEW_ALL_MEDIA_BUTTON" = "सर्व मिडिया";
 
+/* Title for the button that discards all edits in media editor. */
+"MEDIA_EDITOR_BUTTON_CLEAR" = "Clear";
+
 /* Placeholder for message text input field in media editor. */
 "MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "संदेश";
-
-/* Title for the button that discards all edits in media editor. */
-"MEDIA_EDITOR_CLEAR_ALL" = "सर्व साफ करा";
 
 /* Media Editor: Title for the button in 'Discard Changes' confirmation prompt. */
 "MEDIA_EDITOR_DISCARD_ALL_BUTTON" = "बदल नाकारा";
@@ -7235,7 +7286,7 @@
 "POLL_END_CONFIRMATION" = "पोल समाप्त करा?";
 
 /* Message for an action sheet confirming the user wants to end a poll. */
-"POLL_END_CONFIRMATION_MESSAGE" = "गट सदस्यांना या पोलमध्ये यापुढे मत देता येणार नाही.";
+"POLL_END_CONFIRMATION_MESSAGE" = "Members of this chat will no longer be able to vote in this poll.";
 
 /* Shown when another user ends a poll. Embeds {{ another user }} and {{ poll question }}. */
 "POLL_ENDED_BY_OTHER_CHAT_LIST_UPDATE" = "%1$@ने पोल समाप्त केला : %2$@";
@@ -7763,7 +7814,7 @@
 "REGISTRATION_NO_BACKUP_KEY_BUTTON_TITLE" = "रीकव्हरी की नाही?";
 
 /* Body text on a sheet with info for what to do if you don't have a recovery key */
-"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "Backups can’t be recovered without their 64-character recovery code. If you’ve lost your recovery key, Signal can’t help restore your backup.\n\nIf you have your old device, you can view your recovery key in Settings > Backups. Then tap View Recovery Key.";
+"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "बॅकअप्स त्यांच्या 64 अंकी पुनःप्राप्ती कोडशिवाय परत मिळवता येत नाहीत. जर तुमची रीकव्हरी की हरवली असेल तर Signal तुमचा बॅकअप परत मिळवण्यास मदत करू शकत नाही.\n\nजर तुमच्याकडे तुमचा जुना डिव्हाईस असेल तर तुम्ही तुमची रीकव्हरी की सेटिंग्ज > बॅकअप्स मध्ये पाहू शकता. मग रीकव्हरी की पाहा वर टॅप करा.";
 
 /* Title for sheet with info for what to do if you don't have a recovery key */
 "REGISTRATION_NO_BACKUP_KEY_SHEET_TITLE" = "रीकव्हरी की नाही?";
@@ -8516,7 +8567,7 @@
 "SETTINGS_BLOCK_LIST_NO_CONTACTS" = "आपले कुठलेही संपर्क Signal वर नाहीत.";
 
 /* A label that indicates the user's search has no matching results. */
-"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "No Results";
+"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "कुठलेही परिणाम नाहीत";
 
 /* Label for the block list section of the settings view */
 "SETTINGS_BLOCK_LIST_TITLE" = "अवरोधित केले";
@@ -8679,6 +8730,18 @@
 
 /* Footer for setting for enabling & disabling link previews. */
 "SETTINGS_LINK_PREVIEWS_FOOTER" = "तुम्ही पाठवलेल्या संदेशांसाठी थेट कोणत्याही वेबसाइटवरून लिंक पूर्वावलोकने प्राप्त करू शकता.";
+
+/* Subtitle of a card on a linked device's account settings, explaining that account settings are managed on the primary device. */
+"SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_SUBTITLE" = "To manage your account settings, open Signal on your primary device.";
+
+/* Title of a card on a linked device's account settings, indicating that this is a linked device. */
+"SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_TITLE" = "This is a Linked Device";
+
+/* Label for a button that deletes all Signal data from a linked device. */
+"SETTINGS_LINKED_DEVICE_DELETE_DATA_BUTTON" = "Delete App Data";
+
+/* Footer below the 'delete app data' button, shown on a linked device's account settings. */
+"SETTINGS_LINKED_DEVICE_DELETE_DATA_FOOTER" = "This will remove all data from the Signal app on this device.";
 
 /* Label for the 'never' media attachment download behavior in the media download settings. */
 "SETTINGS_MEDIA_DOWNLOAD_CONDITION_NEVER" = "कधीही नाही";

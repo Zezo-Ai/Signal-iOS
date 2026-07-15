@@ -547,6 +547,30 @@
 /* return to the previous screen */
 "BACK_BUTTON" = "返回";
 
+/* Message for an error sheet shown when confirming the user's Recovery Key via their password manager fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_MESSAGE" = "Your recovery key could not be confirmed. Make sure you've saved it in your password manager, or save it manually.";
+
+/* Title for a button that begins saving the user's Recovery Key manually, in an error sheet shown when confirming it via their password manager fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_SAVE_MANUALLY_BUTTON_TITLE" = "Save Key Manually";
+
+/* Title for a button that retries saving the user's Recovery Key to their password manager, in an error sheet shown when confirming it fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_SAVE_TO_PW_MGR_BUTTON_TITLE" = "Save to Password Manager";
+
+/* Title for an error sheet shown when confirming the user's Recovery Key via their password manager fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_TITLE" = "Error Confirming Recovery Key";
+
+/* Title for a button that begins confirming the user's Recovery Key, in a sheet shown after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_CONFIRM_BUTTON_TITLE" = "Confirm Recovery Key";
+
+/* Message for a sheet shown to confirm the user's Recovery Key after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_MESSAGE" = "Confirm that your recovery key was recorded correctly. You will be prompted to sign in with your saved password in the next step.";
+
+/* Title for a button that returns the user to view their Recovery Key, in a sheet shown after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_SEE_KEY_AGAIN_BUTTON_TITLE" = "See Key Again";
+
+/* Title for a sheet shown to confirm the user's Recovery Key after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_TITLE" = "Confirm Your Recovery Key";
+
 /* Action text for Recovery Key reminder megaphone */
 "BACKUP_ENABLEMENT_REMINDER_MEGAPHONE_ACTION" = "开启";
 
@@ -579,6 +603,9 @@
 
 /* Toast indicating that the Recovery Key was correct. */
 "BACKUP_KEY_REMINDER_SUCCESSFUL_TOAST" = "恢复密钥正确。请安全保存您的密钥。";
+
+/* Title for a button that lets the user see their whole Recovery Key, from a preview. */
+"BACKUP_KEY_SEE_FULL_KEY_BUTTON_TITLE" = "See Full Key";
 
 /* Body for a warning sheet shown to discourage the user from sharing their 'Recovery Key', warning them not to share it with anyone. */
 "BACKUP_NEVER_SHARE_RECOVERY_KEY_SHEET_BODY" = "请勿与任何人分享您的恢复密钥。分享该密钥会导致账户被他人接管。<bold>Signal 绝不会发消息向您</bold>索要恢复密钥。请勿回复冒充 Signal 的聊天。";
@@ -676,26 +703,8 @@
 /* Title for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
 "BACKUP_RECORD_KEY_NEW_TITLE" = "保存您的新恢复密钥";
 
-/* Title for a button allowing users to save their 'Recovery Key' to a password manager. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_BUTTON_TITLE" = "保存到密码管理器";
-
-/* Message for a confirmation sheet shown before saving the user's 'Recovery Key' to a password manager, advising them to only use a password manager they trust. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_CONFIRM_MESSAGE" = "请仅将您的恢复密钥储存到您信任的安全密码管理器中。Signal 不会推荐哪款密码管理器适合您。";
-
-/* Title for a confirmation sheet shown before saving the user's 'Recovery Key' to a password manager. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_CONFIRM_TITLE" = "要保存到密码管理器吗？";
-
 /* Name used as both the username and title for the user's 'Recovery Key' credential when saving it to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_CREDENTIAL_NAME" = "Signal 恢复密钥";
-
-/* Message for an error sheet shown when saving the user's 'Recovery Key' to a password manager fails, suggesting that they may not have a supported password manager configured. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_ERROR_MESSAGE" = "您可能未设置密码管理器，或者您使用的密码管理器可能不受支持。您可以在手机设置中选择偏好的密码管理器。";
-
-/* Title for an error sheet shown when saving the user's 'Recovery Key' to a password manager fails. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_ERROR_TITLE" = "无法保存到密码管理器";
-
-/* Toast shown after the user successfully saves their 'Recovery Key' to a password manager. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_SUCCESS_TOAST" = "完成。查看您的密码管理器核实。";
 
 /* Subtitle for a view allowing users to save their 'Recovery Key'. */
 "BACKUP_RECORD_KEY_SUBTITLE" = "这是恢复您的账户和数据时所需的密钥，请将其保存在安全的地方。如果密钥丢失，您将无法恢复您的账户。";
@@ -720,6 +729,24 @@
 
 /* Title for a progress spinner on a modal when restoring messages */
 "BACKUP_RESTORE_MODAL_TITLE" = "正在恢复消息…";
+
+/* Message for a confirmation sheet shown before saving the user's Recovery Key to their password manager. */
+"BACKUP_SAVE_KEY_PW_MGR_CONFIRM_SHEET_MESSAGE" = "Only store your recovery key in a password manager that you trust is secure. Signal does not make a recommendation on which password manager is right for you.";
+
+/* Title for a confirmation sheet shown before saving the user's Recovery Key to their password manager. */
+"BACKUP_SAVE_KEY_PW_MGR_CONFIRM_SHEET_TITLE" = "Save to password manager?";
+
+/* Message for an error sheet shown when saving the user's Recovery Key to their password manager fails. */
+"BACKUP_SAVE_KEY_PW_MGR_ERROR_SHEET_MESSAGE" = "You may not have a password manager set up, or the password manager you're using may not be supported. You can choose your preferred password manager in your phone's settings.";
+
+/* Title for an error sheet shown when saving the user's Recovery Key to their password manager fails. */
+"BACKUP_SAVE_KEY_PW_MGR_ERROR_SHEET_TITLE" = "Can't save to password manager";
+
+/* Title for a button that begins saving the user's Recovery Key manually. */
+"BACKUP_SAVE_KEY_SAVE_MANUALLY_BUTTON_TITLE" = "Save Manually";
+
+/* Title for a button that begins saving the user's Recovery Key to their password manager. */
+"BACKUP_SAVE_KEY_SAVE_TO_PW_MGR_BUTTON_TITLE" = "Save to Password Manager";
 
 /* Message describing that the Background App Refresh permission is disabled for Signal. \"Background App Refresh\" should be localized the same way it is in iOS Settings app permissions. */
 "BACKUP_SETTINGS_BACKGROUND_APP_REFRESH_DISABLED_MESSAGE" = "自动备份已禁用。请更新 Signal 的权限以启用自动备份。";
@@ -870,6 +897,9 @@
 
 /* Header for a menu section related to settings for when Backups are enabled. */
 "BACKUP_SETTINGS_BACKUPS_ENABLED_SECTION_HEADER" = "备份详情";
+
+/* Toast shown when the user's Recovery Key has been confirmed successfully. */
+"BACKUP_SETTINGS_CONFIRM_KEY_SUCCESS_TOAST" = "Recovery Key Confirmed";
 
 /* Message shown in an action sheet when the user tries to create a new Recovery Key, but is not registered. */
 "BACKUP_SETTINGS_CREATE_NEW_KEY_ERROR_NOT_REGISTERED" = "您必须注册才能创建新的恢复密钥。";
@@ -2995,8 +3025,17 @@
 /* If the user has been deregistered, they'll see a warning. This is This is the call to action on that warning. */
 "DEREGISTRATION_WARNING_ACTION_TITLE" = "重新注册设备";
 
+/* Label indicating a linked device was last active about three days ago. */
+"DEVICE_LAST_ACTIVE_ABOUT_THREE_DAYS_AGO" = "Last active about three days ago";
+
 /* {{Short Date}} when device last communicated with Signal Server. */
-"DEVICE_LAST_ACTIVE_AT_LABEL" = "上次活动 %1$@";
+"DEVICE_LAST_ACTIVE_AT_LABEL" = "Last active around %1$@";
+
+/* Label indicating a linked device was last active within the past day. */
+"DEVICE_LAST_ACTIVE_PAST_DAY" = "Last active in the past day";
+
+/* Label indicating a linked device was last active within the past two days. */
+"DEVICE_LAST_ACTIVE_PAST_TWO_DAYS" = "Last active in the past two days";
 
 /* {{Short Date}} when device was linked. */
 "DEVICE_LINKED_AT_LABEL" = "已关联 %1$@";
@@ -4442,34 +4481,34 @@
 "GROUP_MEMBER_ADMIN_INDICATOR" = "管理员";
 
 /* Accessibility label for the button that opens the group member search sheet. */
-"GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL" = "Search members";
+"GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL" = "搜索成员";
 
 /* Accessibility label for the filter button in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_ACCESSIBILITY_LABEL" = "Filter members";
+"GROUP_MEMBER_SEARCH_FILTER_ACCESSIBILITY_LABEL" = "筛选成员";
 
 /* Title for the filter option that shows only admins in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_ADMINS" = "Admins";
+"GROUP_MEMBER_SEARCH_FILTER_ADMINS" = "管理员";
 
 /* Title for the filter option that shows all members in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_ALL" = "All Members";
+"GROUP_MEMBER_SEARCH_FILTER_ALL" = "全部成员";
 
 /* Title for the filter option that shows only members who are in the user's system contacts, in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_CONTACTS" = "Contacts";
+"GROUP_MEMBER_SEARCH_FILTER_CONTACTS" = "联系人";
 
 /* Title for the filter menu in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_MENU_TITLE" = "Filter";
+"GROUP_MEMBER_SEARCH_FILTER_MENU_TITLE" = "筛选";
 
 /* Label for the 'invite via group link' button in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_INVITE_VIA_GROUP_LINK" = "Invite Via Group Link";
+"GROUP_MEMBER_SEARCH_INVITE_VIA_GROUP_LINK" = "通过群组链接邀请";
 
 /* Message shown when a group member search returns no results. Embeds {{ the search query }}. */
-"GROUP_MEMBER_SEARCH_NO_RESULTS_FORMAT" = "No results for “%1$@”";
+"GROUP_MEMBER_SEARCH_NO_RESULTS_FORMAT" = "没有找到“%1$@”的相关结果";
 
 /* Section header shown above the results in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_RESULTS_SECTION_TITLE" = "Search Results";
+"GROUP_MEMBER_SEARCH_RESULTS_SECTION_TITLE" = "搜索结果";
 
 /* Placeholder text for the search bar in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_SEARCH_BAR_PLACEHOLDER" = "Search";
+"GROUP_MEMBER_SEARCH_SEARCH_BAR_PLACEHOLDER" = "搜索";
 
 /* Label indicating that a new group has no other members. */
 "GROUP_MEMBERS_NO_OTHER_MEMBERS" = "您可以在创建此群组后添加或邀请朋友。";
@@ -4858,11 +4897,11 @@
 /* Message confirming recurring donation with bank. This message confirms with the user that they will see a small confirmation charge with their bank before the donation. Embeds 1:{{ 0.01 euro, as a localized string }}, 2:{{ the amount of their donation, as a localized string }}. */
 "IDEAL_DONATION_CONFIRM_DONATION_WITH_BANK_MESSAGE" = "如要设置您的定期捐款，请点击“继续”以便与您的银行确认扣除一笔 %1$@ 的费用。这笔费用将会自动退还，并允许从您的账户中每月扣除 %2$@ 用于捐款。";
 
+/* The image editor tool (on/off switch) that detects and blurs faces in the photo. */
+"IMAGE_EDITOR_BLUR_FACES" = "Blur Faces";
+
 /* The image editor hint that you can draw blur */
 "IMAGE_EDITOR_BLUR_HINT" = "任意位置涂抹实现模糊效果";
-
-/* The image editor setting to blur faces */
-"IMAGE_EDITOR_BLUR_SETTING" = "面部模糊";
 
 /* A toast indicating that you can blur more faces after detection */
 "IMAGE_EDITOR_BLUR_TOAST" = "涂抹更多脸部或区域进行模糊";
@@ -5224,6 +5263,18 @@
 /* Shown in an alert when trying to edit a contact. */
 "LINKED_DEVICE_CONTACTS_NOT_ALLOWED" = "iPad 上已不再提供管理手机通讯录的功能。如要将 Signal 密友添加到您的手机通讯录中，请使用手机版 Signal。";
 
+/* Bullet point on the linked devices info sheet, describing what can be linked. */
+"LINKED_DEVICE_INFO_SHEET_BULLET_1" = "You can link a desktop, tablet or additional phone.";
+
+/* Bullet point on the linked devices info sheet, describing that the primary device manages linking. */
+"LINKED_DEVICE_INFO_SHEET_BULLET_2" = "Your primary device manages what's linked, you can link up to 5 devices.";
+
+/* Bullet point on the linked devices info sheet, describing that some settings are primary-only. */
+"LINKED_DEVICE_INFO_SHEET_BULLET_3" = "Some account settings are managed on your primary device only, including account settings and backups.";
+
+/* Lead paragraph for a sheet explaining linked devices. The text within the <bold></bold> tags is styled bold. */
+"LINKED_DEVICE_INFO_SHEET_HEADER" = "<bold>Linked Devices</bold> let you access your Signal account and messages securely on any of your additional devices.";
+
 /* Shown in a banner when you tap the 'New Chat' icon at the top of the list of chats. */
 "LINKED_DEVICE_MANAGE_CONTACTS_BANNER" = "iPad 已不再支持管理手机通讯录。此设备将继续同步手机版 Signal 对通讯录所做的任何更改。";
 
@@ -5332,11 +5383,11 @@
 /* nav bar button item */
 "MEDIA_DETAIL_VIEW_ALL_MEDIA_BUTTON" = "全部媒体";
 
+/* Title for the button that discards all edits in media editor. */
+"MEDIA_EDITOR_BUTTON_CLEAR" = "Clear";
+
 /* Placeholder for message text input field in media editor. */
 "MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "消息";
-
-/* Title for the button that discards all edits in media editor. */
-"MEDIA_EDITOR_CLEAR_ALL" = "全部清除";
 
 /* Media Editor: Title for the button in 'Discard Changes' confirmation prompt. */
 "MEDIA_EDITOR_DISCARD_ALL_BUTTON" = "放弃更改";
@@ -7235,7 +7286,7 @@
 "POLL_END_CONFIRMATION" = "要结束投票？";
 
 /* Message for an action sheet confirming the user wants to end a poll. */
-"POLL_END_CONFIRMATION_MESSAGE" = "群组成员将无法再参与此投票。";
+"POLL_END_CONFIRMATION_MESSAGE" = "Members of this chat will no longer be able to vote in this poll.";
 
 /* Shown when another user ends a poll. Embeds {{ another user }} and {{ poll question }}. */
 "POLL_ENDED_BY_OTHER_CHAT_LIST_UPDATE" = "%1$@ 结束了投票：%2$@";
@@ -7763,7 +7814,7 @@
 "REGISTRATION_NO_BACKUP_KEY_BUTTON_TITLE" = "没有恢复密钥？";
 
 /* Body text on a sheet with info for what to do if you don't have a recovery key */
-"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "Backups can’t be recovered without their 64-character recovery code. If you’ve lost your recovery key, Signal can’t help restore your backup.\n\nIf you have your old device, you can view your recovery key in Settings > Backups. Then tap View Recovery Key.";
+"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "如果没有 64 个字符的恢复代码，备份将无法恢复。如果您丢失了自己的恢复密钥，Signal 将无法帮助您恢复备份。\n\n如果您的旧设备可用，您可以在“设置 > 备份”中查看您的恢复密钥。点击“查看恢复密钥”即可查看。";
 
 /* Title for sheet with info for what to do if you don't have a recovery key */
 "REGISTRATION_NO_BACKUP_KEY_SHEET_TITLE" = "没有恢复密钥？";
@@ -8516,7 +8567,7 @@
 "SETTINGS_BLOCK_LIST_NO_CONTACTS" = "您没有任何 Signal 联系人。";
 
 /* A label that indicates the user's search has no matching results. */
-"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "No Results";
+"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "无结果";
 
 /* Label for the block list section of the settings view */
 "SETTINGS_BLOCK_LIST_TITLE" = "已屏蔽";
@@ -8679,6 +8730,18 @@
 
 /* Footer for setting for enabling & disabling link previews. */
 "SETTINGS_LINK_PREVIEWS_FOOTER" = "直接从您发送的链接网站中生成预览。";
+
+/* Subtitle of a card on a linked device's account settings, explaining that account settings are managed on the primary device. */
+"SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_SUBTITLE" = "To manage your account settings, open Signal on your primary device.";
+
+/* Title of a card on a linked device's account settings, indicating that this is a linked device. */
+"SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_TITLE" = "This is a Linked Device";
+
+/* Label for a button that deletes all Signal data from a linked device. */
+"SETTINGS_LINKED_DEVICE_DELETE_DATA_BUTTON" = "Delete App Data";
+
+/* Footer below the 'delete app data' button, shown on a linked device's account settings. */
+"SETTINGS_LINKED_DEVICE_DELETE_DATA_FOOTER" = "This will remove all data from the Signal app on this device.";
 
 /* Label for the 'never' media attachment download behavior in the media download settings. */
 "SETTINGS_MEDIA_DOWNLOAD_CONDITION_NEVER" = "永不";

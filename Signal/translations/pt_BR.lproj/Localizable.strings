@@ -547,6 +547,30 @@
 /* return to the previous screen */
 "BACK_BUTTON" = "Voltar";
 
+/* Message for an error sheet shown when confirming the user's Recovery Key via their password manager fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_MESSAGE" = "Your recovery key could not be confirmed. Make sure you've saved it in your password manager, or save it manually.";
+
+/* Title for a button that begins saving the user's Recovery Key manually, in an error sheet shown when confirming it via their password manager fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_SAVE_MANUALLY_BUTTON_TITLE" = "Save Key Manually";
+
+/* Title for a button that retries saving the user's Recovery Key to their password manager, in an error sheet shown when confirming it fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_SAVE_TO_PW_MGR_BUTTON_TITLE" = "Save to Password Manager";
+
+/* Title for an error sheet shown when confirming the user's Recovery Key via their password manager fails. */
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_TITLE" = "Error Confirming Recovery Key";
+
+/* Title for a button that begins confirming the user's Recovery Key, in a sheet shown after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_CONFIRM_BUTTON_TITLE" = "Confirm Recovery Key";
+
+/* Message for a sheet shown to confirm the user's Recovery Key after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_MESSAGE" = "Confirm that your recovery key was recorded correctly. You will be prompted to sign in with your saved password in the next step.";
+
+/* Title for a button that returns the user to view their Recovery Key, in a sheet shown after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_SEE_KEY_AGAIN_BUTTON_TITLE" = "See Key Again";
+
+/* Title for a sheet shown to confirm the user's Recovery Key after it was saved to their password manager. */
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_TITLE" = "Confirm Your Recovery Key";
+
 /* Action text for Recovery Key reminder megaphone */
 "BACKUP_ENABLEMENT_REMINDER_MEGAPHONE_ACTION" = "Habilitar";
 
@@ -579,6 +603,9 @@
 
 /* Toast indicating that the Recovery Key was correct. */
 "BACKUP_KEY_REMINDER_SUCCESSFUL_TOAST" = "Chave de recuperação correta. Mantenha sua chave segura.";
+
+/* Title for a button that lets the user see their whole Recovery Key, from a preview. */
+"BACKUP_KEY_SEE_FULL_KEY_BUTTON_TITLE" = "See Full Key";
 
 /* Body for a warning sheet shown to discourage the user from sharing their 'Recovery Key', warning them not to share it with anyone. */
 "BACKUP_NEVER_SHARE_RECOVERY_KEY_SHEET_BODY" = "Não compartilhe sua chave de recuperação com ninguém. Sua conta pode ser hackeada. <bold>O Signal nunca enviará mensagens para você</bold> solicitando a chave de recuperação. Nunca responda a uma conversa de alguém tentando se passar pelo Signal.";
@@ -676,26 +703,8 @@
 /* Title for a view allowing users to save their newly-created 'Recovery Key', emphasizing that the key is new. */
 "BACKUP_RECORD_KEY_NEW_TITLE" = "Salve sua nova chave de recuperação";
 
-/* Title for a button allowing users to save their 'Recovery Key' to a password manager. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_BUTTON_TITLE" = "Salvar no gerenciador de senhas";
-
-/* Message for a confirmation sheet shown before saving the user's 'Recovery Key' to a password manager, advising them to only use a password manager they trust. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_CONFIRM_MESSAGE" = "Armazene sua chave de recuperação apenas em um gerenciador de senhas em que você confie. O Signal não faz uma recomendação sobre qual gerenciador de senhas é ideal para você.";
-
-/* Title for a confirmation sheet shown before saving the user's 'Recovery Key' to a password manager. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_CONFIRM_TITLE" = "Salvar no gerenciador de senhas?";
-
 /* Name used as both the username and title for the user's 'Recovery Key' credential when saving it to a password manager. */
 "BACKUP_RECORD_KEY_PASSWORD_MANAGER_CREDENTIAL_NAME" = "Chave de recuperação do Signal";
-
-/* Message for an error sheet shown when saving the user's 'Recovery Key' to a password manager fails, suggesting that they may not have a supported password manager configured. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_ERROR_MESSAGE" = "Você pode não ter um gerenciador de senhas configurado ou o gerenciador que está usando talvez não seja compatível. Você pode escolher seu gerenciador de senhas preferido nas configurações do telefone. ";
-
-/* Title for an error sheet shown when saving the user's 'Recovery Key' to a password manager fails. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_ERROR_TITLE" = "Não foi possível salvar no gerenciador de senhas";
-
-/* Toast shown after the user successfully saves their 'Recovery Key' to a password manager. */
-"BACKUP_RECORD_KEY_PASSWORD_MANAGER_SUCCESS_TOAST" = "Concluído. Verifique seu gerenciador de senhas para confirmar. ";
 
 /* Subtitle for a view allowing users to save their 'Recovery Key'. */
 "BACKUP_RECORD_KEY_SUBTITLE" = "Essa chave é necessária para restaurar sua conta e seus dados. Certifique-se de guardá-la em um local seguro. Sem essa chave, não será possível recuperar sua conta.";
@@ -720,6 +729,24 @@
 
 /* Title for a progress spinner on a modal when restoring messages */
 "BACKUP_RESTORE_MODAL_TITLE" = "Restaurando mensagens…";
+
+/* Message for a confirmation sheet shown before saving the user's Recovery Key to their password manager. */
+"BACKUP_SAVE_KEY_PW_MGR_CONFIRM_SHEET_MESSAGE" = "Only store your recovery key in a password manager that you trust is secure. Signal does not make a recommendation on which password manager is right for you.";
+
+/* Title for a confirmation sheet shown before saving the user's Recovery Key to their password manager. */
+"BACKUP_SAVE_KEY_PW_MGR_CONFIRM_SHEET_TITLE" = "Save to password manager?";
+
+/* Message for an error sheet shown when saving the user's Recovery Key to their password manager fails. */
+"BACKUP_SAVE_KEY_PW_MGR_ERROR_SHEET_MESSAGE" = "You may not have a password manager set up, or the password manager you're using may not be supported. You can choose your preferred password manager in your phone's settings.";
+
+/* Title for an error sheet shown when saving the user's Recovery Key to their password manager fails. */
+"BACKUP_SAVE_KEY_PW_MGR_ERROR_SHEET_TITLE" = "Can't save to password manager";
+
+/* Title for a button that begins saving the user's Recovery Key manually. */
+"BACKUP_SAVE_KEY_SAVE_MANUALLY_BUTTON_TITLE" = "Save Manually";
+
+/* Title for a button that begins saving the user's Recovery Key to their password manager. */
+"BACKUP_SAVE_KEY_SAVE_TO_PW_MGR_BUTTON_TITLE" = "Save to Password Manager";
 
 /* Message describing that the Background App Refresh permission is disabled for Signal. \"Background App Refresh\" should be localized the same way it is in iOS Settings app permissions. */
 "BACKUP_SETTINGS_BACKGROUND_APP_REFRESH_DISABLED_MESSAGE" = "Os backups automáticos estão desativados. Ative-os atualizando as permissões do Signal. ";
@@ -870,6 +897,9 @@
 
 /* Header for a menu section related to settings for when Backups are enabled. */
 "BACKUP_SETTINGS_BACKUPS_ENABLED_SECTION_HEADER" = "Detalhes do backup";
+
+/* Toast shown when the user's Recovery Key has been confirmed successfully. */
+"BACKUP_SETTINGS_CONFIRM_KEY_SUCCESS_TOAST" = "Recovery Key Confirmed";
 
 /* Message shown in an action sheet when the user tries to create a new Recovery Key, but is not registered. */
 "BACKUP_SETTINGS_CREATE_NEW_KEY_ERROR_NOT_REGISTERED" = "Você precisa se registrar para criar uma nova chave de recuperação.";
@@ -2995,8 +3025,17 @@
 /* If the user has been deregistered, they'll see a warning. This is This is the call to action on that warning. */
 "DEREGISTRATION_WARNING_ACTION_TITLE" = "Registrar novamente o dispositivo";
 
+/* Label indicating a linked device was last active about three days ago. */
+"DEVICE_LAST_ACTIVE_ABOUT_THREE_DAYS_AGO" = "Last active about three days ago";
+
 /* {{Short Date}} when device last communicated with Signal Server. */
-"DEVICE_LAST_ACTIVE_AT_LABEL" = "Última atividade %1$@";
+"DEVICE_LAST_ACTIVE_AT_LABEL" = "Last active around %1$@";
+
+/* Label indicating a linked device was last active within the past day. */
+"DEVICE_LAST_ACTIVE_PAST_DAY" = "Last active in the past day";
+
+/* Label indicating a linked device was last active within the past two days. */
+"DEVICE_LAST_ACTIVE_PAST_TWO_DAYS" = "Last active in the past two days";
 
 /* {{Short Date}} when device was linked. */
 "DEVICE_LINKED_AT_LABEL" = "Vinculado %1$@";
@@ -4442,34 +4481,34 @@
 "GROUP_MEMBER_ADMIN_INDICATOR" = "Admin";
 
 /* Accessibility label for the button that opens the group member search sheet. */
-"GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL" = "Search members";
+"GROUP_MEMBER_SEARCH_BUTTON_ACCESSIBILITY_LABEL" = "Procurar membros";
 
 /* Accessibility label for the filter button in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_ACCESSIBILITY_LABEL" = "Filter members";
+"GROUP_MEMBER_SEARCH_FILTER_ACCESSIBILITY_LABEL" = "Filtrar membros";
 
 /* Title for the filter option that shows only admins in the group member search sheet. */
 "GROUP_MEMBER_SEARCH_FILTER_ADMINS" = "Admins";
 
 /* Title for the filter option that shows all members in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_ALL" = "All Members";
+"GROUP_MEMBER_SEARCH_FILTER_ALL" = "Todos os membros";
 
 /* Title for the filter option that shows only members who are in the user's system contacts, in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_CONTACTS" = "Contacts";
+"GROUP_MEMBER_SEARCH_FILTER_CONTACTS" = "Contatos";
 
 /* Title for the filter menu in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_FILTER_MENU_TITLE" = "Filter";
+"GROUP_MEMBER_SEARCH_FILTER_MENU_TITLE" = "Filtrar";
 
 /* Label for the 'invite via group link' button in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_INVITE_VIA_GROUP_LINK" = "Invite Via Group Link";
+"GROUP_MEMBER_SEARCH_INVITE_VIA_GROUP_LINK" = "Convidar através do link do grupo";
 
 /* Message shown when a group member search returns no results. Embeds {{ the search query }}. */
-"GROUP_MEMBER_SEARCH_NO_RESULTS_FORMAT" = "No results for “%1$@”";
+"GROUP_MEMBER_SEARCH_NO_RESULTS_FORMAT" = "Nenhum resultado encontrado para “%1$@”";
 
 /* Section header shown above the results in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_RESULTS_SECTION_TITLE" = "Search Results";
+"GROUP_MEMBER_SEARCH_RESULTS_SECTION_TITLE" = "Resultados da pesquisa";
 
 /* Placeholder text for the search bar in the group member search sheet. */
-"GROUP_MEMBER_SEARCH_SEARCH_BAR_PLACEHOLDER" = "Search";
+"GROUP_MEMBER_SEARCH_SEARCH_BAR_PLACEHOLDER" = "Buscar";
 
 /* Label indicating that a new group has no other members. */
 "GROUP_MEMBERS_NO_OTHER_MEMBERS" = "Você pode adicionar ou convidar amigos(as) após criar esse grupo.";
@@ -4858,11 +4897,11 @@
 /* Message confirming recurring donation with bank. This message confirms with the user that they will see a small confirmation charge with their bank before the donation. Embeds 1:{{ 0.01 euro, as a localized string }}, 2:{{ the amount of their donation, as a localized string }}. */
 "IDEAL_DONATION_CONFIRM_DONATION_WITH_BANK_MESSAGE" = "Para configurar sua doação recorrente, toque em Continuar para confirmar uma cobrança de %1$@ no seu banco. Essa cobrança será reembolsada automaticamente e vai permitir que sua doação de %2$@/mês seja debitada de sua conta. ";
 
+/* The image editor tool (on/off switch) that detects and blurs faces in the photo. */
+"IMAGE_EDITOR_BLUR_FACES" = "Blur Faces";
+
 /* The image editor hint that you can draw blur */
 "IMAGE_EDITOR_BLUR_HINT" = "Desenhe em qualquer lugar para desfocar";
-
-/* The image editor setting to blur faces */
-"IMAGE_EDITOR_BLUR_SETTING" = "Desfocar rostos";
 
 /* A toast indicating that you can blur more faces after detection */
 "IMAGE_EDITOR_BLUR_TOAST" = "Desenhe para desfocar outros rostos ou partes da imagem";
@@ -5224,6 +5263,18 @@
 /* Shown in an alert when trying to edit a contact. */
 "LINKED_DEVICE_CONTACTS_NOT_ALLOWED" = "Não é mais possível gerenciar os contatos do seu telefone no iPad. Para adicionar contatos do Signal aos contatos do seu telefone, abra o Signal no seu celular.";
 
+/* Bullet point on the linked devices info sheet, describing what can be linked. */
+"LINKED_DEVICE_INFO_SHEET_BULLET_1" = "You can link a desktop, tablet or additional phone.";
+
+/* Bullet point on the linked devices info sheet, describing that the primary device manages linking. */
+"LINKED_DEVICE_INFO_SHEET_BULLET_2" = "Your primary device manages what's linked, you can link up to 5 devices.";
+
+/* Bullet point on the linked devices info sheet, describing that some settings are primary-only. */
+"LINKED_DEVICE_INFO_SHEET_BULLET_3" = "Some account settings are managed on your primary device only, including account settings and backups.";
+
+/* Lead paragraph for a sheet explaining linked devices. The text within the <bold></bold> tags is styled bold. */
+"LINKED_DEVICE_INFO_SHEET_HEADER" = "<bold>Linked Devices</bold> let you access your Signal account and messages securely on any of your additional devices.";
+
 /* Shown in a banner when you tap the 'New Chat' icon at the top of the list of chats. */
 "LINKED_DEVICE_MANAGE_CONTACTS_BANNER" = "Não é mais possível gerenciar os contatos do seu telefone no iPad. O dispositivo continuará a sincronizar todas as alterações na sua lista de contatos do Signal no seu telefone.";
 
@@ -5332,11 +5383,11 @@
 /* nav bar button item */
 "MEDIA_DETAIL_VIEW_ALL_MEDIA_BUTTON" = "Todas as mídias";
 
+/* Title for the button that discards all edits in media editor. */
+"MEDIA_EDITOR_BUTTON_CLEAR" = "Clear";
+
 /* Placeholder for message text input field in media editor. */
 "MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "Mensagem";
-
-/* Title for the button that discards all edits in media editor. */
-"MEDIA_EDITOR_CLEAR_ALL" = "Limpar tudo";
 
 /* Media Editor: Title for the button in 'Discard Changes' confirmation prompt. */
 "MEDIA_EDITOR_DISCARD_ALL_BUTTON" = "Descartar alterações";
@@ -7235,7 +7286,7 @@
 "POLL_END_CONFIRMATION" = "Encerrar enquete?";
 
 /* Message for an action sheet confirming the user wants to end a poll. */
-"POLL_END_CONFIRMATION_MESSAGE" = "Os membros do grupo não poderão mais votar nesta enquete.";
+"POLL_END_CONFIRMATION_MESSAGE" = "Members of this chat will no longer be able to vote in this poll.";
 
 /* Shown when another user ends a poll. Embeds {{ another user }} and {{ poll question }}. */
 "POLL_ENDED_BY_OTHER_CHAT_LIST_UPDATE" = "%1$@ encerrou a enquete: %2$@";
@@ -7763,7 +7814,7 @@
 "REGISTRATION_NO_BACKUP_KEY_BUTTON_TITLE" = "Sem chave de recuperação?";
 
 /* Body text on a sheet with info for what to do if you don't have a recovery key */
-"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "Backups can’t be recovered without their 64-character recovery code. If you’ve lost your recovery key, Signal can’t help restore your backup.\n\nIf you have your old device, you can view your recovery key in Settings > Backups. Then tap View Recovery Key.";
+"REGISTRATION_NO_BACKUP_KEY_SHEET_BODY" = "Os backups não podem ser recuperados sem o código de recuperação de 64 dígitos. Se perder sua chave de recuperação, o Signal não poderá ajudar você a restaurar o backup.\n\nSe tiver seu dispositivo antigo com você, poderá ver sua chave de recuperação em Configurações > Backups. Depois, toque em Ver chave de recuperação.";
 
 /* Title for sheet with info for what to do if you don't have a recovery key */
 "REGISTRATION_NO_BACKUP_KEY_SHEET_TITLE" = "Sem chave de recuperação?";
@@ -8516,7 +8567,7 @@
 "SETTINGS_BLOCK_LIST_NO_CONTACTS" = "Você não possui contatos no Signal";
 
 /* A label that indicates the user's search has no matching results. */
-"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "No Results";
+"SETTINGS_BLOCK_LIST_NO_SEARCH_RESULTS" = "Nenhum resultado";
 
 /* Label for the block list section of the settings view */
 "SETTINGS_BLOCK_LIST_TITLE" = "Lista de bloqueio";
@@ -8679,6 +8730,18 @@
 
 /* Footer for setting for enabling & disabling link previews. */
 "SETTINGS_LINK_PREVIEWS_FOOTER" = "Carregar pré-visualizações de links diretamente dos sites nas mensagens que você enviar.";
+
+/* Subtitle of a card on a linked device's account settings, explaining that account settings are managed on the primary device. */
+"SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_SUBTITLE" = "To manage your account settings, open Signal on your primary device.";
+
+/* Title of a card on a linked device's account settings, indicating that this is a linked device. */
+"SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_TITLE" = "This is a Linked Device";
+
+/* Label for a button that deletes all Signal data from a linked device. */
+"SETTINGS_LINKED_DEVICE_DELETE_DATA_BUTTON" = "Delete App Data";
+
+/* Footer below the 'delete app data' button, shown on a linked device's account settings. */
+"SETTINGS_LINKED_DEVICE_DELETE_DATA_FOOTER" = "This will remove all data from the Signal app on this device.";
 
 /* Label for the 'never' media attachment download behavior in the media download settings. */
 "SETTINGS_MEDIA_DOWNLOAD_CONDITION_NEVER" = "Nunca";
