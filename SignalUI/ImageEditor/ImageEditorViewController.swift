@@ -88,50 +88,69 @@ class ImageEditorViewController: OWSViewController, UIGestureRecognizerDelegate,
     // Blur Tool UI
     var blurToolUIInitialized = false
 
-    lazy var blurToolPanel: UIView = {
-        let faceBlurSwitchContainer: UIView = {
-            let autoBlurLabel = UILabel()
-            autoBlurLabel.text = OWSLocalizedString(
-                "IMAGE_EDITOR_BLUR_SETTING",
-                comment: "The image editor setting to blur faces",
-            )
-            autoBlurLabel.font = .dynamicTypeSubheadlineClamped
-            autoBlurLabel.textColor = .Signal.label
-            autoBlurLabel.setContentHuggingHigh()
-
-            let stackView = UIStackView(arrangedSubviews: [autoBlurLabel, faceBlurSwitch])
-            stackView.spacing = 12
-            stackView.alignment = .center
-            return stackView
-        }()
-
-        let drawAnywhereHint = UILabel()
-        drawAnywhereHint.font = .dynamicTypeCaption1
-        drawAnywhereHint.textColor = .Signal.label
-        drawAnywhereHint.textAlignment = .center
-        drawAnywhereHint.numberOfLines = 0
-        drawAnywhereHint.lineBreakMode = .byWordWrapping
-        drawAnywhereHint.text = OWSLocalizedString(
+    lazy var blurToolHintView: UIView = {
+        let hintLabel = UILabel()
+        hintLabel.font = .dynamicTypeSubheadlineClamped
+        hintLabel.textColor = .Signal.label
+        hintLabel.textAlignment = .center
+        hintLabel.numberOfLines = 0
+        hintLabel.lineBreakMode = .byWordWrapping
+        hintLabel.text = OWSLocalizedString(
             "IMAGE_EDITOR_BLUR_HINT",
             comment: "The image editor hint that you can draw blur",
         )
-        drawAnywhereHint.setContentHuggingHigh()
+        hintLabel.setContentHuggingHigh()
 
-        let stackView = UIStackView(arrangedSubviews: [faceBlurSwitchContainer, drawAnywhereHint])
+        let visualEffectView: UIVisualEffectView
+        if #available(iOS 26, *) {
+            let glassEffect = UIGlassEffect(style: .regular)
+            glassEffect.isInteractive = true
+            visualEffectView = UIVisualEffectView(effect: glassEffect)
+            visualEffectView.clipsToBounds = true
+            visualEffectView.cornerConfiguration = .capsule(maximumRadius: 26)
+        } else {
+            visualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
+            visualEffectView.clipsToBounds = true
+            visualEffectView.layer.cornerRadius = 16
+        }
+        visualEffectView.directionalLayoutMargins = .init(hMargin: 12, vMargin: 12)
+        hintLabel.translatesAutoresizingMaskIntoConstraints = false
+        visualEffectView.contentView.addSubview(hintLabel)
+        NSLayoutConstraint.activate([
+            hintLabel.topAnchor.constraint(equalTo: visualEffectView.layoutMarginsGuide.topAnchor),
+            hintLabel.leadingAnchor.constraint(equalTo: visualEffectView.layoutMarginsGuide.leadingAnchor),
+            hintLabel.trailingAnchor.constraint(equalTo: visualEffectView.layoutMarginsGuide.trailingAnchor),
+            hintLabel.bottomAnchor.constraint(equalTo: visualEffectView.layoutMarginsGuide.bottomAnchor),
+        ])
+
+        return visualEffectView
+    }()
+
+    lazy var blurToolPanel: UIView = {
+        let autoBlurLabel = UILabel()
+        autoBlurLabel.text = OWSLocalizedString(
+            "IMAGE_EDITOR_BLUR_FACES",
+            comment: "The image editor tool (on/off switch) that detects and blurs faces in the photo.",
+        )
+        autoBlurLabel.font = .dynamicTypeBodyClamped
+        autoBlurLabel.textColor = .Signal.label
+        autoBlurLabel.setContentHuggingHigh()
+
+        let stackView = UIStackView(arrangedSubviews: [autoBlurLabel, faceBlurSwitch])
+        stackView.spacing = 32
         stackView.alignment = .center
-        stackView.axis = .vertical
-        stackView.spacing = 12
+        stackView.translatesAutoresizingMaskIntoConstraints = false
 
         let visualEffectView: UIVisualEffectView
         if #available(iOS 26, *) {
             visualEffectView = UIVisualEffectView(effect: UIGlassEffect(style: .regular))
-            visualEffectView.cornerConfiguration = .uniformCorners(radius: .fixed(26))
+            visualEffectView.cornerConfiguration = .capsule(maximumRadius: 26)
         } else {
             visualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
             visualEffectView.layer.cornerRadius = 16
         }
         visualEffectView.clipsToBounds = true
-        visualEffectView.directionalLayoutMargins = .init(hMargin: 16, vMargin: 12)
+        visualEffectView.directionalLayoutMargins = .init(hMargin: 12, vMargin: 8)
         stackView.translatesAutoresizingMaskIntoConstraints = false
         visualEffectView.contentView.addSubview(stackView)
         NSLayoutConstraint.activate([

@@ -11,9 +11,15 @@ extension ImageEditorViewController {
     private func initializeBlurToolUIIfNecessary() {
         guard !blurToolUIInitialized else { return }
 
+        blurToolHintView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(blurToolHintView)
         blurToolPanel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(blurToolPanel)
         NSLayoutConstraint.activate([
+            blurToolHintView.leadingAnchor.constraint(greaterThanOrEqualTo: view.layoutMarginsGuide.leadingAnchor),
+            blurToolHintView.centerXAnchor.constraint(equalTo: view.layoutMarginsGuide.centerXAnchor),
+            blurToolHintView.centerYAnchor.constraint(equalTo: topBar.controlsLayoutGuide.centerYAnchor),
+
             blurToolPanel.leadingAnchor.constraint(greaterThanOrEqualTo: view.layoutMarginsGuide.leadingAnchor),
             blurToolPanel.centerXAnchor.constraint(equalTo: view.layoutMarginsGuide.centerXAnchor),
             blurToolPanel.bottomAnchor.constraint(equalTo: bottomBar.topAnchor, constant: -32),
@@ -25,6 +31,7 @@ extension ImageEditorViewController {
     }
 
     func updateBlurToolControlsVisibility() {
+        blurToolHintView.alpha = topBar.alpha
         blurToolPanel.alpha = topBar.alpha
         strokeWidthSliderContainer.alpha = topBar.alpha
     }
@@ -38,6 +45,7 @@ extension ImageEditorViewController {
             guard blurToolUIInitialized else { return }
         }
 
+        blurToolHintView.isHidden = !visible
         blurToolPanel.isHidden = !visible
         blurToolGestureRecognizer.isEnabled = visible
 
