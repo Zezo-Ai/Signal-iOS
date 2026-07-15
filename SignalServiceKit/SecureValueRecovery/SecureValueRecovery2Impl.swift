@@ -434,6 +434,9 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
                 pin: pin,
                 connection: connection,
             )
+        } catch WebSocketError.httpError(statusCode: 404, retryAfter: _) {
+            Logger.warn("skipping restore for non-existent enclave")
+            return .backupMissing
         }
     }
 
@@ -556,12 +559,16 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
             Logger.info("wiping enclave: \(obsoleteEnclave)")
             do {
                 try await self.doDelete(mrEnclave: obsoleteEnclave, authMethod: .implicit)
-                await db.awaitableWrite { tx in
-                    markEnclaveDeleted(obsoleteEnclave.stringValue, tx)
-                }
+            } catch WebSocketError.httpError(statusCode: 404, retryAfter: _) {
+                // The enclave doesn't exist.
+                Logger.warn("skipping wipe for non-existent enclave")
             } catch {
                 Logger.warn("couldn't wipe enclave; may retry eventually: \(error)")
                 firstError = firstError ?? error
+                continue
+            }
+            await db.awaitableWrite { tx in
+                markEnclaveDeleted(obsoleteEnclave.stringValue, tx)
             }
         }
         for unknownEnclave in potentialEnclaves {
