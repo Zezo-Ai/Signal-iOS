@@ -12,7 +12,7 @@ class MediaMessageView: UIView, AudioPlayerDelegate {
     private let attachment: PreviewableAttachment
 
     private var audioPlayer: AudioPlayer?
-    private lazy var audioPlayButton = UIButton()
+    private lazy var audioPlayButton = UIButton(configuration: .plain())
 
     // MARK: Initializers
 
@@ -22,7 +22,6 @@ class MediaMessageView: UIView, AudioPlayerDelegate {
         super.init(frame: CGRect.zero)
 
         self.contentMode = contentMode
-        tintColor = .white
 
         recreateViews()
     }
@@ -52,6 +51,7 @@ class MediaMessageView: UIView, AudioPlayerDelegate {
     // MARK: - Create Views
 
     private func recreateViews() {
+        audioPlayer = nil
         subviews.forEach { $0.removeFromSuperview() }
 
         if attachment.rawValue.isLoopingVideo {
@@ -74,7 +74,6 @@ class MediaMessageView: UIView, AudioPlayerDelegate {
         stackView.spacing = 10
         stackView.axis = .vertical
         stackView.alignment = .center
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.preservesSuperviewLayoutMargins = true
         stackView.isLayoutMarginsRelativeArrangement = true
         return stackView
@@ -82,21 +81,28 @@ class MediaMessageView: UIView, AudioPlayerDelegate {
 
     private func createAudioPreview() {
         let audioPlayer = AudioPlayer(attachment: attachment, audioBehavior: .playback)
-
         audioPlayer.delegate = self
         self.audioPlayer = audioPlayer
 
         var subviews = [UIView]()
 
         setAudioIconToPlay()
-        audioPlayButton.addTarget(self, action: #selector(audioPlayButtonPressed), for: .touchUpInside)
-        let buttonSize = createHeroViewSize
-        audioPlayButton.autoSetDimension(.width, toSize: buttonSize)
-        audioPlayButton.autoSetDimension(.height, toSize: buttonSize)
+        audioPlayButton.configuration?.baseForegroundColor = .Signal.label
+        audioPlayButton.addAction(
+            UIAction { [weak self] _ in
+                self?.audioPlayButtonPressed()
+            },
+            for: .primaryActionTriggered,
+        )
+        let buttonSize = Self.heroViewSize
+        audioPlayButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            audioPlayButton.widthAnchor.constraint(equalToConstant: buttonSize),
+            audioPlayButton.heightAnchor.constraint(equalToConstant: buttonSize),
+        ])
         subviews.append(audioPlayButton)
 
-        let fileNameLabel = createFileNameLabel()
-        if let fileNameLabel {
+        if let fileNameLabel = createFileNameLabel() {
             subviews.append(fileNameLabel)
         }
 
@@ -104,13 +110,15 @@ class MediaMessageView: UIView, AudioPlayerDelegate {
         subviews.append(fileSizeLabel)
 
         let stackView = wrapViewsInVerticalStack(subviews: subviews)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stackView)
-
-        stackView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
-        stackView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-        stackView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        stackView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor).isActive = true
-        stackView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor).isActive = true
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stackView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            stackView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor),
+            stackView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor),
+        ])
     }
 
     private func createLoopingVideoPreview() {
@@ -151,27 +159,33 @@ class MediaMessageView: UIView, AudioPlayerDelegate {
     }
 
     private func addSubviewWithScaleAspectFitLayout(view: UIView, aspectRatio: CGFloat) {
+        view.translatesAutoresizingMaskIntoConstraints = false
         addSubview(view)
 
         // This emulates the behavior of contentMode = .scaleAspectFit using iOS auto layout constraints.
-        view.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-        view.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        view.autoPin(toAspectRatio: aspectRatio)
-        view.autoMatch(.width, to: .width, of: self, withMultiplier: 1.0, relation: .lessThanOrEqual)
-        view.autoMatch(.height, to: .height, of: self, withMultiplier: 1.0, relation: .lessThanOrEqual)
+        NSLayoutConstraint.activate([
+            view.centerXAnchor.constraint(equalTo: centerXAnchor),
+            view.centerYAnchor.constraint(equalTo: centerYAnchor),
+            view.widthAnchor.constraint(equalTo: view.heightAnchor, multiplier: aspectRatio),
+            view.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor),
+            view.heightAnchor.constraint(lessThanOrEqualTo: heightAnchor),
+        ])
     }
 
     private func addSubviewWithScaleAspectFillLayout(view: UIView, aspectRatio: CGFloat) {
+        view.translatesAutoresizingMaskIntoConstraints = false
         addSubview(view)
 
         // This emulates the behavior of contentMode = .scaleAspectFill using iOS auto layout constraints.
-        view.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-        view.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        view.autoPin(toAspectRatio: aspectRatio)
-        view.autoMatch(.height, to: .height, of: self, withMultiplier: 1.0, relation: .greaterThanOrEqual)
-        view.autoMatch(.width, to: .width, of: self, withMultiplier: 1.0, relation: .greaterThanOrEqual)
-        view.autoMatch(.width, to: .height, of: self, withMultiplier: aspectRatio, relation: .lessThanOrEqual)
-        view.autoMatch(.height, to: .width, of: self, withMultiplier: 1 / aspectRatio, relation: .lessThanOrEqual)
+        NSLayoutConstraint.activate([
+            view.centerXAnchor.constraint(equalTo: centerXAnchor),
+            view.centerYAnchor.constraint(equalTo: centerYAnchor),
+            view.widthAnchor.constraint(equalTo: view.heightAnchor, multiplier: aspectRatio),
+            view.widthAnchor.constraint(greaterThanOrEqualTo: widthAnchor),
+            view.heightAnchor.constraint(greaterThanOrEqualTo: heightAnchor),
+            view.widthAnchor.constraint(lessThanOrEqualTo: heightAnchor, multiplier: aspectRatio),
+            view.heightAnchor.constraint(lessThanOrEqualTo: widthAnchor, multiplier: 1 / aspectRatio),
+        ])
     }
 
     private func createImagePreview() {
@@ -232,36 +246,33 @@ class MediaMessageView: UIView, AudioPlayerDelegate {
         subviews.append(fileSizeLabel)
 
         let stackView = wrapViewsInVerticalStack(subviews: subviews)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stackView)
-
-        stackView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
-        stackView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-        stackView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        stackView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor).isActive = true
-        stackView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor).isActive = true
+        NSLayoutConstraint.activate([
+            stackView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor),
+            stackView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
+        ])
     }
 
-    private var createHeroViewSize: CGFloat {
-        .scaleFromIPhone5(100)
-    }
+    private static var heroViewSize: CGFloat { .scaleFromIPhone5(100) }
 
     private func createHeroImageView(imageName: String) -> UIView {
-        let imageSize = createHeroViewSize
-
         let imageView = UIImageView(image: UIImage(named: imageName))
+        imageView.tintColor = .Signal.label
         imageView.layer.shadowColor = UIColor.black.cgColor
         let shadowScaling: CGFloat = 5.0
         imageView.layer.shadowRadius = CGFloat(2.0 * shadowScaling)
         imageView.layer.shadowOpacity = 0.25
         imageView.layer.shadowOffset = CGSize(square: 0.75 * shadowScaling)
-        imageView.autoSetDimension(.width, toSize: imageSize)
-        imageView.autoSetDimension(.height, toSize: imageSize)
-
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        let imageSize = Self.heroViewSize
+        NSLayoutConstraint.activate([
+            imageView.widthAnchor.constraint(equalToConstant: imageSize),
+            imageView.heightAnchor.constraint(equalToConstant: imageSize),
+        ])
         return imageView
-    }
-
-    private var labelFont: UIFont {
-        UIFont.regularFont(ofSize: .scaleFromIPhone5To7Plus(18, 24))
     }
 
     private func formattedFileExtension() -> String? {
@@ -296,16 +307,16 @@ class MediaMessageView: UIView, AudioPlayerDelegate {
 
         let label = UILabel()
         label.text = filename
-        label.textColor = tintColor
-        label.font = labelFont
+        label.textColor = .Signal.label
+        label.font = .dynamicTypeHeadline
         label.textAlignment = .center
         label.lineBreakMode = .byTruncatingMiddle
         return label
     }
 
     private func createFileSizeLabel() -> UIView {
-        let label = UILabel()
         let fileSize = (try? attachment.rawValue.dataSource.readLength()) ?? 0
+        let label = UILabel()
         label.text = String.nonPluralLocalizedStringWithFormat(
             OWSLocalizedString(
                 "ATTACHMENT_APPROVAL_FILE_SIZE_FORMAT",
@@ -313,21 +324,19 @@ class MediaMessageView: UIView, AudioPlayerDelegate {
             ),
             OWSFormat.localizedFileSizeString(from: fileSize),
         )
-
-        label.textColor = tintColor
-        label.font = labelFont
+        label.textColor = .Signal.secondaryLabel
+        label.font = .dynamicTypeSubheadline
         label.textAlignment = .center
         return label
     }
 
     // MARK: - Event Handlers
 
-    @objc
-    private func audioPlayButtonPressed(sender: UIButton) {
+    private func audioPlayButtonPressed() {
         audioPlayer?.togglePlayState()
     }
 
-    // MARK: - OWSAudioPlayerDelegate
+    // MARK: - AudioPlayerDelegate
 
     var audioPlaybackState = AudioPlaybackState.stopped {
         didSet {
@@ -350,10 +359,10 @@ class MediaMessageView: UIView, AudioPlayerDelegate {
     }
 
     private func setAudioIconToPlay() {
-        audioPlayButton.setImage(UIImage(named: "play-circle-display"), for: .normal)
+        audioPlayButton.configuration?.image = UIImage(imageLiteralResourceName: "play-circle-display")
     }
 
     private func setAudioIconToPause() {
-        audioPlayButton.setImage(UIImage(named: "pause-circle-display"), for: .normal)
+        audioPlayButton.configuration?.image = UIImage(imageLiteralResourceName: "pause-circle-display")
     }
 }
