@@ -57,6 +57,8 @@ class ImageEditorViewController: OWSViewController, UIGestureRecognizerDelegate,
         }
     }()
 
+    static var toolbarSpacing: CGFloat = 24
+
     // Pen Tool UI
     var drawToolUIInitialized = false
 

@@ -22,7 +22,7 @@ extension ImageEditorViewController {
 
             blurToolPanel.leadingAnchor.constraint(greaterThanOrEqualTo: view.layoutMarginsGuide.leadingAnchor),
             blurToolPanel.centerXAnchor.constraint(equalTo: view.layoutMarginsGuide.centerXAnchor),
-            blurToolPanel.bottomAnchor.constraint(equalTo: bottomBar.topAnchor, constant: -32),
+            blurToolPanel.bottomAnchor.constraint(equalTo: bottomBar.topAnchor, constant: -Self.toolbarSpacing),
         ])
 
         view.addGestureRecognizer(blurToolGestureRecognizer)
@@ -80,7 +80,8 @@ extension ImageEditorViewController {
                     "IMAGE_EDITOR_BLUR_TOAST",
                     comment: "A toast indicating that you can blur more faces after detection",
                 ))
-                let bottomInset = self.view.safeAreaInsets.bottom + 90
+                let blurToolPanelFrame = self.blurToolPanel.convert(self.blurToolPanel.bounds, to: self.view)
+                let bottomInset = self.view.bounds.maxY - blurToolPanelFrame.minY + Self.toolbarSpacing
                 toastController.presentToastView(from: .bottom, of: self.view, inset: bottomInset)
             }
 
