@@ -154,9 +154,16 @@ class AttachmentApprovalToolbar: UIView, MediaCaptionToolbarDelegate {
         }
 
         let containerView = UIView()
-        containerView.preservesSuperviewLayoutMargins = true
+        supplementaryView.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(supplementaryView)
-        supplementaryView.autoPinEdgesToSuperviewMargins()
+        let topMargin: CGFloat = if #available(iOS 26, *) { 0 } else { 16 }
+        let bottomMargin: CGFloat = if #available(iOS 26, *) { 8 } else { 0 }
+        NSLayoutConstraint.activate([
+            supplementaryView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: topMargin),
+            supplementaryView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            supplementaryView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            supplementaryView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -bottomMargin),
+        ])
         containerStackView.insertArrangedSubview(containerView, at: 0)
         self.supplementaryViewContainer = containerView
     }

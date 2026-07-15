@@ -136,13 +136,13 @@ class VideoAttachmentPrepViewController: AttachmentPrepViewController, VideoEdit
                 let thumbnails = try await VideoAttachmentPrepViewController.thumbnails(
                     forVideoAtPath: model.srcVideoPath,
                     aspectRatio: videoAspectRatio,
-                    thumbnailHeight: VideoTimelineView.preferredHeight,
+                    thumbnailHeight: VideoTimelineView.thumbnailStripHeight,
                     contextSize: contextSize,
                     screenScale: screenScale,
                     untrimmedDurationSeconds: untrimmedDurationSeconds,
                 )
                 self?.videoThumbnails = thumbnails
-                self?.timelineView.updateThumbnailView()
+                self?.timelineView.updateThumbnailStrip()
             } catch {
                 owsFailDebug("Error: \(error)")
             }
