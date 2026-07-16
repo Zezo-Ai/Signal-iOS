@@ -118,14 +118,6 @@ public enum OWSRequestFactory {
         )
     }
 
-    public static func registerForPushRequest(apnsToken: String) -> TSRequest {
-        owsAssertDebug(!apnsToken.isEmpty)
-
-        let path = "\(self.textSecureAccountsAPI)/apn"
-
-        return TSRequest(url: URL(string: path)!, method: "PUT", parameters: ["apnRegistrationId": apnsToken])
-    }
-
     static func unregisterAccountRequest() -> TSRequest {
         let path = "\(self.textSecureAccountsAPI)/me"
         return TSRequest(url: URL(string: path)!, method: "DELETE", parameters: [:])

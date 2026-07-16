@@ -96,8 +96,9 @@ class SyncPushTokensJob: NSObject {
 
     private func updatePushTokens(pushToken: String) async throws {
         return try await Retry.performWithBackoff(maxAttempts: 3) {
-            let request = OWSRequestFactory.registerForPushRequest(apnsToken: pushToken)
-            _ = try await SSKEnvironment.shared.networkManagerRef.asyncRequest(request)
+            try await DependenciesBridge.shared.chatConnectionManager.withAuthService(.devices) {
+                try await $0.setPushToken(apns: pushToken)
+            }
         }
     }
 }
