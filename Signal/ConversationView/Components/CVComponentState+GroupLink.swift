@@ -9,24 +9,24 @@ import SignalUI
 private extension CVComponentState {
     private struct GroupLinkState {
         var groupInviteLinkAvatarCache = [String: GroupInviteLinkCachedAvatar]()
-        var expiredGroupInviteLinks = Set<GroupInviteLinkInfo>()
+        var expiredGroupInviteLinks = Set<GroupInviteLink>()
     }
 
     private static let groupLinkState = AtomicValue(GroupLinkState(), lock: .init())
 
-    private static func updateExpirationList(groupInviteLinkInfo: GroupInviteLinkInfo, isExpired: Bool) -> Bool {
+    private static func updateExpirationList(groupInviteLink: GroupInviteLink, isExpired: Bool) -> Bool {
         return groupLinkState.update {
             if isExpired {
-                return $0.expiredGroupInviteLinks.insert(groupInviteLinkInfo).inserted
+                return $0.expiredGroupInviteLinks.insert(groupInviteLink).inserted
             } else {
-                return $0.expiredGroupInviteLinks.remove(groupInviteLinkInfo) != nil
+                return $0.expiredGroupInviteLinks.remove(groupInviteLink) != nil
             }
         }
     }
 
-    private static func isGroupInviteLinkExpired(groupInviteLinkInfo: GroupInviteLinkInfo) -> Bool {
+    private static func isGroupInviteLinkExpired(groupInviteLink: GroupInviteLink) -> Bool {
         return groupLinkState.update {
-            return $0.expiredGroupInviteLinks.contains(groupInviteLinkInfo)
+            return $0.expiredGroupInviteLinks.contains(groupInviteLink)
         }
     }
 
@@ -39,8 +39,8 @@ private extension CVComponentState {
         }
     }
 
-    private static func loadGroupInviteLinkAvatar(avatarUrlPath: String, groupInviteLinkInfo: GroupInviteLinkInfo) async throws {
-        let contextInfo = try GroupV2ContextInfo.deriveFrom(masterKeyData: groupInviteLinkInfo.masterKey)
+    private static func loadGroupInviteLinkAvatar(avatarUrlPath: String, groupInviteLink: GroupInviteLink) async throws {
+        let contextInfo = GroupV2ContextInfo.deriveFrom(masterKey: groupInviteLink.masterKey)
         let avatarData = try await SSKEnvironment.shared.groupsV2Ref.fetchGroupInviteLinkAvatar(
             avatarUrlPath: avatarUrlPath,
             groupSecretParams: contextInfo.groupSecretParams,
@@ -86,7 +86,7 @@ extension CVComponentState {
     static func configureGroupInviteLink(
         _ url: URL,
         message: TSMessage,
-        groupInviteLinkInfo: GroupInviteLinkInfo,
+        groupInviteLink: GroupInviteLink,
     ) -> GroupInviteLinkViewModel {
 
         let touchMessage = { () async -> Void in
@@ -95,24 +95,24 @@ extension CVComponentState {
             }
         }
 
-        guard let groupInviteLinkPreview = GroupManager.cachedGroupInviteLinkPreview(groupInviteLinkInfo: groupInviteLinkInfo) else {
+        guard let groupInviteLinkPreview = GroupManager.cachedGroupInviteLinkPreview(groupInviteLink: groupInviteLink) else {
             // If there is no cached GroupInviteLinkPreview for this link,
             // try to do load it now. On success, touch the interaction
             // in order to trigger reload of the view.
             Task {
                 do {
-                    let groupContextInfo = try GroupV2ContextInfo.deriveFrom(masterKeyData: groupInviteLinkInfo.masterKey)
+                    let groupContextInfo = GroupV2ContextInfo.deriveFrom(masterKey: groupInviteLink.masterKey)
                     _ = try await SSKEnvironment.shared.groupsV2Ref.fetchGroupInviteLinkPreview(
-                        inviteLinkPassword: groupInviteLinkInfo.inviteLinkPassword,
+                        inviteLinkPassword: groupInviteLink.inviteLinkPassword,
                         groupSecretParams: groupContextInfo.groupSecretParams,
                     )
-                    _ = Self.updateExpirationList(groupInviteLinkInfo: groupInviteLinkInfo, isExpired: false)
+                    _ = Self.updateExpirationList(groupInviteLink: groupInviteLink, isExpired: false)
                     await touchMessage()
                 } catch {
                     switch error {
                     case GroupsV2Error.expiredGroupInviteLink, GroupsV2Error.localUserBlockedFromJoining, GroupsV2Error.terminatedGroupInviteLink:
                         Logger.warn("Failed to fetch group link content: \(error)")
-                        if Self.updateExpirationList(groupInviteLinkInfo: groupInviteLinkInfo, isExpired: true) {
+                        if Self.updateExpirationList(groupInviteLink: groupInviteLink, isExpired: true) {
                             await touchMessage()
                         }
                     default:
@@ -125,7 +125,7 @@ extension CVComponentState {
                 url: url,
                 groupInviteLinkPreview: nil,
                 avatar: nil,
-                isExpired: Self.isGroupInviteLinkExpired(groupInviteLinkInfo: groupInviteLinkInfo),
+                isExpired: Self.isGroupInviteLinkExpired(groupInviteLink: groupInviteLink),
             )
         }
 
@@ -144,7 +144,7 @@ extension CVComponentState {
             // success, touch the interaction in order to trigger reload of the view.
             Task {
                 do {
-                    try await Self.loadGroupInviteLinkAvatar(avatarUrlPath: avatarUrlPath, groupInviteLinkInfo: groupInviteLinkInfo)
+                    try await Self.loadGroupInviteLinkAvatar(avatarUrlPath: avatarUrlPath, groupInviteLink: groupInviteLink)
                     await touchMessage()
                 } catch {
                     // TODO: Add retry?

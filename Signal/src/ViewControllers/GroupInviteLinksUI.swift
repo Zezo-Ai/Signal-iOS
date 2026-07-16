@@ -3,15 +3,20 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
+import LibSignalClient
 import SignalServiceKit
-public import SignalUI
+import SignalUI
 
-public enum GroupInviteLinksUI {
+enum GroupInviteLinksUI {
 
-    public static func openGroupInviteLink(_ url: URL, fromViewController: UIViewController) {
+    static func openGroupInviteLink(_ url: PossibleGroupInviteLinkUrl, fromViewController: UIViewController) {
         AssertIsOnMainThread()
 
-        let showInvalidInviteLinkAlert = {
+        let groupInviteLink: GroupInviteLink
+        do {
+            groupInviteLink = try GroupInviteLink.parseFrom(url)
+        } catch {
+            owsFailDebug("Invalid group invite link.")
             OWSActionSheets.showActionSheet(
                 title: OWSLocalizedString(
                     "GROUP_LINK_INVALID_GROUP_INVITE_LINK_ERROR_TITLE",
@@ -22,22 +27,10 @@ public enum GroupInviteLinksUI {
                     comment: "Message for the 'invalid group invite link' alert.",
                 ),
             )
-        }
-
-        guard let groupInviteLinkInfo = GroupInviteLinkInfo.parseFrom(url) else {
-            owsFailDebug("Invalid group invite link.")
-            showInvalidInviteLinkAlert()
             return
         }
 
-        let groupV2ContextInfo: GroupV2ContextInfo
-        do {
-            groupV2ContextInfo = try GroupV2ContextInfo.deriveFrom(masterKeyData: groupInviteLinkInfo.masterKey)
-        } catch {
-            owsFailDebug("Error: \(error)")
-            showInvalidInviteLinkAlert()
-            return
-        }
+        let groupV2ContextInfo = GroupV2ContextInfo.deriveFrom(masterKey: groupInviteLink.masterKey)
 
         // If the group already exists in the database, open it.
         if
@@ -53,10 +46,7 @@ public enum GroupInviteLinksUI {
             return
         }
 
-        let actionSheet = GroupInviteLinksActionSheet(
-            groupInviteLinkInfo: groupInviteLinkInfo,
-            groupV2ContextInfo: groupV2ContextInfo,
-        )
+        let actionSheet = GroupInviteLinksActionSheet(inviteLink: groupInviteLink)
         fromViewController.presentActionSheet(actionSheet)
     }
 }
@@ -64,8 +54,8 @@ public enum GroupInviteLinksUI {
 // MARK: -
 
 private class GroupInviteLinksActionSheet: ActionSheetController {
-    private let groupInviteLinkInfo: GroupInviteLinkInfo
-    private let groupV2ContextInfo: GroupV2ContextInfo
+    private let inviteLink: GroupInviteLink
+    private let secretParams: GroupSecretParams
 
     private var downloadedAvatar: (avatarUrlPath: String, avatarData: Data?)?
 
@@ -212,9 +202,11 @@ private class GroupInviteLinksActionSheet: ActionSheetController {
         },
     )
 
-    init(groupInviteLinkInfo: GroupInviteLinkInfo, groupV2ContextInfo: GroupV2ContextInfo) {
-        self.groupInviteLinkInfo = groupInviteLinkInfo
-        self.groupV2ContextInfo = groupV2ContextInfo
+    init(inviteLink: GroupInviteLink) {
+        self.inviteLink = inviteLink
+        self.secretParams = failIfThrows {
+            return try GroupSecretParams.deriveFromMasterKey(groupMasterKey: inviteLink.masterKey)
+        }
 
         super.init()
 
@@ -229,7 +221,7 @@ private class GroupInviteLinksActionSheet: ActionSheetController {
 
         avatarView.image = databaseStorage.read { tx in
             avatarBuilder.defaultAvatarImage(
-                forGroupId: groupV2ContextInfo.groupId.serialize(),
+                forGroupId: failIfThrows { try secretParams.getPublicParams().getGroupIdentifier().serialize() },
                 diameterPoints: Self.avatarSize,
                 transaction: tx,
             )
@@ -276,11 +268,11 @@ private class GroupInviteLinksActionSheet: ActionSheetController {
     private static let avatarSize: UInt = 88
 
     private func loadLinkPreview() {
-        Task { [weak self, groupInviteLinkInfo, groupV2ContextInfo] in
+        Task { [weak self, inviteLink, secretParams] in
             do {
                 let groupInviteLinkPreview = try await SSKEnvironment.shared.groupsV2Ref.fetchGroupInviteLinkPreviewAndRefreshGroup(
-                    inviteLinkPassword: groupInviteLinkInfo.inviteLinkPassword,
-                    groupSecretParams: groupV2ContextInfo.groupSecretParams,
+                    inviteLinkPassword: inviteLink.inviteLinkPassword,
+                    groupSecretParams: secretParams,
                 )
                 self?.applyLinkPreviewLoadResult(.success(groupInviteLinkPreview))
 
@@ -292,7 +284,7 @@ private class GroupInviteLinksActionSheet: ActionSheetController {
                     do {
                         let avatarData = try await SSKEnvironment.shared.groupsV2Ref.fetchGroupInviteLinkAvatar(
                             avatarUrlPath: avatarUrlPath,
-                            groupSecretParams: groupV2ContextInfo.groupSecretParams,
+                            groupSecretParams: secretParams,
                         )
                         guard DataImageSource(avatarData).ows_isValidImage else {
                             throw OWSAssertionError("Invalid group avatar.")
@@ -446,11 +438,12 @@ private class GroupInviteLinksActionSheet: ActionSheetController {
             fromViewController: self,
             title: CommonStrings.joiningGroupModal,
             canCancel: false,
-            asyncBlock: { [weak self, groupInviteLinkInfo, groupV2ContextInfo] modal in
+            asyncBlock: { [weak self, inviteLink, secretParams] modal in
                 do {
+                    let groupId = try secretParams.getPublicParams().getGroupIdentifier()
                     try await GroupManager.joinGroupViaInviteLink(
-                        secretParams: groupV2ContextInfo.groupSecretParams,
-                        inviteLinkPassword: groupInviteLinkInfo.inviteLinkPassword,
+                        secretParams: secretParams,
+                        inviteLinkPassword: inviteLink.inviteLinkPassword,
                         downloadedAvatar: downloadedAvatar,
                     )
 
@@ -460,7 +453,7 @@ private class GroupInviteLinksActionSheet: ActionSheetController {
                             AssertIsOnMainThread()
                             let groupThread = SSKEnvironment.shared.databaseStorageRef.read { tx in
                                 // We successfully joined, so we must be able to find the TSGroupThread.
-                                return TSGroupThread.fetch(forGroupId: groupV2ContextInfo.groupId, tx: tx)!
+                                return TSGroupThread.fetch(forGroupId: groupId, tx: tx)!
                             }
                             SignalApp.shared.presentConversationForThread(
                                 threadUniqueId: groupThread.uniqueId,

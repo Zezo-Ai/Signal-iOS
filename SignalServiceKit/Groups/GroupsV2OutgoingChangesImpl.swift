@@ -360,7 +360,7 @@ public class GroupsV2OutgoingChanges {
             case .ignore:
                 newInviteLinkPassword = currentGroupModel.inviteLinkPassword
             case .rotate:
-                newInviteLinkPassword = GroupManager.generateInviteLinkPasswordV2()
+                newInviteLinkPassword = GroupInviteLink.generateInviteLinkPassword()
             case .ensureValid:
                 if
                     let oldInviteLinkPassword = currentGroupModel.inviteLinkPassword,
@@ -368,7 +368,7 @@ public class GroupsV2OutgoingChanges {
                 {
                     newInviteLinkPassword = oldInviteLinkPassword
                 } else {
-                    newInviteLinkPassword = GroupManager.generateInviteLinkPasswordV2()
+                    newInviteLinkPassword = GroupInviteLink.generateInviteLinkPassword()
                 }
             }
 

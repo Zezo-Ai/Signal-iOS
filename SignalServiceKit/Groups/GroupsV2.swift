@@ -321,18 +321,18 @@ public struct GroupV2ContextInfo {
     public let groupId: GroupIdentifier
 
     public static func deriveFrom(masterKeyData: Data) throws -> GroupV2ContextInfo {
-        let groupSecretParams = try self.groupSecretParams(for: masterKeyData)
-        let groupIdentifier = try groupSecretParams.getPublicParams().getGroupIdentifier()
+        let groupMasterKey = try GroupMasterKey(contents: masterKeyData)
+        return deriveFrom(masterKey: groupMasterKey)
+    }
+
+    public static func deriveFrom(masterKey: GroupMasterKey) -> GroupV2ContextInfo {
+        let groupSecretParams = failIfThrows { try GroupSecretParams.deriveFromMasterKey(groupMasterKey: masterKey) }
+        let groupIdentifier = failIfThrows { try groupSecretParams.getPublicParams().getGroupIdentifier() }
         return GroupV2ContextInfo(
-            masterKeyData: masterKeyData,
+            masterKeyData: masterKey.serialize(),
             groupSecretParams: groupSecretParams,
             groupId: groupIdentifier,
         )
-    }
-
-    private static func groupSecretParams(for masterKeyData: Data) throws -> GroupSecretParams {
-        let groupMasterKey = try GroupMasterKey(contents: masterKeyData)
-        return try GroupSecretParams.deriveFromMasterKey(groupMasterKey: groupMasterKey)
     }
 
     private init(masterKeyData: Data, groupSecretParams: GroupSecretParams, groupId: GroupIdentifier) {
@@ -340,51 +340,6 @@ public struct GroupV2ContextInfo {
         self.groupSecretParams = groupSecretParams
         self.groupSecretParamsData = groupSecretParams.serialize()
         self.groupId = groupId
-    }
-}
-
-// MARK: -
-
-public struct GroupInviteLinkInfo: Hashable {
-    public let masterKey: Data
-    public let inviteLinkPassword: Data
-
-    public init(masterKey: Data, inviteLinkPassword: Data) {
-        self.masterKey = masterKey
-        self.inviteLinkPassword = inviteLinkPassword
-    }
-
-    public static func parseFrom(_ url: URL) -> GroupInviteLinkInfo? {
-        guard GroupManager.isPossibleGroupInviteLink(url) else {
-            return nil
-        }
-        guard let protoBase64Url = url.fragment, !protoBase64Url.isEmpty else {
-            owsFailDebug("Missing encoded data.")
-            return nil
-        }
-        do {
-            let protoData = try Data.data(fromBase64Url: protoBase64Url)
-            let proto = try GroupsProtoGroupInviteLink(serializedData: protoData)
-            guard let protoContents = proto.contents else {
-                owsFailDebug("Missing proto contents.")
-                return nil
-            }
-            switch protoContents {
-            case .contentsV1(let contentsV1):
-                guard let masterKey = contentsV1.groupMasterKey, !masterKey.isEmpty else {
-                    owsFailDebug("Invalid masterKey.")
-                    return nil
-                }
-                guard let inviteLinkPassword = contentsV1.inviteLinkPassword, !inviteLinkPassword.isEmpty else {
-                    owsFailDebug("Invalid inviteLinkPassword.")
-                    return nil
-                }
-                return GroupInviteLinkInfo(masterKey: masterKey, inviteLinkPassword: inviteLinkPassword)
-            }
-        } catch {
-            owsFailDebug("Error: \(error)")
-            return nil
-        }
     }
 }
 

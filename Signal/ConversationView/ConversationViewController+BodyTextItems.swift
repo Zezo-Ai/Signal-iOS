@@ -124,7 +124,7 @@ extension ConversationViewController {
                     comment: "Title for message actions for a sticker pack.",
                 )
             }
-            if GroupManager.isPossibleGroupInviteLink(dataItem.url) {
+            if PossibleGroupInviteLinkUrl.parseFrom(dataItem.url) != nil {
                 return OWSLocalizedString(
                     "MESSAGE_ACTION_TITLE_GROUP_INVITE",
                     comment: "Title for message actions for a group invite link.",
@@ -147,12 +147,12 @@ extension ConversationViewController {
             } else {
                 owsFailDebug("Invalid URL: \(dataItem.url)")
             }
-        } else if GroupManager.isPossibleGroupInviteLink(dataItem.url) {
+        } else if let url = PossibleGroupInviteLinkUrl.parseFrom(dataItem.url) {
             actionSheet.addAction(ActionSheetAction(
                 title: OWSLocalizedString("MESSAGE_ACTION_LINK_OPEN_GROUP_INVITE", comment: "Label for button to open a group invite."),
                 style: .default,
                 handler: { [weak self] _ in
-                    self?.didTapGroupInviteLink(url: dataItem.url)
+                    self?.didTapGroupInviteLink(url: url)
                 },
             ))
         } else if SignalProxy.isValidProxyLink(dataItem.url) {

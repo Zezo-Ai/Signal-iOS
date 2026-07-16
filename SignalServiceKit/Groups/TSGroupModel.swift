@@ -195,26 +195,10 @@ public final class TSGroupModelV2: TSGroupModel {
     }
 
     public func groupInviteLinkUrl() throws -> URL {
-        guard let inviteLinkPassword, !inviteLinkPassword.isEmpty else {
-            throw OWSAssertionError("Missing password.")
-        }
-        let masterKey = try self.masterKey()
-
-        var contentsV1Builder = GroupsProtoGroupInviteLinkGroupInviteLinkContentsV1.builder()
-        contentsV1Builder.setGroupMasterKey(masterKey.serialize())
-        contentsV1Builder.setInviteLinkPassword(inviteLinkPassword)
-
-        var builder = GroupsProtoGroupInviteLink.builder()
-        builder.setContents(GroupsProtoGroupInviteLinkOneOfContents.contentsV1(contentsV1Builder.buildInfallibly()))
-        let protoData = try builder.buildSerializedData()
-
-        let protoBase64Url = protoData.asBase64Url
-
-        let urlString = "https://signal.group/#\(protoBase64Url)"
-        guard let url = URL(string: urlString) else {
-            throw OWSAssertionError("Could not construct url.")
-        }
-        return url
+        return try GroupInviteLink(
+            masterKey: self.masterKey(),
+            inviteLinkPassword: self.inviteLinkPassword ?? Data(),
+        ).url()
     }
 
     // MARK: -

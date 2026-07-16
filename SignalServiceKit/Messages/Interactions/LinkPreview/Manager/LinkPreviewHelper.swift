@@ -11,7 +11,7 @@ public enum LinkPreviewHelper {
         if StickerPackInfo.isStickerPackShare(url) {
             return Self.stickerPackShareDomain(forUrl: url)
         }
-        if GroupManager.isPossibleGroupInviteLink(url) {
+        if PossibleGroupInviteLinkUrl.parseFrom(url) != nil {
             return "signal.org"
         }
         return url.host

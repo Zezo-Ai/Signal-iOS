@@ -1967,11 +1967,14 @@ private extension CVComponentState.Builder {
             owsFailDebug("Invalid urlString.")
             return
         }
-        if let groupInviteLinkInfo = GroupInviteLinkInfo.parseFrom(url) {
+        if
+            let groupInviteLinkUrl = PossibleGroupInviteLinkUrl.parseFrom(url),
+            let groupInviteLink = try? GroupInviteLink.parseFrom(groupInviteLinkUrl)
+        {
             let groupInviteLinkViewModel = CVComponentState.configureGroupInviteLink(
                 url,
                 message: message,
-                groupInviteLinkInfo: groupInviteLinkInfo,
+                groupInviteLink: groupInviteLink,
             )
             if !groupInviteLinkViewModel.isExpired {
                 let state = LinkPreviewGroupLink(

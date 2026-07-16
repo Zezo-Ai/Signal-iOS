@@ -643,7 +643,7 @@ extension ConversationViewController: CVComponentDelegate {
             return
         }
 
-        if GroupManager.isPossibleGroupInviteLink(url) {
+        if let url = PossibleGroupInviteLinkUrl.parseFrom(url) {
             didTapGroupInviteLink(url: url)
             return
         }
@@ -712,9 +712,8 @@ extension ConversationViewController: CVComponentDelegate {
         navigationController?.pushViewController(paymentsDetailViewController, animated: true)
     }
 
-    public func didTapGroupInviteLink(url: URL) {
+    public func didTapGroupInviteLink(url: PossibleGroupInviteLinkUrl) {
         AssertIsOnMainThread()
-        owsAssertDebug(GroupManager.isPossibleGroupInviteLink(url))
 
         GroupInviteLinksUI.openGroupInviteLink(url, fromViewController: self)
     }

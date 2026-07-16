@@ -492,27 +492,6 @@ public class GroupManager: NSObject {
         }
     }
 
-    public static let inviteLinkPasswordLengthV2: UInt = 16
-
-    public static func generateInviteLinkPasswordV2() -> Data {
-        Randomness.generateRandomBytes(inviteLinkPasswordLengthV2)
-    }
-
-    public static func isPossibleGroupInviteLink(_ url: URL) -> Bool {
-        let possibleHosts: [String]
-        if url.scheme == "https" {
-            possibleHosts = ["signal.group"]
-        } else if url.scheme == "sgnl" {
-            possibleHosts = ["signal.group", "joingroup"]
-        } else {
-            return false
-        }
-        guard let host = url.host else {
-            return false
-        }
-        return possibleHosts.contains(host)
-    }
-
     public static func joinGroupViaInviteLink(
         secretParams: GroupSecretParams,
         inviteLinkPassword: Data,
@@ -560,14 +539,9 @@ public class GroupManager: NSObject {
         }.awaitable()
     }
 
-    public static func cachedGroupInviteLinkPreview(groupInviteLinkInfo: GroupInviteLinkInfo) -> GroupInviteLinkPreview? {
-        do {
-            let groupContextInfo = try GroupV2ContextInfo.deriveFrom(masterKeyData: groupInviteLinkInfo.masterKey)
-            return SSKEnvironment.shared.groupsV2Ref.cachedGroupInviteLinkPreview(groupSecretParams: groupContextInfo.groupSecretParams)
-        } catch {
-            owsFailDebug("Error: \(error)")
-            return nil
-        }
+    public static func cachedGroupInviteLinkPreview(groupInviteLink: GroupInviteLink) -> GroupInviteLinkPreview? {
+        let groupContextInfo = GroupV2ContextInfo.deriveFrom(masterKey: groupInviteLink.masterKey)
+        return SSKEnvironment.shared.groupsV2Ref.cachedGroupInviteLinkPreview(groupSecretParams: groupContextInfo.groupSecretParams)
     }
 
     // MARK: - Announcements

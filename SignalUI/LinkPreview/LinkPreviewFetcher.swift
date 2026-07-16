@@ -56,7 +56,7 @@ public class LinkPreviewFetcherImpl: LinkPreviewFetcher {
         let linkPreviewDraft: OWSLinkPreviewDraft?
         if StickerPackInfo.isStickerPackShare(url) {
             linkPreviewDraft = try await self.linkPreviewDraft(forStickerShare: url)
-        } else if GroupManager.isPossibleGroupInviteLink(url) {
+        } else if let url = PossibleGroupInviteLinkUrl.parseFrom(url) {
             linkPreviewDraft = try await self.linkPreviewDraft(forGroupInviteLink: url)
         } else if let callLink = CallLink(url: url) {
             let linkName = try await self.fetchName(forCallLink: callLink)
@@ -313,14 +313,17 @@ public class LinkPreviewFetcherImpl: LinkPreviewFetcher {
 
     // MARK: - Group Invite Links
 
-    private func linkPreviewDraft(forGroupInviteLink url: URL) async throws -> OWSLinkPreviewDraft? {
-        guard let groupInviteLinkInfo = GroupInviteLinkInfo.parseFrom(url) else {
-            Logger.error("Could not parse URL.")
+    private func linkPreviewDraft(forGroupInviteLink url: PossibleGroupInviteLinkUrl) async throws -> OWSLinkPreviewDraft? {
+        let groupInviteLink: GroupInviteLink
+        do {
+            groupInviteLink = try GroupInviteLink.parseFrom(url)
+        } catch {
+            Logger.warn("couldn't parse URL: \(error)")
             throw LinkPreviewError.invalidPreview
         }
-        let groupV2ContextInfo = try GroupV2ContextInfo.deriveFrom(masterKeyData: groupInviteLinkInfo.masterKey)
+        let groupV2ContextInfo = GroupV2ContextInfo.deriveFrom(masterKey: groupInviteLink.masterKey)
         let groupInviteLinkPreview = try await self.groupsV2.fetchGroupInviteLinkPreview(
-            inviteLinkPassword: groupInviteLinkInfo.inviteLinkPassword,
+            inviteLinkPassword: groupInviteLink.inviteLinkPassword,
             groupSecretParams: groupV2ContextInfo.groupSecretParams,
         )
         let previewThumbnail: PreviewThumbnail? = await {
@@ -346,7 +349,7 @@ public class LinkPreviewFetcherImpl: LinkPreviewFetcher {
         }
 
         return OWSLinkPreviewDraft(
-            url: url,
+            url: url.rawValue,
             title: title,
             imageData: previewThumbnail?.imageData,
             imageMimeType: previewThumbnail?.mimetype,

@@ -11,7 +11,7 @@ private enum OpenableUrl {
     case phoneNumberLink(URL)
     case usernameLink(Usernames.UsernameLink)
     case stickerPack(StickerPackInfo)
-    case groupInvite(URL)
+    case groupInvite(PossibleGroupInviteLinkUrl)
     case signalProxy(URL)
     case linkDevice
     case completeIDEALDonation(Stripe.IDEALCallbackType)
@@ -72,7 +72,7 @@ class UrlOpener {
         if let stickerPackInfo = parseSgnlAddStickersUrl(url) {
             return .stickerPack(stickerPackInfo)
         }
-        if GroupManager.isPossibleGroupInviteLink(url) {
+        if let url = PossibleGroupInviteLinkUrl.parseFrom(url) {
             return .groupInvite(url)
         }
         if SignalProxy.isValidProxyLink(url) {

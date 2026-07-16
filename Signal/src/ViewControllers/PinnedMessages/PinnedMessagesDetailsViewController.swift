@@ -550,7 +550,7 @@ extension PinnedMessagesDetailsViewController: CVComponentDelegate {
 
     func didTapStickerPack(_ stickerPackInfo: StickerPackInfo) {}
 
-    func didTapGroupInviteLink(url: URL) {}
+    func didTapGroupInviteLink(url: PossibleGroupInviteLinkUrl) {}
 
     func didTapProxyLink(url: URL) {}
 
