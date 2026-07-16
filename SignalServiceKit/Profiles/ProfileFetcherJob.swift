@@ -24,12 +24,15 @@ public class ProfileFetcherJob {
     private let accountChecker: AccountChecker
     private let db: any DB
     private let disappearingMessagesConfigurationStore: any DisappearingMessagesConfigurationStore
+    private let groupSendEndorsementStore: GroupSendEndorsementStore
     private let identityManager: any OWSIdentityManager
     private let keyTransparencyStore: KeyTransparencyStore
+    private let localProfileChecker: LocalProfileChecker
     private let paymentsHelper: any PaymentsHelper
     private let profileManager: any ProfileManager
     private let recipientDatabaseTable: RecipientDatabaseTable
     private let syncManager: any SyncManagerProtocol
+    private let threadStore: any ThreadStore
     private let tsAccountManager: any TSAccountManager
     private let udManager: any OWSUDManager
     private let versionedProfiles: any VersionedProfiles
@@ -43,12 +46,15 @@ public class ProfileFetcherJob {
         accountChecker: AccountChecker,
         db: any DB,
         disappearingMessagesConfigurationStore: any DisappearingMessagesConfigurationStore,
+        groupSendEndorsementStore: GroupSendEndorsementStore,
         identityManager: any OWSIdentityManager,
         keyTransparencyStore: KeyTransparencyStore,
+        localProfileChecker: LocalProfileChecker,
         paymentsHelper: any PaymentsHelper,
         profileManager: any ProfileManager,
         recipientDatabaseTable: RecipientDatabaseTable,
         syncManager: any SyncManagerProtocol,
+        threadStore: any ThreadStore,
         tsAccountManager: any TSAccountManager,
         udManager: any OWSUDManager,
         versionedProfiles: any VersionedProfiles,
@@ -61,12 +67,15 @@ public class ProfileFetcherJob {
         self.accountChecker = accountChecker
         self.db = db
         self.disappearingMessagesConfigurationStore = disappearingMessagesConfigurationStore
+        self.groupSendEndorsementStore = groupSendEndorsementStore
         self.identityManager = identityManager
         self.keyTransparencyStore = keyTransparencyStore
+        self.localProfileChecker = localProfileChecker
         self.paymentsHelper = paymentsHelper
         self.profileManager = profileManager
         self.recipientDatabaseTable = recipientDatabaseTable
         self.syncManager = syncManager
+        self.threadStore = threadStore
         self.tsAccountManager = tsAccountManager
         self.udManager = udManager
         self.versionedProfiles = versionedProfiles
@@ -291,22 +300,20 @@ public class ProfileFetcherJob {
         guard let aci = serviceId as? Aci else {
             return nil
         }
-        let threadStore = DependenciesBridge.shared.threadStore
         guard let groupThread = threadStore.fetchGroupThread(groupId: groupId, tx: tx) else {
             throw OWSAssertionError("Can't find group that should exist.")
         }
         guard let groupModel = groupThread.groupModel as? TSGroupModelV2 else {
             throw OWSAssertionError("Can't access v2 model for group with v2 identifier.")
         }
-        let endorsementStore = DependenciesBridge.shared.groupSendEndorsementStore
-        let combinedEndorsement = endorsementStore.fetchCombinedEndorsement(groupThreadId: groupThread.sqliteRowId!, tx: tx)
+        let combinedEndorsement = groupSendEndorsementStore.fetchCombinedEndorsement(groupThreadId: groupThread.sqliteRowId!, tx: tx)
         guard let combinedEndorsement else {
             // Perhaps we haven't fetched it or it expired.
             return nil
         }
         guard
             let recipient = recipientDatabaseTable.fetchRecipient(serviceId: aci, transaction: tx),
-            let individualEndorsement = endorsementStore.fetchIndividualEndorsement(
+            let individualEndorsement = groupSendEndorsementStore.fetchIndividualEndorsement(
                 groupThreadId: groupThread.sqliteRowId!,
                 recipientId: recipient.id,
                 tx: tx,
@@ -486,8 +493,7 @@ public class ProfileFetcherJob {
                 self.reconcileLocalProfileIfNeeded(fetchedProfile: fetchedProfile)
             }
 
-            let identityManager = DependenciesBridge.shared.identityManager
-            identityManager.saveIdentityKey(profile.identityKey, for: serviceId, shouldUpdateStorageService: true, tx: transaction)
+            self.identityManager.saveIdentityKey(profile.identityKey, for: serviceId, shouldUpdateStorageService: true, tx: transaction)
         }
     }
 
@@ -573,7 +579,7 @@ public class ProfileFetcherJob {
         guard tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegisteredPrimaryDevice else {
             return
         }
-        DependenciesBridge.shared.localProfileChecker.didFetchLocalProfile(LocalProfileChecker.RemoteProfile(
+        self.localProfileChecker.didFetchLocalProfile(LocalProfileChecker.RemoteProfile(
             avatarUrlPath: fetchedProfile.profile.avatarUrlPath,
             decryptedProfile: fetchedProfile.decryptedProfile,
         ))

@@ -1391,17 +1391,29 @@ extension AppSetup.GlobalsContinuation {
             tsAccountManager: tsAccountManager,
         )
 
+        let localProfileChecker = LocalProfileChecker(
+            db: db,
+            messageProcessor: messageProcessor,
+            profileManager: profileManager,
+            storageServiceManager: storageServiceManager,
+            tsAccountManager: tsAccountManager,
+            udManager: udManager,
+        )
+
         let profileFetcher = ProfileFetcherImpl(
             accountChecker: accountChecker,
             db: db,
             disappearingMessagesConfigurationStore: disappearingMessagesConfigurationStore,
+            groupSendEndorsementStore: groupSendEndorsementStore,
             identityManager: identityManager,
             keyTransparencyStore: keyTransparencyStore,
+            localProfileChecker: localProfileChecker,
             paymentsHelper: paymentsHelper,
             profileManager: profileManager,
             reachabilityManager: reachabilityManager,
             recipientDatabaseTable: recipientDatabaseTable,
             syncManager: syncManager,
+            threadStore: threadStore,
             tsAccountManager: tsAccountManager,
             udManager: udManager,
             versionedProfiles: versionedProfiles,
@@ -1625,15 +1637,6 @@ extension AppSetup.GlobalsContinuation {
         // However, that class is currently implemented mostly as static methods,
         // so there's no place to store it. Once it's protocolized, this type
         // should be initialized in its initializer.
-        let localProfileChecker = LocalProfileChecker(
-            db: db,
-            messageProcessor: messageProcessor,
-            profileManager: profileManager,
-            storageServiceManager: storageServiceManager,
-            tsAccountManager: tsAccountManager,
-            udManager: udManager,
-        )
-
         let attachmentViewOnceManager = AttachmentViewOnceManagerImpl(
             attachmentStore: attachmentStore,
             db: db,
