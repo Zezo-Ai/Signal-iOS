@@ -8,7 +8,7 @@ import SignalUI
 
 class GroupLinkQRCodeViewController: OWSViewController {
 
-    private let groupModelV2: TSGroupModelV2
+    private let groupInviteLinkUrl: URL
 
     private lazy var shareCodeButton = UIButton(
         configuration: .largePrimary(title: OWSLocalizedString(
@@ -20,9 +20,8 @@ class GroupLinkQRCodeViewController: OWSViewController {
         },
     )
 
-    init(groupModelV2: TSGroupModelV2) {
-        self.groupModelV2 = groupModelV2
-
+    init(groupInviteLinkUrl: URL) {
+        self.groupInviteLinkUrl = groupInviteLinkUrl
         super.init()
     }
 
@@ -38,12 +37,7 @@ class GroupLinkQRCodeViewController: OWSViewController {
         view.backgroundColor = .Signal.groupedBackground
 
         let qrCodeView = QRCodeView()
-        do {
-            let inviteLinkUrl = try groupModelV2.groupInviteLinkUrl()
-            qrCodeView.setQRCode(url: inviteLinkUrl)
-        } catch {
-            owsFailDebug("error \(error)")
-        }
+        qrCodeView.setQRCode(url: groupInviteLinkUrl)
         let qrCodeViewContainer = UIView.container()
         qrCodeViewContainer.addSubview(qrCodeView)
         qrCodeView.translatesAutoresizingMaskIntoConstraints = false
@@ -90,11 +84,7 @@ class GroupLinkQRCodeViewController: OWSViewController {
 
     private func didTapShareCode() {
         do {
-            guard
-                let qrCodeImage = QRCodeGenerator().generateQRCode(
-                    url: try groupModelV2.groupInviteLinkUrl(),
-                )
-            else {
+            guard let qrCodeImage = QRCodeGenerator().generateQRCode(url: groupInviteLinkUrl) else {
                 owsFailDebug("Failed to generate QR code image!")
                 return
             }

@@ -38,22 +38,9 @@ public enum GroupsV2Error: Error {
 
 // MARK: -
 
-@objc
-public enum GroupsV2LinkMode: UInt, CustomStringConvertible {
+public enum GroupInviteLinkMode {
+    case enabled(requireAdminApproval: Bool)
     case disabled
-    case enabledWithoutApproval
-    case enabledWithApproval
-
-    public var description: String {
-        switch self {
-        case .disabled:
-            return ".disabled"
-        case .enabledWithoutApproval:
-            return ".enabledWithoutApproval"
-        case .enabledWithApproval:
-            return ".enabledWithApproval"
-        }
-    }
 }
 
 // MARK: -

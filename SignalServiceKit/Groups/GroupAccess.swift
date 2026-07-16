@@ -177,14 +177,3 @@ public final class GroupAccess: NSObject, NSSecureCoding {
         return "[members: \(members), attributes: \(attributes), addFromInviteLink: \(addFromInviteLink), memberLabels: \(memberLabels), ]"
     }
 }
-
-// MARK: -
-
-@objc
-public extension GroupAccess {
-    var canJoinFromInviteLink: Bool {
-        // TODO: Should this include .member?
-        addFromInviteLink == .any ||
-            addFromInviteLink == .administrator
-    }
-}

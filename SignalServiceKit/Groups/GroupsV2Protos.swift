@@ -172,17 +172,6 @@ public class GroupsV2Protos {
         return groupBuilder.buildInfallibly()
     }
 
-    public class func validateInviteLinkState(inviteLinkPassword: Data?, groupAccess: GroupAccess) {
-        let canJoinFromInviteLink = groupAccess.canJoinFromInviteLink
-        let hasInviteLinkPassword = inviteLinkPassword?.nilIfEmpty != nil
-        if canJoinFromInviteLink, !hasInviteLinkPassword {
-            owsFailDebug("Invite links enabled without inviteLinkPassword.")
-        } else if !canJoinFromInviteLink, hasInviteLinkPassword {
-            // We don't clear the password when disabling invite links,
-            // so that the link doesn't change if it is re-enabled.
-        }
-    }
-
     public class func buildAccessProto(groupAccess: GroupAccess) -> GroupsProtoAccessControl {
         var builder = GroupsProtoAccessControl.builder()
         builder.setAttributes(groupAccess.attributes.protoAccess)
@@ -469,8 +458,6 @@ public class GroupsV2Protos {
             addFromInviteLink: GroupV2Access.access(forProtoAccess: accessControlForAddFromInviteLink),
             memberLabels: GroupV2Access.access(forProtoAccess: accessControlForMemberLabels),
         )
-
-        validateInviteLinkState(inviteLinkPassword: inviteLinkPassword, groupAccess: groupAccess)
 
         var isTerminated = false
         if RemoteConfig.current.groupTerminateReceiveEnabled {

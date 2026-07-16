@@ -374,7 +374,7 @@ class GroupMemberSearchViewController: OWSViewController {
         if canEditConversationMembership, !isTerminatedGroup {
             actionItems.append(.addMembers)
         }
-        if groupModel.isGroupInviteLinkEnabled {
+        if case .enabled = groupModel.inviteLinkConfiguration() {
             actionItems.append(.shareGroupLink)
         }
         if !actionItems.isEmpty {

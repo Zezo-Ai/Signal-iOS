@@ -571,15 +571,15 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
     }
 
     func showGroupLinkView() {
-        guard let groupThread = thread as? TSGroupThread else {
+        guard
+            let groupThread = thread as? TSGroupThread,
+            let groupModel = groupThread.groupModel as? TSGroupModelV2,
+            let secretParams = try? groupModel.secretParams()
+        else {
             owsFailDebug("Invalid thread.")
             return
         }
-        guard let groupModelV2 = groupThread.groupModel as? TSGroupModelV2 else {
-            owsFailDebug("Invalid groupModel.")
-            return
-        }
-        let groupLinkViewController = GroupLinkViewController(groupModelV2: groupModelV2)
+        let groupLinkViewController = GroupLinkViewController(secretParams: secretParams)
         groupLinkViewController.groupLinkViewControllerDelegate = self
         navigationController?.pushViewController(groupLinkViewController, animated: true)
     }

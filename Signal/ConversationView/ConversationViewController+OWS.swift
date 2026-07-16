@@ -428,21 +428,22 @@ extension ConversationViewController: MediaPresentationContextProvider {
 
 public extension ConversationViewController {
     func showGroupLinkPromotionActionSheet() {
-        guard let groupThread = thread as? TSGroupThread else {
+        guard
+            let groupThread = thread as? TSGroupThread,
+            let groupModel = groupThread.groupModel as? TSGroupModelV2,
+            let secretParams = try? groupModel.secretParams()
+        else {
             owsFailDebug("Invalid thread.")
             return
         }
-        guard groupThread.isGroupV2Thread else {
-            return
-        }
 
-        if groupThread.isTerminatedGroup {
+        if groupModel.isTerminated {
             showUnableToTakeActionInEndedGroupSheet()
             return
         }
 
         let view = GroupLinkPromotionActionSheet(
-            groupThread: groupThread,
+            secretParams: secretParams,
             conversationViewController: self,
         )
         view.present(fromViewController: self)

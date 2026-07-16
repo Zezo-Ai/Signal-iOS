@@ -480,7 +480,7 @@ public class GroupManager: NSObject {
 
     // MARK: - Group Links
 
-    public static func updateLinkModeV2(secretParams: GroupSecretParams, linkMode: GroupsV2LinkMode) async throws {
+    public static func updateLinkModeV2(secretParams: GroupSecretParams, linkMode: GroupInviteLinkMode) async throws {
         try await updateGroupV2(secretParams: secretParams, description: "Change group link mode") { groupChangeSet in
             groupChangeSet.setLinkMode(linkMode)
         }

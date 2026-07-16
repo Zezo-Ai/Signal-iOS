@@ -2328,93 +2328,81 @@ private struct DiffingGroupUpdateItemBuilder {
             owsFailDebug("Invalid group model.")
             return
         }
-        let oldGroupInviteLinkMode = oldGroupModel.groupInviteLinkMode
-        let newGroupInviteLinkMode = newGroupModel.groupInviteLinkMode
 
-        guard oldGroupInviteLinkMode != newGroupInviteLinkMode else {
-            if
-                let oldInviteLinkPassword = oldGroupModel.inviteLinkPassword,
-                let newInviteLinkPassword = newGroupModel.inviteLinkPassword,
-                oldInviteLinkPassword != newInviteLinkPassword
-            {
-                switch groupUpdateSource {
-                case .localUser:
-                    addItem(.inviteLinkResetByLocalUser)
-                case let .aci(updaterAci):
-                    addItem(.inviteLinkResetByOtherUser(
-                        updaterAci: updaterAci.codableUuid,
-                    ))
-                case .rejectedInviteToPni, .legacyE164, .unknown:
-                    addItem(.inviteLinkResetByUnknownUser)
-                }
+        switch (oldGroupModel.inviteLinkConfiguration(), newGroupModel.inviteLinkConfiguration()) {
+        case (.disabled, .disabled):
+            fallthrough
+        case (.enabled(_, requireAdminApproval: false), .enabled(_, requireAdminApproval: false)):
+            fallthrough
+        case (.enabled(_, requireAdminApproval: true), .enabled(_, requireAdminApproval: true)):
+            if oldGroupModel.inviteLinkPassword?.nilIfEmpty == newGroupModel.inviteLinkPassword?.nilIfEmpty {
+                // The mode is the same, and the inviteLinkPassword is the same. Do nothing.
+                return
             }
-
-            return
-        }
-
-        switch oldGroupInviteLinkMode {
-        case .disabled:
-            switch newGroupInviteLinkMode {
-            case .disabled:
-                owsFailDebug("State did not change.")
-            case .enabledWithoutApproval:
-                switch groupUpdateSource {
-                case .localUser:
-                    addItem(.inviteLinkEnabledWithoutApprovalByLocalUser)
-                case let .aci(updaterAci):
-                    addItem(.inviteLinkEnabledWithoutApprovalByOtherUser(
-                        updaterAci: updaterAci.codableUuid,
-                    ))
-                case .rejectedInviteToPni, .legacyE164, .unknown:
-                    addItem(.inviteLinkEnabledWithoutApprovalByUnknownUser)
-                }
-            case .enabledWithApproval:
-                switch groupUpdateSource {
-                case .localUser:
-                    addItem(.inviteLinkEnabledWithApprovalByLocalUser)
-                case let .aci(updaterAci):
-                    addItem(.inviteLinkEnabledWithApprovalByOtherUser(
-                        updaterAci: updaterAci.codableUuid,
-                    ))
-                case .rejectedInviteToPni, .legacyE164, .unknown:
-                    addItem(.inviteLinkEnabledWithApprovalByUnknownUser)
-                }
+            switch groupUpdateSource {
+            case .localUser:
+                addItem(.inviteLinkResetByLocalUser)
+            case let .aci(updaterAci):
+                addItem(.inviteLinkResetByOtherUser(
+                    updaterAci: updaterAci.codableUuid,
+                ))
+            case .rejectedInviteToPni, .legacyE164, .unknown:
+                addItem(.inviteLinkResetByUnknownUser)
             }
-        case .enabledWithoutApproval, .enabledWithApproval:
-            switch newGroupInviteLinkMode {
-            case .disabled:
-                switch groupUpdateSource {
-                case .localUser:
-                    addItem(.inviteLinkDisabledByLocalUser)
-                case let .aci(updaterAci):
-                    addItem(.inviteLinkDisabledByOtherUser(
-                        updaterAci: updaterAci.codableUuid,
-                    ))
-                case .rejectedInviteToPni, .legacyE164, .unknown:
-                    addItem(.inviteLinkDisabledByUnknownUser)
-                }
-            case .enabledWithoutApproval:
-                switch groupUpdateSource {
-                case .localUser:
-                    addItem(.inviteLinkApprovalDisabledByLocalUser)
-                case let .aci(updaterAci):
-                    addItem(.inviteLinkApprovalDisabledByOtherUser(
-                        updaterAci: updaterAci.codableUuid,
-                    ))
-                case .rejectedInviteToPni, .legacyE164, .unknown:
-                    addItem(.inviteLinkApprovalDisabledByUnknownUser)
-                }
-            case .enabledWithApproval:
-                switch groupUpdateSource {
-                case .localUser:
-                    addItem(.inviteLinkApprovalEnabledByLocalUser)
-                case let .aci(updaterAci):
-                    addItem(.inviteLinkApprovalEnabledByOtherUser(
-                        updaterAci: updaterAci.codableUuid,
-                    ))
-                case .rejectedInviteToPni, .legacyE164, .unknown:
-                    addItem(.inviteLinkApprovalEnabledByUnknownUser)
-                }
+        case (.disabled, .enabled(inviteLink: _, requireAdminApproval: false)):
+            switch groupUpdateSource {
+            case .localUser:
+                addItem(.inviteLinkEnabledWithoutApprovalByLocalUser)
+            case let .aci(updaterAci):
+                addItem(.inviteLinkEnabledWithoutApprovalByOtherUser(
+                    updaterAci: updaterAci.codableUuid,
+                ))
+            case .rejectedInviteToPni, .legacyE164, .unknown:
+                addItem(.inviteLinkEnabledWithoutApprovalByUnknownUser)
+            }
+        case (.disabled, .enabled(inviteLink: _, requireAdminApproval: true)):
+            switch groupUpdateSource {
+            case .localUser:
+                addItem(.inviteLinkEnabledWithApprovalByLocalUser)
+            case let .aci(updaterAci):
+                addItem(.inviteLinkEnabledWithApprovalByOtherUser(
+                    updaterAci: updaterAci.codableUuid,
+                ))
+            case .rejectedInviteToPni, .legacyE164, .unknown:
+                addItem(.inviteLinkEnabledWithApprovalByUnknownUser)
+            }
+        case (.enabled(inviteLink: _, requireAdminApproval: _), .disabled):
+            switch groupUpdateSource {
+            case .localUser:
+                addItem(.inviteLinkDisabledByLocalUser)
+            case let .aci(updaterAci):
+                addItem(.inviteLinkDisabledByOtherUser(
+                    updaterAci: updaterAci.codableUuid,
+                ))
+            case .rejectedInviteToPni, .legacyE164, .unknown:
+                addItem(.inviteLinkDisabledByUnknownUser)
+            }
+        case (.enabled(inviteLink: _, requireAdminApproval: true), .enabled(inviteLink: _, requireAdminApproval: false)):
+            switch groupUpdateSource {
+            case .localUser:
+                addItem(.inviteLinkApprovalDisabledByLocalUser)
+            case let .aci(updaterAci):
+                addItem(.inviteLinkApprovalDisabledByOtherUser(
+                    updaterAci: updaterAci.codableUuid,
+                ))
+            case .rejectedInviteToPni, .legacyE164, .unknown:
+                addItem(.inviteLinkApprovalDisabledByUnknownUser)
+            }
+        case (.enabled(inviteLink: _, requireAdminApproval: false), .enabled(inviteLink: _, requireAdminApproval: true)):
+            switch groupUpdateSource {
+            case .localUser:
+                addItem(.inviteLinkApprovalEnabledByLocalUser)
+            case let .aci(updaterAci):
+                addItem(.inviteLinkApprovalEnabledByOtherUser(
+                    updaterAci: updaterAci.codableUuid,
+                ))
+            case .rejectedInviteToPni, .legacyE164, .unknown:
+                addItem(.inviteLinkApprovalEnabledByUnknownUser)
             }
         }
     }

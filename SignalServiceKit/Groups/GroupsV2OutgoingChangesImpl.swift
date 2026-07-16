@@ -78,7 +78,7 @@ public class GroupsV2OutgoingChanges {
 
     private var shouldUpdateLocalProfileKey = false
 
-    private var newLinkMode: GroupsV2LinkMode?
+    private var newLinkMode: GroupInviteLinkMode?
 
     /// Non-nil if dm state changed.
     private var newDisappearingMessageToken: DisappearingMessageToken?
@@ -170,7 +170,7 @@ public class GroupsV2OutgoingChanges {
         shouldRevokeInvalidInvites = true
     }
 
-    public func setLinkMode(_ linkMode: GroupsV2LinkMode) {
+    public func setLinkMode(_ linkMode: GroupInviteLinkMode) {
         owsAssertDebug(accessForAddFromInviteLink == nil)
         owsAssertDebug(inviteLinkPasswordMode == nil)
 
@@ -178,12 +178,8 @@ public class GroupsV2OutgoingChanges {
         case .disabled:
             accessForAddFromInviteLink = .unsatisfiable
             inviteLinkPasswordMode = .ignore
-        case .enabledWithoutApproval, .enabledWithApproval:
-            accessForAddFromInviteLink = (
-                linkMode == .enabledWithoutApproval
-                    ? .any
-                    : .administrator,
-            )
+        case .enabled(let requireAdminApproval):
+            accessForAddFromInviteLink = requireAdminApproval ? .administrator : .any
             inviteLinkPasswordMode = .ensureValid
         }
     }

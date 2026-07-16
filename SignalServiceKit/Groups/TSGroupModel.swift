@@ -194,13 +194,6 @@ public final class TSGroupModelV2: TSGroupModel {
         return try secretParams().getMasterKey()
     }
 
-    public func groupInviteLinkUrl() throws -> URL {
-        return try GroupInviteLink(
-            masterKey: self.masterKey(),
-            inviteLinkPassword: self.inviteLinkPassword ?? Data(),
-        ).url()
-    }
-
     // MARK: -
 
     @objc
@@ -283,35 +276,20 @@ public final class TSGroupModelV2: TSGroupModel {
 
     // MARK: -
 
-    @objc
-    public var groupInviteLinkMode: GroupsV2LinkMode {
-        guard
-            let inviteLinkPassword,
-            !inviteLinkPassword.isEmpty
-        else {
-            return .disabled
-        }
-
+    public func inviteLinkConfiguration() -> GroupInviteLinkConfiguration {
+        let requireAdminApproval: Bool
         switch access.addFromInviteLink {
-        case .any:
-            return .enabledWithoutApproval
-        case .administrator:
-            return .enabledWithApproval
-        default:
+        case .unsatisfiable, .unknown, .member:
             return .disabled
+        case .any:
+            requireAdminApproval = false
+        case .administrator:
+            requireAdminApproval = true
         }
-    }
-
-    @objc
-    public var isGroupInviteLinkEnabled: Bool {
-        if
-            let inviteLinkPassword,
-            !inviteLinkPassword.isEmpty,
-            access.canJoinFromInviteLink
-        {
-            return true
-        }
-        return false
+        return .enabled(
+            inviteLink: Result(catching: { try GroupInviteLink(masterKey: masterKey(), inviteLinkPassword: inviteLinkPassword ?? Data()) }),
+            requireAdminApproval: requireAdminApproval,
+        )
     }
 }
 

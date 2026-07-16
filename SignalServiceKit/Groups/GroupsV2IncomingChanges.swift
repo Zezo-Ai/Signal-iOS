@@ -670,8 +670,6 @@ public class GroupsV2IncomingChanges {
         let newGroupMembership = groupMembershipBuilder.build()
         let newGroupAccess = GroupAccess(members: newMembersAccess, attributes: newAttributesAccess, addFromInviteLink: newAddFromInviteLinkAccess, memberLabels: newMemberLabelsAccess)
 
-        GroupsV2Protos.validateInviteLinkState(inviteLinkPassword: newInviteLinkPassword, groupAccess: newGroupAccess)
-
         var builder = oldGroupModel.asBuilder
         builder.name = newGroupName
         builder.descriptionText = newGroupDescription

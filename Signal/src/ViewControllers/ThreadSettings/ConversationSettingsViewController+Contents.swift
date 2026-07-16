@@ -1142,11 +1142,13 @@ extension ConversationSettingsViewController {
     ) {
         let section = OWSTableSection()
 
-        let groupLinkStatus = (
-            groupModelV2.isGroupInviteLinkEnabled
-                ? CommonStrings.switchOn
-                : CommonStrings.switchOff,
-        )
+        let groupLinkStatus: String
+        switch groupModelV2.inviteLinkConfiguration() {
+        case .enabled:
+            groupLinkStatus = CommonStrings.switchOn
+        case .disabled:
+            groupLinkStatus = CommonStrings.switchOff
+        }
         section.add(
             OWSTableItem.disclosureItem(
                 icon: .groupInfoGroupLink,
