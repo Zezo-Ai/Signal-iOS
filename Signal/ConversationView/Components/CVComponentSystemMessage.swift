@@ -161,24 +161,37 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
         let outerVStack = componentView.outerVStack
         let selectionView = componentView.selectionView
         let textLabel = componentView.textLabel
-        let messageTimerView = componentView.messageTimerView
 
         // Configuring the text label should happen in both reuse and non-reuse
         // scenarios
+        let textLabelConfigWithoutTimer = self.textLabelConfig()
+        let textLabelConfig: CVTextLabel.Config
+        if let expiration {
+            let animationManager = componentDelegate.spoilerState.animationManager
+            let quantizedValue = componentView.messageTimerUpdater.configure(
+                expirationTimestampMs: expiration.expirationTimestamp,
+                disappearingMessageInterval: expiration.expiresInSeconds,
+                update: { [weak self, weak textLabel, weak animationManager] quantizedValue in
+                    guard let self, let animationManager else {
+                        return
+                    }
+                    textLabel?.configureForRendering(
+                        config: self.textLabelConfig(timerQuantizedValue: quantizedValue),
+                        spoilerAnimationManager: animationManager,
+                    )
+                },
+            )
+            textLabelConfig = self.textLabelConfig(timerQuantizedValue: quantizedValue)
+        } else {
+            componentView.messageTimerUpdater.clearAnimation()
+            textLabelConfig = textLabelConfigWithoutTimer
+        }
         textLabel.configureForRendering(
             config: textLabelConfig,
             spoilerAnimationManager: componentDelegate.spoilerState.animationManager,
         )
-        componentView.innerHStack.accessibilityLabel = textLabelConfig.text.accessibilityDescription
+        componentView.innerHStack.accessibilityLabel = textLabelConfigWithoutTimer.text.accessibilityDescription
         componentView.innerHStack.isAccessibilityElement = true
-
-        if let expiration {
-            messageTimerView.configure(
-                expirationTimestampMs: expiration.expirationTimestamp,
-                disappearingMessageInterval: expiration.expiresInSeconds,
-                tintColor: textColor,
-            )
-        }
 
         if isReusing {
             innerHStack.configureForReuse(
@@ -210,13 +223,9 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
                 wallpaperBlurView.updateIfNecessary()
             }
         } else {
-            var innerHStackViews: [UIView] = [
+            let innerHStackViews: [UIView] = [
                 textLabel.view,
             ]
-
-            if expiration != nil {
-                innerHStackViews.append(messageTimerView)
-            }
 
             var innerVStackViews: [UIView] = [
                 innerHStack,
@@ -324,7 +333,7 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
                 bubbleView = wallpaperBlurView
             } else {
                 let backgroundView = UIView()
-                backgroundView.backgroundColor = Theme.backgroundColor
+                backgroundView.backgroundColor = .Signal.background
                 backgroundView.layer.cornerRadius = 12
                 componentView.backgroundView = backgroundView
                 bubbleView = backgroundView
@@ -393,14 +402,22 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
         outerHStack.applyTransformBlocks()
     }
 
-    private var textLabelConfig: CVTextLabel.Config {
+    private func textLabelConfig(timerQuantizedValue: UInt64? = nil) -> CVTextLabel.Config {
         let selectionStyling: [NSAttributedString.Key: Any] = [
-            .backgroundColor: Theme.isDarkThemeEnabled ? UIColor.ows_gray80 : UIColor.ows_gray05,
+            .backgroundColor: UIColor(light: .ows_gray05, dark: .ows_gray80),
         ]
         let textColor = textColor
+        let title = NSMutableAttributedString(attributedString: systemMessage.title)
+        if let timerQuantizedValue {
+            title.append(MessageTimerUpdater.signalSymbol(quantizedValue: timerQuantizedValue).attributedString(
+                dynamicTypeBaseSize: 12,
+                leadingCharacter: .nonBreakingSpace,
+                attributes: [.foregroundColor: textColor],
+            ))
+        }
 
         return CVTextLabel.Config(
-            text: .attributedText(systemMessage.title),
+            text: .attributedText(title),
             displayConfig: .forUnstyledText(font: Self.textLabelFont, textColor: textColor),
             font: Self.textLabelFont,
             textColor: textColor,
@@ -472,17 +489,17 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
         maxContentWidth = max(0, maxContentWidth)
 
         let textSize = CVTextLabel.measureSize(
-            config: textLabelConfig,
+            config: textLabelConfig(timerQuantizedValue: expiration.map {
+                MessageTimerUpdater.quantizedValue(
+                    expirationTimestampMs: $0.expirationTimestamp,
+                    disappearingMessageInterval: $0.expiresInSeconds,
+                )
+            }),
             maxWidth: maxContentWidth,
         )
 
         var innerHStackSubviewInfos = [ManualStackSubviewInfo]()
         innerHStackSubviewInfos.append(textSize.size.asManualSubviewInfo)
-
-        if expiration != nil {
-            let timerSize = MessageTimerView.measureSize
-            innerHStackSubviewInfos.append(timerSize.asManualSubviewInfo(hasFixedWidth: true))
-        }
 
         let innerHStackMeasurement = ManualStackView.measure(
             config: innerHStackConfig,
@@ -614,7 +631,7 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
         fileprivate let innerVStack = ManualStackView(name: "systemMessage.innerVStack")
         fileprivate let outerVStack = ManualStackView(name: "systemMessage.outerVStack")
         fileprivate let selectionView = MessageSelectionView()
-        fileprivate let messageTimerView = MessageTimerView()
+        fileprivate let messageTimerUpdater = MessageTimerUpdater()
 
         fileprivate var wallpaperBlurView: CVWallpaperBlurView?
         fileprivate func ensureWallpaperBlurView() -> CVWallpaperBlurView {
@@ -662,8 +679,7 @@ public class CVComponentSystemMessage: CVComponentBase, CVRootComponent {
                 innerHStack.reset()
                 textLabel.reset()
 
-                messageTimerView.prepareForReuse()
-                messageTimerView.removeFromSuperview()
+                messageTimerUpdater.clearAnimation()
 
                 wallpaperBlurView?.removeFromSuperview()
                 wallpaperBlurView = nil
