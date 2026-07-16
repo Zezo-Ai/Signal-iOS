@@ -131,7 +131,6 @@ public class ChatConnectionManagerImpl: ChatConnectionManager {
             db: db,
         )
 
-        SwiftSingletons.register(self)
     }
 
     private func connection(ofType type: OWSChatConnectionType) -> OWSChatConnection {

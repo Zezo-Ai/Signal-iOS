@@ -38,7 +38,6 @@ public class ScreenLock: NSObject {
     override private init() {
         super.init()
 
-        SwiftSingletons.register(self)
     }
 
     // MARK: - KV Store

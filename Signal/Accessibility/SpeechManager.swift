@@ -12,7 +12,6 @@ public class SpeechManager: NSObject, AVSpeechSynthesizerDelegate {
     override init() {
         super.init()
         speechSynthesizer.delegate = self
-        SwiftSingletons.register(self)
     }
 
     deinit {

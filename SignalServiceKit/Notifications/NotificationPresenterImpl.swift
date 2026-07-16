@@ -271,9 +271,7 @@ public class NotificationPresenterImpl: NotificationPresenter {
     private var preferences: Preferences { SSKEnvironment.shared.preferencesRef }
     private var tsAccountManager: any TSAccountManager { DependenciesBridge.shared.tsAccountManager }
 
-    public init() {
-        SwiftSingletons.register(self)
-    }
+    public init() {}
 
     func previewType(tx: DBReadTransaction) -> NotificationType {
         return preferences.notificationPreviewType(tx: tx)

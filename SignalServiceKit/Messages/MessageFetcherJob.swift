@@ -8,9 +8,7 @@ import Foundation
 // MARK: -
 
 public class MessageFetcherJob {
-    public init() {
-        SwiftSingletons.register(self)
-    }
+    public init() {}
 
     public var hasCompletedInitialFetch: Bool {
         get async {

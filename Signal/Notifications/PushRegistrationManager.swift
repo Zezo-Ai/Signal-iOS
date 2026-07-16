@@ -27,7 +27,6 @@ public class PushRegistrationManager: NSObject, PKPushRegistryDelegate {
 
         super.init()
 
-        SwiftSingletons.register(self)
     }
 
     // Coordinates blocking of the calloutQueue while we wait for an incoming call

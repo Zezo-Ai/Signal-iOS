@@ -27,7 +27,6 @@ class WindowManager {
 
     init() {
         AssertIsOnMainThread()
-        SwiftSingletons.register(self)
     }
 
     func setupWithRootWindow(_ rootWindow: UIWindow, screenBlockingWindow: UIWindow) {

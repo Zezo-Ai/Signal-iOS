@@ -42,7 +42,6 @@ public class MessageSenderImpl: MessageSender, DeviceMessageBuilder {
         self.groupSendEndorsementStore = groupSendEndorsementStore
         self.senderKeySendingManager = senderKeySendingManager
 
-        SwiftSingletons.register(self)
     }
 
     // MARK: - Creating Signal Protocol Sessions

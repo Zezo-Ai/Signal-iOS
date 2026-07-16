@@ -138,8 +138,6 @@ public class OWSUDManagerImpl: OWSUDManager {
         self.trustRoots = OWSUDManagerImpl.trustRoots()
         self.tsAccountManager = tsAccountManager
 
-        SwiftSingletons.register(self)
-
         // We can fill in any missing sender certificate async; message sending
         // will fill in the sender certificate sooner if it needs it.
         cron.schedulePeriodically(

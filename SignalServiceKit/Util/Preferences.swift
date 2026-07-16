@@ -59,7 +59,6 @@ public class Preferences {
         if CurrentAppContext().hasUI {
             CurrentAppContext().appUserDefaults().set(UIScreen.main.scale, forKey: UserDefaultsKeys.deviceScale)
         }
-        SwiftSingletons.register(self)
     }
 
     // MARK: Helpers

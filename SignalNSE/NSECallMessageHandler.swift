@@ -13,9 +13,7 @@ class NSECallMessageHandler: CallMessageHandler {
 
     // MARK: Initializers
 
-    init() {
-        SwiftSingletons.register(self)
-    }
+    init() {}
 
     private var databaseStorage: SDSDatabaseStorage { SSKEnvironment.shared.databaseStorageRef }
     private var groupCallManager: GroupCallManager { SSKEnvironment.shared.groupCallManagerRef }

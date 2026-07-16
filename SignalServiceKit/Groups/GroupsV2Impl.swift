@@ -26,8 +26,6 @@ public class GroupsV2Impl: GroupsV2 {
         self.groupSendEndorsementStore = groupSendEndorsementStore
         self.profileKeyUpdater = GroupsV2ProfileKeyUpdater(appReadiness: appReadiness)
 
-        SwiftSingletons.register(self)
-
         appReadiness.runNowOrWhenAppDidBecomeReadyAsync {
             guard DependenciesBridge.shared.tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegistered else {
                 return

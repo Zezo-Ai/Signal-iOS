@@ -95,7 +95,6 @@ public final class ContactDiscoveryManagerImpl: ContactDiscoveryManager {
 
     init(contactDiscoveryTaskQueue: ContactDiscoveryTaskQueue) {
         self.contactDiscoveryTaskQueue = contactDiscoveryTaskQueue
-        SwiftSingletons.register(self)
     }
 
     public convenience init(

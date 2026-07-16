@@ -67,7 +67,6 @@ public class ReceiptSender: NSObject {
         self.sendingState = AtomicValue(SendingState(), lock: .init())
 
         super.init()
-        SwiftSingletons.register(self)
 
         appReadiness.runNowOrWhenAppDidBecomeReadyAsync {
             self.sendPendingReceiptsIfNeeded()

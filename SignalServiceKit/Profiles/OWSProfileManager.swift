@@ -36,8 +36,6 @@ public class OWSProfileManager: ProfileManagerProtocol {
     init(appReadiness: AppReadiness, databaseStorage: SDSDatabaseStorage) {
         self.appReadiness = appReadiness
 
-        SwiftSingletons.register(self)
-
         appReadiness.runNowOrWhenAppDidBecomeReadyAsync {
             self.rotateLocalProfileKeyIfNecessary()
             self.updateProfileOnServiceIfNecessary(authedAccount: .implicit())

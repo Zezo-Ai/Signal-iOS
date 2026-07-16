@@ -16,9 +16,7 @@ public class GroupV2UpdatesImpl: GroupV2Updates {
 
     private let operationQueue = ConcurrentTaskQueue(concurrentLimit: 1)
 
-    init(appReadiness: AppReadiness) {
-        SwiftSingletons.register(self)
-    }
+    init() {}
 
     // MARK: -
 

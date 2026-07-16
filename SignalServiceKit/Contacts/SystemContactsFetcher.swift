@@ -188,7 +188,6 @@ public class SystemContactsFetcher {
 
     public init(appReadiness: AppReadiness) {
         self.contactStoreAdapter = ContactsFrameworkContactStoreAdaptee(appReadiness: appReadiness)
-        SwiftSingletons.register(self)
     }
 
     private func setupObservationIfNecessary() {

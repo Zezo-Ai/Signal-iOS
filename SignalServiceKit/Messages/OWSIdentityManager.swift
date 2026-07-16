@@ -263,7 +263,6 @@ public class OWSIdentityManagerImpl: OWSIdentityManager {
         self.storageServiceManager = storageServiceManager
         self.tsAccountManager = tsAccountManager
 
-        SwiftSingletons.register(self)
     }
 
     public func libSignalStore(for identity: OWSIdentity, tx: DBReadTransaction) throws -> IdentityStore {

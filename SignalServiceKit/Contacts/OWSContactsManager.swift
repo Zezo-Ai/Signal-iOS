@@ -157,7 +157,6 @@ public class OWSContactsManager: NSObject, ContactsManagerProtocol {
         self.usernameLookupManager = usernameLookupManager
         super.init()
         self.systemContactsFetcher.delegate = self
-        SwiftSingletons.register(self)
 
         appReadiness.runNowOrWhenAppDidBecomeReadySync {
             self.setupNotificationObservations()

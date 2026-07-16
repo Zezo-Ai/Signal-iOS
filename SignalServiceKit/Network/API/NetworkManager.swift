@@ -58,7 +58,6 @@ public class NetworkManager: NetworkManagerProtocol {
             self.reachabilityDidChangeObserver = nil
         }
 
-        SwiftSingletons.register(self)
     }
 
     deinit {

@@ -30,7 +30,6 @@ public class OWS2FAManager {
         // Does not take dependencies on init, because circular dependencies
         // abound in this class and I did not have the motivation to break them.
 
-        SwiftSingletons.register(self)
     }
 
     // MARK: -

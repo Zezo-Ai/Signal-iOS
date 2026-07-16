@@ -67,8 +67,6 @@ class DeviceTransferService:
         self.deviceTransferRestore = deviceTransferRestore
         self.keychainStorage = keychainStorage
 
-        SwiftSingletons.register(self)
-
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(didEnterBackground),

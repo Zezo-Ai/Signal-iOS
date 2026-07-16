@@ -63,8 +63,6 @@ public class MessageProcessor {
     public init(appReadiness: AppReadiness) {
         self.appReadiness = appReadiness
 
-        SwiftSingletons.register(self)
-
         appReadiness.runNowOrWhenAppDidBecomeReadySync {
             SSKEnvironment.shared.messagePipelineSupervisorRef.register(pipelineStage: self)
 

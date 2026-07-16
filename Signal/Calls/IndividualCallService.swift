@@ -28,7 +28,6 @@ final class IndividualCallService: CallServiceStateObserver {
     ) {
         self.callManager = callManager
         self.callServiceState = callServiceState
-        SwiftSingletons.register(self)
         self.callServiceState.addObserver(self)
     }
 

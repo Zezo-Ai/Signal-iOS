@@ -37,7 +37,6 @@ public class SUIEnvironment: NSObject {
     override private init() {
         super.init()
 
-        SwiftSingletons.register(self)
     }
 
     @MainActor

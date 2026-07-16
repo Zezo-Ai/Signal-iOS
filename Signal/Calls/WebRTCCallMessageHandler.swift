@@ -11,9 +11,7 @@ class WebRTCCallMessageHandler: CallMessageHandler {
 
     // MARK: Initializers
 
-    init() {
-        SwiftSingletons.register(self)
-    }
+    init() {}
 
     private var callService: CallService { AppEnvironment.shared.callService }
     private var groupCallManager: GroupCallManager { SSKEnvironment.shared.groupCallManagerRef }

@@ -22,7 +22,6 @@ public class MessagePipelineSupervisor: NSObject {
     override public init() {
         super.init()
 
-        SwiftSingletons.register(self)
     }
 
     // MARK: - Public

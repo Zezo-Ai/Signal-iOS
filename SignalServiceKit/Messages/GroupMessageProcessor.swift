@@ -545,9 +545,7 @@ public class GroupMessageProcessorManager {
 
     private let finder = GroupMessageProcessorJobStore()
 
-    public init() {
-        SwiftSingletons.register(self)
-    }
+    public init() {}
 
     // MARK: -
 

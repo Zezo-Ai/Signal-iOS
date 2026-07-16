@@ -172,7 +172,6 @@ public class EarlyMessageManager {
     private var metadataStore = KeyValueStore(collection: "EarlyMessageManager.metadata")
 
     public init(appReadiness: AppReadiness) {
-        SwiftSingletons.register(self)
 
         appReadiness.runNowOrWhenAppDidBecomeReadyAsync {
             self.cleanupStaleMessages()

@@ -139,7 +139,6 @@ public actor ProfileFetcherImpl: ProfileFetcher {
                 userProfileWriter: userProfileWriter,
             )
         }
-        SwiftSingletons.register(self)
     }
 
     private nonisolated func insertFetchState(serviceId: ServiceId) -> FetchState {

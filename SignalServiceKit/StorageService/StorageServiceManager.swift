@@ -142,8 +142,6 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
         self.appReadiness = appReadiness
         super.init()
 
-        SwiftSingletons.register(self)
-
         if CurrentAppContext().isMainApp {
             appReadiness.runNowOrWhenAppWillBecomeReady {
                 self.cleanUpUnknownData()

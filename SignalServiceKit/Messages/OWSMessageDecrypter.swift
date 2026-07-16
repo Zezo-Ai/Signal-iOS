@@ -16,8 +16,6 @@ class OWSMessageDecrypter {
     ) {
         self.senderKeyManager = senderKeyManager
 
-        SwiftSingletons.register(self)
-
         appReadiness.runNowOrWhenAppDidBecomeReadySync {
             NotificationCenter.default.addObserver(
                 self,

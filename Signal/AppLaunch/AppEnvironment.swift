@@ -56,7 +56,6 @@ public class AppEnvironment: NSObject {
 
         super.init()
 
-        SwiftSingletons.register(self)
     }
 
     func setUp(appReadiness: AppReadiness, callService: CallService) {

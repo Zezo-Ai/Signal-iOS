@@ -24,7 +24,6 @@ public class PhoneNumberUtil: NSObject {
 
         super.init()
 
-        SwiftSingletons.register(self)
     }
 
     // TODO: This function should use characters instead of UTF16 code units, but it's been translated as-is from ObjC for now.

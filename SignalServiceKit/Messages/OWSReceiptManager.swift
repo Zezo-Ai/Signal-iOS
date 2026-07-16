@@ -94,8 +94,6 @@ public class OWSReceiptManager: NSObject {
 
         super.init()
 
-        SwiftSingletons.register(self)
-
         self.appReadiness.runNowOrWhenAppDidBecomeReadyAsync { [self] in
             scheduleProcessing()
         }

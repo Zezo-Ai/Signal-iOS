@@ -23,7 +23,6 @@ public class OWSSyncManager {
 
     public init(appReadiness: AppReadiness) {
         self.appReadiness = appReadiness
-        SwiftSingletons.register(self)
         appReadiness.runNowOrWhenMainAppDidBecomeReadyAsync {
             self.addObservers()
 

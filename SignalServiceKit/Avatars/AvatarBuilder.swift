@@ -50,7 +50,6 @@ public class AvatarBuilder {
     // MARK: -
 
     public init(appReadiness: AppReadiness) {
-        SwiftSingletons.register(self)
 
         appReadiness.runNowOrWhenAppWillBecomeReady {
             self.addObservers()

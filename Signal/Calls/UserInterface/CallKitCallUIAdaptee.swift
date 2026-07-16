@@ -32,7 +32,6 @@ final class CallKitCallUIAdaptee: NSObject, CallUIAdaptee, @preconcurrency CXPro
             sharedProvider.configuration = configuration
             return sharedProvider
         } else {
-            SwiftSingletons.register(self)
             let provider = CXProvider(configuration: configuration)
             _sharedProvider = provider
             return provider

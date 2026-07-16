@@ -22,7 +22,6 @@ public class OWSPaymentsLock {
 
     init(appReadiness: AppReadiness) {
         self.appReadiness = appReadiness
-        SwiftSingletons.register(self)
     }
 
     // MARK: - KV Store

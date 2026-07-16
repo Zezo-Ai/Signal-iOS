@@ -173,7 +173,6 @@ public class OWSBackgroundTaskManager {
     /// Due to `isAppActive` should only be executed from the main thread.
     private init() {
         AssertIsOnMainThread()
-        SwiftSingletons.register(self)
     }
 
     deinit {

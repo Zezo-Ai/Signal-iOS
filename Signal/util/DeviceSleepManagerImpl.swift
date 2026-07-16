@@ -18,9 +18,7 @@ class DeviceSleepManagerImpl: DeviceSleepManager {
     @MainActor
     private var blockObjects = [Weak<DeviceSleepBlockObject>]()
 
-    init() {
-        SwiftSingletons.register(self)
-    }
+    init() {}
 
     @MainActor
     func addBlock(blockObject: DeviceSleepBlockObject) {

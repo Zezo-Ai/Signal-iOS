@@ -147,7 +147,6 @@ final class CallService: CallServiceStateObserver, CallServiceStateDelegate {
         self.db = db
         self.deviceSleepManager = deviceSleepManager
         self.callManager.delegate = self
-        SwiftSingletons.register(self)
         self.callServiceState.addObserver(self)
 
         notificationObservers.append(NotificationCenter.default.addObserver(forName: .OWSApplicationDidEnterBackground, object: nil, queue: .main) { [weak self] _ in

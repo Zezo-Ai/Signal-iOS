@@ -446,8 +446,6 @@ open class ProxiedContentDownloader: NSObject, URLSessionTaskDelegate, URLSessio
 
         super.init()
 
-        SwiftSingletons.register(self)
-
         ensureDownloadFolder()
     }
 
