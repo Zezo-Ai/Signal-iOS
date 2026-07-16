@@ -9,7 +9,6 @@ public extension OWSRequestFactory {
     private enum UsernameApiPaths {
         static let reserveUsername = "v1/accounts/username_hash/reserve"
         static let confirmReservedUsername = "v1/accounts/username_hash/confirm"
-        static let deleteUsername = "v1/accounts/username_hash"
         static func aciLookup(forUsernameHash usernameHash: String) -> String {
             "v1/accounts/username_hash/\(usernameHash)"
         }
@@ -63,17 +62,6 @@ public extension OWSRequestFactory {
             url: url,
             method: HTTPMethod.put.methodName,
             parameters: params,
-        )
-    }
-
-    /// Delete the user's server-stored username hash.
-    static func deleteExistingUsernameRequest() -> TSRequest {
-        let url = URL(string: UsernameApiPaths.deleteUsername)!
-
-        return TSRequest(
-            url: url,
-            method: HTTPMethod.delete.methodName,
-            parameters: nil,
         )
     }
 

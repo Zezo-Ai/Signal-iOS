@@ -265,14 +265,6 @@ class OWSRequestFactoryTest: XCTestCase {
         ])
     }
 
-    func testDeleteExistingUsername() {
-        let request = OWSRequestFactory.deleteExistingUsernameRequest()
-
-        XCTAssertEqual(request.url.path, "v1/accounts/username_hash")
-        XCTAssertEqual(request.method, "DELETE")
-        XCTAssertEqual(request.parameters as! [String: String], [:])
-    }
-
     func testLookupAciForUsername() {
         let request = OWSRequestFactory.lookupAciUsernameRequest(usernameHashToLookup: "obi-wan")
 

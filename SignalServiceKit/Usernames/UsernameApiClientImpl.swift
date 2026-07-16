@@ -139,10 +139,8 @@ public class UsernameApiClientImpl: UsernameApiClient {
     // MARK: Deletion
 
     public func deleteCurrentUsername() async throws {
-        let request = OWSRequestFactory.deleteExistingUsernameRequest()
-        let response = try await performRequest(request: request)
-        guard response.responseStatusCode == 204 else {
-            throw response.asError()
+        try await chatConnectionManager.withAuthService(.usernames) {
+            try await $0.deleteUsernameHash()
         }
     }
 
