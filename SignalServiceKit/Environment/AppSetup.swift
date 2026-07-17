@@ -1411,7 +1411,6 @@ extension AppSetup.GlobalsContinuation {
             keyTransparencyStore: keyTransparencyStore,
             localProfileChecker: localProfileChecker,
             paymentsHelper: paymentsHelper,
-            profileBadgeManager: profileBadgeManager,
             profileManager: profileManager,
             reachabilityManager: reachabilityManager,
             recipientDatabaseTable: recipientDatabaseTable,

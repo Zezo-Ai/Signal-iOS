@@ -95,7 +95,7 @@ public struct BadgeAssets {
 
 // MARK: -
 
-public struct BadgeAssetsPopulator {
+public struct BadgeAssetsFetcher {
     private typealias Variant = BadgeAssets.Variant
 
     private let badgeAssets: BadgeAssets
@@ -115,7 +115,7 @@ public struct BadgeAssetsPopulator {
         badgeAssets.fileUrlForVariant(variant)
     }
 
-    func prepareAssetsIfNecessary() async throws {
+    func fetchAssetsIfNecessary() async throws {
         guard CurrentAppContext().isMainApp else {
             return
         }

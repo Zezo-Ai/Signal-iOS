@@ -29,7 +29,6 @@ public class ProfileFetcherJob {
     private let keyTransparencyStore: KeyTransparencyStore
     private let localProfileChecker: LocalProfileChecker
     private let paymentsHelper: any PaymentsHelper
-    private let profileBadgeManager: ProfileBadgeManager
     private let profileManager: any ProfileManager
     private let recipientDatabaseTable: RecipientDatabaseTable
     private let syncManager: any SyncManagerProtocol
@@ -52,7 +51,6 @@ public class ProfileFetcherJob {
         keyTransparencyStore: KeyTransparencyStore,
         localProfileChecker: LocalProfileChecker,
         paymentsHelper: any PaymentsHelper,
-        profileBadgeManager: ProfileBadgeManager,
         profileManager: any ProfileManager,
         recipientDatabaseTable: RecipientDatabaseTable,
         syncManager: any SyncManagerProtocol,
@@ -74,7 +72,6 @@ public class ProfileFetcherJob {
         self.keyTransparencyStore = keyTransparencyStore
         self.localProfileChecker = localProfileChecker
         self.paymentsHelper = paymentsHelper
-        self.profileBadgeManager = profileBadgeManager
         self.profileManager = profileManager
         self.recipientDatabaseTable = recipientDatabaseTable
         self.syncManager = syncManager
@@ -443,10 +440,6 @@ public class ProfileFetcherJob {
                     hasUnrestrictedAccess: profile.hasUnrestrictedUnidentifiedAccess,
                     tx: transaction,
                 )
-            }
-
-            for profileBadge in profile.profileBadges {
-                profileBadgeManager.createOrUpdateBadge(profileBadge, tx: transaction)
             }
 
             let avatarFilename: OptionalChange<String?>

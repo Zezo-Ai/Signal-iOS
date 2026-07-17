@@ -45,24 +45,6 @@ public class ProfileBadgeLookup {
         guard let assets = get(donationReceipt: donationReceipt)?.assets else { return nil }
         return preferDarkTheme ? assets.dark16 : assets.light16
     }
-
-    public func attemptToPopulateBadgeAssets(populateAssetsOnBadge: @escaping (ProfileBadge) async throws -> Void) async -> Void {
-        var badgesToLoad = Array(badgesBySubscriptionLevel.values)
-        if let boostBadge { badgesToLoad.append(boostBadge) }
-        if let giftBadge { badgesToLoad.append(giftBadge) }
-
-        await withTaskGroup(of: Void.self) { group in
-            for badge in badgesToLoad {
-                group.addTask {
-                    do {
-                        try await populateAssetsOnBadge(badge)
-                    } catch {}
-                }
-            }
-
-            await group.waitForAll()
-        }
-    }
 }
 
 // MARK: - Currency picker view

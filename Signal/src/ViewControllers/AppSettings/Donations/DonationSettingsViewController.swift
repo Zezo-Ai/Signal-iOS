@@ -227,8 +227,6 @@ class DonationSettingsViewController: OWSTableViewController2 {
                 giftBadge: donationConfiguration.gift.badge,
                 subscriptionLevels: donationConfiguration.subscription.levels,
             )
-            let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
-            await result.attemptToPopulateBadgeAssets(populateAssetsOnBadge: profileBadgeManager.populateAssetsOnBadge(_:))
             return result
         } else {
             Logger.warn("[Donations] Failed to fetch donation configuration. Proceeding without it, as it is only cosmetic here.")

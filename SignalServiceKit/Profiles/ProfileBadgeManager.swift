@@ -229,10 +229,10 @@ public class ProfileBadgeManager {
 
     // MARK: -
 
-    public func populateAssetsOnBadge(_ badge: ProfileBadge) async throws {
+    public func fetchAssetsIfNecessary(forBadge badge: ProfileBadge) async throws {
         try await taskQueue.run(forKey: badge.resourcePath) {
-            let populator = BadgeAssetsPopulator(badgeAssets: badge.assets)
-            try await populator.prepareAssetsIfNecessary()
+            try await BadgeAssetsFetcher(badgeAssets: badge.assets)
+                .fetchAssetsIfNecessary()
         }
     }
 }

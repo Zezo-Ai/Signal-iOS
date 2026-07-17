@@ -255,7 +255,7 @@ public class AppEnvironment: NSObject {
                 try await withThrowingTaskGroup { taskGroup in
                     for profileBadge in donationConfig.allProfileBadges {
                         taskGroup.addTask {
-                            try await profileBadgeManager.populateAssetsOnBadge(profileBadge)
+                            try await profileBadgeManager.fetchAssetsIfNecessary(forBadge: profileBadge)
                         }
                     }
 
