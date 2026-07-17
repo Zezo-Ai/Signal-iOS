@@ -25,7 +25,7 @@ class ChatListFYISheetCoordinator {
         }
 
         struct BadgeExpiration {
-            let expiredBadgeID: String
+            let expiredBadge: ProfileBadge
             let donationSubscriberID: Data?
             let mostRecentSubscriptionPaymentMethod: DonationPaymentMethod?
             let probablyHasCurrentSubscription: Bool
@@ -141,10 +141,11 @@ class ChatListFYISheetCoordinator {
             return sheet
         } else if
             let expiredBadgeID = donationSubscriptionManager.mostRecentlyExpiredBadgeID(tx: tx),
+            let expiredBadge = profileBadgeManager.fetchBadgeWithId(expiredBadgeID, tx: tx),
             donationSubscriptionManager.showExpirySheetOnHomeScreenKey(tx: tx)
         {
             return .badgeExpiration(FYISheet.BadgeExpiration(
-                expiredBadgeID: expiredBadgeID,
+                expiredBadge: expiredBadge,
                 donationSubscriberID: donationSubscriptionManager.getSubscriberID(tx: tx),
                 mostRecentSubscriptionPaymentMethod: donationSubscriptionManager.getMostRecentSubscriptionPaymentMethod(tx: tx),
                 probablyHasCurrentSubscription: donationSubscriptionManager.probablyHasCurrentSubscription(tx: tx),
@@ -381,27 +382,19 @@ class ChatListFYISheetCoordinator {
     ) async {
         let logger = PrefixedLogger(prefix: "[Donations]")
 
-        let expiredBadgeID = badgeExpiration.expiredBadgeID
+        let expiredBadge = badgeExpiration.expiredBadge
         let donationSubscriberID = badgeExpiration.donationSubscriberID
         let probablyHasCurrentSubscription = badgeExpiration.probablyHasCurrentSubscription
 
-        if BoostBadgeIds.contains(expiredBadgeID) {
+        if BoostBadgeIds.contains(expiredBadge.id) {
             logger.info("Showing expiry sheet for expired boost badge.")
-
-            let boostBadge: ProfileBadge
-            do {
-                boostBadge = try await donationSubscriptionManager.getBoostBadge()
-            } catch {
-                logger.warn("Failed to fetch boost badge for expiration! \(error)")
-                return
-            }
 
             guard chatListViewController.isChatListTopmostViewController() else {
                 return
             }
 
             let badgeIssueSheet = BadgeIssueSheet(
-                badge: boostBadge,
+                badge: expiredBadge,
                 mode: .boostExpired(hasCurrentSubscription: probablyHasCurrentSubscription),
             )
             badgeIssueSheet.delegate = chatListViewController
@@ -411,7 +404,7 @@ class ChatListFYISheetCoordinator {
             await db.awaitableWrite { tx in
                 donationSubscriptionManager.setShowExpirySheetOnHomeScreenKey(show: false, tx: tx)
             }
-        } else if SubscriptionBadgeIds.contains(expiredBadgeID) {
+        } else if SubscriptionBadgeIds.contains(expiredBadge.id) {
             /// We expect to show an error sheet when the subscription fails to
             /// renew and we learn about it from the receipt credential
             /// redemption job kicked off by the keep-alive.
