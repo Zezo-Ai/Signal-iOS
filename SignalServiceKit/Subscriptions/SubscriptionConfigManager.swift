@@ -4,9 +4,9 @@
 //
 
 public class SubscriptionConfigManager {
-    private struct SubscriptionConfig {
-        let donation: DonationSubscriptionConfiguration
-        let backup: BackupSubscriptionConfiguration
+    public struct SubscriptionConfig {
+        public let donation: DonationSubscriptionConfiguration
+        public let backup: BackupSubscriptionConfiguration
     }
 
     private enum StoreKeys {
@@ -18,6 +18,7 @@ public class SubscriptionConfigManager {
     private let db: DB
     private let kvStore: NewKeyValueStore
     private let networkManager: NetworkManager
+    private let taskQueue: ConcurrentTaskQueue = ConcurrentTaskQueue(concurrentLimit: 1)
 
     init(
         dateProvider: @escaping DateProvider,
@@ -30,8 +31,10 @@ public class SubscriptionConfigManager {
         self.networkManager = networkManager
     }
 
-    public func refresh() async throws {
-        _ = try await _refresh()
+    public func refresh() async throws -> SubscriptionConfig {
+        return try await taskQueue.run {
+            return try await _refresh()
+        }
     }
 
     private func _refresh() async throws -> SubscriptionConfig {
@@ -78,7 +81,7 @@ public class SubscriptionConfigManager {
             return donationConfig
         }
 
-        return try await _refresh().donation
+        return try await refresh().donation
     }
 
     // MARK: Backups
@@ -93,7 +96,7 @@ public class SubscriptionConfigManager {
             return backupConfig
         }
 
-        return try await _refresh().backup
+        return try await refresh().backup
     }
 
     /// Returns a recently-fetched-and-cached `BackupSubscriptionConfiguration`
@@ -229,6 +232,14 @@ public struct DonationSubscriptionConfiguration {
         self.gift = gift
         self.subscription = subscription
         self.paymentMethods = paymentMethods
+    }
+
+    public var allProfileBadges: [ProfileBadge] {
+        var result = [ProfileBadge]()
+        result.append(boost.badge)
+        result.append(gift.badge)
+        result.append(contentsOf: subscription.levels.map { $0.badge })
+        return result
     }
 
     // MARK: -

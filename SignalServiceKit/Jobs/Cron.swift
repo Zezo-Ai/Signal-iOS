@@ -72,6 +72,7 @@ public class Cron {
         case cleanUpViewOnceMessages
         case fetchCallingAssets
         case fetchDevices
+        case fetchDonationBadgeAssets
         case fetchEmojiSearch
         case fetchLocalProfile
         case fetchMegaphones

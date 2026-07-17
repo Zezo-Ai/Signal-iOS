@@ -188,17 +188,9 @@ public class ProfileBadgeManager {
     public func createOrUpdateBadge(
         _ newBadge: ProfileBadge,
         tx: DBWriteTransaction,
-    ) throws {
+    ) {
         failIfThrows {
             try newBadge.save(tx.database)
-
-            Task {
-                do {
-                    try await populateAssetsOnBadge(newBadge)
-                } catch {
-                    owsFailDebug("Failed to populate assets on badge \(error)")
-                }
-            }
         }
     }
 
@@ -207,21 +199,9 @@ public class ProfileBadgeManager {
         tx: DBReadTransaction,
     ) -> ProfileBadge? {
         return failIfThrows {
-            let result = try ProfileBadge
+            try ProfileBadge
                 .filter(key: badgeId)
                 .fetchOne(tx.database)
-
-            if let result {
-                Task {
-                    do {
-                        try await populateAssetsOnBadge(result)
-                    } catch {
-                        owsFailDebug("Failed to populate assets on badge! \(error)")
-                    }
-                }
-            }
-
-            return result
         }
     }
 

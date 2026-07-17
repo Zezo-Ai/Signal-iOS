@@ -112,7 +112,7 @@ public protocol ProfileManager: ProfileManagerProtocol {
         decryptedProfile: DecryptedProfile?,
         avatarUrlPath: OptionalChange<String?>,
         avatarFileName: OptionalChange<String?>,
-        profileBadges: [OWSUserProfileBadgeInfo],
+        profileBadgeUserInfos: [OWSUserProfileBadgeInfo],
         lastFetchDate: Date,
         userProfileWriter: UserProfileWriter,
         tx: DBWriteTransaction,

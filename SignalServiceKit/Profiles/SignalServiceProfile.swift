@@ -38,7 +38,12 @@ public class SignalServiceProfile {
     public let unidentifiedAccessVerifier: Data?
     public let hasUnrestrictedUnidentifiedAccess: Bool
     public let credential: Data?
-    public let badges: [(OWSUserProfileBadgeInfo, ProfileBadge)]
+    /// Metadata about the badges present on the profile, as pertains to the
+    /// specific profile.
+    public let profileBadgeUserInfos: [OWSUserProfileBadgeInfo]
+    /// Info about the badges present on the profile, describing the badge
+    /// object itself.
+    public let profileBadges: [ProfileBadge]
     public let phoneNumberSharingEncrypted: Data?
 
     public let capabilities: Capabilities
@@ -54,7 +59,7 @@ public class SignalServiceProfile {
         unidentifiedAccessVerifier: Data?,
         hasUnrestrictedUnidentifiedAccess: Bool,
         credential: Data?,
-        badges: [(OWSUserProfileBadgeInfo, ProfileBadge)],
+        badges: [(userInfo: OWSUserProfileBadgeInfo, badge: ProfileBadge)],
         phoneNumberSharingEncrypted: Data?,
         capabilities: Capabilities,
     ) {
@@ -68,7 +73,8 @@ public class SignalServiceProfile {
         self.unidentifiedAccessVerifier = unidentifiedAccessVerifier
         self.hasUnrestrictedUnidentifiedAccess = hasUnrestrictedUnidentifiedAccess
         self.credential = credential
-        self.badges = badges
+        self.profileBadgeUserInfos = badges.map(\.userInfo)
+        self.profileBadges = badges.map(\.badge)
         self.phoneNumberSharingEncrypted = phoneNumberSharingEncrypted
         self.capabilities = capabilities
     }

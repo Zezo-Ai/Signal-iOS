@@ -222,13 +222,46 @@ public class AppEnvironment: NSObject {
             operation: { try await inactiveLinkedDeviceFinder.refreshLinkedDeviceStateIfNecessary() },
         )
 
-        let subscriptionConfigManager = DependenciesBridge.shared.subscriptionConfigManager
         cron.schedulePeriodically(
             uniqueKey: .fetchSubscriptionConfig,
             approximateInterval: .day,
             mustBeRegistered: false,
             mustBeConnected: true,
-            operation: { try await subscriptionConfigManager.refresh() },
+            operation: {
+                let subscriptionConfigManager = DependenciesBridge.shared.subscriptionConfigManager
+
+                _ = try await subscriptionConfigManager.refresh()
+            },
+        )
+
+        cron.schedulePeriodically(
+            uniqueKey: .fetchDonationBadgeAssets,
+            approximateInterval: .day,
+            mustBeRegistered: false,
+            mustBeConnected: true,
+            operation: {
+                let db = DependenciesBridge.shared.db
+                let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
+                let subscriptionConfigManager = DependenciesBridge.shared.subscriptionConfigManager
+
+                let donationConfig = try await subscriptionConfigManager.donationConfiguration()
+
+                await db.awaitableWrite { tx in
+                    for profileBadge in donationConfig.allProfileBadges {
+                        profileBadgeManager.createOrUpdateBadge(profileBadge, tx: tx)
+                    }
+                }
+
+                try await withThrowingTaskGroup { taskGroup in
+                    for profileBadge in donationConfig.allProfileBadges {
+                        taskGroup.addTask {
+                            try await profileBadgeManager.populateAssetsOnBadge(profileBadge)
+                        }
+                    }
+
+                    try await taskGroup.waitForAll()
+                }
+            },
         )
 
         let identityKeyMismatchManager = DependenciesBridge.shared.identityKeyMismatchManager

@@ -341,12 +341,14 @@ public class ProfileFetcherJob {
         localIdentifiers: LocalIdentifiers,
         userProfileWriter: UserProfileWriter,
     ) async throws {
+        let avatarDownloadResult = try await downloadAvatarIfNeeded(
+            fetchedProfile,
+            localIdentifiers: localIdentifiers,
+        )
+
         await updateProfile(
             fetchedProfile: fetchedProfile,
-            avatarDownloadResult: try await downloadAvatarIfNeeded(
-                fetchedProfile,
-                localIdentifiers: localIdentifiers,
-            ),
+            avatarDownloadResult: avatarDownloadResult,
             localIdentifiers: localIdentifiers,
             userProfileWriter: userProfileWriter,
         )
@@ -443,23 +445,9 @@ public class ProfileFetcherJob {
                 )
             }
 
-            // First, we add ensure we have a copy of any new badge in our badge store
-            let badgeModels = fetchedProfile.profile.badges.map { $0.1 }
-            let persistedBadgeIds: [String] = badgeModels.compactMap {
-                do {
-                    try self.profileBadgeManager.createOrUpdateBadge($0, tx: transaction)
-                    return $0.id
-                } catch {
-                    owsFailDebug("Failed to save badgeId: \($0.id). \(error)")
-                    return nil
-                }
+            for profileBadge in profile.profileBadges {
+                profileBadgeManager.createOrUpdateBadge(profileBadge, tx: transaction)
             }
-
-            // Then, we update the profile. `profileBadges` will contain the badgeId of
-            // badges in the badge store
-            let profileBadgeMetadata = fetchedProfile.profile.badges
-                .map { $0.0 }
-                .filter { persistedBadgeIds.contains($0.badgeId) }
 
             let avatarFilename: OptionalChange<String?>
             do {
@@ -478,7 +466,7 @@ public class ProfileFetcherJob {
                     decryptedProfile: fetchedProfile.decryptedProfile,
                     avatarUrlPath: avatarDownloadResult.remoteRelativePath,
                     avatarFileName: avatarFilename,
-                    profileBadges: profileBadgeMetadata,
+                    profileBadgeUserInfos: profile.profileBadgeUserInfos,
                     lastFetchDate: Date(),
                     userProfileWriter: userProfileWriter,
                     tx: transaction,
