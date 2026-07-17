@@ -444,7 +444,7 @@ public class ProfileFetcherJob {
             let badgeModels = fetchedProfile.profile.badges.map { $0.1 }
             let persistedBadgeIds: [String] = badgeModels.compactMap {
                 do {
-                    try self.profileManager.badgeStore.createOrUpdateBadge($0, transaction: transaction)
+                    try self.profileManager.badgeStore.createOrUpdateBadge($0, tx: transaction)
                     return $0.id
                 } catch {
                     owsFailDebug("Failed to save badgeId: \($0.id). \(error)")

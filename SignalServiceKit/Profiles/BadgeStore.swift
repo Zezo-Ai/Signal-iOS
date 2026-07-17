@@ -7,11 +7,21 @@ import Foundation
 public import GRDB
 
 /// Model object for a badge. Only information for the badge itself, nothing user-specific (expirations, visibility, etc.)
-public class ProfileBadge: Codable, Equatable {
+public class ProfileBadge:
+    Codable,
+    FetchableRecord,
+    PersistableRecord,
+    Equatable
+{
+    public static let databaseTableName = "model_ProfileBadgeTable"
+
     public let id: String
     public let category: Category
     public let localizedName: String
     public let localizedDescriptionFormatString: String
+    /// - Note
+    /// At the time of writing, this is set by the server to the sha256 of the
+    /// badge's image.
     let resourcePath: String
 
     let badgeVariant: BadgeVariant
@@ -80,11 +90,9 @@ public class ProfileBadge: Codable, Equatable {
         // Don't check assets -- it's essentially a derived property that doesn't
         // need to be included in equality checks.
     }
-}
 
-// MARK: - ProfileBadge assets
+    // MARK: - Assets
 
-extension ProfileBadge {
     static let remoteAssetPrefix = URL(string: "https://updates2.signal.org/static/badges/")!
     static let localAssetPrefix = URL(fileURLWithPath: "ProfileBadges", isDirectory: true, relativeTo: OWSFileSystem.appSharedDataDirectoryURL())
 
@@ -98,11 +106,9 @@ extension ProfileBadge {
         let trimmedPath = resourcePath.prefix(upTo: extensionIndex)
         return Self.localAssetPrefix.appendingPathComponent(String(trimmedPath), isDirectory: true)
     }
-}
 
-// MARK: - ProfileBadge enums
+    // MARK: -
 
-extension ProfileBadge {
     /// Server defined category for the badge type
     public enum Category: String, Codable {
         case donor
@@ -178,26 +184,23 @@ extension ProfileBadge {
 }
 #endif
 
-// MARK: - ProfileBadge<PersistableRecord>
-
-extension ProfileBadge: FetchableRecord, PersistableRecord {
-    public static let databaseTableName = "model_ProfileBadgeTable"
-}
-
 // MARK: - BadgeStore
 
 public class BadgeStore {
-    let lock = UnfairLock()
-    var badgeCache = LRUCache<String, ProfileBadge>(maxSize: 5)
+    private let lock = UnfairLock()
+    private var badgeCache = LRUCache<String, ProfileBadge>(maxSize: 5)
     // BadgeAssets have two roles: fetching assets we don't currently have and vending retrieved assets as UIImages
     // They're a reference type, so we're fine aliasing the assets into multiple ProfileBadges
     // We don't use an LRUCache since we don't want to clear out BadgeAssets that are mid-fetch and risk having
     // two instances of this class trying to fetch assets at the same time.
-    var assetCache = [String: BadgeAssets]()
+    private var assetCache = [String: BadgeAssets]()
 
     // TODO: Badging — Memory warnings?
 
-    func createOrUpdateBadge(_ newBadge: ProfileBadge, transaction writeTx: DBWriteTransaction) throws {
+    public func createOrUpdateBadge(
+        _ newBadge: ProfileBadge,
+        tx writeTx: DBWriteTransaction,
+    ) throws {
         try lock.withLock {
             // First, we check to see if we already have a cached badge that's equal to the new version
             // If so, we can just update the assets property and return
@@ -225,7 +228,10 @@ public class BadgeStore {
         }
     }
 
-    func fetchBadgeWithId(_ badgeId: String, readTx: DBReadTransaction) -> ProfileBadge? {
+    public func fetchBadgeWithId(
+        _ badgeId: String,
+        tx readTx: DBReadTransaction,
+    ) -> ProfileBadge? {
         do {
             return try lock.withLock {
                 if let cachedBadge = badgeCache[badgeId] {
@@ -254,6 +260,13 @@ public class BadgeStore {
         }
     }
 
+    public func populateAssetsOnBadge(_ badge: ProfileBadge) async throws {
+        let badgeAssets = lock.withLock {
+            return getBadgetAssets(badge)
+        }
+        try await badgeAssets.prepareAssetsIfNecessary()
+    }
+
     private func getBadgetAssets(_ badge: ProfileBadge) -> BadgeAssets {
         lock.assertOwner()
 
@@ -275,12 +288,5 @@ public class BadgeStore {
         badge.assets = badgeAssets
 
         return badgeAssets
-    }
-
-    public func populateAssetsOnBadge(_ badge: ProfileBadge) async throws {
-        let badgeAssets = lock.withLock {
-            return getBadgetAssets(badge)
-        }
-        try await badgeAssets.prepareAssetsIfNecessary()
     }
 }

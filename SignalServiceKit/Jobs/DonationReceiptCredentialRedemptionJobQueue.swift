@@ -545,12 +545,12 @@ private class DonationReceiptCredentialRedemptionJobRunner: JobRunner {
             return .retryAfter(retryDelay, canRetryEarly: false)
         }
 
-        let badge: ProfileBadge
-        if let cachedBadge {
-            badge = cachedBadge
+        let badgeID: String
+        if let cachedBadgeID {
+            badgeID = cachedBadgeID
         } else {
-            badge = try await loadBadge(paymentType: configuration.paymentType)
-            cachedBadge = badge
+            badgeID = try await loadBadge(paymentType: configuration.paymentType).id
+            cachedBadgeID = badgeID
         }
 
         let amount: FiatMoney
@@ -571,7 +571,6 @@ private class DonationReceiptCredentialRedemptionJobRunner: JobRunner {
                 receiptCredentialPresentation = try await fetchReceiptCredentialPresentation(
                     jobRecord: jobRecord,
                     configuration: configuration,
-                    badge: badge,
                     amount: amount,
                 )
             } catch let error as ReceiptCredentialRequestError {
@@ -594,7 +593,7 @@ private class DonationReceiptCredentialRedemptionJobRunner: JobRunner {
                         errorCode: errorCode,
                         chargeFailureCodeIfPaymentFailed: chargeFailureCodeIfPaymentFailed,
                         configuration: configuration,
-                        badge: badge,
+                        badgeID: badgeID,
                         amount: amount,
                         tx: tx,
                     )
@@ -657,7 +656,7 @@ private class DonationReceiptCredentialRedemptionJobRunner: JobRunner {
             self.donationReceiptCredentialResultStore.setRedemptionSuccess(
                 success: DonationReceiptCredentialRedemptionSuccess(
                     badgesSnapshotBeforeJob: badgesSnapshotBeforeJob,
-                    badge: badge,
+                    badgeID: badgeID,
                     paymentMethod: configuration.paymentMethod,
                 ),
                 successMode: configuration.paymentType.receiptCredentialResultMode,
@@ -675,7 +674,7 @@ private class DonationReceiptCredentialRedemptionJobRunner: JobRunner {
         }
     }
 
-    var cachedBadge: ProfileBadge?
+    var cachedBadgeID: String?
 
     private func loadBadge(paymentType: PaymentType) async throws -> ProfileBadge {
         switch paymentType {
@@ -706,7 +705,6 @@ private class DonationReceiptCredentialRedemptionJobRunner: JobRunner {
     private func fetchReceiptCredentialPresentation(
         jobRecord: DonationReceiptCredentialRedemptionJobRecord,
         configuration: Configuration,
-        badge: ProfileBadge,
         amount: FiatMoney,
     ) async throws -> ReceiptCredentialPresentation {
         let receiptCredential: ReceiptCredential
@@ -760,14 +758,14 @@ private class DonationReceiptCredentialRedemptionJobRunner: JobRunner {
         errorCode: ReceiptCredentialRequestError.ErrorCode,
         chargeFailureCodeIfPaymentFailed: String?,
         configuration: Configuration,
-        badge: ProfileBadge,
+        badgeID: String,
         amount: FiatMoney,
         tx: DBWriteTransaction,
     ) {
         let receiptCredentialRequestError = DonationReceiptCredentialRequestError(
             errorCode: errorCode,
             chargeFailureCodeIfPaymentFailed: chargeFailureCodeIfPaymentFailed,
-            badge: badge,
+            badgeID: badgeID,
             amount: amount,
             paymentMethod: configuration.paymentMethod,
             now: dateProvider(),

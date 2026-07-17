@@ -70,6 +70,7 @@ class ChatListFYISheetCoordinator {
     private let backupAttachmentDownloadStore: BackupAttachmentDownloadStore
     private let backupExportJobRunner: BackupExportJobRunner
     private let backupSubscriptionIssueStore: BackupSubscriptionIssueStore
+    private let badgeStore: BadgeStore
     private let dateProvider: DateProvider
     private let db: DB
     private let donationReceiptCredentialResultStore: DonationReceiptCredentialResultStore
@@ -77,7 +78,6 @@ class ChatListFYISheetCoordinator {
     private let keyTransparencyStore: KeyTransparencyStore
     private let lowDiskSpaceWarningManager: LowDiskSpaceWarningManager
     private let networkManager: NetworkManager
-    private let profileManager: ProfileManager
     private let safetyTipsManager: SafetyTipsManager
 
     init(
@@ -85,6 +85,7 @@ class ChatListFYISheetCoordinator {
         backupAttachmentDownloadStore: BackupAttachmentDownloadStore,
         backupExportJobRunner: BackupExportJobRunner,
         backupSubscriptionIssueStore: BackupSubscriptionIssueStore,
+        badgeStore: BadgeStore,
         dateProvider: @escaping DateProvider,
         db: DB,
         donationReceiptCredentialResultStore: DonationReceiptCredentialResultStore,
@@ -92,12 +93,12 @@ class ChatListFYISheetCoordinator {
         keyTransparencyStore: KeyTransparencyStore,
         lowDiskSpaceWarningManager: LowDiskSpaceWarningManager,
         networkManager: NetworkManager,
-        profileManager: ProfileManager,
     ) {
         self.backupArchiveErrorStore = backupArchiveErrorStore
         self.backupAttachmentDownloadStore = backupAttachmentDownloadStore
         self.backupExportJobRunner = backupExportJobRunner
         self.backupSubscriptionIssueStore = backupSubscriptionIssueStore
+        self.badgeStore = badgeStore
         self.dateProvider = dateProvider
         self.db = db
         self.donationReceiptCredentialResultStore = donationReceiptCredentialResultStore
@@ -105,7 +106,6 @@ class ChatListFYISheetCoordinator {
         self.keyTransparencyStore = keyTransparencyStore
         self.lowDiskSpaceWarningManager = lowDiskSpaceWarningManager
         self.networkManager = networkManager
-        self.profileManager = profileManager
         self.safetyTipsManager = SafetyTipsManager()
     }
 
@@ -270,9 +270,14 @@ class ChatListFYISheetCoordinator {
             break
         }
 
+        guard let badge = badgeStore.fetchBadgeWithId(redemptionError.badgeID, tx: tx) else {
+            Logger.warn("Missing badge for expected badge ID! \(redemptionError.badgeID)")
+            return nil
+        }
+
         return .badgeIssue(FYISheet.BadgeIssue(
             redemptionError: redemptionError,
-            badge: redemptionError.badge,
+            badge: badge,
             errorMode: errorMode,
         ))
     }
@@ -336,7 +341,7 @@ class ChatListFYISheetCoordinator {
         let errorMode = badgeIssue.errorMode
 
         do {
-            try await profileManager.badgeStore.populateAssetsOnBadge(badge)
+            try await badgeStore.populateAssetsOnBadge(badge)
         } catch {
             logger.error("Failed to populate badge assets! \(error)")
             return
@@ -393,7 +398,7 @@ class ChatListFYISheetCoordinator {
             let boostBadge: ProfileBadge
             do {
                 boostBadge = try await donationSubscriptionManager.getBoostBadge()
-                try await profileManager.badgeStore.populateAssetsOnBadge(boostBadge)
+                try await badgeStore.populateAssetsOnBadge(boostBadge)
             } catch {
                 logger.warn("Failed to fetch boost badge and assets for expiration! \(error)")
                 return

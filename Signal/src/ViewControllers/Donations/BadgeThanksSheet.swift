@@ -120,7 +120,10 @@ class BadgeThanksSheet: OWSTableSheetViewController {
 
     convenience init(
         receiptCredentialRedemptionSuccess: DonationReceiptCredentialRedemptionSuccess,
+        newBadge: ProfileBadge,
     ) {
+        owsPrecondition(receiptCredentialRedemptionSuccess.badgeID == newBadge.id)
+
         let thanksType: ThanksType = {
             switch receiptCredentialRedemptionSuccess.paymentMethod {
             case nil, .applePay, .creditOrDebitCard, .paypal:
@@ -131,7 +134,7 @@ class BadgeThanksSheet: OWSTableSheetViewController {
         }()
 
         self.init(
-            newBadge: receiptCredentialRedemptionSuccess.badge,
+            newBadge: newBadge,
             thanksType: thanksType,
             oldBadgesSnapshot: receiptCredentialRedemptionSuccess.badgesSnapshotBeforeJob,
         )

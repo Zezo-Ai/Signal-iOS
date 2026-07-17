@@ -391,6 +391,7 @@ public class ChatListViewController: OWSViewController, HomeTabViewController {
             backupAttachmentDownloadStore: BackupAttachmentDownloadStore(),
             backupExportJobRunner: DependenciesBridge.shared.backupExportJobRunner,
             backupSubscriptionIssueStore: BackupSubscriptionIssueStore(),
+            badgeStore: SSKEnvironment.shared.profileManagerRef.badgeStore,
             dateProvider: { Date() },
             db: DependenciesBridge.shared.db,
             donationReceiptCredentialResultStore: DependenciesBridge.shared.donationReceiptCredentialResultStore,
@@ -398,7 +399,6 @@ public class ChatListViewController: OWSViewController, HomeTabViewController {
             keyTransparencyStore: KeyTransparencyStore(),
             lowDiskSpaceWarningManager: DependenciesBridge.shared.lowDiskSpaceWarningManager,
             networkManager: SSKEnvironment.shared.networkManagerRef,
-            profileManager: SSKEnvironment.shared.profileManagerRef,
         )
 
         Task {

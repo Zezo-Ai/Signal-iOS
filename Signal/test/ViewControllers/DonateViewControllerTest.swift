@@ -241,7 +241,7 @@ final class DonateViewControllerTest: SignalBaseTest {
             return DonationReceiptCredentialRequestError(
                 errorCode: .paymentStillProcessing,
                 chargeFailureCodeIfPaymentFailed: nil,
-                badge: MonthlyFixtures.badgeOne,
+                badgeID: MonthlyFixtures.badgeOne.id,
                 amount: FiatMoney(currencyCode: "EUR", value: 5),
                 paymentMethod: .sepa,
                 now: Date(),
@@ -263,7 +263,7 @@ final class DonateViewControllerTest: SignalBaseTest {
             oneTimeBoostReceiptCredentialRequestError: DonationReceiptCredentialRequestError(
                 errorCode: .paymentStillProcessing,
                 chargeFailureCodeIfPaymentFailed: nil,
-                badge: OneTimeFixtures.badge,
+                badgeID: OneTimeFixtures.badge.id,
                 amount: FiatMoney(currencyCode: "EUR", value: 100),
                 paymentMethod: .sepa,
                 now: Date(),
