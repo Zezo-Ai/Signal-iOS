@@ -242,6 +242,11 @@ public struct DonationSubscriptionConfiguration {
         return result
     }
 
+    /// Returns the subscription level matching the given raw level, if any.
+    public func subscriptionLevel(forRawLevel rawLevel: UInt) -> DonationSubscriptionLevel? {
+        return subscription.levels.first { $0.level == rawLevel }
+    }
+
     // MARK: -
 
     enum ParseError: Error, Equatable {

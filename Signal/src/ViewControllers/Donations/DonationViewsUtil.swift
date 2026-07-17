@@ -214,8 +214,8 @@ public enum DonationViewsUtil {
     public static func finalizeAndRedeemMonthlyDonation(
         subscriberId: Data,
         paymentType: DonationSubscriptionManager.RecurringSubscriptionPaymentType,
-        newSubscriptionLevel: DonationSubscriptionLevel,
-        priorSubscriptionLevel: DonationSubscriptionLevel?,
+        newSubscriptionLevel: UInt,
+        priorSubscriptionLevel: UInt?,
         currencyCode: Currency.Code,
         db: DB,
         donationSubscriptionManager: DonationSubscriptionManager,
@@ -226,15 +226,15 @@ public enum DonationViewsUtil {
             _ = try await donationSubscriptionManager.finalizeNewSubscription(
                 forSubscriberId: subscriberId,
                 paymentType: paymentType,
-                subscription: newSubscriptionLevel,
+                subscriptionLevel: newSubscriptionLevel,
                 currencyCode: currencyCode,
             )
 
             return try await DonationViewsUtil.waitForRedemption(paymentMethod: paymentType.paymentMethod) {
                 try await donationSubscriptionManager.requestAndRedeemReceipt(
                     subscriberId: subscriberId,
-                    subscriptionLevel: newSubscriptionLevel.level,
-                    priorSubscriptionLevel: priorSubscriptionLevel?.level,
+                    subscriptionLevel: newSubscriptionLevel,
+                    priorSubscriptionLevel: priorSubscriptionLevel,
                     paymentProcessor: paymentType.paymentProcessor,
                     paymentMethod: paymentType.paymentMethod,
                     isNewSubscription: true,

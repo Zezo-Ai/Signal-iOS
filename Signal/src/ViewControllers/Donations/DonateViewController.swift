@@ -530,7 +530,7 @@ class DonateViewController: OWSViewController, OWSNavigationChildController {
                         operation: {
                             let subscription = try await DependenciesBridge.shared.donationSubscriptionManager.updateSubscriptionLevel(
                                 for: subscriberID,
-                                to: selectedSubscriptionLevel,
+                                to: selectedSubscriptionLevel.level,
                                 currencyCode: monthly.selectedCurrencyCode,
                             )
 

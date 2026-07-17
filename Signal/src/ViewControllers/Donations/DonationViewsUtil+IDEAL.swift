@@ -127,16 +127,22 @@ extension DonationViewsUtil {
             Task { await donationsVC.loadAndUpdateState() }
         }
 
-        let profileBadge: ProfileBadge? = databaseStorage.read { tx in
-            switch donationType {
-            case .oneTime:
-                return profileBadgeManager.fetchBoostBadge(id: .boost, tx: tx)
-            case .monthly:
-                guard let pendingSubscription = idealStore.getPendingSubscription(tx: tx) else {
-                    return nil
-                }
-
-                return pendingSubscription.newSubscriptionLevel.badge
+        let profileBadge: ProfileBadge?
+        switch donationType {
+        case .oneTime:
+            profileBadge = databaseStorage.read { tx in
+                profileBadgeManager.fetchBoostBadge(id: .boost, tx: tx)
+            }
+        case .monthly:
+            let pendingSubscriptionLevel = databaseStorage.read { tx in
+                idealStore.getPendingSubscription(tx: tx)?.newSubscriptionLevel
+            }
+            if let pendingSubscriptionLevel {
+                profileBadge = try? await donationSubscriptionManager
+                    .getSubscriptionLevel(rawLevel: pendingSubscriptionLevel)
+                    .badge
+            } else {
+                profileBadge = nil
             }
         }
 

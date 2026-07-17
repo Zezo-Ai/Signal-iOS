@@ -16,7 +16,7 @@ class DonationSettingsViewController: OWSTableViewController2 {
 
             case noSubscription
 
-            case pendingSubscription(PendingMonthlyIDEALDonation)
+            case pendingSubscription(PendingMonthlyIDEALDonation, subscriptionBadge: ProfileBadge?)
 
             /// The user has a subscription, which may be active or inactive.
             ///
@@ -178,12 +178,15 @@ class DonationSettingsViewController: OWSTableViewController2 {
         async let donationConfiguration = DependenciesBridge.shared.donationSubscriptionManager.fetchDonationConfiguration()
 
         do {
+            let currentSubscription = try await currentSubscription
+            let donationConfiguration = try await donationConfiguration
+
             let subscriptionStatus: State.SubscriptionStatus
-            if let currentSubscription = try await currentSubscription {
+            if let currentSubscription {
                 subscriptionStatus = .hasSubscription(
                     subscription: currentSubscription,
                     subscriptionLevel: DonationViewsUtil.subscriptionLevelForSubscription(
-                        subscriptionLevels: try await donationConfiguration.subscription.levels,
+                        subscriptionLevels: donationConfiguration.subscription.levels,
                         subscription: currentSubscription,
                     ),
                     previouslyHadActiveSubscription: hasEverRedeemedRecurringSubscriptionBadge,
@@ -191,7 +194,13 @@ class DonationSettingsViewController: OWSTableViewController2 {
                 )
 
             } else if let pendingIDEALSubscription {
-                subscriptionStatus = .pendingSubscription(pendingIDEALSubscription)
+                let subscriptionBadge = donationConfiguration
+                    .subscriptionLevel(forRawLevel: pendingIDEALSubscription.newSubscriptionLevel)?
+                    .badge
+                subscriptionStatus = .pendingSubscription(
+                    pendingIDEALSubscription,
+                    subscriptionBadge: subscriptionBadge,
+                )
             } else {
                 subscriptionStatus = .noSubscription
             }
@@ -199,7 +208,7 @@ class DonationSettingsViewController: OWSTableViewController2 {
             let result: State = .loadFinished(
                 subscriptionStatus: subscriptionStatus,
                 oneTimeBoostReceiptCredentialRequestError: oneTimeBoostReceiptCredentialRequestError,
-                profileBadgeLookup: await loadProfileBadgeLookup(donationConfiguration: try? await donationConfiguration),
+                profileBadgeLookup: loadProfileBadgeLookup(donationConfiguration: donationConfiguration),
                 pendingOneTimeDonation: pendingIDEALOneTimeDonation,
                 hasAnyBadges: hasAnyBadges,
                 hasAnyDonationReceipts: hasAnyDonationReceipts,
@@ -211,7 +220,7 @@ class DonationSettingsViewController: OWSTableViewController2 {
             let result: State = .loadFinished(
                 subscriptionStatus: .loadFailed,
                 oneTimeBoostReceiptCredentialRequestError: oneTimeBoostReceiptCredentialRequestError,
-                profileBadgeLookup: await loadProfileBadgeLookup(donationConfiguration: try? await donationConfiguration),
+                profileBadgeLookup: loadProfileBadgeLookup(donationConfiguration: try? await donationConfiguration),
                 pendingOneTimeDonation: pendingIDEALOneTimeDonation,
                 hasAnyBadges: hasAnyBadges,
                 hasAnyDonationReceipts: hasAnyDonationReceipts,
@@ -220,14 +229,13 @@ class DonationSettingsViewController: OWSTableViewController2 {
         }
     }
 
-    private func loadProfileBadgeLookup(donationConfiguration: DonationSubscriptionConfiguration?) async -> ProfileBadgeLookup {
+    private func loadProfileBadgeLookup(donationConfiguration: DonationSubscriptionConfiguration?) -> ProfileBadgeLookup {
         if let donationConfiguration {
-            let result = ProfileBadgeLookup(
+            return ProfileBadgeLookup(
                 boostBadge: donationConfiguration.boost.badge,
                 giftBadge: donationConfiguration.gift.badge,
                 subscriptionLevels: donationConfiguration.subscription.levels,
             )
-            return result
         } else {
             Logger.warn("[Donations] Failed to fetch donation configuration. Proceeding without it, as it is only cosmetic here.")
             return ProfileBadgeLookup(

@@ -681,7 +681,9 @@ private class DonationReceiptCredentialRedemptionJobRunner: JobRunner {
         case .oneTimeBoost:
             return try await donationSubscriptionManager.getBoostBadge()
         case let .recurringSubscription(_, targetSubscriptionLevel, _, _):
-            return try await donationSubscriptionManager.getSubscriptionBadge(subscriptionLevel: targetSubscriptionLevel)
+            return try await donationSubscriptionManager.getSubscriptionLevel(
+                rawLevel: targetSubscriptionLevel,
+            ).badge
         }
     }
 

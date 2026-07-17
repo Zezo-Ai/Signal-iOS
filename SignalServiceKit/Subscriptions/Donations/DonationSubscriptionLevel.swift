@@ -5,7 +5,7 @@
 
 import Foundation
 
-public class DonationSubscriptionLevel: Comparable, Equatable, Codable {
+public class DonationSubscriptionLevel: Comparable, Equatable {
     public let level: UInt
     public let badge: ProfileBadge
     public let amounts: [Currency.Code: FiatMoney]

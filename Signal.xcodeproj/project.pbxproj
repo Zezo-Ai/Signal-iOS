@@ -3228,6 +3228,7 @@
 		D9C0AE692BD82DBC00FCB05E /* InactiveLinkedDeviceReminderMegaphone.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C0AE682BD82DBC00FCB05E /* InactiveLinkedDeviceReminderMegaphone.swift */; };
 		D9C0AE6F2BDC6B3800FCB05E /* BackupArchiveIndividualCallArchiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C0AE6E2BDC6B3800FCB05E /* BackupArchiveIndividualCallArchiver.swift */; };
 		D9C0DE022E3F0A0100C0DE01 /* DonationReceiptCredentialResultCodableTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C0DE012E3F0A0100C0DE01 /* DonationReceiptCredentialResultCodableTest.swift */; };
+		D9C0DE122E3F0A0100C0DE11 /* PendingMonthlyIDEALDonationCodableTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C0DE112E3F0A0100C0DE11 /* PendingMonthlyIDEALDonationCodableTest.swift */; };
 		D9C2D77E299D750200D79715 /* UsernameEducationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C2D77D299D750200D79715 /* UsernameEducationManager.swift */; };
 		D9C2D780299EC11400D79715 /* CreateUsernameMegaphone.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C2D77F299EC11400D79715 /* CreateUsernameMegaphone.swift */; };
 		D9C2D782299EEDDA00D79715 /* UsernameSelectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C2D781299EEDDA00D79715 /* UsernameSelectionCoordinator.swift */; };
@@ -7559,6 +7560,7 @@
 		D9C0AE682BD82DBC00FCB05E /* InactiveLinkedDeviceReminderMegaphone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InactiveLinkedDeviceReminderMegaphone.swift; sourceTree = "<group>"; };
 		D9C0AE6E2BDC6B3800FCB05E /* BackupArchiveIndividualCallArchiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupArchiveIndividualCallArchiver.swift; sourceTree = "<group>"; };
 		D9C0DE012E3F0A0100C0DE01 /* DonationReceiptCredentialResultCodableTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonationReceiptCredentialResultCodableTest.swift; sourceTree = "<group>"; };
+		D9C0DE112E3F0A0100C0DE11 /* PendingMonthlyIDEALDonationCodableTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingMonthlyIDEALDonationCodableTest.swift; sourceTree = "<group>"; };
 		D9C2D777299B07D300D79715 /* Usernames+BetterIdentifierChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Usernames+BetterIdentifierChecker.swift"; sourceTree = "<group>"; };
 		D9C2D77D299D750200D79715 /* UsernameEducationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameEducationManager.swift; sourceTree = "<group>"; };
 		D9C2D77F299EC11400D79715 /* CreateUsernameMegaphone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateUsernameMegaphone.swift; sourceTree = "<group>"; };
@@ -11119,6 +11121,7 @@
 				D97992A02D9E55E10080A4F5 /* CurrencyFormatterTest.swift */,
 				D9D1A6EA2DD69CFE00050A85 /* DonationReceiptCredentialRedemptionJobFinderTest.swift */,
 				D9C0DE012E3F0A0100C0DE01 /* DonationReceiptCredentialResultCodableTest.swift */,
+				D9C0DE112E3F0A0100C0DE11 /* PendingMonthlyIDEALDonationCodableTest.swift */,
 				F992ACC328F8C9D900906038 /* StripeTest.swift */,
 			);
 			path = Subscriptions;
@@ -20426,6 +20429,7 @@
 				F9426242289B1B5500460798 /* OWSURLBuilderUtilTest.swift in Sources */,
 				509085C02C49C2A500409B85 /* PaddingBucketTest.swift in Sources */,
 				50468F2529EDD46500948E02 /* ParamParserTest.swift in Sources */,
+				D9C0DE122E3F0A0100C0DE11 /* PendingMonthlyIDEALDonationCodableTest.swift in Sources */,
 				50468F2B29EE19C300948E02 /* PhoneNumberChangedMessageInserterTest.swift in Sources */,
 				F9CAC7852919B5A400EEC1DE /* PhoneNumberRegionsTest.swift in Sources */,
 				F9426274289B1B5500460798 /* PhoneNumberTest.swift in Sources */,

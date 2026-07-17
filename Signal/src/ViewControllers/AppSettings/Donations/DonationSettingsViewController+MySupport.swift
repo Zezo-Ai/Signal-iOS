@@ -84,11 +84,11 @@ extension DonationSettingsViewController {
             )))
         case .noSubscription:
             break
-        case let .pendingSubscription(pendingDonation):
+        case let .pendingSubscription(pendingDonation, subscriptionBadge):
             if
                 let recurringSubscriptionTableItem = mySupportRecurringSubscriptionTableItem(
                     subscriptionType: .pendingAuthorization(pendingDonation),
-                    subscriptionBadge: pendingDonation.newSubscriptionLevel.badge,
+                    subscriptionBadge: subscriptionBadge,
                     previouslyHadActiveSubscription: pendingDonation.oldSubscriptionLevel != nil,
                     receiptCredentialRequestError: nil,
                 )

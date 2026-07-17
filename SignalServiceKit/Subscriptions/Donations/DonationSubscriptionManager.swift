@@ -163,7 +163,7 @@ public class DonationSubscriptionManager {
     public func finalizeNewSubscription(
         forSubscriberId subscriberId: Data,
         paymentType: RecurringSubscriptionPaymentType,
-        subscription: DonationSubscriptionLevel,
+        subscriptionLevel: UInt,
         currencyCode: Currency.Code,
     ) async throws -> Subscription {
         Logger.info("[Donations] Setting default payment method on service")
@@ -195,20 +195,24 @@ public class DonationSubscriptionManager {
             )
         }
 
-        return try await setSubscription(for: subscriberId, subscription: subscription, currencyCode: currencyCode)
+        return try await setSubscription(
+            for: subscriberId,
+            subscriptionLevel: subscriptionLevel,
+            currencyCode: currencyCode,
+        )
     }
 
     /// Update the subscription level for the given subscriber ID.
     public func updateSubscriptionLevel(
         for subscriberID: Data,
-        to subscription: DonationSubscriptionLevel,
+        to subscriptionLevel: UInt,
         currencyCode: Currency.Code,
     ) async throws -> Subscription {
         Logger.info("[Donations] Updating subscription level")
 
         return try await setSubscription(
             for: subscriberID,
-            subscription: subscription,
+            subscriptionLevel: subscriptionLevel,
             currencyCode: currencyCode,
         )
     }
@@ -304,13 +308,13 @@ public class DonationSubscriptionManager {
     /// The updated subscription.
     private func setSubscription(
         for subscriberID: Data,
-        subscription: DonationSubscriptionLevel,
+        subscriptionLevel: UInt,
         currencyCode: Currency.Code,
     ) async throws -> Subscription {
         let key = Randomness.generateRandomBytes(UInt(32)).asBase64Url
         let request = OWSRequestFactory.subscriptionSetSubscriptionLevelRequest(
             subscriberID: subscriberID,
-            level: subscription.level,
+            level: subscriptionLevel,
             currency: currencyCode,
             idempotencyKey: key,
         )
@@ -726,17 +730,13 @@ public class DonationSubscriptionManager {
         }
     }
 
-    public func getSubscriptionBadge(subscriptionLevel levelRawValue: UInt) async throws -> ProfileBadge {
+    public func getSubscriptionLevel(rawLevel: UInt) async throws -> DonationSubscriptionLevel {
         let donationConfiguration = try await fetchDonationConfiguration()
-        guard
-            let matchingLevel = donationConfiguration.subscription.levels.first(where: {
-                $0.level == levelRawValue
-            })
-        else {
+        guard let matchingLevel = donationConfiguration.subscriptionLevel(forRawLevel: rawLevel) else {
             throw OWSAssertionError("Missing requested subscription level!")
         }
 
-        return matchingLevel.badge
+        return matchingLevel
     }
 
     public func fetchDonationConfiguration() async throws -> DonationSubscriptionConfiguration {

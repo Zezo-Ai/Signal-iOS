@@ -113,8 +113,8 @@ extension DonateViewController {
                 try await DonationViewsUtil.finalizeAndRedeemMonthlyDonation(
                     subscriberId: subscriberId,
                     paymentType: .paypal(paymentMethodId: paymentMethodId),
-                    newSubscriptionLevel: selectedSubscriptionLevel,
-                    priorSubscriptionLevel: monthly.currentSubscriptionLevel,
+                    newSubscriptionLevel: selectedSubscriptionLevel.level,
+                    priorSubscriptionLevel: monthly.currentSubscriptionLevel?.level,
                     currencyCode: monthly.selectedCurrencyCode,
                     db: db,
                     donationSubscriptionManager: donationSubscriptionManager,

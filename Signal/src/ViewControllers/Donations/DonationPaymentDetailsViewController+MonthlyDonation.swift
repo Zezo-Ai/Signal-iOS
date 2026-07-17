@@ -67,8 +67,8 @@ extension DonationPaymentDetailsViewController {
                                     subscriberId: subscriberId,
                                     clientSecret: clientSecret,
                                     setupIntentId: confirmedIntent.setupIntentId,
-                                    newSubscriptionLevel: newSubscriptionLevel,
-                                    oldSubscriptionLevel: priorSubscriptionLevel,
+                                    newSubscriptionLevel: newSubscriptionLevel.level,
+                                    oldSubscriptionLevel: priorSubscriptionLevel?.level,
                                     amount: self.donationAmount,
                                 )
                                 await db.awaitableWrite { tx in
@@ -97,8 +97,8 @@ extension DonationPaymentDetailsViewController {
                         try await DonationViewsUtil.finalizeAndRedeemMonthlyDonation(
                             subscriberId: subscriberId,
                             paymentType: paymentType,
-                            newSubscriptionLevel: newSubscriptionLevel,
-                            priorSubscriptionLevel: priorSubscriptionLevel,
+                            newSubscriptionLevel: newSubscriptionLevel.level,
+                            priorSubscriptionLevel: priorSubscriptionLevel?.level,
                             currencyCode: currencyCode,
                             db: db,
                             donationSubscriptionManager: donationSubscriptionManager,

@@ -24,8 +24,8 @@ public struct PendingMonthlyIDEALDonation: Codable, Equatable {
     public let subscriberId: Data
     public let clientSecret: String
     public let setupIntentId: String
-    public let newSubscriptionLevel: DonationSubscriptionLevel
-    public let oldSubscriptionLevel: DonationSubscriptionLevel?
+    public let newSubscriptionLevel: UInt
+    public let oldSubscriptionLevel: UInt?
     public let amount: FiatMoney
     public let createDate: Date
 
@@ -33,8 +33,8 @@ public struct PendingMonthlyIDEALDonation: Codable, Equatable {
         subscriberId: Data,
         clientSecret: String,
         setupIntentId: String,
-        newSubscriptionLevel: DonationSubscriptionLevel,
-        oldSubscriptionLevel: DonationSubscriptionLevel?,
+        newSubscriptionLevel: UInt,
+        oldSubscriptionLevel: UInt?,
         amount: FiatMoney,
     ) {
         self.subscriberId = subscriberId
@@ -44,6 +44,68 @@ public struct PendingMonthlyIDEALDonation: Codable, Equatable {
         self.oldSubscriptionLevel = oldSubscriptionLevel
         self.amount = amount
         self.createDate = Date()
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case subscriberId
+        case clientSecret
+        case setupIntentId
+        // Deserialize-only; see usage.
+        case newSubscriptionLevel
+        // Deserialize-only; see usage.
+        case oldSubscriptionLevel
+        case newSubscriptionLevelRaw
+        case oldSubscriptionLevelRaw
+        case amount
+        case createDate
+    }
+
+    /// In the past, we persisted subscription levels as full
+    /// ``DonationSubscriptionLevel`` objects. We've since migrated to only
+    /// storing the raw level, but we may need to decode legacy objects to get
+    /// their raw level.
+    private struct LegacyDonationSubscriptionLevel: Decodable {
+        let level: UInt
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        subscriberId = try container.decode(Data.self, forKey: .subscriberId)
+        clientSecret = try container.decode(String.self, forKey: .clientSecret)
+        setupIntentId = try container.decode(String.self, forKey: .setupIntentId)
+        amount = try container.decode(FiatMoney.self, forKey: .amount)
+        createDate = try container.decode(Date.self, forKey: .createDate)
+
+        if container.contains(.newSubscriptionLevelRaw) {
+            newSubscriptionLevel = try container.decode(UInt.self, forKey: .newSubscriptionLevelRaw)
+        } else {
+            newSubscriptionLevel = try container.decode(
+                LegacyDonationSubscriptionLevel.self,
+                forKey: .newSubscriptionLevel,
+            ).level
+        }
+
+        if container.contains(.oldSubscriptionLevelRaw) {
+            oldSubscriptionLevel = try container.decodeIfPresent(UInt.self, forKey: .oldSubscriptionLevelRaw)
+        } else {
+            oldSubscriptionLevel = try container.decodeIfPresent(
+                LegacyDonationSubscriptionLevel.self,
+                forKey: .oldSubscriptionLevel,
+            )?.level
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(subscriberId, forKey: .subscriberId)
+        try container.encode(clientSecret, forKey: .clientSecret)
+        try container.encode(setupIntentId, forKey: .setupIntentId)
+        try container.encode(newSubscriptionLevel, forKey: .newSubscriptionLevelRaw)
+        try container.encodeIfPresent(oldSubscriptionLevel, forKey: .oldSubscriptionLevelRaw)
+        try container.encode(amount, forKey: .amount)
+        try container.encode(createDate, forKey: .createDate)
     }
 }
 
