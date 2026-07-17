@@ -11,8 +11,6 @@ class BadgeGiftingAlreadyRedeemedSheet: OWSTableSheetViewController {
     private let shortName: String
 
     init(badge: ProfileBadge, shortName: String) {
-        owsAssertDebug(badge.assets != nil)
-
         self.profileBadge = badge
         self.shortName = shortName
 
@@ -44,7 +42,7 @@ class BadgeGiftingAlreadyRedeemedSheet: OWSTableSheetViewController {
             stackView.autoPinEdgesToSuperviewEdges()
 
             let badgeImageView = UIImageView()
-            badgeImageView.image = self.profileBadge.assets?.universal160
+            badgeImageView.image = self.profileBadge.assets.universal160
             badgeImageView.autoSetDimensions(to: CGSize(square: 160))
             stackView.addArrangedSubview(badgeImageView)
             stackView.setCustomSpacing(24, after: badgeImageView)

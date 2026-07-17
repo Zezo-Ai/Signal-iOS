@@ -277,7 +277,6 @@ class BadgeIssueSheet: OWSTableSheetViewController {
                 tsAccountManager: DependenciesBridge.shared.tsAccountManager,
             ),
         )
-        owsAssertDebug(state.badge.assets != nil)
 
         super.init()
 
@@ -311,7 +310,7 @@ class BadgeIssueSheet: OWSTableSheetViewController {
             stackView.setCustomSpacing(24, after: containerView)
 
             let badgeImageView = UIImageView()
-            badgeImageView.image = self.state.badge.assets?.universal160
+            badgeImageView.image = self.state.badge.assets.universal160
             badgeImageView.autoSetDimensions(to: CGSize(square: 80))
             containerView.addSubview(badgeImageView)
             badgeImageView.autoPinEdgesToSuperviewEdges()

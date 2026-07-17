@@ -248,7 +248,7 @@ class BadgeCollectionViewCell: UICollectionViewCell {
     }
 
     func applyBadge(_ profileBadge: OWSUserProfileBadgeInfo) {
-        badgeImageView.image = profileBadge.badge?.assets?.universal160
+        badgeImageView.image = profileBadge.badge?.assets.universal160
         badgeSubtitleView.text = profileBadge.badge?.localizedName
     }
 

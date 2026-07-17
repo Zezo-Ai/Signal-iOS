@@ -11,7 +11,6 @@ class BadgeGiftingThanksSheet: OWSTableViewController2 {
     private let badge: ProfileBadge
 
     init(thread: TSContactThread, badge: ProfileBadge) {
-        owsAssertDebug(badge.assets != nil)
         self.thread = thread
         self.badge = badge
 

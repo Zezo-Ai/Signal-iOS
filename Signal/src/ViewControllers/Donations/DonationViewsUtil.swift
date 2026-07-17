@@ -152,7 +152,7 @@ public class GiftBadgeCellView: UIStackView {
         self.alignment = .center
 
         let badgeImageView: UIView = {
-            let badgeImage = badge.assets?.universal160
+            let badgeImage = badge.assets.universal160
             return UIImageView(image: badgeImage)
         }()
         self.addArrangedSubview(badgeImageView)

@@ -111,12 +111,10 @@ class DonateChoosePaymentMethodSheet: StackSheetViewController {
         stackView.alignment = .center
         stackView.spacing = 6
 
-        if let assets = badge.assets {
-            let badgeImageView = UIImageView(image: assets.universal160)
-            badgeImageView.autoSetDimensions(to: CGSize(square: 80))
-            stackView.addArrangedSubview(badgeImageView)
-            stackView.setCustomSpacing(12, after: badgeImageView)
-        }
+        let badgeImageView = UIImageView(image: badge.assets.universal160)
+        badgeImageView.autoSetDimensions(to: CGSize(square: 80))
+        stackView.addArrangedSubview(badgeImageView)
+        stackView.setCustomSpacing(12, after: badgeImageView)
 
         let titleLabel = UILabel.title2Label(text: titleText)
         stackView.addArrangedSubview(titleLabel)

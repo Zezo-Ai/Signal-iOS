@@ -298,7 +298,7 @@ extension DonationSettingsViewController {
         return OWSTableItem(
             customCellBlock: { () -> UITableViewCell in
                 return OWSTableItem.buildImageCell(
-                    image: subscriptionBadge?.assets?.universal160,
+                    image: subscriptionBadge?.assets.universal160,
                     itemName: pricingTitle,
                     subtitle: statusSubtitle,
                     accessoryType: .disclosureIndicator,
@@ -382,7 +382,7 @@ extension DonationSettingsViewController {
                 }()
 
                 return OWSTableItem.buildImageCell(
-                    image: boostBadge?.assets?.universal160,
+                    image: boostBadge?.assets.universal160,
                     itemName: pricingTitle,
                     subtitle: errorState.tableCellSubtitle,
                     accessoryType: .disclosureIndicator,

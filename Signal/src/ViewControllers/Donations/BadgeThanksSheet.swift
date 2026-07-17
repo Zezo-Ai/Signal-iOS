@@ -154,7 +154,6 @@ class BadgeThanksSheet: OWSTableSheetViewController {
         thanksType: ThanksType,
         oldBadgesSnapshot: ProfileBadgesSnapshot,
     ) {
-        owsAssertDebug(badge.assets != nil)
         self.badge = badge
         self.thanksType = thanksType
         self.initialVisibleBadgeResolver = VisibleBadgeResolver(badgesSnapshot: oldBadgesSnapshot)
@@ -316,7 +315,7 @@ class BadgeThanksSheet: OWSTableSheetViewController {
             stackView.autoPinEdgesToSuperviewMargins()
 
             let badgeImageView = UIImageView()
-            badgeImageView.image = self.badge.assets?.universal160
+            badgeImageView.image = self.badge.assets.universal160
             badgeImageView.autoSetDimensions(to: CGSize(square: 80))
             stackView.addArrangedSubview(badgeImageView)
             stackView.setCustomSpacing(24, after: badgeImageView)

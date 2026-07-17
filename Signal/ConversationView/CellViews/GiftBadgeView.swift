@@ -285,7 +285,7 @@ class GiftBadgeView: ManualStackView {
             self.buttonStack.alpha = 0.5
 
         case .loaded(let profileBadge):
-            self.badgeView.image = profileBadge.assets?.universal64
+            self.badgeView.image = profileBadge.assets.universal64
             Self.titleLabelConfig(for: state).applyForRendering(label: self.titleLabel)
             Self.timeRemainingLabelConfig(for: state).applyForRendering(label: self.timeRemainingLabel)
             self.labelStack.configure(

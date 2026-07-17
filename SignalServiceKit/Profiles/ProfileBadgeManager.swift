@@ -29,8 +29,7 @@ public class ProfileBadge:
 
     public let duration: TimeInterval?
 
-    // TODO: Make non-optional
-    public var assets: BadgeAssets? {
+    public var assets: BadgeAssets {
         BadgeAssets(
             scale: badgeVariant.intendedScale,
             remoteSourceUrl: remoteAssetUrl,
@@ -207,7 +206,7 @@ public class ProfileBadgeManager {
 
     public func populateAssetsOnBadge(_ badge: ProfileBadge) async throws {
         try await taskQueue.run(forKey: badge.resourcePath) {
-            let populator = BadgeAssetsPopulator(badgeAssets: badge.assets!)
+            let populator = BadgeAssetsPopulator(badgeAssets: badge.assets)
             try await populator.prepareAssetsIfNecessary()
         }
     }

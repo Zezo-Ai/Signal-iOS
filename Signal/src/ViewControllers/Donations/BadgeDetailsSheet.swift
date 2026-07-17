@@ -69,7 +69,7 @@ class BadgeDetailsSheet: HeroSheetViewController {
         }()
 
         super.init(
-            hero: .image(focusedBadge.assets?.universal160 ?? UIImage()),
+            hero: .image(focusedBadge.assets.universal160 ?? UIImage()),
             title: title,
             body: owner.formattedDescription(for: focusedBadge),
             primaryButton: primaryButton,

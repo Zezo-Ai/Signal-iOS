@@ -65,7 +65,7 @@ extension DonateViewController {
 
             let badge = subscriptionLevel.badge
             let imageView = UIImageView()
-            if let badgeImage = badge.assets?.universal64 {
+            if let badgeImage = badge.assets.universal64 {
                 imageView.image = badgeImage
             } else {
                 Logger.warn("[Donations] Badge image failed to load")
