@@ -22,29 +22,19 @@ public class CVComponentGiftBadge: CVComponentBase, CVComponent {
     // hasn't changed. This is similar to how the time in the footer works.
     struct ViewState: Equatable {
         let timeRemainingText: String
-        let cachedBadgeValue: CachedBadge.Value?
+        let profileBadge: ProfileBadge?
     }
 
     static func buildViewState(_ giftBadge: CVComponentState.GiftBadge) -> ViewState {
         ViewState(
             timeRemainingText: GiftBadgeView.timeRemainingText(for: giftBadge.expirationDate),
-            cachedBadgeValue: giftBadge.cachedBadge.cachedValue,
+            profileBadge: giftBadge.profileBadge,
         )
     }
 
     private var state: GiftBadgeView.State {
-        let stateBadge: GiftBadgeView.State.Badge
-        switch self.viewState.cachedBadgeValue {
-        case .none:
-            let cachedBadge = self.giftBadge.cachedBadge
-            stateBadge = .notLoaded({ cachedBadge.fetchIfNeeded().asVoid() })
-        case .some(.notFound):
-            stateBadge = .notFound
-        case .some(.profileBadge(let profileBadge)):
-            stateBadge = .loaded(profileBadge)
-        }
         return GiftBadgeView.State(
-            badge: stateBadge,
+            profileBadge: self.giftBadge.profileBadge,
             messageUniqueId: self.giftBadge.messageUniqueId,
             timeRemainingText: self.viewState.timeRemainingText,
             otherUserShortName: self.giftBadge.otherUserShortName,
@@ -118,11 +108,7 @@ public class CVComponentGiftBadge: CVComponentBase, CVComponent {
             return true
         }
 
-        let profileBadge: ProfileBadge
-        switch self.viewState.cachedBadgeValue {
-        case .some(.profileBadge(let value)):
-            profileBadge = value
-        default:
+        guard let profileBadge = self.viewState.profileBadge else {
             // If there's not a badge, it's still showing the loading indicator.
             return false
         }

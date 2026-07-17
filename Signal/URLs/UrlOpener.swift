@@ -24,6 +24,7 @@ class UrlOpener {
     private let databaseStorage: SDSDatabaseStorage
     private let donationSubscriptionManager: DonationSubscriptionManager
     private let idealStore: ExternalPendingIDEALDonationStore
+    private let profileBadgeManager: ProfileBadgeManager
     private let tsAccountManager: TSAccountManager
 
     init(
@@ -31,12 +32,14 @@ class UrlOpener {
         databaseStorage: SDSDatabaseStorage,
         donationSubscriptionManager: DonationSubscriptionManager,
         idealStore: ExternalPendingIDEALDonationStore,
+        profileBadgeManager: ProfileBadgeManager,
         tsAccountManager: TSAccountManager,
     ) {
         self.appReadiness = appReadiness
         self.databaseStorage = databaseStorage
         self.donationSubscriptionManager = donationSubscriptionManager
         self.idealStore = idealStore
+        self.profileBadgeManager = profileBadgeManager
         self.tsAccountManager = tsAccountManager
     }
 
@@ -278,6 +281,7 @@ class UrlOpener {
                         databaseStorage: databaseStorage,
                         donationSubscriptionManager: donationSubscriptionManager,
                         idealStore: idealStore,
+                        profileBadgeManager: profileBadgeManager,
                         appReadiness: appReadiness,
                     )
                     Logger.info("[Donations] Completed iDEAL donation")

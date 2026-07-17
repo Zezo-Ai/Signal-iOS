@@ -13,16 +13,7 @@ import SignalUI
 class GiftBadgeView: ManualStackView {
 
     struct State {
-        enum Badge {
-            // The badge isn't loaded. Calling the block will load it.
-            case notLoaded(() -> Promise<Void>)
-            // The badge is loaded. The associated value is the badge.
-            case loaded(ProfileBadge)
-            // No badge was found for the level in the gift.
-            case notFound
-        }
-
-        let badge: Badge
+        let profileBadge: ProfileBadge?
         let messageUniqueId: String
         let timeRemainingText: String
         let otherUserShortName: String
@@ -265,26 +256,15 @@ class GiftBadgeView: ManualStackView {
         )
 
         let innerStackSubviews: [UIView]
-        switch state.badge {
-        case .notLoaded(let loadPromise):
-            loadPromise().done { [weak componentDelegate] in
-                componentDelegate?.enqueueReload()
-            }.cauterize()
-            // TODO: (GB) If an error occurs, we'll be stuck with a spinner.
-
-            let activityIndicator = self.activityIndicator(for: state)
-            activityIndicator.play()
-            innerStackSubviews = [activityIndicator]
-            self.buttonStack.alpha = 0.5
-
-        case .notFound:
+        switch state.profileBadge {
+        case nil:
             // Show the same UI as we do when loading.
             let activityIndicator = self.activityIndicator(for: state)
             activityIndicator.play()
             innerStackSubviews = [activityIndicator]
             self.buttonStack.alpha = 0.5
 
-        case .loaded(let profileBadge):
+        case .some(let profileBadge):
             self.badgeView.image = profileBadge.assets.universal64
             Self.titleLabelConfig(for: state).applyForRendering(label: self.titleLabel)
             Self.timeRemainingLabelConfig(for: state).applyForRendering(label: self.timeRemainingLabel)

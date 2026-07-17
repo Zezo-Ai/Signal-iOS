@@ -703,19 +703,6 @@ public class DonationSubscriptionManager {
 
     // MARK: -
 
-    private static let cachedBadges = AtomicValue<[OneTimeBadgeLevel: CachedBadge]>([:], lock: .init())
-
-    public func getCachedBadge(level: OneTimeBadgeLevel) -> CachedBadge {
-        return Self.cachedBadges.update {
-            if let cachedBadge = $0[level] {
-                return cachedBadge
-            }
-            let cachedBadge = CachedBadge(level: level)
-            $0[level] = cachedBadge
-            return cachedBadge
-        }
-    }
-
     public func getBoostBadge() async throws -> ProfileBadge {
         let profileBadge = try await getOneTimeBadge(level: .boostBadge)
         guard let profileBadge else {

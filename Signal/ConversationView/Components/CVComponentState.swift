@@ -391,7 +391,7 @@ public struct CVComponentState: Equatable {
     struct GiftBadge: Equatable {
         let messageUniqueId: String
         let otherUserShortName: String
-        let cachedBadge: CachedBadge
+        let profileBadge: ProfileBadge?
         let expirationDate: Date
         let redemptionState: OWSGiftBadgeRedemptionState
     }
@@ -2061,11 +2061,15 @@ private extension CVComponentState.Builder {
     }
 
     private mutating func buildGiftBadge(messageUniqueId: String, giftBadge: OWSGiftBadge) throws -> CVComponentState {
-        let (level, expirationDate) = try giftBadge.getReceiptDetails()
+        let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
+
+        let (_, expirationDate) = try giftBadge.getReceiptDetails()
+        let giftProfileBadge = profileBadgeManager.fetchGiftBadge(id: .gift, tx: transaction)
+
         self.giftBadge = GiftBadge(
             messageUniqueId: messageUniqueId,
             otherUserShortName: threadViewModel.shortName ?? threadViewModel.name,
-            cachedBadge: DependenciesBridge.shared.donationSubscriptionManager.getCachedBadge(level: .giftBadge(level)),
+            profileBadge: giftProfileBadge,
             expirationDate: expirationDate,
             redemptionState: giftBadge.redemptionState,
         )

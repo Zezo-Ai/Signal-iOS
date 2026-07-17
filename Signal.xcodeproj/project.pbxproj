@@ -1412,7 +1412,6 @@
 		7254653C2BA01FCC00EABFD2 /* DonationUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00385FD273F6388000B5ABD /* DonationUtilities.swift */; };
 		7254653D2BA01FCC00EABFD2 /* Stripe.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00385FE273F6388000B5ABD /* Stripe.swift */; };
 		7254653E2BA01FCC00EABFD2 /* DonationMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91F7A2C2935A32F00012C64 /* DonationMode.swift */; };
-		7254653F2BA01FCC00EABFD2 /* CachedBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500FE48E2886148800FA090C /* CachedBadge.swift */; };
 		725465402BA01FCC00EABFD2 /* Paypal+API.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9517ABF292C5A3900DDD37E /* Paypal+API.swift */; };
 		725465412BA01FCC00EABFD2 /* Stripe+PaymentMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = F98ED2D529255E92008483DC /* Stripe+PaymentMethod.swift */; };
 		725465422BA01FCC00EABFD2 /* Stripe+StripeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9189ABD2947D7C300CD8EF6 /* Stripe+StripeError.swift */; };
@@ -3228,6 +3227,7 @@
 		D9C0AE672BD7162300FCB05E /* InactiveLinkedDeviceFinderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C0AE612BD7102500FCB05E /* InactiveLinkedDeviceFinderTest.swift */; };
 		D9C0AE692BD82DBC00FCB05E /* InactiveLinkedDeviceReminderMegaphone.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C0AE682BD82DBC00FCB05E /* InactiveLinkedDeviceReminderMegaphone.swift */; };
 		D9C0AE6F2BDC6B3800FCB05E /* BackupArchiveIndividualCallArchiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C0AE6E2BDC6B3800FCB05E /* BackupArchiveIndividualCallArchiver.swift */; };
+		D9C0DE022E3F0A0100C0DE01 /* DonationReceiptCredentialResultCodableTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C0DE012E3F0A0100C0DE01 /* DonationReceiptCredentialResultCodableTest.swift */; };
 		D9C2D77E299D750200D79715 /* UsernameEducationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C2D77D299D750200D79715 /* UsernameEducationManager.swift */; };
 		D9C2D780299EC11400D79715 /* CreateUsernameMegaphone.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C2D77F299EC11400D79715 /* CreateUsernameMegaphone.swift */; };
 		D9C2D782299EEDDA00D79715 /* UsernameSelectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C2D781299EEDDA00D79715 /* UsernameSelectionCoordinator.swift */; };
@@ -3260,7 +3260,6 @@
 		D9CD40622A155C4800545803 /* TSInfoMessage+PersistableGroupUpdateItemTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CD40612A155C4800545803 /* TSInfoMessage+PersistableGroupUpdateItemTest.swift */; };
 		D9CFB0102F1FF87F00DFB14A /* ChatListViewController+BackupExportProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CFB00F2F1FF87800DFB14A /* ChatListViewController+BackupExportProgressView.swift */; };
 		D9CFB0142F20466300DFB14A /* ArcView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CFB0132F20466100DFB14A /* ArcView.swift */; };
-		D9C0DE022E3F0A0100C0DE01 /* DonationReceiptCredentialResultCodableTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C0DE012E3F0A0100C0DE01 /* DonationReceiptCredentialResultCodableTest.swift */; };
 		D9D1A6EB2DD69D0800050A85 /* DonationReceiptCredentialRedemptionJobFinderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9D1A6EA2DD69CFE00050A85 /* DonationReceiptCredentialRedemptionJobFinderTest.swift */; };
 		D9D3216A2A8AC9B0004FC110 /* OutgoingGroupCallUpdateMessageTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9D321692A8AC9B0004FC110 /* OutgoingGroupCallUpdateMessageTest.swift */; };
 		D9D5018A2F2B16820068EEA5 /* KeyTransparencyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9D501892F2B16820068EEA5 /* KeyTransparencyManager.swift */; };
@@ -4946,7 +4945,6 @@
 		500CC1EA2F15D1E5001A86F7 /* StickerPackSyncMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerPackSyncMessage.swift; sourceTree = "<group>"; };
 		500F35222FFDA1010007B0D1 /* SendMessageResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendMessageResult.swift; sourceTree = "<group>"; };
 		500FB6172915B86D00257951 /* UITableView+ReusableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+ReusableCell.swift"; sourceTree = "<group>"; };
-		500FE48E2886148800FA090C /* CachedBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedBadge.swift; sourceTree = "<group>"; };
 		500FE4DF288A11AF00FA090C /* ConversationViewController+GiftBadges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ConversationViewController+GiftBadges.swift"; sourceTree = "<group>"; };
 		500FE4E1288A373100FA090C /* BadgeGiftingAlreadyRedeemedSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeGiftingAlreadyRedeemedSheet.swift; sourceTree = "<group>"; };
 		50101FB12B083C8100C648E4 /* ChatListSettingsButtonState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListSettingsButtonState.swift; sourceTree = "<group>"; };
@@ -7560,6 +7558,7 @@
 		D9C0AE642BD7103100FCB05E /* InactiveLinkedDeviceFinder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InactiveLinkedDeviceFinder.swift; sourceTree = "<group>"; };
 		D9C0AE682BD82DBC00FCB05E /* InactiveLinkedDeviceReminderMegaphone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InactiveLinkedDeviceReminderMegaphone.swift; sourceTree = "<group>"; };
 		D9C0AE6E2BDC6B3800FCB05E /* BackupArchiveIndividualCallArchiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupArchiveIndividualCallArchiver.swift; sourceTree = "<group>"; };
+		D9C0DE012E3F0A0100C0DE01 /* DonationReceiptCredentialResultCodableTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonationReceiptCredentialResultCodableTest.swift; sourceTree = "<group>"; };
 		D9C2D777299B07D300D79715 /* Usernames+BetterIdentifierChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Usernames+BetterIdentifierChecker.swift"; sourceTree = "<group>"; };
 		D9C2D77D299D750200D79715 /* UsernameEducationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameEducationManager.swift; sourceTree = "<group>"; };
 		D9C2D77F299EC11400D79715 /* CreateUsernameMegaphone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateUsernameMegaphone.swift; sourceTree = "<group>"; };
@@ -7592,7 +7591,6 @@
 		D9CD40612A155C4800545803 /* TSInfoMessage+PersistableGroupUpdateItemTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TSInfoMessage+PersistableGroupUpdateItemTest.swift"; sourceTree = "<group>"; };
 		D9CFB00F2F1FF87800DFB14A /* ChatListViewController+BackupExportProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatListViewController+BackupExportProgressView.swift"; sourceTree = "<group>"; };
 		D9CFB0132F20466100DFB14A /* ArcView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcView.swift; sourceTree = "<group>"; };
-		D9C0DE012E3F0A0100C0DE01 /* DonationReceiptCredentialResultCodableTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonationReceiptCredentialResultCodableTest.swift; sourceTree = "<group>"; };
 		D9D1A6EA2DD69CFE00050A85 /* DonationReceiptCredentialRedemptionJobFinderTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonationReceiptCredentialRedemptionJobFinderTest.swift; sourceTree = "<group>"; };
 		D9D321692A8AC9B0004FC110 /* OutgoingGroupCallUpdateMessageTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingGroupCallUpdateMessageTest.swift; sourceTree = "<group>"; };
 		D9D3217B2A8FEA9B004FC110 /* Groups.proto */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.protobuf; path = Groups.proto; sourceTree = "<group>"; };
@@ -13826,7 +13824,6 @@
 		D986D1362CC8332F00F9803D /* Donations */ = {
 			isa = PBXGroup;
 			children = (
-				500FE48E2886148800FA090C /* CachedBadge.swift */,
 				D91F7A2C2935A32F00012C64 /* DonationMode.swift */,
 				F98ED2D729255F4D008483DC /* DonationPaymentMethod.swift */,
 				D91A39E82AE2F4C000F57A61 /* DonationPaymentProcessor.swift */,
@@ -19274,7 +19271,6 @@
 				D9F9A63B2BFFFCC400EF13EC /* BulkDeleteInteractionJobQueue.swift in Sources */,
 				D9F9A6392BFFC84300EF13EC /* BulkDeleteInteractionJobRecord.swift in Sources */,
 				E7D7C93F28B580AC003F043B /* Bundle+OWS.swift in Sources */,
-				7254653F2BA01FCC00EABFD2 /* CachedBadge.swift in Sources */,
 				50C97C252C3C7F7000A9F384 /* CallEventConversation.swift in Sources */,
 				50D3136F2BFFE9370023EDCC /* CallEventInserter.swift in Sources */,
 				50E42FEA2C1BA3B900554BD6 /* CallHTTPClient.swift in Sources */,

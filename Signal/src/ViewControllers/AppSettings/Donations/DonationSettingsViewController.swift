@@ -460,34 +460,43 @@ class DonationSettingsViewController: OWSTableViewController2 {
     }
 
     private func showGiftBadgeExpirationSheetIfNeeded() {
-        guard Self.shouldShowExpiredGiftBadgeSheetWithSneakyTransaction() else {
+        let db = DependenciesBridge.shared.db
+        let donationSubscriptionManager = DependenciesBridge.shared.donationSubscriptionManager
+        let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
+
+        guard
+            Self.shouldShowExpiredGiftBadgeSheetWithSneakyTransaction(),
+            UIApplication.shared.frontmostViewController === self
+        else {
             return
         }
         Logger.info("[Gifting] Preparing to show gift badge expiration sheet...")
-        firstly {
-            DependenciesBridge.shared.donationSubscriptionManager.getCachedBadge(level: .giftBadge(.signalGift)).fetchIfNeeded()
-        }.done { [weak self] cachedValue in
-            guard let self else { return }
-            guard UIApplication.shared.frontmostViewController == self else { return }
-            guard case .profileBadge(let profileBadge) = cachedValue else {
-                // The server confirmed this badge doesn't exist. This shouldn't happen,
-                // but clear the flag so that we don't keep trying.
-                Logger.warn("[Gifting] Clearing expired badge ID because the server said it didn't exist")
-                DependenciesBridge.shared.donationSubscriptionManager.clearMostRecentlyExpiredBadgeIDWithSneakyTransaction()
-                return
-            }
 
-            let hasCurrentSubscription = SSKEnvironment.shared.databaseStorageRef.read { tx -> Bool in
-                return DependenciesBridge.shared.donationSubscriptionManager.probablyHasCurrentSubscription(tx: tx)
-            }
-            Logger.info("[Gifting] Showing badge gift expiration sheet (hasCurrentSubscription: \(hasCurrentSubscription))")
-            let sheet = BadgeIssueSheet(badge: profileBadge, mode: .giftBadgeExpired(hasCurrentSubscription: hasCurrentSubscription))
-            sheet.delegate = self
-            self.present(sheet, animated: true)
+        let profileBadge: ProfileBadge?
+        let hasCurrentSubscription: Bool
+        (
+            profileBadge,
+            hasCurrentSubscription,
+        ) = db.read { tx in
+            return (
+                profileBadgeManager.fetchGiftBadge(id: .gift, tx: tx),
+                donationSubscriptionManager.probablyHasCurrentSubscription(tx: tx),
+            )
+        }
 
-            // We've shown it, so don't show it again.
-            DependenciesBridge.shared.donationSubscriptionManager.clearMostRecentlyExpiredGiftBadgeIDWithSneakyTransaction()
-        }.cauterize()
+        guard let profileBadge else {
+            Logger.warn("[Gifting] Showing sheet for expired badge ID, but missing profile badge?")
+            donationSubscriptionManager.clearMostRecentlyExpiredBadgeIDWithSneakyTransaction()
+            return
+        }
+
+        Logger.info("[Gifting] Showing badge gift expiration sheet (hasCurrentSubscription: \(hasCurrentSubscription))")
+        let sheet = BadgeIssueSheet(badge: profileBadge, mode: .giftBadgeExpired(hasCurrentSubscription: hasCurrentSubscription))
+        sheet.delegate = self
+        self.present(sheet, animated: true)
+
+        // We've shown it, so don't show it again.
+        donationSubscriptionManager.clearMostRecentlyExpiredGiftBadgeIDWithSneakyTransaction()
     }
 
     // MARK: - IDEAL support methods

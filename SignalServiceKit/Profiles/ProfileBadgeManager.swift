@@ -184,6 +184,8 @@ public class ProfileBadgeManager {
         self.taskQueue = KeyedConcurrentTaskQueue(concurrentLimitPerKey: 1)
     }
 
+    // MARK: -
+
     public func createOrUpdateBadge(
         _ newBadge: ProfileBadge,
         tx: DBWriteTransaction,
@@ -191,6 +193,27 @@ public class ProfileBadgeManager {
         failIfThrows {
             try newBadge.save(tx.database)
         }
+    }
+
+    public func fetchBoostBadge(
+        id: BoostBadgeIds,
+        tx: DBReadTransaction,
+    ) -> ProfileBadge? {
+        return fetchBadgeWithId(id.rawValue, tx: tx)
+    }
+
+    public func fetchSubscriptionBadge(
+        id: SubscriptionBadgeIds,
+        tx: DBReadTransaction,
+    ) -> ProfileBadge? {
+        return fetchBadgeWithId(id.rawValue, tx: tx)
+    }
+
+    public func fetchGiftBadge(
+        id: GiftBadgeIds,
+        tx: DBReadTransaction,
+    ) -> ProfileBadge? {
+        fetchBadgeWithId(id.rawValue, tx: tx)
     }
 
     public func fetchBadgeWithId(
@@ -203,6 +226,8 @@ public class ProfileBadgeManager {
                 .fetchOne(tx.database)
         }
     }
+
+    // MARK: -
 
     public func populateAssetsOnBadge(_ badge: ProfileBadge) async throws {
         try await taskQueue.run(forKey: badge.resourcePath) {

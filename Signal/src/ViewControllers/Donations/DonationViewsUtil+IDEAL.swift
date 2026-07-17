@@ -18,6 +18,7 @@ extension DonationViewsUtil {
         databaseStorage: SDSDatabaseStorage,
         donationSubscriptionManager: DonationSubscriptionManager,
         idealStore: ExternalPendingIDEALDonationStore,
+        profileBadgeManager: ProfileBadgeManager,
         appReadiness: AppReadinessSetter,
     ) async throws {
         let donationStore = DependenciesBridge.shared.externalPendingIDEALDonationStore
@@ -49,12 +50,13 @@ extension DonationViewsUtil {
         await frontVc.awaitablePresentFormSheet(appSettings, animated: false)
 
         if success, let localIntent, intent == localIntent {
-            try await Self.completeDonation(
-                type: donationType,
-                from: donationsVC,
+            try await Self.completeIDEALDonation(
+                fromViewController: donationsVC,
+                donationType: donationType,
                 databaseStorage: databaseStorage,
                 donationSubscriptionManager: donationSubscriptionManager,
                 idealStore: idealStore,
+                profileBadgeManager: profileBadgeManager,
             )
         } else {
             Self.handleIDEALDonationIssue(
@@ -111,19 +113,31 @@ extension DonationViewsUtil {
     }
 
     @MainActor
-    private static func completeDonation(
-        type donationType: Stripe.IDEALCallbackType,
-        from donationsVC: DonationSettingsViewController,
+    private static func completeIDEALDonation(
+        fromViewController donationsVC: DonationSettingsViewController,
+        donationType: Stripe.IDEALCallbackType,
         databaseStorage: SDSDatabaseStorage,
         donationSubscriptionManager: DonationSubscriptionManager,
         idealStore: ExternalPendingIDEALDonationStore,
+        profileBadgeManager: ProfileBadgeManager,
     ) async throws {
-        let badge = try await Self.loadBadgeForDonation(type: donationType, databaseStorage: databaseStorage)
-
         defer {
             // refresh the local state upon completing the donation
             // to refresh any pending donation messages
             Task { await donationsVC.loadAndUpdateState() }
+        }
+
+        let profileBadge: ProfileBadge? = databaseStorage.read { tx in
+            switch donationType {
+            case .oneTime:
+                return profileBadgeManager.fetchBoostBadge(id: .boost, tx: tx)
+            case .monthly:
+                guard let pendingSubscription = idealStore.getPendingSubscription(tx: tx) else {
+                    return nil
+                }
+
+                return pendingSubscription.newSubscriptionLevel.badge
+            }
         }
 
         do {
@@ -151,12 +165,12 @@ extension DonationViewsUtil {
                 )
             }
         } catch {
-            if let badge {
+            if let profileBadge {
                 DonationViewsUtil.presentErrorSheet(
                     from: donationsVC,
                     error: error,
                     mode: donationType.asDonationMode,
-                    badge: badge,
+                    badge: profileBadge,
                     paymentMethod: .ideal,
                 )
             } else {
@@ -218,30 +232,6 @@ extension DonationViewsUtil {
 
         if let frontVc = CurrentAppContext().frontmostViewController() {
             frontVc.presentActionSheet(actionSheet, animated: true)
-        }
-    }
-
-    private static func loadBadgeForDonation(
-        type donationType: Stripe.IDEALCallbackType,
-        databaseStorage: SDSDatabaseStorage,
-    ) async throws -> ProfileBadge? {
-        switch donationType {
-        case .oneTime:
-            switch try await DependenciesBridge.shared.donationSubscriptionManager.getCachedBadge(level: .boostBadge).fetchIfNeeded().awaitable() {
-            case .notFound:
-                return nil
-            case let .profileBadge(profileBadge):
-                return profileBadge
-            }
-        case .monthly:
-            let donationStore = DependenciesBridge.shared.externalPendingIDEALDonationStore
-            let monthlyDonation = databaseStorage.read { tx in
-                return donationStore.getPendingSubscription(tx: tx)
-            }
-            guard let monthlyDonation else {
-                return nil
-            }
-            return monthlyDonation.newSubscriptionLevel.badge
         }
     }
 }
