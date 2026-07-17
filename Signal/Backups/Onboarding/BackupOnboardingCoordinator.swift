@@ -9,8 +9,6 @@ import UIKit
 
 @MainActor
 class BackupOnboardingCoordinator {
-    private static let onboardingRootViewControllerType = BackupOnboardingIntroViewController.self
-
     private let accountKeyStore: AccountKeyStore
     private let backupEnablingManager: BackupEnablingManager
     private let backupSettingsStore: BackupSettingsStore
@@ -89,12 +87,6 @@ class BackupOnboardingCoordinator {
                     }
                 },
             )
-
-            // At the end of onboarding we'll look for this as the "root" of the
-            // onboarding view controller stack, so we don't want to update the
-            // returned type here without updating that site too.
-            owsPrecondition(type(of: introViewController) == Self.onboardingRootViewControllerType)
-
             return introViewController
         }
     }
@@ -205,10 +197,7 @@ class BackupOnboardingCoordinator {
     }
 
     private func completeOnboarding() {
-        guard
-            let onboardingNavController,
-            let preOnboardingViewControllers = preOnboardingViewControllers()
-        else {
+        guard let onboardingNavController else {
             return
         }
 
@@ -217,7 +206,8 @@ class BackupOnboardingCoordinator {
         }
 
         onboardingNavController.setViewControllers(
-            preOnboardingViewControllers + [
+            [
+                onboardingNavController.viewControllers.first!,
                 BackupSettingsViewController(onAppearAction: .presentWelcomeToBackupsSheet),
             ],
             animated: true,
@@ -242,35 +232,15 @@ class BackupOnboardingCoordinator {
             ),
             style: .default,
             handler: { [weak onboardingNavController] _ in
-                guard
-                    let onboardingNavController,
-                    let preOnboardingViewControllers = self.preOnboardingViewControllers()
-                else {
+                guard let onboardingNavController else {
                     return
                 }
 
-                onboardingNavController.setViewControllers(
-                    preOnboardingViewControllers,
-                    animated: true,
-                )
+                onboardingNavController.popToRootViewController(animated: true)
             },
         ))
         actionSheet.addAction(.cancel)
 
         fromViewController.presentActionSheet(actionSheet)
-    }
-
-    // MARK: -
-
-    private func preOnboardingViewControllers() -> [UIViewController]? {
-        guard
-            let onboardingNavController,
-            let onboardingRootVCIndex = onboardingNavController.viewControllers
-                .firstIndex(where: { type(of: $0) == Self.onboardingRootViewControllerType })
-        else {
-            return nil
-        }
-
-        return Array(onboardingNavController.viewControllers[0..<onboardingRootVCIndex])
     }
 }
