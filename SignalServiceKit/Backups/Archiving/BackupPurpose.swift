@@ -54,8 +54,9 @@ public enum BackupExportPurpose {
     /// This ephemeral key is combined with the ACI to derive the encryption key for the synced backup file.
     case linkNsync(ephemeralKey: BackupKey, aci: Aci)
 
-    // TODO: [Backups] add local backup case. This should just have the backup key;
-    // internally we will generate a backupId without the aci.
+    /// A backup that gets stored locally on a user's device. This uses the same MessageRootBackupKey
+    /// as remote backups, derived in the same way.
+    case localExport(key: MessageRootBackupKey, attachmentCollector: LocalFileBackupAttachmentCollector)
 }
 
 // MARK: - Libsignal.MessageBackupPurpose
@@ -77,6 +78,8 @@ extension BackupExportPurpose {
         case .linkNsync:
             return .deviceTransfer
         case .remoteExport:
+            return .remoteBackup
+        case .localExport:
             return .remoteBackup
         }
     }
@@ -261,6 +264,18 @@ extension BackupExportPurpose {
             return BackupExportPurpose.EncryptionMetadata(
                 encryptionKey: encryptionKey,
                 backupId: backupId,
+                metadataHeader: nil,
+                nonceMetadata: nil,
+            )
+        case let .localExport(key, _):
+            let encryptionKey = try MessageBackupKey(
+                backupKey: key.backupKey,
+                backupId: key.backupId,
+                forwardSecrecyToken: nil,
+            )
+            return BackupExportPurpose.EncryptionMetadata(
+                encryptionKey: encryptionKey,
+                backupId: key.backupId,
                 metadataHeader: nil,
                 nonceMetadata: nil,
             )

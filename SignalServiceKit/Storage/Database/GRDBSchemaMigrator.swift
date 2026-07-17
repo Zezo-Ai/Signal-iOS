@@ -346,6 +346,7 @@ public class GRDBSchemaMigrator {
         case addCombinedGroupSendEndorsementExpirationIndex
         case migrateGroupKeyValueStores
         case addSenderKey
+        case addLocalFileBackupTables
 
         // NOTE: Every time we add a migration id, consider
         // incrementing grdbSchemaVersionLatest.
@@ -5429,6 +5430,31 @@ public class GRDBSchemaMigrator {
                 on: "SenderKeySentToDevice",
                 columns: ["recipientId"],
             )
+            return .success(())
+        }
+
+        migrator.registerMigration(.addLocalFileBackupTables) { tx in
+            try tx.database.create(table: "BackupLocalFileAttachmentExport") { table in
+                table.column("attachmentRowId", .integer)
+                    .references("Attachment", column: "id", onDelete: .cascade)
+                    .notNull()
+                    .primaryKey()
+            }
+            try tx.database.create(table: "BackupLocalFileAttachmentImport") { table in
+                table.column("attachmentRowId", .integer)
+                    .references("Attachment", column: "id", onDelete: .cascade)
+                    .notNull()
+                    .primaryKey()
+            }
+
+            try tx.database.create(table: "BackupLocalFileAttachmentMetadata") { table in
+                table.column("attachmentRowId", .integer)
+                    .references("Attachment", column: "id", onDelete: .cascade)
+                    .notNull()
+                    .primaryKey()
+                table.column("localKey", .blob).notNull()
+                table.column("unencryptedByteCount", .integer).notNull()
+            }
             return .success(())
         }
 

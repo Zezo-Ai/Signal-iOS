@@ -32,6 +32,8 @@ extension BackupArchive {
         let attachmentByteCounter: BackupArchiveAttachmentByteCounter
         /// Parameters configuring what content is included in this archive.
         let includedContentFilter: IncludedContentFilter
+        /// Tracks attachments to be written to a local-file backup. Presence indicates we are archiving a local-file backup.
+        let localFileBackupAttachmentCollector: LocalFileBackupAttachmentCollector?
         /// The single transaction used to create the archive.
         let tx: DBReadTransaction
 
@@ -43,6 +45,7 @@ extension BackupArchive {
             bencher: BackupArchive.ArchiveBencher,
             attachmentByteCounter: BackupArchiveAttachmentByteCounter,
             includedContentFilter: IncludedContentFilter,
+            localFileBackupAttachmentCollector: LocalFileBackupAttachmentCollector?,
             tx: DBReadTransaction,
         ) {
             self.localIdentifiers = localIdentifiers
@@ -52,6 +55,7 @@ extension BackupArchive {
             self.bencher = bencher
             self.attachmentByteCounter = attachmentByteCounter
             self.includedContentFilter = includedContentFilter
+            self.localFileBackupAttachmentCollector = localFileBackupAttachmentCollector
             self.tx = tx
         }
     }

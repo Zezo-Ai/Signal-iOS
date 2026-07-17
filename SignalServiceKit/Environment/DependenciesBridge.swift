@@ -140,6 +140,7 @@ public class DependenciesBridge {
     public let linkPreviewSettingManager: any LinkPreviewSettingManager
     public let accountKeyStore: AccountKeyStore
     let localProfileChecker: LocalProfileChecker
+    public let localFileBackupManager: LocalFileBackupManager
     public let localUsernameManager: LocalUsernameManager
     public let lowDiskSpaceWarningManager: LowDiskSpaceWarningManager
     public let mediaBandwidthPreferenceStore: MediaBandwidthPreferenceStore
@@ -287,6 +288,7 @@ public class DependenciesBridge {
         linkPreviewSettingStore: LinkPreviewSettingStore,
         linkPreviewSettingManager: any LinkPreviewSettingManager,
         accountKeyStore: AccountKeyStore,
+        localFileBackupManager: LocalFileBackupManager,
         localProfileChecker: LocalProfileChecker,
         localUsernameManager: LocalUsernameManager,
         lowDiskSpaceWarningManager: LowDiskSpaceWarningManager,
@@ -434,6 +436,7 @@ public class DependenciesBridge {
         self.linkPreviewSettingStore = linkPreviewSettingStore
         self.linkPreviewSettingManager = linkPreviewSettingManager
         self.accountKeyStore = accountKeyStore
+        self.localFileBackupManager = localFileBackupManager
         self.localProfileChecker = localProfileChecker
         self.localUsernameManager = localUsernameManager
         self.lowDiskSpaceWarningManager = lowDiskSpaceWarningManager

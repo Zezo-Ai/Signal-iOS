@@ -471,13 +471,37 @@ extension ReferencedAttachment {
             transitTierInfoToExport = nil
         }
 
-        if let transitTierInfoToExport {
+        let isLocalBackup = context.localFileBackupAttachmentCollector != nil
+
+        if let transitTierInfoToExport, !isLocalBackup {
             locatorInfo.transitCdnKey = transitTierInfoToExport.cdnKey
             locatorInfo.transitCdnNumber = transitTierInfoToExport.cdnNumber
             locatorInfo.transitTierUploadTimestamp = transitTierInfoToExport.uploadTimestamp
         }
 
-        if let mediaTierInfo = attachment.mediaTierInfo {
+        if let localFileBackupAttachmentCollector = context.localFileBackupAttachmentCollector {
+            if let streamInfo = attachment.streamInfo {
+                let existingMetadata = failIfThrows {
+                    try BackupLocalFileAttachmentMetadataRecord
+                        .filter(key: attachment.id)
+                        .fetchOne(context.tx.database)
+                }
+                if let existingMetadata {
+                    localFileBackupAttachmentCollector.append(id: attachment.id)
+                    locatorInfo.localKey = existingMetadata.localKey
+
+                    locatorInfo.key = attachment.encryptionKey
+                    locatorInfo.size = streamInfo.unencryptedByteCount
+                    locatorInfo.integrityCheck = .plaintextHash(streamInfo.plaintextHash)
+                } else {
+                    owsFailDebug("Attachment in local backup should always have metadata")
+                }
+            } else {
+                // We have no stream info for an attachment we are trying to backup locally,
+                // which means its offloaded, or never downloaded, and we can't back it up.
+                // Leave fields unset so any restoring device knows it's unavailable
+            }
+        } else if let mediaTierInfo = attachment.mediaTierInfo {
             locatorInfo.key = attachment.encryptionKey
             locatorInfo.size = mediaTierInfo.unencryptedByteCount
             locatorInfo.integrityCheck = .plaintextHash(mediaTierInfo.plaintextHash)

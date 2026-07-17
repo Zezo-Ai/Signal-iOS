@@ -266,6 +266,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
             backupPurpose: backupPurpose.libsignalPurpose,
         )
 
+        var localFileBackupAttachmentCollector: LocalFileBackupAttachmentCollector?
         switch backupPurpose {
         case .remoteExport(let key, let chatAuth):
             // If an SVRB restore has been scheduled, do this restore before continuing
@@ -293,6 +294,8 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
             }
         case .linkNsync:
             break
+        case .localExport(_, let attachmentCollector):
+            localFileBackupAttachmentCollector = attachmentCollector
         }
 
         let encryptionMetadata = try await backupPurpose.deriveEncryptionMetadataWithSVRBIfNeeded(
@@ -309,6 +312,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
             includedContentFilter: includedContentFilter,
             progressSink: progressSink,
             attachmentByteCounter: attachmentByteCounter,
+            localFileBackupAttachmentCollector: localFileBackupAttachmentCollector,
             benchTitle: "Export encrypted Backup",
             openOutputStreamBlock: { exportProgress, tx in
                 return encryptedStreamProvider.openEncryptedOutputFileStream(
@@ -351,6 +355,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
             includedContentFilter: includedContentFilter,
             progressSink: nil,
             attachmentByteCounter: attachmentByteCounter,
+            localFileBackupAttachmentCollector: nil,
             benchTitle: "Export plaintext Backup",
             openOutputStreamBlock: { exportProgress, tx in
                 return plaintextStreamProvider.openPlaintextOutputFileStream(
@@ -368,6 +373,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
         includedContentFilter: BackupArchive.IncludedContentFilter,
         progressSink: OWSProgressSink?,
         attachmentByteCounter: BackupArchiveAttachmentByteCounter,
+        localFileBackupAttachmentCollector: LocalFileBackupAttachmentCollector?,
         benchTitle: String,
         openOutputStreamBlock: (
             BackupArchiveExportProgress?,
@@ -427,6 +433,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
                     currentAppVersion: appVersion.currentAppVersion,
                     firstAppVersion: appVersion.firstBackupAppVersion ?? appVersion.firstAppVersion,
                     memorySampler: memorySampler,
+                    localFileBackupAttachmentCollector: localFileBackupAttachmentCollector,
                     tx: tx,
                 )
 
@@ -447,6 +454,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
         currentAppVersion: String,
         firstAppVersion: String,
         memorySampler: MemorySampler,
+        localFileBackupAttachmentCollector: LocalFileBackupAttachmentCollector?,
         tx: DBReadTransaction,
     ) throws {
         let bencher = BackupArchive.ArchiveBencher(
@@ -493,6 +501,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
                 bencher: bencher,
                 attachmentByteCounter: attachmentByteCounter,
                 includedContentFilter: includedContentFilter,
+                localFileBackupAttachmentCollector: localFileBackupAttachmentCollector,
                 tx: tx,
             )
             try autoreleasepool {
@@ -547,6 +556,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
                 bencher: bencher,
                 attachmentByteCounter: attachmentByteCounter,
                 includedContentFilter: includedContentFilter,
+                localFileBackupAttachmentCollector: localFileBackupAttachmentCollector,
                 tx: tx,
             )
 
@@ -626,6 +636,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
                 bencher: bencher,
                 attachmentByteCounter: attachmentByteCounter,
                 includedContentFilter: includedContentFilter,
+                localFileBackupAttachmentCollector: localFileBackupAttachmentCollector,
                 tx: tx,
             )
             let chatArchiveResult = try chatArchiver.archiveChats(
@@ -664,6 +675,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
                 bencher: bencher,
                 attachmentByteCounter: attachmentByteCounter,
                 includedContentFilter: includedContentFilter,
+                localFileBackupAttachmentCollector: localFileBackupAttachmentCollector,
                 tx: tx,
             )
             let stickerPackArchiveResult = try stickerPackArchiver.archiveStickerPacks(

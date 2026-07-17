@@ -347,6 +347,9 @@ public enum DatabaseRecovery {
             SignalServiceKit.SessionRecord.databaseTableName,
             StoredReleaseNote.databaseTableName,
             SignalServiceKit.SenderKeyRecord.databaseTableName,
+            BackupLocalFileAttachmentExportRecord.databaseTableName,
+            BackupLocalFileAttachmentImportRecord.databaseTableName,
+            BackupLocalFileAttachmentMetadataRecord.databaseTableName,
         ]
 
         private static func prepareToCopyTablesWithBestEffort(

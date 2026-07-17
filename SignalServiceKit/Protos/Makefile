@@ -8,7 +8,7 @@
 PROTOC=protoc --proto_path=Specifications
 WRAPPER_SCRIPT=../../Scripts/protos/ProtoWrappers.py --proto-dir=Specifications --verbose
 
-all: registration_protos signal_service_protos provisioning_protos fingerprint_protos signal_ios_protos storage_service_protos groups_protos device_transfer_protos session_record_protos svr_protos mobilecoin_protos backup_protos call_quality_survey_protos
+all: registration_protos signal_service_protos provisioning_protos fingerprint_protos signal_ios_protos storage_service_protos groups_protos device_transfer_protos session_record_protos svr_protos mobilecoin_protos backup_protos local_backup_protos call_quality_survey_protos
 
 signal_service_protos: Specifications/SignalService.proto
 	$(PROTOC) --swift_out=Generated SignalService.proto
@@ -51,6 +51,9 @@ registration_protos: Specifications/Registration.proto
 
 backup_protos: Backups/Backup.proto
 	$(PROTOC) --swift_out=Backups --proto_path=Backups --swift_opt=Visibility=public --swift_opt=UseAccessLevelOnImports=true Backup.proto
+
+local_backup_protos: Backups/LocalBackup.proto
+	$(PROTOC) --swift_out=Backups --proto_path=Backups --swift_opt=Visibility=public --swift_opt=UseAccessLevelOnImports=true LocalBackup.proto
 
 call_quality_survey_protos: Specifications/CallQualitySurvey.proto
 	$(PROTOC) --swift_out=Generated CallQualitySurvey.proto --swift_opt=Visibility=public --swift_opt=UseAccessLevelOnImports=true

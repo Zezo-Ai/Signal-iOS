@@ -84,6 +84,26 @@ class InternalBackupSettingsViewController: OWSTableViewController2 {
             },
         ))
 
+        if BuildFlags.LocalFileBackups.archive {
+            section.add(.actionItem(withText: "Choose local file backup destination") {
+                DependenciesBridge.shared.localFileBackupManager.promptUserToChooseFileLocation(fromViewController: self)
+            })
+
+            section.add(.actionItem(withText: "Save Local File Backup") {
+                let localFileBackupExportJob = LocalFileBackupExportJob(
+                    accountKeyStore: DependenciesBridge.shared.accountKeyStore,
+                    backupArchiveManager: DependenciesBridge.shared.backupArchiveManager,
+                    db: DependenciesBridge.shared.db,
+                    tsAccountManager: DependenciesBridge.shared.tsAccountManager,
+                    localFileBackupManager: DependenciesBridge.shared.localFileBackupManager,
+                )
+
+                Task {
+                    try await localFileBackupExportJob.run(mode: .manual)
+                }
+            })
+        }
+
         contents.add(section)
 
         self.contents = contents

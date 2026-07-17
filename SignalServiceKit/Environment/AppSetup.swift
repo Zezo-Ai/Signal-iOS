@@ -1498,6 +1498,11 @@ extension AppSetup.GlobalsContinuation {
             recipientDatabaseTable: recipientDatabaseTable,
             reactionArchiver: backupReactionArchiver,
         )
+        let localFileBackupManager = LocalFileBackupManager(
+            db: db,
+            dateProvider: dateProvider,
+            attachmentStore: attachmentStore,
+        )
         let backupArchiveManager = BackupArchiveManagerImpl(
             accountDataArchiver: BackupArchiveAccountDataArchiver(
                 backupAttachmentUploadEraStore: backupAttachmentUploadEraStore,
@@ -1818,6 +1823,7 @@ extension AppSetup.GlobalsContinuation {
             linkPreviewSettingStore: linkPreviewSettingStore,
             linkPreviewSettingManager: linkPreviewSettingManager,
             accountKeyStore: accountKeyStore,
+            localFileBackupManager: localFileBackupManager,
             localProfileChecker: localProfileChecker,
             localUsernameManager: localUsernameManager,
             lowDiskSpaceWarningManager: lowDiskSpaceWarningManager,

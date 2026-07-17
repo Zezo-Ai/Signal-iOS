@@ -91,6 +91,11 @@ public enum BuildFlags {
         public static let announcementFetch = true
         public static let ignoreFetchDelay = build <= .internal
     }
+
+    public enum LocalFileBackups {
+        public static let archive = build <= .dev
+        public static let restore = build <= .dev
+    }
 }
 
 // MARK: -

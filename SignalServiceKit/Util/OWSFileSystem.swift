@@ -424,3 +424,118 @@ public enum OWSFileSystem {
         return UInt64(result)
     }
 }
+
+extension NSFileCoordinator {
+    func coordinateThrows(
+        writingItemAt url: URL,
+        options: WritingOptions = [],
+        by block: (URL) throws -> Void,
+    ) throws {
+        var blockError: Error?
+        var coordinatorError: NSError?
+        coordinate(
+            writingItemAt: url,
+            options: options,
+            error: &coordinatorError,
+        ) { url in
+            do { try block(url) }
+            catch { blockError = error }
+        }
+
+        if let blockError {
+            if DebugFlags.internalLogging {
+                Logger.error("NSFileCoordinator blockError: \(blockError)")
+            } else {
+                let nsError = blockError as NSError
+                Logger.error("NSFileCoordinator blockError \(nsError.domain):\(nsError.code)")
+            }
+            throw OWSGenericError("NSFileCoordinator blockError")
+        }
+
+        if let coordinatorError {
+            if DebugFlags.internalLogging {
+                Logger.error("NSFileCoordinator coordinatorError: \(coordinatorError)")
+            } else {
+                Logger.error("NSFileCoordinator coordinatorError: \(coordinatorError.domain):\(coordinatorError.code)")
+            }
+            throw OWSGenericError("NSFileCoordinator coordinatorError")
+        }
+    }
+
+    func coordinateThrows(
+        readingItemAt url: URL,
+        options: ReadingOptions = [],
+        by block: (URL) throws -> Void,
+    ) throws {
+        var blockError: Error?
+        var coordinatorError: NSError?
+        coordinate(
+            readingItemAt: url,
+            options: options,
+            error: &coordinatorError,
+        ) { url in
+            do { try block(url) }
+            catch { blockError = error }
+        }
+
+        if let blockError {
+            if DebugFlags.internalLogging {
+                Logger.error("NSFileCoordinator blockError: \(blockError)")
+            } else {
+                let nsError = blockError as NSError
+                Logger.error("NSFileCoordinator blockError \(nsError.domain):\(nsError.code)")
+            }
+            throw OWSGenericError("NSFileCoordinator blockError")
+        }
+
+        if let coordinatorError {
+            if DebugFlags.internalLogging {
+                Logger.error("NSFileCoordinator coordinatorError: \(coordinatorError)")
+            } else {
+                Logger.error("NSFileCoordinator coordinatorError: \(coordinatorError.domain):\(coordinatorError.code)")
+            }
+            throw OWSGenericError("NSFileCoordinator coordinatorError")
+        }
+    }
+
+    func coordinateThrows(
+        writingItemAt url1: URL,
+        options options1: WritingOptions = [],
+        writingItemAt url2: URL,
+        options options2: WritingOptions = [],
+        by block: (URL, URL) throws -> Void,
+    ) throws {
+        var blockError: Error?
+        var coordinatorError: NSError?
+        coordinate(
+            writingItemAt: url1,
+            options: options1,
+            writingItemAt: url2,
+            options: options2,
+            error: &coordinatorError,
+        ) { url1, url2 in
+            do { try block(url1, url2) }
+            catch { blockError = error }
+        }
+
+        if let blockError {
+            if DebugFlags.internalLogging {
+                Logger.error("NSFileCoordinator blockError: \(blockError)")
+            } else {
+                let nsError = blockError as NSError
+                Logger.error("NSFileCoordinator blockError \(nsError.domain):\(nsError.code)")
+            }
+            throw OWSGenericError("NSFileCoordinator blockError")
+        }
+
+        if let coordinatorError {
+            if DebugFlags.internalLogging {
+                Logger.error("NSFileCoordinator coordinatorError: \(coordinatorError)")
+            } else {
+                Logger.error("NSFileCoordinator coordinatorError: \(coordinatorError.domain):\(coordinatorError.code)")
+            }
+            throw OWSGenericError("NSFileCoordinator coordinatorError")
+        }
+    }
+
+}

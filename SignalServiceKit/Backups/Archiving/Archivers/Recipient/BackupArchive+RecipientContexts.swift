@@ -138,6 +138,7 @@ extension BackupArchive {
             bencher: BackupArchive.ArchiveBencher,
             attachmentByteCounter: BackupArchiveAttachmentByteCounter,
             includedContentFilter: IncludedContentFilter,
+            localFileBackupAttachmentCollector: LocalFileBackupAttachmentCollector?,
             tx: DBReadTransaction,
         ) {
             self.localRecipientId = localRecipientId
@@ -164,6 +165,7 @@ extension BackupArchive {
                 bencher: bencher,
                 attachmentByteCounter: attachmentByteCounter,
                 includedContentFilter: includedContentFilter,
+                localFileBackupAttachmentCollector: localFileBackupAttachmentCollector,
                 tx: tx,
             )
         }
