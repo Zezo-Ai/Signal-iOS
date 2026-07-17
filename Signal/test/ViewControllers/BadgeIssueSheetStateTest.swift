@@ -10,7 +10,7 @@ import XCTest
 class BadgeIssueSheetStateTest: XCTestCase {
     typealias State = BadgeIssueSheetState
 
-    private func getSubscriptionBadge(populateAssets: Bool = true) -> ProfileBadge {
+    private func getSubscriptionBadge() -> ProfileBadge {
         let result = try! ProfileBadge(jsonDictionary: [
             "id": "R_MED",
             "category": "donor",
@@ -18,13 +18,10 @@ class BadgeIssueSheetStateTest: XCTestCase {
             "description": "A subscriber badge!",
             "sprites6": ["ldpi.png", "mdpi.png", "hdpi.png", "xhdpi.png", "xxhdpi.png", "xxxhdpi.png"],
         ])
-        if populateAssets {
-            result._testingOnly_populateAssets()
-        }
         return result
     }
 
-    private func getBoostBadge(populateAssets: Bool = true) -> ProfileBadge {
+    private func getBoostBadge() -> ProfileBadge {
         let result = try! ProfileBadge(jsonDictionary: [
             "id": "BOOST",
             "category": "donor",
@@ -32,13 +29,10 @@ class BadgeIssueSheetStateTest: XCTestCase {
             "description": "A boost badge!",
             "sprites6": ["ldpi.png", "mdpi.png", "hdpi.png", "xhdpi.png", "xxhdpi.png", "xxxhdpi.png"],
         ])
-        if populateAssets {
-            result._testingOnly_populateAssets()
-        }
         return result
     }
 
-    private func getGiftBadge(populateAssets: Bool = true) -> ProfileBadge {
+    private func getGiftBadge() -> ProfileBadge {
         let result = try! ProfileBadge(jsonDictionary: [
             "id": "GIFT",
             "category": "donor",
@@ -46,9 +40,6 @@ class BadgeIssueSheetStateTest: XCTestCase {
             "description": "A gift badge!",
             "sprites6": ["ldpi.png", "mdpi.png", "hdpi.png", "xhdpi.png", "xxhdpi.png", "xxxhdpi.png"],
         ])
-        if populateAssets {
-            result._testingOnly_populateAssets()
-        }
         return result
     }
 

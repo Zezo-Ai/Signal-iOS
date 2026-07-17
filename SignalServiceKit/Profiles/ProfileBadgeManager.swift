@@ -29,8 +29,14 @@ public class ProfileBadge:
 
     public let duration: TimeInterval?
 
-    // Nil until a badge is checked in to the ProfileBadgeManager
-    public fileprivate(set) var assets: BadgeAssets?
+    // TODO: Make non-optional
+    public var assets: BadgeAssets? {
+        BadgeAssets(
+            scale: badgeVariant.intendedScale,
+            remoteSourceUrl: remoteAssetUrl,
+            localAssetDirectory: localAssetDir,
+        )
+    }
 
     private enum CodingKeys: String, CodingKey {
         // Skip encoding of `assets`
@@ -168,123 +174,61 @@ public class ProfileBadge:
             }
         }
     }
-
-    // MARK: - ProfileBadge fake assets
-
-#if TESTABLE_BUILD
-    public func _testingOnly_populateAssets() {
-        assets = BadgeAssets(
-            scale: badgeVariant.intendedScale,
-            remoteSourceUrl: remoteAssetUrl,
-            localAssetDirectory: localAssetDir,
-        )
-    }
-#endif
 }
 
 // MARK: - ProfileBadgeManager
 
 public class ProfileBadgeManager {
-    private let lock = UnfairLock()
-    private var badgeCache = LRUCache<String, ProfileBadge>(maxSize: 5)
-    // BadgeAssets have two roles: fetching assets we don't currently have and vending retrieved assets as UIImages
-    // They're a reference type, so we're fine aliasing the assets into multiple ProfileBadges
-    // We don't use an LRUCache since we don't want to clear out BadgeAssets that are mid-fetch and risk having
-    // two instances of this class trying to fetch assets at the same time.
-    private var assetCache = [String: BadgeAssets]()
+    private let taskQueue: KeyedConcurrentTaskQueue<String>
 
-    // TODO: Badging — Memory warnings?
+    init() {
+        self.taskQueue = KeyedConcurrentTaskQueue(concurrentLimitPerKey: 1)
+    }
 
     public func createOrUpdateBadge(
         _ newBadge: ProfileBadge,
-        tx writeTx: DBWriteTransaction,
+        tx: DBWriteTransaction,
     ) throws {
-        try lock.withLock {
-            // First, we check to see if we already have a cached badge that's equal to the new version
-            // If so, we can just update the assets property and return
-            if let cachedValue = badgeCache[newBadge.id], cachedValue == newBadge {
-                Logger.debug("Badge already up-to-date")
-                newBadge.assets = cachedValue.assets
-                return
-            }
+        failIfThrows {
+            try newBadge.save(tx.database)
 
-            // Something changed, so we need to update our database copy
-            try newBadge.save(writeTx.database)
-
-            // Finally we update our cached badge and start preparing our assets
-            let badgeAssets = getBadgetAssets(newBadge)
             Task {
                 do {
-                    try await badgeAssets.prepareAssetsIfNecessary()
+                    try await populateAssetsOnBadge(newBadge)
                 } catch {
                     owsFailDebug("Failed to populate assets on badge \(error)")
                 }
             }
-
-            owsAssertDebug(newBadge.assets != nil)
-            badgeCache[newBadge.id] = newBadge
         }
     }
 
     public func fetchBadgeWithId(
         _ badgeId: String,
-        tx readTx: DBReadTransaction,
+        tx: DBReadTransaction,
     ) -> ProfileBadge? {
-        do {
-            return try lock.withLock {
-                if let cachedBadge = badgeCache[badgeId] {
-                    owsAssertDebug(cachedBadge.assets != nil)
-                    return cachedBadge
-                } else if let fetchedBadge = try ProfileBadge.filter(key: badgeId).fetchOne(readTx.database) {
-                    let badgeAssets = getBadgetAssets(fetchedBadge)
-                    Task {
-                        do {
-                            try await badgeAssets.prepareAssetsIfNecessary()
-                        } catch {
-                            owsFailDebug("Failed to populate assets on badge \(error)")
-                        }
-                    }
+        return failIfThrows {
+            let result = try ProfileBadge
+                .filter(key: badgeId)
+                .fetchOne(tx.database)
 
-                    owsAssertDebug(fetchedBadge.assets != nil)
-                    badgeCache[fetchedBadge.id] = fetchedBadge
-                    return fetchedBadge
-                } else {
-                    return nil
+            if let result {
+                Task {
+                    do {
+                        try await populateAssetsOnBadge(result)
+                    } catch {
+                        owsFailDebug("Failed to populate assets on badge! \(error)")
+                    }
                 }
             }
-        } catch {
-            owsFailDebug("Failed to fetch badge: \(error)")
-            return nil
+
+            return result
         }
     }
 
     public func populateAssetsOnBadge(_ badge: ProfileBadge) async throws {
-        let badgeAssets = lock.withLock {
-            return getBadgetAssets(badge)
+        try await taskQueue.run(forKey: badge.resourcePath) {
+            let populator = BadgeAssetsPopulator(badgeAssets: badge.assets!)
+            try await populator.prepareAssetsIfNecessary()
         }
-        try await badgeAssets.prepareAssetsIfNecessary()
-    }
-
-    private func getBadgetAssets(_ badge: ProfileBadge) -> BadgeAssets {
-        lock.assertOwner()
-
-        let badgeAssets: BadgeAssets
-
-        // We try and reuse any existing BadgeAssets instances if we have one cached
-        if let cachedValue = badgeCache[badge.id], cachedValue.resourcePath == badge.resourcePath, let assets = cachedValue.assets {
-            badgeAssets = assets
-        } else if let cachedAssets = assetCache[badge.resourcePath] {
-            badgeAssets = cachedAssets
-        } else {
-            badgeAssets = BadgeAssets(
-                scale: badge.badgeVariant.intendedScale,
-                remoteSourceUrl: badge.remoteAssetUrl,
-                localAssetDirectory: badge.localAssetDir,
-            )
-            assetCache[badge.resourcePath] = badgeAssets
-        }
-        badge.assets = badgeAssets
-
-        return badgeAssets
     }
 }
