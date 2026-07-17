@@ -292,6 +292,9 @@ open class TSThread: NSObject, SDSCodableModel, InheritableRecord {
         DependenciesBridge.shared.pinnedThreadManager.handleUpdatedThread(self, tx: transaction)
     }
 
+    public func anyWillRemove(transaction: DBWriteTransaction) {
+    }
+
     public var isNoteToSelf: Bool { false }
 
     public final var recipientAddressesWithSneakyTransaction: [SignalServiceAddress] {

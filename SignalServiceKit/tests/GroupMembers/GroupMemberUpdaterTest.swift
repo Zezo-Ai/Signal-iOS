@@ -4,7 +4,7 @@
 //
 
 import LibSignalClient
-import XCTest
+import Testing
 
 @testable import SignalServiceKit
 
@@ -34,18 +34,23 @@ private class MockGroupMemberUpdaterTemporaryShims: GroupMemberUpdaterTemporaryS
     }
 }
 
-class GroupMemberUpdaterTest: XCTestCase {
-    private lazy var mockGroupMemberUpdaterTemporaryShims = MockGroupMemberUpdaterTemporaryShims()
-    private lazy var mockGroupMemberStore = MockGroupMemberStore()
-    private lazy var mockPhoneNumberVisibilityFetcher = MockPhoneNumberVisibilityFetcher()
-    private lazy var mockSignalServiceAddressCache = SignalServiceAddressCache(phoneNumberVisibilityFetcher: mockPhoneNumberVisibilityFetcher)
+struct GroupMemberUpdaterTest {
+    private let mockGroupMemberUpdaterTemporaryShims = MockGroupMemberUpdaterTemporaryShims()
+    private let mockGroupMemberStore = MockGroupMemberStore()
+    private let mockPhoneNumberVisibilityFetcher = MockPhoneNumberVisibilityFetcher()
+    private let mockSignalServiceAddressCache: SignalServiceAddressCache
+    private let groupMemberUpdater: GroupMemberUpdaterImpl
 
-    private lazy var groupMemberUpdater = GroupMemberUpdaterImpl(
-        temporaryShims: mockGroupMemberUpdaterTemporaryShims,
-        groupMemberStore: mockGroupMemberStore,
-        signalServiceAddressCache: mockSignalServiceAddressCache,
-    )
+    init() {
+        self.mockSignalServiceAddressCache = SignalServiceAddressCache(phoneNumberVisibilityFetcher: mockPhoneNumberVisibilityFetcher)
+        self.groupMemberUpdater = GroupMemberUpdaterImpl(
+            temporaryShims: mockGroupMemberUpdaterTemporaryShims,
+            groupMemberStore: mockGroupMemberStore,
+            signalServiceAddressCache: mockSignalServiceAddressCache,
+        )
+    }
 
+    @Test
     func testUpdateRecords() {
         let mockDB = InMemoryDB()
 
@@ -162,7 +167,11 @@ class GroupMemberUpdaterTest: XCTestCase {
         // -- Run the test. --
 
         mockDB.write {
-            groupMemberUpdater.updateRecords(groupThread: groupThread, transaction: $0)
+            groupMemberUpdater.updateRecords(
+                groupThreadUniqueId: groupThread.uniqueId,
+                groupMembership: groupThread.groupMembership,
+                transaction: $0,
+            )
         }
 
         // -- Validate the output. --
@@ -171,24 +180,43 @@ class GroupMemberUpdaterTest: XCTestCase {
             mockGroupMemberStore.sortedFullGroupMembers(in: groupThread.uniqueId, tx: $0)
         }
 
-        XCTAssertEqual(groupMembers.count, newGroupMembers.count)
+        #expect(groupMembers.count == newGroupMembers.count)
         for (actualGroupMember, expectedGroupMember) in zip(groupMembers, newGroupMembers.reversed()) {
-            XCTAssertEqual(actualGroupMember.serviceId?.serviceIdUppercaseString, expectedGroupMember.serviceId, "\(expectedGroupMember)")
-            XCTAssertEqual(actualGroupMember.phoneNumber, expectedGroupMember.phoneNumber, "\(expectedGroupMember)")
-            XCTAssertEqual(actualGroupMember.lastInteractionTimestamp, expectedGroupMember.interactionTimestamp, "\(expectedGroupMember)")
+            #expect(actualGroupMember.serviceId?.serviceIdUppercaseString == expectedGroupMember.serviceId, "\(expectedGroupMember)")
+            #expect(actualGroupMember.phoneNumber == expectedGroupMember.phoneNumber, "\(expectedGroupMember)")
+            #expect(actualGroupMember.lastInteractionTimestamp == expectedGroupMember.interactionTimestamp, "\(expectedGroupMember)")
         }
 
-        XCTAssertEqual(mockGroupMemberUpdaterTemporaryShims.fetchableLatestInteractionTimestamps.count, 0)
-        XCTAssertEqual(mockGroupMemberUpdaterTemporaryShims.updatedGroupThreadIds, [groupThread.uniqueId])
+        #expect(mockGroupMemberUpdaterTemporaryShims.fetchableLatestInteractionTimestamps.count == 0)
+        #expect(mockGroupMemberUpdaterTemporaryShims.updatedGroupThreadIds == [groupThread.uniqueId])
 
         // -- Make sure the algorithm is stable. --
 
         mockDB.write {
-            groupMemberUpdater.updateRecords(groupThread: groupThread, transaction: $0)
+            groupMemberUpdater.updateRecords(
+                groupThreadUniqueId: groupThread.uniqueId,
+                groupMembership: groupThread.groupMembership,
+                transaction: $0,
+            )
         }
 
         // We just performed a redundant update, so we shouldn't notify anyone.
-        XCTAssertEqual(mockGroupMemberUpdaterTemporaryShims.updatedGroupThreadIds, [groupThread.uniqueId])
+        #expect(mockGroupMemberUpdaterTemporaryShims.updatedGroupThreadIds == [groupThread.uniqueId])
+
+        // -- Remove all the group members. --
+
+        mockDB.write {
+            groupMemberUpdater.updateRecords(
+                groupThreadUniqueId: groupThread.uniqueId,
+                groupMembership: .empty,
+                transaction: $0,
+            )
+        }
+        let groupMembersAfterRemoving = mockDB.read {
+            return mockGroupMemberStore.sortedFullGroupMembers(in: groupThread.uniqueId, tx: $0)
+        }
+        #expect(groupMembersAfterRemoving.count == 0)
+        #expect(mockGroupMemberUpdaterTemporaryShims.updatedGroupThreadIds == [groupThread.uniqueId, groupThread.uniqueId])
     }
 
     // MARK: - Helpers

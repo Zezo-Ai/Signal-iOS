@@ -7,7 +7,11 @@ import Foundation
 import LibSignalClient
 
 public protocol GroupMemberUpdater {
-    func updateRecords(groupThread: TSGroupThread, transaction: DBWriteTransaction)
+    func updateRecords(
+        groupThreadUniqueId: String,
+        groupMembership: GroupMembership,
+        transaction: DBWriteTransaction,
+    )
 }
 
 protocol GroupMemberUpdaterTemporaryShims {
@@ -35,8 +39,12 @@ class GroupMemberUpdaterImpl: GroupMemberUpdater {
         self.signalServiceAddressCache = signalServiceAddressCache
     }
 
-    func updateRecords(groupThread: TSGroupThread, transaction: DBWriteTransaction) {
-        let groupThreadId = groupThread.uniqueId
+    func updateRecords(
+        groupThreadUniqueId: String,
+        groupMembership: GroupMembership,
+        transaction: DBWriteTransaction,
+    ) {
+        let groupThreadId = groupThreadUniqueId
 
         var groupMembersToRemove = [TSGroupMember]()
         var groupMembersToInsert = [TSGroupMember]()
@@ -61,7 +69,7 @@ class GroupMemberUpdaterImpl: GroupMemberUpdater {
         // from disk, so it may have outdated phone number information. Re-create
         // each address without specifying a phone number to ensure that we only
         // use values contained in the cache.
-        var expectedAddresses = Set(groupThread.groupMembership.fullMembers.lazy.map { address in
+        var expectedAddresses = Set(groupMembership.fullMembers.lazy.map { address in
             address.withNormalizedPhoneNumberAndServiceId(cache: self.signalServiceAddressCache)
         })
 

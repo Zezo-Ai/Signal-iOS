@@ -129,9 +129,21 @@ public extension TSGroupThread {
 
     func updateGroupMemberRecords(transaction: DBWriteTransaction) {
         let groupMemberUpdater = DependenciesBridge.shared.groupMemberUpdater
-        groupMemberUpdater.updateRecords(groupThread: self, transaction: transaction)
+        groupMemberUpdater.updateRecords(
+            groupThreadUniqueId: self.uniqueId,
+            groupMembership: self.groupMembership,
+            transaction: transaction,
+        )
     }
 
+    func removeGroupMemberRecords(transaction: DBWriteTransaction) {
+        let groupMemberUpdater = DependenciesBridge.shared.groupMemberUpdater
+        groupMemberUpdater.updateRecords(
+            groupThreadUniqueId: self.uniqueId,
+            groupMembership: .empty,
+            transaction: transaction,
+        )
+    }
 }
 
 // MARK: -

@@ -43,7 +43,11 @@ class GroupMemberMergeObserverImpl: RecipientMergeObserver {
                 continue
             }
             mergeV1GroupMembersIfNeeded(in: thread, tx: tx)
-            groupMemberUpdater.updateRecords(groupThread: thread, transaction: tx)
+            groupMemberUpdater.updateRecords(
+                groupThreadUniqueId: thread.uniqueId,
+                groupMembership: thread.groupMembership,
+                transaction: tx,
+            )
         }
     }
 
