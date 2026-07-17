@@ -1926,7 +1926,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                 appReadiness: appReadiness,
                 databaseStorage: SSKEnvironment.shared.databaseStorageRef,
                 donationSubscriptionManager: DependenciesBridge.shared.donationSubscriptionManager,
-                idealStore: DependenciesBridge.shared.externalPendingIDEALDonationStore,
+                idealStore: DependenciesBridge.shared.pendingIDEALDonationStore,
                 profileBadgeManager: DependenciesBridge.shared.profileBadgeManager,
                 tsAccountManager: DependenciesBridge.shared.tsAccountManager,
             )

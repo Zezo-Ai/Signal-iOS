@@ -5,6 +5,8 @@
 
 import Foundation
 
+// MARK: - PendingOneTimeIDEALDonation
+
 public struct PendingOneTimeIDEALDonation: Codable, Equatable {
     public let amount: FiatMoney
     public let paymentIntentId: String
@@ -19,6 +21,8 @@ public struct PendingOneTimeIDEALDonation: Codable, Equatable {
         self.createDate = Date()
     }
 }
+
+// MARK: - PendingMonthlyIDEALDonation
 
 public struct PendingMonthlyIDEALDonation: Codable, Equatable {
     public let subscriberId: Data
@@ -109,17 +113,9 @@ public struct PendingMonthlyIDEALDonation: Codable, Equatable {
     }
 }
 
-public protocol ExternalPendingIDEALDonationStore {
-    func getPendingOneTimeDonation(tx: DBReadTransaction) -> PendingOneTimeIDEALDonation?
-    func setPendingOneTimeDonation(donation: PendingOneTimeIDEALDonation, tx: DBWriteTransaction) throws
-    func clearPendingOneTimeDonation(tx: DBWriteTransaction)
+// MARK: - PendingIDEALDonationStore
 
-    func getPendingSubscription(tx: DBReadTransaction) -> PendingMonthlyIDEALDonation?
-    func setPendingSubscription(donation: PendingMonthlyIDEALDonation, tx: DBWriteTransaction) throws
-    func clearPendingSubscription(tx: DBWriteTransaction)
-}
-
-public class ExternalPendingIDEALDonationStoreImpl: ExternalPendingIDEALDonationStore {
+public struct PendingIDEALDonationStore {
 
     private enum Constants {
         static let pendingOneTimeDonationKey = "PendingOneTimeDonationKey"
@@ -127,9 +123,12 @@ public class ExternalPendingIDEALDonationStoreImpl: ExternalPendingIDEALDonation
     }
 
     private let keyStore: KeyValueStore
+
     init() {
         keyStore = KeyValueStore(collection: "PendingExternalDonationStore")
     }
+
+    // MARK: - One-time
 
     public func getPendingOneTimeDonation(tx: DBReadTransaction) -> PendingOneTimeIDEALDonation? {
         do {
@@ -147,6 +146,8 @@ public class ExternalPendingIDEALDonationStoreImpl: ExternalPendingIDEALDonation
     public func clearPendingOneTimeDonation(tx: DBWriteTransaction) {
         keyStore.removeValue(forKey: Constants.pendingOneTimeDonationKey, transaction: tx)
     }
+
+    // MARK: - Monthly
 
     public func getPendingSubscription(tx: DBReadTransaction) -> PendingMonthlyIDEALDonation? {
         do {

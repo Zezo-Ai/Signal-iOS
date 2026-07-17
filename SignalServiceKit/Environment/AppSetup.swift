@@ -1637,7 +1637,7 @@ extension AppSetup.GlobalsContinuation {
             tsAccountManager: tsAccountManager,
         )
 
-        let externalPendingIDEALDonationStore = ExternalPendingIDEALDonationStoreImpl()
+        let pendingIDEALDonationStore = PendingIDEALDonationStore()
 
         // TODO: Move this into ProfileFetcherJob.
         // Ideally, this would be a private implementation detail of that class.
@@ -1801,7 +1801,6 @@ extension AppSetup.GlobalsContinuation {
             donationSubscriptionManager: donationSubscriptionManager,
             editManager: editManager,
             editMessageStore: editMessageStore,
-            externalPendingIDEALDonationStore: externalPendingIDEALDonationStore,
             groupCallRecordManager: groupCallRecordManager,
             groupMemberStore: groupMemberStore,
             groupMemberUpdater: groupMemberUpdater,
@@ -1835,6 +1834,7 @@ extension AppSetup.GlobalsContinuation {
             nicknameManager: nicknameManager,
             orphanedAttachmentCleaner: orphanedAttachmentCleaner,
             archivedPaymentStore: archivedPaymentStore,
+            pendingIDEALDonationStore: pendingIDEALDonationStore,
             phoneNumberDiscoverabilityManager: phoneNumberDiscoverabilityManager,
             phoneNumberVisibilityFetcher: phoneNumberVisibilityFetcher,
             pinnedMessageManager: pinnedMessageManager,

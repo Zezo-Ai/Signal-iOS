@@ -219,7 +219,7 @@ public enum DonationViewsUtil {
         currencyCode: Currency.Code,
         db: DB,
         donationSubscriptionManager: DonationSubscriptionManager,
-        idealStore: ExternalPendingIDEALDonationStore,
+        idealStore: PendingIDEALDonationStore,
     ) async throws {
         var rethrowError: Error?
         do {
@@ -265,7 +265,7 @@ public enum DonationViewsUtil {
         paymentMethod: DonationPaymentMethod,
         db: DB,
         donationSubscriptionManager: DonationSubscriptionManager,
-        idealStore: ExternalPendingIDEALDonationStore,
+        idealStore: PendingIDEALDonationStore,
     ) async throws {
         var rethrowError: Error?
         do {
@@ -337,7 +337,7 @@ public enum DonationViewsUtil {
         donationType: Stripe.IDEALCallbackType,
         databaseStorage: SDSDatabaseStorage,
         donationSubscriptionManager: DonationSubscriptionManager,
-        idealStore: ExternalPendingIDEALDonationStore,
+        idealStore: PendingIDEALDonationStore,
     ) async throws {
         switch donationType {
         case let .monthly(success, clientSecret, intentId):
@@ -462,13 +462,13 @@ public enum DonationViewsUtil {
         actionSheet.addAction(.init(title: CommonStrings.okButton, style: .cancel, handler: { _ in
             switch paymentMethod {
             case .ideal:
-                let idealDonationStore = DependenciesBridge.shared.externalPendingIDEALDonationStore
+                let idealStore = DependenciesBridge.shared.pendingIDEALDonationStore
                 SSKEnvironment.shared.databaseStorageRef.write { tx in
                     switch donateMode {
                     case .oneTime:
-                        idealDonationStore.clearPendingOneTimeDonation(tx: tx)
+                        idealStore.clearPendingOneTimeDonation(tx: tx)
                     case .monthly:
-                        idealDonationStore.clearPendingSubscription(tx: tx)
+                        idealStore.clearPendingSubscription(tx: tx)
                     }
                 }
             case .applePay, .creditOrDebitCard, .paypal, .sepa, .none:

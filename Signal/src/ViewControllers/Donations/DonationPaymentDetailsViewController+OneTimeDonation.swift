@@ -15,7 +15,7 @@ extension DonationPaymentDetailsViewController {
         let db = DependenciesBridge.shared.db
         let donationPermitFetcher = DependenciesBridge.shared.donationPermitFetcher
         let donationSubscriptionManager = DependenciesBridge.shared.donationSubscriptionManager
-        let idealStore = DependenciesBridge.shared.externalPendingIDEALDonationStore
+        let idealStore = DependenciesBridge.shared.pendingIDEALDonationStore
         let networkManager = SSKEnvironment.shared.networkManagerRef
 
         Logger.info("[Donations] Starting one-time donation")

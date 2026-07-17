@@ -17,18 +17,18 @@ extension DonationViewsUtil {
         rootViewController: UIViewController,
         databaseStorage: SDSDatabaseStorage,
         donationSubscriptionManager: DonationSubscriptionManager,
-        idealStore: ExternalPendingIDEALDonationStore,
+        idealStore: PendingIDEALDonationStore,
         profileBadgeManager: ProfileBadgeManager,
         appReadiness: AppReadinessSetter,
     ) async throws {
-        let donationStore = DependenciesBridge.shared.externalPendingIDEALDonationStore
+        let idealStore = DependenciesBridge.shared.pendingIDEALDonationStore
         let (success, intent, localIntent) = databaseStorage.read { tx in
             switch donationType {
             case let .oneTime(didSucceed: success, paymentIntentId: intentId):
-                let localIntentId = donationStore.getPendingOneTimeDonation(tx: tx)
+                let localIntentId = idealStore.getPendingOneTimeDonation(tx: tx)
                 return (success, intentId, localIntentId?.paymentIntentId)
             case let .monthly(didSucceed: success, _, setupIntentId: intentId):
-                let localIntentId = donationStore.getPendingSubscription(tx: tx)
+                let localIntentId = idealStore.getPendingSubscription(tx: tx)
                 return (success, intentId, localIntentId?.setupIntentId)
             }
         }
@@ -118,7 +118,7 @@ extension DonationViewsUtil {
         donationType: Stripe.IDEALCallbackType,
         databaseStorage: SDSDatabaseStorage,
         donationSubscriptionManager: DonationSubscriptionManager,
-        idealStore: ExternalPendingIDEALDonationStore,
+        idealStore: PendingIDEALDonationStore,
         profileBadgeManager: ProfileBadgeManager,
     ) async throws {
         defer {
@@ -194,7 +194,7 @@ extension DonationViewsUtil {
         databaseStorage: SDSDatabaseStorage,
     ) {
         let clearPendingDonation = { @MainActor in
-            let idealStore = DependenciesBridge.shared.externalPendingIDEALDonationStore
+            let idealStore = DependenciesBridge.shared.pendingIDEALDonationStore
             databaseStorage.write { tx in
                 switch donationType {
                 case .monthly:

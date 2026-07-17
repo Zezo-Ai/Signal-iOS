@@ -1952,7 +1952,7 @@
 		C1F09B9F2BB307E100F9E7F5 /* TransformingInputStreamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F09B9E2BB307E100F9E7F5 /* TransformingInputStreamTests.swift */; };
 		C1F09BA12BB32E5900F9E7F5 /* RegistrationChooseRestoreMethodViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F09BA02BB32E5900F9E7F5 /* RegistrationChooseRestoreMethodViewController.swift */; };
 		C1FB9B732B16495D00D51A3B /* DonationSubscriptionLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB9B722B16495D00D51A3B /* DonationSubscriptionLevel.swift */; };
-		C1FB9B752B16498C00D51A3B /* ExternalPendingDonationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB9B742B16498C00D51A3B /* ExternalPendingDonationStore.swift */; };
+		C1FB9B752B16498C00D51A3B /* PendingIDEALDonationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB9B742B16498C00D51A3B /* PendingIDEALDonationStore.swift */; };
 		C1FE1F612C80CDC30031860B /* AttachmentBackupThumbnail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FE1F602C80CDC30031860B /* AttachmentBackupThumbnail.swift */; };
 		C26296B4BDCEDADBDA01DDD2 /* Pods_SignalServiceKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 948B2FC201146EF3BA459226 /* Pods_SignalServiceKit.framework */; };
 		CBCD7499B0A64FE64EAC82E4 /* LowDiskSpaceWarningManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A780A90C5DDC028939E97635 /* LowDiskSpaceWarningManager.swift */; };
@@ -6275,7 +6275,7 @@
 		C1F09B9E2BB307E100F9E7F5 /* TransformingInputStreamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformingInputStreamTests.swift; sourceTree = "<group>"; };
 		C1F09BA02BB32E5900F9E7F5 /* RegistrationChooseRestoreMethodViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationChooseRestoreMethodViewController.swift; sourceTree = "<group>"; };
 		C1FB9B722B16495D00D51A3B /* DonationSubscriptionLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonationSubscriptionLevel.swift; sourceTree = "<group>"; };
-		C1FB9B742B16498C00D51A3B /* ExternalPendingDonationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalPendingDonationStore.swift; sourceTree = "<group>"; };
+		C1FB9B742B16498C00D51A3B /* PendingIDEALDonationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingIDEALDonationStore.swift; sourceTree = "<group>"; };
 		C1FE1F602C80CDC30031860B /* AttachmentBackupThumbnail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentBackupThumbnail.swift; sourceTree = "<group>"; };
 		C597942EF64D456BBE9782A2 /* Pods-SignalTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SignalTests.debug.xcconfig"; path = "Target Support Files/Pods-SignalTests/Pods-SignalTests.debug.xcconfig"; sourceTree = "<group>"; };
 		D2179CFB16BB0B3A0006F3AB /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
@@ -13838,10 +13838,10 @@
 				C1FB9B722B16495D00D51A3B /* DonationSubscriptionLevel.swift */,
 				886A58C8276A760600A1099B /* DonationSubscriptionManager.swift */,
 				F00385FD273F6388000B5ABD /* DonationUtilities.swift */,
-				C1FB9B742B16498C00D51A3B /* ExternalPendingDonationStore.swift */,
 				D9517ABF292C5A3900DDD37E /* Paypal+API.swift */,
 				D9517ABD292C596B00DDD37E /* Paypal+WebAuthentication.swift */,
 				D938CD5F29283402006FB16A /* Paypal.swift */,
+				C1FB9B742B16498C00D51A3B /* PendingIDEALDonationStore.swift */,
 				F9292633297743EF0097F8FF /* PreparedGiftPayment.swift */,
 				D99554702AF566C30001E15C /* ProfileBadgesSnapshot+Constructors.swift */,
 				D99554692AF4873E0001E15C /* ProfileBadgesSnapshot.swift */,
@@ -19446,7 +19446,6 @@
 				D97992AC2FC147C5002E79F3 /* ExperienceUpgradeStore.swift in Sources */,
 				D98BC5332EE387A30052A81F /* ExpirationJob.swift in Sources */,
 				B9B432262FD37E9B0059FCB9 /* ExpiringInteraction.swift in Sources */,
-				C1FB9B752B16498C00D51A3B /* ExternalPendingDonationStore.swift in Sources */,
 				F9C5CE57289453B400548EEE /* Factories.swift in Sources */,
 				F9C5CC1D289453B300548EEE /* FailedMessagesJob.swift in Sources */,
 				7255A4C82B98DF3E00E95368 /* FailedStorySendDisplayController.swift in Sources */,
@@ -19838,6 +19837,7 @@
 				725465402BA01FCC00EABFD2 /* Paypal+API.swift in Sources */,
 				725465432BA01FCC00EABFD2 /* Paypal+WebAuthentication.swift in Sources */,
 				725465462BA01FCC00EABFD2 /* Paypal.swift in Sources */,
+				C1FB9B752B16498C00D51A3B /* PendingIDEALDonationStore.swift in Sources */,
 				F9C5CD78289453B300548EEE /* PendingReadReceiptRecord.swift in Sources */,
 				F9C5CE20289453B400548EEE /* PendingTasks.swift in Sources */,
 				F9C5CD56289453B300548EEE /* PendingViewedReceiptRecord.swift in Sources */,

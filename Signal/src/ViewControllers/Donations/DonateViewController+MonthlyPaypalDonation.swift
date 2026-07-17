@@ -105,7 +105,7 @@ extension DonateViewController {
     ) async throws {
         let db = DependenciesBridge.shared.db
         let donationSubscriptionManager = DependenciesBridge.shared.donationSubscriptionManager
-        let idealStore = DependenciesBridge.shared.externalPendingIDEALDonationStore
+        let idealStore = DependenciesBridge.shared.pendingIDEALDonationStore
 
         return try await DonationViewsUtil.wrapInProgressView(
             from: self,

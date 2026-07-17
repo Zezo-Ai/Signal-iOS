@@ -115,7 +115,6 @@ public class DependenciesBridge {
     public let donationSubscriptionManager: DonationSubscriptionManager
     public let editManager: EditManager
     public let editMessageStore: EditMessageStore
-    public let externalPendingIDEALDonationStore: ExternalPendingIDEALDonationStore
     public let groupCallRecordManager: GroupCallRecordManager
     public let groupMemberStore: GroupMemberStore
     public let groupMemberUpdater: GroupMemberUpdater
@@ -149,6 +148,7 @@ public class DependenciesBridge {
     public let nicknameManager: any NicknameManager
     public let orphanedAttachmentCleaner: OrphanedAttachmentCleaner
     public let archivedPaymentStore: ArchivedPaymentStore
+    public let pendingIDEALDonationStore: PendingIDEALDonationStore
     public let phoneNumberDiscoverabilityManager: PhoneNumberDiscoverabilityManager
     public let phoneNumberVisibilityFetcher: any PhoneNumberVisibilityFetcher
     public let pinnedMessageManager: PinnedMessageManager
@@ -265,7 +265,6 @@ public class DependenciesBridge {
         donationSubscriptionManager: DonationSubscriptionManager,
         editManager: EditManager,
         editMessageStore: EditMessageStore,
-        externalPendingIDEALDonationStore: ExternalPendingIDEALDonationStore,
         groupCallRecordManager: GroupCallRecordManager,
         groupMemberStore: GroupMemberStore,
         groupMemberUpdater: GroupMemberUpdater,
@@ -299,6 +298,7 @@ public class DependenciesBridge {
         nicknameManager: any NicknameManager,
         orphanedAttachmentCleaner: OrphanedAttachmentCleaner,
         archivedPaymentStore: ArchivedPaymentStore,
+        pendingIDEALDonationStore: PendingIDEALDonationStore,
         phoneNumberDiscoverabilityManager: PhoneNumberDiscoverabilityManager,
         phoneNumberVisibilityFetcher: any PhoneNumberVisibilityFetcher,
         pinnedMessageManager: PinnedMessageManager,
@@ -414,7 +414,6 @@ public class DependenciesBridge {
         self.donationSubscriptionManager = donationSubscriptionManager
         self.editManager = editManager
         self.editMessageStore = editMessageStore
-        self.externalPendingIDEALDonationStore = externalPendingIDEALDonationStore
         self.groupCallRecordManager = groupCallRecordManager
         self.groupMemberStore = groupMemberStore
         self.groupMemberUpdater = groupMemberUpdater
@@ -448,6 +447,7 @@ public class DependenciesBridge {
         self.nicknameManager = nicknameManager
         self.orphanedAttachmentCleaner = orphanedAttachmentCleaner
         self.archivedPaymentStore = archivedPaymentStore
+        self.pendingIDEALDonationStore = pendingIDEALDonationStore
         self.phoneNumberDiscoverabilityManager = phoneNumberDiscoverabilityManager
         self.phoneNumberVisibilityFetcher = phoneNumberVisibilityFetcher
         self.pinnedMessageManager = pinnedMessageManager

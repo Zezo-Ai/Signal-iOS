@@ -781,8 +781,8 @@ class DonateViewController: OWSViewController, OWSNavigationChildController {
                     .getRequestError(errorMode: .oneTimeBoost, tx: $0),
                 DependenciesBridge.shared.donationReceiptCredentialResultStore
                     .getRequestErrorForAnyRecurringSubscription(tx: $0),
-                DependenciesBridge.shared.externalPendingIDEALDonationStore.getPendingOneTimeDonation(tx: $0),
-                DependenciesBridge.shared.externalPendingIDEALDonationStore.getPendingSubscription(tx: $0),
+                DependenciesBridge.shared.pendingIDEALDonationStore.getPendingOneTimeDonation(tx: $0),
+                DependenciesBridge.shared.pendingIDEALDonationStore.getPendingSubscription(tx: $0),
             )
         }
 

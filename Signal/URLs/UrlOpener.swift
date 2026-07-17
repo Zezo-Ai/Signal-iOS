@@ -23,7 +23,7 @@ class UrlOpener {
     private let appReadiness: AppReadinessSetter
     private let databaseStorage: SDSDatabaseStorage
     private let donationSubscriptionManager: DonationSubscriptionManager
-    private let idealStore: ExternalPendingIDEALDonationStore
+    private let idealStore: PendingIDEALDonationStore
     private let profileBadgeManager: ProfileBadgeManager
     private let tsAccountManager: TSAccountManager
 
@@ -31,7 +31,7 @@ class UrlOpener {
         appReadiness: AppReadinessSetter,
         databaseStorage: SDSDatabaseStorage,
         donationSubscriptionManager: DonationSubscriptionManager,
-        idealStore: ExternalPendingIDEALDonationStore,
+        idealStore: PendingIDEALDonationStore,
         profileBadgeManager: ProfileBadgeManager,
         tsAccountManager: TSAccountManager,
     ) {

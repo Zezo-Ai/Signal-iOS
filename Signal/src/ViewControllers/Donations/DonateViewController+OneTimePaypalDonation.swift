@@ -89,7 +89,7 @@ extension DonateViewController {
             paymentMethod: .paypal,
             db: DependenciesBridge.shared.db,
             donationSubscriptionManager: DependenciesBridge.shared.donationSubscriptionManager,
-            idealStore: DependenciesBridge.shared.externalPendingIDEALDonationStore,
+            idealStore: DependenciesBridge.shared.pendingIDEALDonationStore,
         )
     }
 }

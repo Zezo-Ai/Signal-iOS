@@ -148,7 +148,7 @@ class DonationSettingsViewController: OWSTableViewController2 {
     }
 
     private func loadState() async -> State {
-        let idealStore = DependenciesBridge.shared.externalPendingIDEALDonationStore
+        let idealStore = DependenciesBridge.shared.pendingIDEALDonationStore
         let profileManager = SSKEnvironment.shared.profileManagerRef
         let (
             subscriberID,
@@ -511,7 +511,7 @@ class DonationSettingsViewController: OWSTableViewController2 {
     /// payment is and display a message that either it still needs external authorization or the payment
     /// failed and can be tried again.
     private func showPendingIDEALAuthorizationSheetIfNeeded() -> Bool {
-        let idealStore = DependenciesBridge.shared.externalPendingIDEALDonationStore
+        let idealStore = DependenciesBridge.shared.pendingIDEALDonationStore
         let expiration: TimeInterval = 15 * .minute
 
         func showError(title: String, message: String, donationMode: DonateViewController.DonateMode) {
@@ -634,10 +634,10 @@ class DonationSettingsViewController: OWSTableViewController2 {
         return clearErrorAndShowDonateAction(title: title, donateMode: preferredDonateMode) { tx in
             switch preferredDonateMode {
             case .oneTime:
-                DependenciesBridge.shared.externalPendingIDEALDonationStore
+                DependenciesBridge.shared.pendingIDEALDonationStore
                     .clearPendingOneTimeDonation(tx: tx)
             case .monthly:
-                DependenciesBridge.shared.externalPendingIDEALDonationStore
+                DependenciesBridge.shared.pendingIDEALDonationStore
                     .clearPendingSubscription(tx: tx)
             }
         }
