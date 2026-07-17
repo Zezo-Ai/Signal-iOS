@@ -241,8 +241,6 @@ extension DonationViewsUtil {
             guard let monthlyDonation else {
                 return nil
             }
-            let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
-            try await profileBadgeManager.populateAssetsOnBadge(monthlyDonation.newSubscriptionLevel.badge)
             return monthlyDonation.newSubscriptionLevel.badge
         }
     }

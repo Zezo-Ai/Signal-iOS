@@ -75,20 +75,12 @@ class BadgeThanksSheetPresenter {
         let logger = PrefixedLogger(prefix: "[Donations]", suffix: "\(successMode)")
         logger.info("Preparing to present badge thanks sheet.")
 
-        let badge: ProfileBadge
-        do {
-            guard
-                let _badge = db.read(block: { tx in
-                    profileBadgeManager.fetchBadgeWithId(redemptionSuccess.badgeID, tx: tx)
-                })
-            else {
-                throw OWSAssertionError("Missing badge for expected badge ID! \(redemptionSuccess.badgeID)")
-            }
-
-            badge = _badge
-            try await self.profileBadgeManager.populateAssetsOnBadge(badge)
-        } catch {
-            logger.error("Failed to populate badge assets for badge thanks sheet! \(error)")
+        guard
+            let badge = db.read(block: { tx in
+                profileBadgeManager.fetchBadgeWithId(redemptionSuccess.badgeID, tx: tx)
+            })
+        else {
+            owsFailDebug("Missing badge for expected badge ID! \(redemptionSuccess.badgeID)", logger: logger)
             return
         }
 

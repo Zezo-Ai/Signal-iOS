@@ -149,7 +149,6 @@ class DonationSettingsViewController: OWSTableViewController2 {
 
     private func loadState() async -> State {
         let idealStore = DependenciesBridge.shared.externalPendingIDEALDonationStore
-        let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
         let profileManager = SSKEnvironment.shared.profileManagerRef
         let (
             subscriberID,
@@ -184,10 +183,7 @@ class DonationSettingsViewController: OWSTableViewController2 {
                 subscriptionStatus = .hasSubscription(
                     subscription: currentSubscription,
                     subscriptionLevel: DonationViewsUtil.subscriptionLevelForSubscription(
-                        subscriptionLevels: try await DonationViewsUtil.loadSubscriptionLevels(
-                            donationConfiguration: try await donationConfiguration,
-                            profileBadgeManager: profileBadgeManager,
-                        ),
+                        subscriptionLevels: try await donationConfiguration.subscription.levels,
                         subscription: currentSubscription,
                     ),
                     previouslyHadActiveSubscription: hasEverRedeemedRecurringSubscriptionBadge,
@@ -208,11 +204,6 @@ class DonationSettingsViewController: OWSTableViewController2 {
                 hasAnyBadges: hasAnyBadges,
                 hasAnyDonationReceipts: hasAnyDonationReceipts,
             )
-            if let pendingIDEALSubscription {
-                // Serialized badges lose their assets, so ensure they've
-                // been populated before returning.
-                try? await profileBadgeManager.populateAssetsOnBadge(pendingIDEALSubscription.newSubscriptionLevel.badge)
-            }
             return result
         } catch {
             Logger.warn("[Donations] \(error)")

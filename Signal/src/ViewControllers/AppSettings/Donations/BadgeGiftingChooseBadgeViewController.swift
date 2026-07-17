@@ -75,10 +75,7 @@ public class BadgeGiftingChooseBadgeViewController: OWSTableViewController2 {
         do {
             Logger.info("[Gifting] Fetching donation configuration...")
             let donationConfiguration = try await DependenciesBridge.shared.donationSubscriptionManager.fetchDonationConfiguration()
-            Logger.info("[Gifting] Populating badge assets...")
-            let giftBadge = donationConfiguration.gift.badge
-            let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
-            try await profileBadgeManager.populateAssetsOnBadge(giftBadge)
+
             let defaultCurrencyCode = DonationUtilities.chooseDefaultCurrency(
                 preferred: [
                     Locale.current.currencyCode?.uppercased(),

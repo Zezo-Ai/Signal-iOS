@@ -340,13 +340,6 @@ class ChatListFYISheetCoordinator {
         let badge = badgeIssue.badge
         let errorMode = badgeIssue.errorMode
 
-        do {
-            try await profileBadgeManager.populateAssetsOnBadge(badge)
-        } catch {
-            logger.error("Failed to populate badge assets! \(error)")
-            return
-        }
-
         guard chatListViewController.isChatListTopmostViewController() else {
             logger.warn("Not presenting error – no longer the top view controller.")
             return
@@ -398,9 +391,8 @@ class ChatListFYISheetCoordinator {
             let boostBadge: ProfileBadge
             do {
                 boostBadge = try await donationSubscriptionManager.getBoostBadge()
-                try await profileBadgeManager.populateAssetsOnBadge(boostBadge)
             } catch {
-                logger.warn("Failed to fetch boost badge and assets for expiration! \(error)")
+                logger.warn("Failed to fetch boost badge for expiration! \(error)")
                 return
             }
 

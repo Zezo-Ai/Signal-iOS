@@ -786,35 +786,17 @@ class DonateViewController: OWSViewController, OWSNavigationChildController {
             )
         }
 
-        let donationConfigurationClosure = { () async throws -> DonationConfiguration in
-            let donationConfiguration = try await DependenciesBridge.shared.donationSubscriptionManager.fetchDonationConfiguration()
-
-            let boostBadge = donationConfiguration.boost.badge
-            let subscriptionBadges = donationConfiguration.subscription.levels.map { $0.badge }
-
-            try await withThrowingTaskGroup { taskGroup in
-                for badge in [boostBadge] + subscriptionBadges {
-                    taskGroup.addTask {
-                        let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
-                        try await profileBadgeManager.populateAssetsOnBadge(badge)
-                    }
-                }
-                try await taskGroup.waitForAll()
-            }
-
-            return donationConfiguration
-        }
-
-        // Start loading the current subscription.
+        async let donationConfiguration = DependenciesBridge.shared.donationSubscriptionManager.fetchDonationConfiguration()
         async let currentSubscription = DonationViewsUtil.loadCurrentSubscription(subscriberID: subscriberID)
 
         do {
-            let donationConfiguration = try await donationConfigurationClosure()
+            let donationConfiguration = try await donationConfiguration
+            let currentSubscription = try await currentSubscription
             return currentState.loaded(
                 oneTimeConfig: donationConfiguration.boost,
                 monthlyConfig: donationConfiguration.subscription,
                 paymentMethodsConfig: donationConfiguration.paymentMethods,
-                currentMonthlySubscription: try await currentSubscription,
+                currentMonthlySubscription: currentSubscription,
                 subscriberID: subscriberID,
                 previousMonthlySubscriptionCurrencyCode: previousSubscriberCurrencyCode,
                 previousMonthlySubscriptionPaymentMethod: previousSubscriberPaymentMethod,
