@@ -30,7 +30,6 @@ public class OWSProfileManager: ProfileManagerProtocol {
     private var isRotatingProfileKey: Bool = false
 
     private let appReadiness: AppReadiness
-    public let badgeStore = BadgeStore()
 
     @MainActor
     init(appReadiness: AppReadiness, databaseStorage: SDSDatabaseStorage) {

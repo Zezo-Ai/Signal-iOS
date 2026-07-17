@@ -1383,6 +1383,8 @@ extension AppSetup.GlobalsContinuation {
             threadStore: threadStore,
         )
 
+        let profileBadgeManager = ProfileBadgeManager()
+
         let reactionStore: any ReactionStore = ReactionStoreImpl()
 
         let storageServiceRecordIkmMigrator = StorageServiceRecordIkmMigratorImpl(
@@ -1409,6 +1411,7 @@ extension AppSetup.GlobalsContinuation {
             keyTransparencyStore: keyTransparencyStore,
             localProfileChecker: localProfileChecker,
             paymentsHelper: paymentsHelper,
+            profileBadgeManager: profileBadgeManager,
             profileManager: profileManager,
             reachabilityManager: reachabilityManager,
             recipientDatabaseTable: recipientDatabaseTable,
@@ -1842,6 +1845,7 @@ extension AppSetup.GlobalsContinuation {
             pollMessageManager: pollMessageManager,
             preKeyManager: preKeyManager,
             privateStoryThreadDeletionManager: privateStoryThreadDeletionManager,
+            profileBadgeManager: profileBadgeManager,
             quotedReplyManager: quotedReplyManager,
             reactionStore: reactionStore,
             recipientDatabaseTable: recipientDatabaseTable,

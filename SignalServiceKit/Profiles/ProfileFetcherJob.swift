@@ -29,6 +29,7 @@ public class ProfileFetcherJob {
     private let keyTransparencyStore: KeyTransparencyStore
     private let localProfileChecker: LocalProfileChecker
     private let paymentsHelper: any PaymentsHelper
+    private let profileBadgeManager: ProfileBadgeManager
     private let profileManager: any ProfileManager
     private let recipientDatabaseTable: RecipientDatabaseTable
     private let syncManager: any SyncManagerProtocol
@@ -51,6 +52,7 @@ public class ProfileFetcherJob {
         keyTransparencyStore: KeyTransparencyStore,
         localProfileChecker: LocalProfileChecker,
         paymentsHelper: any PaymentsHelper,
+        profileBadgeManager: ProfileBadgeManager,
         profileManager: any ProfileManager,
         recipientDatabaseTable: RecipientDatabaseTable,
         syncManager: any SyncManagerProtocol,
@@ -72,6 +74,7 @@ public class ProfileFetcherJob {
         self.keyTransparencyStore = keyTransparencyStore
         self.localProfileChecker = localProfileChecker
         self.paymentsHelper = paymentsHelper
+        self.profileBadgeManager = profileBadgeManager
         self.profileManager = profileManager
         self.recipientDatabaseTable = recipientDatabaseTable
         self.syncManager = syncManager
@@ -444,7 +447,7 @@ public class ProfileFetcherJob {
             let badgeModels = fetchedProfile.profile.badges.map { $0.1 }
             let persistedBadgeIds: [String] = badgeModels.compactMap {
                 do {
-                    try self.profileManager.badgeStore.createOrUpdateBadge($0, tx: transaction)
+                    try self.profileBadgeManager.createOrUpdateBadge($0, tx: transaction)
                     return $0.id
                 } catch {
                     owsFailDebug("Failed to save badgeId: \($0.id). \(error)")

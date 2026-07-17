@@ -9,7 +9,6 @@ import LibSignalClient
 #if TESTABLE_BUILD
 
 class OWSFakeProfileManager {
-    let badgeStore: BadgeStore = BadgeStore()
     var fakeUserProfiles: [SignalServiceAddress: OWSUserProfile]?
     var localProfile: OWSUserProfile?
     var localProfileKey: Aes256Key?

@@ -48,8 +48,8 @@ public class OWSUserProfileBadgeInfo: NSObject, Codable {
     }
 
     public func loadBadge(transaction tx: DBReadTransaction) {
-        let badgeStore = SSKEnvironment.shared.profileManagerRef.badgeStore
-        badge = badgeStore.fetchBadgeWithId(badgeId, tx: tx)
+        let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
+        badge = profileBadgeManager.fetchBadgeWithId(badgeId, tx: tx)
     }
 
     public func fetchBadgeContent(transaction: DBReadTransaction) -> ProfileBadge? {

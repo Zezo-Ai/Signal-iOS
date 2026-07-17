@@ -13,23 +13,23 @@ class BadgeThanksSheetPresenter {
         }
     }
 
-    private let badgeStore: BadgeStore
     private let db: DB
     private let donationReceiptCredentialResultStore: DonationReceiptCredentialResultStore
+    private let profileBadgeManager: ProfileBadgeManager
 
     private var redemptionSuccess: DonationReceiptCredentialRedemptionSuccess
     private let successMode: DonationReceiptCredentialResultStore.Mode
 
     private init(
-        badgeStore: BadgeStore,
         db: DB,
         donationReceiptCredentialResultStore: DonationReceiptCredentialResultStore,
+        profileBadgeManager: ProfileBadgeManager,
         redemptionSuccess: DonationReceiptCredentialRedemptionSuccess,
         successMode: DonationReceiptCredentialResultStore.Mode,
     ) {
-        self.badgeStore = badgeStore
         self.db = db
         self.donationReceiptCredentialResultStore = donationReceiptCredentialResultStore
+        self.profileBadgeManager = profileBadgeManager
         self.redemptionSuccess = redemptionSuccess
         self.successMode = successMode
     }
@@ -60,9 +60,9 @@ class BadgeThanksSheetPresenter {
         successMode: DonationReceiptCredentialResultStore.Mode,
     ) -> BadgeThanksSheetPresenter {
         return BadgeThanksSheetPresenter(
-            badgeStore: SSKEnvironment.shared.profileManagerRef.badgeStore,
             db: DependenciesBridge.shared.db,
             donationReceiptCredentialResultStore: Deps.donationReceiptCredentialResultStore,
+            profileBadgeManager: DependenciesBridge.shared.profileBadgeManager,
             redemptionSuccess: redemptionSuccess,
             successMode: successMode,
         )
@@ -79,14 +79,14 @@ class BadgeThanksSheetPresenter {
         do {
             guard
                 let _badge = db.read(block: { tx in
-                    badgeStore.fetchBadgeWithId(redemptionSuccess.badgeID, tx: tx)
+                    profileBadgeManager.fetchBadgeWithId(redemptionSuccess.badgeID, tx: tx)
                 })
             else {
                 throw OWSAssertionError("Missing badge for expected badge ID! \(redemptionSuccess.badgeID)")
             }
 
             badge = _badge
-            try await self.badgeStore.populateAssetsOnBadge(badge)
+            try await self.profileBadgeManager.populateAssetsOnBadge(badge)
         } catch {
             logger.error("Failed to populate badge assets for badge thanks sheet! \(error)")
             return

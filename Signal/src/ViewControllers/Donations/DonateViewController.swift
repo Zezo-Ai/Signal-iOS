@@ -795,7 +795,8 @@ class DonateViewController: OWSViewController, OWSNavigationChildController {
             try await withThrowingTaskGroup { taskGroup in
                 for badge in [boostBadge] + subscriptionBadges {
                     taskGroup.addTask {
-                        try await SSKEnvironment.shared.profileManagerRef.badgeStore.populateAssetsOnBadge(badge)
+                        let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
+                        try await profileBadgeManager.populateAssetsOnBadge(badge)
                     }
                 }
                 try await taskGroup.waitForAll()

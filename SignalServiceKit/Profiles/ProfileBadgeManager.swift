@@ -29,7 +29,7 @@ public class ProfileBadge:
 
     public let duration: TimeInterval?
 
-    // Nil until a badge is checked in to the BadgeStore
+    // Nil until a badge is checked in to the ProfileBadgeManager
     public fileprivate(set) var assets: BadgeAssets?
 
     private enum CodingKeys: String, CodingKey {
@@ -168,12 +168,10 @@ public class ProfileBadge:
             }
         }
     }
-}
 
-// MARK: - ProfileBadge fake assets
+    // MARK: - ProfileBadge fake assets
 
 #if TESTABLE_BUILD
-extension ProfileBadge {
     public func _testingOnly_populateAssets() {
         assets = BadgeAssets(
             scale: badgeVariant.intendedScale,
@@ -181,12 +179,12 @@ extension ProfileBadge {
             localAssetDirectory: localAssetDir,
         )
     }
-}
 #endif
+}
 
-// MARK: - BadgeStore
+// MARK: - ProfileBadgeManager
 
-public class BadgeStore {
+public class ProfileBadgeManager {
     private let lock = UnfairLock()
     private var badgeCache = LRUCache<String, ProfileBadge>(maxSize: 5)
     // BadgeAssets have two roles: fetching assets we don't currently have and vending retrieved assets as UIImages

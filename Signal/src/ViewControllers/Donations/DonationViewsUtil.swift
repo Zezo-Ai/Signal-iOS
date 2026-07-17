@@ -313,12 +313,15 @@ public enum DonationViewsUtil {
         }
     }
 
-    public static func loadSubscriptionLevels(donationConfiguration: DonationSubscriptionConfiguration, badgeStore: BadgeStore) async throws -> [DonationSubscriptionLevel] {
+    public static func loadSubscriptionLevels(
+        donationConfiguration: DonationSubscriptionConfiguration,
+        profileBadgeManager: ProfileBadgeManager,
+    ) async throws -> [DonationSubscriptionLevel] {
         let levels = donationConfiguration.subscription.levels
         try await withThrowingTaskGroup(of: Void.self) { taskGroup in
             for level in levels {
                 taskGroup.addTask {
-                    try await badgeStore.populateAssetsOnBadge(level.badge)
+                    try await profileBadgeManager.populateAssetsOnBadge(level.badge)
                 }
             }
             try await taskGroup.waitForAll()

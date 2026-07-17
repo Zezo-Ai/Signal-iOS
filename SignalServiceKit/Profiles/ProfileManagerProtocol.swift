@@ -6,8 +6,6 @@
 import Foundation
 
 public protocol ProfileManagerProtocol {
-    var badgeStore: BadgeStore { get }
-
     /// Fetch the profile for the local user. (It should always exist.)
     func localUserProfile(tx: DBReadTransaction) -> OWSUserProfile?
 

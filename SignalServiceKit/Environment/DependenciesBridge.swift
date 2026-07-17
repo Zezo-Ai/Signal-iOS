@@ -158,6 +158,7 @@ public class DependenciesBridge {
     public let pollMessageManager: PollMessageManager
     public let preKeyManager: PreKeyManager
     public let privateStoryThreadDeletionManager: any PrivateStoryThreadDeletionManager
+    public let profileBadgeManager: ProfileBadgeManager
     public let quotedReplyManager: QuotedReplyManager
     public let reactionStore: any ReactionStore
     public let recipientDatabaseTable: RecipientDatabaseTable
@@ -307,6 +308,7 @@ public class DependenciesBridge {
         pollMessageManager: PollMessageManager,
         preKeyManager: PreKeyManager,
         privateStoryThreadDeletionManager: any PrivateStoryThreadDeletionManager,
+        profileBadgeManager: ProfileBadgeManager,
         quotedReplyManager: QuotedReplyManager,
         reactionStore: any ReactionStore,
         recipientDatabaseTable: RecipientDatabaseTable,
@@ -455,6 +457,7 @@ public class DependenciesBridge {
         self.pollMessageManager = pollMessageManager
         self.preKeyManager = preKeyManager
         self.privateStoryThreadDeletionManager = privateStoryThreadDeletionManager
+        self.profileBadgeManager = profileBadgeManager
         self.quotedReplyManager = quotedReplyManager
         self.reactionStore = reactionStore
         self.recipientDatabaseTable = recipientDatabaseTable

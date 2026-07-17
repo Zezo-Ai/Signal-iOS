@@ -149,6 +149,7 @@ class DonationSettingsViewController: OWSTableViewController2 {
 
     private func loadState() async -> State {
         let idealStore = DependenciesBridge.shared.externalPendingIDEALDonationStore
+        let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
         let profileManager = SSKEnvironment.shared.profileManagerRef
         let (
             subscriberID,
@@ -185,7 +186,7 @@ class DonationSettingsViewController: OWSTableViewController2 {
                     subscriptionLevel: DonationViewsUtil.subscriptionLevelForSubscription(
                         subscriptionLevels: try await DonationViewsUtil.loadSubscriptionLevels(
                             donationConfiguration: try await donationConfiguration,
-                            badgeStore: SSKEnvironment.shared.profileManagerRef.badgeStore,
+                            profileBadgeManager: profileBadgeManager,
                         ),
                         subscription: currentSubscription,
                     ),
@@ -210,7 +211,7 @@ class DonationSettingsViewController: OWSTableViewController2 {
             if let pendingIDEALSubscription {
                 // Serialized badges lose their assets, so ensure they've
                 // been populated before returning.
-                try? await SSKEnvironment.shared.profileManagerRef.badgeStore.populateAssetsOnBadge(pendingIDEALSubscription.newSubscriptionLevel.badge)
+                try? await profileBadgeManager.populateAssetsOnBadge(pendingIDEALSubscription.newSubscriptionLevel.badge)
             }
             return result
         } catch {
@@ -235,7 +236,8 @@ class DonationSettingsViewController: OWSTableViewController2 {
                 giftBadge: donationConfiguration.gift.badge,
                 subscriptionLevels: donationConfiguration.subscription.levels,
             )
-            await result.attemptToPopulateBadgeAssets(populateAssetsOnBadge: SSKEnvironment.shared.profileManagerRef.badgeStore.populateAssetsOnBadge(_:))
+            let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
+            await result.attemptToPopulateBadgeAssets(populateAssetsOnBadge: profileBadgeManager.populateAssetsOnBadge(_:))
             return result
         } else {
             Logger.warn("[Donations] Failed to fetch donation configuration. Proceeding without it, as it is only cosmetic here.")

@@ -241,7 +241,8 @@ extension DonationViewsUtil {
             guard let monthlyDonation else {
                 return nil
             }
-            try await SSKEnvironment.shared.profileManagerRef.badgeStore.populateAssetsOnBadge(monthlyDonation.newSubscriptionLevel.badge)
+            let profileBadgeManager = DependenciesBridge.shared.profileBadgeManager
+            try await profileBadgeManager.populateAssetsOnBadge(monthlyDonation.newSubscriptionLevel.badge)
             return monthlyDonation.newSubscriptionLevel.badge
         }
     }
