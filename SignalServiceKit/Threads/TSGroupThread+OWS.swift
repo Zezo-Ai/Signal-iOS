@@ -5,20 +5,19 @@
 
 import LibSignalClient
 
-@objc
-public extension TSGroupThread {
+extension TSGroupThread {
 
-    var groupId: Data { groupModel.groupId }
+    public var groupId: Data { groupModel.groupId }
 
-    var groupMembership: GroupMembership {
+    @objc
+    public var groupMembership: GroupMembership {
         groupModel.groupMembership
     }
 
     // MARK: -
 
-    static let groupThreadUniqueIdPrefix = "g"
+    public static let groupThreadUniqueIdPrefix = "g"
 
-    @nonobjc
     private static let uniqueIdMappingStore = NewKeyValueStore(collection: "TSGroupThread.uniqueIdMappingStore")
 
     private static func mappingKey(forGroupId groupId: Data) -> String {
@@ -47,7 +46,7 @@ public extension TSGroupThread {
     /// We've actually been doing a deterministic unique ID derivation for new
     /// threads for some time; we'd then also store that mapping, which is not
     /// necessary.
-    static func threadUniqueId(
+    public static func threadUniqueId(
         forGroupId groupId: Data,
         transaction tx: DBReadTransaction,
     ) -> String {
@@ -65,7 +64,7 @@ public extension TSGroupThread {
         return defaultThreadUniqueId(forGroupId: groupId)
     }
 
-    static func defaultThreadUniqueId(forGroupId groupId: Data) -> String {
+    public static func defaultThreadUniqueId(forGroupId groupId: Data) -> String {
         owsAssertDebug(!groupId.isEmpty)
 
         return groupThreadUniqueIdPrefix + groupId.base64EncodedString()
@@ -78,7 +77,7 @@ public extension TSGroupThread {
     /// whom the mapping does not exist.
     ///
     /// - SeeAlso ``threadId(forGroupId:transaction:)``
-    static func setGroupIdMappingForLegacyThread(
+    public static func setGroupIdMappingForLegacyThread(
         threadUniqueId: String,
         groupId: Data,
         tx: DBWriteTransaction,
@@ -125,9 +124,9 @@ public extension TSGroupThread {
     /// The object is the group's unique ID as a string. Note that NotificationCenter dispatches by
     /// object identity rather than equality, so any observer should register for *all* membership
     /// changes and then filter the notifications they receive as needed.
-    static let membershipDidChange = Notification.Name("TSGroupThread.membershipDidChange")
+    public static let membershipDidChange = Notification.Name("TSGroupThread.membershipDidChange")
 
-    func updateGroupMemberRecords(transaction: DBWriteTransaction) {
+    public func updateGroupMemberRecords(transaction: DBWriteTransaction) {
         let groupMemberUpdater = DependenciesBridge.shared.groupMemberUpdater
         groupMemberUpdater.updateRecords(
             groupThreadUniqueId: self.uniqueId,
@@ -148,16 +147,15 @@ public extension TSGroupThread {
 
 // MARK: -
 
-@objc
-public extension TSThread {
-    var isLocalUserFullMemberOfThread: Bool {
+extension TSThread {
+    public var isLocalUserFullMemberOfThread: Bool {
         guard let groupThread = self as? TSGroupThread else {
             return true
         }
         return groupThread.groupModel.groupMembership.isLocalUserFullMember
     }
 
-    var isTerminatedGroup: Bool {
+    public var isTerminatedGroup: Bool {
         guard
             let groupThread = self as? TSGroupThread,
             let groupModelV2 = groupThread.groupModel as? TSGroupModelV2
