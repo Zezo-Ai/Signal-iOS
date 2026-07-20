@@ -725,8 +725,8 @@ private enum ValueFlag: String, FlagType {
     case replaceableInteractionExpiration = "ios.replaceableInteractionExpiration"
     case requirePqRatio = "ios.requirePqRatio"
     case ringrtcDredDuration = "ios.ringrtcDredDuration"
-    case ringrtcVp9DeviceModelDenylist = "ios.ringrtcVp9DeviceModelDenylist"
     case ringrtcVp9DeviceModelDecodeDenylist = "ios.ringrtcVp9DeviceModelDecodeDenylist"
+    case ringrtcVp9DeviceModelDenylist = "ios.ringrtcVp9DeviceModelDenylist"
     case sepaEnabledRegions = "global.donations.sepaEnabledRegions"
     case standardMediaQualityLevel = "ios.standardMediaQualityLevel"
     case videoAttachmentMaxEncryptedBytes = "ios.videoAttachments.maxBytes"
@@ -772,8 +772,8 @@ private enum ValueFlag: String, FlagType {
         case .replaceableInteractionExpiration: false
         case .requirePqRatio: true
         case .ringrtcDredDuration: true
-        case .ringrtcVp9DeviceModelDenylist: true
         case .ringrtcVp9DeviceModelDecodeDenylist: true
+        case .ringrtcVp9DeviceModelDenylist: true
         case .sepaEnabledRegions: true
         case .standardMediaQualityLevel: true
         case .videoAttachmentMaxEncryptedBytes: true
