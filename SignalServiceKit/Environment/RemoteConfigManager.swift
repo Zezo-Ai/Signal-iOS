@@ -392,12 +392,12 @@ public class RemoteConfig {
         return isEnabled(.ringrtcVp9Enabled, defaultValue: false)
     }
 
-    /// List of "device models" hardware identifiers allow-listed for which
-    /// RingRTC should always offer encoding VP9. (overriden by the deny list)
+    /// List of "device models" hardware identifiers deny-listed for which
+    /// RingRTC should avoid encoding VP9.
     ///
     /// Compare entries to the value of `String(sysctlKey: "hw.machine")`.
-    public var ringrtcVp9DeviceModelEnablelist: [String] {
-        guard let valueFlag = valueFlags[ValueFlag.ringrtcVp9DeviceModelEnablelist.rawValue] else {
+    public var ringrtcVp9DeviceModelEncodeDenylist: [String] {
+        guard let valueFlag = valueFlags[ValueFlag.ringrtcVp9DeviceModelDenylist.rawValue] else {
             return []
         }
 
@@ -405,11 +405,11 @@ public class RemoteConfig {
     }
 
     /// List of "device models" hardware identifiers deny-listed for which
-    /// RingRTC should avoid encoding VP9.
+    /// RingRTC should avoid decoding VP9.
     ///
     /// Compare entries to the value of `String(sysctlKey: "hw.machine")`.
-    public var ringrtcVp9DeviceModelDenylist: [String] {
-        guard let valueFlag = valueFlags[ValueFlag.ringrtcVp9DeviceModelDenylist.rawValue] else {
+    public var ringrtcVp9DeviceModelDecodeDenylist: [String] {
+        guard let valueFlag = valueFlags[ValueFlag.ringrtcVp9DeviceModelDecodeDenylist.rawValue] else {
             return []
         }
 
@@ -726,7 +726,7 @@ private enum ValueFlag: String, FlagType {
     case requirePqRatio = "ios.requirePqRatio"
     case ringrtcDredDuration = "ios.ringrtcDredDuration"
     case ringrtcVp9DeviceModelDenylist = "ios.ringrtcVp9DeviceModelDenylist"
-    case ringrtcVp9DeviceModelEnablelist = "ios.ringrtcVp9DeviceModelEnablelist"
+    case ringrtcVp9DeviceModelDecodeDenylist = "ios.ringrtcVp9DeviceModelDecodeDenylist"
     case sepaEnabledRegions = "global.donations.sepaEnabledRegions"
     case standardMediaQualityLevel = "ios.standardMediaQualityLevel"
     case videoAttachmentMaxEncryptedBytes = "ios.videoAttachments.maxBytes"
@@ -773,7 +773,7 @@ private enum ValueFlag: String, FlagType {
         case .requirePqRatio: true
         case .ringrtcDredDuration: true
         case .ringrtcVp9DeviceModelDenylist: true
-        case .ringrtcVp9DeviceModelEnablelist: true
+        case .ringrtcVp9DeviceModelDecodeDenylist: true
         case .sepaEnabledRegions: true
         case .standardMediaQualityLevel: true
         case .videoAttachmentMaxEncryptedBytes: true

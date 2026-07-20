@@ -442,6 +442,10 @@ final class IndividualCallService: CallServiceStateObserver {
                 if DebugFlags.callingNeverRelay.get() {
                     iceServers = iceServers.filter { !$0.urlStrings.contains { $0.starts(with: "turn:") || $0.starts(with: "turns:") } }
                 }
+
+                // Extract the current config so settings stay in sync.
+                let remoteConfigCurrent = RemoteConfig.current
+
                 // Tell the Call Manager to proceed with its active call.
                 try self.callManager.proceed(
                     callId: callId,
@@ -450,8 +454,9 @@ final class IndividualCallService: CallServiceStateObserver {
                     videoCaptureController: call.videoCaptureController,
                     dataMode: useLowData ? .low : .normal,
                     audioLevelsIntervalMillis: nil,
-                    enableVp9: RingrtcVp9Config.enableVp9(with: RemoteConfig.current),
-                    dredDuration: RemoteConfig.current.ringrtcDredDuration,
+                    enableVp9Encode: RingrtcVp9Config.enableVp9Encode(with: remoteConfigCurrent),
+                    enableVp9Decode: RingrtcVp9Config.enableVp9Decode(with: remoteConfigCurrent),
+                    dredDuration: remoteConfigCurrent.ringrtcDredDuration,
                 )
             } catch {
                 owsFailDebug("\(error)")
