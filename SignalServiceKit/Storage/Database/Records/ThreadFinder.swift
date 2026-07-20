@@ -336,7 +336,7 @@ public class ThreadFinder {
                 )
 
                 while let groupId = try groupIdCursor.next() {
-                    allowedDefaultThreadIds.append(TSGroupThread.threadId(
+                    allowedDefaultThreadIds.append(TSGroupThread.threadUniqueId(
                         forGroupId: groupId,
                         transaction: transaction,
                     ))

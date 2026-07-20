@@ -983,9 +983,9 @@ class StorageServiceGroupV2RecordUpdater: StorageServiceRecordUpdater {
         builder.setWhitelisted(profileManager.isGroupId(inProfileWhitelist: groupId.serialize(), transaction: transaction))
         builder.setBlocked(blockingManager.isGroupIdBlocked(groupId, transaction: transaction))
 
-        let threadId = TSGroupThread.threadId(forGroupId: groupId.serialize(), transaction: transaction)
+        let threadUniqueId = TSGroupThread.threadUniqueId(forGroupId: groupId.serialize(), transaction: transaction)
         let threadAssociatedData = ThreadAssociatedData.fetchOrDefault(
-            for: threadId,
+            for: threadUniqueId,
             ignoreMissing: true,
             transaction: transaction,
         )
@@ -1012,7 +1012,7 @@ class StorageServiceGroupV2RecordUpdater: StorageServiceRecordUpdater {
             builder.setHideStory(storyContextAssociatedData.isHidden)
         }
 
-        if let thread = TSGroupThread.fetchGroupThreadViaCache(uniqueId: threadId, transaction: transaction) {
+        if let thread = TSGroupThread.fetchGroupThreadViaCache(uniqueId: threadUniqueId, transaction: transaction) {
             builder.setStorySendMode(thread.storyViewMode.storageServiceMode)
         } else if
             let enqueuedRecord = groupsV2.groupRecordPendingStorageServiceRestore(
@@ -1111,9 +1111,9 @@ class StorageServiceGroupV2RecordUpdater: StorageServiceRecordUpdater {
             }
         }
 
-        let localThreadId = TSGroupThread.threadId(forGroupId: groupId.serialize(), transaction: transaction)
-        ThreadAssociatedData.create(for: localThreadId, transaction: transaction)
-        let localThreadAssociatedData = ThreadAssociatedData.fetchOrDefault(for: localThreadId, transaction: transaction)
+        let localThreadUniqueId = TSGroupThread.threadUniqueId(forGroupId: groupId.serialize(), transaction: transaction)
+        ThreadAssociatedData.create(for: localThreadUniqueId, transaction: transaction)
+        let localThreadAssociatedData = ThreadAssociatedData.fetchOrDefault(for: localThreadUniqueId, transaction: transaction)
 
         if record.archived != localThreadAssociatedData.isArchived {
             localThreadAssociatedData.updateWith(isArchived: record.archived, updateStorageService: false, transaction: transaction)
@@ -1991,10 +1991,10 @@ extension StorageServiceAccountRecordUpdater {
                 pinnedThreadIds.append(thread.uniqueId)
             case .groupMasterKey(let masterKey)?:
                 let contextInfo = try GroupV2ContextInfo.deriveFrom(masterKeyData: masterKey)
-                let threadUniqueId = TSGroupThread.threadId(forGroupId: contextInfo.groupId.serialize(), transaction: transaction)
+                let threadUniqueId = TSGroupThread.threadUniqueId(forGroupId: contextInfo.groupId.serialize(), transaction: transaction)
                 pinnedThreadIds.append(threadUniqueId)
             case .legacyGroupID(let groupId)?:
-                let threadUniqueId = TSGroupThread.threadId(
+                let threadUniqueId = TSGroupThread.threadUniqueId(
                     forGroupId: groupId,
                     transaction: transaction,
                 )

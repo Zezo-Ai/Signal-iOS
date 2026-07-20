@@ -103,7 +103,7 @@ open class TSGroupThread: TSThread {
 
     public convenience init(groupModel: TSGroupModelV2) {
         self.init(
-            uniqueId: Self.defaultThreadId(forGroupId: groupModel.groupId),
+            uniqueId: Self.defaultThreadUniqueId(forGroupId: groupModel.groupId),
             groupModel: groupModel,
         )
     }
@@ -228,7 +228,7 @@ open class TSGroupThread: TSThread {
 
     @objc
     public static func fetch(groupId: Data, transaction: DBReadTransaction) -> TSGroupThread? {
-        let uniqueId = threadId(forGroupId: groupId, transaction: transaction)
+        let uniqueId = threadUniqueId(forGroupId: groupId, transaction: transaction)
         return TSGroupThread.fetchGroupThreadViaCache(uniqueId: uniqueId, transaction: transaction)
     }
 
@@ -356,7 +356,7 @@ open class TSGroupThread: TSThread {
         secretParamsData: Data = Data(count: 1),
         groupMembers: [SignalServiceAddress] = [],
     ) -> TSGroupThread {
-        let groupThreadId = TSGroupThread.defaultThreadId(forGroupId: groupId)
+        let groupThreadId = TSGroupThread.defaultThreadUniqueId(forGroupId: groupId)
         let groupThread = TSGroupThread(
             id: 1,
             uniqueId: groupThreadId,

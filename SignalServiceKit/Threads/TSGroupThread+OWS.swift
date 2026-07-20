@@ -25,7 +25,7 @@ public extension TSGroupThread {
         groupId.hexadecimalString
     }
 
-    private static func existingThreadId(
+    private static func existingThreadUniqueId(
         forGroupId groupId: Data,
         transaction: DBReadTransaction,
     ) -> String? {
@@ -47,14 +47,14 @@ public extension TSGroupThread {
     /// We've actually been doing a deterministic unique ID derivation for new
     /// threads for some time; we'd then also store that mapping, which is not
     /// necessary.
-    static func threadId(
+    static func threadUniqueId(
         forGroupId groupId: Data,
         transaction tx: DBReadTransaction,
     ) -> String {
         owsAssertDebug(!groupId.isEmpty)
 
         if
-            let threadUniqueId = existingThreadId(
+            let threadUniqueId = existingThreadUniqueId(
                 forGroupId: groupId,
                 transaction: tx,
             )
@@ -62,10 +62,10 @@ public extension TSGroupThread {
             return threadUniqueId
         }
 
-        return defaultThreadId(forGroupId: groupId)
+        return defaultThreadUniqueId(forGroupId: groupId)
     }
 
-    static func defaultThreadId(forGroupId groupId: Data) -> String {
+    static func defaultThreadUniqueId(forGroupId groupId: Data) -> String {
         owsAssertDebug(!groupId.isEmpty)
 
         return groupThreadUniqueIdPrefix + groupId.base64EncodedString()

@@ -437,7 +437,7 @@ public extension StoryContext {
     func threadUniqueId(transaction: DBReadTransaction) -> String? {
         switch self {
         case .groupId(let data):
-            return TSGroupThread.threadId(
+            return TSGroupThread.threadUniqueId(
                 forGroupId: data,
                 transaction: transaction,
             )
