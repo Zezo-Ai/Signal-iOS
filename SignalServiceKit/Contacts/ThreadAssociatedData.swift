@@ -31,11 +31,11 @@ public class ThreadAssociatedData: NSObject, Codable, FetchableRecord, Persistab
     }
 
     static func groupNameVerificationHash(groupName: String?) -> Data? {
-        guard let groupName, let groupNameData = groupName.data(using: .utf8) else {
+        guard let groupName else {
             return nil
         }
         var sha = SHA256()
-        sha.update(data: groupNameData)
+        sha.update(data: Data(groupName.utf8))
         return Data(sha.finalize())
     }
 
