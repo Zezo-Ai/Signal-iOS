@@ -227,7 +227,9 @@ class OWSMessageDecrypter {
                         transaction: transaction,
                     )
                     if recoverableErrorMessage != nil {
-                        DependenciesBridge.shared.decryptionPlaceholderExpirationJob.restart()
+                        transaction.addSyncCompletion {
+                            DependenciesBridge.shared.decryptionPlaceholderExpirationJob.restart()
+                        }
                     }
                     errorMessage = recoverableErrorMessage
                 case .implicit:

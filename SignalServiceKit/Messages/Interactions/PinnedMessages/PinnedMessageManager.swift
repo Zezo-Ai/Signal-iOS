@@ -180,7 +180,9 @@ public class PinnedMessageManager {
             tx: transaction,
         )
 
-        expirationJob.restart()
+        transaction.addSyncCompletion { [expirationJob] in
+            expirationJob.restart()
+        }
     }
 
     public func unpinMessage(
@@ -383,7 +385,9 @@ public class PinnedMessageManager {
             tx: tx,
         )
 
-        expirationJob.restart()
+        tx.addSyncCompletion { [expirationJob] in
+            expirationJob.restart()
+        }
     }
 
     private func getMessageAuthorAci(interaction: TSMessage, tx: DBReadTransaction) -> Aci? {

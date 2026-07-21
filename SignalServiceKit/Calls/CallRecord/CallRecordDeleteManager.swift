@@ -147,6 +147,8 @@ final class CallRecordDeleteManagerImpl: CallRecordDeleteManager {
 
         // We've added a new DeletedCallRecord to expire, so let the expiration
         // job know.
-        deletedCallRecordExpirationJob.restart()
+        tx.addSyncCompletion { [deletedCallRecordExpirationJob] in
+            deletedCallRecordExpirationJob.restart()
+        }
     }
 }

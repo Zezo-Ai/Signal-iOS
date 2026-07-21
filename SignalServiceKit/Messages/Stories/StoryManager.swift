@@ -124,7 +124,9 @@ public class StoryManager {
 
         // We have a new story message, so make sure our expiration job knows
         // about it.
-        DependenciesBridge.shared.storyMessageExpirationJob.restart()
+        transaction.addSyncCompletion {
+            DependenciesBridge.shared.storyMessageExpirationJob.restart()
+        }
 
         SSKEnvironment.shared.earlyMessageManagerRef.applyPendingMessages(for: message, transaction: transaction)
     }
@@ -162,7 +164,9 @@ public class StoryManager {
 
             // We have a new story message, so make sure our expiration job
             // knows about it.
-            DependenciesBridge.shared.storyMessageExpirationJob.restart()
+            transaction.addSyncCompletion {
+                DependenciesBridge.shared.storyMessageExpirationJob.restart()
+            }
 
             SSKEnvironment.shared.earlyMessageManagerRef.applyPendingMessages(for: message, transaction: transaction)
         } else {

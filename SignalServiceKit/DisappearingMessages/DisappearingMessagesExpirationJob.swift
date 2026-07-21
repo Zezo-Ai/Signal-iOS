@@ -52,7 +52,9 @@ public final class DisappearingMessagesExpirationJob: ExpirationJob<ExpiringInte
             interaction.updateWithExpireStarted(at: expirationStartedAt, transaction: tx)
         }
 
-        restart()
+        tx.addSyncCompletion {
+            self.restart()
+        }
     }
 }
 
