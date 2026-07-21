@@ -34,6 +34,10 @@ public class PhoneNumberDiscoverabilityManagerImpl: PhoneNumberDiscoverabilityMa
         authedAccount: AuthedAccount,
         tx: DBWriteTransaction,
     ) {
+        let oldValue = tsAccountManager.phoneNumberDiscoverability(tx: tx)
+        let oldDescription = oldValue.map { "\($0)" } ?? "nil"
+        Logger.info("Setting phone number discoverability: \(oldDescription) -> \(phoneNumberDiscoverability); updateAccountAttributes: \(updateAccountAttributes), updateStorageService: \(updateStorageService)")
+
         tsAccountManager.setPhoneNumberDiscoverability(phoneNumberDiscoverability, tx: tx)
 
         if updateAccountAttributes {
