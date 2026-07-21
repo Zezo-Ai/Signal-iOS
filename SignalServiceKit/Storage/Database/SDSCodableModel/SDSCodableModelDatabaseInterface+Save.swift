@@ -102,26 +102,11 @@ extension SDSCodableModelDatabaseInterfaceImpl {
 private extension SDSCodableModelDatabaseInterface {
 
     /// Get the row ID of this model if it has already been persisted.
-    func existingGrdbRowId<Model: SDSCodableModel>(
+    func fetchRowId<Model: SDSCodableModel>(
         forModel model: Model,
-        transaction: DBReadTransaction,
-    ) -> SDSCodableModel.RowId? {
-        do {
-            let databaseTableName = Model.databaseTableName.quotedDatabaseIdentifier
-            let sql: String = """
-                SELECT id FROM \(databaseTableName)
-                WHERE uniqueId = ?
-            """
-
-            return try SDSCodableModel.RowId.fetchOne(
-                transaction.database,
-                sql: sql,
-                arguments: [model.uniqueId],
-            )
-        } catch let error {
-            owsFailDebug("Failed to fetch GRDB row ID for uniqueId: \(error)")
-            return nil
-        }
+        tx: DBReadTransaction,
+    ) -> Model.RowId? {
+        return fetchRowId(modelType: Model.self, uniqueId: model.uniqueId, tx: tx)
     }
 
     /// Persist the given model using the given mode.
@@ -166,7 +151,7 @@ private extension SDSCodableModelDatabaseInterface {
         saveMode: SDSSaveMode,
         transaction: DBWriteTransaction,
     ) {
-        if let existingGrdbRowId = existingGrdbRowId(forModel: model, transaction: transaction) {
+        if let rowId = fetchRowId(forModel: model, tx: transaction) {
             owsAssertDebug(
                 saveMode == .update,
                 "Could not insert existing record - updating instead.",
@@ -174,7 +159,7 @@ private extension SDSCodableModelDatabaseInterface {
 
             updateModelInDatabase(
                 model,
-                existingGrdbRowId: existingGrdbRowId,
+                existingGrdbRowId: rowId,
                 transaction: transaction,
             )
         } else {

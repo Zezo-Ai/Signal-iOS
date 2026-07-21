@@ -5,6 +5,25 @@
 
 import GRDB
 
+extension SDSCodableModelDatabaseInterface {
+    func fetchRowId<Model: SDSCodableModel>(
+        modelType: Model.Type,
+        uniqueId: String,
+        tx: DBReadTransaction,
+    ) -> Model.RowId? {
+        owsAssertDebug(!uniqueId.isEmpty)
+        return failIfThrows {
+            return try Model.RowId.fetchOne(
+                tx.database,
+                sql: """
+                SELECT "id" FROM "\(modelType.databaseTableName)" WHERE "uniqueId" = ?
+                """,
+                arguments: [uniqueId],
+            )
+        }
+    }
+}
+
 extension SDSCodableModelDatabaseInterfaceImpl {
     /// Fetch a persisted model with the given rowid if it exists.
     func fetchModel<Model: SDSCodableModel>(
