@@ -297,10 +297,16 @@ public final class KeyTransparencyManager {
         try await prepareAndPerformSelfCheck(localIdentifiers: localIdentifiers)
     }
 
+    private enum PrepareSelfCheckResult {
+        case success(CheckParams)
+        case selfCheckUnavailable
+        case failure(OWSAssertionError)
+    }
+
     private func prepareSelfCheck(
         localIdentifiers: LocalIdentifiers,
         tx: DBReadTransaction,
-    ) throws(OWSAssertionError) -> CheckParams {
+    ) -> PrepareSelfCheckResult {
         let logger = logger.suffixed(with: "[self]")
         logger.info("")
 
@@ -311,7 +317,7 @@ public final class KeyTransparencyManager {
                 identityKey: localIdentityKey.identityKeyPair.identityKey,
             )
         } else {
-            throw OWSAssertionError("Missing AciInfo.", logger: logger)
+            return .failure(OWSAssertionError("Missing AciInfo.", logger: logger))
         }
 
         let e164Info: KeyTransparency.E164Info?
@@ -327,9 +333,13 @@ public final class KeyTransparencyManager {
                 e164Info = nil
             }
         } else {
-            throw OWSAssertionError("Missing E164Info.", logger: logger)
+            return .failure(OWSAssertionError("Missing E164Info.", logger: logger))
         }
 
+        // Skip self-check if our username is corrupted. We don't want to fail
+        // the self-check artificially, but we're unlikely to succeed if we
+        // attempt. Since username corruption shows a warning banner, hopefully
+        // the user resolves it before our next self-check.
         var username: Username?
         switch localUsernameManager.usernameState(tx: tx) {
         case .unset:
@@ -338,10 +348,12 @@ public final class KeyTransparencyManager {
             do {
                 username = try Username(_username)
             } catch {
-                throw OWSAssertionError("Failed to hash local username! \(error)", logger: logger)
+                logger.warn("Failed to hash local username; self-check unavailable. \(error)")
+                return .selfCheckUnavailable
             }
         case .usernameAndLinkCorrupted:
-            throw OWSAssertionError("Local username is corrupted.", logger: logger)
+            logger.warn("Local username corrupted; self-check unavailable.")
+            return .selfCheckUnavailable
         }
 
         // We can't self-check our own username until all our devices support
@@ -350,12 +362,12 @@ public final class KeyTransparencyManager {
             username = nil
         }
 
-        return CheckParams(
+        return .success(CheckParams(
             aciInfo: aciInfo,
             e164Info: e164Info,
             username: username,
             localIdentifiers: localIdentifiers,
-        )
+        ))
     }
 
     private func prepareAndPerformSelfCheck(
@@ -370,17 +382,39 @@ public final class KeyTransparencyManager {
             // our username), so best-effort make sure we're up-to-date.
             try? await storageServiceManager.waitForPendingRestores()
 
-            let selfCheckParams = try db.read { tx in
-                return try prepareSelfCheck(
+            let prepareSelfCheckResult = db.read { tx in
+                return prepareSelfCheck(
                     localIdentifiers: localIdentifiers,
                     tx: tx,
                 )
             }
 
+            let selfCheckParams: CheckParams
+            switch prepareSelfCheckResult {
+            case .success(let _selfCheckParams):
+                selfCheckParams = _selfCheckParams
+            case .selfCheckUnavailable:
+                // If self-check is unavailable, punt for now and schedule
+                // another self-check for a day from now. Hopefully by then
+                // self-check is available again.
+                logger.info("Self-check unavailable; deferring to next Cron.")
+                await db.awaitableWrite { tx in
+                    keyTransparencyStore.setSelfCheckCronJobCompletedAt(
+                        now: dateProvider(),
+                        specialIntervalTillNextCron: .day,
+                        tx: tx,
+                    )
+                }
+                return
+            case .failure(let assertionError):
+                throw assertionError
+            }
+
+            logger.info("Performing self-check.")
             try await performCheck(params: selfCheckParams)
+            logger.info("Self-check success.")
 
             await db.awaitableWrite { tx in
-                logger.info("Self-check success.")
                 keyTransparencyStore.setSelfCheckState(.succeeded, tx: tx)
                 keyTransparencyStore.setSelfCheckCronJobCompletedAt(
                     now: dateProvider(),
