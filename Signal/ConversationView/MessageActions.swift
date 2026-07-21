@@ -366,6 +366,11 @@ class MessageActions: NSObject {
         let deleteAction = MessageActionBuilder.deleteMessage(itemViewModel: itemViewModel, delegate: delegate)
         actions.append(deleteAction)
 
+        if itemViewModel.canCopyOrShareOrSpeakText {
+            let copyTextAction = MessageActionBuilder.copyText(itemViewModel: itemViewModel, delegate: delegate)
+            actions.append(copyTextAction)
+        }
+
         if shouldAllowMessageSendActions {
             let replyAction = MessageActionBuilder.reply(itemViewModel: itemViewModel, delegate: delegate)
             actions.append(replyAction)
