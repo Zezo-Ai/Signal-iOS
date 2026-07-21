@@ -117,7 +117,7 @@ public extension SDSCodableModel {
     static func anyCount(
         transaction: DBReadTransaction,
     ) -> UInt {
-        SDSCodableModelDatabaseInterfaceImpl().countAllModels(
+        SDSCodableModelDatabaseInterface().countAllModels(
             modelType: Self.self,
             transaction: transaction,
         )
@@ -129,7 +129,7 @@ public extension SDSCodableModel {
         rowId: Int64,
         transaction: DBReadTransaction,
     ) -> Self? {
-        SDSCodableModelDatabaseInterfaceImpl().fetchModel(
+        SDSCodableModelDatabaseInterface().fetchModel(
             modelType: Self.self,
             rowId: rowId,
             tx: transaction,
@@ -142,7 +142,7 @@ public extension SDSCodableModel {
         uniqueId: String,
         transaction: DBReadTransaction,
     ) -> Self? {
-        SDSCodableModelDatabaseInterfaceImpl().fetchModel(
+        SDSCodableModelDatabaseInterface().fetchModel(
             modelType: Self.self,
             uniqueId: uniqueId,
             transaction: transaction,
@@ -154,7 +154,7 @@ public extension SDSCodableModel {
         arguments: StatementArguments = [],
         transaction: DBReadTransaction,
     ) -> Self? {
-        SDSCodableModelDatabaseInterfaceImpl().fetchModel(
+        SDSCodableModelDatabaseInterface().fetchModel(
             modelType: Self.self,
             sql: sql,
             arguments: arguments,
@@ -167,7 +167,7 @@ public extension SDSCodableModel {
     static func anyFetchAll(
         transaction: DBReadTransaction,
     ) -> [Self] {
-        SDSCodableModelDatabaseInterfaceImpl().fetchAllModels(
+        SDSCodableModelDatabaseInterface().fetchAllModels(
             modelType: Self.self,
             transaction: transaction,
         )
@@ -176,25 +176,25 @@ public extension SDSCodableModel {
     /// Convenience method delegating to ``SDSCodableModelDatabaseInterface``.
     /// See that class for details.
     func anyInsert(transaction: DBWriteTransaction) {
-        SDSCodableModelDatabaseInterfaceImpl().insertModel(self, transaction: transaction)
+        SDSCodableModelDatabaseInterface().insertModel(self, transaction: transaction)
     }
 
     /// Convenience method delegating to ``SDSCodableModelDatabaseInterface``.
     /// See that class for details.
     func anyUpsert(transaction: DBWriteTransaction) {
-        SDSCodableModelDatabaseInterfaceImpl().upsertModel(self, transaction: transaction)
+        SDSCodableModelDatabaseInterface().upsertModel(self, transaction: transaction)
     }
 
     /// Convenience method delegating to ``SDSCodableModelDatabaseInterface``.
     /// See that class for details.
     func anyOverwritingUpdate(transaction: DBWriteTransaction) {
-        SDSCodableModelDatabaseInterfaceImpl().overwritingUpdateModel(self, transaction: transaction)
+        SDSCodableModelDatabaseInterface().overwritingUpdateModel(self, transaction: transaction)
     }
 
     /// Convenience method delegating to ``SDSCodableModelDatabaseInterface``.
     /// See that class for details.
     func anyRemove(transaction: DBWriteTransaction) {
-        SDSCodableModelDatabaseInterfaceImpl().removeModel(self, transaction: transaction)
+        SDSCodableModelDatabaseInterface().removeModel(self, transaction: transaction)
     }
 }
 
@@ -202,7 +202,7 @@ public extension SDSCodableModel where Self: AnyObject {
     /// Convenience method delegating to ``SDSCodableModelDatabaseInterface``.
     /// See that class for details.
     func anyUpdate(transaction: DBWriteTransaction, block: (Self) -> Void) {
-        SDSCodableModelDatabaseInterfaceImpl().updateModel(
+        SDSCodableModelDatabaseInterface().updateModel(
             self,
             transaction: transaction,
             block: block,
@@ -218,7 +218,7 @@ public extension SDSCodableModel {
         batchingPreference: BatchingPreference = .unbatched,
         block: (Self, inout Bool) -> Void,
     ) {
-        SDSCodableModelDatabaseInterfaceImpl().enumerateModels(
+        SDSCodableModelDatabaseInterface().enumerateModels(
             modelType: Self.self,
             transaction: transaction,
             batchingPreference: batchingPreference,
@@ -234,7 +234,7 @@ public extension SDSCodableModel {
         arguments: StatementArguments,
         block: (Self, inout Bool) -> Void,
     ) {
-        SDSCodableModelDatabaseInterfaceImpl().enumerateModels(
+        SDSCodableModelDatabaseInterface().enumerateModels(
             modelType: Self.self,
             transaction: transaction,
             sql: sql,

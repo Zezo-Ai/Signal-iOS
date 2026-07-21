@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-extension SDSCodableModelDatabaseInterfaceImpl {
+extension SDSCodableModelDatabaseInterface {
 
     /// Remove a model from the database.
     func removeModel<Model: SDSCodableModel>(

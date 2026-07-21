@@ -10,7 +10,7 @@ public enum BatchingPreference {
     case unbatched
 }
 
-extension SDSCodableModelDatabaseInterfaceImpl {
+extension SDSCodableModelDatabaseInterface {
     /// Traverse all records, in no particular order.
     func enumerateModels<Model: SDSCodableModel>(
         modelType: Model.Type,

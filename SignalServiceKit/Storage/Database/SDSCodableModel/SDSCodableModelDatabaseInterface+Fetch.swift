@@ -22,9 +22,7 @@ extension SDSCodableModelDatabaseInterface {
             )
         }
     }
-}
 
-extension SDSCodableModelDatabaseInterfaceImpl {
     /// Fetch a persisted model with the given rowid if it exists.
     func fetchModel<Model: SDSCodableModel>(
         modelType: Model.Type,

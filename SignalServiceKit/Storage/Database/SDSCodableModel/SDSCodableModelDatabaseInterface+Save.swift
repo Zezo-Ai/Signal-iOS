@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-extension SDSCodableModelDatabaseInterfaceImpl {
+extension SDSCodableModelDatabaseInterface {
 
     /// Insert the given model to the database.
     func insertModel<Model: SDSCodableModel>(
@@ -95,14 +95,9 @@ extension SDSCodableModelDatabaseInterfaceImpl {
     ) {
         saveModelToDatabase(model, saveMode: .update, transaction: transaction)
     }
-}
-
-// MARK: - Helpers
-
-private extension SDSCodableModelDatabaseInterface {
 
     /// Get the row ID of this model if it has already been persisted.
-    func fetchRowId<Model: SDSCodableModel>(
+    private func fetchRowId<Model: SDSCodableModel>(
         forModel model: Model,
         tx: DBReadTransaction,
     ) -> Model.RowId? {
@@ -116,7 +111,7 @@ private extension SDSCodableModelDatabaseInterface {
     /// state, the appropriate mode will be used instead. For example, if
     /// `.insert` is given, but we already have a persisted record for this
     /// model, `.update` will be used instead. (And vice versa.)
-    func saveModelToDatabase<Model: SDSCodableModel>(
+    private func saveModelToDatabase<Model: SDSCodableModel>(
         _ model: Model,
         saveMode: SDSSaveMode,
         transaction: DBWriteTransaction,
@@ -146,7 +141,7 @@ private extension SDSCodableModelDatabaseInterface {
     ///
     /// Upserts in production, triggers asserts in debug builds if the passed
     /// `saveMode` does not align with database contents.
-    func faultTolerantSaveModelToDatabase<Model: SDSCodableModel>(
+    private func faultTolerantSaveModelToDatabase<Model: SDSCodableModel>(
         _ model: Model,
         saveMode: SDSSaveMode,
         transaction: DBWriteTransaction,
@@ -172,7 +167,7 @@ private extension SDSCodableModelDatabaseInterface {
         }
     }
 
-    func updateModelInDatabase<Model: SDSCodableModel>(
+    private func updateModelInDatabase<Model: SDSCodableModel>(
         _ model: Model,
         existingGrdbRowId: SDSCodableModel.RowId,
         transaction: DBWriteTransaction,
@@ -183,7 +178,7 @@ private extension SDSCodableModelDatabaseInterface {
         }
     }
 
-    func insertToDatabase<Model: SDSCodableModel>(
+    private func insertToDatabase<Model: SDSCodableModel>(
         model: Model,
         transaction: DBWriteTransaction,
     ) {
