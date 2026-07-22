@@ -137,7 +137,30 @@ extension OWSGroupCallMessage: OWSPreviewText {
 extension OWSGroupCallMessage: ExpiringCallInteraction {
     @objc
     func ensureExpirationStarted(transaction tx: DBWriteTransaction) {
+        guard !isWaitingForCallToEnd(tx: tx) else { return }
         startExpirationIfNecessary(transaction: tx)
+    }
+
+    private func isWaitingForCallToEnd(tx: DBReadTransaction) -> Bool {
+        guard expiresInSeconds > 0, !hasEnded else {
+            return false
+        }
+
+        guard
+            let sqliteRowId,
+            let callRecord = DependenciesBridge.shared.callRecordStore.fetch(
+                interactionRowId: sqliteRowId,
+                tx: tx,
+            )
+        else {
+            // Call records take a call interaction at creation (see
+            // GroupCallManager.createModelsForNewGroupCall), so this will fire
+            // once before the record exists. Wait until we actually have
+            // the record to determine if the disappearing timer can start.
+            return true
+        }
+
+        return !callRecord.callStatus.isMissedCall
     }
 }
 
@@ -152,7 +175,9 @@ extension OWSGroupCallMessage: OWSReadTracking {
         shouldClearNotifications: Bool,
         transaction tx: DBWriteTransaction,
     ) {
-        if readTimestamp < expireStartedAt {
+        let isWaitingForCallToEnd = self.isWaitingForCallToEnd(tx: tx)
+
+        if !isWaitingForCallToEnd, readTimestamp < expireStartedAt {
             // This device already read the item but a linked device read it earlier
             startOrUpdateExpiration(readTimestamp: readTimestamp, tx: tx)
         }
@@ -185,7 +210,9 @@ extension OWSGroupCallMessage: OWSReadTracking {
             }
         case .onLinkedDevice, .onLinkedDeviceWhilePendingMessageRequest:
             // This device has not read the item but a linked device has
-            startOrUpdateExpiration(readTimestamp: readTimestamp, tx: tx)
+            if !isWaitingForCallToEnd {
+                startOrUpdateExpiration(readTimestamp: readTimestamp, tx: tx)
+            }
         @unknown default:
             break
         }
