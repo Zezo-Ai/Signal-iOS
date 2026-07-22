@@ -59,8 +59,8 @@ public class HydratedMessageBody: Equatable, Hashable {
         mentionHydrator: MentionHydrator,
         isRTL: Bool = CurrentAppContext().isRTL,
     ) {
-        var mentionsInOriginal = messageBody.ranges.orderedMentions
-        var stylesInOriginal = messageBody.ranges.collapsedStyles
+        var mentionsInOriginal = messageBody.ranges.orderedMentions[...]
+        var stylesInOriginal = messageBody.ranges.collapsedStyles[...]
 
         let finalText = NSMutableString(string: messageBody.text)
         let startLength = finalText.length
