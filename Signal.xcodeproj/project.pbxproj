@@ -812,6 +812,7 @@
 		509A8DC22E25817E0024BF14 /* ConnectionLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509A8DC12E25817E0024BF14 /* ConnectionLock.swift */; };
 		509BBF7A28CA556700F4D8A0 /* Data+SSKTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509BBF7928CA556700F4D8A0 /* Data+SSKTest.swift */; };
 		509DC8DA2BCED88600375E86 /* RemoteMegaphoneFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98DD85D28EE53B00089333E /* RemoteMegaphoneFetcher.swift */; };
+		50A0B3D0301015050053607C /* HydratedMessageBodyTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A0B3CF301015050053607C /* HydratedMessageBodyTest.swift */; };
 		50A156C72FA11AA8008FE086 /* Fingerprint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A156C62FA11AA8008FE086 /* Fingerprint.swift */; };
 		50A1CE3A2A00931900730C40 /* DebugLogger+MainApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A1CE392A00931900730C40 /* DebugLogger+MainApp.swift */; };
 		50A26F1A2FB6991F000A2D8B /* SVR2PinHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A26F192FB6991F000A2D8B /* SVR2PinHash.swift */; };
@@ -5126,6 +5127,7 @@
 		509913BD2913274100F34F8E /* RecipientPickerViewControllerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipientPickerViewControllerTest.swift; sourceTree = "<group>"; };
 		509A8DC12E25817E0024BF14 /* ConnectionLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionLock.swift; sourceTree = "<group>"; };
 		509BBF7928CA556700F4D8A0 /* Data+SSKTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+SSKTest.swift"; sourceTree = "<group>"; };
+		50A0B3CF301015050053607C /* HydratedMessageBodyTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HydratedMessageBodyTest.swift; sourceTree = "<group>"; };
 		50A156C62FA11AA8008FE086 /* Fingerprint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fingerprint.swift; sourceTree = "<group>"; };
 		50A1CE372A00894C00730C40 /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
 		50A1CE392A00931900730C40 /* DebugLogger+MainApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DebugLogger+MainApp.swift"; sourceTree = "<group>"; };
@@ -11058,6 +11060,7 @@
 		66FC636D29DF793000F00DAC /* BodyRanges */ = {
 			isa = PBXGroup;
 			children = (
+				50A0B3CF301015050053607C /* HydratedMessageBodyTest.swift */,
 				66FC637029DF79F400F00DAC /* MessageBodyRangesTests.swift */,
 				668444812A3292AB00DBED7C /* MessageBodyStyleTests.swift */,
 				66883A3829D7630300E898CF /* MessageBodyTests.swift */,
@@ -20360,6 +20363,7 @@
 				50925DEC2DA87AEF00DAB484 /* GroupMessageProcessorJobTest.swift in Sources */,
 				F9426251289B1B5500460798 /* GroupModelsTest.swift in Sources */,
 				F9426243289B1B5500460798 /* HttpHeadersTest.swift in Sources */,
+				50A0B3D0301015050053607C /* HydratedMessageBodyTest.swift in Sources */,
 				D9F399B02A967664001599EC /* IdentityKeyCheckerTest.swift in Sources */,
 				D9F399B42A96E54C001599EC /* IdentityKeyMismatchManagerTest.swift in Sources */,
 				501631CA2EA03615006F9B0E /* ImageMetadataTest.swift in Sources */,

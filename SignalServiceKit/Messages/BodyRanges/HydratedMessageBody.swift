@@ -124,7 +124,6 @@ public class HydratedMessageBody: Equatable, Hashable {
             )
 
             let finalMentionLength: Int
-            let mentionOffsetDelta: Int
             switch mentionHydrator(mention.value) {
             case .preserveMention:
                 // Preserve the mention without replacement and proceed.
@@ -140,10 +139,9 @@ public class HydratedMessageBody: Equatable, Hashable {
                 } else {
                     mentionPlaintext = Mention.prefix + displayName
                 }
-                finalMentionLength = (mentionPlaintext as NSString).length
                 // Make sure we don't have any illegal mention ranges; if so skip them.
                 if newMentionRange.upperBound <= finalText.length {
-                    mentionOffsetDelta = finalMentionLength - mention.range.length
+                    finalMentionLength = (mentionPlaintext as NSString).length
                     finalText.replaceCharacters(in: newMentionRange, with: mentionPlaintext)
                     finalMentionAttributes.append(.init(
                         HydratedMentionAttribute.fromOriginalRange(
@@ -154,40 +152,34 @@ public class HydratedMessageBody: Equatable, Hashable {
                         range: NSRange(location: newMentionRange.location, length: finalMentionLength),
                     ))
                 } else {
-                    mentionOffsetDelta = 0
+                    finalMentionLength = mention.range.length
                 }
             }
+            let mentionOffsetDelta: Int = finalMentionLength - mention.range.length
             rangeOffset += mentionOffsetDelta
 
             // We have to adjust style ranges for the active style
             if let style = styleAtCurrentIndex {
-                if style.originalRange.upperBound <= mention.range.upperBound {
-                    // If the style ended inside (or right at the end of) the mention,
-                    // it should now end at the end of the replacement text.
-                    let finalLength = (newMentionRange.location + finalMentionLength) - style.newRange.location
-                    finalStyleAttributes.append(.init(
-                        StyleAttribute.fromCollapsedStyle(style.style),
-                        range: NSRange(
-                            location: style.newRange.location,
-                            length: finalLength,
-                        ),
-                    ))
-
-                    // We are done with it, now.
-                    styleAtCurrentIndex = nil
-                } else {
-                    // The original style ends past the mention; extend its
-                    // length by the right amount, but keep it in
-                    // the current styles being walked through.
-                    styleAtCurrentIndex = .init(
-                        originalRange: style.originalRange,
-                        newRange: NSRange(
-                            location: style.newRange.location,
-                            length: style.newRange.length + mentionOffsetDelta,
-                        ),
-                        style: style.style,
-                    )
+                var extensionLength = 0
+                // If the unhydrated range ended inside the mention, extend it to the end
+                // of the mention. Also update the originalRange to avoid redundant updates
+                // for overlapping mentions.
+                if style.originalRange.upperBound < mention.range.upperBound {
+                    extensionLength = mention.range.upperBound - style.originalRange.upperBound
                 }
+                // In all cases, we need to adjust the hydrated range by the number of
+                // characters added (or removed).
+                styleAtCurrentIndex = .init(
+                    originalRange: NSRange(
+                        location: style.originalRange.location,
+                        length: style.originalRange.length + extensionLength,
+                    ),
+                    newRange: NSRange(
+                        location: style.newRange.location,
+                        length: style.newRange.length + extensionLength + mentionOffsetDelta,
+                    ),
+                    style: style.style,
+                )
             }
         }
 
