@@ -59,14 +59,6 @@ public class HydratedMessageBody: Equatable, Hashable {
         mentionHydrator: MentionHydrator,
         isRTL: Bool = CurrentAppContext().isRTL,
     ) {
-        if messageBody.text.isEmpty {
-            self.hydratedText = ""
-            self.unhydratedMentions = []
-            self.mentionAttributes = []
-            self.styleAttributes = []
-            return
-        }
-
         var mentionsInOriginal = messageBody.ranges.orderedMentions
         var stylesInOriginal = messageBody.ranges.collapsedStyles
 
