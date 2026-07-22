@@ -254,7 +254,7 @@ struct RotatingQRCodeView: View {
     var body: some View {
         GeometryReader { qrCodeGeometry in
             ZStack {
-                Color(UIColor.ows_gray02)
+                Color.Signal.ultramarine
                     .cornerRadius(24)
 
                 switch model.urlDisplayMode {

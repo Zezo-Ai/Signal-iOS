@@ -193,6 +193,17 @@ class ProvisioningController: NSObject {
     }
 
     @MainActor
+    func cancelProvisioning(from viewController: UIViewController) {
+        Logger.info("")
+
+        if UIDevice.current.isIPad {
+            SignalApp.shared.showSecondaryProvisioning(skipOnboarding: false, appReadiness: appReadiness)
+        } else {
+            switchToPrimaryRegistration(viewController: viewController)
+        }
+    }
+
+    @MainActor
     func provisioningSplashDidComplete(viewController: UIViewController) async {
         Logger.info("")
         await pushPermissionsViewOrSkipToRegistration(onto: viewController)

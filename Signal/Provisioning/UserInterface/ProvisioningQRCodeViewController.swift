@@ -35,6 +35,10 @@ class ProvisioningQRCodeViewController: ProvisioningBaseViewController, Provisio
 
         let qrCodeViewHostingContainer = HostingContainer(wrappedView: ProvisioningQRCodeView(
             model: provisioningQRCodeViewModel,
+            onCancel: { [unowned self] in
+                self.provisioningSocketManager.stop()
+                self.provisioningController.cancelProvisioning(from: self)
+            },
         ))
 
         addChild(qrCodeViewHostingContainer)
@@ -78,10 +82,15 @@ class ProvisioningQRCodeViewController: ProvisioningBaseViewController, Provisio
 
 private struct ProvisioningQRCodeView: View {
     @ObservedObject var model: RotatingQRCodeView.Model
+    let onCancel: () -> Void
+
+    private static let contentMaxWidth: CGFloat = 440
 
     var body: some View {
         GeometryReader { overallGeometry in
-            VStack(spacing: 12) {
+            VStack(spacing: 0) {
+                Spacer()
+
                 Text(OWSLocalizedString(
                     "SECONDARY_ONBOARDING_SCAN_CODE_TITLE",
                     comment: "header text while displaying a QR code which, when scanned, will link this device.",
@@ -89,21 +98,42 @@ private struct ProvisioningQRCodeView: View {
                 .font(.title)
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.Signal.label)
+                .multilineTextAlignment(.center)
 
-                Text(OWSLocalizedString(
-                    "SECONDARY_ONBOARDING_SCAN_CODE_BODY",
-                    comment: "body text while displaying a QR code which, when scanned, will link this device.",
-                ))
-                .font(.body)
-                .foregroundStyle(Color.Signal.secondaryLabel)
-
-                Spacer()
-                    .frame(height: overallGeometry.size.height * 0.05)
+                Spacer(minLength: 8)
+                    .frame(maxHeight: 28)
 
                 RotatingQRCodeView(model: self.model)
+                    .frame(maxWidth: Self.contentMaxWidth)
 
-                Spacer()
-                    .frame(height: overallGeometry.size.height * (overallGeometry.size.isLandscape ? 0.05 : 0.1))
+                Spacer(minLength: 8)
+                    .frame(maxHeight: 38)
+
+                VStack(alignment: .leading, spacing: 24) {
+                    InstructionStep(
+                        icon: .devicePhone,
+                        text: OWSLocalizedString(
+                            "SECONDARY_ONBOARDING_SCAN_CODE_STEP_OPEN_PRIMARY",
+                            comment: "First bullet point on the QR code screen for linking a device",
+                        ),
+                    )
+                    InstructionStep(
+                        icon: .personCircle,
+                        text: OWSLocalizedString(
+                            "SECONDARY_ONBOARDING_SCAN_CODE_STEP_OPEN_SETTINGS",
+                            comment: "Second bullet point on the QR code screen for linking a device",
+                        ),
+                    )
+                    InstructionStep(
+                        icon: .devices,
+                        text: OWSLocalizedString(
+                            "SECONDARY_ONBOARDING_SCAN_CODE_STEP_LINK_DEVICE",
+                            comment: "Third bullet point on the QR code screen for linking a device",
+                        ),
+                    )
+                }
+                .frame(maxWidth: Self.contentMaxWidth, alignment: .leading)
+                .padding(.horizontal, 24)
 
 #if TESTABLE_BUILD
                 if
@@ -132,6 +162,9 @@ private struct ProvisioningQRCodeView: View {
                 }
 #endif
 
+                Spacer(minLength: 24)
+                    .frame(maxHeight: 30)
+
                 Link(
                     OWSLocalizedString(
                         "SECONDARY_ONBOARDING_SCAN_CODE_HELP_TEXT",
@@ -139,16 +172,43 @@ private struct ProvisioningQRCodeView: View {
                     ),
                     destination: URL.Support.troubleshootingMultipleDevices,
                 )
-                .buttonStyle(Registration.UI.MediumSecondaryButtonStyle())
-                .padding(.bottom, NSDirectionalEdgeInsets.buttonContainerLayoutMargins.bottom)
+                .font(.subheadline.weight(.semibold))
+
+                Spacer(minLength: 40)
+
+                Button(CommonStrings.cancelButton, action: onCancel)
+                    .buttonStyle(Registration.UI.MediumSecondaryButtonStyle())
+                    .padding(.bottom, NSDirectionalEdgeInsets.buttonContainerLayoutMargins.bottom)
             }
-            .multilineTextAlignment(.center)
+            .frame(width: overallGeometry.size.width, height: overallGeometry.size.height)
         }
     }
 }
 
 // MARK: -
 
+private struct InstructionStep: View {
+    let icon: ImageResource
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 16) {
+            Image(icon)
+                .renderingMode(.template)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 24, height: 24)
+            Text(text)
+                .font(.headline.weight(.regular))
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .foregroundStyle(Color.Signal.secondaryLabel)
+    }
+}
+
+// MARK: - Previews
+
+#if DEBUG
 private struct PreviewView: View {
     let urlDisplayMode: RotatingQRCodeView.Model.URLDisplayMode
 
@@ -158,6 +218,7 @@ private struct PreviewView: View {
                 urlDisplayMode: urlDisplayMode,
                 onRefreshButtonPressed: {},
             ),
+            onCancel: {},
         )
         .padding(112)
     }
@@ -174,3 +235,4 @@ private struct PreviewView: View {
 #Preview("Refresh Button") {
     PreviewView(urlDisplayMode: .refreshButton)
 }
+#endif
