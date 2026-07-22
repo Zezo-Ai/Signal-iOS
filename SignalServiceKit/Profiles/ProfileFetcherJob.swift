@@ -404,7 +404,10 @@ public class ProfileFetcherJob {
                 profileKey: profileKey,
             )
         } catch {
-            Logger.warn("Error: \(error)")
+            // Log only domain/code; the raw error's userInfo can contain the
+            // avatar CDN URL.
+            Logger.warn("Error: \(error.shortDescription)")
+
             // Reaching this point with anything other than a network failure or
             // timeout should be very rare. It might reflect:
             //

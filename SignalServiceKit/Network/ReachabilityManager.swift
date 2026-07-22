@@ -184,7 +184,7 @@ public class SSKReachabilityManagerImpl: SSKReachabilityManager {
                 _ = try await backgroundSession.performDownload(TSConstants.mainServiceURL, method: .get, maxResponseSize: .max)
                 Logger.info("Finished wakeup request.")
             } catch {
-                Logger.warn("Failed wakeup request \(error)")
+                Logger.warn("Failed wakeup request \(error.shortDescription)")
             }
         }
     }

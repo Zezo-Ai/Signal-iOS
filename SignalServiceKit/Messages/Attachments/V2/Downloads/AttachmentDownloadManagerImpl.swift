@@ -1878,7 +1878,8 @@ public class AttachmentDownloadManagerImpl: AttachmentDownloadManager {
                 try OWSFileSystem.moveFile(from: downloadUrl, to: tmpFile)
                 return tmpFile
             } onError: { error, attemptCount in
-                Logger.warn("Error: \(error)")
+                // Avoid logging the whole error, as it may contain the CDN URL.
+                Logger.warn("Error: \(error.shortDescription)")
 
                 if let resumeData = ((error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data)?.nilIfEmpty {
                     resumeDataCache.set(key: downloadState, value: resumeData)

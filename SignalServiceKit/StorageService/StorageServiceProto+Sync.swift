@@ -1544,7 +1544,9 @@ class StorageServiceAccountRecordUpdater: StorageServiceRecordUpdater {
                     do {
                         try await profileManager.downloadAndDecryptLocalUserAvatarIfNeeded(authedAccount: authedAccount)
                     } catch {
-                        Logger.warn("Couldn't download local avatar: \(error)")
+                        // Log only domain/code; the raw error's userInfo can
+                        // contain the avatar CDN URL.
+                        Logger.warn("Couldn't download local avatar: \(error.shortDescription)")
                     }
                 }
             }

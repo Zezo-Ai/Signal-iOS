@@ -1234,7 +1234,10 @@ extension OWSProfileManager: ProfileManager {
                 // Ignore the error because it's not likely to go away if we retry. If we
                 // can't decrypt the existing avatar, then we don't really have any choice
                 // other than blowing it away.
-                Logger.warn("Dropping unfetchable avatar: \(error)")
+                //
+                // Log only domain/code; the raw error's userInfo can contain
+                // the avatar CDN URL.
+                Logger.warn("Dropping unfetchable avatar: \(error.shortDescription)")
             }
             if let avatarFilename = localUserProfile.avatarFileName, let avatarData = localUserProfile.loadAvatarData() {
                 return (.changeAvatar(avatarData), .setTo(avatarFilename))
