@@ -27,7 +27,7 @@ public enum BuildFlags {
 
     public static let failDebug = build <= .internal
 
-    public static let linkedPhones = build <= .internal
+    public static let linkedPhones = true
 
     public static let isPrerelease = build <= .beta
 
