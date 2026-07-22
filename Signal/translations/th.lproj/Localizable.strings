@@ -548,28 +548,28 @@
 "BACK_BUTTON" = "กลับ";
 
 /* Message for an error sheet shown when confirming the user's Recovery Key via their password manager fails. */
-"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_MESSAGE" = "Your recovery key could not be confirmed. Make sure you've saved it in your password manager, or save it manually.";
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_MESSAGE" = "ไม่สามารถยืนยันกุญแจกู้คืนของคุณได้ โปรดตรวจสอบว่าคุณบันทึกกุญแจไว้ในตัวจัดการรหัสผ่านแล้ว หรือบันทึกกุญแจด้วยตัวเอง";
 
 /* Title for a button that begins saving the user's Recovery Key manually, in an error sheet shown when confirming it via their password manager fails. */
-"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_SAVE_MANUALLY_BUTTON_TITLE" = "Save Key Manually";
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_SAVE_MANUALLY_BUTTON_TITLE" = "บันทึกกุญแจด้วยตัวเอง";
 
 /* Title for a button that retries saving the user's Recovery Key to their password manager, in an error sheet shown when confirming it fails. */
-"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_SAVE_TO_PW_MGR_BUTTON_TITLE" = "Save to Password Manager";
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_SAVE_TO_PW_MGR_BUTTON_TITLE" = "บันทึกไปยังตัวจัดการรหัสผ่าน";
 
 /* Title for an error sheet shown when confirming the user's Recovery Key via their password manager fails. */
-"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_TITLE" = "Error Confirming Recovery Key";
+"BACKUP_CONFIRM_KEY_PW_MGR_ERROR_SHEET_TITLE" = "เกิดข้อผิดพลาดในการยืนยันกุญแจกู้คืน";
 
 /* Title for a button that begins confirming the user's Recovery Key, in a sheet shown after it was saved to their password manager. */
-"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_CONFIRM_BUTTON_TITLE" = "Confirm Recovery Key";
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_CONFIRM_BUTTON_TITLE" = "ยืนยันกุญแจกู้คืน";
 
 /* Message for a sheet shown to confirm the user's Recovery Key after it was saved to their password manager. */
-"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_MESSAGE" = "Confirm that your recovery key was recorded correctly. You will be prompted to sign in with your saved password in the next step.";
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_MESSAGE" = "โปรดยืนยันว่าคุณบันทึกกุญแจกู้คืนเรียบร้อยแล้ว ระบบจะให้คุณลงชื่อเข้าใช้ด้วยรหัสผ่านที่บันทึกไว้ในขั้นตอนต่อไป";
 
 /* Title for a button that returns the user to view their Recovery Key, in a sheet shown after it was saved to their password manager. */
-"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_SEE_KEY_AGAIN_BUTTON_TITLE" = "See Key Again";
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_SEE_KEY_AGAIN_BUTTON_TITLE" = "ดูกุญแจอีกครั้ง";
 
 /* Title for a sheet shown to confirm the user's Recovery Key after it was saved to their password manager. */
-"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_TITLE" = "Confirm Your Recovery Key";
+"BACKUP_CONFIRM_KEY_PW_MGR_SHEET_TITLE" = "ยืนยันกุญแจกู้คืนของคุณ";
 
 /* Action text for Recovery Key reminder megaphone */
 "BACKUP_ENABLEMENT_REMINDER_MEGAPHONE_ACTION" = "เปิด";
@@ -605,7 +605,7 @@
 "BACKUP_KEY_REMINDER_SUCCESSFUL_TOAST" = "กุญแจกู้คืนถูกต้อง โปรดเก็บกุญแจของคุณให้ปลอดภัย";
 
 /* Title for a button that lets the user see their whole Recovery Key, from a preview. */
-"BACKUP_KEY_SEE_FULL_KEY_BUTTON_TITLE" = "See Full Key";
+"BACKUP_KEY_SEE_FULL_KEY_BUTTON_TITLE" = "ดูกุญแจแบบเต็ม";
 
 /* Body for a warning sheet shown to discourage the user from sharing their 'Recovery Key', warning them not to share it with anyone. */
 "BACKUP_NEVER_SHARE_RECOVERY_KEY_SHEET_BODY" = "อย่าเปิดเผยกุญแจกู้คืนของคุณกับใคร ข้อมูลนี้จะทำให้บุคคลอื่นสามารถเข้าถึงบัญชีคุณ <bold>Signal จะไม่ส่งข้อความหาคุณ</bold>เพื่อขอกุญแจกู้คืน โปรดอย่าตอบกลับแชทที่แอบอ้างว่าเป็น Signal";
@@ -731,22 +731,22 @@
 "BACKUP_RESTORE_MODAL_TITLE" = "กำลังกู้คืนข้อความ…";
 
 /* Message for a confirmation sheet shown before saving the user's Recovery Key to their password manager. */
-"BACKUP_SAVE_KEY_PW_MGR_CONFIRM_SHEET_MESSAGE" = "Only store your recovery key in a password manager that you trust is secure. Signal does not make a recommendation on which password manager is right for you.";
+"BACKUP_SAVE_KEY_PW_MGR_CONFIRM_SHEET_MESSAGE" = "โปรดเก็บกุญแจกู้คืนของคุณไว้กับตัวจัดการรหัสผ่านที่คุณมั่นใจว่าปลอดภัยเท่านั้น โดย Signal จะไม่แนะนำตัวจัดการรหัสผ่านที่เหมาะกับคุณตัวใดตัวหนึ่งเป็นพิเศษ";
 
 /* Title for a confirmation sheet shown before saving the user's Recovery Key to their password manager. */
-"BACKUP_SAVE_KEY_PW_MGR_CONFIRM_SHEET_TITLE" = "Save to password manager?";
+"BACKUP_SAVE_KEY_PW_MGR_CONFIRM_SHEET_TITLE" = "บันทึกไปยังตัวจัดการรหัสผ่านใช่หรือไม่";
 
 /* Message for an error sheet shown when saving the user's Recovery Key to their password manager fails. */
-"BACKUP_SAVE_KEY_PW_MGR_ERROR_SHEET_MESSAGE" = "You may not have a password manager set up, or the password manager you're using may not be supported. You can choose your preferred password manager in your phone's settings.";
+"BACKUP_SAVE_KEY_PW_MGR_ERROR_SHEET_MESSAGE" = "คุณอาจยังไม่ได้ตั้งค่าตัวจัดการรหัสผ่าน หรือระบบอาจไม่รองรับตัวจัดการรหัสผ่านที่คุณใช้อยู่ โปรดเลือกตัวจัดการรหัสผ่านที่คุณต้องการใช้ในการตั้งค่าโทรศัพท์";
 
 /* Title for an error sheet shown when saving the user's Recovery Key to their password manager fails. */
-"BACKUP_SAVE_KEY_PW_MGR_ERROR_SHEET_TITLE" = "Can't save to password manager";
+"BACKUP_SAVE_KEY_PW_MGR_ERROR_SHEET_TITLE" = "ไม่สามารถบันทึกไปยังตัวจัดการรหัสผ่าน";
 
 /* Title for a button that begins saving the user's Recovery Key manually. */
-"BACKUP_SAVE_KEY_SAVE_MANUALLY_BUTTON_TITLE" = "Save Manually";
+"BACKUP_SAVE_KEY_SAVE_MANUALLY_BUTTON_TITLE" = "บันทึกด้วยตัวเอง";
 
 /* Title for a button that begins saving the user's Recovery Key to their password manager. */
-"BACKUP_SAVE_KEY_SAVE_TO_PW_MGR_BUTTON_TITLE" = "Save to Password Manager";
+"BACKUP_SAVE_KEY_SAVE_TO_PW_MGR_BUTTON_TITLE" = "บันทึกไปยังตัวจัดการรหัสผ่าน";
 
 /* Message describing that the Background App Refresh permission is disabled for Signal. \"Background App Refresh\" should be localized the same way it is in iOS Settings app permissions. */
 "BACKUP_SETTINGS_BACKGROUND_APP_REFRESH_DISABLED_MESSAGE" = "การสำรองข้อมูลอัตโนมัติถูกปิดใช้งานอยู่ โปรดเปิดใช้งานการสำรองข้อมูลอัตโนมัติโดยอัปเดตการอนุญาตสิทธิ์ของ Signal";
@@ -899,7 +899,7 @@
 "BACKUP_SETTINGS_BACKUPS_ENABLED_SECTION_HEADER" = "รายละเอียดการสำรองข้อมูล";
 
 /* Toast shown when the user's Recovery Key has been confirmed successfully. */
-"BACKUP_SETTINGS_CONFIRM_KEY_SUCCESS_TOAST" = "Recovery Key Confirmed";
+"BACKUP_SETTINGS_CONFIRM_KEY_SUCCESS_TOAST" = "ยืนยันกุญแจกู้คืนแล้ว";
 
 /* Message shown in an action sheet when the user tries to create a new Recovery Key, but is not registered. */
 "BACKUP_SETTINGS_CREATE_NEW_KEY_ERROR_NOT_REGISTERED" = "คุณจำเป็นต้องลงทะเบียนเพื่อสร้างกุญแจกู้คืนใหม่";
@@ -1026,6 +1026,18 @@
 
 /* Title for a sheet explaining that the user's Backups subscription was not found on this device. */
 "BACKUP_SETTINGS_IAP_NOT_FOUND_LOCALLY_SHEET_TITLE" = "ไม่พบการสมัครแพ็กเกจ";
+
+/* Note on the linked-device Backups screen explaining that the Backups subscription can only be managed on the user's primary device. */
+"BACKUP_SETTINGS_LINKED_DEVICE_MANAGE_ON_PRIMARY_FOOTER" = "You can manage or upgrade your Signal Secure Backups subscription on your primary device.";
+
+/* Note on the linked-device Backups screen, shown on the paid tier, explaining that the Backups subscription can only be managed on the user's primary device. */
+"BACKUP_SETTINGS_LINKED_DEVICE_MANAGE_ON_PRIMARY_FOOTER_PAID" = "You can manage or cancel your Signal Backups subscription on your primary device.";
+
+/* Body text on the linked-device Backups screen, shown when Backups aren't set up, explaining the feature and that it can be enabled on the user's primary device. */
+"BACKUP_SETTINGS_LINKED_DEVICE_NO_BACKUP_FOOTER" = "Automatic backups with Signal's secure, end-to-end encrypted storage service. Get started on your primary device.";
+
+/* Message on the linked-device Backups screen, shown when the user's paid subscription can't be found, prompting them to renew. */
+"BACKUP_SETTINGS_LINKED_DEVICE_SUBSCRIPTION_NOT_FOUND" = "Your subscription was not found. Renew to continue using Signal Secure Backups.";
 
 /* Title for a button allowing users to trigger a manual backup. */
 "BACKUP_SETTINGS_MANUAL_BACKUP_BUTTON_TITLE" = "สำรองข้อมูลเดี๋ยวนี้";
@@ -3026,16 +3038,16 @@
 "DEREGISTRATION_WARNING_ACTION_TITLE" = "ลงทะเบียนอุปกรณ์อีกครั้ง";
 
 /* Label indicating a linked device was last active about three days ago. */
-"DEVICE_LAST_ACTIVE_ABOUT_THREE_DAYS_AGO" = "Last active about three days ago";
+"DEVICE_LAST_ACTIVE_ABOUT_THREE_DAYS_AGO" = "ใช้งานล่าสุดประมาณสามวันที่ผ่านมา";
 
 /* {{Short Date}} when device last communicated with Signal Server. */
-"DEVICE_LAST_ACTIVE_AT_LABEL" = "Last active around %1$@";
+"DEVICE_LAST_ACTIVE_AT_LABEL" = "ใช้งานล่าสุดประมาณ %1$@";
 
 /* Label indicating a linked device was last active within the past day. */
-"DEVICE_LAST_ACTIVE_PAST_DAY" = "Last active in the past day";
+"DEVICE_LAST_ACTIVE_PAST_DAY" = "ใช้งานล่าสุดในหนึ่งวันที่ผ่านมา";
 
 /* Label indicating a linked device was last active within the past two days. */
-"DEVICE_LAST_ACTIVE_PAST_TWO_DAYS" = "Last active in the past two days";
+"DEVICE_LAST_ACTIVE_PAST_TWO_DAYS" = "ใช้งานล่าสุดในสองวันที่ผ่านมา";
 
 /* {{Short Date}} when device was linked. */
 "DEVICE_LINKED_AT_LABEL" = "เชื่อมโยงกับ %1$@";
@@ -3443,7 +3455,7 @@
 "DONATION_RECEIPT_EXPORT_RECEIPT_BUTTON" = "แชร์ใบเสร็จ";
 
 /* Footer text at the bottom of donation receipts */
-"DONATION_RECEIPT_FOOTER" = "ขอบคุณสำหรับการสนับสนุน Signal การสนับสนุนของคุณจะช่วยเป็นพลังให้กับภารกิจในการพัฒนาเทคโนโลยีความเป็นส่วนตัวแบบโอเพนซอร์สที่ปกป้องการแสดงออกอย่างเสรีและเปิดใช้งานการสื่อสารทั่วโลกที่ปลอดภัยสำหรับผู้คนหลายล้านคนทั่วโลก ถ้าคุณเป็นผู้อาศัยในสหรัฐอเมริกา ให้เก็บใบเสร็จไว้เพื่อบันทึกภาษี Signal Technology Foundation เป็นองค์กรที่ได้รับการยกเว้นภาษีในสหรัฐอเมริกาภายใต้มาตรา 501c3 ของประมวลรัษฎากรภายใน หมายเลขประจำตัวผู้เสียภาษีของรัฐบาลกลางของเราคือ 82–4506840";
+"DONATION_RECEIPT_FOOTER" = "Thank you for supporting Signal. Your contribution helps fuel the mission of protecting free expression and enabling secure global communication for millions around the world, through open source privacy technology. If you’re a resident of the United States, please retain this receipt for your tax records. Signal Technology Foundation is a tax-exempt nonprofit organization in the United States under section 501c3 of the Internal Revenue Code. Our Federal Tax ID is 82-4506840. Signal did not provide any goods or services in consideration of this contribution.";
 
 /* Title for receipts for donations given on a friend's behalf */
 "DONATION_RECEIPT_FOR_DONATION_ON_BEHALF_OF_A_FRIEND" = "การบริจาคในนามของเพื่อน";
@@ -4898,7 +4910,7 @@
 "IDEAL_DONATION_CONFIRM_DONATION_WITH_BANK_MESSAGE" = "แตะดำเนินการต่อเพื่อตั้งการบริจาครายเดือนของคุณ โดยคุณจะถูกเรียกเก็บเงิน %1$@ จากทางธนาคาร ซึ่งยอดดังกล่าวจะถูกโอนกลับคืนเข้าบัญชีโดยอัตโนมัติ และการบริจาคจำนวน %2$@/เดือนจะถูกหักจากบัญชีของคุณ";
 
 /* The image editor tool (on/off switch) that detects and blurs faces in the photo. */
-"IMAGE_EDITOR_BLUR_FACES" = "Blur Faces";
+"IMAGE_EDITOR_BLUR_FACES" = "เบลอหน้า";
 
 /* The image editor hint that you can draw blur */
 "IMAGE_EDITOR_BLUR_HINT" = "วาดที่ใดก็ได้เพื่อมัว";
@@ -5194,6 +5206,9 @@
 /* report an invalid linking code */
 "LINK_DEVICE_INVALID_CODE_TITLE" = "การเชื่อมโยงอุปกรณ์ไม่สำเร็จ";
 
+/* Menu action on the phone number entry screen to link this device as a secondary device. */
+"LINK_DEVICE_MENU_ACTION" = "Link Device";
+
 /* confirm the users intent to link a new device */
 "LINK_DEVICE_PERMISSION_ALERT_BODY" = "อุปกรณ์เครื่องนี้จะสามารถเห็นกลุ่ม รายชื่อผู้ติดต่อ เข้าถึงแชทของคุณ และส่งข้อความด้วยชื่อของคุณ";
 
@@ -5261,22 +5276,22 @@
 "LINK_PREVIEW_UNKNOWN_DOMAIN" = "ภาพตัวอย่างลิงก์";
 
 /* Shown in an alert when trying to edit a contact. */
-"LINKED_DEVICE_CONTACTS_NOT_ALLOWED" = "ไม่สามารถใช้ iPad จัดการรายชื่อผู้ติดต่อบนโทรศัพท์ได้อีกต่อไป กรุณาเปิดแอป Signal บนโทรศัพท์เพื่อเพิ่มเครือข่าย Signal ลงในรายชื่อผู้ติดต่อบนโทรศัพท์";
+"LINKED_DEVICE_CONTACTS_NOT_ALLOWED" = "Managing phone contacts is no longer available on linked devices. To add Signal connections to your phone contacts open Signal on your primary device.";
 
 /* Bullet point on the linked devices info sheet, describing what can be linked. */
-"LINKED_DEVICE_INFO_SHEET_BULLET_1" = "You can link a desktop, tablet or additional phone.";
+"LINKED_DEVICE_INFO_SHEET_BULLET_1" = "คุณสามารถเชื่อมโยงอุปกรณ์ที่เป็นเดสก์ท็อป แท็บเล็ต หรือโทรศัพท์อีกเครื่อง";
 
 /* Bullet point on the linked devices info sheet, describing that the primary device manages linking. */
-"LINKED_DEVICE_INFO_SHEET_BULLET_2" = "Your primary device manages what's linked, you can link up to 5 devices.";
+"LINKED_DEVICE_INFO_SHEET_BULLET_2" = "ใช้อุปกรณ์หลักจัดการอุปกรณ์ที่เชื่อมโยงอยู่ทั้งหมด โดยสามารถเชื่อมโยงอุปกรณ์ได้สูงสุด 5 เครื่อง";
 
 /* Bullet point on the linked devices info sheet, describing that some settings are primary-only. */
-"LINKED_DEVICE_INFO_SHEET_BULLET_3" = "Some account settings are managed on your primary device only, including account settings and backups.";
+"LINKED_DEVICE_INFO_SHEET_BULLET_3" = "การตั้งค่าบัญชีบางรายการ เช่น การตั้งค่าบัญชีและการสำรองข้อมูล จะต้องใช้อุปกรณ์หลักในการจัดการเท่านั้น";
 
 /* Lead paragraph for a sheet explaining linked devices. The text within the <bold></bold> tags is styled bold. */
-"LINKED_DEVICE_INFO_SHEET_HEADER" = "<bold>Linked Devices</bold> let you access your Signal account and messages securely on any of your additional devices.";
+"LINKED_DEVICE_INFO_SHEET_HEADER" = "<bold>อุปกรณ์ที่เชื่อมโยง</bold>ทำให้คุณสามารถเข้าถึงบัญชี Signal และข้อความของคุณได้อย่างปลอดภัยบนอุปกรณ์เครื่องอื่นๆ";
 
 /* Shown in a banner when you tap the 'New Chat' icon at the top of the list of chats. */
-"LINKED_DEVICE_MANAGE_CONTACTS_BANNER" = "ไม่รองรับการใช้ iPad จัดการรายชื่อผู้ติดต่อบนโทรศัพท์อีกต่อไป อุปกรณ์นี้จะยังคงซิงค์การเปลี่ยนแปลงในรายชื่อผู้ติดต่อตามแอป Signal บนโทรศัพท์ของคุณ";
+"LINKED_DEVICE_MANAGE_CONTACTS_BANNER" = "Managing phone contacts is no longer supported on linked devices. This device will continue to sync any changes to your contact list from Signal on your primary device.";
 
 /* A button shown in a banner when you tap the 'New Chat' icon at the top of the list of chats. Tapping it opens a website with more details. */
 "LINKED_DEVICE_MANAGE_CONTACTS_LEARN_MORE" = "เรียนรู้เพิ่มเติม";
@@ -5384,7 +5399,7 @@
 "MEDIA_DETAIL_VIEW_ALL_MEDIA_BUTTON" = "สื่อทั้งหมด";
 
 /* Title for the button that discards all edits in media editor. */
-"MEDIA_EDITOR_BUTTON_CLEAR" = "Clear";
+"MEDIA_EDITOR_BUTTON_CLEAR" = "ล้าง";
 
 /* Placeholder for message text input field in media editor. */
 "MEDIA_EDITOR_CAPTION_PLACEHOLDER" = "ข้อความ";
@@ -6328,26 +6343,23 @@
 /* button indicating that the user will register their ipad */
 "ONBOARDING_MODE_SWITCH_BUTTON_PROVISIONING" = "ลงทะเบียนไอแพด";
 
-/* button indicating that the user will link their phone */
-"ONBOARDING_MODE_SWITCH_BUTTON_REGISTERING" = "เชื่อมโยงไอโฟน";
+/* button indicating that the user will link this device */
+"ONBOARDING_MODE_SWITCH_BUTTON_REGISTERING" = "Link this device";
 
 /* explanation to the user they're switching from linking to registering flow */
 "ONBOARDING_MODE_SWITCH_EXPLANATION_PROVISIONING" = "แตะ \"ลงทะเบียน iPad\" ทำให้คุณสามารถสร้างบัญชี Signal ใหม่หรือย้ายบัญชีที่มีอยู่แล้วลงใน iPad เครื่องนี้ นี่จะเป็นการปิดใช้ Signal บนอุปกรณ์อื่นที่ลงทะเบียนไว้ด้วยหมายเลขโทรศัพท์เดียวกัน";
 
 /* explanation to the user they're switching from registering to linking flow */
-"ONBOARDING_MODE_SWITCH_EXPLANATION_REGISTERING" = "การแตะ \"เชื่อมโยง iPhone\" จะเชื่อมโยงโทรศัพท์ของคุณเข้ากับบัญชีที่มีอยู่แล้ว ปกติแล้วการเชื่อมโยงโทรศัพท์จะไม่เป็นที่แนะนำ และมันจะจำกัดการใช้งานบางอย่าง เช่น การโทร";
+"ONBOARDING_MODE_SWITCH_EXPLANATION_REGISTERING" = "Tapping “Link this device” will let you connect this device to an existing Signal account.";
 
 /* header text indicating to the user they're switching from linking to registering flow */
 "ONBOARDING_MODE_SWITCH_TITLE_PROVISIONING" = "ลงทะเบียนไอแพดนี้";
 
 /* header text indicating to the user they're switching from registering to linking flow */
-"ONBOARDING_MODE_SWITCH_TITLE_REGISTERING" = "เชื่อมโยงกับไอโฟนนี้";
+"ONBOARDING_MODE_SWITCH_TITLE_REGISTERING" = "Link this device";
 
 /* warning to the user that registering an ipad is not recommended */
 "ONBOARDING_MODE_SWITCH_WARNING_PROVISIONING" = "การลงทะเบียน iPad เครื่องนี้จะเป็นการปิดใช้ Signal บนอุปกรณ์อื่นที่ลงทะเบียนไว้ด้วยหมายเลขโทรศัพท์เดียวกัน";
-
-/* warning to the user that linking a phone is not recommended */
-"ONBOARDING_MODE_SWITCH_WARNING_REGISTERING" = "การเชื่อมโยงกับ iPhone นั้นไม่แนะนำ และมันจะจำกัดความสามารถหลัก";
 
 /* Description of the 'Contacts' permission in the 'onboarding permissions' view. */
 "ONBOARDING_PERMISSIONS_CONTACTS_DESCRIPTION" = "ค้นหาคนที่คุณรู้จัก โดยรายชื่อผู้ติดต่อของคุณจะได้รับการเข้ารหัสและไม่ถูกเปิดเผยต่อบริการของ Signal";
@@ -7286,7 +7298,7 @@
 "POLL_END_CONFIRMATION" = "ปิดโพลใช่หรือไม่";
 
 /* Message for an action sheet confirming the user wants to end a poll. */
-"POLL_END_CONFIRMATION_MESSAGE" = "Members of this chat will no longer be able to vote in this poll.";
+"POLL_END_CONFIRMATION_MESSAGE" = "สมาชิกในแชทนี้จะไม่สามารถโหวตในโพลนี้ได้อีกต่อไป";
 
 /* Shown when another user ends a poll. Embeds {{ another user }} and {{ poll question }}. */
 "POLL_ENDED_BY_OTHER_CHAT_LIST_UPDATE" = "%1$@ ปิดโพล: %2$@";
@@ -8353,17 +8365,23 @@
 /* alert title */
 "SECONDARY_ONBOARDING_INSTALL_PRIMARY_FIRST_TITLE" = "ติดตั้ง Signal บนไอโฟนของคุณ";
 
-/* body text while displaying a QR code which, when scanned, will link this device. */
-"SECONDARY_ONBOARDING_SCAN_CODE_BODY" = "แตะบนรูปโปรไฟล์ของคุณเพื่อเปิดการตั้งค่า การตั้งค่า Signal บนโทรศัพท์ของคุณ หลังจากนั้น \"เชื่อมโยงอุปกรณ์\" และ \"เชื่อมโยงอุปกรณ์ใหม่\" เพื่อสแกนรหัสนี้เข้ากับโทรศัพท์ของคุณ";
-
 /* Link text for page with troubleshooting info shown on the QR scanning screen */
-"SECONDARY_ONBOARDING_SCAN_CODE_HELP_TEXT" = "ดูการเชื่อมโยง iPad ของคุณที่นี่";
+"SECONDARY_ONBOARDING_SCAN_CODE_HELP_TEXT" = "Get help with these steps";
 
 /* Text for a button offering to refresh the QR code to link an iPad. */
 "SECONDARY_ONBOARDING_SCAN_CODE_REFRESH_CODE_BUTTON" = "รีเฟรชคิวอาร์โค้ด";
 
+/* Third bullet point on the QR code screen for linking a device */
+"SECONDARY_ONBOARDING_SCAN_CODE_STEP_LINK_DEVICE" = "Tap “Linked devices” and “Link new device”";
+
+/* First bullet point on the QR code screen for linking a device */
+"SECONDARY_ONBOARDING_SCAN_CODE_STEP_OPEN_PRIMARY" = "Open Signal on your primary device";
+
+/* Second bullet point on the QR code screen for linking a device */
+"SECONDARY_ONBOARDING_SCAN_CODE_STEP_OPEN_SETTINGS" = "Tap your profile picture to open Signal Settings";
+
 /* header text while displaying a QR code which, when scanned, will link this device. */
-"SECONDARY_ONBOARDING_SCAN_CODE_TITLE" = "สแกนรหัส QR ด้วยโทรศัพท์ของคุณ";
+"SECONDARY_ONBOARDING_SCAN_CODE_TITLE" = "Scan this code to link your account";
 
 /* header text before the user can transfer to this device */
 "SECONDARY_TRANSFER_GET_STARTED_BY_OPENING_IPAD" = "เปิด Signal ในไอแพดเครื่องเก่าของคุณเพื่อถ่ายโอนบัญชีของคุณ";
@@ -8732,16 +8750,16 @@
 "SETTINGS_LINK_PREVIEWS_FOOTER" = "เรียกภาพตัวอย่างลิงก์โดยตรงจากเว็บไซต์สำหรับข้อความที่คุณส่ง";
 
 /* Subtitle of a card on a linked device's account settings, explaining that account settings are managed on the primary device. */
-"SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_SUBTITLE" = "To manage your account settings, open Signal on your primary device.";
+"SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_SUBTITLE" = "โปรดเปิด Signal บนอุปกรณ์หลักของคุณเพื่อจัดการการตั้งค่าบัญชี";
 
 /* Title of a card on a linked device's account settings, indicating that this is a linked device. */
-"SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_TITLE" = "This is a Linked Device";
+"SETTINGS_LINKED_DEVICE_ACCOUNT_CARD_TITLE" = "อุปกรณ์นี้เป็นอุปกรณ์ที่เชื่อมโยงอยู่";
 
 /* Label for a button that deletes all Signal data from a linked device. */
-"SETTINGS_LINKED_DEVICE_DELETE_DATA_BUTTON" = "Delete App Data";
+"SETTINGS_LINKED_DEVICE_DELETE_DATA_BUTTON" = "ลบข้อมูลแอป";
 
 /* Footer below the 'delete app data' button, shown on a linked device's account settings. */
-"SETTINGS_LINKED_DEVICE_DELETE_DATA_FOOTER" = "This will remove all data from the Signal app on this device.";
+"SETTINGS_LINKED_DEVICE_DELETE_DATA_FOOTER" = "ข้อมูลทั้งหมดในแอป Signal บนอุปกรณ์เครื่องนี้จะถูกลบ";
 
 /* Label for the 'never' media attachment download behavior in the media download settings. */
 "SETTINGS_MEDIA_DOWNLOAD_CONDITION_NEVER" = "ไม่เลย";
