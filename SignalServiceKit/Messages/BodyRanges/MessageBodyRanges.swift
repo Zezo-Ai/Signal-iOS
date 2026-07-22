@@ -64,7 +64,6 @@ public final class MessageBodyRanges: NSObject, NSCopying, NSSecureCoding {
         self.init(mentions: mentions, orderedMentions: orderedMentions, collapsedStyles: collapsedStyles)
     }
 
-    @objc
     public convenience init(protos: [SSKProtoBodyRange]) {
         var mentions = [NSRange: Aci]()
         var styles = [NSRangedValue<SingleStyle>]()

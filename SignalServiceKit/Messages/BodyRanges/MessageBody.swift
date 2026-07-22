@@ -20,10 +20,8 @@ public class MessageBody: NSObject, NSSecureCoding {
     public static var supportsSecureCoding = true
     public static let mentionPlaceholder = "\u{FFFC}" // Object Replacement Character
 
-    @objc
     public let text: String
 
-    @objc
     public let ranges: MessageBodyRanges
 
     public var hasRanges: Bool {
