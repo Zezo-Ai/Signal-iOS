@@ -50,7 +50,6 @@ public extension GroupsV2Impl {
 
     static func enqueueGroupRestore(
         groupRecord: StorageServiceProtoGroupV2Record,
-        account: AuthedAccount,
         transaction: DBWriteTransaction,
     ) {
         guard GroupMasterKey.isValid(groupRecord.masterKey) else {
@@ -81,7 +80,7 @@ public extension GroupsV2Impl {
         storageServiceGroupsToRestore.writeValue(serializedData, forKey: key, tx: transaction)
 
         transaction.addSyncCompletion {
-            self.enqueueRestoreGroupPass(authedAccount: account)
+            self.enqueueRestoreGroupPass()
         }
     }
 
@@ -89,67 +88,29 @@ public extension GroupsV2Impl {
         return masterKeyData.hexadecimalString
     }
 
-    private static func canProcessGroupRestore(authedAccount: AuthedAccount) async -> Bool {
-        return await (
-            self.isMainAppAndActive()
-                && SSKEnvironment.shared.reachabilityManagerRef.isReachable
-                && isRegisteredWithSneakyTransaction(authedAccount: authedAccount)
+    private static func canProcessGroupRestore() async -> Bool {
+        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+        let reachabilityManager = SSKEnvironment.shared.reachabilityManagerRef
+
+        let isMainAppAndActive = await CurrentAppContext().isMainAppAndActiveIsolated
+        let isReachable = reachabilityManager.isReachable
+        let isRegistered = tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegistered
+
+        return (
+            isMainAppAndActive
+                && isReachable
+                && isRegistered,
         )
     }
 
-    @MainActor
-    private static func isMainAppAndActive() -> Bool {
-        return CurrentAppContext().isMainAppAndActive
-    }
+    private static let restoreTaskQueue = SerialTaskQueue()
 
-    private static func isRegisteredWithSneakyTransaction(authedAccount: AuthedAccount) -> Bool {
-        switch authedAccount.info {
-        case .explicit:
-            return false
-        case .implicit:
-            return DependenciesBridge.shared.tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegistered
-        }
-    }
-
-    private struct State {
-        var inProgress = false
-        var pendingAuthedAccount: AuthedAccount?
-
-        mutating func startIfNeeded(authedAccount: AuthedAccount) -> AuthedAccount? {
-            if self.inProgress {
-                // Already started, so queue up the next one for whenever it finishes.
-                self.pendingAuthedAccount = self.pendingAuthedAccount?.orIfImplicitUse(authedAccount) ?? authedAccount
-                return nil
-            } else {
-                self.inProgress = true
-                return authedAccount
+    static func enqueueRestoreGroupPass() {
+        restoreTaskQueue.enqueue {
+            let shouldContinue = await tryToRestoreNextGroup()
+            if shouldContinue {
+                enqueueRestoreGroupPass()
             }
-        }
-
-        mutating func continueIfNeeded(hasMore: Bool, authedAccount: AuthedAccount) -> AuthedAccount? {
-            assert(self.inProgress)
-            if hasMore {
-                self.pendingAuthedAccount = self.pendingAuthedAccount?.orIfImplicitUse(authedAccount) ?? authedAccount
-            }
-            let result = self.pendingAuthedAccount
-            self.pendingAuthedAccount = nil
-            self.inProgress = (result != nil)
-            return result
-        }
-    }
-
-    private static let state = AtomicValue<State>(State(), lock: .init())
-
-    static func enqueueRestoreGroupPass(authedAccount: AuthedAccount) {
-        let authedAccountToStart = self.state.update { $0.startIfNeeded(authedAccount: authedAccount) }
-        Task { await startRestoreGroupPass(authedAccount: authedAccountToStart) }
-    }
-
-    private static func startRestoreGroupPass(authedAccount initialAuthedAccount: AuthedAccount?) async {
-        var nextAuthedAccount = initialAuthedAccount
-        while let currentAuthedAccount = nextAuthedAccount {
-            let hasMore = await tryToRestoreNextGroup(authedAccount: currentAuthedAccount)
-            nextAuthedAccount = self.state.update { $0.continueIfNeeded(hasMore: hasMore, authedAccount: currentAuthedAccount) }
         }
     }
 
@@ -168,8 +129,8 @@ public extension GroupsV2Impl {
     /// - Returns: True if there is another group to process immediately. False
     /// if there are no more groups to process or the app can't process updates
     /// (eg because the device is in Airplane Mode).
-    private static func tryToRestoreNextGroup(authedAccount: AuthedAccount) async -> Bool {
-        guard await canProcessGroupRestore(authedAccount: authedAccount) else {
+    private static func tryToRestoreNextGroup() async -> Bool {
+        guard await canProcessGroupRestore() else {
             return false
         }
 
@@ -220,7 +181,7 @@ public extension GroupsV2Impl {
                     }
 
                     let recordUpdater = StorageServiceGroupV2RecordUpdater(
-                        authedAccount: authedAccount,
+                        authedAccount: .implicit(),
                         isPrimaryDevice: isPrimaryDevice,
                         avatarDefaultColorManager: DependenciesBridge.shared.avatarDefaultColorManager,
                         blockingManager: SSKEnvironment.shared.blockingManagerRef,
@@ -283,7 +244,7 @@ public extension GroupsV2Impl {
             await markAsFailed()
             return true
         } catch {
-            owsFailDebug("Error: \(error)")
+            Logger.warn("Failed to restore group! \(error)")
             await markAsFailed()
             return true
         }

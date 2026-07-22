@@ -1078,7 +1078,7 @@ class StorageServiceGroupV2RecordUpdater: StorageServiceRecordUpdater {
                 break
             }
         } else {
-            groupsV2.restoreGroupFromStorageServiceIfNecessary(groupRecord: record, account: authedAccount, transaction: transaction)
+            groupsV2.restoreGroupFromStorageServiceIfNecessary(groupRecord: record, transaction: transaction)
         }
 
         // Gather some local contact state to do comparisons against.

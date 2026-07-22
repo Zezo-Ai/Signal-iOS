@@ -41,7 +41,7 @@ public class GroupsV2Impl: GroupsV2 {
         }
 
         appReadiness.runNowOrWhenAppDidBecomeReadyAsync {
-            Self.enqueueRestoreGroupPass(authedAccount: .implicit())
+            Self.enqueueRestoreGroupPass()
         }
 
         observeNotifications()
@@ -88,22 +88,19 @@ public class GroupsV2Impl: GroupsV2 {
     @objc
     private func didBecomeActive() {
         AssertIsOnMainThread()
-
-        Self.enqueueRestoreGroupPass(authedAccount: .implicit())
+        Self.enqueueRestoreGroupPass()
     }
 
     @objc
     private func reachabilityChanged() {
         AssertIsOnMainThread()
-
-        Self.enqueueRestoreGroupPass(authedAccount: .implicit())
+        Self.enqueueRestoreGroupPass()
     }
 
     @objc
     private func registrationStateDidChange() {
         AssertIsOnMainThread()
-
-        Self.enqueueRestoreGroupPass(authedAccount: .implicit())
+        Self.enqueueRestoreGroupPass()
     }
 
     // MARK: - Create Group
@@ -1483,10 +1480,9 @@ public class GroupsV2Impl: GroupsV2 {
 
     public func restoreGroupFromStorageServiceIfNecessary(
         groupRecord: StorageServiceProtoGroupV2Record,
-        account: AuthedAccount,
         transaction: DBWriteTransaction,
     ) {
-        GroupsV2Impl.enqueueGroupRestore(groupRecord: groupRecord, account: account, transaction: transaction)
+        GroupsV2Impl.enqueueGroupRestore(groupRecord: groupRecord, transaction: transaction)
     }
 
     // MARK: - Group Links

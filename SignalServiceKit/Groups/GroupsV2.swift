@@ -137,7 +137,6 @@ public protocol GroupsV2 {
 
     func restoreGroupFromStorageServiceIfNecessary(
         groupRecord: StorageServiceProtoGroupV2Record,
-        account: AuthedAccount,
         transaction: DBWriteTransaction,
     )
 
@@ -500,7 +499,6 @@ public class MockGroupsV2: GroupsV2 {
 
     public func restoreGroupFromStorageServiceIfNecessary(
         groupRecord: StorageServiceProtoGroupV2Record,
-        account: AuthedAccount,
         transaction: DBWriteTransaction,
     ) {
         owsFail("Not implemented.")
