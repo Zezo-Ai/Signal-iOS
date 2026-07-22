@@ -264,6 +264,21 @@ class AppSettingsViewController: OWSTableViewController2 {
                     )
                 },
             ))
+        } else {
+            section2.add(.disclosureItem(
+                icon: .backup,
+                withText: OWSLocalizedString(
+                    "SETTINGS_BACKUPS",
+                    comment: "Label for the 'backups' section of app settings.",
+                ),
+                addBetaLabel: false,
+                actionBlock: { [weak self] in
+                    self?.navigationController?.pushViewController(
+                        LinkedDeviceBackupSettingsViewController(),
+                        animated: true,
+                    )
+                },
+            ))
         }
         section2.add(.disclosureItem(
             icon: .settingsDataUsage,

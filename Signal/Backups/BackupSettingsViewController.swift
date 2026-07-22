@@ -160,10 +160,7 @@ class BackupSettingsViewController:
 
         super.init(wrappedView: BackupSettingsView(viewModel: viewModel))
 
-        title = OWSLocalizedString(
-            "BACKUPS_SETTINGS_TITLE",
-            comment: "Title for the 'Backup' settings menu.",
-        )
+        title = BackupSettingsView.Strings.title
         OWSTableViewController2.removeBackButtonText(viewController: self)
 
         viewModel.actionsDelegate = self
@@ -2123,10 +2120,7 @@ struct BackupSettingsView: View {
                         }
                     }
                 } header: {
-                    Text(OWSLocalizedString(
-                        "BACKUP_SETTINGS_BACKUPS_ENABLED_SECTION_HEADER",
-                        comment: "Header for a menu section related to settings for when Backups are enabled.",
-                    ))
+                    Text(Strings.backupDetailsSectionHeader)
                 }
 
                 SignalSection {
@@ -3030,25 +3024,17 @@ private struct BackupSubscriptionLoadedView: View {
     private func headerView() -> some View {
         switch loadedBackupSubscription {
         case .freeAndEnabled, .freeAndDisabled:
-            Text(String.localizedStringWithFormat(
-                OWSLocalizedString(
-                    "BACKUP_SETTINGS_BACKUP_PLAN_FREE_HEADER_%d",
-                    tableName: "PluralAware",
-                    comment: "Header describing what the free backup plan includes. Embeds {{ the number of days that files are available, e.g. '45' }}.",
-                ),
-                backupSubscriptionConfiguration.freeTierMediaDays,
+            Text(BackupSettingsView.Strings.freePlanHeader(
+                mediaDays: backupSubscriptionConfiguration.freeTierMediaDays,
             ))
             .font(.subheadline)
             .foregroundStyle(Color.Signal.secondaryLabel)
 
             Spacer().frame(height: 8)
         case .paidButFreeForTesters, .paid, .paidButExpiring, .paidButExpired, .paidButFailedToRenew:
-            Text(OWSLocalizedString(
-                "BACKUP_SETTINGS_BACKUP_PLAN_PAID_HEADER",
-                comment: "Header describing what the paid backup plan includes.",
-            ))
-            .font(.subheadline)
-            .foregroundStyle(Color.Signal.secondaryLabel)
+            Text(BackupSettingsView.Strings.paidPlanHeader)
+                .font(.subheadline)
+                .foregroundStyle(Color.Signal.secondaryLabel)
 
             Spacer().frame(height: 8)
         case .paidButIAPNotFoundLocally:
@@ -3060,66 +3046,24 @@ private struct BackupSubscriptionLoadedView: View {
     private func descriptionView() -> some View {
         switch loadedBackupSubscription {
         case .freeAndEnabled:
-            Text(OWSLocalizedString(
-                "BACKUP_SETTINGS_BACKUP_PLAN_FREE_DESCRIPTION",
-                comment: "Text describing the user's free backup plan.",
-            ))
+            Text(BackupSettingsView.Strings.freePlanDescription)
         case .freeAndDisabled:
             Text(OWSLocalizedString(
                 "BACKUP_SETTINGS_BACKUP_PLAN_FREE_AND_DISABLED_DESCRIPTION",
                 comment: "Text describing the user's free backup plan when they have Backups disabled.",
             ))
         case .paidButFreeForTesters:
-            Text(OWSLocalizedString(
-                "BACKUP_SETTINGS_BACKUP_PLAN_PAID_BUT_FREE_FOR_TESTERS_DESCRIPTION",
-                comment: "Text describing that the user's backup plan is paid, but free for them as a tester.",
-            ))
+            Text(BackupSettingsView.Strings.paidPlanFreeForTestersText)
         case .paid(let price, let renewalDate):
-            let priceStringFormat = OWSLocalizedString(
-                "BACKUP_SETTINGS_BACKUP_PLAN_PAID_PRICE_FORMAT",
-                comment: "Text explaining the price of the user's paid backup plan. Embeds {{ the formatted price }}.",
-            )
-            Text(String.nonPluralLocalizedStringWithFormat(
-                priceStringFormat,
-                CurrencyFormatter.format(money: price),
-            ))
-
-            let renewalStringFormat = OWSLocalizedString(
-                "BACKUP_SETTINGS_BACKUP_PLAN_PAID_RENEWAL_FORMAT",
-                comment: "Text explaining when the user's paid backup plan renews. Embeds {{ the formatted renewal date }}.",
-            )
-            Text(String.nonPluralLocalizedStringWithFormat(
-                renewalStringFormat,
-                DateFormatter.localizedString(from: renewalDate, dateStyle: .medium, timeStyle: .none),
-            ))
+            Text(BackupSettingsView.Strings.paidPlanPriceText(price))
+            Text(BackupSettingsView.Strings.paidPlanRenewalText(renewalDate))
         case .paidButExpiring(let expirationDate), .paidButExpired(let expirationDate):
-            let expirationDateFormatString = switch loadedBackupSubscription {
-            case .freeAndEnabled, .freeAndDisabled, .paidButFreeForTesters, .paid, .paidButFailedToRenew, .paidButIAPNotFoundLocally:
-                owsFail("Not possible")
-            case .paidButExpiring:
-                OWSLocalizedString(
-                    "BACKUP_SETTINGS_BACKUP_PLAN_PAID_BUT_CANCELED_FUTURE_EXPIRATION_FORMAT",
-                    comment: "Text explaining that a user's paid plan, which has been canceled, will expire on a future date. Embeds {{ the formatted expiration date }}.",
-                )
-            case .paidButExpired:
-                OWSLocalizedString(
-                    "BACKUP_SETTINGS_BACKUP_PLAN_PAID_BUT_CANCELED_PAST_EXPIRATION_FORMAT",
-                    comment: "Text explaining that a user's paid plan, which has been canceled, expired on a past date. Embeds {{ the formatted expiration date }}.",
-                )
-            }
+            Text(BackupSettingsView.Strings.paidPlanCanceledText)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundStyle(Color.Signal.red)
 
-            Text(OWSLocalizedString(
-                "BACKUP_SETTINGS_BACKUP_PLAN_PAID_BUT_CANCELED_DESCRIPTION",
-                comment: "Text describing that the user's paid backup plan has been canceled.",
-            ))
-            .font(.subheadline)
-            .fontWeight(.semibold)
-            .foregroundStyle(Color.Signal.red)
-
-            Text(String.nonPluralLocalizedStringWithFormat(
-                expirationDateFormatString,
-                DateFormatter.localizedString(from: expirationDate, dateStyle: .medium, timeStyle: .none),
-            ))
+            Text(BackupSettingsView.Strings.paidPlanExpirationText(expirationDate))
         case .paidButFailedToRenew:
             Text(OWSLocalizedString(
                 "BACKUP_SETTINGS_BACKUP_PLAN_PAID_BUT_FAILED_TO_RENEW_DESCRIPTION_1",
@@ -3259,42 +3203,9 @@ private struct BackupDetailsView: View {
 
     var body: some View {
         HStack {
-            let lastBackupMessage: String? = {
-                guard let lastBackupDate = lastBackupDetails?.date else {
-                    return nil
-                }
+            let lastBackupMessage = lastBackupDetails.map { BackupSettingsView.Strings.lastBackupString(date: $0.date) }
 
-                let lastBackupDateString = DateFormatter.localizedString(from: lastBackupDate, dateStyle: .medium, timeStyle: .none)
-                let lastBackupTimeString = DateFormatter.localizedString(from: lastBackupDate, dateStyle: .none, timeStyle: .short)
-
-                if Calendar.current.isDateInToday(lastBackupDate) {
-                    let todayFormatString = OWSLocalizedString(
-                        "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_TODAY_FORMAT",
-                        comment: "Text explaining that the user's last backup was today. Embeds {{ the time of the backup }}.",
-                    )
-
-                    return String.nonPluralLocalizedStringWithFormat(todayFormatString, lastBackupTimeString)
-                } else if Calendar.current.isDateInYesterday(lastBackupDate) {
-                    let yesterdayFormatString = OWSLocalizedString(
-                        "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_YESTERDAY_FORMAT",
-                        comment: "Text explaining that the user's last backup was yesterday. Embeds {{ the time of the backup }}.",
-                    )
-
-                    return String.nonPluralLocalizedStringWithFormat(yesterdayFormatString, lastBackupTimeString)
-                } else {
-                    let pastFormatString = OWSLocalizedString(
-                        "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_PAST_FORMAT",
-                        comment: "Text explaining that the user's last backup was in the past. Embeds 1:{{ the date of the backup }} and 2:{{ the time of the backup }}.",
-                    )
-
-                    return String.nonPluralLocalizedStringWithFormat(pastFormatString, lastBackupDateString, lastBackupTimeString)
-                }
-            }()
-
-            Text(OWSLocalizedString(
-                "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_LABEL",
-                comment: "Label for a menu item explaining when the user's last backup occurred.",
-            ))
+            Text(BackupSettingsView.Strings.lastBackupLabel)
             Spacer()
             if let lastBackupMessage {
                 Text(lastBackupMessage)
@@ -3349,6 +3260,140 @@ private struct BackupViewKeyView: View {
             }
         }
         .foregroundStyle(Color.Signal.label)
+    }
+}
+
+// MARK: - Strings
+
+extension BackupSettingsView {
+    enum Strings {
+        static var title: String {
+            OWSLocalizedString(
+                "BACKUPS_SETTINGS_TITLE",
+                comment: "Title for the 'Backup' settings menu.",
+            )
+        }
+
+        static var paidPlanHeader: String {
+            OWSLocalizedString(
+                "BACKUP_SETTINGS_BACKUP_PLAN_PAID_HEADER",
+                comment: "Header describing what the paid backup plan includes.",
+            )
+        }
+
+        static func freePlanHeader(mediaDays: UInt64) -> String {
+            String.localizedStringWithFormat(
+                OWSLocalizedString(
+                    "BACKUP_SETTINGS_BACKUP_PLAN_FREE_HEADER_%d",
+                    tableName: "PluralAware",
+                    comment: "Header describing what the free backup plan includes. Embeds {{ the number of days that files are available, e.g. '45' }}.",
+                ),
+                mediaDays,
+            )
+        }
+
+        static var freePlanDescription: String {
+            OWSLocalizedString(
+                "BACKUP_SETTINGS_BACKUP_PLAN_FREE_DESCRIPTION",
+                comment: "Text describing the user's free backup plan.",
+            )
+        }
+
+        static var paidPlanFreeForTestersText: String {
+            OWSLocalizedString(
+                "BACKUP_SETTINGS_BACKUP_PLAN_PAID_BUT_FREE_FOR_TESTERS_DESCRIPTION",
+                comment: "Text describing that the user's backup plan is paid, but free for them as a tester.",
+            )
+        }
+
+        static var backupDetailsSectionHeader: String {
+            OWSLocalizedString(
+                "BACKUP_SETTINGS_BACKUPS_ENABLED_SECTION_HEADER",
+                comment: "Header for a menu section related to settings for when Backups are enabled.",
+            )
+        }
+
+        static var lastBackupLabel: String {
+            OWSLocalizedString(
+                "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_LABEL",
+                comment: "Label for a menu item explaining when the user's last backup occurred.",
+            )
+        }
+
+        static func lastBackupString(date: Date) -> String {
+            let timeString = DateFormatter.localizedString(from: date, dateStyle: .none, timeStyle: .short)
+
+            if Calendar.current.isDateInToday(date) {
+                return String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
+                        "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_TODAY_FORMAT",
+                        comment: "Text explaining that the user's last backup was today. Embeds {{ the time of the backup }}.",
+                    ),
+                    timeString,
+                )
+            } else if Calendar.current.isDateInYesterday(date) {
+                return String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
+                        "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_YESTERDAY_FORMAT",
+                        comment: "Text explaining that the user's last backup was yesterday. Embeds {{ the time of the backup }}.",
+                    ),
+                    timeString,
+                )
+            } else {
+                let dateString = DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .none)
+                return String.nonPluralLocalizedStringWithFormat(
+                    OWSLocalizedString(
+                        "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_PAST_FORMAT",
+                        comment: "Text explaining that the user's last backup was in the past. Embeds 1:{{ the date of the backup }} and 2:{{ the time of the backup }}.",
+                    ),
+                    dateString,
+                    timeString,
+                )
+            }
+        }
+
+        static func paidPlanPriceText(_ price: FiatMoney) -> String {
+            String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
+                    "BACKUP_SETTINGS_BACKUP_PLAN_PAID_PRICE_FORMAT",
+                    comment: "Text explaining the price of the user's paid backup plan. Embeds {{ the formatted price }}.",
+                ),
+                CurrencyFormatter.format(money: price),
+            )
+        }
+
+        static func paidPlanRenewalText(_ date: Date) -> String {
+            String.nonPluralLocalizedStringWithFormat(
+                OWSLocalizedString(
+                    "BACKUP_SETTINGS_BACKUP_PLAN_PAID_RENEWAL_FORMAT",
+                    comment: "Text explaining when the user's paid backup plan renews. Embeds {{ the formatted renewal date }}.",
+                ),
+                DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .none),
+            )
+        }
+
+        static var paidPlanCanceledText: String {
+            OWSLocalizedString(
+                "BACKUP_SETTINGS_BACKUP_PLAN_PAID_BUT_CANCELED_DESCRIPTION",
+                comment: "Text describing that the user's paid backup plan has been canceled.",
+            )
+        }
+
+        static func paidPlanExpirationText(_ date: Date) -> String {
+            let format = date.isAfterNow
+                ? OWSLocalizedString(
+                    "BACKUP_SETTINGS_BACKUP_PLAN_PAID_BUT_CANCELED_FUTURE_EXPIRATION_FORMAT",
+                    comment: "Text explaining that a user's paid plan, which has been canceled, will expire on a future date. Embeds {{ the formatted expiration date }}.",
+                )
+                : OWSLocalizedString(
+                    "BACKUP_SETTINGS_BACKUP_PLAN_PAID_BUT_CANCELED_PAST_EXPIRATION_FORMAT",
+                    comment: "Text explaining that a user's paid plan, which has been canceled, expired on a past date. Embeds {{ the formatted expiration date }}.",
+                )
+            return String.nonPluralLocalizedStringWithFormat(
+                format,
+                DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .none),
+            )
+        }
     }
 }
 

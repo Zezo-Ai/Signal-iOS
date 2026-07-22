@@ -1814,6 +1814,7 @@
 		B99B155D2A71BA5200E26DAC /* StoryContextViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99B155C2A71BA5200E26DAC /* StoryContextViewState.swift */; };
 		B99CD9442DA9AB530035C77B /* TypedItemProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99CD9432DA9AB530035C77B /* TypedItemProvider.swift */; };
 		B99CD9452DB066740035C77B /* AttachmentSaving.swift in Sources */ = {isa = PBXBuildFile; fileRef = D954A5AC2D7BA7DA00F61C36 /* AttachmentSaving.swift */; };
+		B99FFDF530003EDC00EC4E45 /* LinkedDeviceBackupSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99FFDF430003EDC00EC4E45 /* LinkedDeviceBackupSettingsViewController.swift */; };
 		B9A0807A2B07D76A000FDB5B /* HomeTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A080792B07D76A000FDB5B /* HomeTabViewController.swift */; };
 		B9A47ACE2D36DA6B0024DD9C /* circular_indeterminate.json in Resources */ = {isa = PBXBuildFile; fileRef = B9A47ACD2D36DA6B0024DD9C /* circular_indeterminate.json */; };
 		B9A53B912CF507FB0000578B /* BackupRestoreProgressModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A53B902CF507FB0000578B /* BackupRestoreProgressModal.swift */; };
@@ -6134,6 +6135,7 @@
 		B995C2352D669FA3001EE321 /* NameEducationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameEducationSheet.swift; sourceTree = "<group>"; };
 		B99B155C2A71BA5200E26DAC /* StoryContextViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryContextViewState.swift; sourceTree = "<group>"; };
 		B99CD9432DA9AB530035C77B /* TypedItemProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypedItemProvider.swift; sourceTree = "<group>"; };
+		B99FFDF430003EDC00EC4E45 /* LinkedDeviceBackupSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedDeviceBackupSettingsViewController.swift; sourceTree = "<group>"; };
 		B9A080792B07D76A000FDB5B /* HomeTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTabViewController.swift; sourceTree = "<group>"; };
 		B9A47ACD2D36DA6B0024DD9C /* circular_indeterminate.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = circular_indeterminate.json; sourceTree = "<group>"; };
 		B9A53B902CF507FB0000578B /* BackupRestoreProgressModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupRestoreProgressModal.swift; sourceTree = "<group>"; };
@@ -13663,6 +13665,7 @@
 				D951F5302D9B236100C5EBF3 /* BackupSettingsViewController.swift */,
 				D92CB5552F030F7A00537EBE /* BackupSubscriptionAlreadyRedeemedSheet.swift */,
 				D9680CF22DBB0B28005DD5BE /* ChooseBackupPlanViewController.swift */,
+				B99FFDF430003EDC00EC4E45 /* LinkedDeviceBackupSettingsViewController.swift */,
 			);
 			path = Backups;
 			sourceTree = "<group>";
@@ -18650,6 +18653,7 @@
 				66F98DE82DBBF25A009F1A86 /* LineWrappingStackViewTestController.swift in Sources */,
 				660FA9112CE58CD7006F9C34 /* LinkAndSyncProvisioningProgressViewController.swift in Sources */,
 				505C2ED42997015800C23FB2 /* LinkDeviceViewController.swift in Sources */,
+				B99FFDF530003EDC00EC4E45 /* LinkedDeviceBackupSettingsViewController.swift in Sources */,
 				B9AA11012FEA08010017C2E8 /* LinkedDeviceInfoSheet.swift in Sources */,
 				B99287FB2CF0FE8D000D62C4 /* LinkedDevicesEducationSheet.swift in Sources */,
 				B9E322E92CD191CF006DAF3B /* LinkedDevicesView.swift in Sources */,
