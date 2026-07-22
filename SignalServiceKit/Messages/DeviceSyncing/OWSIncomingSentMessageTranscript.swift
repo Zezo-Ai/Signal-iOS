@@ -213,7 +213,7 @@ public class OWSIncomingSentMessageTranscript: SentMessageTranscript {
     ) -> SentMessageTranscriptType.Message? {
         let isViewOnceMessage = dataMessage.hasIsViewOnce && dataMessage.isViewOnce
 
-        let bodyRanges = dataMessage.bodyRanges.isEmpty ? MessageBodyRanges.empty : MessageBodyRanges(protos: dataMessage.bodyRanges)
+        let bodyRanges = MessageBodyRanges(protos: dataMessage.bodyRanges)
         var body = dataMessage.body.map {
             DependenciesBridge.shared.attachmentContentValidator.truncatedMessageBodyForInlining(
                 MessageBody(text: $0, ranges: bodyRanges),

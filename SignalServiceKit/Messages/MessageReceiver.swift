@@ -1296,7 +1296,8 @@ public final class MessageReceiver {
             return nil
         }
 
-        let bodyRanges = dataMessage.bodyRanges.isEmpty ? MessageBodyRanges.empty : MessageBodyRanges(protos: dataMessage.bodyRanges)
+        let bodyRanges = MessageBodyRanges(protos: dataMessage.bodyRanges)
+
         var body = dataMessage.body.map {
             // Note: we already checked above that the length doesn't need truncation; this
             // just returns the validated body object needed for downstream APIs.

@@ -83,10 +83,7 @@ public class EditManagerImpl: EditManager {
             tx: tx,
         )
 
-        var bodyRanges: MessageBodyRanges = .empty
-        if !newDataMessage.bodyRanges.isEmpty {
-            bodyRanges = MessageBodyRanges(protos: newDataMessage.bodyRanges)
-        }
+        let bodyRanges = MessageBodyRanges(protos: newDataMessage.bodyRanges)
 
         let oversizeText = newDataMessage.attachments
             .first(where: {
