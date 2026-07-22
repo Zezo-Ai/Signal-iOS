@@ -71,7 +71,10 @@ class ProvisioningController: NSObject {
     }
 
     @MainActor
-    static func presentProvisioningFlow(appReadiness: AppReadinessSetter) {
+    static func presentProvisioningFlow(
+        skipOnboarding: Bool,
+        appReadiness: AppReadinessSetter,
+    ) {
         let provisioningSocketManager = ProvisioningSocketManager(linkType: .linkDevice)
         let provisioningController = ProvisioningController(
             appReadiness: appReadiness,
@@ -99,10 +102,26 @@ class ProvisioningController: NSObject {
             break
         }
 
-        let vc = ProvisioningSplashViewController(provisioningController: provisioningController)
-        navController.setViewControllers([vc], animated: false)
+        if skipOnboarding {
+            let qrCodeViewController = ProvisioningQRCodeViewController(
+                provisioningController: provisioningController,
+                provisioningSocketManager: provisioningSocketManager,
+            )
 
-        CurrentAppContext().mainWindow?.rootViewController = navController
+            navController.pushViewController(qrCodeViewController, animated: false)
+            CurrentAppContext().mainWindow?.rootViewController = navController
+
+            Task {
+                await provisioningController.awaitProvisioning(
+                    from: qrCodeViewController,
+                    navigationController: navController,
+                )
+            }
+        } else {
+            let vc = ProvisioningSplashViewController(provisioningController: provisioningController)
+            navController.setViewControllers([vc], animated: false)
+            CurrentAppContext().mainWindow?.rootViewController = navController
+        }
     }
 
     static func presentRelinkingFlow(appReadiness: AppReadinessSetter) {

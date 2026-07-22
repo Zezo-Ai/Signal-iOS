@@ -66,7 +66,7 @@ public class SignalApp {
             showRegistration(loader: registrationLoader, desiredMode: desiredMode, appReadiness: appReadiness)
             appReadiness.setUIIsReady()
         case .secondaryProvisioning:
-            showSecondaryProvisioning(appReadiness: appReadiness)
+            showSecondaryProvisioning(skipOnboarding: false, appReadiness: appReadiness)
             appReadiness.setUIIsReady()
         case .chatList:
             showConversationSplitView(appReadiness: appReadiness)
@@ -116,8 +116,11 @@ public class SignalApp {
     }
 
     @MainActor
-    func showSecondaryProvisioning(appReadiness: AppReadinessSetter) {
-        ProvisioningController.presentProvisioningFlow(appReadiness: appReadiness)
+    func showSecondaryProvisioning(skipOnboarding: Bool, appReadiness: AppReadinessSetter) {
+        ProvisioningController.presentProvisioningFlow(
+            skipOnboarding: skipOnboarding,
+            appReadiness: appReadiness,
+        )
         conversationSplitViewController = nil
     }
 

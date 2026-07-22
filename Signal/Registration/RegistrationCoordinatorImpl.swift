@@ -43,14 +43,10 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
 
         switch mode {
         case .registering:
-            if persistedState.hasShownSplash {
-                return false
-            } else {
-                self.db.write { tx in
-                    self.wipePersistedState(tx)
-                }
-                return true
+            self.db.write { tx in
+                self.wipePersistedState(tx)
             }
+            return true
         case .reRegistering, .changingNumber:
             return false
         }

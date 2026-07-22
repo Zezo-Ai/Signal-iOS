@@ -36,16 +36,14 @@ public class RegistrationSplashViewController: OWSViewController, OWSNavigationC
 
         view.backgroundColor = .Signal.background
 
-        // Buttons in the top right corner.
-        let canSwitchModes = UIDevice.current.isIPad || BuildFlags.linkedPhones
-        if canSwitchModes {
+        if UIDevice.current.isIPad {
             let modeSwitchButton = UIButton(
                 configuration: .plain(),
                 primaryAction: UIAction { [weak self] _ in
                     self?.didTapModeSwitch()
                 },
             )
-            modeSwitchButton.configuration?.image = .init(named: UIDevice.current.isIPad ? "link" : "link-slash")
+            modeSwitchButton.configuration?.image = .link
             modeSwitchButton.tintColor = .ows_gray25
 
             view.addSubview(modeSwitchButton)

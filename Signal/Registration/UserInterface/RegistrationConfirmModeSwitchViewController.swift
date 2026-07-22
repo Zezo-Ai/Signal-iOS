@@ -32,13 +32,6 @@ class RegistrationConfirmModeSwitchViewController: OWSViewController {
         )
     }
 
-    private var warningText: String {
-        OWSLocalizedString(
-            "ONBOARDING_MODE_SWITCH_WARNING_REGISTERING",
-            comment: "warning to the user that linking a phone is not recommended",
-        )
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -50,10 +43,10 @@ class RegistrationConfirmModeSwitchViewController: OWSViewController {
         let nextButton = UIButton(
             configuration: .largePrimary(title: OWSLocalizedString(
                 "ONBOARDING_MODE_SWITCH_BUTTON_REGISTERING",
-                comment: "button indicating that the user will link their phone",
+                comment: "button indicating that the user will link this device",
             )),
-            primaryAction: UIAction { [weak self] _ in
-                self?.didPressNext()
+            primaryAction: UIAction { [weak presenter] _ in
+                presenter?.confirmSwitchToDeviceLinkingMode()
             },
         )
         nextButton.accessibilityIdentifier = "onboarding.modeSwitch.nextButton"
@@ -64,21 +57,6 @@ class RegistrationConfirmModeSwitchViewController: OWSViewController {
             .vStretchingSpacer(),
             nextButton.enclosedInVerticalStackView(isFullWidthButton: true),
         ])
-    }
-
-    func didPressNext() {
-        let actionSheet = ActionSheetController(message: warningText)
-
-        let continueAction = ActionSheetAction(
-            title: CommonStrings.continueButton,
-            handler: { [weak self] _ in
-                self?.presenter?.confirmSwitchToDeviceLinkingMode()
-            },
-        )
-        actionSheet.addAction(continueAction)
-        actionSheet.addAction(OWSActionSheets.cancelAction)
-
-        presentActionSheet(actionSheet)
     }
 }
 

@@ -11,6 +11,8 @@ import SignalUI
 protocol RegistrationPhoneNumberPresenter: RegistrationMethodPresenter {
     func goToNextStep(withE164: E164)
 
+    func switchToDeviceLinking()
+
     /// Completely exit registration. Not to be confused with  `cancelChosenRestoreMethod`
     /// which returns to the splash screen.
     func exitRegistration()
@@ -232,16 +234,34 @@ class RegistrationPhoneNumberViewController: OWSViewController {
             ),
         ]
         let canCancelChosenRegistrationMethod: Bool
+        let canSwitchToLinking: Bool
         let canExitRegistration: Bool
         switch state {
         case .initialRegistration(let subState):
             canCancelChosenRegistrationMethod = true
+            canSwitchToLinking = true
             canExitRegistration = subState.canExitRegistration
             Logger.debug("initialRegistration")
         case .reregistration(let subState):
             canCancelChosenRegistrationMethod = false
+            canSwitchToLinking = false
             canExitRegistration = subState.canExitRegistration
             Logger.debug("reregistration")
+        }
+
+        if
+            canSwitchToLinking,
+            UIDevice.current.isIPad || BuildFlags.linkedPhones
+        {
+            actions.insert(UIAction(
+                title: OWSLocalizedString(
+                    "LINK_DEVICE_MENU_ACTION",
+                    comment: "Menu action on the phone number entry screen to link this device as a secondary device.",
+                ),
+                handler: { [weak presenter] _ in
+                    presenter?.switchToDeviceLinking()
+                },
+            ), at: 0)
         }
 
         cancelButton.isHidden = !canCancelChosenRegistrationMethod

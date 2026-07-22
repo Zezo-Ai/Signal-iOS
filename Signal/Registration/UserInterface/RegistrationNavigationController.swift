@@ -526,11 +526,18 @@ extension RegistrationNavigationController: RegistrationSplashPresenter {
 extension RegistrationNavigationController: RegistrationConfimModeSwitchPresenter {
 
     public func confirmSwitchToDeviceLinkingMode() {
+        beginSecondaryDeviceLinking(startingAtQRCode: false)
+    }
+
+    fileprivate func beginSecondaryDeviceLinking(startingAtQRCode: Bool) {
         guard coordinator.switchToSecondaryDeviceLinking() else {
             owsFailBeta("Can't switch to secondary device linking")
             return
         }
-        SignalApp.shared.showSecondaryProvisioning(appReadiness: appReadiness)
+        SignalApp.shared.showSecondaryProvisioning(
+            skipOnboarding: startingAtQRCode,
+            appReadiness: appReadiness,
+        )
     }
 }
 
@@ -552,6 +559,10 @@ extension RegistrationNavigationController: RegistrationPhoneNumberPresenter {
 
     func goToNextStep(withE164 e164: E164) {
         pushNextController(coordinator.submitE164(e164), loadingMode: .submittingPhoneNumber(e164: e164.stringValue))
+    }
+
+    func switchToDeviceLinking() {
+        beginSecondaryDeviceLinking(startingAtQRCode: true)
     }
 
     func exitRegistration() {
