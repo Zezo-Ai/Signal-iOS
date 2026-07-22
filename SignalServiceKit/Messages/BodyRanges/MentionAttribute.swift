@@ -7,7 +7,12 @@ import Foundation
 import LibSignalClient
 public import UIKit
 
-public typealias MentionIDType = Int
+struct MentionId: Hashable {
+    private let rawValue: NSRange
+    fileprivate init(rawValue: NSRange) {
+        self.rawValue = rawValue
+    }
+}
 
 // Note that this struct gets put into NSAttributedString,
 // so we want it to mostly contain simple types and not
@@ -34,26 +39,20 @@ protocol MentionAttribute: Equatable, Hashable {
 
     /// Externally: identifies a single mention range, even if multiple mentions with
     /// the same uuid exist in the same message.
-    ///
-    /// Really this is just the original range of the mention, hashed. But that detail is
-    /// irrelevant to everthing outside of this class.
-    var id: MentionIDType { get }
+    var id: MentionId { get }
     var mentionAci: Aci { get }
 }
 
 struct UnhydratedMentionAttribute: MentionAttribute {
 
-    let id: MentionIDType
+    let id: MentionId
     let mentionAci: Aci
 
     static func fromOriginalRange(_ range: NSRange, mentionAci: Aci) -> Self {
-        var hasher = Hasher()
-        hasher.combine(range)
-        let id = hasher.finalize()
-        return .init(id: id, mentionAci: mentionAci)
+        return .init(id: MentionId(rawValue: range), mentionAci: mentionAci)
     }
 
-    private init(id: MentionIDType, mentionAci: Aci) {
+    private init(id: MentionId, mentionAci: Aci) {
         self.id = id
         self.mentionAci = mentionAci
     }
@@ -61,7 +60,7 @@ struct UnhydratedMentionAttribute: MentionAttribute {
 
 struct HydratedMentionAttribute: MentionAttribute {
 
-    let id: MentionIDType
+    let id: MentionId
     let mentionAci: Aci
     /// Name without the prefix.
     let displayName: String
@@ -71,14 +70,11 @@ struct HydratedMentionAttribute: MentionAttribute {
         mentionAci: Aci,
         displayName: String,
     ) -> Self {
-        var hasher = Hasher()
-        hasher.combine(range)
-        let id = hasher.finalize()
-        return .init(id: id, mentionAci: mentionAci, displayName: displayName)
+        return .init(id: MentionId(rawValue: range), mentionAci: mentionAci, displayName: displayName)
     }
 
     private init(
-        id: MentionIDType,
+        id: MentionId,
         mentionAci: Aci,
         displayName: String,
     ) {
