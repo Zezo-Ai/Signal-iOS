@@ -5261,7 +5261,7 @@
 "LINK_PREVIEW_UNKNOWN_DOMAIN" = "Link Preview";
 
 /* Shown in an alert when trying to edit a contact. */
-"LINKED_DEVICE_CONTACTS_NOT_ALLOWED" = "Managing phone contacts is no longer available on iPad. To add Signal connections to your phone contacts open Signal on your phone.";
+"LINKED_DEVICE_CONTACTS_NOT_ALLOWED" = "Managing phone contacts is no longer available on linked devices. To add Signal connections to your phone contacts open Signal on your primary device.";
 
 /* Bullet point on the linked devices info sheet, describing what can be linked. */
 "LINKED_DEVICE_INFO_SHEET_BULLET_1" = "You can link a desktop, tablet or additional phone.";
@@ -5276,7 +5276,7 @@
 "LINKED_DEVICE_INFO_SHEET_HEADER" = "<bold>Linked Devices</bold> let you access your Signal account and messages securely on any of your additional devices.";
 
 /* Shown in a banner when you tap the 'New Chat' icon at the top of the list of chats. */
-"LINKED_DEVICE_MANAGE_CONTACTS_BANNER" = "Managing phone contacts is no longer supported on iPad. This device will continue to sync any changes to your contact list from Signal on your phone.";
+"LINKED_DEVICE_MANAGE_CONTACTS_BANNER" = "Managing phone contacts is no longer supported on linked devices. This device will continue to sync any changes to your contact list from Signal on your primary device.";
 
 /* A button shown in a banner when you tap the 'New Chat' icon at the top of the list of chats. Tapping it opens a website with more details. */
 "LINKED_DEVICE_MANAGE_CONTACTS_LEARN_MORE" = "Learn more";
