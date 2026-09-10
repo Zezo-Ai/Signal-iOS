@@ -36,9 +36,15 @@ class WADeviceTransferIncomingConnection: DeviceTransfer.IncomingConnection {
         self.discoveredPeerStream = peers.subscribe()
 
         Task {
-            for try await peerList in internalPeerStream {
-                // Publish peer data to any internal subscribers
-                peers.update(peerList)
+            do {
+                for try await peerList in internalPeerStream {
+                    // Publish peer data to any internal subscribers
+                    peers.update(peerList)
+                }
+            } catch is CancellationError {
+                // Nothing
+            } catch {
+                owsFailDebug("Peer discovery stream errored! \(error)")
             }
         }
     }
