@@ -642,10 +642,42 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
     private func _showViewRecoveryKey() async {
         guard
             let navigationController,
-            let authSuccess = await LocalDeviceAuthentication().performBiometricAuth(),
-            let aep = db.read(block: { accountKeyStore.getAccountEntropyPool(tx: $0) })
+            let authSuccess = await LocalDeviceAuthentication().performBiometricAuth()
         else {
             return
+        }
+
+        let (aep, isRegisteredPrimaryDevice) = db.read { tx in
+            (
+                accountKeyStore.getAccountEntropyPool(tx: tx),
+                tsAccountManager.registrationState(tx: tx).isRegisteredPrimaryDevice,
+            )
+        }
+
+        guard let aep else {
+            return
+        }
+
+        var options: [BackupSaveAndConfirmKeyCoordinator.Option] = [
+            .showSaveKeyToPasswordManager(onConfirmed: { [weak self, weak navigationController] in
+                guard let self, let navigationController else { return }
+
+                navigationController.popToViewController(self, animated: true) {
+                    self.presentToast(
+                        text: OWSLocalizedString(
+                            "BACKUP_SETTINGS_CONFIRM_KEY_SUCCESS_TOAST",
+                            comment: "Toast shown when the user's Recovery Key has been confirmed successfully.",
+                        ),
+                        image: .checkCircle,
+                    )
+                }
+            }),
+        ]
+
+        if isRegisteredPrimaryDevice {
+            options.append(.showCreateNewKey(onPressed: { [weak self] _ in
+                self?.createNewKeyFlow()
+            }))
         }
 
         let saveAndConfirmKeyCoordinator = BackupSaveAndConfirmKeyCoordinator(
@@ -653,24 +685,7 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
         )
         saveAndConfirmKeyCoordinator.present(
             aepMode: .current(aep, authSuccess),
-            options: [
-                .showSaveKeyToPasswordManager(onConfirmed: { [weak self, weak navigationController] in
-                    guard let self, let navigationController else { return }
-
-                    navigationController.popToViewController(self, animated: true) {
-                        self.presentToast(
-                            text: OWSLocalizedString(
-                                "BACKUP_SETTINGS_CONFIRM_KEY_SUCCESS_TOAST",
-                                comment: "Toast shown when the user's Recovery Key has been confirmed successfully.",
-                            ),
-                            image: .checkCircle,
-                        )
-                    }
-                }),
-                .showCreateNewKey(onPressed: { [weak self] _ in
-                    self?.createNewKeyFlow()
-                }),
-            ],
+            options: options,
         )
     }
 

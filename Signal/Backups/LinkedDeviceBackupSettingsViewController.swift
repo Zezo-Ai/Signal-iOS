@@ -81,10 +81,24 @@ final class LinkedDeviceBackupSettingsViewController: OWSTableViewController2 {
     private var subscriptionState: SubscriptionState = .loading
     private var subscriptionFetchTask: Task<Void, Never>?
 
-    override init() {
+    private let localFileBackupsStore: LocalFileBackupStore
+    private let db: DB
+
+    override convenience init() {
+        self.init(
+            localFileBackupsStore: LocalFileBackupStore(),
+            db: DependenciesBridge.shared.db,
+        )
+    }
+
+    init(localFileBackupsStore: LocalFileBackupStore, db: DB) {
         self.currentDisplayTier = Self.currentDisplayTierFromDatabase
         self.loadLastBackupDate = Self.loadLastBackupDateFromCDN
         self.loadSubscription = Self.loadSubscriptionFromServer
+
+        self.localFileBackupsStore = localFileBackupsStore
+        self.db = db
+
         super.init()
     }
 
@@ -153,6 +167,15 @@ final class LinkedDeviceBackupSettingsViewController: OWSTableViewController2 {
         case .disabled:
             break
         }
+
+        let onDeviceSection = OWSTableSection()
+        onDeviceSection.customHeaderView = buildOtherWaysHeaderView()
+        onDeviceSection.footerTitle = OWSLocalizedString(
+            "BACKUP_SETTINGS_LANDING_ON_DEVICE_BACKUPS_FOOTER",
+            comment: "Footer text below the On-Device Backups row on the Backups settings landing page.",
+        )
+        onDeviceSection.add(buildOnDeviceBackupsItem())
+        contents.add(onDeviceSection)
 
         self.contents = contents
     }
@@ -409,6 +432,64 @@ final class LinkedDeviceBackupSettingsViewController: OWSTableViewController2 {
         }
     }
 
+    private func buildOtherWaysHeaderView() -> UIView {
+        let label = UILabel()
+        label.text = OWSLocalizedString(
+            "BACKUP_SETTINGS_LANDING_OTHER_WAYS_HEADER",
+            comment: "Section header on the Backups settings landing page.",
+        )
+        label.font = .dynamicTypeHeadlineClamped
+        label.textColor = .Signal.label
+        label.numberOfLines = 0
+
+        let container = UIView()
+        container.addSubview(label)
+        label.autoPinEdge(toSuperviewEdge: .leading, withInset: Self.cellHInnerMargin)
+        label.autoPinEdge(toSuperviewEdge: .trailing, withInset: Self.cellHInnerMargin)
+        label.autoPinEdge(toSuperviewEdge: .top, withInset: (defaultSpacingBetweenSections ?? 0) + 12)
+        label.autoPinEdge(toSuperviewEdge: .bottom, withInset: 10)
+        return container
+    }
+
+    private func buildOnDeviceBackupsItem() -> OWSTableItem {
+        let (shouldSkipLocalBackupsOnboarding, localBackupsEnabled) = db.read { tx in
+            let localBackupsEnabled = localFileBackupsStore.localBackupsEnabled(tx: tx)
+            let skipOnboarding: Bool = {
+                if localFileBackupsStore.shouldOverrideShowLocalBackupsOnboarding(tx: tx) {
+                    return false
+                }
+                return localBackupsEnabled
+            }()
+            return (skipOnboarding, localBackupsEnabled)
+        }
+
+        return OWSTableItem(
+            customCellBlock: {
+                OWSTableItem.buildImageCell(
+                    image: UIImage(named: "device-phone")?.withRenderingMode(.alwaysTemplate),
+                    itemName: OWSLocalizedString(
+                        "BACKUP_SETTINGS_LANDING_ON_DEVICE_BACKUPS",
+                        comment: "Label for the On-Device Backups option on the Backups settings landing page.",
+                    ),
+                    accessoryText: localBackupsEnabled ? CommonStrings.switchOn : nil,
+                    accessoryType: .disclosureIndicator,
+                )
+            },
+            actionBlock: { [weak self] in
+                guard let navigationController = self?.navigationController else { return }
+                navigationController.pushViewController(
+                    BackupOnboardingCoordinator(
+                        backupType: .local,
+                    ).prepareForPresentation(
+                        inNavController: navigationController,
+                        shouldSkipOnboarding: shouldSkipLocalBackupsOnboarding,
+                    ),
+                    animated: true,
+                )
+            },
+        )
+    }
+
     // MARK: - Previews
 
 #if DEBUG
@@ -420,6 +501,9 @@ final class LinkedDeviceBackupSettingsViewController: OWSTableViewController2 {
         self.currentDisplayTier = { displayTier }
         self.loadLastBackupDate = loadLastBackupDate
         self.loadSubscription = loadSubscription
+        self.localFileBackupsStore = LocalFileBackupStore()
+        self.db = DependenciesBridge.shared.db
+
         super.init()
     }
 #endif

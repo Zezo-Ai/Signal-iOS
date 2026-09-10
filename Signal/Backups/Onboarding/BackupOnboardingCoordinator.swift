@@ -53,10 +53,12 @@ class BackupOnboardingCoordinator {
         localFileBackupExportJobStore: LocalFileBackupExportJobStore,
         backupFailureStateManager: BackupFailureStateManager,
     ) {
-        owsPrecondition(
-            db.read { tsAccountManager.registrationState(tx: $0).isPrimaryDevice == true },
-            "Unsafe to let a linked device do Backups Onboarding!",
-        )
+        if backupType == .remote {
+            owsPrecondition(
+                db.read { tsAccountManager.registrationState(tx: $0).isPrimaryDevice == true },
+                "Unsafe to let a linked device do Remote Backups Onboarding!",
+            )
+        }
 
         self.accountKeyStore = accountKeyStore
         self.backupEnablingManager = backupEnablingManager
