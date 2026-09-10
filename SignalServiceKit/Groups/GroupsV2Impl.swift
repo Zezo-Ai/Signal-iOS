@@ -153,7 +153,7 @@ public class GroupsV2Impl: GroupsV2 {
 
         let response = try await performServiceRequest(
             requestBuilder: requestBuilder,
-            groupId: nil,
+            groupId: newGroup.secretParams.getPublicParams().getGroupIdentifier(),
             behavior400: isRetryingAfterRecoverable400 ? .fail : .reportForRecovery,
             behavior403: .fail,
         )
@@ -1110,7 +1110,7 @@ public class GroupsV2Impl: GroupsV2 {
     /// certain errors.
     private func performServiceRequest(
         requestBuilder: RequestBuilder,
-        groupId: GroupIdentifier?,
+        groupId: GroupIdentifier,
         behavior400: Behavior400,
         behavior403: Behavior403,
     ) async throws -> HTTPResponse {
@@ -1142,7 +1142,7 @@ public class GroupsV2Impl: GroupsV2 {
     /// on the error and our 4XX behaviors.
     private func tryRecoveryFromServiceRequestFailure(
         error: Error,
-        groupId: GroupIdentifier?,
+        groupId: GroupIdentifier,
         behavior400: Behavior400,
         behavior403: Behavior403,
     ) async throws -> Never {
@@ -1191,23 +1191,15 @@ public class GroupsV2Impl: GroupsV2 {
                     // We may get a 403 when fetching change actions if
                     // they are not yet a member - for example, if they are
                     // joining via an invite link.
-                    owsAssertDebug(groupId != nil, "Expecting a groupId for this path")
+                    break
 
                 case .removeFromGroup:
-                    guard let groupId else {
-                        owsFailDebug("GroupId must be set to remove from group")
-                        break
-                    }
                     // If we receive 403 when trying to fetch group state, we have left the
                     // group, been removed from the group, or had our invite revoked, and we
                     // should make sure group state in the database reflects that.
                     await GroupManager.handleNotInGroup(groupId: groupId)
 
                 case .fetchGroupUpdates:
-                    guard let groupId else {
-                        owsFailDebug("GroupId must be set to fetch group updates")
-                        break
-                    }
                     // Service returns 403 if client tries to perform an
                     // update for which it is not authorized (e.g. add a
                     // new member if membership access is admin-only).
@@ -1218,8 +1210,6 @@ public class GroupsV2Impl: GroupsV2 {
                     self.tryToUpdateGroupToLatest(groupId: groupId)
 
                 case .reportInvalidOrBlockedGroupLink:
-                    owsAssertDebug(groupId == nil, "groupId should not be set in this code path.")
-
                     if error.httpResponseHeaders?.containsBan == true {
                         throw GroupsV2Error.localUserBlockedFromJoining
                     } else {
@@ -1227,7 +1217,6 @@ public class GroupsV2Impl: GroupsV2 {
                     }
 
                 case .localUserIsNotARequestingMember:
-                    owsAssertDebug(groupId == nil, "groupId should not be set in this code path.")
                     throw GroupsV2Error.localUserIsNotARequestingMember
                 }
 
@@ -1506,7 +1495,7 @@ public class GroupsV2Impl: GroupsV2 {
         )
         let response = try await performServiceRequest(
             requestBuilder: requestBuilder,
-            groupId: nil,
+            groupId: groupSecretParams.getPublicParams().getGroupIdentifier(),
             behavior400: .fail,
             behavior403: behavior403,
         )
