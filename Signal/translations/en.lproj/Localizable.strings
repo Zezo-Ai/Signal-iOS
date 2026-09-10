@@ -3197,7 +3197,7 @@
 "DEVICE_TRANSFER_STATUS_NEW_DEVICE_CONNECTING_WIFI_AWARE_MESSAGE" = "Bring your old device nearby, and make sure Wi-Fi and Bluetooth are enabled. Select this device from the list of devices on the old device.  If device is not visible on old device, select 'Pair New Device' below.";
 
 /* Title for paring an old device to transfer to. */
-"DEVICE_TRANSFER_STATUS_NEW_DEVICE_PAIR_DEVICE" = "Pair This device";
+"DEVICE_TRANSFER_STATUS_NEW_DEVICE_PAIR_DEVICE" = "Pair This Device";
 
 /* Status message on new device when transfer is starting. */
 "DEVICE_TRANSFER_STATUS_NEW_DEVICE_STARTING" = "Waiting to connect to old device…";
@@ -3227,7 +3227,7 @@
 "DEVICE_TRANSFER_STATUS_OLD_DEVICE_CONNECTING_WIFI_AWARE_MESSAGE" = "Bring your new device nearby, and make sure Wi-Fi and Bluetooth are enabled.";
 
 /* Title for paring an new device to transfer to. */
-"DEVICE_TRANSFER_STATUS_OLD_DEVICE_PAIR_DEVICE" = "Pair With New device";
+"DEVICE_TRANSFER_STATUS_OLD_DEVICE_PAIR_DEVICE" = "Pair With New Device";
 
 /* Status message on old device when transfer is starting. */
 "DEVICE_TRANSFER_STATUS_OLD_DEVICE_STARTING" = "Waiting to connect to new device…";
@@ -3251,7 +3251,7 @@
 "DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_DEVICE_MESSAGE" = "Tap “Pair This Device” below";
 
 /* Message informing the user to tap on the pair device button */
-"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_NEW_DEVICE_MESSAGE" = "Tap “Pair With New Decvice” below";
+"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_NEW_DEVICE_MESSAGE" = "Tap “Pair With New Device” below";
 
 /* table cell label in conversation settings */
 "DISAPPEARING_MESSAGES" = "Disappearing Messages";
