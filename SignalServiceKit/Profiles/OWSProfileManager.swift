@@ -498,10 +498,10 @@ extension OWSProfileManager: ProfileManager {
             // But if it's been more than a week since we checked that our groups are up to date, schedule that.
             if -lastGroupProfileKeyCheckTimestamp.timeIntervalSinceNow > .week {
                 await databaseStorage.awaitableWrite { tx in
+                    // These updates will be processed the next time Cron runs.
                     groupsV2.scheduleAllGroupsV2ForProfileKeyUpdate(transaction: tx)
                     self.setLastGroupProfileKeyCheckTimestamp(tx: tx)
                 }
-                groupsV2.processProfileKeyUpdates()
             }
             return
         }
@@ -651,7 +651,19 @@ extension OWSProfileManager: ProfileManager {
         try await attributesUpdateTask.value
 
         Logger.info("Completed profile key rotation.")
-        SSKEnvironment.shared.groupsV2Ref.processProfileKeyUpdates()
+
+        Task {
+            do {
+                try await Retry.performWithBackoff(
+                    maxAttempts: 6,
+                    maxAverageBackoff: 6 * .hour,
+                    isRetryable: { _ in true },
+                    block: { try await SSKEnvironment.shared.groupsV2Ref.processProfileKeyUpdates() },
+                )
+            } catch {
+                Logger.warn("couldn't update profile key in groups after rotating profile key: \(error)")
+            }
+        }
 
         return needsAnotherRotation
     }

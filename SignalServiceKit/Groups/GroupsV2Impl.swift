@@ -24,7 +24,7 @@ public class GroupsV2Impl: GroupsV2 {
         self.authCredentialStore = authCredentialStore
         self.authCredentialManager = authCredentialManager
         self.groupSendEndorsementStore = groupSendEndorsementStore
-        self.profileKeyUpdater = GroupsV2ProfileKeyUpdater(appReadiness: appReadiness)
+        self.profileKeyUpdater = GroupsV2ProfileKeyUpdater()
 
         appReadiness.runNowOrWhenAppDidBecomeReadyAsync {
             guard DependenciesBridge.shared.tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegistered else {
@@ -1077,8 +1077,8 @@ public class GroupsV2Impl: GroupsV2 {
         profileKeyUpdater.scheduleAllGroupsV2ForProfileKeyUpdate(transaction: transaction)
     }
 
-    public func processProfileKeyUpdates() {
-        profileKeyUpdater.processProfileKeyUpdates()
+    public func processProfileKeyUpdates() async throws {
+        try await profileKeyUpdater.updateIfNeeded()
     }
 
     public func updateLocalProfileKeyInGroup(groupId: GroupIdentifier, tx: DBWriteTransaction) {

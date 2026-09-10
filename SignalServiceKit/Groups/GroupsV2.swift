@@ -54,7 +54,7 @@ public protocol GroupsV2 {
 
     func scheduleAllGroupsV2ForProfileKeyUpdate(transaction: DBWriteTransaction)
 
-    func processProfileKeyUpdates()
+    func processProfileKeyUpdates() async throws
 
     func updateLocalProfileKeyInGroup(groupId: GroupIdentifier, tx: DBWriteTransaction)
 
@@ -458,7 +458,7 @@ public class MockGroupsV2: GroupsV2 {
         owsFail("Not implemented.")
     }
 
-    public func processProfileKeyUpdates() {
+    public func processProfileKeyUpdates() async throws {
         owsFail("Not implemented.")
     }
 

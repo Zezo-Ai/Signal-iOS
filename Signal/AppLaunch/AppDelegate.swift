@@ -655,6 +655,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             operation: { try await groupV2Updates.autoRefreshGroups() },
         )
 
+        // Run this even when we're not registered/connected/a primary to ensure we
+        // prune any pending groups that have been deleted.
+        let groupsV2 = SSKEnvironment.shared.groupsV2Ref
+        cron.scheduleFrequently(
+            mustBeRegistered: false,
+            mustBeConnected: false,
+            maxAverageBackoff: 6 * .hour,
+            isRetryable: { !$0.isCancellation },
+            operation: { try await groupsV2.processProfileKeyUpdates() },
+        )
+
         appReadiness.runNowOrWhenAppDidBecomeReadyAsync {
             Task.detached(priority: .low) {
                 YDBStorage.deleteYDBStorage()
