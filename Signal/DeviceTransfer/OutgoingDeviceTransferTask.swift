@@ -196,6 +196,11 @@ class OutgoingDeviceTransferTask {
         try await withCheckedThrowingContinuation { continuation in
             self.transferFinishedContinuation = continuation
         }
+
+        // Everything done and acknowledged, mark the local device as transferred
+        await db.awaitableWrite { tx in
+            self.registrationStateChangeManager.setWasTransferred(tx: tx)
+        }
     }
 
     func stop(error: Error?) {
@@ -275,10 +280,6 @@ class OutgoingDeviceTransferTask {
             }
             // Make sure to wait for whatever's left at the end.
             try await taskGroup.waitForAll()
-        }
-
-        await db.awaitableWrite { tx in
-            self.registrationStateChangeManager.setWasTransferred(tx: tx)
         }
 
         try session.send(message: .done)
