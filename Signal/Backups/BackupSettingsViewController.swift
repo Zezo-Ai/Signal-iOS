@@ -1429,12 +1429,16 @@ class BackupSettingsViewController:
         let (
             currentBackupPlan,
             isRegisteredPrimaryDevice,
-            canRotateAEPResult,
+            rotateAEPRestrictions,
         ) = db.read { tx in
+            // Don't warn the user about the flow they are currently in, that is handled in-flow.
+            var restrictions = accountEntropyPoolManager.verifyRequirementsForSettingAccountEntropyPool(tx: tx)
+            restrictions.remove(.remoteBackupsEnabled)
+
             return (
                 backupSettingsStore.backupPlan(tx: tx),
                 tsAccountManager.registrationState(tx: tx).isRegisteredPrimaryDevice,
-                accountEntropyPoolManager.verifyRequirementsForSettingAccountEntropyPool(tx: tx),
+                restrictions,
             )
         }
 
@@ -1449,8 +1453,8 @@ class BackupSettingsViewController:
             return
         }
 
-        guard canRotateAEPResult == .success else {
-            if let sheet = CannotRotateAEPActionSheet(reason: canRotateAEPResult, fromViewController: fromViewController) {
+        if rotateAEPRestrictions.contains(.localFileBackupsEnabled) {
+            if let sheet = CannotRotateAEPActionSheet(restrictions: rotateAEPRestrictions, fromViewController: fromViewController) {
                 fromViewController.presentActionSheet(sheet)
             }
             return

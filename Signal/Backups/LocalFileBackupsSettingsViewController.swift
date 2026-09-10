@@ -18,6 +18,8 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
     private let backupFailureStateManager: BackupFailureStateManager
     private var presentWelcomeSheet: Bool
     private let clvLocalFileBackupExportProgressViewStore: CLVLocalFileBackupExportProgressView.Store
+    private let accountEntropyPoolManager: AccountEntropyPoolManager
+    private let tsAccountManager: TSAccountManager
 
     // Archive progress
     private var latestArchiveProgressUpdate: OWSSequentialProgress<LocalFileBackupExportJobStage>?
@@ -44,6 +46,8 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
         localFileBackupAttachmentRestoreProgress: LocalFileBackupAttachmentRestoreProgress,
         presentWelcomeSheet: Bool,
         clvLocalFileBackupExportProgressViewStore: CLVLocalFileBackupExportProgressView.Store,
+        accountEntropyPoolManager: AccountEntropyPoolManager,
+        tsAccountManager: TSAccountManager,
     ) {
         self.localFileBackupExportJobRunner = localFileBackupExportJobRunner
         self.localFileBackupStore = localFileBackupStore
@@ -55,6 +59,8 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
         self.localFileBackupAttachmentRestoreProgress = localFileBackupAttachmentRestoreProgress
         self.presentWelcomeSheet = presentWelcomeSheet
         self.clvLocalFileBackupExportProgressViewStore = clvLocalFileBackupExportProgressViewStore
+        self.accountEntropyPoolManager = accountEntropyPoolManager
+        self.tsAccountManager = tsAccountManager
     }
 
     deinit {
@@ -661,11 +667,14 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
                         )
                     }
                 }),
+                .showCreateNewKey(onPressed: { [weak self] _ in
+                    self?.createNewKeyFlow()
+                }),
             ],
         )
     }
 
-    private func turnOffAndDeleteBackupWithModal() {
+    private func turnOffAndDeleteBackupWithModal(aepSideEffect: BackupDisablingManager.AEPSideEffect? = nil) {
         ModalActivityIndicatorViewController.present(
             fromViewController: self,
             asyncBlock: { [weak self] modal in
@@ -681,7 +690,7 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
 
                 let cleanUpState: () -> Void = { [weak self] in
                     guard let self else { return }
-                    db.write { [localFileBackupStore, localFileBackupExportJobStore, clvLocalFileBackupExportProgressViewStore] tx in
+                    db.write { [localFileBackupStore, localFileBackupExportJobStore, clvLocalFileBackupExportProgressViewStore, accountEntropyPoolManager] tx in
                         localFileBackupStore.setLocalBackupsEnabled(value: false, tx: tx)
 
                         // Clear any reminders or details associated with the local backup.
@@ -696,6 +705,18 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
                         localFileBackupExportJobStore.wipe(tx: tx)
                         // Reset the Backups progress bars, in case we later reenable Backups.
                         clvLocalFileBackupExportProgressViewStore.setIsHidden(false, tx: tx)
+
+                        // Rotate AEP, if requested.
+                        switch aepSideEffect {
+                        case .rotate(let newAEP):
+                            do {
+                                try accountEntropyPoolManager.setAccountEntropyPool(newAccountEntropyPool: newAEP, tx: tx)
+                            } catch {
+                                owsFailDebug("Failed to set AEP: \(error)")
+                            }
+                        case nil:
+                            break
+                        }
                     }
                 }
 
@@ -910,5 +931,140 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
             },
         )
         present(welcomeToLocalBackupsSheet, animated: true)
+    }
+
+    // MARK: - Create a new key
+
+    private func createNewKeyFlow() {
+        let (
+            restrictions,
+            localBackupsEnabled,
+            isRegisteredPrimaryDevice,
+        ) = db.read { tx in
+            // Don't warn the user about the flow they are currently in, that is handled in-flow.
+            var restrictions = accountEntropyPoolManager.verifyRequirementsForSettingAccountEntropyPool(tx: tx)
+            restrictions.remove(.localFileBackupsEnabled)
+
+            return (
+                restrictions,
+                localFileBackupStore.localBackupsEnabled(tx: tx),
+                tsAccountManager.registrationState(tx: tx).isRegisteredPrimaryDevice,
+            )
+        }
+
+        guard isRegisteredPrimaryDevice else {
+            OWSActionSheets.showActionSheet(
+                message: OWSLocalizedString(
+                    "BACKUP_SETTINGS_CREATE_NEW_KEY_ERROR_NOT_REGISTERED",
+                    comment: "Message shown in an action sheet when the user tries to create a new Recovery Key, but is not registered.",
+                ),
+                fromViewController: self,
+            )
+            return
+        }
+
+        if !restrictions.isEmpty {
+            if let sheet = CannotRotateAEPActionSheet(restrictions: restrictions, fromViewController: self) {
+                presentActionSheet(sheet)
+            }
+            return
+        }
+
+        self.showCreateNewRecoveryKeyWarningSheet(localBackupsEnabled: localBackupsEnabled)
+    }
+
+    private func showCreateNewRecoveryKeyWarningSheet(localBackupsEnabled: Bool) {
+        let primaryButtonTitle: String
+
+        if localBackupsEnabled {
+            primaryButtonTitle = OWSLocalizedString(
+                "BACKUP_SETTINGS_CREATE_NEW_KEY_WARNING_SHEET_BACKUPS_MUST_BE_DISABLED_TITLE",
+                comment: "TItle for a sheet warning users that Backups must be disabled to create a new Recovery Key.",
+            )
+        } else {
+            primaryButtonTitle = CommonStrings.continueButton
+        }
+
+        let warningSheet = HeroSheetViewController(
+            hero: .image(.backupsKey),
+            title: OWSLocalizedString(
+                "BACKUP_SETTINGS_CREATE_NEW_KEY_WARNING_SHEET_TITLE",
+                comment: "Title for a sheet warning users about creating a new Recovery Key.",
+            ),
+            body: OWSLocalizedString(
+                "LOCAL_BACKUP_SETTINGS_CREATE_NEW_KEY_WARNING_SHEET_BODY",
+                comment: "Body for a sheet warning users about creating a new Recovery Key.",
+            ),
+            primaryButton: HeroSheetViewController.Button(
+                title: primaryButtonTitle,
+                action: { [self] sheet in
+                    sheet.dismiss(animated: true) { [weak self] in
+                        guard let self else { return }
+                        showSaveNewRecoveryKey()
+                    }
+                },
+            ),
+            secondaryButton: .dismissing(
+                title: CommonStrings.cancelButton,
+                style: .secondary,
+            ),
+        )
+
+        present(warningSheet, animated: true)
+    }
+
+    private func showSaveNewRecoveryKey() {
+        guard let navigationController else {
+            return
+        }
+
+        let newCandidateAEP = AccountEntropyPool()
+        let onNewCandidateConfirmed = { [weak self] in
+            guard let self else { return }
+
+            // Pop all the way back to Local Backup Settings.
+            navigationController.popToViewController(self, animated: true) {
+                self.finalizeNewRecoveryKey(newCandidateAEP: newCandidateAEP)
+
+                self.presentToast(text: OWSLocalizedString(
+                    "BACKUP_SETTINGS_CREATE_NEW_KEY_SUCCESS_TOAST",
+                    comment: "Toast shown when a new Recovery Key has been created successfully.",
+                ))
+            }
+        }
+
+        let saveAndConfirmKeyCoordinator = BackupSaveAndConfirmKeyCoordinator(
+            navigationController: navigationController,
+        )
+        saveAndConfirmKeyCoordinator.present(
+            aepMode: .newCandidate(newCandidateAEP),
+            options: [
+                .showSaveKeyToPasswordManager(onConfirmed: onNewCandidateConfirmed),
+                .showSaveKeyManually(onConfirmed: onNewCandidateConfirmed),
+            ],
+        )
+    }
+
+    private func finalizeNewRecoveryKey(newCandidateAEP: AccountEntropyPool) {
+        let localBackupsEnabled: Bool = db.write { tx in
+            let localBackupsEnabled = localFileBackupStore.localBackupsEnabled(tx: tx)
+            if !localBackupsEnabled {
+                Logger.warn("Rotating AEP.")
+                do {
+                    try accountEntropyPoolManager.setAccountEntropyPool(
+                        newAccountEntropyPool: newCandidateAEP,
+                        tx: tx,
+                    )
+                } catch {
+                    owsFailDebug("Failed to set AEP: \(error)")
+                }
+            }
+            return localBackupsEnabled
+        }
+
+        if localBackupsEnabled {
+            Logger.warn("Disabling Backups, then rotating AEP.")
+            turnOffAndDeleteBackupWithModal(aepSideEffect: .rotate(newAEP: newCandidateAEP))
+        }
     }
 }

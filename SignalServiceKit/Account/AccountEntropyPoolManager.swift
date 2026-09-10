@@ -3,9 +3,17 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-public enum CanRotateAEPResult {
-    case localFileBackupsEnabled
-    case success
+/// Restrictions that prevent a user from rotating their AEP.
+/// e.g. a user can't rotate their AEP if local or remote backups are enabled.
+public struct RotateAEPRestrictions: OptionSet {
+    public let rawValue: Int
+
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+
+    public static let localFileBackupsEnabled = Self(rawValue: 1 << 0)
+    public static let remoteBackupsEnabled = Self(rawValue: 1 << 1)
 }
 
 public protocol AccountEntropyPoolManager {
@@ -16,7 +24,7 @@ public protocol AccountEntropyPoolManager {
         tx: DBWriteTransaction,
     ) throws
 
-    func verifyRequirementsForSettingAccountEntropyPool(tx: DBReadTransaction) -> CanRotateAEPResult
+    func verifyRequirementsForSettingAccountEntropyPool(tx: DBReadTransaction) -> RotateAEPRestrictions
 }
 
 // MARK: -
@@ -92,11 +100,19 @@ class AccountEntropyPoolManagerImpl: AccountEntropyPoolManager {
         }
     }
 
-    func verifyRequirementsForSettingAccountEntropyPool(tx: DBReadTransaction) -> CanRotateAEPResult {
-        guard localFileBackupStore.localBackupsEnabled(tx: tx) == false else {
-            return .localFileBackupsEnabled
+    func verifyRequirementsForSettingAccountEntropyPool(tx: DBReadTransaction) -> RotateAEPRestrictions {
+        var options = RotateAEPRestrictions()
+        if localFileBackupStore.localBackupsEnabled(tx: tx) {
+            options.insert(.localFileBackupsEnabled)
         }
-        return .success
+        let backupPlan = backupSettingsStore.backupPlan(tx: tx)
+        switch backupPlan {
+        case .disabled:
+            break
+        case .disabling, .free, .paid, .paidAsTester, .paidExpiringSoon:
+            options.insert(.remoteBackupsEnabled)
+        }
+        return options
     }
 
     // MARK: -
@@ -105,9 +121,9 @@ class AccountEntropyPoolManagerImpl: AccountEntropyPoolManager {
         newAccountEntropyPool: AccountEntropyPool,
         tx: DBWriteTransaction,
     ) throws {
-        let canRotateAEPResult = verifyRequirementsForSettingAccountEntropyPool(tx: tx)
-        guard canRotateAEPResult == .success else {
-            throw OWSAssertionError("Failing to rotate AEP because some requirement was not met: \(canRotateAEPResult)")
+        let rotateAEPRestrictions = verifyRequirementsForSettingAccountEntropyPool(tx: tx)
+        guard rotateAEPRestrictions.isEmpty else {
+            throw OWSAssertionError("Failing to rotate AEP because some requirement was not met. Restrictions: \(rotateAEPRestrictions)")
         }
 
         logger.warn("Setting new AEP!")
@@ -194,8 +210,8 @@ class AccountEntropyPoolManagerImpl: AccountEntropyPoolManager {
 #if TESTABLE_BUILD
 
 class MockAccountEntropyPoolManager: AccountEntropyPoolManager {
-    func verifyRequirementsForSettingAccountEntropyPool(tx: DBReadTransaction) -> CanRotateAEPResult {
-        return .success
+    func verifyRequirementsForSettingAccountEntropyPool(tx: DBReadTransaction) -> RotateAEPRestrictions {
+        return RotateAEPRestrictions()
     }
 
     func generateIfMissing() async {}

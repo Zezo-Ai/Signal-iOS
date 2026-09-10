@@ -96,6 +96,8 @@ class BackupOnboardingCoordinator {
                     localFileBackupAttachmentRestoreProgress: DependenciesBridge.shared.localFileBackupAttachmentRestoreProgress,
                     presentWelcomeSheet: false,
                     clvLocalFileBackupExportProgressViewStore: CLVLocalFileBackupExportProgressView.Store(),
+                    accountEntropyPoolManager: DependenciesBridge.shared.accountEntropyPoolManager,
+                    tsAccountManager: DependenciesBridge.shared.tsAccountManager,
                 )
             }
         } else {
@@ -271,6 +273,8 @@ class BackupOnboardingCoordinator {
                                     localFileBackupAttachmentRestoreProgress: DependenciesBridge.shared.localFileBackupAttachmentRestoreProgress,
                                     presentWelcomeSheet: true,
                                     clvLocalFileBackupExportProgressViewStore: CLVLocalFileBackupExportProgressView.Store(),
+                                    accountEntropyPoolManager: DependenciesBridge.shared.accountEntropyPoolManager,
+                                    tsAccountManager: DependenciesBridge.shared.tsAccountManager,
                                 ),
                             ],
                             animated: true,

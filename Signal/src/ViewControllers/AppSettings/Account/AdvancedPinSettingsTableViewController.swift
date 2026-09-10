@@ -31,23 +31,15 @@ class AdvancedPinSettingsTableViewController: OWSTableViewController2 {
         let (
             isPinEnabled,
             isReglockV2Enabled,
-            isBackupsEnabled,
+            rotateAEPRestrictions,
         ) = context.db.read { tx in
             let ows2FAManager = SSKEnvironment.shared.ows2FAManagerRef
-            let backupSettingsStore = BackupSettingsStore()
-
-            let isBackupsEnabled: Bool
-            switch backupSettingsStore.backupPlan(tx: tx) {
-            case .disabled:
-                isBackupsEnabled = false
-            case .disabling, .free, .paid, .paidExpiringSoon, .paidAsTester:
-                isBackupsEnabled = true
-            }
+            let accountEntropyPoolManager = DependenciesBridge.shared.accountEntropyPoolManager
 
             return (
                 ows2FAManager.isPinEnabled(tx: tx),
                 ows2FAManager.isRegistrationLockV2Enabled(transaction: tx),
-                isBackupsEnabled,
+                accountEntropyPoolManager.verifyRequirementsForSettingAccountEntropyPool(tx: tx),
             )
         }
 
@@ -66,7 +58,7 @@ class AdvancedPinSettingsTableViewController: OWSTableViewController2 {
                 self?.enableOrDisablePin(
                     isPinEnabled: isPinEnabled,
                     isReglockV2Enabled: isReglockV2Enabled,
-                    isBackupsEnabled: isBackupsEnabled,
+                    rotateAEPRestrictions: rotateAEPRestrictions,
                 )
             },
         ))
@@ -78,20 +70,10 @@ class AdvancedPinSettingsTableViewController: OWSTableViewController2 {
     private func enableOrDisablePin(
         isPinEnabled: Bool,
         isReglockV2Enabled: Bool,
-        isBackupsEnabled: Bool,
+        rotateAEPRestrictions: RotateAEPRestrictions,
     ) {
-        let accountEntropyPoolManager = DependenciesBridge.shared.accountEntropyPoolManager
-
         if isPinEnabled {
-            let canRotateAEPResult = context.db.read { tx in
-                accountEntropyPoolManager.verifyRequirementsForSettingAccountEntropyPool(tx: tx)
-            }
-
-            if canRotateAEPResult != .success {
-                if let sheet = CannotRotateAEPActionSheet(reason: canRotateAEPResult, fromViewController: self) {
-                    presentActionSheet(sheet)
-                }
-            } else if
+            if
                 SSKEnvironment.shared.paymentsHelperRef.arePaymentsEnabled,
                 !PaymentsSettingsViewController.hasReviewedPassphraseWithSneakyTransaction()
             {
@@ -104,14 +86,10 @@ class AdvancedPinSettingsTableViewController: OWSTableViewController2 {
                     ),
                     fromViewController: self,
                 )
-            } else if isBackupsEnabled {
-                OWSActionSheets.showActionSheet(
-                    message: OWSLocalizedString(
-                        "SETTINGS_ADVANCED_PINS_DISABLE_PIN_ACTION_BACKUPS_DISABLE_REQUIRED",
-                        comment: "Message shown in an action sheet when attempting to disable PIN, but Backups is enabled.",
-                    ),
-                    fromViewController: self,
-                )
+            } else if !rotateAEPRestrictions.isEmpty {
+                if let sheet = CannotRotateAEPActionSheet(restrictions: rotateAEPRestrictions, fromViewController: self) {
+                    presentActionSheet(sheet)
+                }
             } else {
                 disablePinWithConfirmation()
             }

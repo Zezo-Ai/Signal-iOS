@@ -7,13 +7,13 @@ import SignalServiceKit
 import SignalUI
 
 class CannotRotateAEPActionSheet: ActionSheetController {
-    init?(reason: CanRotateAEPResult, fromViewController: UIViewController) {
+    init?(restrictions: RotateAEPRestrictions, fromViewController: UIViewController) {
         let message: String
         let primaryButtonTitle: String
         let primaryButtonAction: () -> Void
 
-        switch reason {
-        case .localFileBackupsEnabled:
+        // Only show one restriction at a time, so we can direct the user to that settings page.
+        if restrictions.contains(.localFileBackupsEnabled) {
             message = OWSLocalizedString(
                 "AEP_MANAGER_LOCAL_BACKUPS_DISABLE_REQUIRED",
                 comment: "Message shown in an action sheet when attempting to rotate AEP, but local backups is enabled.",
@@ -27,7 +27,21 @@ class CannotRotateAEPActionSheet: ActionSheetController {
                     SignalApp.shared.showAppSettings(mode: .backups(page: .local))
                 }
             }
-        case .success:
+        } else if restrictions.contains(.remoteBackupsEnabled) {
+            message = OWSLocalizedString(
+                "ROTATE_AEP_ACTION_BACKUPS_DISABLE_REQUIRED",
+                comment: "Message shown in an action sheet when attempting to disable PIN, but Backups is enabled.",
+            )
+            primaryButtonTitle = OWSLocalizedString(
+                "BACKUP_SETTINGS_LANDING_VIEW_SETTINGS_BUTTON",
+                comment: "Button to view settings for remote backups on the Backups settings landing page.",
+            )
+            primaryButtonAction = { [weak fromViewController] in
+                fromViewController?.dismiss(animated: true) {
+                    SignalApp.shared.showAppSettings(mode: .backups(page: .remote()))
+                }
+            }
+        } else {
             owsFailDebug("Should not present CannotRotateAEPActionSheet when result is .success")
             return nil
         }
