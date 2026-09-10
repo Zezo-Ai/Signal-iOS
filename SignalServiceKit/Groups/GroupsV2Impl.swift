@@ -1125,7 +1125,7 @@ public class GroupsV2Impl: GroupsV2 {
                 let authCredential = try await authCredentialManager.fetchGroupAuthCredential(localIdentifiers: localIdentifiers)
                 let request = try await requestBuilder(authCredential)
                 do {
-                    return try await performServiceRequestAttempt(request: request)
+                    return try await performServiceRequestAttempt(request: request, groupId: groupId)
                 } catch {
                     try await self.tryRecoveryFromServiceRequestFailure(
                         error: error,
@@ -1238,11 +1238,14 @@ public class GroupsV2Impl: GroupsV2 {
         }
     }
 
-    private func performServiceRequestAttempt(request: GroupsV2Request) async throws -> HTTPResponse {
+    private func performServiceRequestAttempt(
+        request: GroupsV2Request,
+        groupId: GroupIdentifier,
+    ) async throws -> HTTPResponse {
 
         let urlSession = self.urlSession
 
-        let requestDescription = "G2 \(request.method) \(request.urlString)"
+        let requestDescription = "G2 \(request.method) \(request.urlString) [\(groupId.serialize().hexadecimalString)]"
         Logger.info("Sending… -> \(requestDescription)")
 
         do {
