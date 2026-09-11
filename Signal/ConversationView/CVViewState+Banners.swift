@@ -8,9 +8,7 @@ public import SignalServiceKit
 
 /// Manages state for banners that might be hidden.
 private class BannerHiding {
-    private static func hiddenStateKey(forThreadId threadId: String) -> String {
-        "hiddenState_\(threadId)"
-    }
+    private let hiddenStateStore: BannerHidingStore
 
     /// Encapsulates state for a hidden banner.
     private struct HiddenState: Codable {
@@ -26,27 +24,23 @@ private class BannerHiding {
         let numberOfTimesHidden: UInt
     }
 
-    let bannerHidingStore: KeyValueStore
-
     private let hideDuration: TimeInterval
     private let hideForeverAfterNumberOfHides: UInt?
 
-    /// - Parameter identifier: an identifier for the banner whose hides we are tracking
     /// - Parameter hideDuration: how long to hide the banner for, after a hide is recorded
     /// - Parameter hideForeverAfterNumberOfHides: after this many manual hides, the banner will be hidden forever. If `nil`, the banner is never hidden forever.
     init(
-        identifier: String,
+        hiddenStateStore: BannerHidingStore,
         hideDuration: TimeInterval,
-        hideForeverAfterNumberOfHides: UInt? = nil,
+        hideForeverAfterNumberOfHides: UInt?,
     ) {
-        bannerHidingStore = KeyValueStore(collection: identifier)
-
+        self.hiddenStateStore = hiddenStateStore
         self.hideDuration = hideDuration
         self.hideForeverAfterNumberOfHides = hideForeverAfterNumberOfHides
     }
 
-    func isHidden(threadUniqueId threadId: String, transaction: DBReadTransaction) -> Bool {
-        guard let hiddenState = getHiddenState(forThreadId: threadId, transaction: transaction) else {
+    func isHidden(threadUniqueId: String, transaction: DBReadTransaction) -> Bool {
+        guard let hiddenState = getHiddenState(forThreadUniqueId: threadUniqueId, transaction: transaction) else {
             // We've never hidden this banner before, so no reason to hide it now.
             return false
         }
@@ -68,10 +62,10 @@ private class BannerHiding {
         return false
     }
 
-    func hide(threadUniqueId threadId: String, transaction: DBWriteTransaction) {
+    func hide(threadUniqueId: String, transaction: DBWriteTransaction) {
         let stateToWrite: HiddenState
 
-        if let existingHiddenState = getHiddenState(forThreadId: threadId, transaction: transaction) {
+        if let existingHiddenState = getHiddenState(forThreadUniqueId: threadUniqueId, transaction: transaction) {
             stateToWrite = HiddenState(
                 lastHiddenDate: Date(),
                 numberOfTimesHidden: existingHiddenState.numberOfTimesHidden + 1,
@@ -80,25 +74,14 @@ private class BannerHiding {
             stateToWrite = HiddenState(lastHiddenDate: Date(), numberOfTimesHidden: 1)
         }
 
-        do {
-            try bannerHidingStore.setCodable(
-                stateToWrite,
-                key: Self.hiddenStateKey(forThreadId: threadId),
-                transaction: transaction,
-            )
-        } catch let error {
-            owsFailDebug("Caught error while encoding banner hiding state: \(error)!")
-        }
+        hiddenStateStore.writeValueAsJSON(stateToWrite, forThreadUniqueId: threadUniqueId, tx: transaction)
     }
 
-    private func getHiddenState(forThreadId threadId: String, transaction: DBReadTransaction) -> HiddenState? {
+    private func getHiddenState(forThreadUniqueId threadUniqueId: String, transaction: DBReadTransaction) -> HiddenState? {
         do {
-            return try bannerHidingStore.getCodableValue(
-                forKey: Self.hiddenStateKey(forThreadId: threadId),
-                transaction: transaction,
-            )
+            return try hiddenStateStore.fetchJSONAsValue(HiddenState.self, forThreadUniqueId: threadUniqueId, tx: transaction)
         } catch let error {
-            owsFailDebug("Caught error while getting banner hiding state: \(error)!")
+            owsFailDebug("couldn't fetch banner hiding state: \(error)")
             return nil
         }
     }
@@ -106,6 +89,22 @@ private class BannerHiding {
 
 /// Manages state for the "pending member requests" banner.
 private class PendingMemberRequestsBannerHiding: BannerHiding {
+    private let requestingMembersStateStore: BannerHidingStore
+
+    init(
+        hiddenStateStore: BannerHidingStore,
+        requestingMembersStateStore: BannerHidingStore,
+        hideDuration: TimeInterval,
+        hideForeverAfterNumberOfHides: UInt?,
+    ) {
+        self.requestingMembersStateStore = requestingMembersStateStore
+        super.init(
+            hiddenStateStore: hiddenStateStore,
+            hideDuration: hideDuration,
+            hideForeverAfterNumberOfHides: hideForeverAfterNumberOfHides,
+        )
+    }
+
     private struct RequestingMembersState: Codable {
         let requestingMemberAcis: Set<AciUuid>
 
@@ -114,16 +113,12 @@ private class PendingMemberRequestsBannerHiding: BannerHiding {
         }
     }
 
-    private static func requestingMembersStateKey(forThreadId threadId: String) -> String {
-        "requestingMembersState_\(threadId)"
-    }
-
     func isHidden(
         currentRequestingMemberAcis: [Aci],
-        threadUniqueId threadId: String,
+        threadUniqueId: String,
         transaction: DBReadTransaction,
     ) -> Bool {
-        guard isHidden(threadUniqueId: threadId, transaction: transaction) else {
+        guard isHidden(threadUniqueId: threadUniqueId, transaction: transaction) else {
             return false
         }
 
@@ -131,7 +126,7 @@ private class PendingMemberRequestsBannerHiding: BannerHiding {
         // pending member requests we didn't know about last time we snoozed.
 
         let persistedMemberRequestAcis: [Aci] = getRequestingMembersState(
-            forThreadId: threadId,
+            forThreadUniqueId: threadUniqueId,
             transaction: transaction,
         )?.requestingMemberAcis.map({ $0.wrappedValue }) ?? []
 
@@ -140,34 +135,27 @@ private class PendingMemberRequestsBannerHiding: BannerHiding {
 
     func hide(
         currentPendingMemberRequestAcis: [Aci],
-        threadUniqueId threadId: String,
+        threadUniqueId: String,
         transaction: DBWriteTransaction,
     ) {
-        super.hide(threadUniqueId: threadId, transaction: transaction)
+        super.hide(threadUniqueId: threadUniqueId, transaction: transaction)
 
-        do {
-            let newPendingMemberRequestState = RequestingMembersState(
-                requestingMemberAcis: Set(currentPendingMemberRequestAcis.map { $0.codableUuid }),
-            )
+        let newPendingMemberRequestState = RequestingMembersState(
+            requestingMemberAcis: Set(currentPendingMemberRequestAcis.map { $0.codableUuid }),
+        )
 
-            try bannerHidingStore.setCodable(
-                newPendingMemberRequestState,
-                key: Self.requestingMembersStateKey(forThreadId: threadId),
-                transaction: transaction,
-            )
-        } catch let error {
-            owsFailDebug("Caught error while encoding banner hiding state: \(error)!")
-        }
+        requestingMembersStateStore.writeValueAsJSON(newPendingMemberRequestState, forThreadUniqueId: threadUniqueId, tx: transaction)
     }
 
     private func getRequestingMembersState(
-        forThreadId threadId: String,
+        forThreadUniqueId threadUniqueId: String,
         transaction: DBReadTransaction,
     ) -> RequestingMembersState? {
         do {
-            return try bannerHidingStore.getCodableValue(
-                forKey: Self.requestingMembersStateKey(forThreadId: threadId),
-                transaction: transaction,
+            return try requestingMembersStateStore.fetchJSONAsValue(
+                RequestingMembersState.self,
+                forThreadUniqueId: threadUniqueId,
+                tx: transaction,
             )
         } catch let error {
             owsFailDebug("Caught error while getting banner hiding state: \(error)!")
@@ -181,15 +169,18 @@ public extension CVViewState {
     /// This banner will snooze for 1 week after each hiding, and is
     /// responsive to changes in pending member request state.
     private static let isPendingMemberRequestsBannerHiding = PendingMemberRequestsBannerHiding(
-        identifier: "BannerHiding_pendingMemberRequests",
+        hiddenStateStore: .joinRequestHiddenStore,
+        requestingMembersStateStore: .joinRequestMembersStore,
         hideDuration: .week,
+        hideForeverAfterNumberOfHides: nil,
     )
 
     /// This banner will snooze for only 1 hour after each hiding, since this
     /// is a potential safety concern (and only appears in message requests).
     private static let isMessageRequestNameCollisionBannerHiding = BannerHiding(
-        identifier: "BannerHiding_messageRequestNameCollision",
+        hiddenStateStore: .nameCollisionHiddenStore,
         hideDuration: .hour,
+        hideForeverAfterNumberOfHides: nil,
     )
 
     func shouldShowPendingMemberRequestsBanner(

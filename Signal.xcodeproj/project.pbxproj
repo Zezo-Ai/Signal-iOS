@@ -745,6 +745,7 @@
 		504474D330461B210058016E /* ReregisteringLocalIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504474D230461B210058016E /* ReregisteringLocalIdentifiers.swift */; };
 		504474D5304621060058016E /* DeregisteredLocalIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504474D4304621050058016E /* DeregisteredLocalIdentifiers.swift */; };
 		5045F44229E0DB7100058E5F /* LaunchJobs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349C3636233D198300D52012 /* LaunchJobs.swift */; };
+		504642E53053488800601248 /* BannerHidingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504642E43053488800601248 /* BannerHidingStore.swift */; };
 		50468F2529EDD46500948E02 /* ParamParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EF7FC2107DDEE0007EBF7 /* ParamParserTest.swift */; };
 		50468F2929EE130A00948E02 /* InteractionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50468F2829EE130A00948E02 /* InteractionStore.swift */; };
 		50468F2B29EE19C300948E02 /* PhoneNumberChangedMessageInserterTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50468F2A29EE19C300948E02 /* PhoneNumberChangedMessageInserterTest.swift */; };
@@ -5112,6 +5113,7 @@
 		504474D03046021B0058016E /* TableRecord+SSKTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TableRecord+SSKTest.swift"; sourceTree = "<group>"; };
 		504474D230461B210058016E /* ReregisteringLocalIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReregisteringLocalIdentifiers.swift; sourceTree = "<group>"; };
 		504474D4304621050058016E /* DeregisteredLocalIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeregisteredLocalIdentifiers.swift; sourceTree = "<group>"; };
+		504642E43053488800601248 /* BannerHidingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerHidingStore.swift; sourceTree = "<group>"; };
 		50468F2829EE130A00948E02 /* InteractionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractionStore.swift; sourceTree = "<group>"; };
 		50468F2A29EE19C300948E02 /* PhoneNumberChangedMessageInserterTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneNumberChangedMessageInserterTest.swift; sourceTree = "<group>"; };
 		5049246E2F209DA8006469B3 /* OutgoingMessageRequestResponseSyncMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingMessageRequestResponseSyncMessage.swift; sourceTree = "<group>"; };
@@ -15525,6 +15527,7 @@
 		F9C5C9E3289453B100548EEE /* Threads */ = {
 			isa = PBXGroup;
 			children = (
+				504642E43053488800601248 /* BannerHidingStore.swift */,
 				6671DC862CD44C9B002620EF /* LastVisibleInteractionStore.swift */,
 				D9CA614A2C2F675E00F99EA3 /* PrivateStoryThreadDeletionManager.swift */,
 				D9F9A63E2C013EF100EF13EC /* ThreadDeletionManager.swift */,
@@ -19532,6 +19535,7 @@
 				D987C8CF2E1CBE00004072BC /* BackupTestFlightEntitlementManager.swift in Sources */,
 				F9C5CE3A289453B400548EEE /* BadgeAssets.swift in Sources */,
 				D979DA162B8D1FDD000EEAB8 /* BadgeCountFetcher.swift in Sources */,
+				504642E53053488800601248 /* BannerHidingStore.swift in Sources */,
 				F9C5CD58289453B300548EEE /* BaseModel.m in Sources */,
 				6600F369298DA57200B1EDB7 /* BaseOWSURLSessionMock.swift in Sources */,
 				F9C5CE36289453B400548EEE /* Batching.swift in Sources */,
