@@ -155,7 +155,6 @@ final class DatabaseRecoveryTest: SSKBaseTest {
                 reactorAci: localAci,
                 reactorPhoneNumber: nil,
                 sentAtTimestamp: 1234,
-                sortOrder: 1234,
             )
             reaction.anyInsert(transaction: transaction)
 

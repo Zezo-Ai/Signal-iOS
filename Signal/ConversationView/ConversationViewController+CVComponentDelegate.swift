@@ -377,11 +377,6 @@ extension ConversationViewController: CVComponentDelegate {
     ) {
         AssertIsOnMainThread()
 
-        if !reactionState.hasReactions {
-            owsFailDebug("missing reaction state")
-            return
-        }
-
         let detailSheet = ReactionsDetailSheet(reactionState: reactionState, message: message)
         self.present(detailSheet, animated: true, completion: nil)
         self.reactionsDetailSheet = detailSheet

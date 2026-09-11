@@ -1131,13 +1131,7 @@ private extension CVComponentState.Builder {
 
     mutating func populateAndBuild() throws -> CVComponentState {
 
-        if
-            let reactionState = InteractionReactionState(
-                interaction: interaction,
-                transaction: transaction,
-            ),
-            reactionState.hasReactions
-        {
+        if let reactionState = InteractionReactionState(interaction: interaction, tx: transaction) {
             self.reactions = Reactions(
                 reactionState: reactionState,
                 viewState: CVReactionCountsView.buildState(with: reactionState),
