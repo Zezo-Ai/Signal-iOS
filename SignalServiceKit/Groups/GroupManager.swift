@@ -72,9 +72,9 @@ public class GroupManager: NSObject {
         avatarData: Data?,
         disappearingMessageToken: DisappearingMessageToken,
     ) async throws -> TSGroupThread {
-        guard let localIdentifiers = DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction else {
-            throw OWSAssertionError("Missing localIdentifiers.")
-        }
+        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+        let registeredState = try tsAccountManager.registeredStateWithMaybeSneakyTransaction()
+        let localIdentifiers = registeredState.localIdentifiers
 
         var otherMembers = membersParam.compactMap(\.serviceId)
         otherMembers.removeAll(where: { $0 == localIdentifiers.aci })

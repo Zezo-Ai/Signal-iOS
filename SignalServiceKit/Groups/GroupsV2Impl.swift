@@ -1114,15 +1114,13 @@ public class GroupsV2Impl: GroupsV2 {
         behavior400: Behavior400,
         behavior403: Behavior403,
     ) async throws -> HTTPResponse {
-        guard let localIdentifiers = DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction else {
-            throw OWSAssertionError("Missing localIdentifiers.")
-        }
-
+        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
         return try await Retry.performWithBackoff(
             maxAttempts: 3,
             isRetryable: { $0.isNetworkFailureOrTimeout || $0.httpStatusCode == 401 },
             block: {
-                let authCredential = try await authCredentialManager.fetchGroupAuthCredential(localIdentifiers: localIdentifiers)
+                let registeredState = try tsAccountManager.registeredStateWithMaybeSneakyTransaction()
+                let authCredential = try await authCredentialManager.fetchGroupAuthCredential(localIdentifiers: registeredState.localIdentifiers)
                 let request = try await requestBuilder(authCredential)
                 do {
                     return try await performServiceRequestAttempt(request: request, groupId: groupId)
@@ -1628,10 +1626,7 @@ public class GroupsV2Impl: GroupsV2 {
         inviteLinkPassword: Data,
         downloadedAvatar: (avatarUrlPath: String, avatarData: Data?)?,
     ) async throws {
-        guard let localIdentifiers = DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction else {
-            throw OWSAssertionError("Missing localAci.")
-        }
-
+        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
         try await Retry.performWithBackoff(
             maxAttempts: 5,
             isRetryable: {
@@ -1650,9 +1645,10 @@ public class GroupsV2Impl: GroupsV2 {
                 return false
             },
             block: {
+                let registeredState = try tsAccountManager.registeredStateWithMaybeSneakyTransaction()
                 try await _joinGroupViaInviteLink(
                     secretParams: secretParams,
-                    localIdentifiers: localIdentifiers,
+                    localIdentifiers: registeredState.localIdentifiers,
                     inviteLinkPassword: inviteLinkPassword,
                     downloadedAvatar: downloadedAvatar,
                 )
