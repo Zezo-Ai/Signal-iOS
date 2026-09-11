@@ -1153,13 +1153,9 @@ class BackupListMediaManagerImpl: BackupListMediaManager {
             state = .ineligible
             fallthrough
         case .ready:
-            // Dequeue any existing download first; this will reset the retry counter
-            backupAttachmentDownloadStore.remove(
-                attachmentId: attachment.id,
-                thumbnail: isThumbnail,
-                tx: tx,
-            )
-
+            // Enqueueing no-ops entirely if the enqueued download already
+            // matches; list media walks every attachment on every run, so
+            // most of these are no-ops.
             backupAttachmentDownloadStore.enqueue(
                 ReferencedAttachment(
                     reference: mostRecentReference,
