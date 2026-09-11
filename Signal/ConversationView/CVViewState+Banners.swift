@@ -14,43 +14,27 @@ private class BannerHiding {
     private struct HiddenState: Codable {
         private enum CodingKeys: String, CodingKey {
             case lastHiddenDate
-            case numberOfTimesHidden
         }
 
         /// The last time this banner was hidden.
         let lastHiddenDate: Date
-
-        /// How many times this banner has been hidden.
-        let numberOfTimesHidden: UInt
     }
 
     private let hideDuration: TimeInterval
-    private let hideForeverAfterNumberOfHides: UInt?
 
     /// - Parameter hideDuration: how long to hide the banner for, after a hide is recorded
-    /// - Parameter hideForeverAfterNumberOfHides: after this many manual hides, the banner will be hidden forever. If `nil`, the banner is never hidden forever.
     init(
         hiddenStateStore: BannerHidingStore,
         hideDuration: TimeInterval,
-        hideForeverAfterNumberOfHides: UInt?,
     ) {
         self.hiddenStateStore = hiddenStateStore
         self.hideDuration = hideDuration
-        self.hideForeverAfterNumberOfHides = hideForeverAfterNumberOfHides
     }
 
     func isHidden(threadUniqueId: String, transaction: DBReadTransaction) -> Bool {
         guard let hiddenState = getHiddenState(forThreadUniqueId: threadUniqueId, transaction: transaction) else {
             // We've never hidden this banner before, so no reason to hide it now.
             return false
-        }
-
-        if
-            let hideForeverAfterNumberOfHides,
-            hiddenState.numberOfTimesHidden >= hideForeverAfterNumberOfHides
-        {
-            // This banner was hidden too many times, and is now hidden forever.
-            return true
         }
 
         let timeIntervalSinceLastHidden = Date().timeIntervalSince(hiddenState.lastHiddenDate)
@@ -63,17 +47,7 @@ private class BannerHiding {
     }
 
     func hide(threadUniqueId: String, transaction: DBWriteTransaction) {
-        let stateToWrite: HiddenState
-
-        if let existingHiddenState = getHiddenState(forThreadUniqueId: threadUniqueId, transaction: transaction) {
-            stateToWrite = HiddenState(
-                lastHiddenDate: Date(),
-                numberOfTimesHidden: existingHiddenState.numberOfTimesHidden + 1,
-            )
-        } else {
-            stateToWrite = HiddenState(lastHiddenDate: Date(), numberOfTimesHidden: 1)
-        }
-
+        let stateToWrite = HiddenState(lastHiddenDate: Date())
         hiddenStateStore.writeValueAsJSON(stateToWrite, forThreadUniqueId: threadUniqueId, tx: transaction)
     }
 
@@ -95,13 +69,11 @@ private class PendingMemberRequestsBannerHiding: BannerHiding {
         hiddenStateStore: BannerHidingStore,
         requestingMembersStateStore: BannerHidingStore,
         hideDuration: TimeInterval,
-        hideForeverAfterNumberOfHides: UInt?,
     ) {
         self.requestingMembersStateStore = requestingMembersStateStore
         super.init(
             hiddenStateStore: hiddenStateStore,
             hideDuration: hideDuration,
-            hideForeverAfterNumberOfHides: hideForeverAfterNumberOfHides,
         )
     }
 
@@ -172,7 +144,6 @@ public extension CVViewState {
         hiddenStateStore: .joinRequestHiddenStore,
         requestingMembersStateStore: .joinRequestMembersStore,
         hideDuration: .week,
-        hideForeverAfterNumberOfHides: nil,
     )
 
     /// This banner will snooze for only 1 hour after each hiding, since this
@@ -180,7 +151,6 @@ public extension CVViewState {
     private static let isMessageRequestNameCollisionBannerHiding = BannerHiding(
         hiddenStateStore: .nameCollisionHiddenStore,
         hideDuration: .hour,
-        hideForeverAfterNumberOfHides: nil,
     )
 
     func shouldShowPendingMemberRequestsBanner(
