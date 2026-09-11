@@ -340,14 +340,15 @@ public class OWSUDManagerImpl: OWSUDManager {
             throw OWSUDError.invalidData(description: "Sender certificate has incorrect device ID")
         }
 
-        let localIdentifiers = self.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction
+        let registeredState = try self.tsAccountManager.registeredStateWithMaybeSneakyTransaction()
+        let localIdentifiers = registeredState.localIdentifiers
 
         let sender = certificate.sender
-        guard sender.e164 == nil || sender.e164 == localIdentifiers?.phoneNumber else {
+        guard sender.e164 == nil || sender.e164 == localIdentifiers.phoneNumber else {
             throw OWSUDError.invalidData(description: "Sender certificate has incorrect phone number")
         }
 
-        guard sender.senderAci == localIdentifiers!.aci else {
+        guard sender.senderAci == localIdentifiers.aci else {
             throw OWSUDError.invalidData(description: "Sender certificate has incorrect ACI")
         }
 
