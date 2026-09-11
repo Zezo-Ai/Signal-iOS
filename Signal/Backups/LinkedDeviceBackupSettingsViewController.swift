@@ -367,18 +367,16 @@ final class LinkedDeviceBackupSettingsViewController: OWSTableViewController2 {
         let tsAccountManager = DependenciesBridge.shared.tsAccountManager
 
         do {
-            guard
-                let localAci = tsAccountManager.localIdentifiersWithMaybeSneakyTransaction?.aci,
-                let backupKey = db.read(block: { tx in
-                    return accountKeyStore.getMessageRootBackupKey(aci: localAci, tx: tx)
-                })
-            else {
+            let registeredState = try tsAccountManager.registeredStateWithMaybeSneakyTransaction()
+            let backupKey = db.read { tx in
+                return accountKeyStore.getMessageRootBackupKey(aci: registeredState.localIdentifiers.aci, tx: tx)
+            }
+            guard let backupKey else {
                 return nil
             }
-
             let backupAuth = try await backupRequestManager.fetchBackupServiceAuth(
                 for: backupKey,
-                localAci: localAci,
+                localAci: registeredState.localIdentifiers.aci,
                 auth: .implicit(),
                 logger: logger,
             )
