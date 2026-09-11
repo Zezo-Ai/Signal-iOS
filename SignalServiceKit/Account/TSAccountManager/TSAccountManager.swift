@@ -125,15 +125,12 @@ extension TSAccountManager {
         return try RegisteredState(registrationState: self.registrationState(tx: tx))
     }
 
-    public func localIdentifiersWithMaybeSneakyTransaction(authedAccount: AuthedAccount) throws -> LocalIdentifiers {
+    public func localIdentifiersWithMaybeSneakyTransaction(authedAccount: AuthedAccount) throws(NotRegisteredError) -> LocalIdentifiers {
         switch authedAccount.info {
         case .explicit(let info):
             return info.localIdentifiers
         case .implicit:
-            guard let localIdentifiers = localIdentifiersWithMaybeSneakyTransaction else {
-                throw OWSAssertionError("Missing localIdentifiers.")
-            }
-            return localIdentifiers
+            return try registeredStateWithMaybeSneakyTransaction().localIdentifiers
         }
     }
 
