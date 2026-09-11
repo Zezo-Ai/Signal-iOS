@@ -584,7 +584,9 @@ public extension PaymentsImpl {
         guard paymentAmount.currency == .mobileCoin else {
             throw OWSAssertionError("Invalid currency.")
         }
-        guard recipientAci != DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction?.aci else {
+        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+        let registeredState = try tsAccountManager.registeredStateWithMaybeSneakyTransaction()
+        guard recipientAci != registeredState.localIdentifiers.aci else {
             throw OWSAssertionError("Can't make payment to yourself.")
         }
 
