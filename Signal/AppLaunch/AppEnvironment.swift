@@ -208,6 +208,8 @@ public class AppEnvironment: NSObject {
             db: DependenciesBridge.shared.db,
             backupSettingsStore: BackupSettingsStore(),
             deviceSleepManager: DependenciesBridge.shared.deviceSleepManager,
+            messagePipelineSupervisor: SSKEnvironment.shared.messagePipelineSupervisorRef,
+            messageProcessor: SSKEnvironment.shared.messageProcessorRef,
             quickRestoreManager: quickRestoreManager,
             registrationStateChangeManager: DependenciesBridge.shared.registrationStateChangeManager,
             tsAccountManager: DependenciesBridge.shared.tsAccountManager,

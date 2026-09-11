@@ -27,6 +27,8 @@ class OutgoingDeviceRestorePresenter: OutgoingDeviceRestoreInitialPresenter {
     private let db: DB
     private let backupSettingsStore: BackupSettingsStore
     private let deviceSleepManager: DeviceSleepManager?
+    private let messagePipelineSupervisor: MessagePipelineSupervisor
+    private let messageProcessor: MessageProcessor
     private let quickRestoreManager: QuickRestoreManager
     private let registrationStateChangeManager: RegistrationStateChangeManager
     private let tsAccountManager: TSAccountManager
@@ -39,6 +41,8 @@ class OutgoingDeviceRestorePresenter: OutgoingDeviceRestoreInitialPresenter {
         db: DB,
         backupSettingsStore: BackupSettingsStore,
         deviceSleepManager: DeviceSleepManager?,
+        messagePipelineSupervisor: MessagePipelineSupervisor,
+        messageProcessor: MessageProcessor,
         quickRestoreManager: QuickRestoreManager,
         registrationStateChangeManager: RegistrationStateChangeManager,
         tsAccountManager: TSAccountManager,
@@ -47,6 +51,8 @@ class OutgoingDeviceRestorePresenter: OutgoingDeviceRestoreInitialPresenter {
         self.db = db
         self.backupSettingsStore = backupSettingsStore
         self.deviceSleepManager = deviceSleepManager
+        self.messagePipelineSupervisor = messagePipelineSupervisor
+        self.messageProcessor = messageProcessor
         self.quickRestoreManager = quickRestoreManager
         self.registrationStateChangeManager = registrationStateChangeManager
         self.tsAccountManager = tsAccountManager
@@ -62,6 +68,8 @@ class OutgoingDeviceRestorePresenter: OutgoingDeviceRestoreInitialPresenter {
             db: db,
             deviceProvisioningURL: provisioningURL,
             deviceSleepManager: deviceSleepManager,
+            messagePipelineSupervisor: messagePipelineSupervisor,
+            messageProcessor: messageProcessor,
             quickRestoreManager: quickRestoreManager,
             registrationStateChangeManager: registrationStateChangeManager,
             tsAccountManager: tsAccountManager,

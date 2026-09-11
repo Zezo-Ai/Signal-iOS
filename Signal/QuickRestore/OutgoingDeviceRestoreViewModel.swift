@@ -19,6 +19,8 @@ class OutgoingDeviceRestoreViewModel: ObservableObject {
     private let db: DB
     private let provisioningURL: DeviceProvisioningURL
     private let deviceSleepManager: DeviceSleepManager?
+    private let messageProcessor: MessageProcessor
+    private let messagePipelineSupervisor: MessagePipelineSupervisor
     private let quickRestoreManager: QuickRestoreManager
     private let registrationStateChangeManager: RegistrationStateChangeManager
     private let tsAccountManager: TSAccountManager
@@ -32,6 +34,8 @@ class OutgoingDeviceRestoreViewModel: ObservableObject {
         db: DB,
         deviceProvisioningURL: DeviceProvisioningURL,
         deviceSleepManager: DeviceSleepManager?,
+        messagePipelineSupervisor: MessagePipelineSupervisor,
+        messageProcessor: MessageProcessor,
         quickRestoreManager: QuickRestoreManager,
         registrationStateChangeManager: RegistrationStateChangeManager,
         tsAccountManager: TSAccountManager,
@@ -39,6 +43,8 @@ class OutgoingDeviceRestoreViewModel: ObservableObject {
         self.db = db
         self.provisioningURL = deviceProvisioningURL
         self.deviceSleepManager = deviceSleepManager
+        self.messagePipelineSupervisor = messagePipelineSupervisor
+        self.messageProcessor = messageProcessor
         self.quickRestoreManager = quickRestoreManager
         self.registrationStateChangeManager = registrationStateChangeManager
         self.tsAccountManager = tsAccountManager
@@ -129,7 +135,19 @@ class OutgoingDeviceRestoreViewModel: ObservableObject {
         }
 
         transferStatusViewModel.state = .connecting
-        try await outgoingDeviceTransferTask.connectToNewDevice(peer: peer)
+
+        // Wait for messages to process, then suspend processing
+        try await messageProcessor.waitForFetchingAndProcessing()
+        messagePipelineSupervisor.suspendMessageProcessingWithoutHandle(for: .deviceTransfer)
+
+        do {
+            try await outgoingDeviceTransferTask.connectToNewDevice(peer: peer)
+        } catch {
+            // If an error is encountered, unsuspend message processing since the user may
+            // give up on transferring and go back to using the app as normal
+            messagePipelineSupervisor.unsuspendMessageProcessing(for: .deviceTransfer)
+            throw error
+        }
     }
 
     /// Once connected to the device described in `PeerConnectionData`
