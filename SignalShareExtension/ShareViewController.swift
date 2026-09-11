@@ -438,7 +438,7 @@ public class ShareViewController: OWSNavigationController, ShareViewDelegate {
         try Task.checkCancellation()
 
         // Make sure the user is not trying to share more than our attachment limit.
-        guard typedItems.count <= SignalAttachment.maxAttachmentsAllowed else {
+        guard typedItems.count <= MessageBodyAttachmentLimits.maxAllowedVisualMedia else {
             throw ShareViewControllerError.tooManyAttachments
         }
 
@@ -453,7 +453,10 @@ public class ShareViewController: OWSNavigationController, ShareViewDelegate {
                 comment: "Momentarily shown to the user when attempting to select more images than is allowed. Embeds {{max number of items}} that can be shared.",
             )
 
-            let alertTitle = String.nonPluralLocalizedStringWithFormat(format, OWSFormat.formatInt(SignalAttachment.maxAttachmentsAllowed))
+            let alertTitle = String.nonPluralLocalizedStringWithFormat(
+                format,
+                OWSFormat.formatInt(MessageBodyAttachmentLimits.maxAllowedVisualMedia),
+            )
 
             OWSActionSheets.showActionSheet(
                 title: alertTitle,

@@ -83,3 +83,66 @@ public struct OutgoingAttachmentLimits {
         )
     }
 }
+
+// MARK: -
+
+struct ValidatedMessageBodyAttachmentProtos: CustomStringConvertible {
+    let wrapped: [SSKProtoAttachmentPointer]
+
+    fileprivate var oversizeText: [SSKProtoAttachmentPointer] = []
+    fileprivate var visualMedia: [SSKProtoAttachmentPointer] = []
+    fileprivate var nonVisualMedia: [SSKProtoAttachmentPointer] = []
+
+    init(wrapped: [SSKProtoAttachmentPointer]) {
+        self.wrapped = wrapped
+    }
+
+    var isEmpty: Bool { wrapped.isEmpty }
+
+    var description: String {
+        "oversizeText \(oversizeText.count); visualMedia \(visualMedia.count); nonVisualMedia \(nonVisualMedia.count)"
+    }
+}
+
+public struct MessageBodyAttachmentLimits {
+    /// How many visual-media attachments are allowed in a message body.
+    public static let maxAllowedVisualMedia: Int = 32
+
+    /// One more than ``maxAllowedVisualMedia``, to allow for long-text.
+    public static let maxAllowedOverall: Int = maxAllowedVisualMedia + 1
+
+    public init() {}
+
+    func validateMessageBodyProtos(
+        _ messageBodyProtos: [SSKProtoAttachmentPointer],
+    ) throws -> ValidatedMessageBodyAttachmentProtos {
+        guard messageBodyProtos.count <= Self.maxAllowedOverall else {
+            throw OWSGenericError("too many body attachments overall!")
+        }
+
+        var validated = ValidatedMessageBodyAttachmentProtos(wrapped: messageBodyProtos)
+        for proto in validated.wrapped {
+            if proto.isOversizeText {
+                validated.oversizeText.append(proto)
+            } else if proto.isVisualMedia {
+                validated.visualMedia.append(proto)
+            } else {
+                validated.nonVisualMedia.append(proto)
+            }
+        }
+
+        if validated.oversizeText.count > 1 {
+            throw OWSGenericError("too many oversize text protos! \(validated)")
+        }
+        if validated.visualMedia.count > Self.maxAllowedVisualMedia {
+            throw OWSGenericError("too many visual-media protos! \(validated)")
+        }
+        if validated.nonVisualMedia.count > 1 {
+            throw OWSGenericError("too many non-visual-media protos! \(validated)")
+        }
+        if !(validated.visualMedia.isEmpty || validated.nonVisualMedia.isEmpty) {
+            throw OWSGenericError("both visual and non-visual media protos present! \(validated)")
+        }
+        return validated
+    }
+}

@@ -1690,7 +1690,6 @@
 		887889A52476E999001B5FCF /* PinConfirmationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887889A42476E999001B5FCF /* PinConfirmationViewController.swift */; };
 		887B380825F0355700685845 /* ChatsSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887B380725F0355700685845 /* ChatsSettingsViewController.swift */; };
 		887B380A25F0427F00685845 /* NotificationSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887B380925F0427F00685845 /* NotificationSettingsViewController.swift */; };
-		AB0C401C2E5BADCE00A1B2C3 /* NotificationSettingsBadgeCountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0C401B2E5BADCE00A1B2C3 /* NotificationSettingsBadgeCountViewController.swift */; };
 		887B380D25F042BE00685845 /* NotificationSettingsContentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887B380C25F042BE00685845 /* NotificationSettingsContentViewController.swift */; };
 		887B380F25F056FD00685845 /* NotificationSettingsSoundViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887B380E25F056FD00685845 /* NotificationSettingsSoundViewController.swift */; };
 		887B381125F05F3100685845 /* PrivacySettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887B381025F05F3100685845 /* PrivacySettingsViewController.swift */; };
@@ -1788,6 +1787,7 @@
 		A1A018521805C5E800A052A6 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A11CD70C17FA230600A2D1B1 /* QuartzCore.framework */; };
 		A1A018531805C60D00A052A6 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D221A091169C9E5E00537ABF /* CoreGraphics.framework */; };
 		A5E7C675248C5443007C949A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A5E7C673248C5442007C949A /* InfoPlist.strings */; };
+		AB0C401C2E5BADCE00A1B2C3 /* NotificationSettingsBadgeCountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0C401B2E5BADCE00A1B2C3 /* NotificationSettingsBadgeCountViewController.swift */; };
 		B60EDE041A05A01700D73516 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B60EDE031A05A01700D73516 /* AudioToolbox.framework */; };
 		B66DBF4A19D5BBC8006EA940 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B66DBF4919D5BBC8006EA940 /* Images.xcassets */; };
 		B69CD25119773E79005CE69A /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B69CD25019773E79005CE69A /* XCTest.framework */; };
@@ -2968,6 +2968,8 @@
 		D9697C162FD78FE400119F72 /* BackupNeverShareRecoveryKeySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9697C152FD78FDD00119F72 /* BackupNeverShareRecoveryKeySheet.swift */; };
 		D9697C182FD8C4A700119F72 /* UsernameChangeSyncMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9697C172FD8C4A300119F72 /* UsernameChangeSyncMessage.swift */; };
 		D96A94A72954E57F004EA434 /* DonateViewController+MonthlyPaypalDonation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96A94A62954E57F004EA434 /* DonateViewController+MonthlyPaypalDonation.swift */; };
+		D96AAD4930521B60003E47B3 /* AttachmentLimitsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96AAD4830521B52003E47B3 /* AttachmentLimitsTest.swift */; };
+		D96AAD4B30521DCD003E47B3 /* MimeTypeUtilTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96AAD4A30521DCA003E47B3 /* MimeTypeUtilTest.swift */; };
 		D97046062E81D4240034C05D /* InfoMessageGroupUpdateMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97046052E81D41F0034C05D /* InfoMessageGroupUpdateMigrator.swift */; };
 		D970460A2E81D5C00034C05D /* InfoMessageGroupUpdateMigratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97046092E81D5BB0034C05D /* InfoMessageGroupUpdateMigratorTest.swift */; };
 		D970541A2CFE49E400AC7954 /* SubscriptionFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97054192CFE49E200AC7954 /* SubscriptionFetcher.swift */; };
@@ -5994,7 +5996,6 @@
 		887889A42476E999001B5FCF /* PinConfirmationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinConfirmationViewController.swift; sourceTree = "<group>"; };
 		887B380725F0355700685845 /* ChatsSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatsSettingsViewController.swift; sourceTree = "<group>"; };
 		887B380925F0427F00685845 /* NotificationSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsViewController.swift; sourceTree = "<group>"; };
-		AB0C401B2E5BADCE00A1B2C3 /* NotificationSettingsBadgeCountViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsBadgeCountViewController.swift; sourceTree = "<group>"; };
 		887B380C25F042BE00685845 /* NotificationSettingsContentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsContentViewController.swift; sourceTree = "<group>"; };
 		887B380E25F056FD00685845 /* NotificationSettingsSoundViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsSoundViewController.swift; sourceTree = "<group>"; };
 		887B381025F05F3100685845 /* PrivacySettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacySettingsViewController.swift; sourceTree = "<group>"; };
@@ -6140,6 +6141,7 @@
 		A566C0C0B69138202C0367E6 /* Pods-Signal.app store release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Signal.app store release.xcconfig"; path = "Target Support Files/Pods-Signal/Pods-Signal.app store release.xcconfig"; sourceTree = "<group>"; };
 		A5E7C674248C5442007C949A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = translations/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A780A90C5DDC028939E97635 /* LowDiskSpaceManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LowDiskSpaceManager.swift; sourceTree = "<group>"; };
+		AB0C401B2E5BADCE00A1B2C3 /* NotificationSettingsBadgeCountViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsBadgeCountViewController.swift; sourceTree = "<group>"; };
 		B3F39202F831935AAE1C5F54 /* Pods_SignalUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SignalUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B60EDE031A05A01700D73516 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		B634CBB31AB10D2300C49B99 /* hr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hr; path = translations/hr.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -7351,6 +7353,8 @@
 		D9697C172FD8C4A300119F72 /* UsernameChangeSyncMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameChangeSyncMessage.swift; sourceTree = "<group>"; };
 		D96A94A62954E57F004EA434 /* DonateViewController+MonthlyPaypalDonation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DonateViewController+MonthlyPaypalDonation.swift"; sourceTree = "<group>"; };
 		D96A94A82955270D004EA434 /* Stripe+Subscriptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stripe+Subscriptions.swift"; sourceTree = "<group>"; };
+		D96AAD4830521B52003E47B3 /* AttachmentLimitsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentLimitsTest.swift; sourceTree = "<group>"; };
+		D96AAD4A30521DCA003E47B3 /* MimeTypeUtilTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MimeTypeUtilTest.swift; sourceTree = "<group>"; };
 		D97046052E81D41F0034C05D /* InfoMessageGroupUpdateMigrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoMessageGroupUpdateMigrator.swift; sourceTree = "<group>"; };
 		D97046092E81D5BB0034C05D /* InfoMessageGroupUpdateMigratorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoMessageGroupUpdateMigratorTest.swift; sourceTree = "<group>"; };
 		D97054192CFE49E200AC7954 /* SubscriptionFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionFetcher.swift; sourceTree = "<group>"; };
@@ -10247,6 +10251,7 @@
 		50ED28002F0EDAFB00E57C54 /* Attachments */ = {
 			isa = PBXGroup;
 			children = (
+				D96AAD4830521B52003E47B3 /* AttachmentLimitsTest.swift */,
 				5088330B2FE0B1E500CE51AC /* AutoDownloadPolicyTest.swift */,
 				50ED28012F0EDB0B00E57C54 /* ImageQualityTest.swift */,
 			);
@@ -14702,6 +14707,7 @@
 				50D5E2422980B53000899660 /* LinkValidatorTest.swift */,
 				F94261F2289B1B5400460798 /* LRUCacheTest.swift */,
 				F94261FC289B1B5400460798 /* MathOWSTests.swift */,
+				D96AAD4A30521DCA003E47B3 /* MimeTypeUtilTest.swift */,
 				04AC221C2F86B9F2006CB71A /* NSAttributedStringExtensionTests.swift */,
 				F94261E9289B1B5400460798 /* NSData+ImageTest.swift */,
 				50135A2A301424DE005F45F5 /* NSRange+SSKTest.swift */,
@@ -20573,6 +20579,7 @@
 				D92EFDEF2F69B9D80031D257 /* AttachmentBackfillManagerTest.swift in Sources */,
 				669573082C1B9ECD0092B755 /* AttachmentDownloadQueueDBTests.swift in Sources */,
 				66BE13CC2C1D02700081A1ED /* AttachmentDownloadStoreTests.swift in Sources */,
+				D96AAD4930521B60003E47B3 /* AttachmentLimitsTest.swift in Sources */,
 				664013302C00155E00F10FC4 /* AttachmentStoreTests.swift in Sources */,
 				66C1A8852BB77EE00076C65A /* AttachmentUploadManagerTestHelper.swift in Sources */,
 				66C1A8862BB77EE30076C65A /* AttachmentUploadManagerTestMocks.swift in Sources */,
@@ -20681,6 +20688,7 @@
 				F9426293289B1B5600460798 /* MessageSendLogTests.swift in Sources */,
 				6633B3932BACF3EB003AFF60 /* MessageStickerSerializationTest.swift in Sources */,
 				500BAD822C519F3600B4CD7F /* MessageTimestampGeneratorTest.swift in Sources */,
+				D96AAD4B30521DCD003E47B3 /* MimeTypeUtilTest.swift in Sources */,
 				F942624C289B1B5500460798 /* ModelReadCacheTest.swift in Sources */,
 				50CDC6592DFB92FD00824B4A /* MonitorTest.swift in Sources */,
 				5056B3BF2DEED72800F55320 /* MonotonicDateTest.swift in Sources */,

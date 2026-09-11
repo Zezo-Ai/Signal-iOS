@@ -191,10 +191,7 @@ public class AttachmentManagerImpl: AttachmentManager {
         }()
 
         let sourceFilename = proto.fileName
-        let mimeType = self.mimeType(
-            fromProtoContentType: proto.contentType,
-            sourceFilename: sourceFilename,
-        )
+        let mimeType = proto.mimeType
 
         let contentType = Attachment.ContentType(mimeType: mimeType)
         var attachmentRecord = Attachment.Record.forInsertingPointer(
@@ -307,10 +304,7 @@ public class AttachmentManagerImpl: AttachmentManager {
         } ?? .knownNil
 
         let sourceFilename = proto.fileName.nilIfEmpty
-        let mimeType = self.mimeType(
-            fromProtoContentType: proto.contentType,
-            sourceFilename: sourceFilename,
-        )
+        let mimeType = MimeTypeUtil.mimeType(proto.contentType, orInferredFrom: sourceFilename)
 
         let sourceMediaSizePixels: CGSize?
         if
@@ -544,29 +538,6 @@ public class AttachmentManagerImpl: AttachmentManager {
             incrementalMacInfo: incrementalMacInfo,
             lastDownloadAttemptTimestamp: nil,
         )
-    }
-
-    private func mimeType(
-        fromProtoContentType contentType: String?,
-        sourceFilename: String?,
-    ) -> String {
-        if let protoMimeType = contentType?.nilIfEmpty {
-            return protoMimeType
-        } else {
-            // Content type might not set if the sending client can't
-            // infer a MIME type from the file extension.
-            if
-                let sourceFilename,
-                let fileExtension = (sourceFilename as NSString).pathExtension.lowercased().nilIfEmpty,
-                let inferredMimeType = MimeTypeUtil.mimeTypeForFileExtension(fileExtension)?.nilIfEmpty
-            {
-                Logger.warn("Missing attachment content type! Inferred MIME type: \(inferredMimeType)")
-                return inferredMimeType
-            } else {
-                Logger.warn("Missing attachment content type! Failed to infer MIME type, falling back to octet-stream.")
-                return MimeType.applicationOctetStream.rawValue
-            }
-        }
     }
 
     private func _createAttachmentStream(

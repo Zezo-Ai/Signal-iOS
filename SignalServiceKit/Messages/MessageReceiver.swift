@@ -1540,6 +1540,15 @@ public final class MessageReceiver {
             }
         }
 
+        let validatedMessageBodyAttachments: ValidatedMessageBodyAttachmentProtos
+        do {
+            let attachmentLimits = MessageBodyAttachmentLimits()
+            validatedMessageBodyAttachments = try attachmentLimits.validateMessageBodyProtos(dataMessage.attachments)
+        } catch {
+            owsFailDebug("failed to validate body attachment protos! \(error)")
+            return nil
+        }
+
         // Legit usage of senderTimestamp when creating an incoming group message
         // record.
         let messageBuilder = TSIncomingMessageBuilder(
@@ -1581,7 +1590,7 @@ public final class MessageReceiver {
         }
 
         let hasRenderableContent = messageBuilder.hasRenderableContent(
-            hasBodyAttachments: !dataMessage.attachments.isEmpty,
+            hasBodyAttachments: !validatedMessageBodyAttachments.isEmpty,
             hasLinkPreview: validatedLinkPreview != nil,
             hasQuotedReply: validatedQuotedReply != nil,
             hasContactShare: validatedContactShare != nil,
@@ -1611,7 +1620,11 @@ public final class MessageReceiver {
         do {
             let attachmentManager = DependenciesBridge.shared.attachmentManager
 
-            for (idx, proto) in dataMessage.attachments.enumerated() {
+            if !validatedMessageBodyAttachments.isEmpty {
+                Logger.info("Data message with body attachments: \(validatedMessageBodyAttachments)")
+            }
+
+            for (idx, proto) in validatedMessageBodyAttachments.wrapped.enumerated() {
                 let attachmentID = try attachmentManager.createAttachmentPointer(
                     from: OwnedAttachmentPointerProto(
                         proto: proto,

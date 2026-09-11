@@ -84,8 +84,6 @@ public class SignalAttachment: CustomDebugStringConvertible {
 
     public var isVoiceMessage = false
 
-    public static let maxAttachmentsAllowed: Int = 32
-
     // MARK: Constructor
 
     // This method should not be called directly; use the factory
