@@ -53,7 +53,8 @@ class RemoteMuteToast: UIView {
             ).resolvedValue(useShortNameIfAvailable: true)
         }
         let toastText: String
-        let localAci = self.deps.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction!.aci
+        let registeredState = self.deps.tsAccountManager.mustBeRegisteredStateWithMaybeSneakyTransaction()
+        let localAci = registeredState.localIdentifiers.aci
         if muteSource == localAci {
             toastText = String.nonPluralLocalizedStringWithFormat(
                 OWSLocalizedString(
@@ -78,7 +79,8 @@ class RemoteMuteToast: UIView {
 
     func displayOtherMuted(source: Aci, target: Aci) {
         let toastText: String
-        let localAci = self.deps.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction!.aci
+        let registeredState = self.deps.tsAccountManager.mustBeRegisteredStateWithMaybeSneakyTransaction()
+        let localAci = registeredState.localIdentifiers.aci
         if source == localAci {
             if target == localAci {
                 // Don't display a toast if you muted your other device.

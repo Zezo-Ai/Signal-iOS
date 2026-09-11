@@ -259,15 +259,10 @@ extension CallControlsOverflowView: MessageReactionPickerDelegate {
     }
 
     private func react(with reaction: String) {
+        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
         self.callControlsOverflowPresenter?.willSendReaction()
         self.reactionSender.react(value: reaction)
-        let localAci = SSKEnvironment.shared.databaseStorageRef.read { tx in
-            DependenciesBridge.shared.tsAccountManager.localIdentifiers(tx: tx)?.aci
-        }
-        guard let localAci else {
-            owsFailDebug("Local user is in call but doesn't have ACI!")
-            return
-        }
+        let localAci = tsAccountManager.mustBeRegisteredStateWithMaybeSneakyTransaction().localIdentifiers.aci
         // Locally-sent reactions do not come in via the API, so we add them here.
         self.reactionsSink.addReactions(
             reactions: [

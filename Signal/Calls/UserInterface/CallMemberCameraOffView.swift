@@ -271,11 +271,8 @@ class BlurredAvatarBackgroundView: UIView {
         switch type {
         case .local:
             let tsAccountManager = DependenciesBridge.shared.tsAccountManager
-            guard let localAddress = tsAccountManager.localIdentifiersWithMaybeSneakyTransaction?.aciAddress else {
-                owsFailDebug("missing local address")
-                return
-            }
-            address = localAddress
+            let registeredState = tsAccountManager.mustBeRegisteredStateWithMaybeSneakyTransaction()
+            address = registeredState.localIdentifiers.aciAddress
         case .remoteInGroup:
             guard let remoteGroupMemberDeviceState else { return }
             address = remoteGroupMemberDeviceState.address

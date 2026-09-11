@@ -1489,7 +1489,9 @@ extension GroupCallViewController: CallViewControllerWindowReference {
 
     var remoteVideoAddress: SignalServiceAddress {
         guard let firstMember = ringRtcCall.remoteDeviceStates.sortedByAddedTime.first else {
-            return DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction!.aciAddress
+            let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+            let registeredState = tsAccountManager.mustBeRegisteredStateWithMaybeSneakyTransaction()
+            return registeredState.localIdentifiers.aciAddress
         }
         return firstMember.address
     }
