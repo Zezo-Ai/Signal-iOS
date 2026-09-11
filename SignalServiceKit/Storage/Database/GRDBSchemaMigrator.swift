@@ -362,6 +362,7 @@ public class GRDBSchemaMigrator {
         case addShouldNotifyWhenMutedColumns
         case preserveCallsWhenMutedForExistingUsers
         case migrateSomeKeyValueStores
+        case removeInteractionConversationLoadCountIndex
 
         // NOTE: Every time we add a migration id, consider
         // incrementing grdbSchemaVersionLatest.
@@ -5631,6 +5632,11 @@ public class GRDBSchemaMigrator {
                 let migrator = KeyValueStoreMigrator(collection: "BackupOversizeTextCacheStore")
                 try migrator.migrateInt64("lastRestoredRowIdKey", tx: tx)
             }
+            return .success(())
+        }
+
+        migrator.registerMigration(.removeInteractionConversationLoadCountIndex) { tx in
+            try removeInteractionConversationLoadCountIndex(tx: tx)
             return .success(())
         }
 

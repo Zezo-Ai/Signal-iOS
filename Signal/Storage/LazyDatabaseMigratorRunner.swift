@@ -69,7 +69,6 @@ private struct LazyIndexMigrator {
                 return Set(try String.fetchAll(db, sql: "SELECT name FROM sqlite_master WHERE type = 'index'"))
             }
             let lazilyRemovedIndexes = [
-                "index_model_TSInteraction_ConversationLoadInteractionCount",
                 "index_model_TSInteraction_ConversationLoadInteractionDistance",
             ]
             if !indexes.isDisjoint(with: lazilyRemovedIndexes) {
@@ -85,12 +84,6 @@ private struct LazyIndexMigrator {
 
     func run() async throws {
         // Must be idempotent.
-
-        try Task.checkCancellation()
-        await databaseStorage.awaitableWrite { tx in
-            logger.info("Removing conversation load count index.")
-            try! GRDBSchemaMigrator.removeInteractionConversationLoadCountIndex(tx: tx)
-        }
 
         try Task.checkCancellation()
         await databaseStorage.awaitableWrite { tx in
