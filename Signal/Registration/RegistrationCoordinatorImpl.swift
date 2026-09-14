@@ -2083,8 +2083,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
     ) async -> RegistrationStep {
         let reglockToken = self.reglockToken(for: e164)
         return await makeRegisterOrChangeNumberRequest(
-            .recoveryPassword(regRecoveryPw),
-            e164: e164,
+            .recoveryPassword(.phoneNumber(e164), regRecoveryPw),
             reglockToken: reglockToken,
             responseHandler: { accountResponse in
                 return await self.handleCreateAccountResponseFromRegRecoveryPassword(
@@ -2806,8 +2805,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         }
         let reglockToken = reglockToken(for: session.e164)
         return await makeRegisterOrChangeNumberRequest(
-            .sessionId(session.id),
-            e164: session.e164,
+            .sessionId(session.e164, session.id),
             reglockToken: reglockToken,
             responseHandler: { accountResponse in
                 return await self.handleCreateAccountResponseFromSession(
@@ -4377,7 +4375,6 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
     @MainActor
     private func makeRegisterOrChangeNumberRequest(
         _ method: RegistrationRequestFactory.VerificationMethod,
-        e164: E164,
         reglockToken: RegistrationLock?,
         responseHandler: @escaping @MainActor (AccountResponse) async -> RegistrationStep,
     ) async -> RegistrationStep {
@@ -4441,8 +4438,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
             do {
                 try await sendRestoreMethodIfNecessary()
                 return await makeCreateAccountRequestAndFinalizePreKeys(
-                    method: method,
-                    e164: e164,
+                    verificationMethod: method,
                     authPassword: authToken,
                     accountAttributes: accountAttributes,
                     skipDeviceTransfer: shouldSkipDeviceTransfer(),
@@ -4462,7 +4458,6 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
                 )
             }
             let changeNumberResult = await generatePniStateAndMakeChangeNumberRequest(
-                e164: e164,
                 verificationMethod: method,
                 reglockToken: reglockToken,
                 changeNumberState: changeNumberState,
@@ -4544,8 +4539,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
 
     @MainActor
     private func makeCreateAccountRequestAndFinalizePreKeys(
-        method: RegistrationRequestFactory.VerificationMethod,
-        e164: E164,
+        verificationMethod: RegistrationRequestFactory.VerificationMethod,
         authPassword: String,
         accountAttributes: AccountAttributes,
         skipDeviceTransfer: Bool,
@@ -4562,8 +4556,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         let shouldSkipDeviceTransfer = self.shouldSkipDeviceTransfer()
         let signalService = self.deps.signalService
         let accountResponse = await Service.makeCreateAccountRequest(
-            method,
-            e164: e164,
+            verificationMethod,
             authPassword: authPassword,
             accountAttributes: accountAttributes,
             skipDeviceTransfer: shouldSkipDeviceTransfer,
@@ -4595,15 +4588,22 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
     }
 
     private func generatePniStateAndMakeChangeNumberRequest(
-        e164: E164,
         verificationMethod: RegistrationRequestFactory.VerificationMethod,
         reglockToken: RegistrationLock?,
         changeNumberState: RegistrationCoordinatorLoaderImpl.Mode.ChangeNumberState,
     ) async -> ChangeNumberResult {
         logger.info("")
 
+        let newPhoneNumber: E164
+        switch verificationMethod {
+        case .sessionId(let _newPhoneNumber, _):
+            newPhoneNumber = _newPhoneNumber
+        case .recoveryPassword(.phoneNumber(let _newPhoneNumber), _):
+            newPhoneNumber = _newPhoneNumber
+        }
+
         let pniResult = await deps.changeNumberPniManager.generatePniIdentity(
-            forNewE164: e164,
+            forNewE164: newPhoneNumber,
             localAci: changeNumberState.localAci,
             localDeviceId: changeNumberState.localDeviceId,
         )
@@ -4613,7 +4613,6 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
             return .pniStateError
         case .success(let pniParams, let pniPendingState):
             return .serviceResponse(await makeChangeNumberRequest(
-                e164: e164,
                 verificationMethod: verificationMethod,
                 reglockToken: reglockToken,
                 changeNumberState: changeNumberState,
@@ -4625,7 +4624,6 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
 
     @MainActor
     private func makeChangeNumberRequest(
-        e164: E164,
         verificationMethod: RegistrationRequestFactory.VerificationMethod,
         reglockToken: RegistrationLock?,
         changeNumberState: RegistrationCoordinatorLoaderImpl.Mode.ChangeNumberState,
@@ -4649,7 +4647,6 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
 
         return await Service.makeChangeNumberRequest(
             verificationMethod,
-            e164: e164,
             reglockToken: reglockToken,
             authPassword: changeNumberState.oldAuthToken,
             pniChangeNumberParameters: pniParams,

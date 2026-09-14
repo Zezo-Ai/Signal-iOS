@@ -864,6 +864,7 @@
 		50B6BCB62AEC68940010FB3B /* AuthorMergeHelperTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B6BCB52AEC68940010FB3B /* AuthorMergeHelperTest.swift */; };
 		50B74C752F1716F500F59813 /* OutgoingDeleteMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B74C742F1716F500F59813 /* OutgoingDeleteMessage.swift */; };
 		50BA9B2A3049DDF9006DB636 /* AccountEntropyPoolTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA9B293049DDF9006DB636 /* AccountEntropyPoolTest.swift */; };
+		50BA9B2D304A6654006DB636 /* RegistrationIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BA9B2B304A65E9006DB636 /* RegistrationIdentifier.swift */; };
 		50BCD53E2F213EAF0032BF02 /* LinkedDeviceViewedReceipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BCD53D2F213EAF0032BF02 /* LinkedDeviceViewedReceipt.swift */; };
 		50BCD5402F21447B0032BF02 /* OutgoingViewedReceiptsSyncMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BCD53F2F21447B0032BF02 /* OutgoingViewedReceiptsSyncMessage.swift */; };
 		50BCD5522F2182430032BF02 /* OutgoingNullMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BCD5512F2182430032BF02 /* OutgoingNullMessage.swift */; };
@@ -5236,6 +5237,7 @@
 		50B6BCB52AEC68940010FB3B /* AuthorMergeHelperTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorMergeHelperTest.swift; sourceTree = "<group>"; };
 		50B74C742F1716F500F59813 /* OutgoingDeleteMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingDeleteMessage.swift; sourceTree = "<group>"; };
 		50BA9B293049DDF9006DB636 /* AccountEntropyPoolTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEntropyPoolTest.swift; sourceTree = "<group>"; };
+		50BA9B2B304A65E9006DB636 /* RegistrationIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationIdentifier.swift; sourceTree = "<group>"; };
 		50BCD53D2F213EAF0032BF02 /* LinkedDeviceViewedReceipt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedDeviceViewedReceipt.swift; sourceTree = "<group>"; };
 		50BCD53F2F21447B0032BF02 /* OutgoingViewedReceiptsSyncMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingViewedReceiptsSyncMessage.swift; sourceTree = "<group>"; };
 		50BCD5512F2182430032BF02 /* OutgoingNullMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingNullMessage.swift; sourceTree = "<group>"; };
@@ -10283,6 +10285,7 @@
 		6600F352298C8FBB00B1EDB7 /* Registration */ = {
 			isa = PBXGroup;
 			children = (
+				50BA9B2B304A65E9006DB636 /* RegistrationIdentifier.swift */,
 				6600F353298C8FCA00B1EDB7 /* RegistrationSession.swift */,
 				6600F355298C903000B1EDB7 /* RegistrationSessionManager.swift */,
 				6600F357298D646E00B1EDB7 /* RegistrationSessionManagerImpl.swift */,
@@ -20224,6 +20227,7 @@
 				720547F62B9C985300E2CF2F /* RefreshEvent.swift in Sources */,
 				507C6AF52ED10BD900A7C74C /* RegisteredState.swift in Sources */,
 				C13EDC3F2D94636000670597 /* Registration.pb.swift in Sources */,
+				50BA9B2D304A6654006DB636 /* RegistrationIdentifier.swift in Sources */,
 				661170C12ABA459D00A1B16D /* RegistrationIdGenerator.swift in Sources */,
 				C1C2185D2E70BA27008567A1 /* RegistrationIdMismatchManager.swift in Sources */,
 				C180878C2D763D4800B16D1E /* RegistrationProvisioningMessage.swift in Sources */,

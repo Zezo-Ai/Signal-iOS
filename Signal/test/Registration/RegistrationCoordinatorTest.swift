@@ -3024,8 +3024,7 @@ public class RegistrationCoordinatorTest {
         recoveryPassword: RegistrationRecoveryPassword,
     ) -> TSRequest {
         return RegistrationRequestFactory.createAccountRequest(
-            verificationMethod: .sessionId(Stubs.sessionId),
-            e164: Stubs.e164,
+            verificationMethod: .sessionId(Stubs.e164, Stubs.sessionId),
             authPassword: "", // Doesn't matter for request generation.
             accountAttributes: Stubs.accountAttributes(registrationRecoveryPassword: recoveryPassword),
             skipDeviceTransfer: true,
@@ -3039,8 +3038,7 @@ public class RegistrationCoordinatorTest {
         _ recoveryPassword: RegistrationRecoveryPassword,
     ) -> TSRequest {
         return RegistrationRequestFactory.createAccountRequest(
-            verificationMethod: .recoveryPassword(recoveryPassword),
-            e164: Stubs.e164,
+            verificationMethod: .recoveryPassword(.phoneNumber(Stubs.e164), recoveryPassword),
             authPassword: "", // Doesn't matter for request generation.
             accountAttributes: Stubs.accountAttributes(registrationRecoveryPassword: recoveryPassword),
             skipDeviceTransfer: true,

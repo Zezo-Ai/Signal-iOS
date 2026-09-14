@@ -207,9 +207,8 @@ public enum RegistrationRequestFactory {
 
     public enum VerificationMethod {
         /// The ID of an existing, validated RegistrationSession.
-        case sessionId(String)
-        /// Base64 encoded registration recovery password (derived from KBS master secret).
-        case recoveryPassword(RegistrationRecoveryPassword)
+        case sessionId(E164, String)
+        case recoveryPassword(RegistrationIdentifier, RegistrationRecoveryPassword)
     }
 
     public struct ApnRegistrationId: Codable {
@@ -241,7 +240,6 @@ public enum RegistrationRequestFactory {
     /// - parameter prekeyBundles: Prekey information to include in the request; mirrors the requests to `v2/keys`.
     public static func createAccountRequest(
         verificationMethod: VerificationMethod,
-        e164: E164,
         authPassword: String,
         accountAttributes: AccountAttributes,
         skipDeviceTransfer: Bool,
@@ -270,16 +268,22 @@ public enum RegistrationRequestFactory {
             apnToken: apnRegistrationId,
         )
 
+        let username: String
         switch verificationMethod {
-        case .sessionId(let sessionId):
+        case .sessionId(let phoneNumber, let sessionId):
+            username = phoneNumber.stringValue
             request.sessionId = sessionId
-        case .recoveryPassword(let recoveryPassword):
+        case .recoveryPassword(let identifier, let recoveryPassword):
+            switch identifier {
+            case .phoneNumber(let phoneNumber):
+                username = phoneNumber.stringValue
+            }
             request.recoveryPassword = OWSRequestFactory.RegistrationRecoveryPassword(recoveryPassword)
         }
 
         var result = TSRequest(url: url, method: "POST", body: .encodable(request), logger: logger)
         // As odd as this is, it is to spec.
-        result.auth = .registration((username: e164.stringValue, password: authPassword))
+        result.auth = .registration((username: username, password: authPassword))
         result.headers["X-Signal-Agent"] = "OWI"
         return result
     }
@@ -308,7 +312,6 @@ public enum RegistrationRequestFactory {
     ///   linked device of the change number and rotated pni keys.
     public static func changeNumberRequest(
         verificationMethod: VerificationMethod,
-        e164: E164,
         reglockToken: RegistrationLock?,
         pniChangeNumberParameters: PniDistribution.Parameters,
         logger: PrefixedLogger,
@@ -320,8 +323,16 @@ public enum RegistrationRequestFactory {
         urlComponents.percentEncodedPath = urlPathComponents.percentEncoded
         let url = urlComponents.url!
 
+        let newPhoneNumber: E164
+        switch verificationMethod {
+        case .sessionId(let _newPhoneNumber, _):
+            newPhoneNumber = _newPhoneNumber
+        case .recoveryPassword(.phoneNumber(let _newPhoneNumber), _):
+            newPhoneNumber = _newPhoneNumber
+        }
+
         var request = ChangeNumberRequest(
-            number: e164,
+            number: newPhoneNumber,
             reglock: reglockToken.map { OWSRequestFactory.RegistrationLock($0) },
             pniIdentityKey: OWSRequestFactory.IdentityKey(pniChangeNumberParameters.pniIdentityKey),
             devicePniSignedPrekeys: pniChangeNumberParameters.devicePniSignedPreKeys.mapKeys(injectiveTransform: { "\($0)" }).mapValues {
@@ -335,9 +346,9 @@ public enum RegistrationRequestFactory {
         )
 
         switch verificationMethod {
-        case .sessionId(let sessionId):
+        case .sessionId(_, let sessionId):
             request.sessionId = sessionId
-        case .recoveryPassword(let recoveryPassword):
+        case .recoveryPassword(_, let recoveryPassword):
             request.recoveryPassword = OWSRequestFactory.RegistrationRecoveryPassword(recoveryPassword)
         }
 
