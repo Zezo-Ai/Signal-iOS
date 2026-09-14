@@ -1003,10 +1003,11 @@ public class StickerManager: NSObject {
             owsFailDebug("Invalid pack key length: \(packKey.count).")
             throw StickerError.invalidInput
         }
-        let stickerKeyLength = 64
-        let stickerKey = try hkdf(outputLength: stickerKeyLength, inputKeyMaterial: packKey, salt: [], info: Data("Sticker Pack".utf8))
-        let attachmentKey = try! AttachmentKey(combinedKey: stickerKey)
-
+        let attachmentKey = failIfThrows {
+            let stickerKeyLength = 64
+            let stickerKey = try hkdf(outputLength: stickerKeyLength, inputKeyMaterial: packKey, salt: [], info: Data("Sticker Pack".utf8))
+            return try AttachmentKey(combinedKey: stickerKey)
+        }
         let temporaryDecryptedFile = OWSFileSystem.temporaryFileUrl(
             fileExtension: nil,
             isAvailableWhileDeviceLocked: true,
