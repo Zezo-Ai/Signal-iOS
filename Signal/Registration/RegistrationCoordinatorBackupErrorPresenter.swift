@@ -350,9 +350,20 @@ public class RegistrationCoordinatorBackupErrorPresenterImpl:
                 }
             })
         case .missingLocalFileBackupLocation:
-            // TODO: [KC] correct copy
-            title = "Local File Backup Error"
-            message = "Choose a new file location"
+            title = OWSLocalizedString(
+                "REGISTRATION_BACKUP_RESTORE_ERROR_LOCAL_BACKUP_LOCATION_TITLE",
+                comment: "Title for a sheet warning users about an invalid local backup location",
+            )
+            message = OWSLocalizedString(
+                "REGISTRATION_BACKUP_RESTORE_ERROR_LOCAL_BACKUP_LOCATION_MESSAGE",
+                comment: "Message for a sheet warning users about an invalid local backup location",
+            )
+            actions.append(ActionSheetAction(title: tryAgainString) { _ in
+                continuation.resume(returning: .tryAgain)
+            })
+            actions.append(ActionSheetAction(title: skipRestoreString) { _ in
+                continuation.resume(returning: .skipRestore)
+            })
         }
 
         let actionSheet = ActionSheetController(title: title, message: message)
