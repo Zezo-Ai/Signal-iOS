@@ -54,9 +54,8 @@ public class ProvisioningManager {
             var mediaRootBackupKey: MediaRootBackupKey
             var profileKey: Aes256Key
         }
+        let registeredState = try tsAccountManager.registeredStateWithMaybeSneakyTransaction()
         let provisioningState = await db.awaitableWrite { tx in
-            guard let localIdentifiers = tsAccountManager.localIdentifiers(tx: tx) else { owsFail("Can't provision without an aci & phone number.")
-            }
             guard let aciIdentityKeyPair = identityManager.identityKeyPair(for: .aci, tx: tx) else {
                 owsFail("Can't provision without an aci identity.")
             }
@@ -74,7 +73,7 @@ public class ProvisioningManager {
                 owsFail("Can't provision without a profile key.")
             }
             return ProvisioningState(
-                localIdentifiers: localIdentifiers,
+                localIdentifiers: registeredState.localIdentifiers,
                 aciIdentityKeyPair: aciIdentityKeyPair,
                 pniIdentityKeyPair: pniIdentityKeyPair,
                 areReadReceiptsEnabled: areReadReceiptsEnabled,

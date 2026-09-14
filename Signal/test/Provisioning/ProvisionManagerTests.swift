@@ -44,7 +44,7 @@ public class ProvisioningManagerTests {
     }
 
     @Test
-    func testProvisioningWithMasterKey() async throws {
+    func testProvisioning() async throws {
         let myAciIdentityKeyPair = IdentityKeyPair.generate()
         let myPniIdentityKeyPair = IdentityKeyPair.generate()
         let myAci = Aci.randomForTesting()
@@ -70,12 +70,16 @@ public class ProvisioningManagerTests {
             _ = try! SignalRecipient.insertRecord(aci: myAci, phoneNumber: myPhoneNumber, pni: myPni, tx: tx)
         }
 
+        let localIdentifiers = LocalIdentifiers(
+            aci: myAci,
+            pni: myPni,
+            e164: myPhoneNumber,
+        )
+        mockTsAccountManager.registrationStateMock = {
+            return .registered(localIdentifiers)
+        }
         mockTsAccountManager.localIdentifiersMock = {
-            return LocalIdentifiers(
-                aci: myAci,
-                pni: myPni,
-                e164: myPhoneNumber,
-            )
+            return localIdentifiers
         }
         mockProfileManager.localProfile = OWSUserProfile(address: .localUser, profileKey: profileKey)
         mockReceiptManager.areReadReceiptsEnabledValue = readReceiptsEnabled
