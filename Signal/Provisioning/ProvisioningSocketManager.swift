@@ -219,14 +219,18 @@ class ProvisioningSocketManager: ProvisioningConnectionListener {
         }()
 
         var capabilities = [DeviceProvisioningURL.Capability]()
-        if shouldLinkAndSync {
-            capabilities.append(DeviceProvisioningURL.Capability.linknsync)
-        }
-        if
-            #available(iOS 26.0, *),
-            DeviceTransfer.platformSupportsWifiAware()
-        {
-            capabilities.append(DeviceProvisioningURL.Capability.wifiaware)
+        switch type {
+        case .linkDevice:
+            if shouldLinkAndSync {
+                capabilities.append(.linknsync)
+            }
+        case .quickRestore:
+            if
+                #available(iOS 26.0, *),
+                DeviceTransfer.platformSupportsWifiAware()
+            {
+                capabilities.append(.wifiaware)
+            }
         }
 
         return try DeviceProvisioningURL(
