@@ -87,6 +87,7 @@ class ChatListFYISheetCoordinator {
     private let profileBadgeManager: ProfileBadgeManager
     private let safetyTipsManager: SafetyTipsManager
     private let localFileBackupManager: LocalFileBackupManager
+    private let localFileBackupStore: LocalFileBackupStore
 
     init(
         backupArchiveErrorStore: BackupArchiveErrorStore,
@@ -103,6 +104,7 @@ class ChatListFYISheetCoordinator {
         profileBadgeManager: ProfileBadgeManager,
         profileManager: ProfileManager,
         localFileBackupManager: LocalFileBackupManager,
+        localFileBackupStore: LocalFileBackupStore,
     ) {
         self.backupArchiveErrorStore = backupArchiveErrorStore
         self.backupAttachmentDownloadStore = backupAttachmentDownloadStore
@@ -118,6 +120,7 @@ class ChatListFYISheetCoordinator {
         self.profileBadgeManager = profileBadgeManager
         self.safetyTipsManager = SafetyTipsManager()
         self.localFileBackupManager = localFileBackupManager
+        self.localFileBackupStore = localFileBackupStore
     }
 
     func presentIfNecessary(
@@ -640,7 +643,11 @@ class ChatListFYISheetCoordinator {
         let logger = PrefixedLogger(prefix: "[LocalBackups]")
         logger.warn("Showing EnableLocalBackups FYI sheet.")
 
-        let warningSheet = EnableLocalBackupsHeroSheet()
+        let warningSheet = EnableLocalBackupsHeroSheet(
+            fromViewController: chatListViewController,
+            db: db,
+            localFileBackupStore: localFileBackupStore,
+        )
 
         chatListViewController.present(warningSheet, animated: true) { [self] in
             db.write { tx in
@@ -960,26 +967,87 @@ private final class LowDiskSpaceWarningHeroSheet: HeroSheetViewController {
 // MARK: -
 
 private final class EnableLocalBackupsHeroSheet: HeroSheetViewController {
-    init() {
+    private let fromViewController: UIViewController
+    private var didTapEnable = false
+
+    init(
+        fromViewController: UIViewController,
+        db: DB,
+        localFileBackupStore: LocalFileBackupStore,
+    ) {
+        self.fromViewController = fromViewController
         super.init(
-            hero: .image(.backupsOnDevice),
+            hero: .circleIcon(
+                icon: .backup,
+                iconSize: 40,
+                tintColor: UIColor(rgbHex: 0x3B45FD),
+                backgroundColor: UIColor(rgbHex: 0xE0E5FF),
+            ),
             title: OWSLocalizedString(
-                "ENABLE_LOCAL_FILE_BACKUPS_HERO_SHEET_TITLE",
+                "RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_TITLE",
                 comment: "Title for a sheet asking the user if they want to enable local file backups.",
             ),
             body: OWSLocalizedString(
-                "ENABLE_LOCAL_FILE_BACKUPS_HERO_SHEET_MESSAGE",
+                "RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_MESSAGE",
                 comment: "Message for a sheet asking the user if they want to enable local file backups.",
             ),
             primaryButton: Button(title: OWSLocalizedString(
-                "ENABLE_LOCAL_FILE_BACKUPS_HERO_SHEET_BUTTON",
-                comment: "Button for a sheet asking the user if they want to enable local file backups",
+                "RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_CHOOSE_FOLDER_BUTTON",
+                comment: "Button on a sheet prompting the user to pick a folder on their device where on-device backups will be saved",
             ), action: { heroSheet in
+                (heroSheet as? EnableLocalBackupsHeroSheet)?.didTapEnable = true
                 heroSheet.dismiss(animated: true)
-                // TODO: [KC] go directly to local file backups page
-                SignalApp.shared.showAppSettings(mode: .backups())
+                LocalFileBackupArchiveFolderPicker.present(
+                    fromViewController: fromViewController,
+                    manager: DependenciesBridge.shared.localFileBackupManager,
+                    onSuccess: {
+                        db.write { tx in
+                            localFileBackupStore.setLocalBackupsEnabled(value: true, tx: tx)
+                        }
+                        fromViewController.presentToast(
+                            text: OWSLocalizedString(
+                                "ENABLE_LOCAL_FILE_BACKUPS_TOAST_CONFIRM",
+                                comment: "Label for a toast that confirms that local backups are enabled.",
+                            ),
+                            image: .checkCircle,
+                        )
+                    },
+                    onCancel: {
+                        Self.presentDisabledToast(from: fromViewController)
+                    },
+                )
             }),
-            secondaryButton: .dismissing(title: CommonStrings.notNowButton, style: .secondary),
+            secondaryButton: Button(
+                title: OWSLocalizedString(
+                    "RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_DISABLE_BUTTON",
+                    comment: "Button for a sheet asking the user if they want to disable local backups",
+                ),
+                style: .secondary,
+                action: .custom({ heroSheet in
+                    db.write { tx in
+                        // backups should be disabled right after a restore, but just in case, set it explicitly.
+                        localFileBackupStore.setLocalBackupsEnabled(value: false, tx: tx)
+                    }
+                    heroSheet.dismiss(animated: true)
+                }),
+            ),
+        )
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if !didTapEnable {
+            Self.presentDisabledToast(from: fromViewController)
+        }
+    }
+
+    private static func presentDisabledToast(from viewController: UIViewController) {
+        viewController.presentToast(
+            text: OWSLocalizedString(
+                "DISABLE_LOCAL_FILE_BACKUPS_TOAST_CONFIRM",
+                comment: "Label for a toast that confirms that local backups are disabled.",
+            ),
+            image: .backup,
         )
     }
 }

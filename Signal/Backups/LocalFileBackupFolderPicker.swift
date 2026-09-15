@@ -11,21 +11,25 @@ enum LocalFileBackupArchiveFolderPicker {
         fromViewController: UIViewController,
         manager: LocalFileBackupManager,
         onSuccess: @escaping () -> Void,
+        onCancel: (() -> Void)? = nil,
     ) {
         manager.promptUserToChooseFileLocationForArchiving(
             fromViewController: fromViewController,
-            completion: { [self] chooseError in
-                if let chooseError {
+            completion: { [self] result in
+                switch result {
+                case .picked:
+                    onSuccess()
+                case .cancelled:
+                    onCancel?()
+                case .failed(let chooseError):
                     Logger.error("Error choosing file location for local backup: \(chooseError.shortDescription)")
                     let actionSheet = LocalFileBackupChooseFolderErrorActionSheet(
                         fromViewController: fromViewController,
                         onTryAgain: {
-                            present(fromViewController: fromViewController, manager: manager, onSuccess: onSuccess)
+                            present(fromViewController: fromViewController, manager: manager, onSuccess: onSuccess, onCancel: onCancel)
                         },
                     )
                     fromViewController.presentActionSheet(actionSheet)
-                } else {
-                    onSuccess()
                 }
             },
         )

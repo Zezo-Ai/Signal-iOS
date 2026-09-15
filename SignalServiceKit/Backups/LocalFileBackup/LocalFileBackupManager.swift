@@ -67,7 +67,7 @@ public class LocalFileBackupManager: NSObject, UIDocumentPickerDelegate {
 
     private static let maxAllowedNumberOfBackups: Int = 2
 
-    private var folderPickerCompletion: ((Error?) -> Void)?
+    private var folderPickerCompletion: ((FolderPickerResult) -> Void)?
 
     public static let attachmentBatchSize = 50
 
@@ -685,9 +685,15 @@ public class LocalFileBackupManager: NSObject, UIDocumentPickerDelegate {
 
     // MARK: - Choosing backup location
 
+    public enum FolderPickerResult {
+        case picked
+        case cancelled
+        case failed(Error)
+    }
+
     /// This should only be used when choosing a file location for archiving a local file backup.
     /// When the file is chosen, it will be stored with an archive-specific DB key.
-    public func promptUserToChooseFileLocationForArchiving(fromViewController: UIViewController, completion: ((Error?) -> Void)?) {
+    public func promptUserToChooseFileLocationForArchiving(fromViewController: UIViewController, completion: ((FolderPickerResult) -> Void)?) {
         let pickerController = UIDocumentPickerViewController(
             forOpeningContentTypes: [.folder],
             asCopy: false,
@@ -753,17 +759,24 @@ public class LocalFileBackupManager: NSObject, UIDocumentPickerDelegate {
 
         defer { securityScopedBookmarkAccess.stopAccessToSecurityScopedBookmark(url: url) }
 
-        var saveError: Error?
+        let result: FolderPickerResult
         do {
             try saveSecurityScopedBookmark(url: url, type: .archive)
+            result = .picked
         } catch {
-            saveError = error
             logger.error("Failed to save bookmark: \(error.shortDescription)")
+            result = .failed(error)
         }
 
         let completion = folderPickerCompletion
         folderPickerCompletion = nil
-        completion?(saveError)
+        completion?(result)
+    }
+
+    public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        let completion = folderPickerCompletion
+        folderPickerCompletion = nil
+        completion?(.cancelled)
     }
 
     // MARK: - Prompt user to enable local backups, e.g. after restoring

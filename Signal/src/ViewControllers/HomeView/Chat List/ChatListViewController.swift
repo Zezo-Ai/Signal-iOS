@@ -388,6 +388,7 @@ public class ChatListViewController: OWSViewController, HomeTabViewController {
             profileBadgeManager: DependenciesBridge.shared.profileBadgeManager,
             profileManager: SSKEnvironment.shared.profileManagerRef,
             localFileBackupManager: DependenciesBridge.shared.localFileBackupManager,
+            localFileBackupStore: LocalFileBackupStore(),
         )
 
         Task {
