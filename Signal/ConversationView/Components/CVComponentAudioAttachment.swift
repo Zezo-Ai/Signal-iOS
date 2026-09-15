@@ -19,6 +19,10 @@ public class CVComponentAudioAttachment:
     private let audioAttachment: AudioAttachment
     private let nextAudioAttachment: AudioAttachment?
     private var attachment: Attachment { audioAttachment.attachment }
+    private var playbackID: CVAudioPlaybackID {
+        CVAudioPlaybackID(audioAttachment: audioAttachment)
+    }
+
     private var attachmentStream: AttachmentStream? { audioAttachment.attachmentStream?.attachmentStream }
     private let footerOverlay: CVComponent?
 
@@ -166,7 +170,8 @@ public class CVComponentAudioAttachment:
 
     /// Checks if the message still exists and stops playback if it does not.
     private func checkIfMessageStillExists() {
-        guard AppEnvironment.shared.cvAudioPlayerRef.audioPlaybackState(forAttachmentId: attachment.id) == .playing else {
+        let cvAudioPlayer = AppEnvironment.shared.cvAudioPlayerRef
+        guard cvAudioPlayer.audioPlaybackState(playbackID: playbackID) == .playing else {
             return
         }
 
@@ -315,8 +320,8 @@ public class CVComponentAudioAttachment:
             audioMessageView.clearOverrideProgress(animated: false)
             let scrubbedTime = audioMessageView.scrubToLocation(location)
             AppEnvironment.shared.cvAudioPlayerRef.setPlaybackProgress(
-                progress: scrubbedTime,
-                forAttachmentID: attachment.id,
+                scrubbedTime,
+                playbackID: playbackID,
             )
         case .possible, .began, .failed, .cancelled:
             audioMessageView.clearOverrideProgress(animated: false)
@@ -359,27 +364,15 @@ public class CVComponentAudioAttachment:
 
     // MARK: - CVAudioPlayerListener
 
-    func audioPlayerStateDidChange(
-        attachmentId: Attachment.IDType,
-        interactionId: String,
-    ) {}
+    func audioPlayerStateDidChange(playbackID: CVAudioPlaybackID) {}
 
-    func audioPlayerDidFinish(
-        attachmentId: Attachment.IDType,
-        interactionId: String,
-    ) {
-        guard
-            attachmentId == audioAttachment.attachment.id,
-            interactionId == audioAttachment.owningMessage.uniqueId
-        else { return }
+    func audioPlayerDidFinish(playbackID: CVAudioPlaybackID) {
+        guard playbackID == self.playbackID else { return }
 
         AppEnvironment.shared.cvAudioPlayerRef.autoplayNextAudioAttachmentIfNeeded(nextAudioAttachment)
     }
 
-    func audioPlayerDidMarkViewed(
-        attachmentId: Attachment.IDType,
-        interactionId: String,
-    ) {}
+    func audioPlayerDidMarkViewed(playbackID: CVAudioPlaybackID) {}
 
     // MARK: - DatabaseChangeDelegate
 

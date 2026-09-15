@@ -206,10 +206,9 @@ class AudioMessagePlaybackRateView: ManualLayoutViewWithLayer {
         itemModel: CVItemModel,
         audioMessageViewDelegate: AudioMessageViewDelegate?,
     ) -> Bool {
-        guard
-            let attachmentId = audioAttachment.attachmentStream?.attachmentStream.id,
-            AppEnvironment.shared.cvAudioPlayerRef.audioPlaybackState(forAttachmentId: attachmentId) == .playing
-        else {
+        let cvAudioPlayer = AppEnvironment.shared.cvAudioPlayerRef
+        let playbackID = CVAudioPlaybackID(audioAttachment: audioAttachment)
+        guard cvAudioPlayer.audioPlaybackState(playbackID: playbackID) == .playing else {
             return false
         }
         // Check that the tap is within the bounding box, but

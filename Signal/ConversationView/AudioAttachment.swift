@@ -45,15 +45,6 @@ public class AudioAttachment: Equatable {
 
     public let state: State
 
-    public var sourceFilename: String? {
-        switch state {
-        case .attachmentStream(let attachmentStream, _):
-            return attachmentStream.reference.sourceFilename
-        case .attachmentPointer(let attachmentPointer, _):
-            return attachmentPointer.reference.sourceFilename
-        }
-    }
-
     public let receivedAtDate: Date
     public let owningMessage: TSMessage
 
@@ -147,14 +138,23 @@ public class AudioAttachment: Equatable {
     }
 
     public var isVoiceMessage: Bool {
-        { () -> AttachmentReference.RenderingFlag in
-            switch state {
-            case .attachmentStream(let attachmentStream, _):
-                return attachmentStream.reference.renderingFlag
-            case .attachmentPointer(let attachmentPointer, _):
-                return attachmentPointer.reference.renderingFlag
-            }
-        }() == .voiceMessage
+        let renderingFlag: AttachmentReference.RenderingFlag = switch state {
+        case .attachmentStream(let attachmentStream, _):
+            attachmentStream.reference.renderingFlag
+        case .attachmentPointer(let attachmentPointer, _):
+            attachmentPointer.reference.renderingFlag
+        }
+
+        return renderingFlag == .voiceMessage
+    }
+
+    public var sourceFilename: String? {
+        switch state {
+        case .attachmentStream(let attachmentStream, _):
+            return attachmentStream.reference.sourceFilename
+        case .attachmentPointer(let attachmentPointer, _):
+            return attachmentPointer.reference.sourceFilename
+        }
     }
 
     public func markOwningMessageAsViewed() -> Bool {

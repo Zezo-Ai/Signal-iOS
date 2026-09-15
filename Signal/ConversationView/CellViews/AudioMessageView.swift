@@ -17,7 +17,10 @@ class AudioMessageView: ManualStackView, CVAudioPlayerListener {
 
     // MARK: - State
 
-    private var owningInteractionId: String { presentation.audioAttachment.owningMessage.uniqueId }
+    private var playbackID: CVAudioPlaybackID {
+        CVAudioPlaybackID(audioAttachment: presentation.audioAttachment)
+    }
+
     private var attachment: Attachment { presentation.audioAttachment.attachment }
     private var attachmentStream: AttachmentStream? { presentation.audioAttachment.attachmentStream?.attachmentStream }
     private var durationSeconds: TimeInterval? { presentation.audioAttachment.durationSeconds }
@@ -30,14 +33,14 @@ class AudioMessageView: ManualStackView, CVAudioPlayerListener {
     private let mediaCache: CVMediaCache
 
     private var audioPlaybackState: AudioPlaybackState {
-        AppEnvironment.shared.cvAudioPlayerRef.audioPlaybackState(forAttachmentId: attachment.id)
+        AppEnvironment.shared.cvAudioPlayerRef.audioPlaybackState(playbackID: playbackID)
     }
 
     private var elapsedSeconds: TimeInterval {
-        guard let attachmentStream = self.attachmentStream else {
+        guard attachmentStream != nil else {
             return 0
         }
-        return AppEnvironment.shared.cvAudioPlayerRef.playbackProgress(forAttachmentID: attachmentStream.id)
+        return AppEnvironment.shared.cvAudioPlayerRef.playbackProgress(playbackID: playbackID)
     }
 
     private var isViewed = false
@@ -475,54 +478,37 @@ class AudioMessageView: ManualStackView, CVAudioPlayerListener {
 
     private func updatePlaybackRate(animated: Bool) {
         let isPlaying: Bool = {
-            guard let attachmentStream else {
+            guard attachmentStream != nil else {
                 return false
             }
-            return AppEnvironment.shared.cvAudioPlayerRef.audioPlaybackState(forAttachmentId: attachmentStream.id) == .playing
+            let cvAudioPlayer = AppEnvironment.shared.cvAudioPlayerRef
+            return cvAudioPlayer.audioPlaybackState(playbackID: playbackID) == .playing
         }()
         presentation.playbackRateView.setVisibility(isPlaying, animated: animated)
     }
 
     // MARK: - CVAudioPlayerListener
 
-    func audioPlayerStateDidChange(
-        attachmentId: Attachment.IDType,
-        interactionId: String,
-    ) {
+    func audioPlayerStateDidChange(playbackID: CVAudioPlaybackID) {
         AssertIsOnMainThread()
 
-        guard
-            attachmentId == attachment.id,
-            interactionId == owningInteractionId
-        else { return }
+        guard playbackID == self.playbackID else { return }
 
         updateContents(animated: true)
     }
 
-    func audioPlayerDidFinish(
-        attachmentId: Attachment.IDType,
-        interactionId: String,
-    ) {
+    func audioPlayerDidFinish(playbackID: CVAudioPlaybackID) {
         AssertIsOnMainThread()
 
-        guard
-            attachmentId == attachment.id,
-            interactionId == owningInteractionId
-        else { return }
+        guard playbackID == self.playbackID else { return }
 
         updateContents(animated: true)
     }
 
-    func audioPlayerDidMarkViewed(
-        attachmentId: Attachment.IDType,
-        interactionId: String,
-    ) {
+    func audioPlayerDidMarkViewed(playbackID: CVAudioPlaybackID) {
         AssertIsOnMainThread()
 
-        guard
-            attachmentId == attachment.id,
-            interactionId == owningInteractionId
-        else { return }
+        guard playbackID == self.playbackID else { return }
 
         setViewed(true, animated: true)
     }

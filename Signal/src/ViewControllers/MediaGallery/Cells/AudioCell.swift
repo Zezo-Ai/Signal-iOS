@@ -252,7 +252,10 @@ class AudioCell: MediaTileListModeCell {
 
     @objc
     private func handlePanGesture(_ sender: UIPanGestureRecognizer) {
-        guard let audioMessageView, let audioItem else { return }
+        guard
+            let audioMessageView,
+            let audioAttachment
+        else { return }
 
         let location = panGestureRecognizer.location(in: audioMessageView)
         switch panGestureRecognizer.state {
@@ -269,8 +272,8 @@ class AudioCell: MediaTileListModeCell {
             let scrubbedTime = audioMessageView.scrubToLocation(location)
             let cvAudioPlayer = AppEnvironment.shared.cvAudioPlayerRef
             cvAudioPlayer.setPlaybackProgress(
-                progress: scrubbedTime,
-                forAttachmentID: audioItem.referencedAttachment.attachment.id,
+                scrubbedTime,
+                playbackID: CVAudioPlaybackID(audioAttachment: audioAttachment),
             )
         case .possible, .failed, .cancelled:
             audioMessageView.clearOverrideProgress(animated: false)
