@@ -6,7 +6,13 @@
 public import SignalServiceKit
 public import SignalUI
 
-public class CVComponentAudioAttachment: CVComponentBase, CVComponent {
+public class CVComponentAudioAttachment:
+    CVComponentBase,
+    CVComponent,
+    CVAudioPlayerListener,
+    DatabaseChangeDelegate,
+    CVAccessibilityComponent
+{
 
     public var componentKey: CVComponentKey { .audioAttachment }
 
@@ -350,11 +356,9 @@ public class CVComponentAudioAttachment: CVComponentBase, CVComponent {
             footerOverlayView = nil
         }
     }
-}
 
-// MARK: - CVAudioPlayerListener
+    // MARK: - CVAudioPlayerListener
 
-extension CVComponentAudioAttachment: CVAudioPlayerListener {
     func audioPlayerStateDidChange(attachmentId: Attachment.IDType) {}
 
     func audioPlayerDidFinish(attachmentId: Attachment.IDType, forInteractionId interactionId: String?) {
@@ -367,11 +371,9 @@ extension CVComponentAudioAttachment: CVAudioPlayerListener {
     }
 
     func audioPlayerDidMarkViewed(attachmentId: Attachment.IDType) {}
-}
 
-// MARK: - DatabaseChangeDelegate
+    // MARK: - DatabaseChangeDelegate
 
-extension CVComponentAudioAttachment: DatabaseChangeDelegate {
     public func databaseChangesDidUpdate(databaseChanges: SignalServiceKit.DatabaseChanges) {
         guard databaseChanges.didUpdate(interaction: self.interaction) else {
             return
@@ -387,11 +389,9 @@ extension CVComponentAudioAttachment: DatabaseChangeDelegate {
     public func databaseChangesDidReset() {
         checkIfMessageStillExists()
     }
-}
 
-// MARK: -
+    // MARK: - CVAccessibilityComponent
 
-extension CVComponentAudioAttachment: CVAccessibilityComponent {
     public var accessibilityDescription: String {
         if
             audioAttachment.isVoiceMessage,

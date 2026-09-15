@@ -29,7 +29,7 @@ protocol CVAudioPlayerListener {
 //     * The cell is scrolled offscreen and unloaded.
 //     * etc.
 // * Ensure thread safety.
-public class CVAudioPlayer: NSObject {
+public class CVAudioPlayer: NSObject, AudioPlayerDelegate, CVAudioPlaybackDelegate {
     // The currently playing audio, if any.
     private var _audioPlayback: CVAudioPlayback?
     private var audioPlayback: CVAudioPlayback? {
@@ -253,9 +253,9 @@ public class CVAudioPlayer: NSObject {
         audioPlayback.stop()
         self.audioPlayback = nil
     }
-}
 
-extension CVAudioPlayer: AudioPlayerDelegate {
+    // MARK: - AudioPlayerDelegate
+
     public func setAudioProgress(_ progress: TimeInterval, duration: TimeInterval, playbackRate: Float) {}
 
     public func audioPlayerDidFinish() {
@@ -267,11 +267,9 @@ extension CVAudioPlayer: AudioPlayerDelegate {
             self?.soundComplete = nil
         }
     }
-}
 
-// MARK: -
+    // MARK: - CVAudioPlaybackDelegate
 
-extension CVAudioPlayer: CVAudioPlaybackDelegate {
     fileprivate func audioPlaybackStateDidChange(_ audioPlayback: CVAudioPlayback) {
         AssertIsOnMainThread()
 
