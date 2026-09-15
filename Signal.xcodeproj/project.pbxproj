@@ -3914,7 +3914,6 @@
 		F9C5CC91289453B300548EEE /* FingerprintProtocol.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C9A6289453B100548EEE /* FingerprintProtocol.pb.swift */; };
 		F9C5CC92289453B300548EEE /* StorageServiceProto.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C9A7289453B100548EEE /* StorageServiceProto.swift */; };
 		F9C5CC94289453B300548EEE /* DeviceTransfer.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C9A9289453B100548EEE /* DeviceTransfer.pb.swift */; };
-		F9C5CC95289453B300548EEE /* ProvisioningProto.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C9AA289453B100548EEE /* ProvisioningProto.swift */; };
 		F9C5CC96289453B300548EEE /* SessionRecord.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C9AB289453B100548EEE /* SessionRecord.pb.swift */; };
 		F9C5CC98289453B300548EEE /* GroupsProto.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C9AD289453B100548EEE /* GroupsProto.swift */; };
 		F9C5CC9A289453B300548EEE /* SignalService.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C5C9AF289453B100548EEE /* SignalService.pb.swift */; };
@@ -8330,7 +8329,6 @@
 		F9C5C9A6289453B100548EEE /* FingerprintProtocol.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FingerprintProtocol.pb.swift; sourceTree = "<group>"; };
 		F9C5C9A7289453B100548EEE /* StorageServiceProto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StorageServiceProto.swift; sourceTree = "<group>"; };
 		F9C5C9A9289453B100548EEE /* DeviceTransfer.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceTransfer.pb.swift; sourceTree = "<group>"; };
-		F9C5C9AA289453B100548EEE /* ProvisioningProto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProvisioningProto.swift; sourceTree = "<group>"; };
 		F9C5C9AB289453B100548EEE /* SessionRecord.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionRecord.pb.swift; sourceTree = "<group>"; };
 		F9C5C9AD289453B100548EEE /* GroupsProto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroupsProto.swift; sourceTree = "<group>"; };
 		F9C5C9AF289453B100548EEE /* SignalService.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignalService.pb.swift; sourceTree = "<group>"; };
@@ -15422,7 +15420,6 @@
 				F9C5C9AD289453B100548EEE /* GroupsProto.swift */,
 				501052632BDAEEDC0097DDC5 /* MobileCoinExternal.pb.swift */,
 				F9C5C9B2289453B100548EEE /* Provisioning.pb.swift */,
-				F9C5C9AA289453B100548EEE /* ProvisioningProto.swift */,
 				C15EE0922D5D5AC00070838C /* Registration.pb.swift */,
 				F9C5C9AB289453B100548EEE /* SessionRecord.pb.swift */,
 				F9C5C9A4289453B100548EEE /* SignalIOS.pb.swift */,
@@ -20193,7 +20190,6 @@
 				72901D2F2C9B1918000406DC /* ProtoUtils.swift in Sources */,
 				F9C5CC9D289453B300548EEE /* Provisioning.pb.swift in Sources */,
 				F9C5CD08289453B300548EEE /* ProvisioningCipher.swift in Sources */,
-				F9C5CC95289453B300548EEE /* ProvisioningProto.swift in Sources */,
 				66CDB7632AFC5E24009A36EC /* ProvisioningRequestFactory.swift in Sources */,
 				66CDB7652AFC5E74009A36EC /* ProvisioningServiceResponses.swift in Sources */,
 				F9C5CD97289453B300548EEE /* ProxiedContentDownloader.swift in Sources */,

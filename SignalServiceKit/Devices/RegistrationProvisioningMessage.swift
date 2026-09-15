@@ -83,9 +83,7 @@ public struct RegistrationProvisioningMessage {
         self.capabilites = capabilites
     }
 
-    public init(plaintext: Data) throws {
-        let proto = try RegistrationProtos_RegistrationProvisionMessage(serializedBytes: plaintext)
-
+    public init(_ proto: RegistrationProtos_RegistrationProvisionMessage) throws {
         self.aciIdentityKeyPair = try IdentityKeyPair(
             publicKey: PublicKey(proto.aciIdentityKeyPublic),
             privateKey: PrivateKey(proto.aciIdentityKeyPrivate),
