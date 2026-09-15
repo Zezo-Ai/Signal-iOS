@@ -69,7 +69,7 @@ public struct LinkingProvisioningMessage {
         )
 
         guard let profileKey = Aes256Key(data: proto.profileKey) else {
-            throw ProvisioningError.invalidProvisionMessage("invalid profileKey - count: \(proto.profileKey.count)")
+            throw OWSGenericError("invalid profileKey - count: \(proto.profileKey.count)")
         }
         self.profileKey = profileKey
 
@@ -81,13 +81,13 @@ public struct LinkingProvisioningMessage {
         self.provisioningVersion = provisioningVersion
 
         guard proto.number.count > 1 else {
-            throw ProvisioningError.invalidProvisionMessage("missing number from provisioning message")
+            throw OWSGenericError("missing number from provisioning message")
         }
         self.phoneNumber = proto.number
 
         self.aci = try {
             guard let aci = Aci.parseFrom(serviceIdBinary: proto.aciBinary, serviceIdString: proto.aci) else {
-                throw ProvisioningError.invalidProvisionMessage("invalid ACI from provisioning message")
+                throw OWSGenericError("invalid ACI from provisioning message")
             }
             return aci
         }()
@@ -95,24 +95,20 @@ public struct LinkingProvisioningMessage {
         self.pni = try {
             if proto.hasPniBinary {
                 guard let pniUuid = UUID(data: proto.pniBinary) else {
-                    throw ProvisioningError.invalidProvisionMessage("invalid PNI from provisioning message")
+                    throw OWSGenericError("invalid PNI from provisioning message")
                 }
                 return Pni(fromUUID: pniUuid)
             }
             if proto.hasPni {
                 guard let pni = Pni.parseFrom(ambiguousString: proto.pni) else {
-                    throw ProvisioningError.invalidProvisionMessage("invalid PNI from provisioning message")
+                    throw OWSGenericError("invalid PNI from provisioning message")
                 }
                 return pni
             }
-            throw ProvisioningError.invalidProvisionMessage("invalid PNI from provisioning message")
+            throw OWSGenericError("invalid PNI from provisioning message")
         }()
 
-        if let aep = try? AccountEntropyPool(key: proto.accountEntropyPool) {
-            self.aep = aep
-        } else {
-            throw ProvisioningError.invalidProvisionMessage("missing aep from provisioning message")
-        }
+        self.aep = try AccountEntropyPool(key: proto.accountEntropyPool)
 
         self.mrbk = MediaRootBackupKey(backupKey: try BackupKey(contents: proto.mediaRootBackupKey))
 

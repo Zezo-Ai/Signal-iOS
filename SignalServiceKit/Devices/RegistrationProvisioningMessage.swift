@@ -98,14 +98,14 @@ public struct RegistrationProvisioningMessage {
             let accountEntropyPool = proto.accountEntropyPool.nilIfEmpty,
             let aep = try? AccountEntropyPool(key: accountEntropyPool)
         else {
-            throw ProvisioningError.invalidProvisionMessage("missing master key from provisioning message")
+            throw OWSGenericError("missing master key from provisioning message")
         }
         self.accountEntropyPool = aep
 
         self.aci = try Aci.parseFrom(serviceIdBinary: proto.aci)
 
         guard let e164 = E164(proto.e164) else {
-            throw ProvisioningError.invalidProvisionMessage("missing number from provisioning message")
+            throw OWSGenericError("missing number from provisioning message")
         }
         self.phoneNumber = e164
 
