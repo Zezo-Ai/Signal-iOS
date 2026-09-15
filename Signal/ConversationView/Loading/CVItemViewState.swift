@@ -560,7 +560,6 @@ struct CVItemModelBuilder: CVItemBuilding {
             attachment.attachment.asStream()?.contentType.isAudio
             ?? MimeTypeUtil.isSupportedAudioMimeType(attachment.attachment.mimeType)
         {
-
             if let stream = attachment.asReferencedStream {
                 itemViewState.nextAudioAttachment = AudioAttachment(
                     attachmentStream: stream,

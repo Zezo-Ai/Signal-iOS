@@ -1894,7 +1894,7 @@ private extension CVComponentState.Builder {
             let attachmentStream = referencedAttachment.asReferencedStream,
             let audioAttachment = AudioAttachment(
                 attachmentStream: attachmentStream,
-                owningMessage: interaction as? TSMessage,
+                owningMessage: message,
                 metadata: nil,
                 receivedAtDate: interaction.receivedAtDate,
             )
@@ -1903,7 +1903,7 @@ private extension CVComponentState.Builder {
         } else if let referencedAttachmentPointer = referencedAttachment.asReferencedAnyPointer {
             self.audioAttachment = AudioAttachment(
                 attachmentPointer: referencedAttachmentPointer,
-                owningMessage: interaction as? TSMessage,
+                owningMessage: message,
                 metadata: nil,
                 receivedAtDate: interaction.receivedAtDate,
                 downloadState: referencedAttachmentPointer.attachmentPointer.downloadState(tx: transaction),

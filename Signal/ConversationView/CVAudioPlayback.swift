@@ -8,11 +8,18 @@ public import SignalServiceKit
 public import SignalUI
 
 protocol CVAudioPlayerListener {
-    func audioPlayerStateDidChange(attachmentId: Attachment.IDType)
-    // Attachments are deduplicated by content across conversations, so
-    // attachmentId alone is not enough to identify which message finished.
-    func audioPlayerDidFinish(attachmentId: Attachment.IDType, forInteractionId interactionId: String?)
-    func audioPlayerDidMarkViewed(attachmentId: Attachment.IDType)
+    func audioPlayerStateDidChange(
+        attachmentId: Attachment.IDType,
+        interactionId: String,
+    )
+    func audioPlayerDidFinish(
+        attachmentId: Attachment.IDType,
+        interactionId: String,
+    )
+    func audioPlayerDidMarkViewed(
+        attachmentId: Attachment.IDType,
+        interactionId: String,
+    )
 }
 
 // MARK: -
@@ -113,26 +120,24 @@ public class CVAudioPlayer: NSObject, AudioPlayerDelegate, CVAudioPlaybackDelega
         if let progress = progressCache[attachmentId] {
             audioPlayback.setProgress(progress)
         }
-        if
-            let uniqueThreadId = audioPlayback.uniqueThreadId,
-            let playbackRate = playbackRateCache[uniqueThreadId]
-        {
+        if let playbackRate = playbackRateCache[audioPlayback.uniqueThreadId] {
             audioPlayback.setPlaybackRate(playbackRate)
         } else {
             audioPlayback.setPlaybackRate(1)
         }
         audioPlayback.delegate = self
 
-        let oldAudioPlayback = self.audioPlayback
-        self.audioPlayback = audioPlayback
-
         // Let the existing player know its state has changed.
-        if let oldId = oldAudioPlayback?.attachmentId {
+        if let oldAudioPlayback = self.audioPlayback {
             for listener in listeners.elements {
-                listener.audioPlayerStateDidChange(attachmentId: oldId)
+                listener.audioPlayerStateDidChange(
+                    attachmentId: oldAudioPlayback.attachmentId,
+                    interactionId: oldAudioPlayback.interactionId,
+                )
             }
         }
 
+        self.audioPlayback = audioPlayback
         return audioPlayback
     }
 
@@ -146,7 +151,10 @@ public class CVAudioPlayer: NSObject, AudioPlayerDelegate, CVAudioPlaybackDelega
 
         if audioAttachment.markOwningMessageAsViewed() {
             for listener in listeners.elements {
-                listener.audioPlayerDidMarkViewed(attachmentId: audioPlayback.attachmentId)
+                listener.audioPlayerDidMarkViewed(
+                    attachmentId: audioPlayback.attachmentId,
+                    interactionId: audioPlayback.interactionId,
+                )
             }
         }
 
@@ -200,7 +208,10 @@ public class CVAudioPlayer: NSObject, AudioPlayerDelegate, CVAudioPlaybackDelega
 
             if audioAttachment.markOwningMessageAsViewed() {
                 for listener in self?.listeners.elements ?? [] {
-                    listener.audioPlayerDidMarkViewed(attachmentId: audioPlayback.attachmentId)
+                    listener.audioPlayerDidMarkViewed(
+                        attachmentId: audioPlayback.attachmentId,
+                        interactionId: audioPlayback.interactionId,
+                    )
                 }
             }
 
@@ -284,7 +295,10 @@ public class CVAudioPlayer: NSObject, AudioPlayerDelegate, CVAudioPlaybackDelega
         }
 
         for listener in listeners.elements {
-            listener.audioPlayerStateDidChange(attachmentId: audioPlayback.attachmentId)
+            listener.audioPlayerStateDidChange(
+                attachmentId: audioPlayback.attachmentId,
+                interactionId: audioPlayback.interactionId,
+            )
         }
     }
 
@@ -296,7 +310,7 @@ public class CVAudioPlayer: NSObject, AudioPlayerDelegate, CVAudioPlaybackDelega
         for listener in listeners.elements {
             listener.audioPlayerDidFinish(
                 attachmentId: audioPlayback.attachmentId,
-                forInteractionId: audioPlayback.owningInteractionId,
+                interactionId: audioPlayback.interactionId,
             )
         }
     }
@@ -318,8 +332,8 @@ private class CVAudioPlayback: NSObject, AudioPlayerDelegate {
 
     fileprivate weak var delegate: CVAudioPlaybackDelegate?
 
-    fileprivate let uniqueThreadId: String?
-    fileprivate let owningInteractionId: String?
+    fileprivate let uniqueThreadId: String
+    fileprivate let interactionId: String
     fileprivate let attachmentId: Attachment.IDType
 
     private let audioPlayer: AudioPlayer
@@ -394,8 +408,8 @@ private class CVAudioPlayback: NSObject, AudioPlayerDelegate {
         self.attachmentId = attachmentStream.attachmentStream.id
 
         audioPlayer = AudioPlayer(attachment: attachmentStream.attachmentStream, audioBehavior: .audioMessagePlayback)
-        uniqueThreadId = attachment.owningMessage?.uniqueThreadId
-        owningInteractionId = attachment.owningMessage?.uniqueId
+        uniqueThreadId = attachment.owningMessage.uniqueThreadId
+        interactionId = attachment.owningMessage.uniqueId
 
         super.init()
 

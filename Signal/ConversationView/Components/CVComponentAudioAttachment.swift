@@ -359,18 +359,27 @@ public class CVComponentAudioAttachment:
 
     // MARK: - CVAudioPlayerListener
 
-    func audioPlayerStateDidChange(attachmentId: Attachment.IDType) {}
+    func audioPlayerStateDidChange(
+        attachmentId: Attachment.IDType,
+        interactionId: String,
+    ) {}
 
-    func audioPlayerDidFinish(attachmentId: Attachment.IDType, forInteractionId interactionId: String?) {
-        guard attachmentId == audioAttachment.attachment.id else { return }
-        // Prevent a stale listener in a different conversation (sharing the
-        // same deduplicated attachment) from incorrectly triggering autoplay
-        // of its own, unrelated "next" message.
-        guard interactionId == self.interaction.uniqueId else { return }
+    func audioPlayerDidFinish(
+        attachmentId: Attachment.IDType,
+        interactionId: String,
+    ) {
+        guard
+            attachmentId == audioAttachment.attachment.id,
+            interactionId == audioAttachment.owningMessage.uniqueId
+        else { return }
+
         AppEnvironment.shared.cvAudioPlayerRef.autoplayNextAudioAttachmentIfNeeded(nextAudioAttachment)
     }
 
-    func audioPlayerDidMarkViewed(attachmentId: Attachment.IDType) {}
+    func audioPlayerDidMarkViewed(
+        attachmentId: Attachment.IDType,
+        interactionId: String,
+    ) {}
 
     // MARK: - DatabaseChangeDelegate
 

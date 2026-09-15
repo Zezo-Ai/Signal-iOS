@@ -17,6 +17,7 @@ class AudioMessageView: ManualStackView, CVAudioPlayerListener {
 
     // MARK: - State
 
+    private var owningInteractionId: String { presentation.audioAttachment.owningMessage.uniqueId }
     private var attachment: Attachment { presentation.audioAttachment.attachment }
     private var attachmentStream: AttachmentStream? { presentation.audioAttachment.attachmentStream?.attachmentStream }
     private var durationSeconds: TimeInterval? { presentation.audioAttachment.durationSeconds }
@@ -484,26 +485,44 @@ class AudioMessageView: ManualStackView, CVAudioPlayerListener {
 
     // MARK: - CVAudioPlayerListener
 
-    func audioPlayerStateDidChange(attachmentId: Attachment.IDType) {
+    func audioPlayerStateDidChange(
+        attachmentId: Attachment.IDType,
+        interactionId: String,
+    ) {
         AssertIsOnMainThread()
 
-        guard attachmentId == attachment.id else { return }
+        guard
+            attachmentId == attachment.id,
+            interactionId == owningInteractionId
+        else { return }
 
         updateContents(animated: true)
     }
 
-    func audioPlayerDidFinish(attachmentId: Attachment.IDType, forInteractionId interactionId: String?) {
+    func audioPlayerDidFinish(
+        attachmentId: Attachment.IDType,
+        interactionId: String,
+    ) {
         AssertIsOnMainThread()
 
-        guard attachmentId == attachment.id else { return }
+        guard
+            attachmentId == attachment.id,
+            interactionId == owningInteractionId
+        else { return }
 
         updateContents(animated: true)
     }
 
-    func audioPlayerDidMarkViewed(attachmentId: Attachment.IDType) {
+    func audioPlayerDidMarkViewed(
+        attachmentId: Attachment.IDType,
+        interactionId: String,
+    ) {
         AssertIsOnMainThread()
 
-        guard !isViewed, attachmentId == attachment.id else { return }
+        guard
+            attachmentId == attachment.id,
+            interactionId == owningInteractionId
+        else { return }
 
         setViewed(true, animated: true)
     }

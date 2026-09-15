@@ -55,7 +55,7 @@ public class AudioAttachment: Equatable {
     }
 
     public let receivedAtDate: Date
-    public let owningMessage: TSMessage?
+    public let owningMessage: TSMessage
 
     // Set at time of init. Value doesn't change even after download completes
     // to ensure that conversation view diffing catches the need to redraw the cell
@@ -63,7 +63,7 @@ public class AudioAttachment: Equatable {
 
     public init?(
         attachmentStream referencedAttachmentStream: ReferencedAttachmentStream,
-        owningMessage: TSMessage?,
+        owningMessage: TSMessage,
         metadata: MediaMetadata?,
         receivedAtDate: Date,
     ) {
@@ -90,7 +90,7 @@ public class AudioAttachment: Equatable {
 
     public init(
         attachmentPointer: ReferencedAttachmentPointer,
-        owningMessage: TSMessage?,
+        owningMessage: TSMessage,
         metadata: MediaMetadata?,
         receivedAtDate: Date,
         downloadState: AttachmentDownloadState,
