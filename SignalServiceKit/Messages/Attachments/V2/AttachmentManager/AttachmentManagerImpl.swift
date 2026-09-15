@@ -360,7 +360,7 @@ public class AttachmentManagerImpl: AttachmentManager {
                     mimeType: mimeType,
                     contentType: contentType,
                     encryptionKey: encryptionKey,
-                    latestTransitTierInfo: hasLocalKey ? nil : transitTierInfo,
+                    latestTransitTierInfo: transitTierInfo,
                     plaintextHash: plaintextHash,
                     mediaTierInfo: hasLocalKey ? nil : .init(
                         cdnNumber: mediaTierCdnNumber,
