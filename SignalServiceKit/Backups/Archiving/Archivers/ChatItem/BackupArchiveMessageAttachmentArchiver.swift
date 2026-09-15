@@ -429,7 +429,7 @@ extension ReferencedAttachment {
         proto.locatorInfo = self.asBackupFilePointerLocatorInfo(context: context, localFileBackupStore: localFileBackupStore)
 
         if proto.locatorInfo.hasLocalKey {
-            context.attachmentByteCounter.addToByteCount(
+            context.attachmentByteCounter.addToLocalByteCount(
                 attachmentID: attachment.id,
                 byteCount: Cryptography.localBackupEncryptedSize(unencryptedSize: UInt64(safeCast: proto.locatorInfo.size)) ?? .max,
             )
@@ -441,7 +441,7 @@ extension ReferencedAttachment {
                 unencryptedSize: UInt64(safeCast: mediaTierInfo.unencryptedByteCount),
             ) ?? UInt64(UInt32.max)
 
-            context.attachmentByteCounter.addToByteCount(
+            context.attachmentByteCounter.addToRemoteByteCount(
                 attachmentID: attachment.id,
                 byteCount: estimatedMediaTierSize,
             )

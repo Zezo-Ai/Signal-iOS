@@ -150,7 +150,7 @@ class LocalFileBackupExportJob {
                 currentDirectoryName = currentBackupDirectoryName
 
                 let backupFileSizeBytes = UInt64(safeCast: metadata.encryptedDataLength)
-                let backupMediaSizeBytes = metadata.attachmentByteSize
+                let backupMediaSizeBytes = metadata.localAttachmentByteSize
                 await db.awaitableWrite { tx in
                     localFileBackupStore.setLastBackupDetails(
                         date: metadata.exportStartDate,

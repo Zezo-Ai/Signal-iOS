@@ -439,7 +439,7 @@ public class AttachmentManagerImpl: AttachmentManager {
                 estimatedMediaTierSize = UInt64(UInt32.max)
             }
 
-            attachmentByteCounter.addToByteCount(
+            attachmentByteCounter.addToRemoteByteCount(
                 attachmentID: attachment.id,
                 byteCount: estimatedMediaTierSize,
             )
@@ -452,6 +452,10 @@ public class AttachmentManagerImpl: AttachmentManager {
                     unencryptedByteCount: proto.locatorInfo.size,
                     localKey: proto.locatorInfo.localKey,
                     tx: tx,
+                )
+                attachmentByteCounter.addToLocalByteCount(
+                    attachmentID: attachment.id,
+                    byteCount: Cryptography.localBackupEncryptedSize(unencryptedSize: UInt64(safeCast: proto.locatorInfo.size)) ?? .max,
                 )
             }
 

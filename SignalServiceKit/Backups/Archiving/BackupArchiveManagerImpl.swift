@@ -219,7 +219,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
             switch backupSettingsStore.backupPlan(tx: tx) {
             case .paid, .paidExpiringSoon, .paidAsTester:
                 backupFileSizeBytes = UInt64(safeCast: metadata.encryptedDataLength)
-                backupMediaSizeBytes = metadata.attachmentByteSize
+                backupMediaSizeBytes = metadata.remoteAttachmentByteSize
             case .free:
                 backupFileSizeBytes = UInt64(safeCast: metadata.encryptedDataLength)
                 backupMediaSizeBytes = 0
@@ -1339,7 +1339,7 @@ public class BackupArchiveManagerImpl: BackupArchiveManager {
             backupSettingsStore.setLastBackupDetails(
                 date: Date(millisecondsSince1970: backupInfo.backupTimeMs),
                 backupFileSizeBytes: inputFileSize,
-                backupMediaSizeBytes: attachmentByteCounter.attachmentByteSize(),
+                backupMediaSizeBytes: attachmentByteCounter.remoteAttachmentByteSize(),
                 tx: tx,
             )
 
