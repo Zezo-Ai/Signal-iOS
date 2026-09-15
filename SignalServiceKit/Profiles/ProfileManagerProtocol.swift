@@ -13,12 +13,12 @@ public protocol ProfileManagerProtocol {
     func userProfile(for address: SignalServiceAddress, tx: DBReadTransaction) -> OWSUserProfile?
 
     func addRecipientToProfileWhitelist(_ recipient: inout SignalRecipient, userProfileWriter: UserProfileWriter, tx: DBWriteTransaction)
-    func removeRecipientFromProfileWhitelist(_ recipient: inout SignalRecipient, userProfileWriter: UserProfileWriter, tx: DBWriteTransaction)
+    func removeRecipientFromProfileWhitelist(_ recipient: inout SignalRecipient, userProfileWriter: UserProfileWriter, tx: DBWriteTransaction) -> Bool
     func isRecipientInProfileWhitelist(_ recipient: SignalRecipient, tx: DBReadTransaction) -> Bool
 
     func isGroupId(inProfileWhitelist groupId: Data, transaction: DBReadTransaction) -> Bool
     func addGroupId(toProfileWhitelist groupId: Data, userProfileWriter: UserProfileWriter, transaction: DBWriteTransaction)
-    func removeGroupId(fromProfileWhitelist groupId: Data, userProfileWriter: UserProfileWriter, transaction: DBWriteTransaction)
+    func removeGroupId(fromProfileWhitelist groupId: Data, userProfileWriter: UserProfileWriter, transaction: DBWriteTransaction) -> Bool
 
     func setLocalProfileKey(_ key: Aes256Key, userProfileWriter: UserProfileWriter, transaction: DBWriteTransaction)
 

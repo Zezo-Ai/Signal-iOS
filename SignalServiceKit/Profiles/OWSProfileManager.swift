@@ -109,17 +109,18 @@ public class OWSProfileManager: ProfileManagerProtocol {
         _ recipient: inout SignalRecipient,
         userProfileWriter: UserProfileWriter,
         tx: DBWriteTransaction,
-    ) {
+    ) -> Bool {
         let recipientStore = DependenciesBridge.shared.recipientDatabaseTable
         switch recipient.status {
         case .unspecified:
-            return
+            return false
         case .whitelisted:
             break
         }
         recipient.status = .unspecified
         recipientStore.updateRecipient(recipient, transaction: tx)
         _didUpdateRecipientInWhitelist(recipient, userProfileWriter: userProfileWriter, tx: tx)
+        return true
     }
 
     private func _didUpdateRecipientInWhitelist(
@@ -160,18 +161,25 @@ public class OWSProfileManager: ProfileManagerProtocol {
 
     public func addGroupId(toProfileWhitelist groupId: Data, userProfileWriter: UserProfileWriter, transaction: DBWriteTransaction) {
         owsAssertDebug(!groupId.isEmpty)
+        let blockingManager = SSKEnvironment.shared.blockingManagerRef
+        if blockingManager.isGroupIdBlocked_deprecated(groupId, tx: transaction) {
+            owsFailDebug("can't whitelist a blocked group")
+            return
+        }
         let groupIdKey = groupKey(groupId: groupId)
         if whitelistedGroupsStore.fetchValue(Bool.self, forKey: groupIdKey, tx: transaction) == nil {
             addConfirmedUnwhitelistedGroupId(groupId, userProfileWriter: userProfileWriter, transaction: transaction)
         }
     }
 
-    public func removeGroupId(fromProfileWhitelist groupId: Data, userProfileWriter: UserProfileWriter, transaction: DBWriteTransaction) {
+    public func removeGroupId(fromProfileWhitelist groupId: Data, userProfileWriter: UserProfileWriter, transaction: DBWriteTransaction) -> Bool {
         owsAssertDebug(!groupId.isEmpty)
         let groupIdKey = groupKey(groupId: groupId)
-        if whitelistedGroupsStore.fetchValue(Bool.self, forKey: groupIdKey, tx: transaction) != nil {
-            removeConfirmedWhitelistedGroupId(groupId, userProfileWriter: userProfileWriter, transaction: transaction)
+        guard whitelistedGroupsStore.fetchValue(Bool.self, forKey: groupIdKey, tx: transaction) != nil else {
+            return false
         }
+        removeConfirmedWhitelistedGroupId(groupId, userProfileWriter: userProfileWriter, transaction: transaction)
+        return true
     }
 
     private func removeConfirmedWhitelistedGroupId(_ groupId: Data, userProfileWriter: UserProfileWriter, transaction: DBWriteTransaction) {

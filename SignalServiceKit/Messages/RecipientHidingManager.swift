@@ -331,7 +331,7 @@ private extension RecipientHidingManagerImpl {
 
         if wasLocallyInitiated {
             Logger.info("[Recipient hiding][side effects] Remove from whitelist.")
-            profileManager.removeRecipientFromProfileWhitelist(&recipient, userProfileWriter: .localUser, tx: tx)
+            _ = profileManager.removeRecipientFromProfileWhitelist(&recipient, userProfileWriter: .localUser, tx: tx)
             Logger.info("[Recipient hiding][side effects] Remove from story distribution lists.")
             let storyRecipientManager = DependenciesBridge.shared.storyRecipientManager
             storyRecipientManager.removeRecipientIdFromAllPrivateStoryThreads(

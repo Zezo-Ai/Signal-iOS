@@ -613,12 +613,16 @@ class StorageServiceContactRecordUpdater: StorageServiceRecordUpdater {
             }
         }
 
+        // Note: It's important to set "blocked" first so that blocked ->
+        // whitelisted transitions work properly and so that whitelisted -> blocked
+        // transitions schedule a profile key rotation.
+
         // If our local whitelisted state differs from the service state, use the service's value.
         if record.whitelisted != localIsWhitelisted {
             if record.whitelisted {
                 profileManager.addRecipientToProfileWhitelist(&recipient, userProfileWriter: .storageService, tx: tx)
             } else {
-                profileManager.removeRecipientFromProfileWhitelist(&recipient, userProfileWriter: .storageService, tx: tx)
+                _ = profileManager.removeRecipientFromProfileWhitelist(&recipient, userProfileWriter: .storageService, tx: tx)
             }
         }
 
@@ -1114,6 +1118,10 @@ class StorageServiceGroupV2RecordUpdater: StorageServiceRecordUpdater {
             }
         }
 
+        // Note: It's important to set "blocked" first so that blocked ->
+        // whitelisted transitions work properly and so that whitelisted -> blocked
+        // transitions schedule a profile key rotation.
+
         // If our local whitelisted state differs from the service state, use the service's value.
         if record.whitelisted != localIsWhitelisted {
             if record.whitelisted {
@@ -1123,7 +1131,7 @@ class StorageServiceGroupV2RecordUpdater: StorageServiceRecordUpdater {
                     transaction: transaction,
                 )
             } else {
-                profileManager.removeGroupId(
+                _ = profileManager.removeGroupId(
                     fromProfileWhitelist: groupId.serialize(),
                     userProfileWriter: .storageService,
                     transaction: transaction,
