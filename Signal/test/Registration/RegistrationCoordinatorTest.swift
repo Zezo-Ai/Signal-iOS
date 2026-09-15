@@ -344,9 +344,13 @@ public class RegistrationCoordinatorTest {
         // It needs an apns token to register.
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
         // It needs prekeys as well.
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
         // And will finalize prekeys after success.
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(didSucceed)
         }
 
@@ -483,9 +487,13 @@ public class RegistrationCoordinatorTest {
         // It needs an apns token to register.
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
         // Every time we register we also ask for prekeys.
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
         // And we finalize them after.
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(didSucceed)
         }
 
@@ -610,15 +618,23 @@ public class RegistrationCoordinatorTest {
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
 
         // Every time we register we also ask for prekeys.
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
 
         // And we finalize them after.
         // Set up a list of mocks that should be returned in order
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(!didSucceed)
         }
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(!didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(didSucceed)
         }
 
@@ -713,14 +729,23 @@ public class RegistrationCoordinatorTest {
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
 
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
 
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(!didSucceed)
         }
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(!didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(!didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(!didSucceed)
         }
 
@@ -808,14 +833,22 @@ public class RegistrationCoordinatorTest {
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
 
         // Every time we register we also ask for prekeys.
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
 
         // And we finalize them after.
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(!didSucceed)
         }
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(!didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(didSucceed)
         }
 
@@ -934,11 +967,15 @@ public class RegistrationCoordinatorTest {
         let expectedSteps: [TestStep] = [
             .requestPushToken,
             .createPreKeys,
+            .createPreKeys,
             .failedRequest,
+            .finalizePreKeys,
             .finalizePreKeys,
             .requestPushToken,
             .createPreKeys,
+            .createPreKeys,
             .createAccount,
+            .finalizePreKeys,
             .finalizePreKeys,
             .rotateOneTimePreKeys,
             .markPinEnabled,
@@ -997,11 +1034,15 @@ public class RegistrationCoordinatorTest {
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
 
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
 
-        preKeyManagerMock.addFinalizePreKeyMock({ _ in })
-        preKeyManagerMock.addFinalizePreKeyMock({ _ in })
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, _ in }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, _ in }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, _ in }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, _ in }
 
         // Fail the first request;
         let expectedRecoveryPwRequest = createAccountWithRecoveryPw(aep.getMasterKey().deriveRegistrationRecoveryPassword())
@@ -1142,13 +1183,21 @@ public class RegistrationCoordinatorTest {
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
 
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
 
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(!didSucceed)
         }
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(!didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(didSucceed)
         }
 
@@ -1334,13 +1383,19 @@ public class RegistrationCoordinatorTest {
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
 
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
 
-        preKeyManagerMock.addFinalizePreKeyMock({ _ in })
-        preKeyManagerMock.addFinalizePreKeyMock({ _ in })
-        preKeyManagerMock.addFinalizePreKeyMock({ _ in })
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, _ in }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, _ in }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, _ in }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, _ in }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, _ in }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, _ in }
 
         // Fail the first request; the local key is invalid.
         let expectedRecoveryPwRequest = createAccountWithRecoveryPw(masterKey.deriveRegistrationRecoveryPassword())
@@ -1466,10 +1521,14 @@ public class RegistrationCoordinatorTest {
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
 
         // Every time we register we also ask for prekeys.
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
 
         // And we finalize them after.
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(didSucceed)
         }
 
@@ -1567,7 +1626,9 @@ public class RegistrationCoordinatorTest {
             .restoreKeys,
             .requestPushToken,
             .createPreKeys,
+            .createPreKeys,
             .createAccount,
+            .finalizePreKeys,
             .finalizePreKeys,
             .rotateOneTimePreKeys,
             .restoreStorageService,
@@ -1742,7 +1803,8 @@ public class RegistrationCoordinatorTest {
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
 
         // It should also fetch the prekeys for account creation
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
 
         let expectedRequest = createAccountWithSession(recoveryPassword: newMasterKey.deriveRegistrationRecoveryPassword())
         mockURLSession.addResponse(
@@ -1767,7 +1829,10 @@ public class RegistrationCoordinatorTest {
         }
 
         // Once we are registered, we should finalize prekeys.
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(didSucceed)
         }
 
@@ -2760,7 +2825,8 @@ public class RegistrationCoordinatorTest {
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
 
         // It should also fetch the prekeys for account creation
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
 
         let expectedRequest = createAccountWithSession(recoveryPassword: newMasterKey.deriveRegistrationRecoveryPassword())
         mockURLSession.addResponse(
@@ -2789,7 +2855,10 @@ public class RegistrationCoordinatorTest {
         }
 
         // Once we are registered, we should finalize prekeys.
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(didSucceed)
         }
 
@@ -2881,7 +2950,8 @@ public class RegistrationCoordinatorTest {
         pushRegistrationManagerMock.addRequestPushTokenMock({ .success(Stubs.apnsRegistrationId) })
 
         // It should also fetch the prekeys for account creation
-        preKeyManagerMock.addCreatePreKeysMock({ Stubs.prekeyBundles() })
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
+        preKeyManagerMock.addCreatePreKeysMock(Stubs.preKeyBundle(identity:))
 
         let expectedRequest = createAccountWithSession(recoveryPassword: newMasterKey.deriveRegistrationRecoveryPassword())
         mockURLSession.addResponse(
@@ -2906,7 +2976,10 @@ public class RegistrationCoordinatorTest {
         }
 
         // Once we are registered, we should finalize prekeys.
-        preKeyManagerMock.addFinalizePreKeyMock { didSucceed in
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
+            #expect(didSucceed)
+        }
+        preKeyManagerMock.addFinalizePreKeyBundleMock { _, didSucceed in
             #expect(didSucceed)
         }
 
@@ -3029,7 +3102,8 @@ public class RegistrationCoordinatorTest {
             accountAttributes: Stubs.accountAttributes(registrationRecoveryPassword: recoveryPassword),
             skipDeviceTransfer: true,
             apnRegistrationId: Stubs.apnsRegistrationId,
-            prekeyBundles: Stubs.prekeyBundles(),
+            aciPreKeyBundle: Stubs.preKeyBundle(identity: .aci),
+            pniPreKeyBundle: Stubs.preKeyBundle(identity: .pni),
             logger: .empty(),
         )
     }
@@ -3043,7 +3117,8 @@ public class RegistrationCoordinatorTest {
             accountAttributes: Stubs.accountAttributes(registrationRecoveryPassword: recoveryPassword),
             skipDeviceTransfer: true,
             apnRegistrationId: Stubs.apnsRegistrationId,
-            prekeyBundles: Stubs.prekeyBundles(),
+            aciPreKeyBundle: Stubs.preKeyBundle(identity: .aci),
+            pniPreKeyBundle: Stubs.preKeyBundle(identity: .pni),
             logger: .empty(),
         )
     }
@@ -3274,20 +3349,13 @@ public class RegistrationCoordinatorTest {
             )
         }
 
-        static func prekeyBundles() -> RegistrationPreKeyUploadBundles {
-            return RegistrationPreKeyUploadBundles(
-                aci: preKeyBundle(identity: .aci),
-                pni: preKeyBundle(identity: .pni),
-            )
-        }
-
         static func preKeyBundle(identity: OWSIdentity) -> RegistrationPreKeyUploadBundle {
-            let identityKeyPair = ECKeyPair.generateKeyPair()
+            let identityKeyPair = IdentityKeyPair.generate()
             return RegistrationPreKeyUploadBundle(
                 identity: identity,
                 identityKeyPair: identityKeyPair,
-                signedPreKey: SignedPreKeyStoreImpl.generateSignedPreKey(keyId: PreKeyId.random(), signedBy: identityKeyPair.keyPair.privateKey),
-                lastResortPreKey: KyberPreKeyStoreImpl.generatePreKeyRecord(keyId: 0, now: Date(), signedBy: identityKeyPair.keyPair.privateKey),
+                signedPreKey: SignedPreKeyStoreImpl.generateSignedPreKey(keyId: PreKeyId.random(), signedBy: identityKeyPair.privateKey),
+                lastResortPreKey: KyberPreKeyStoreImpl.generatePreKeyRecord(keyId: 0, now: Date(), signedBy: identityKeyPair.privateKey),
             )
         }
 

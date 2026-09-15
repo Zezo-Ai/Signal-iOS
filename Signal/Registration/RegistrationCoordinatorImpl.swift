@@ -4551,7 +4551,8 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
             persistRegistrationMessage(registrationMessage)
         }
 
-        let prekeyBundles = await deps.preKeyManager.createPreKeysForRegistration()
+        let aciPreKeyBundle = await deps.preKeyManager.createPreKeysForRegistration(forIdentity: .aci)
+        let pniPreKeyBundle = await deps.preKeyManager.createPreKeysForRegistration(forIdentity: .pni)
 
         let shouldSkipDeviceTransfer = self.shouldSkipDeviceTransfer()
         let signalService = self.deps.signalService
@@ -4561,7 +4562,8 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
             accountAttributes: accountAttributes,
             skipDeviceTransfer: shouldSkipDeviceTransfer,
             apnRegistrationId: apnRegistrationId,
-            prekeyBundles: prekeyBundles,
+            aciPreKeyBundle: aciPreKeyBundle,
+            pniPreKeyBundle: pniPreKeyBundle,
             signalService: signalService,
             logger: logger,
         )
@@ -4575,8 +4577,12 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
             .genericError,
             .deviceTransferPossible: false
         }
-        await deps.preKeyManager.finalizeRegistrationPreKeys(
-            prekeyBundles,
+        await deps.preKeyManager.finalizeRegistrationPreKeyBundle(
+            aciPreKeyBundle,
+            uploadDidSucceed: isPrekeyUploadSuccess,
+        )
+        await deps.preKeyManager.finalizeRegistrationPreKeyBundle(
+            pniPreKeyBundle,
             uploadDidSucceed: isPrekeyUploadSuccess,
         )
         return await responseHandler(accountResponse)

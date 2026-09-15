@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import LibSignalClient
+public import LibSignalClient
 @testable public import Signal
 @testable public import SignalServiceKit
 
@@ -167,24 +167,24 @@ public class _RegistrationCoordinator_PreKeyManagerMock: PreKeyManager {
 
     public func isAppLockedDueToPreKeyUpdateFailures(tx: DBReadTransaction) -> Bool { fatalError() }
     public func checkPreKeysIfNecessary() async throws { fatalError() }
-    public func createPreKeysForProvisioning(aciIdentityKeyPair: ECKeyPair, pniIdentityKeyPair: ECKeyPair) async -> RegistrationPreKeyUploadBundles { fatalError() }
+    public func createPreKeysForProvisioning(forIdentity identity: OWSIdentity, keyPair: IdentityKeyPair) async -> RegistrationPreKeyUploadBundle { fatalError() }
     public func rotateSignedPreKeysIfNeeded() async throws { fatalError() }
     public func refreshOneTimePreKeys(forIdentity identity: OWSIdentity, alsoRefreshSignedPreKey shouldRefreshSignedPreKey: Bool) async throws { fatalError() }
 
-    public typealias CreatePreKeysMock = () async -> RegistrationPreKeyUploadBundles
+    public typealias CreatePreKeysMock = (OWSIdentity) async -> RegistrationPreKeyUploadBundle
     private var createPreKeysMocks = [CreatePreKeysMock]()
     public func addCreatePreKeysMock(_ mock: @escaping CreatePreKeysMock) { createPreKeysMocks.append(mock) }
-    public func createPreKeysForRegistration() async -> RegistrationPreKeyUploadBundles {
+    public func createPreKeysForRegistration(forIdentity identity: OWSIdentity) async -> RegistrationPreKeyUploadBundle {
         run.addObservedStep(.createPreKeys)
-        return await createPreKeysMocks.removeFirst()()
+        return await createPreKeysMocks.removeFirst()(identity)
     }
 
-    public typealias FinalizePreKeysMock = (Bool) async -> Void
-    private var finalizePreKeysMocks = [FinalizePreKeysMock]()
-    public func addFinalizePreKeyMock(_ mock: @escaping FinalizePreKeysMock) { finalizePreKeysMocks.append(mock) }
-    public func finalizeRegistrationPreKeys(_ bundles: RegistrationPreKeyUploadBundles, uploadDidSucceed: Bool) async {
+    public typealias FinalizePreKeyBundleMock = (OWSIdentity, Bool) async -> Void
+    private var finalizePreKeyBundleMocks = [FinalizePreKeyBundleMock]()
+    public func addFinalizePreKeyBundleMock(_ mock: @escaping FinalizePreKeyBundleMock) { finalizePreKeyBundleMocks.append(mock) }
+    public func finalizeRegistrationPreKeyBundle(_ bundle: RegistrationPreKeyUploadBundle, uploadDidSucceed: Bool) async {
         run.addObservedStep(.finalizePreKeys)
-        await finalizePreKeysMocks.removeFirst()(uploadDidSucceed)
+        await finalizePreKeyBundleMocks.removeFirst()(bundle.identity, uploadDidSucceed)
     }
 
     public typealias RotateOneTimePreKeysMock = (ChatServiceAuth) async throws -> Void

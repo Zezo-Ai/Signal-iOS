@@ -4,6 +4,7 @@
 //
 
 import Foundation
+public import LibSignalClient
 
 /// Broadly speaking, this class does not perform PreKey operations. It just manages scheduling
 /// them (they must occur in serial), including deciding which need to happen in the first place.
@@ -167,31 +168,25 @@ public class PreKeyManagerImpl: PreKeyManager {
         }
     }
 
-    public func createPreKeysForRegistration() async -> RegistrationPreKeyUploadBundles {
+    public func createPreKeysForRegistration(forIdentity identity: OWSIdentity) async -> RegistrationPreKeyUploadBundle {
         logger.info("Create registration prekeys")
-        return await taskManager.createForRegistration()
+        return await taskManager.createForRegistration(forIdentity: identity)
     }
 
     public func createPreKeysForProvisioning(
-        aciIdentityKeyPair: ECKeyPair,
-        pniIdentityKeyPair: ECKeyPair,
-    ) async -> RegistrationPreKeyUploadBundles {
+        forIdentity identity: OWSIdentity,
+        keyPair: IdentityKeyPair,
+    ) async -> RegistrationPreKeyUploadBundle {
         logger.info("Create provisioning prekeys")
-        return await taskManager.createForProvisioning(
-            aciIdentityKeyPair: aciIdentityKeyPair,
-            pniIdentityKeyPair: pniIdentityKeyPair,
-        )
+        return await taskManager.createForProvisioning(forIdentity: identity, keyPair: keyPair)
     }
 
-    public func finalizeRegistrationPreKeys(
-        _ bundles: RegistrationPreKeyUploadBundles,
+    public func finalizeRegistrationPreKeyBundle(
+        _ bundle: RegistrationPreKeyUploadBundle,
         uploadDidSucceed: Bool,
     ) async {
         logger.info("Finalize registration prekeys")
-        await taskManager.persistAfterRegistration(
-            bundles: bundles,
-            uploadDidSucceed: uploadDidSucceed,
-        )
+        await taskManager.persistRegistrationBundle(bundle, uploadDidSucceed: uploadDidSucceed)
     }
 
     public func rotateOneTimePreKeysForRegistration(auth: ChatServiceAuth) async throws {

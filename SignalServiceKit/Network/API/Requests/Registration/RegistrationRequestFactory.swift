@@ -244,7 +244,8 @@ public enum RegistrationRequestFactory {
         accountAttributes: AccountAttributes,
         skipDeviceTransfer: Bool,
         apnRegistrationId: ApnRegistrationId?,
-        prekeyBundles: RegistrationPreKeyUploadBundles,
+        aciPreKeyBundle: RegistrationPreKeyUploadBundle,
+        pniPreKeyBundle: RegistrationPreKeyUploadBundle,
         logger: PrefixedLogger,
     ) -> TSRequest {
         owsAssertDebug((apnRegistrationId != nil) != accountAttributes.isManualMessageFetchEnabled)
@@ -259,12 +260,12 @@ public enum RegistrationRequestFactory {
         var request = RegistrationRequest(
             accountAttributes: accountAttributes,
             skipDeviceTransfer: skipDeviceTransfer,
-            aciIdentityKey: OWSRequestFactory.IdentityKey(prekeyBundles.aci.identityKeyPair.keyPair.identityKey),
-            aciSignedPreKey: OWSRequestFactory.SignedPreKey(prekeyBundles.aci.signedPreKey),
-            aciPqLastResortPreKey: OWSRequestFactory.KyberPreKey(prekeyBundles.aci.lastResortPreKey),
-            pniIdentityKey: OWSRequestFactory.IdentityKey(prekeyBundles.pni.identityKeyPair.keyPair.identityKey),
-            pniSignedPreKey: OWSRequestFactory.SignedPreKey(prekeyBundles.pni.signedPreKey),
-            pniPqLastResortPreKey: OWSRequestFactory.KyberPreKey(prekeyBundles.pni.lastResortPreKey),
+            aciIdentityKey: OWSRequestFactory.IdentityKey(aciPreKeyBundle.identityKeyPair.identityKey),
+            aciSignedPreKey: OWSRequestFactory.SignedPreKey(aciPreKeyBundle.signedPreKey),
+            aciPqLastResortPreKey: OWSRequestFactory.KyberPreKey(aciPreKeyBundle.lastResortPreKey),
+            pniIdentityKey: OWSRequestFactory.IdentityKey(pniPreKeyBundle.identityKeyPair.identityKey),
+            pniSignedPreKey: OWSRequestFactory.SignedPreKey(pniPreKeyBundle.signedPreKey),
+            pniPqLastResortPreKey: OWSRequestFactory.KyberPreKey(pniPreKeyBundle.lastResortPreKey),
             apnToken: apnRegistrationId,
         )
 

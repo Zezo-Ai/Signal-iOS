@@ -225,7 +225,7 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         // Update censorship circumvention state as e164 could be changing.
         signalService.updateHasCensoredPhoneNumberDuringProvisioning(phoneNumber)
 
-        return try await completeProvisioning_createPrekeys(
+        return try await completeProvisioning_createPreKeys(
             provisionMessage: provisionMessage,
             deviceName: deviceName,
             aci: aci,
@@ -236,16 +236,20 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         }
     }
 
-    private func completeProvisioning_createPrekeys(
+    private func completeProvisioning_createPreKeys(
         provisionMessage: LinkingProvisioningMessage,
         deviceName: String,
         aci: Aci,
         pni: Pni,
         phoneNumber: E164,
     ) async throws(CompleteProvisioningError) -> CompleteProvisioningStepResult {
-        let prekeyBundles = await self.preKeyManager.createPreKeysForProvisioning(
-            aciIdentityKeyPair: provisionMessage.aciIdentityKeyPair.asECKeyPair,
-            pniIdentityKeyPair: provisionMessage.pniIdentityKeyPair.asECKeyPair,
+        let aciPreKeyBundle = await self.preKeyManager.createPreKeysForProvisioning(
+            forIdentity: .aci,
+            keyPair: provisionMessage.aciIdentityKeyPair,
+        )
+        let pniPreKeyBundle = await self.preKeyManager.createPreKeysForProvisioning(
+            forIdentity: .pni,
+            keyPair: provisionMessage.pniIdentityKeyPair,
         )
 
         return try await completeProvisioning_createRegistrationIds(
@@ -254,10 +258,15 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
             aci: aci,
             pni: pni,
             phoneNumber: phoneNumber,
-            prekeyBundles: prekeyBundles,
+            aciPreKeyBundle: aciPreKeyBundle,
+            pniPreKeyBundle: pniPreKeyBundle,
         ).withUndoOnFailureStep {
-            await self.preKeyManager.finalizeRegistrationPreKeys(
-                prekeyBundles,
+            await self.preKeyManager.finalizeRegistrationPreKeyBundle(
+                aciPreKeyBundle,
+                uploadDidSucceed: false,
+            )
+            await self.preKeyManager.finalizeRegistrationPreKeyBundle(
+                pniPreKeyBundle,
                 uploadDidSucceed: false,
             )
         }
@@ -269,7 +278,8 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         aci: Aci,
         pni: Pni,
         phoneNumber: E164,
-        prekeyBundles: RegistrationPreKeyUploadBundles,
+        aciPreKeyBundle: RegistrationPreKeyUploadBundle,
+        pniPreKeyBundle: RegistrationPreKeyUploadBundle,
     ) async throws(CompleteProvisioningError) -> CompleteProvisioningStepResult {
         return try await completeProvisioning_verifyAndLinkOnServer(
             provisionMessage: provisionMessage,
@@ -277,7 +287,8 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
             aci: aci,
             pni: pni,
             phoneNumber: phoneNumber,
-            prekeyBundles: prekeyBundles,
+            aciPreKeyBundle: aciPreKeyBundle,
+            pniPreKeyBundle: pniPreKeyBundle,
             aciRegistrationId: RegistrationIdGenerator.generate(),
             pniRegistrationId: RegistrationIdGenerator.generate(),
         ).withUndoOnFailureStep {
@@ -293,7 +304,8 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         aci: Aci,
         pni: Pni,
         phoneNumber: E164,
-        prekeyBundles: RegistrationPreKeyUploadBundles,
+        aciPreKeyBundle: RegistrationPreKeyUploadBundle,
+        pniPreKeyBundle: RegistrationPreKeyUploadBundle,
         aciRegistrationId: UInt32,
         pniRegistrationId: UInt32,
     ) async throws(CompleteProvisioningError) -> CompleteProvisioningStepResult {
@@ -314,11 +326,12 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
             aci: aci,
             pni: pni,
             phoneNumber: phoneNumber,
+            aciPreKeyBundle: aciPreKeyBundle,
+            pniPreKeyBundle: pniPreKeyBundle,
             aciRegistrationId: aciRegistrationId,
             pniRegistrationId: pniRegistrationId,
             encryptedDeviceName: encryptedDeviceName,
             apnRegistrationId: apnRegistrationId,
-            prekeyBundles: prekeyBundles,
         )
 
         await registrationWebSocketManager.acquireRestrictedWebSocket(
@@ -327,7 +340,8 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
 
         return try await completeProvisioning_setLocalKeys(
             provisionMessage: provisionMessage,
-            prekeyBundles: prekeyBundles,
+            aciPreKeyBundle: aciPreKeyBundle,
+            pniPreKeyBundle: pniPreKeyBundle,
             authedDevice: authedDevice,
             aciRegistrationId: aciRegistrationId,
             pniRegistrationId: pniRegistrationId,
@@ -338,7 +352,8 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
 
     private func completeProvisioning_setLocalKeys(
         provisionMessage: LinkingProvisioningMessage,
-        prekeyBundles: RegistrationPreKeyUploadBundles,
+        aciPreKeyBundle: RegistrationPreKeyUploadBundle,
+        pniPreKeyBundle: RegistrationPreKeyUploadBundle,
         authedDevice: AuthedDevice.Explicit,
         aciRegistrationId: UInt32,
         pniRegistrationId: UInt32,
@@ -383,7 +398,8 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
 
         return try await completeProvisioning_finalizePrekeys(
             provisionMessage: provisionMessage,
-            prekeyBundles: prekeyBundles,
+            aciPreKeyBundle: aciPreKeyBundle,
+            pniPreKeyBundle: pniPreKeyBundle,
             authedDevice: authedDevice,
         ).withUndoOnFailureStep {
             await self.db.awaitableWrite { tx in
@@ -409,12 +425,13 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
 
     private func completeProvisioning_finalizePrekeys(
         provisionMessage: LinkingProvisioningMessage,
-        prekeyBundles: RegistrationPreKeyUploadBundles,
+        aciPreKeyBundle: RegistrationPreKeyUploadBundle,
+        pniPreKeyBundle: RegistrationPreKeyUploadBundle,
         authedDevice: AuthedDevice.Explicit,
     ) async throws(CompleteProvisioningError) -> CompleteProvisioningStepResult {
+        await self.preKeyManager.finalizeRegistrationPreKeyBundle(aciPreKeyBundle, uploadDidSucceed: true)
+        await self.preKeyManager.finalizeRegistrationPreKeyBundle(pniPreKeyBundle, uploadDidSucceed: true)
         do {
-            await self.preKeyManager
-                .finalizeRegistrationPreKeys(prekeyBundles, uploadDidSucceed: true)
             try await self.preKeyManager
                 .rotateOneTimePreKeysForRegistration(auth: authedDevice.authedAccount.chatServiceAuth)
         } catch {
@@ -579,11 +596,12 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         aci: Aci,
         pni: Pni,
         phoneNumber: E164,
+        aciPreKeyBundle: RegistrationPreKeyUploadBundle,
+        pniPreKeyBundle: RegistrationPreKeyUploadBundle,
         aciRegistrationId: UInt32,
         pniRegistrationId: UInt32,
         encryptedDeviceName: Data,
         apnRegistrationId: RegistrationRequestFactory.ApnRegistrationId?,
-        prekeyBundles: RegistrationPreKeyUploadBundles,
     ) async throws(CompleteProvisioningError) -> AuthedDevice.Explicit {
         let serverAuthToken = generateServerAuthToken()
 
@@ -601,10 +619,11 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         let rawVerifyDeviceResponse = await Self.Service.makeVerifySecondaryDeviceRequest(
             verificationCode: provisionMessage.provisioningCode,
             aci: provisionMessage.aci,
+            aciPreKeyBundle: aciPreKeyBundle,
+            pniPreKeyBundle: pniPreKeyBundle,
             authPassword: serverAuthToken,
             accountAttributes: accountAttributes,
             apnRegistrationId: apnRegistrationId,
-            prekeyBundles: prekeyBundles,
             signalService: self.signalService,
         )
 

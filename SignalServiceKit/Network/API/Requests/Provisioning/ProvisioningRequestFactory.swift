@@ -11,10 +11,11 @@ public enum ProvisioningRequestFactory {
     public static func verifySecondaryDeviceRequest(
         verificationCode: String,
         aci: Aci,
+        aciPreKeyBundle: RegistrationPreKeyUploadBundle,
+        pniPreKeyBundle: RegistrationPreKeyUploadBundle,
         authPassword: String,
         attributes: AccountAttributes,
         apnRegistrationId: RegistrationRequestFactory.ApnRegistrationId?,
-        prekeyBundles: RegistrationPreKeyUploadBundles,
     ) -> TSRequest {
         owsAssertDebug(!verificationCode.isEmpty)
         owsAssertDebug((apnRegistrationId != nil) != attributes.isManualMessageFetchEnabled)
@@ -30,10 +31,10 @@ public enum ProvisioningRequestFactory {
         let request = LinkDeviceRequest(
             verificationCode: verificationCode,
             accountAttributes: attributes,
-            aciSignedPreKey: OWSRequestFactory.SignedPreKey(prekeyBundles.aci.signedPreKey),
-            aciPqLastResortPreKey: OWSRequestFactory.KyberPreKey(prekeyBundles.aci.lastResortPreKey),
-            pniSignedPreKey: OWSRequestFactory.SignedPreKey(prekeyBundles.pni.signedPreKey),
-            pniPqLastResortPreKey: OWSRequestFactory.KyberPreKey(prekeyBundles.pni.lastResortPreKey),
+            aciSignedPreKey: OWSRequestFactory.SignedPreKey(aciPreKeyBundle.signedPreKey),
+            aciPqLastResortPreKey: OWSRequestFactory.KyberPreKey(aciPreKeyBundle.lastResortPreKey),
+            pniSignedPreKey: OWSRequestFactory.SignedPreKey(pniPreKeyBundle.signedPreKey),
+            pniPqLastResortPreKey: OWSRequestFactory.KyberPreKey(pniPreKeyBundle.lastResortPreKey),
             apnToken: apnRegistrationId,
         )
 

@@ -69,7 +69,8 @@ extension RegistrationCoordinatorImpl {
             accountAttributes: AccountAttributes,
             skipDeviceTransfer: Bool,
             apnRegistrationId: RegistrationRequestFactory.ApnRegistrationId?,
-            prekeyBundles: RegistrationPreKeyUploadBundles,
+            aciPreKeyBundle: RegistrationPreKeyUploadBundle,
+            pniPreKeyBundle: RegistrationPreKeyUploadBundle,
             signalService: OWSSignalServiceProtocol,
             logger: PrefixedLogger,
         ) async -> AccountResponse {
@@ -79,7 +80,8 @@ extension RegistrationCoordinatorImpl {
                 accountAttributes: accountAttributes,
                 skipDeviceTransfer: skipDeviceTransfer,
                 apnRegistrationId: apnRegistrationId,
-                prekeyBundles: prekeyBundles,
+                aciPreKeyBundle: aciPreKeyBundle,
+                pniPreKeyBundle: pniPreKeyBundle,
                 logger: logger,
             )
             return await makeRequest(
