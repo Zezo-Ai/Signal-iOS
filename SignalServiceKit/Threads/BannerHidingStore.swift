@@ -5,7 +5,7 @@
 
 import Foundation
 
-public struct BannerHidingStore {
+public struct BannerHidingStore: ThreadRemoverObserver {
     private let keyValueStore: KeyValueStore
     private let keyPrefix: String
 
@@ -44,5 +44,9 @@ public struct BannerHidingStore {
 
     public func fetchJSONAsValue<T: Decodable>(_ type: T.Type, forThreadUniqueId threadUniqueId: String, tx: DBReadTransaction) throws -> T? {
         return try keyValueStore.getCodableValue(forKey: keyPrefix + threadUniqueId, failDebugOnParseError: false, transaction: tx)
+    }
+
+    public func didRemoveThread(_ thread: TSThread, tx: DBWriteTransaction) {
+        keyValueStore.removeValue(forKey: keyPrefix + thread.uniqueId, transaction: tx)
     }
 }

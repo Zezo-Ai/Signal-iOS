@@ -60,6 +60,7 @@ final class ThreadMergerTest: XCTestCase {
             threadReplyInfoStore: threadReplyInfoStore,
             threadStore: threadStore,
             wallpaperStore: wallpaperStore,
+            observers: [],
         )
         threadMerger = ThreadMerger(
             callRecordStore: callRecordStore,

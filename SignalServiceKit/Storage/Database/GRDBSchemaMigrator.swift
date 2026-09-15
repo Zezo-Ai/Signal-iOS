@@ -363,6 +363,7 @@ public class GRDBSchemaMigrator {
         case preserveCallsWhenMutedForExistingUsers
         case migrateSomeKeyValueStores
         case removeInteractionConversationLoadCountIndex
+        case removeObsoleteThreadReferences
 
         // NOTE: Every time we add a migration id, consider
         // incrementing grdbSchemaVersionLatest.
@@ -5640,6 +5641,11 @@ public class GRDBSchemaMigrator {
             return .success(())
         }
 
+        migrator.registerMigration(.removeObsoleteThreadReferences) { tx in
+            try removeObsoleteThreadReferences(tx: tx)
+            return .success(())
+        }
+
         // MARK: - Schema Migration Insertion Point
     }
 
@@ -8502,6 +8508,22 @@ public class GRDBSchemaMigrator {
         try tx.database.execute(sql: """
         INSERT INTO keyvalue (key, collection, value)
         VALUES ('NotifyForCallsWhenMuted', 'NotificationPreferences', 1)
+        """)
+    }
+
+    static func removeObsoleteThreadReferences(tx: DBWriteTransaction) throws {
+        try tx.database.execute(sql: """
+        DELETE FROM "keyvalue" WHERE "collection" = 'DraftVoiceMessage' AND "key" NOT IN (SELECT "uniqueId" FROM model_TSThread);
+        DELETE FROM "keyvalue" WHERE "collection" = 'GroupThreadCollisionFinder' AND "key" NOT IN (SELECT "uniqueId" FROM model_TSThread);
+        DELETE FROM "keyvalue" WHERE "collection" = 'SenderKeyStore_SendingDistributionId' AND "key" NOT IN (SELECT "uniqueId" FROM model_TSThread);
+        DELETE FROM "keyvalue" WHERE "collection" = 'OWSContactsManager.skipGroupAvatarBlurByGroupIdStore' AND unhex("key") NOT IN (SELECT "groupId" FROM GroupRecord WHERE "threadId" IS NOT NULL);
+        DELETE FROM "keyvalue" WHERE "collection" = 'BannerHiding_pendingMemberRequests' AND (
+            (substr("key", 1, length('hiddenState_')) = 'hiddenState_' AND substr("key", length('hiddenState_') + 1) NOT IN (SELECT "uniqueId" FROM model_TSThread))
+            OR (substr("key", 1, length('requestingMembersState_')) = 'requestingMembersState_' AND substr("key", length('requestingMembersState_') + 1) NOT IN (SELECT "uniqueId" FROM model_TSThread))
+        );
+        DELETE FROM "keyvalue" WHERE "collection" = 'BannerHiding_messageRequestNameCollision' AND (
+            (substr("key", 1, length('hiddenState_')) = 'hiddenState_' AND substr("key", length('hiddenState_') + 1) NOT IN (SELECT "uniqueId" FROM model_TSThread))
+        );
         """)
     }
 

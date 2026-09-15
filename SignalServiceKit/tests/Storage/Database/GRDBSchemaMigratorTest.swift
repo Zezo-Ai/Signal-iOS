@@ -2709,4 +2709,159 @@ struct GRDBSchemaMigratorTest {
             #expect(threadRecords.isEmpty)
         }
     }
+
+    @Test
+    func testRemoveObsoleteThreadReferences() throws {
+        let groupId1 = try GroupSecretParams.generate().getPublicParams().getGroupIdentifier()
+        let groupId2 = try GroupSecretParams.generate().getPublicParams().getGroupIdentifier()
+        let groupId3 = try GroupSecretParams.generate().getPublicParams().getGroupIdentifier()
+        let threadUniqueId1 = UUID().uuidString
+        let threadUniqueId2 = UUID().uuidString
+
+        let databaseQueue = DatabaseQueue()
+        try databaseQueue.write { db in
+            try db.execute(sql: """
+            CREATE TABLE "keyvalue" (
+                "collection" TEXT NOT NULL,
+                "key" TEXT NOT NULL,
+                "value" BLOB NOT NULL,
+                PRIMARY KEY ("collection", "key")
+            );
+
+            CREATE TABLE "model_TSThread" (
+              "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+              "uniqueId" TEXT NOT NULL UNIQUE ON CONFLICT FAIL
+            );
+
+            CREATE TABLE "GroupRecord" (
+              "rowId" INTEGER PRIMARY KEY NOT NULL,
+              "groupId" BLOB NOT NULL UNIQUE,
+              "threadId" BLOB UNIQUE REFERENCES "model_TSThread" (
+                "id"
+              ) ON DELETE SET NULL ON UPDATE CASCADE
+            );
+            """)
+
+            try db.execute(
+                sql: """
+                INSERT INTO "model_TSThread" (
+                    "id", "uniqueId"
+                ) VALUES (?, ?)
+                """,
+                arguments: [1, threadUniqueId1],
+            )
+
+            try db.execute(
+                sql: """
+                INSERT INTO "GroupRecord" (
+                    "rowId", "groupId", "threadId"
+                ) VALUES (?, ?, ?)
+                """,
+                arguments: [1, groupId1.serialize(), 1],
+            )
+            try db.execute(
+                sql: """
+                INSERT INTO "GroupRecord" (
+                    "rowId", "groupId", "threadId"
+                ) VALUES (?, ?, ?)
+                """,
+                arguments: [2, groupId2.serialize(), nil],
+            )
+
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" (
+                    "collection", "key", "value"
+                ) VALUES (?, ?, ?)
+                """,
+                arguments: ["DraftVoiceMessage", threadUniqueId1, Data()],
+            )
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" (
+                    "collection", "key", "value"
+                ) VALUES (?, ?, ?)
+                """,
+                arguments: ["DraftVoiceMessage", threadUniqueId2, Data()],
+            )
+
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" (
+                    "collection", "key", "value"
+                ) VALUES (?, ?, ?)
+                """,
+                arguments: ["OWSContactsManager.skipGroupAvatarBlurByGroupIdStore", groupId1.serialize().hexadecimalString, Data()],
+            )
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" (
+                    "collection", "key", "value"
+                ) VALUES (?, ?, ?)
+                """,
+                arguments: ["OWSContactsManager.skipGroupAvatarBlurByGroupIdStore", groupId2.serialize().hexadecimalString, Data()],
+            )
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" (
+                    "collection", "key", "value"
+                ) VALUES (?, ?, ?)
+                """,
+                arguments: ["OWSContactsManager.skipGroupAvatarBlurByGroupIdStore", groupId3.serialize().hexadecimalString, Data()],
+            )
+
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" (
+                    "collection", "key", "value"
+                ) VALUES (?, ?, ?)
+                """,
+                arguments: ["BannerHiding_pendingMemberRequests", "hiddenState_" + threadUniqueId1, Data()],
+            )
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" (
+                    "collection", "key", "value"
+                ) VALUES (?, ?, ?)
+                """,
+                arguments: ["BannerHiding_pendingMemberRequests", "requestingMembersState_" + threadUniqueId1, Data()],
+            )
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" (
+                    "collection", "key", "value"
+                ) VALUES (?, ?, ?)
+                """,
+                arguments: ["BannerHiding_pendingMemberRequests", "hiddenState_" + threadUniqueId2, Data()],
+            )
+            try db.execute(
+                sql: """
+                INSERT INTO "keyvalue" (
+                    "collection", "key", "value"
+                ) VALUES (?, ?, ?)
+                """,
+                arguments: ["BannerHiding_pendingMemberRequests", "requestingMembersState_" + threadUniqueId2, Data()],
+            )
+
+            do {
+                let tx = DBWriteTransaction(database: db)
+                defer { tx.finalizeTransaction() }
+                try GRDBSchemaMigrator.removeObsoleteThreadReferences(tx: tx)
+            }
+
+            let remainingValues = try String.fetchAll(
+                db,
+                sql: """
+                SELECT concat("collection", '.', "key") FROM "keyvalue" ORDER BY "collection", "key"
+                """,
+            )
+            let expectedValues = [
+                "BannerHiding_pendingMemberRequests.hiddenState_\(threadUniqueId1)",
+                "BannerHiding_pendingMemberRequests.requestingMembersState_\(threadUniqueId1)",
+                "DraftVoiceMessage.\(threadUniqueId1)",
+                "OWSContactsManager.skipGroupAvatarBlurByGroupIdStore.\(groupId1.serialize().hexadecimalString)",
+            ]
+            #expect(remainingValues == expectedValues)
+        }
+    }
 }

@@ -734,6 +734,7 @@
 		503C06362F4774F40073D54A /* TSPaymentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503C06352F4774F40073D54A /* TSPaymentModel.swift */; };
 		503C06382F47751E0073D54A /* MobileCoinPayment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503C06372F47751E0073D54A /* MobileCoinPayment.swift */; };
 		503C2F432977752B00217527 /* OWSURLSessionEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503C2F422977752B00217527 /* OWSURLSessionEndpoint.swift */; };
+		503E1C3E304B733800B27606 /* GroupMembershipNameCollisionFinderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503E1C3D304B733800B27606 /* GroupMembershipNameCollisionFinderStore.swift */; };
 		50423CA42BBF427900DCB8F5 /* StaleProfileFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50423CA32BBF427900DCB8F5 /* StaleProfileFetcher.swift */; };
 		504271B62BB4C54500E33C01 /* SystemContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504271B52BB4C54500E33C01 /* SystemContact.swift */; };
 		50428EA52F2BD81700B0C969 /* StickerPackItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50428EA42F2BD81700B0C969 /* StickerPackItem.swift */; };
@@ -5106,6 +5107,7 @@
 		503C06352F4774F40073D54A /* TSPaymentModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TSPaymentModel.swift; sourceTree = "<group>"; };
 		503C06372F47751E0073D54A /* MobileCoinPayment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileCoinPayment.swift; sourceTree = "<group>"; };
 		503C2F422977752B00217527 /* OWSURLSessionEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OWSURLSessionEndpoint.swift; sourceTree = "<group>"; };
+		503E1C3D304B733800B27606 /* GroupMembershipNameCollisionFinderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupMembershipNameCollisionFinderStore.swift; sourceTree = "<group>"; };
 		50423CA32BBF427900DCB8F5 /* StaleProfileFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaleProfileFetcher.swift; sourceTree = "<group>"; };
 		504271B52BB4C54500E33C01 /* SystemContact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemContact.swift; sourceTree = "<group>"; };
 		50428EA42F2BD81700B0C969 /* StickerPackItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerPackItem.swift; sourceTree = "<group>"; };
@@ -15484,6 +15486,7 @@
 				50A40ED22B88005A0060C5A5 /* DisplayName.swift */,
 				5003BB42299F034D0037159B /* E164.swift */,
 				342FFE822721D4B6000AC89F /* FetchedSystemContacts.swift */,
+				503E1C3D304B733800B27606 /* GroupMembershipNameCollisionFinderStore.swift */,
 				5052AF5D2ACB0E9700D7EE9F /* MergePair.swift */,
 				50086B9B29DF5CB100F9C072 /* NameResolver.swift */,
 				4C6E446822AEDDEE007982E6 /* NewAccountDiscovery.swift */,
@@ -19761,6 +19764,7 @@
 				F9C5CE77289453B400548EEE /* GroupManager.swift in Sources */,
 				506695EA29C52F2F00B6D8D0 /* GroupMemberMergeObserver.swift in Sources */,
 				F9C5CE72289453B400548EEE /* GroupMembership.swift in Sources */,
+				503E1C3E304B733800B27606 /* GroupMembershipNameCollisionFinderStore.swift in Sources */,
 				506695EC29C5305900B6D8D0 /* GroupMemberStore.swift in Sources */,
 				506695EF29C533A400B6D8D0 /* GroupMemberUpdater.swift in Sources */,
 				F9C5CDA2289453B400548EEE /* GroupMessageProcessor.swift in Sources */,

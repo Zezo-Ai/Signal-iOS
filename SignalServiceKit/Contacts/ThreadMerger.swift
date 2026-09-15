@@ -397,6 +397,7 @@ extension ThreadMerger {
             threadReplyInfoStore: threadReplyInfoStore,
             threadStore: threadStore,
             wallpaperStore: wallpaperStore,
+            observers: [],
         )
         return ThreadMerger(
             callRecordStore: MockCallRecordStore(),

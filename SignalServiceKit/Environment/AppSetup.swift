@@ -88,7 +88,7 @@ extension AppSetup {
     /// limited set of mock singletons.
     public struct TestDependencies {
         let backupAttachmentCoordinator: BackupAttachmentCoordinator?
-        let contactManager: (any ContactManager)?
+        let contactManager: (any ContactManager & ThreadRemoverObserver)?
         let dateProvider: DateProvider?
         let groupV2Updates: (any GroupV2Updates)?
         let groupsV2: (any GroupsV2)?
@@ -109,7 +109,7 @@ extension AppSetup {
 
         public init(
             backupAttachmentCoordinator: BackupAttachmentCoordinator? = nil,
-            contactManager: (any ContactManager)? = nil,
+            contactManager: (any ContactManager & ThreadRemoverObserver)? = nil,
             dateProvider: DateProvider? = nil,
             groupV2Updates: (any GroupV2Updates)? = nil,
             groupsV2: (any GroupsV2)? = nil,
@@ -943,6 +943,19 @@ extension AppSetup.GlobalsContinuation {
             threadStore: threadStore,
         )
 
+        let senderKeyStore = SenderKeyStore()
+        let senderKeyManager = SenderKeyManager(
+            oldSenderKeyStore: OldSenderKeyStore(),
+            recipientFetcher: recipientFetcher,
+            recipientStore: recipientDatabaseTable,
+            senderKeyStore: senderKeyStore,
+            sessionStore: sessionStore,
+        )
+        let senderKeySendingManager = SenderKeySendingManager(
+            senderKeyManager: senderKeyManager,
+            dateProvider: dateProvider,
+        )
+
         let threadRemover = ThreadRemoverImpl(
             chatColorSettingStore: chatColorSettingStore,
             databaseStorage: ThreadRemoverImpl.Wrappers.DatabaseStorage(databaseStorage),
@@ -954,6 +967,15 @@ extension AppSetup.GlobalsContinuation {
             threadReplyInfoStore: threadReplyInfoStore,
             threadStore: threadStore,
             wallpaperStore: wallpaperStore,
+            observers: [
+                BannerHidingStore.joinRequestHiddenStore,
+                BannerHidingStore.joinRequestMembersStore,
+                BannerHidingStore.nameCollisionHiddenStore,
+                contactManager,
+                GroupMembershipNameCollisionFinderStore(),
+                senderKeySendingManager,
+                VoiceMessageInterruptedDraftStoreWrapper(),
+            ],
         )
 
         let threadDeletionManager = ThreadDeletionManagerImpl(
@@ -1061,19 +1083,6 @@ extension AppSetup.GlobalsContinuation {
         )
 
         let keyTransparencyStore = KeyTransparencyStore()
-
-        let senderKeyStore = SenderKeyStore()
-        let senderKeyManager = SenderKeyManager(
-            oldSenderKeyStore: OldSenderKeyStore(),
-            recipientFetcher: recipientFetcher,
-            recipientStore: recipientDatabaseTable,
-            senderKeyStore: senderKeyStore,
-            sessionStore: sessionStore,
-        )
-        let senderKeySendingManager = SenderKeySendingManager(
-            senderKeyManager: senderKeyManager,
-            dateProvider: dateProvider,
-        )
 
         let registrationStateChangeManager = RegistrationStateChangeManagerImpl(
             authCredentialStore: authCredentialStore,

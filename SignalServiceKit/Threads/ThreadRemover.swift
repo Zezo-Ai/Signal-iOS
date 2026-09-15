@@ -14,6 +14,10 @@ public protocol ThreadRemover {
     func remove(_ thread: TSThread, tx: DBWriteTransaction)
 }
 
+public protocol ThreadRemoverObserver {
+    func didRemoveThread(_ thread: TSThread, tx: DBWriteTransaction)
+}
+
 class ThreadRemoverImpl: ThreadRemover {
     private let chatColorSettingStore: ChatColorSettingStore
     private let databaseStorage: Shims.DatabaseStorage
@@ -25,6 +29,7 @@ class ThreadRemoverImpl: ThreadRemover {
     private let threadReplyInfoStore: ThreadReplyInfoStore
     private let threadStore: ThreadStore
     private let wallpaperStore: WallpaperStore
+    private let observers: [any ThreadRemoverObserver]
 
     init(
         chatColorSettingStore: ChatColorSettingStore,
@@ -37,6 +42,7 @@ class ThreadRemoverImpl: ThreadRemover {
         threadReplyInfoStore: ThreadReplyInfoStore,
         threadStore: ThreadStore,
         wallpaperStore: WallpaperStore,
+        observers: [any ThreadRemoverObserver],
     ) {
         self.chatColorSettingStore = chatColorSettingStore
         self.databaseStorage = databaseStorage
@@ -48,6 +54,7 @@ class ThreadRemoverImpl: ThreadRemover {
         self.threadReplyInfoStore = threadReplyInfoStore
         self.threadStore = threadStore
         self.wallpaperStore = wallpaperStore
+        self.observers = observers
     }
 
     func remove(_ thread: TSThread, tx: DBWriteTransaction) {
@@ -68,6 +75,9 @@ class ThreadRemoverImpl: ThreadRemover {
         threadReadCache.didRemove(thread: thread, tx: tx)
         wallpaperStore.reset(for: thread, tx: tx)
         lastVisibleInteractionStore.clearLastVisibleInteraction(for: thread, tx: tx)
+        for observer in observers {
+            observer.didRemoveThread(thread, tx: tx)
+        }
     }
 }
 

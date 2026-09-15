@@ -55,7 +55,7 @@ public enum ContactAuthorizationForSharing {
     case authorized
 }
 
-public class OWSContactsManager: NSObject, ContactsManagerProtocol {
+public class OWSContactsManager: NSObject, ContactsManagerProtocol, ThreadRemoverObserver {
     private let cnContactCache = LRUCache<String, CNContact>(maxSize: 50, shouldEvacuateInBackground: true)
     private let systemContactsCache = SystemContactsCache()
 
@@ -217,6 +217,14 @@ public class OWSContactsManager: NSObject, ContactsManagerProtocol {
                 }
             }
         }
+    }
+
+    public func didRemoveThread(_ thread: TSThread, tx: DBWriteTransaction) {
+        guard let thread = thread as? TSGroupThread else {
+            return
+        }
+        let groupId = thread.groupId
+        groupIdsExplicitlyAllowingAvatarDownloadsStore.removeValue(forKey: groupId.hexadecimalString, tx: tx)
     }
 }
 
