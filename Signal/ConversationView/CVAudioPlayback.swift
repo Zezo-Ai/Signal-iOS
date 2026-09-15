@@ -97,25 +97,30 @@ public class CVAudioPlayer: NSObject, AudioPlayerDelegate, CVAudioPlaybackDelega
         return audioPlayback.audioPlaybackState
     }
 
-    private func ensurePlayback(for attachment: AudioAttachment, forAutoplay: Bool = false) -> CVAudioPlayback? {
+    private func ensurePlayback(for audioAttachment: AudioAttachment, forAutoplay: Bool = false) -> CVAudioPlayback? {
         AssertIsOnMainThread()
 
-        guard let attachmentId = attachment.attachmentStream?.attachmentStream.id else {
+        guard let referencedAttachmentStream = audioAttachment.attachmentStream else {
             return nil
         }
 
+        let attachmentId = audioAttachment.attachment.id
+        let interactionId = audioAttachment.owningMessage.uniqueId
         autoplayAttachmentId = forAutoplay ? attachmentId : nil
 
         if
             let audioPlayback = self.audioPlayback,
-            audioPlayback.attachmentId == attachmentId
+            audioPlayback.attachmentId == attachmentId,
+            audioPlayback.interactionId == interactionId
         {
             return audioPlayback
         }
-        guard let audioPlayback = CVAudioPlayback(attachment: attachment) else {
-            owsFailDebug("Could not play audio attachment.")
-            return nil
-        }
+
+        let audioPlayback = CVAudioPlayback(
+            audioAttachment: audioAttachment,
+            attachmentStream: referencedAttachmentStream.attachmentStream,
+        )
+
         // Restore playback continuity.
         if let progress = progressCache[attachmentId] {
             audioPlayback.setProgress(progress)
@@ -127,8 +132,11 @@ public class CVAudioPlayer: NSObject, AudioPlayerDelegate, CVAudioPlaybackDelega
         }
         audioPlayback.delegate = self
 
+        let oldAudioPlayback = self.audioPlayback
+        self.audioPlayback = audioPlayback
+
         // Let the existing player know its state has changed.
-        if let oldAudioPlayback = self.audioPlayback {
+        if let oldAudioPlayback {
             for listener in listeners.elements {
                 listener.audioPlayerStateDidChange(
                     attachmentId: oldAudioPlayback.attachmentId,
@@ -137,7 +145,6 @@ public class CVAudioPlayer: NSObject, AudioPlayerDelegate, CVAudioPlaybackDelega
             }
         }
 
-        self.audioPlayback = audioPlayback
         return audioPlayback
     }
 
@@ -398,18 +405,16 @@ private class CVAudioPlayback: NSObject, AudioPlayerDelegate {
         delegate?.audioPlaybackDidFinish(self)
     }
 
-    init?(attachment: AudioAttachment) {
+    init(
+        audioAttachment: AudioAttachment,
+        attachmentStream: AttachmentStream,
+    ) {
         AssertIsOnMainThread()
 
-        guard let attachmentStream = attachment.attachmentStream else {
-            owsFailDebug("missing audio attachment stream \(attachment)")
-            return nil
-        }
-        self.attachmentId = attachmentStream.attachmentStream.id
-
-        audioPlayer = AudioPlayer(attachment: attachmentStream.attachmentStream, audioBehavior: .audioMessagePlayback)
-        uniqueThreadId = attachment.owningMessage.uniqueThreadId
-        interactionId = attachment.owningMessage.uniqueId
+        self.attachmentId = attachmentStream.id
+        audioPlayer = AudioPlayer(attachment: attachmentStream, audioBehavior: .audioMessagePlayback)
+        uniqueThreadId = audioAttachment.owningMessage.uniqueThreadId
+        interactionId = audioAttachment.owningMessage.uniqueId
 
         super.init()
 
