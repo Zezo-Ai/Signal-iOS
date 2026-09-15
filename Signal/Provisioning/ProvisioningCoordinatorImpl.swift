@@ -86,8 +86,8 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         switch self.tsAccountManager.registrationStateWithMaybeSneakyTransaction {
         case .reregistering(let localIdentifiers):
             oldLocalIdentifiers = localIdentifiers
-            let oldPhoneNumber = localIdentifiers.phoneNumber
-            guard oldPhoneNumber == provisionMessage.phoneNumber else {
+            let oldPhoneNumber: String = localIdentifiers.phoneNumber
+            guard oldPhoneNumber == provisionMessage.phoneNumberState.e164.stringValue else {
                 Logger.warn("can't re-link primary a different phone number")
                 throw .previouslyLinkedWithDifferentAccount
             }
@@ -104,16 +104,9 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
             }
         }
 
-        guard let phoneNumber = E164(provisionMessage.phoneNumber) else {
-            throw .genericError(OWSAssertionError("Primary E164 isn't valid"))
-        }
-
         let result = try await completeProvisioning_updateCensorshipCircumvention(
             provisionMessage: provisionMessage,
             deviceName: deviceName,
-            aci: provisionMessage.aci,
-            pni: provisionMessage.pni,
-            phoneNumber: phoneNumber,
         )
 
         try await continueFromLinkNSync(
@@ -218,19 +211,13 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
     private func completeProvisioning_updateCensorshipCircumvention(
         provisionMessage: LinkingProvisioningMessage,
         deviceName: String,
-        aci: Aci,
-        pni: Pni,
-        phoneNumber: E164,
     ) async throws(CompleteProvisioningError) -> CompleteProvisioningStepResult {
         // Update censorship circumvention state as e164 could be changing.
-        signalService.updateHasCensoredPhoneNumberDuringProvisioning(phoneNumber)
+        signalService.updateHasCensoredPhoneNumberDuringProvisioning(provisionMessage.phoneNumberState.e164)
 
         return try await completeProvisioning_createPreKeys(
             provisionMessage: provisionMessage,
             deviceName: deviceName,
-            aci: aci,
-            pni: pni,
-            phoneNumber: phoneNumber,
         ).withUndoOnFailureStep {
             self.signalService.resetHasCensoredPhoneNumberFromProvisioning()
         }
@@ -239,9 +226,6 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
     private func completeProvisioning_createPreKeys(
         provisionMessage: LinkingProvisioningMessage,
         deviceName: String,
-        aci: Aci,
-        pni: Pni,
-        phoneNumber: E164,
     ) async throws(CompleteProvisioningError) -> CompleteProvisioningStepResult {
         let aciPreKeyBundle = await self.preKeyManager.createPreKeysForProvisioning(
             forIdentity: .aci,
@@ -249,15 +233,12 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         )
         let pniPreKeyBundle = await self.preKeyManager.createPreKeysForProvisioning(
             forIdentity: .pni,
-            keyPair: provisionMessage.pniIdentityKeyPair,
+            keyPair: provisionMessage.phoneNumberState.pniIdentityKeyPair,
         )
 
         return try await completeProvisioning_createRegistrationIds(
             provisionMessage: provisionMessage,
             deviceName: deviceName,
-            aci: aci,
-            pni: pni,
-            phoneNumber: phoneNumber,
             aciPreKeyBundle: aciPreKeyBundle,
             pniPreKeyBundle: pniPreKeyBundle,
         ).withUndoOnFailureStep {
@@ -275,18 +256,12 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
     private func completeProvisioning_createRegistrationIds(
         provisionMessage: LinkingProvisioningMessage,
         deviceName: String,
-        aci: Aci,
-        pni: Pni,
-        phoneNumber: E164,
         aciPreKeyBundle: RegistrationPreKeyUploadBundle,
         pniPreKeyBundle: RegistrationPreKeyUploadBundle,
     ) async throws(CompleteProvisioningError) -> CompleteProvisioningStepResult {
         return try await completeProvisioning_verifyAndLinkOnServer(
             provisionMessage: provisionMessage,
             deviceName: deviceName,
-            aci: aci,
-            pni: pni,
-            phoneNumber: phoneNumber,
             aciPreKeyBundle: aciPreKeyBundle,
             pniPreKeyBundle: pniPreKeyBundle,
             aciRegistrationId: RegistrationIdGenerator.generate(),
@@ -301,9 +276,6 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
     private func completeProvisioning_verifyAndLinkOnServer(
         provisionMessage: LinkingProvisioningMessage,
         deviceName: String,
-        aci: Aci,
-        pni: Pni,
-        phoneNumber: E164,
         aciPreKeyBundle: RegistrationPreKeyUploadBundle,
         pniPreKeyBundle: RegistrationPreKeyUploadBundle,
         aciRegistrationId: UInt32,
@@ -323,9 +295,6 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
 
         let authedDevice = try await self.verifyAndLinkOnServer(
             provisionMessage: provisionMessage,
-            aci: aci,
-            pni: pni,
-            phoneNumber: phoneNumber,
             aciPreKeyBundle: aciPreKeyBundle,
             pniPreKeyBundle: pniPreKeyBundle,
             aciRegistrationId: aciRegistrationId,
@@ -365,7 +334,7 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
                 tx: tx,
             )
             self.identityManager.setIdentityKeyPair(
-                provisionMessage.pniIdentityKeyPair.asECKeyPair,
+                provisionMessage.phoneNumberState.pniIdentityKeyPair.asECKeyPair,
                 for: .pni,
                 tx: tx,
             )
@@ -593,9 +562,6 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
 
     private func verifyAndLinkOnServer(
         provisionMessage: LinkingProvisioningMessage,
-        aci: Aci,
-        pni: Pni,
-        phoneNumber: E164,
         aciPreKeyBundle: RegistrationPreKeyUploadBundle,
         pniPreKeyBundle: RegistrationPreKeyUploadBundle,
         aciRegistrationId: UInt32,
@@ -638,7 +604,7 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         case .success(let response):
             verifyDeviceResponse = response
         }
-        if pni != verifyDeviceResponse.pni {
+        if provisionMessage.phoneNumberState.pni != verifyDeviceResponse.pni {
             throw .genericError(OWSAssertionError("PNI from primary is out of sync with the server!"))
         }
         if verifyDeviceResponse.deviceId.isPrimary {
@@ -646,9 +612,9 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         }
 
         let authedDevice = AuthedDevice.Explicit(
-            aci: aci,
-            phoneNumber: phoneNumber,
-            pni: pni,
+            aci: provisionMessage.aci,
+            phoneNumber: provisionMessage.phoneNumberState.e164,
+            pni: provisionMessage.phoneNumberState.pni,
             deviceId: verifyDeviceResponse.deviceId,
             authPassword: serverAuthToken,
         )

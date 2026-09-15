@@ -374,7 +374,7 @@ class ProvisioningController: NSObject {
             let messageData = try await provisioningSocketManager.waitForMessageData(ProvisioningProtos_ProvisionEnvelope.self)
             return try LinkingProvisioningMessage(ProvisioningProtos_ProvisionMessage(serializedBytes: messageData))
         } catch let error {
-            Logger.error("Failed to decrypt provision envelope: \(error)")
+            Logger.warn("couldn't decrypt/decode provisioning envelope: \(error)")
             let alert = ActionSheetController(
                 title: OWSLocalizedString(
                     "SECONDARY_LINKING_ERROR_WAITING_FOR_SCAN",

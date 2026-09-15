@@ -48,7 +48,7 @@ public class ProvisioningManager {
         struct ProvisioningState {
             var localIdentifiers: LocalIdentifiers
             var aciIdentityKeyPair: ECKeyPair
-            var pniIdentityKeyPair: ECKeyPair
+            var pniIdentityKeyPair: ECKeyPair?
             var areReadReceiptsEnabled: Bool
             var aep: SignalServiceKit.AccountEntropyPool
             var mediaRootBackupKey: MediaRootBackupKey
@@ -59,9 +59,7 @@ public class ProvisioningManager {
             guard let aciIdentityKeyPair = identityManager.identityKeyPair(for: .aci, tx: tx) else {
                 owsFail("Can't provision without an aci identity.")
             }
-            guard let pniIdentityKeyPair = identityManager.identityKeyPair(for: .pni, tx: tx) else {
-                owsFail("Can't provision without a pni identity.")
-            }
+            let pniIdentityKeyPair = identityManager.identityKeyPair(for: .pni, tx: tx)
             let areReadReceiptsEnabled = receiptManager.areReadReceiptsEnabled(tx: tx)
             guard let accountEntropyPool = accountKeyStore.getAccountEntropyPool(tx: tx) else {
                 // This should be impossible; the only times you don't have
@@ -84,9 +82,24 @@ public class ProvisioningManager {
         }
 
         let myAci = provisioningState.localIdentifiers.aci
-        let myPhoneNumber = provisioningState.localIdentifiers.phoneNumber
-        guard let myPni = provisioningState.localIdentifiers.pni else {
-            owsFail("Can't provision without a pni.")
+
+        var phoneNumberState: LinkingProvisioningMessage.PhoneNumberState?
+        if let myPhoneNumber = E164(provisioningState.localIdentifiers.phoneNumber) {
+            guard let myPni = provisioningState.localIdentifiers.pni else {
+                owsFail("can't provision without pni")
+            }
+            guard let pniIdentityKeyPair = provisioningState.pniIdentityKeyPair else {
+                owsFail("can't provision without pni identity key")
+            }
+            phoneNumberState = LinkingProvisioningMessage.PhoneNumberState(
+                e164: myPhoneNumber,
+                pni: myPni,
+                pniIdentityKeyPair: pniIdentityKeyPair.identityKeyPair,
+            )
+        }
+        // TODO: [#less] Allow provisioning without a phone number.
+        guard let phoneNumberState else {
+            owsFail("can't provision without phone number state")
         }
 
         let ephemeralBackupKey: MessageRootBackupKey?
@@ -102,12 +115,10 @@ public class ProvisioningManager {
         let provisioningCode = try await deviceProvisioningService.requestDeviceProvisioningCode()
 
         let provisioningMessage = LinkingProvisioningMessage(
-            aep: provisioningState.aep,
             aci: myAci,
-            phoneNumber: myPhoneNumber,
-            pni: myPni,
             aciIdentityKeyPair: provisioningState.aciIdentityKeyPair.identityKeyPair,
-            pniIdentityKeyPair: provisioningState.pniIdentityKeyPair.identityKeyPair,
+            aep: provisioningState.aep,
+            phoneNumberState: phoneNumberState,
             profileKey: provisioningState.profileKey,
             mrbk: provisioningState.mediaRootBackupKey,
             ephemeralBackupKey: ephemeralBackupKey,

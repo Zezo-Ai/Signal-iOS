@@ -101,13 +101,18 @@ public class ProvisioningCoordinatorTest: XCTestCase {
 
     public func testProvisioning() async throws {
         let aep = AccountEntropyPool()
+        let e164 = E164("+17875550100")!
+        let pni = Pni.randomForTesting()
+        let pniIdentityKeyPair = IdentityKeyPair.generate()
         let provisioningMessage = LinkingProvisioningMessage(
-            aep: aep,
             aci: .randomForTesting(),
-            phoneNumber: "+17875550100",
-            pni: .randomForTesting(),
-            aciIdentityKeyPair: IdentityKeyPair.generate(),
-            pniIdentityKeyPair: IdentityKeyPair.generate(),
+            aciIdentityKeyPair: .generate(),
+            aep: aep,
+            phoneNumberState: LinkingProvisioningMessage.PhoneNumberState(
+                e164: e164,
+                pni: pni,
+                pniIdentityKeyPair: pniIdentityKeyPair,
+            ),
             profileKey: .generateRandom(),
             mrbk: MediaRootBackupKey(backupKey: .generateRandom()),
             ephemeralBackupKey: nil,
@@ -120,7 +125,7 @@ public class ProvisioningCoordinatorTest: XCTestCase {
         let mockSession = UrlSessionMock()
 
         let verificationResponse = ProvisioningServiceResponses.VerifySecondaryDeviceResponse(
-            pni: provisioningMessage.pni,
+            pni: pni,
             deviceId: deviceId,
         )
 
@@ -152,9 +157,9 @@ public class ProvisioningCoordinatorTest: XCTestCase {
 
         var didSetLocalIdentifiers = false
         registrationStateChangeManagerMock.didRegisterOrProvisionMock = { aci, phoneNumber, _, storedDeviceId in
-            XCTAssertEqual(phoneNumber.e164.stringValue, provisioningMessage.phoneNumber)
+            XCTAssertEqual(phoneNumber.e164, e164)
             XCTAssertEqual(aci, provisioningMessage.aci)
-            XCTAssertEqual(phoneNumber.pni, provisioningMessage.pni)
+            XCTAssertEqual(phoneNumber.pni, pni)
             XCTAssertEqual(storedDeviceId, deviceId)
             didSetLocalIdentifiers = true
         }
@@ -177,7 +182,7 @@ public class ProvisioningCoordinatorTest: XCTestCase {
         )
         XCTAssertEqual(
             identityManagerMock.identityKeyPairs[.pni]?.publicKey,
-            provisioningMessage.pniIdentityKeyPair.asECKeyPair.publicKey,
+            pniIdentityKeyPair.asECKeyPair.publicKey,
         )
         let masterKey = provisioningMessage.aep.getMasterKey()
         XCTAssertEqual(svrMock.syncedMasterKey?.rawData, masterKey.rawData)

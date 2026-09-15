@@ -13,12 +13,23 @@ public struct LinkingProvisioningMessage {
         public static let userAgent: String = "OWI"
     }
 
-    public let aep: AccountEntropyPool
+    /// Wraps state that's only available for accounts with phone numbers.
+    public struct PhoneNumberState {
+        public let e164: E164
+        public let pni: Pni
+        public let pniIdentityKeyPair: IdentityKeyPair
+
+        public init(e164: E164, pni: Pni, pniIdentityKeyPair: IdentityKeyPair) {
+            self.e164 = e164
+            self.pni = pni
+            self.pniIdentityKeyPair = pniIdentityKeyPair
+        }
+    }
+
     public let aci: Aci
-    public let phoneNumber: String
-    public let pni: Pni
     public let aciIdentityKeyPair: IdentityKeyPair
-    public let pniIdentityKeyPair: IdentityKeyPair
+    public let aep: AccountEntropyPool
+    public let phoneNumberState: PhoneNumberState
     public let profileKey: Aes256Key
     public let mrbk: MediaRootBackupKey
     public let ephemeralBackupKey: MessageRootBackupKey?
@@ -28,12 +39,10 @@ public struct LinkingProvisioningMessage {
     public let provisioningVersion: UInt32
 
     public init(
-        aep: AccountEntropyPool,
         aci: Aci,
-        phoneNumber: String,
-        pni: Pni,
         aciIdentityKeyPair: IdentityKeyPair,
-        pniIdentityKeyPair: IdentityKeyPair,
+        aep: AccountEntropyPool,
+        phoneNumberState: PhoneNumberState,
         profileKey: Aes256Key,
         mrbk: MediaRootBackupKey,
         ephemeralBackupKey: MessageRootBackupKey?,
@@ -44,10 +53,8 @@ public struct LinkingProvisioningMessage {
     ) {
         self.aep = aep
         self.aci = aci
-        self.phoneNumber = phoneNumber
-        self.pni = pni
+        self.phoneNumberState = phoneNumberState
         self.aciIdentityKeyPair = aciIdentityKeyPair
-        self.pniIdentityKeyPair = pniIdentityKeyPair
         self.profileKey = profileKey
         self.mrbk = mrbk
         self.ephemeralBackupKey = ephemeralBackupKey
@@ -63,11 +70,6 @@ public struct LinkingProvisioningMessage {
             privateKey: PrivateKey(proto.aciIdentityKeyPrivate),
         )
 
-        self.pniIdentityKeyPair = try IdentityKeyPair(
-            publicKey: PublicKey(proto.pniIdentityKeyPublic),
-            privateKey: PrivateKey(proto.pniIdentityKeyPrivate),
-        )
-
         guard let profileKey = Aes256Key(data: proto.profileKey) else {
             throw OWSGenericError("invalid profileKey - count: \(proto.profileKey.count)")
         }
@@ -80,17 +82,28 @@ public struct LinkingProvisioningMessage {
         let provisioningVersion = proto.provisioningVersion
         self.provisioningVersion = provisioningVersion
 
-        guard proto.number.count > 1 else {
-            throw OWSGenericError("missing number from provisioning message")
+        var phoneNumberState: PhoneNumberState?
+        if proto.hasNumber {
+            guard let e164 = E164(proto.number) else {
+                throw OWSGenericError("malformed number in provisioning message")
+            }
+            guard let pniUuid = UUID(data: proto.pniBinary) else {
+                throw OWSGenericError("malformed PNI in provisioning message")
+            }
+            let pni = Pni(fromUUID: pniUuid)
+            let pniIdentityKeyPair = try IdentityKeyPair(
+                publicKey: PublicKey(proto.pniIdentityKeyPublic),
+                privateKey: PrivateKey(proto.pniIdentityKeyPrivate),
+            )
+            phoneNumberState = PhoneNumberState(e164: e164, pni: pni, pniIdentityKeyPair: pniIdentityKeyPair)
         }
-        self.phoneNumber = proto.number
+        guard let phoneNumberState else {
+            // TODO: [#less] Allow linking accounts without phone numbers.
+            throw OWSGenericError("missing phone number")
+        }
+        self.phoneNumberState = phoneNumberState
 
         self.aci = try Aci.parseFrom(serviceIdBinary: proto.aciBinary)
-
-        guard let pniUuid = UUID(data: proto.pniBinary) else {
-            throw OWSGenericError("invalid PNI from provisioning message")
-        }
-        self.pni = Pni(fromUUID: pniUuid)
 
         self.aep = try AccountEntropyPool(key: proto.accountEntropyPool)
 
@@ -110,20 +123,24 @@ public struct LinkingProvisioningMessage {
         var message = ProvisioningProtos_ProvisionMessage()
         message.aciIdentityKeyPublic = aciIdentityKeyPair.publicKey.serialize()
         message.aciIdentityKeyPrivate = aciIdentityKeyPair.privateKey.serialize()
-        message.pniIdentityKeyPublic = pniIdentityKeyPair.publicKey.serialize()
-        message.pniIdentityKeyPrivate = pniIdentityKeyPair.privateKey.serialize()
         message.provisioningCode = provisioningCode
         message.profileKey = profileKey.keyData
         message.userAgent = Constants.userAgent
         message.readReceipts = areReadReceiptsEnabled
         message.provisioningVersion = Constants.provisioningVersion
-        message.number = phoneNumber
         message.aciBinary = aci.rawUUID.data
-        message.pniBinary = pni.rawUUID.data
         message.accountEntropyPool = aep.rawString
         message.mediaRootBackupKey = mrbk.serialize()
         if let ephemeralBackupKey {
             message.ephemeralBackupKey = ephemeralBackupKey.serialize()
+        }
+        // TODO: [#less] Don't include this when phoneNumber is nil.
+        let phoneNumberState = self.phoneNumberState
+        do {
+            message.number = phoneNumberState.e164.stringValue
+            message.pniBinary = phoneNumberState.pni.rawUUID.data
+            message.pniIdentityKeyPublic = phoneNumberState.pniIdentityKeyPair.publicKey.serialize()
+            message.pniIdentityKeyPrivate = phoneNumberState.pniIdentityKeyPair.privateKey.serialize()
         }
 
         let plainTextProvisionMessage = try message.serializedData()
