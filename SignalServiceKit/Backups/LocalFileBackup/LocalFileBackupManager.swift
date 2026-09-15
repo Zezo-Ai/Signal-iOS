@@ -31,6 +31,7 @@ public class LocalFileBackupManager: NSObject, UIDocumentPickerDelegate {
         static let dateFormatter: DateFormatter = {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd-HH-mm-ss"
+            formatter.timeZone = TimeZone(identifier: "UTC")
             return formatter
         }()
 
