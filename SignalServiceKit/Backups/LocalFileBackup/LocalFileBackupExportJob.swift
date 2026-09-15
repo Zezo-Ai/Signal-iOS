@@ -198,7 +198,7 @@ class LocalFileBackupExportJob {
                 }
 
                 switch reason {
-                case .stale, .missing:
+                case .stale, .missing, .failedToResolveBookmark:
                     logger.error("Unable to export local file backup (\(reason))")
                     // Prompt the user to pick a new backup location on next load of the chat list.
                     localFileBackupManager.setChooseNewLocalBackupLocation(tx: tx)

@@ -875,7 +875,7 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
                     LocalFileBackupArchiveFolderPicker.present(
                         fromViewController: self,
                         manager: self.localFileBackupManager,
-                        onSuccess: { [weak self] in
+                        onSuccess: { [weak self, localFileBackupStore, db] in
                             self?.presentToast(
                                 text: OWSLocalizedString(
                                     "SETTINGS_LOCAL_FILE_BACKUP_FOLDER_UPDATED",
@@ -884,6 +884,9 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
                                 image: .checkCircle,
                             )
                             self?.lastLocalBackupDetailsDidChange()
+                            db.write { tx in
+                                localFileBackupStore.clearChooseNewLocalBackupLocation(tx: tx)
+                            }
                         },
                     )
                 },

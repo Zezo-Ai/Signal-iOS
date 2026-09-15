@@ -11,6 +11,7 @@ public enum LocalFileBackupError: Error {
         case stale
         case missing
         case noAccess
+        case failedToResolveBookmark(Error)
     }
 
     case unableToAccessLocalFile(AccessFailureReason)
@@ -717,7 +718,8 @@ public class LocalFileBackupManager: NSObject, UIDocumentPickerDelegate {
         } catch NSFileProviderError.noSuchItem {
             throw LocalFileBackupError.unableToAccessLocalFile(.missing)
         } catch {
-            throw OWSAssertionError("Unable to resolve bookmark data: \(error)")
+            logger.error("failedToResolveBookmark: \(error)")
+            throw LocalFileBackupError.unableToAccessLocalFile(.failedToResolveBookmark(error))
         }
 
         if isStale {
