@@ -360,7 +360,7 @@ extension OWSSyncManager: SyncManagerProtocol, SyncManagerProtocolSwift {
                 )
             }
             if shouldBlock {
-                blockingManager.addBlockedThread(thread, blockMode: .remote, transaction: transaction)
+                blockingManager.addBlockedThread(thread, blockMode: .syncMessage, transaction: transaction)
             }
             if shouldSpam {
                 TSInfoMessage(thread: thread, messageType: .reportedSpam).anyInsert(transaction: transaction)
@@ -391,7 +391,7 @@ extension OWSSyncManager: SyncManagerProtocol, SyncManagerProtocolSwift {
                 profileManager.addRecipientToProfileWhitelist(&recipient, userProfileWriter: .syncMessage, tx: transaction)
             }
             if shouldBlock {
-                blockingManager.addBlockedThread(thread, blockMode: .remote, transaction: transaction)
+                blockingManager.addBlockedThread(thread, blockMode: .syncMessage, transaction: transaction)
             }
             if shouldSpam {
                 TSInfoMessage(thread: thread, messageType: .reportedSpam).anyInsert(transaction: transaction)

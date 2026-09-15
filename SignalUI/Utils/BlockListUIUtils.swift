@@ -193,7 +193,7 @@ public class BlockListUIUtils {
         let databaseStorage = SSKEnvironment.shared.databaseStorageRef
 
         databaseStorage.write { tx in
-            blockingManager.addBlockedAddress(address, blockMode: .local, transaction: tx)
+            blockingManager.addBlockedAddress(address, blockMode: .localUser, transaction: tx)
         }
 
         showOkActionSheet(
@@ -227,7 +227,7 @@ public class BlockListUIUtils {
             // "leave group" message.
             blockingManager.addBlockedGroupId(
                 groupThread.groupId,
-                blockMode: .local,
+                blockMode: .localUser,
                 transaction: tx,
             )
             if groupThread.groupModel.groupMembership.isLocalUserFullOrInvitedMember {
@@ -263,7 +263,7 @@ public class BlockListUIUtils {
         db.write { tx in
             blockingManager.addBlockedReleaseNotesThread(
                 thread: thread,
-                blockMode: .local,
+                blockMode: .localUser,
                 transaction: tx,
             )
         }

@@ -589,7 +589,7 @@ class StorageServiceContactRecordUpdater: StorageServiceRecordUpdater {
         // If our local blocked state differs from the service state, use the service's value.
         if record.blocked != localIsBlocked {
             if record.blocked {
-                blockingManager.addBlockedAddress(anyAddress, blockMode: .remote, transaction: tx)
+                blockingManager.addBlockedAddress(anyAddress, blockMode: .storageService, transaction: tx)
             } else {
                 blockingManager.removeBlockedAddress(anyAddress, wasLocallyInitiated: false, transaction: tx)
             }
@@ -1108,7 +1108,7 @@ class StorageServiceGroupV2RecordUpdater: StorageServiceRecordUpdater {
         // If our local blocked state differs from the service state, use the service's value.
         if record.blocked != localIsBlocked {
             if record.blocked {
-                blockingManager.addBlockedGroupId(groupId.serialize(), blockMode: .remote, transaction: transaction)
+                blockingManager.addBlockedGroupId(groupId.serialize(), blockMode: .storageService, transaction: transaction)
             } else {
                 blockingManager.removeBlockedGroup(groupId: groupId.serialize(), wasLocallyInitiated: false, transaction: transaction)
             }
@@ -1828,7 +1828,7 @@ class StorageServiceAccountRecordUpdater: StorageServiceRecordUpdater {
         {
             Logger.info("[ReleaseNotes] blocked changing: \(localReleaseNotesBlocked) -> \(newReleaseNotesBlocked)")
             if newReleaseNotesBlocked {
-                blockingManager.addBlockedReleaseNotesThread(thread: releaseNotesThread, blockMode: .remote, transaction: transaction)
+                blockingManager.addBlockedReleaseNotesThread(thread: releaseNotesThread, blockMode: .storageService, transaction: transaction)
             } else {
                 blockingManager.removeBlockedReleaseNotesThread(thread: releaseNotesThread, wasLocallyInitiated: false, transaction: transaction)
             }

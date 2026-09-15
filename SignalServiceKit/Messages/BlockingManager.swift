@@ -7,15 +7,16 @@ import Foundation
 public import LibSignalClient
 
 public enum BlockMode {
-    case remote
-    case restoreFromBackup
-    case local
+    case localUser
+    case storageService
+    case syncMessage
+    case backupRestore
 
     var isLocallyInitiated: Bool {
         switch self {
-        case .remote, .restoreFromBackup:
+        case .syncMessage, .storageService, .backupRestore:
             return false
-        case .local:
+        case .localUser:
             return true
         }
     }
@@ -172,11 +173,11 @@ public class BlockingManager {
         )
 
         switch blockMode {
-        case .restoreFromBackup:
+        case .backupRestore:
             // If we're restoring from a Backup, avoid the side effect of
             // inserting a message. One either existed in the backup or not.
             break
-        case .remote, .local:
+        case .storageService, .syncMessage, .localUser:
             // Insert an info message that we blocked this user.
             let threadStore = DependenciesBridge.shared.threadStore
             let interactionStore = DependenciesBridge.shared.interactionStore
@@ -258,11 +259,11 @@ public class BlockingManager {
         }
 
         switch blockMode {
-        case .restoreFromBackup:
+        case .backupRestore:
             // If we're restoring from a Backup, avoid the side effect of
             // inserting a message. One either existed in the backup or not.
             break
-        case .remote, .local:
+        case .storageService, .syncMessage, .localUser:
             let groupThread = TSGroupThread.fetchThread(forGroupIdData: groupId, tx: transaction)
             owsAssertDebug(groupThread != nil, "Must have TSGroupThread in order to insert an event.")
             if let groupThread {

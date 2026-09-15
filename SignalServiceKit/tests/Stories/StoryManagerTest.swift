@@ -99,7 +99,7 @@ class StoryManagerTest: SSKBaseTest {
 
             SSKEnvironment.shared.blockingManagerRef.addBlockedAddress(
                 SignalServiceAddress(author),
-                blockMode: .local,
+                blockMode: .localUser,
                 transaction: $0,
             )
 
@@ -156,7 +156,7 @@ class StoryManagerTest: SSKBaseTest {
             )
             SSKEnvironment.shared.blockingManagerRef.addBlockedGroupId(
                 groupId,
-                blockMode: .local,
+                blockMode: .localUser,
                 transaction: $0,
             )
 

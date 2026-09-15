@@ -972,7 +972,7 @@ extension ConversationViewController: CVComponentDelegate {
                 let blockingManager = SSKEnvironment.shared.blockingManagerRef
                 let databaseStorage = SSKEnvironment.shared.databaseStorageRef
                 databaseStorage.write { tx in
-                    blockingManager.addBlockedAddress(address, blockMode: .local, transaction: tx)
+                    blockingManager.addBlockedAddress(address, blockMode: .localUser, transaction: tx)
                 }
             },
         )
