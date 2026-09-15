@@ -759,13 +759,34 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
                             fileLocation = LocalFileBackupManager.FileStructure.rootDirectory.rawValue
                         }
 
-                        let message = OWSLocalizedString(
-                            "SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_MESSAGE_FORMAT",
-                            comment: "Message shown on an action sheet when a user's backup fails to delete. Embeds {{ local file backup location }}",
-                        )
+                        let message: String
+                        let title: String
+
+                        if
+                            let owsFileCoordinatorError = error as? OWSFileCoordinatorError,
+                            owsFileCoordinatorError == OWSFileCoordinatorError.fileNotFound
+                        {
+                            title = OWSLocalizedString(
+                                "SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_NO_FILE_TITLE",
+                                comment: "Title shown on an action sheet when a user's backup fails to delete because the file isn't found",
+                            )
+                            message = OWSLocalizedString(
+                                "SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_NO_FILE_MESSAGE",
+                                comment: "Message shown on an action sheet when a user's backup fails to delete because the file isn't found.",
+                            )
+                        } else {
+                            title = OWSLocalizedString(
+                                "SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_TITLE",
+                                comment: "Title shown on an action sheet when a user's backup fails to delete",
+                            )
+                            message = OWSLocalizedString(
+                                "SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_MESSAGE_FORMAT",
+                                comment: "Message shown on an action sheet when a user's backup fails to delete. Embeds {{ local file backup location }}",
+                            )
+                        }
 
                         let actionSheet = ActionSheetController(
-                            title: OWSLocalizedString("SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_TITLE", comment: "Title shown on an action sheet when a user's backup fails to delete"),
+                            title: title,
                             message: String.nonPluralLocalizedStringWithFormat(message, fileLocation),
                         )
 
