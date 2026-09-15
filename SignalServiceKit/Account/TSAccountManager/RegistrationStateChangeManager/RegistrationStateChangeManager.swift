@@ -29,7 +29,7 @@ public protocol RegistrationStateChangeManager {
 
     func didRegisterOrProvision(
         aci: Aci,
-        phoneNumber: (e164: E164, pni: Pni),
+        phoneNumber: LocalIdentifiers.PhoneNumber,
         authToken: String,
         deviceId: DeviceId,
         tx: DBWriteTransaction,
@@ -46,7 +46,7 @@ public protocol RegistrationStateChangeManager {
      */
     func didUpdateLocalPhoneNumber(
         aci: Aci,
-        phoneNumber: (e164: E164, pni: Pni),
+        phoneNumber: LocalIdentifiers.PhoneNumber,
         tx: DBWriteTransaction,
     )
 

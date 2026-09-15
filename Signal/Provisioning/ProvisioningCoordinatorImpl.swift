@@ -87,7 +87,7 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         case .reregistering(let localIdentifiers):
             oldLocalIdentifiers = localIdentifiers
             let oldPhoneNumber: String = localIdentifiers.phoneNumber
-            guard oldPhoneNumber == provisionMessage.phoneNumberState.e164.stringValue else {
+            guard oldPhoneNumber == provisionMessage.phoneNumberState.phoneNumber.e164.stringValue else {
                 Logger.warn("can't re-link primary a different phone number")
                 throw .previouslyLinkedWithDifferentAccount
             }
@@ -213,7 +213,7 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         deviceName: String,
     ) async throws(CompleteProvisioningError) -> CompleteProvisioningStepResult {
         // Update censorship circumvention state as e164 could be changing.
-        signalService.updateHasCensoredPhoneNumberDuringProvisioning(provisionMessage.phoneNumberState.e164)
+        signalService.updateHasCensoredPhoneNumberDuringProvisioning(provisionMessage.phoneNumberState.phoneNumber.e164)
 
         return try await completeProvisioning_createPreKeys(
             provisionMessage: provisionMessage,
@@ -473,7 +473,7 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         await self.db.awaitableWrite { tx in
             self.registrationStateChangeManager.didRegisterOrProvision(
                 aci: authedDevice.aci,
-                phoneNumber: (authedDevice.phoneNumber, authedDevice.pni),
+                phoneNumber: authedDevice.phoneNumber,
                 authToken: authedDevice.authPassword,
                 deviceId: authedDevice.deviceId,
                 tx: tx,
@@ -604,21 +604,19 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         case .success(let response):
             verifyDeviceResponse = response
         }
-        if provisionMessage.phoneNumberState.pni != verifyDeviceResponse.pni {
+        if provisionMessage.phoneNumberState.phoneNumber.pni != verifyDeviceResponse.pni {
             throw .genericError(OWSAssertionError("PNI from primary is out of sync with the server!"))
         }
         if verifyDeviceResponse.deviceId.isPrimary {
             throw .genericError(OWSAssertionError("Server is trying to link device as primary!"))
         }
 
-        let authedDevice = AuthedDevice.Explicit(
+        return AuthedDevice.Explicit(
             aci: provisionMessage.aci,
-            phoneNumber: provisionMessage.phoneNumberState.e164,
-            pni: provisionMessage.phoneNumberState.pni,
+            phoneNumber: provisionMessage.phoneNumberState.phoneNumber,
             deviceId: verifyDeviceResponse.deviceId,
             authPassword: serverAuthToken,
         )
-        return authedDevice
     }
 
     private func undoVerifyAndLinkOnServer(authedDevice: AuthedDevice.Explicit) async throws(CompleteProvisioningError) {

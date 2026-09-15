@@ -22,7 +22,7 @@ open class MockRegistrationStateChangeManager: RegistrationStateChangeManager {
 
     public lazy var didRegisterOrProvisionMock: (
         _ aci: Aci,
-        _ phoneNumber: (e164: E164, pni: Pni),
+        _ phoneNumber: LocalIdentifiers.PhoneNumber,
         _ authToken: String,
         _ deviceId: DeviceId,
     ) -> Void = { [weak self] aci, phoneNumber, _, _ in
@@ -31,7 +31,7 @@ open class MockRegistrationStateChangeManager: RegistrationStateChangeManager {
 
     open func didRegisterOrProvision(
         aci: Aci,
-        phoneNumber: (e164: E164, pni: Pni),
+        phoneNumber: LocalIdentifiers.PhoneNumber,
         authToken: String,
         deviceId: DeviceId,
         tx: DBWriteTransaction,
@@ -41,10 +41,10 @@ open class MockRegistrationStateChangeManager: RegistrationStateChangeManager {
 
     public var didUpdateLocalPhoneNumberMock: (
         _ aci: Aci,
-        _ phoneNumber: (E164, Pni),
+        _ phoneNumber: LocalIdentifiers.PhoneNumber,
     ) -> Void = { _, _ in }
 
-    public func didUpdateLocalPhoneNumber(aci: Aci, phoneNumber: (e164: E164, pni: Pni), tx: DBWriteTransaction) {
+    public func didUpdateLocalPhoneNumber(aci: Aci, phoneNumber: LocalIdentifiers.PhoneNumber, tx: DBWriteTransaction) {
         didUpdateLocalPhoneNumberMock(aci, phoneNumber)
     }
 

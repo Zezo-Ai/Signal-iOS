@@ -15,13 +15,11 @@ public struct LinkingProvisioningMessage {
 
     /// Wraps state that's only available for accounts with phone numbers.
     public struct PhoneNumberState {
-        public let e164: E164
-        public let pni: Pni
+        public let phoneNumber: LocalIdentifiers.PhoneNumber
         public let pniIdentityKeyPair: IdentityKeyPair
 
-        public init(e164: E164, pni: Pni, pniIdentityKeyPair: IdentityKeyPair) {
-            self.e164 = e164
-            self.pni = pni
+        public init(phoneNumber: LocalIdentifiers.PhoneNumber, pniIdentityKeyPair: IdentityKeyPair) {
+            self.phoneNumber = phoneNumber
             self.pniIdentityKeyPair = pniIdentityKeyPair
         }
     }
@@ -95,7 +93,8 @@ public struct LinkingProvisioningMessage {
                 publicKey: PublicKey(proto.pniIdentityKeyPublic),
                 privateKey: PrivateKey(proto.pniIdentityKeyPrivate),
             )
-            phoneNumberState = PhoneNumberState(e164: e164, pni: pni, pniIdentityKeyPair: pniIdentityKeyPair)
+            let phoneNumber = LocalIdentifiers.PhoneNumber(e164: e164, pni: pni)
+            phoneNumberState = PhoneNumberState(phoneNumber: phoneNumber, pniIdentityKeyPair: pniIdentityKeyPair)
         }
         guard let phoneNumberState else {
             // TODO: [#less] Allow linking accounts without phone numbers.
@@ -137,8 +136,8 @@ public struct LinkingProvisioningMessage {
         // TODO: [#less] Don't include this when phoneNumber is nil.
         let phoneNumberState = self.phoneNumberState
         do {
-            message.number = phoneNumberState.e164.stringValue
-            message.pniBinary = phoneNumberState.pni.rawUUID.data
+            message.number = phoneNumberState.phoneNumber.e164.stringValue
+            message.pniBinary = phoneNumberState.phoneNumber.pni.rawUUID.data
             message.pniIdentityKeyPublic = phoneNumberState.pniIdentityKeyPair.publicKey.serialize()
             message.pniIdentityKeyPrivate = phoneNumberState.pniIdentityKeyPair.privateKey.serialize()
         }

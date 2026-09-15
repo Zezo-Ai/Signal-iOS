@@ -92,8 +92,7 @@ public class ProvisioningManager {
                 owsFail("can't provision without pni identity key")
             }
             phoneNumberState = LinkingProvisioningMessage.PhoneNumberState(
-                e164: myPhoneNumber,
-                pni: myPni,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: myPhoneNumber, pni: myPni),
                 pniIdentityKeyPair: pniIdentityKeyPair.identityKeyPair,
             )
         }

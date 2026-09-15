@@ -123,8 +123,8 @@ public class ProvisioningManagerTests {
         // values populated by the old device
         #expect(provisionMessage.aep == accountEntropyPool)
         #expect(provisionMessage.aci == myAci)
-        #expect(provisionMessage.phoneNumberState.e164 == myPhoneNumber)
-        #expect(provisionMessage.phoneNumberState.pni == myPni)
+        #expect(provisionMessage.phoneNumberState.phoneNumber.e164 == myPhoneNumber)
+        #expect(provisionMessage.phoneNumberState.phoneNumber.pni == myPni)
         #expect(provisionMessage.aciIdentityKeyPair.publicKey == myAciIdentityKeyPair.publicKey)
         #expect(provisionMessage.phoneNumberState.pniIdentityKeyPair.publicKey == myPniIdentityKeyPair.publicKey)
         #expect(provisionMessage.profileKey == profileKey)

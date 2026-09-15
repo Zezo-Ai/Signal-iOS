@@ -90,7 +90,7 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
 
     public func didRegisterOrProvision(
         aci: Aci,
-        phoneNumber: (e164: E164, pni: Pni),
+        phoneNumber: LocalIdentifiers.PhoneNumber,
         authToken: String,
         deviceId: DeviceId,
         tx: DBWriteTransaction,
@@ -117,7 +117,7 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
 
     public func didUpdateLocalPhoneNumber(
         aci: Aci,
-        phoneNumber: (e164: E164, pni: Pni),
+        phoneNumber: LocalIdentifiers.PhoneNumber,
         tx: DBWriteTransaction,
     ) {
         tsAccountManager.changeLocalNumber(aci: aci, phoneNumber: phoneNumber, tx: tx)
@@ -322,7 +322,7 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
 
     private func didUpdateLocalIdentifiers(
         aci: Aci,
-        phoneNumber: (e164: E164, pni: Pni),
+        phoneNumber: LocalIdentifiers.PhoneNumber,
         deviceId: DeviceId,
         shouldUpdateStorageService: Bool,
         tx: DBWriteTransaction,
@@ -386,16 +386,21 @@ extension RegistrationStateChangeManagerImpl {
     ) {
         owsAssertDebug(CurrentAppContext().isRunningTests)
 
+        let phoneNumber = LocalIdentifiers.PhoneNumber(
+            e164: E164(localIdentifiers.phoneNumber)!,
+            pni: localIdentifiers.pni!,
+        )
+
         tsAccountManager.initializeLocalIdentifiers(
             aci: localIdentifiers.aci,
-            phoneNumber: (E164(localIdentifiers.phoneNumber)!, localIdentifiers.pni!),
+            phoneNumber: phoneNumber,
             deviceId: .primary,
             serverAuthToken: "",
             tx: tx,
         )
         didUpdateLocalIdentifiers(
             aci: localIdentifiers.aci,
-            phoneNumber: (E164(localIdentifiers.phoneNumber)!, localIdentifiers.pni!),
+            phoneNumber: phoneNumber,
             deviceId: .primary,
             shouldUpdateStorageService: false,
             tx: tx,

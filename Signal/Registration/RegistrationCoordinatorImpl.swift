@@ -1526,7 +1526,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
 
             deps.registrationStateChangeManager.didRegisterOrProvision(
                 aci: accountIdentity.aci,
-                phoneNumber: (accountIdentity.e164, accountIdentity.pni),
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: accountIdentity.e164, pni: accountIdentity.pni),
                 authToken: accountIdentity.authPassword,
                 deviceId: .primary,
                 tx: tx,
@@ -4342,7 +4342,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
             // syncing out-of-date state to storage service.
             self.deps.registrationStateChangeManager.didUpdateLocalPhoneNumber(
                 aci: accountIdentity.aci,
-                phoneNumber: (accountIdentity.e164, accountIdentity.pni),
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: accountIdentity.e164, pni: accountIdentity.pni),
                 tx: tx,
             )
             // Make sure we update our local account.
@@ -4821,8 +4821,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         var authedAccount: AuthedAccount {
             return AuthedAccount.explicit(
                 aci: aci,
-                pni: pni,
-                e164: e164,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: e164, pni: pni),
                 deviceId: .primary,
                 authPassword: authPassword,
             )
@@ -4831,8 +4830,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         var authedDevice: AuthedDevice {
             return .explicit(AuthedDevice.Explicit(
                 aci: aci,
-                phoneNumber: e164,
-                pni: pni,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: e164, pni: pni),
                 deviceId: .primary,
                 authPassword: authPassword,
             ))
@@ -4849,8 +4847,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         var localIdentifiers: LocalIdentifiers {
             return AuthedDevice.Explicit(
                 aci: aci,
-                phoneNumber: e164,
-                pni: pni,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: e164, pni: pni),
                 deviceId: .primary,
                 authPassword: authPassword,
             ).localIdentifiers

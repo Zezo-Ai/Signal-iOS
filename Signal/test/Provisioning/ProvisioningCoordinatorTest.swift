@@ -109,8 +109,7 @@ public class ProvisioningCoordinatorTest: XCTestCase {
             aciIdentityKeyPair: .generate(),
             aep: aep,
             phoneNumberState: LinkingProvisioningMessage.PhoneNumberState(
-                e164: e164,
-                pni: pni,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: e164, pni: pni),
                 pniIdentityKeyPair: pniIdentityKeyPair,
             ),
             profileKey: .generateRandom(),

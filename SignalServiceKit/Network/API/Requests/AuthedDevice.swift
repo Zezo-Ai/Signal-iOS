@@ -12,29 +12,26 @@ public enum AuthedDevice {
 
     public struct Explicit {
         public let aci: Aci
-        public let phoneNumber: E164
-        public let pni: Pni
+        public let phoneNumber: LocalIdentifiers.PhoneNumber
         public let deviceId: DeviceId
         public var isPrimaryDevice: Bool { deviceId == .primary }
         public let authPassword: String
 
-        public init(aci: Aci, phoneNumber: E164, pni: Pni, deviceId: DeviceId, authPassword: String) {
+        public init(aci: Aci, phoneNumber: LocalIdentifiers.PhoneNumber, deviceId: DeviceId, authPassword: String) {
             self.aci = aci
             self.phoneNumber = phoneNumber
-            self.pni = pni
             self.deviceId = deviceId
             self.authPassword = authPassword
         }
 
         public var localIdentifiers: LocalIdentifiers {
-            return LocalIdentifiers(aci: aci, pni: pni, e164: phoneNumber)
+            return LocalIdentifiers(aci: aci, pni: phoneNumber.pni, e164: phoneNumber.e164)
         }
 
         public var authedAccount: AuthedAccount.Explicit {
-            return .init(
+            return AuthedAccount.Explicit(
                 aci: aci,
-                pni: pni,
-                e164: phoneNumber,
+                phoneNumber: phoneNumber,
                 deviceId: deviceId,
                 authPassword: authPassword,
             )
@@ -57,8 +54,7 @@ public enum AuthedDevice {
         case .explicit(let explicit):
             return .explicit(
                 aci: explicit.aci,
-                pni: explicit.pni,
-                e164: explicit.phoneNumber,
+                phoneNumber: explicit.phoneNumber,
                 deviceId: explicit.deviceId,
                 authPassword: explicit.authPassword,
             )

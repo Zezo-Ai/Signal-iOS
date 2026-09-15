@@ -10,6 +10,20 @@ public final class LocalIdentifiers {
     /// The ACI for the current user.
     public let aci: Aci
 
+    // TODO: [#less] Use within LocalIdentifiers.
+    public struct PhoneNumber: Equatable {
+        /// The phone number for the current user.
+        public let e164: E164
+
+        /// The PNI for the current user.
+        public let pni: Pni
+
+        public init(e164: E164, pni: Pni) {
+            self.e164 = e164
+            self.pni = pni
+        }
+    }
+
     /// The PNI for the current user.
     ///
     /// - Note: Primary & linked devices may not have access to their PNI. The

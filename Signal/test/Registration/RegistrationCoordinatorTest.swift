@@ -381,8 +381,7 @@ public class RegistrationCoordinatorTest {
         func expectedAuthedAccount() -> AuthedAccount {
             return .explicit(
                 aci: identityResponse.aci,
-                pni: identityResponse.pni,
-                e164: Stubs.e164,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: identityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
             )
@@ -517,8 +516,7 @@ public class RegistrationCoordinatorTest {
         func expectedAuthedAccount() -> AuthedAccount {
             return .explicit(
                 aci: identityResponse.aci,
-                pni: identityResponse.pni,
-                e164: Stubs.e164,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: identityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
             )
@@ -889,8 +887,7 @@ public class RegistrationCoordinatorTest {
         func expectedAuthedAccount() -> AuthedAccount {
             return .explicit(
                 aci: identityResponse.aci,
-                pni: identityResponse.pni,
-                e164: Stubs.e164,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: identityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
             )
@@ -1232,8 +1229,7 @@ public class RegistrationCoordinatorTest {
         func expectedAuthedAccount() -> AuthedAccount {
             return .explicit(
                 aci: accountIdentityResponse.aci,
-                pni: accountIdentityResponse.pni,
-                e164: Stubs.e164,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: accountIdentityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
             )
@@ -1551,8 +1547,7 @@ public class RegistrationCoordinatorTest {
         func expectedAuthedAccount() -> AuthedAccount {
             return .explicit(
                 aci: accountIdentityResponse.aci,
-                pni: accountIdentityResponse.pni,
-                e164: Stubs.e164,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: accountIdentityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
             )
@@ -1821,8 +1816,7 @@ public class RegistrationCoordinatorTest {
         func expectedAuthedAccount() -> AuthedAccount {
             return .explicit(
                 aci: accountIdentityResponse.aci,
-                pni: accountIdentityResponse.pni,
-                e164: Stubs.e164,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: accountIdentityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
             )
@@ -2847,8 +2841,7 @@ public class RegistrationCoordinatorTest {
         func expectedAuthedAccount() -> AuthedAccount {
             return .explicit(
                 aci: accountIdentityResponse.aci,
-                pni: accountIdentityResponse.pni,
-                e164: Stubs.e164,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: accountIdentityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
             )
@@ -2968,8 +2961,7 @@ public class RegistrationCoordinatorTest {
         func expectedAuthedAccount() -> AuthedAccount {
             return .explicit(
                 aci: accountIdentityResponse.aci,
-                pni: accountIdentityResponse.pni,
-                e164: Stubs.e164,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: accountIdentityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
             )

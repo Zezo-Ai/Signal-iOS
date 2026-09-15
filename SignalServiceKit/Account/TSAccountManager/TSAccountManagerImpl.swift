@@ -161,7 +161,7 @@ extension TSAccountManagerImpl: LocalIdentifiersSetter {
 
     public func initializeLocalIdentifiers(
         aci: Aci,
-        phoneNumber: (e164: E164, pni: Pni),
+        phoneNumber: LocalIdentifiers.PhoneNumber,
         deviceId: DeviceId,
         serverAuthToken: String,
         tx: DBWriteTransaction,
@@ -195,7 +195,7 @@ extension TSAccountManagerImpl: LocalIdentifiersSetter {
 
     public func changeLocalNumber(
         aci: Aci,
-        phoneNumber: (e164: E164, pni: Pni),
+        phoneNumber: LocalIdentifiers.PhoneNumber,
         tx: DBWriteTransaction,
     ) {
         mutateWithLock(tx: tx) {

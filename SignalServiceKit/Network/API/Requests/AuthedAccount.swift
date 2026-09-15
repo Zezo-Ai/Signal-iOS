@@ -10,21 +10,18 @@ public class AuthedAccount: Hashable, Equatable {
 
     public struct Explicit: Equatable {
         public let aci: Aci
-        public let pni: Pni
-        public let e164: E164
+        public let phoneNumber: LocalIdentifiers.PhoneNumber
         public let deviceId: DeviceId
         public let authPassword: String
 
         public init(
             aci: Aci,
-            pni: Pni,
-            e164: E164,
+            phoneNumber: LocalIdentifiers.PhoneNumber,
             deviceId: DeviceId,
             authPassword: String,
         ) {
             self.aci = aci
-            self.pni = pni
-            self.e164 = e164
+            self.phoneNumber = phoneNumber
             self.deviceId = deviceId
             self.authPassword = authPassword
         }
@@ -48,15 +45,13 @@ public class AuthedAccount: Hashable, Equatable {
 
     public static func explicit(
         aci: Aci,
-        pni: Pni,
-        e164: E164,
+        phoneNumber: LocalIdentifiers.PhoneNumber,
         deviceId: DeviceId,
         authPassword: String,
     ) -> AuthedAccount {
         return AuthedAccount(.explicit(Explicit(
             aci: aci,
-            pni: pni,
-            e164: e164,
+            phoneNumber: phoneNumber,
             deviceId: deviceId,
             authPassword: authPassword,
         )))
@@ -68,7 +63,7 @@ public class AuthedAccount: Hashable, Equatable {
             break
         case let .explicit(info):
             hasher.combine(info.aci)
-            hasher.combine(info.e164)
+            hasher.combine(info.phoneNumber.e164)
             hasher.combine(info.authPassword)
         }
     }
@@ -113,8 +108,7 @@ public class AuthedAccount: Hashable, Equatable {
         case let .explicit(info):
             return .explicit(AuthedDevice.Explicit(
                 aci: info.aci,
-                phoneNumber: info.e164,
-                pni: info.pni,
+                phoneNumber: info.phoneNumber,
                 deviceId: info.deviceId,
                 authPassword: info.authPassword,
             ))
@@ -129,7 +123,7 @@ extension AuthedAccount.Explicit {
     }
 
     public var localIdentifiers: LocalIdentifiers {
-        return LocalIdentifiers(aci: aci, pni: pni, phoneNumber: e164.stringValue)
+        return LocalIdentifiers(aci: aci, pni: phoneNumber.pni, e164: phoneNumber.e164)
     }
 
     public var chatServiceAuth: ChatServiceAuth {
