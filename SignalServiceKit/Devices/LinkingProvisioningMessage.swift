@@ -85,28 +85,12 @@ public struct LinkingProvisioningMessage {
         }
         self.phoneNumber = proto.number
 
-        self.aci = try {
-            guard let aci = Aci.parseFrom(serviceIdBinary: proto.aciBinary, serviceIdString: proto.aci) else {
-                throw OWSGenericError("invalid ACI from provisioning message")
-            }
-            return aci
-        }()
+        self.aci = try Aci.parseFrom(serviceIdBinary: proto.aciBinary)
 
-        self.pni = try {
-            if proto.hasPniBinary {
-                guard let pniUuid = UUID(data: proto.pniBinary) else {
-                    throw OWSGenericError("invalid PNI from provisioning message")
-                }
-                return Pni(fromUUID: pniUuid)
-            }
-            if proto.hasPni {
-                guard let pni = Pni.parseFrom(ambiguousString: proto.pni) else {
-                    throw OWSGenericError("invalid PNI from provisioning message")
-                }
-                return pni
-            }
+        guard let pniUuid = UUID(data: proto.pniBinary) else {
             throw OWSGenericError("invalid PNI from provisioning message")
-        }()
+        }
+        self.pni = Pni(fromUUID: pniUuid)
 
         self.aep = try AccountEntropyPool(key: proto.accountEntropyPool)
 
