@@ -540,6 +540,37 @@ struct LocalFileBackupManagerTests {
         #expect(fileNamesAfter.contains(mediaName1))
         #expect(fileNamesAfter.contains(mediaName2))
     }
+
+    @Test
+    func testInsertExportRecordSkipsDeletedAttachment() throws {
+        let store = LocalFileBackupStore()
+
+        let mockAttachment = AttachmentStream.mock(
+            streamInfo: .mock(
+                encryptedByteCount: 20,
+                unencryptedByteCount: 32,
+            ),
+        ).attachment
+
+        // Insert, then delete the attachment, simulating an attachment being deleted
+        // between the archive walk and the queue-export step.
+        let orphanedId: Attachment.IDType = db.write { tx in
+            let id = LocalFileBackupTestSupport.insertMockAttachment(mockAttachment, tx: tx)
+            try! Attachment.Record
+                .filter(key: id)
+                .deleteAll(tx.database)
+            return id
+        }
+
+        db.write { tx in
+            store.insertExportRecord(attachmentId: orphanedId, tx: tx)
+        }
+
+        let exportRecords = try db.read { tx in
+            try BackupLocalFileAttachmentExportRecord.fetchAll(tx.database)
+        }
+        #expect(exportRecords.isEmpty)
+    }
 }
 
 public enum LocalFileBackupTestSupport {

@@ -144,8 +144,15 @@ public struct LocalFileBackupStore {
     }
 
     func insertExportRecord(attachmentId: Attachment.IDType, tx: DBWriteTransaction) {
-        let attachmentToExport = BackupLocalFileAttachmentExportRecord(attachmentRowId: attachmentId)
         failIfThrows {
+            let attachmentExists = try Attachment.Record
+                .filter(key: attachmentId)
+                .fetchCount(tx.database) > 0
+            guard attachmentExists else {
+                Logger.warn("Skipping export queue insert; attachment \(attachmentId) was deleted after backup proto was created")
+                return
+            }
+            let attachmentToExport = BackupLocalFileAttachmentExportRecord(attachmentRowId: attachmentId)
             try attachmentToExport.insert(tx.database)
         }
     }
