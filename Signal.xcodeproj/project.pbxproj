@@ -3631,7 +3631,7 @@
 		F915A77229CB6F6F00EB6F68 /* AccountDataReportTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F915A77129CB6F6F00EB6F68 /* AccountDataReportTest.swift */; };
 		F9189AC02947D9F300CD8EF6 /* DonationViewsUtil+LocalizedStripeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9189ABF2947D9F300CD8EF6 /* DonationViewsUtil+LocalizedStripeError.swift */; };
 		F9198485299AA7FC007FD5E4 /* RegistrationPhoneNumberInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9198484299AA7FC007FD5E4 /* RegistrationPhoneNumberInputView.swift */; };
-		F92074762888648A00B7F087 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F92074752888648A00B7F087 /* AppDelegate.swift */; };
+		F92074762888648A00B7F087 /* AppLifecycleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F92074752888648A00B7F087 /* AppLifecycleManager.swift */; };
 		F924A68228F8706200E368C8 /* DonationReadMoreSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F924A68128F8706200E368C8 /* DonationReadMoreSheetViewController.swift */; };
 		F9262C46289462F600063502 /* SignalServiceKit-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = F9C985D2289459860029F9AD /* SignalServiceKit-Prefix.pch */; };
 		F927478828CFE9B10056EAFE /* test-png.png in Resources */ = {isa = PBXBuildFile; fileRef = F927478728CFE9B10056EAFE /* test-png.png */; };
@@ -8037,7 +8037,7 @@
 		F9189ABD2947D7C300CD8EF6 /* Stripe+StripeError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stripe+StripeError.swift"; sourceTree = "<group>"; };
 		F9189ABF2947D9F300CD8EF6 /* DonationViewsUtil+LocalizedStripeError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DonationViewsUtil+LocalizedStripeError.swift"; sourceTree = "<group>"; };
 		F9198484299AA7FC007FD5E4 /* RegistrationPhoneNumberInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationPhoneNumberInputView.swift; sourceTree = "<group>"; };
-		F92074752888648A00B7F087 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		F92074752888648A00B7F087 /* AppLifecycleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycleManager.swift; sourceTree = "<group>"; };
 		F924A68128F8706200E368C8 /* DonationReadMoreSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonationReadMoreSheetViewController.swift; sourceTree = "<group>"; };
 		F927478728CFE9B10056EAFE /* test-png.png */ = {isa = PBXFileReference; explicitFileType = compiled; path = "test-png.png"; sourceTree = "<group>"; };
 		F927478928CFE9C60056EAFE /* test-png-with-metadata.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "test-png-with-metadata.png"; sourceTree = "<group>"; };
@@ -9953,8 +9953,8 @@
 		5045F44129E0DAA400058E5F /* AppLaunch */ = {
 			isa = PBXGroup;
 			children = (
-				F92074752888648A00B7F087 /* AppDelegate.swift */,
 				34D99CE3217509C1000AFB39 /* AppEnvironment.swift */,
+				F92074752888648A00B7F087 /* AppLifecycleManager.swift */,
 				349C3636233D198300D52012 /* LaunchJobs.swift */,
 				4542DF53208D40AC007B4E76 /* LoadingViewController.swift */,
 				5033D46829D7951F007FEADA /* MainAppContext.swift */,
@@ -18442,7 +18442,6 @@
 				45D49115296F69AA00B92BB1 /* AllMediaViewController.swift in Sources */,
 				32E958AA25C12B3800BF12AD /* AnimatedProgressView.swift in Sources */,
 				50A76F562AF573CE00FCF02D /* AppActivePrecondition.swift in Sources */,
-				F92074762888648A00B7F087 /* AppDelegate.swift in Sources */,
 				8827004E23208A1900F01C46 /* AppearanceSettingsTableViewController.swift in Sources */,
 				34D99CE4217509C2000AFB39 /* AppEnvironment.swift in Sources */,
 				052D178A2C7E60340023D56F /* AppIcon.swift in Sources */,
@@ -18450,6 +18449,7 @@
 				052D178C2C7E60750023D56F /* AppIconLearnMoreTableViewController.swift in Sources */,
 				B909C1592AAA5BAA00FED2AF /* AppIconSettingsTableViewController.swift in Sources */,
 				F941B17028412D5F00498CCD /* ApplePayButton.swift in Sources */,
+				F92074762888648A00B7F087 /* AppLifecycleManager.swift in Sources */,
 				88F58A1725EEE5B9008CDA24 /* AppSettingsViewController.swift in Sources */,
 				F9BC0A2527FB8E730085B23D /* AppSettingsViewsUtil.swift in Sources */,
 				1489ED0227A3D70200C7043A /* ArchivedConversationsCell.swift in Sources */,
