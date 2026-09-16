@@ -269,14 +269,6 @@ extension ConversationViewController {
     }
 
     public func updateNavigationBarSubtitleLabel() {
-        AssertIsOnMainThread()
-
-        // Shorter, more vertically compact navigation bar doesn't have second line of text.
-        if #unavailable(iOS 26), !UIDevice.current.isPlusSizePhone, traitCollection.verticalSizeClass == .compact {
-            headerView.subtitleLabel.text = nil
-            return
-        }
-
         let subtitleText = NSMutableAttributedString()
         let subtitleFont = headerView.subtitleLabel.font!
         // To ensure a single source of text color do not set `color` attributes unless you really need to.
