@@ -227,8 +227,8 @@ public class LocalFileBackupManager: NSObject, UIDocumentPickerDelegate {
                     continue
                 }
 
-                try db.write { tx in
-                    try attachmentStore.updateLocalFileBackupAttachmentAsTransferred(
+                db.write { tx in
+                    attachmentStore.updateLocalFileBackupAttachmentAsTransferred(
                         attachment: attachmentWithMetadata.attachment,
                         streamInfo: Attachment.StreamInfo(pendingAttachment: pendingAttachment),
                         tx: tx,
@@ -238,7 +238,9 @@ public class LocalFileBackupManager: NSObject, UIDocumentPickerDelegate {
                         tx: tx,
                     )
 
-                    try localFileImport.delete(tx.database)
+                    failIfThrows {
+                        try localFileImport.delete(tx.database)
+                    }
                 }
 
                 restoreProgress.didProcessAttachment(

@@ -572,6 +572,36 @@ struct LocalFileBackupManagerTests {
         #expect(exportRecords.isEmpty)
     }
 
+    @Test
+    func testUpdateAsTransferredNoopsWhenAttachmentAlreadyDeleted() throws {
+        let mockAttachment = try LocalFileBackupTestSupport.makeMockAttachmentWithRealFile()
+
+        let id = db.write { tx in
+            LocalFileBackupTestSupport.insertMockAttachment(mockAttachment, tx: tx)
+        }
+
+        let staleReference = db.read { tx in
+            attachmentStore.fetch(id: id, tx: tx)
+        }!
+
+        try db.write { tx in
+            _ = try Attachment.Record.filter(key: id).deleteAll(tx.database)
+        }
+
+        db.write { tx in
+            attachmentStore.updateLocalFileBackupAttachmentAsTransferred(
+                attachment: staleReference,
+                streamInfo: .mock(),
+                tx: tx,
+            )
+        }
+
+        let result = db.read { tx in
+            attachmentStore.fetch(id: id, tx: tx)
+        }
+        #expect(result == nil)
+    }
+
     // MARK: - NSFileCoordinator related tests
 
     /// Models a file-provider extension holding a pending deletion in memory:
