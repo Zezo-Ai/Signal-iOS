@@ -2842,6 +2842,7 @@
 		D94CE91A2F52392F00354DE4 /* ChatListBackupProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94CE9192F52392B00354DE4 /* ChatListBackupProgressView.swift */; };
 		D94D67CD2C9DEF870091B485 /* BackupArchivePostFrameRestoreActionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94D67CC2C9DEF6E0091B485 /* BackupArchivePostFrameRestoreActionManager.swift */; };
 		D94D67CF2C9DF4720091B485 /* TSInfoMessage+ContactHidden.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94D67CE2C9DF46E0091B485 /* TSInfoMessage+ContactHidden.swift */; };
+		D95150933047770900931FB0 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95150923047770700931FB0 /* SceneDelegate.swift */; };
 		D951F5312D9B236700C5EBF3 /* BackupSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D951F5302D9B236100C5EBF3 /* BackupSettingsViewController.swift */; };
 		D953424A2D8B71190087AD93 /* recipient_groups_07.binproto in Resources */ = {isa = PBXBuildFile; fileRef = D95342282D8B71190087AD93 /* recipient_groups_07.binproto */; };
 		D953424B2D8B71190087AD93 /* recipient_groups_11.binproto in Resources */ = {isa = PBXBuildFile; fileRef = D95342302D8B71190087AD93 /* recipient_groups_11.binproto */; };
@@ -7226,6 +7227,7 @@
 		D94CE9192F52392B00354DE4 /* ChatListBackupProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListBackupProgressView.swift; sourceTree = "<group>"; };
 		D94D67CC2C9DEF6E0091B485 /* BackupArchivePostFrameRestoreActionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupArchivePostFrameRestoreActionManager.swift; sourceTree = "<group>"; };
 		D94D67CE2C9DF46E0091B485 /* TSInfoMessage+ContactHidden.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TSInfoMessage+ContactHidden.swift"; sourceTree = "<group>"; };
+		D95150923047770700931FB0 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		D9517ABD292C596B00DDD37E /* Paypal+WebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Paypal+WebAuthentication.swift"; sourceTree = "<group>"; };
 		D9517ABF292C5A3900DDD37E /* Paypal+API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Paypal+API.swift"; sourceTree = "<group>"; };
 		D951F5302D9B236100C5EBF3 /* BackupSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupSettingsViewController.swift; sourceTree = "<group>"; };
@@ -9961,6 +9963,7 @@
 				349C3636233D198300D52012 /* LaunchJobs.swift */,
 				4542DF53208D40AC007B4E76 /* LoadingViewController.swift */,
 				5033D46829D7951F007FEADA /* MainAppContext.swift */,
+				D95150923047770700931FB0 /* SceneDelegate.swift */,
 				880D902F2481E617003D2B14 /* SignalApp.swift */,
 				6698FC13297F38BB004EFC30 /* ViewControllerContext.swift */,
 				76616C9C2A266A05005F7001 /* WindowManager.swift */,
@@ -19139,6 +19142,7 @@
 				D9E43C2C2CC194140001536E /* RTCIceServerFetcher.swift in Sources */,
 				044EA2232FC0EFAE005B5A3E /* SafetyTipsSheet.swift in Sources */,
 				C1D9B1552B7FA28200D94595 /* SafetyTipsViewController.swift in Sources */,
+				D95150933047770900931FB0 /* SceneDelegate.swift in Sources */,
 				7677E41329F84C2100AC6A75 /* ScreenLockUI.swift in Sources */,
 				D959F1172FE4581900006744 /* ScreenshotBlocking.swift in Sources */,
 				667EDE6428F8D6B7001FB487 /* SDAnimatedImage+Duration.swift in Sources */,

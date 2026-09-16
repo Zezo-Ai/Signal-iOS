@@ -23,9 +23,13 @@ public class SignalApp {
         return conversationSplitViewController?.selectedThread != nil
     }
 
-    func showConversationSplitView() {
+    func showConversationSplitView(in window: UIWindow? = nil) {
+        guard let window = window ?? CurrentAppContext().mainWindow else {
+            owsFailDebug("Missing window.")
+            return
+        }
         let splitViewController = ConversationSplitViewController()
-        UIApplication.shared.delegate?.window??.rootViewController = splitViewController
+        window.rootViewController = splitViewController
         self.conversationSplitViewController = splitViewController
     }
 
@@ -47,7 +51,12 @@ public class SignalApp {
     }
 
     @MainActor
-    func showLaunchInterface(_ launchInterface: LaunchInterface, appReadiness: AppReadinessSetter, launchStartedAt: TimeInterval) {
+    func showLaunchInterface(
+        _ launchInterface: LaunchInterface,
+        in window: UIWindow,
+        appReadiness: AppReadinessSetter,
+        launchStartedAt: TimeInterval,
+    ) {
         owsPrecondition(appReadiness.isAppReady)
 
         let startupDuration = CACurrentMediaTime() - launchStartedAt
@@ -63,11 +72,11 @@ public class SignalApp {
 
         switch launchInterface {
         case .registration(let registrationLoader, let desiredMode):
-            showRegistration(loader: registrationLoader, desiredMode: desiredMode)
+            showRegistration(loader: registrationLoader, desiredMode: desiredMode, in: window)
         case .secondaryProvisioning:
             showSecondaryProvisioning(skipOnboarding: false)
         case .chatList:
-            showConversationSplitView()
+            showConversationSplitView(in: window)
         }
         appReadiness.setUIIsReady()
 
@@ -90,7 +99,12 @@ public class SignalApp {
     func showRegistration(
         loader: RegistrationCoordinatorLoader,
         desiredMode: RegistrationMode,
+        in window: UIWindow? = nil,
     ) {
+        guard let window = window ?? CurrentAppContext().mainWindow else {
+            owsFailDebug("Missing window.")
+            return
+        }
         let logger: PrefixedLogger
         switch desiredMode {
         case .registering:
@@ -108,7 +122,7 @@ public class SignalApp {
         }
         let navController = RegistrationNavigationController.withCoordinator(coordinator)
 
-        UIApplication.shared.delegate?.window??.rootViewController = navController
+        window.rootViewController = navController
 
         conversationSplitViewController = nil
     }

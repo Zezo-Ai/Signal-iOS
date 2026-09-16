@@ -6,17 +6,14 @@
 import SignalServiceKit
 import UIKit
 
-/// Receives app lifecycle events from UIKit, and forwards them to
+/// Receives app-wide lifecycle events from UIKit, and forwards them to
 /// ``AppLifecycleManager``.
+///
+/// Events tied to the app's UI arrive in ``SceneDelegate`` instead.
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     private let lifecycleManager = AppLifecycleManager.shared
-
-    var window: UIWindow? {
-        get { lifecycleManager.window }
-        set { lifecycleManager.window = newValue }
-    }
 
     // MARK: - Lifecycle
 
@@ -27,26 +24,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         return lifecycleManager.didFinishLaunching(launchOptions: launchOptions)
     }
 
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        lifecycleManager.willEnterForeground()
-    }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        lifecycleManager.didBecomeActive()
-    }
-
-    func applicationWillResignActive(_ application: UIApplication) {
-        lifecycleManager.willResignActive()
-    }
-
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        lifecycleManager.didEnterBackground()
-    }
-
     func applicationDidReceiveMemoryWarning(_ application: UIApplication) {
         lifecycleManager.didReceiveMemoryWarning()
     }
 
+    /// UIKit generally prefers `SceneDelegate.sceneDidDisconnect(_:)` for
+    /// scene-based apps, which also calls through to the manager.
     func applicationWillTerminate(_ application: UIApplication) {
         lifecycleManager.willTerminate()
     }
@@ -76,33 +59,5 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void,
     ) {
         lifecycleManager.didReceiveRemoteNotification(userInfo, completionHandler: completionHandler)
-    }
-
-    // MARK: - Handoff
-
-    @available(iOS, deprecated: 13.0)
-    func application(
-        _ application: UIApplication,
-        continue userActivity: NSUserActivity,
-        restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void,
-    ) -> Bool {
-        return lifecycleManager.handle(userActivity: userActivity)
-    }
-
-    // MARK: - Shortcut Items
-
-    func application(
-        _ application: UIApplication,
-        performActionFor shortcutItem: UIApplicationShortcutItem,
-        completionHandler: @escaping (Bool) -> Void,
-    ) {
-        lifecycleManager.performAction(for: shortcutItem, completionHandler: completionHandler)
-    }
-
-    // MARK: - URL Handling
-
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        AssertIsOnMainThread()
-        return lifecycleManager.handleOpenUrl(url)
     }
 }

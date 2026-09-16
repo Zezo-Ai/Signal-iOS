@@ -133,6 +133,21 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
 
     private nonisolated let appReadiness = AppReadinessImpl()
 
+    private var mainAppContext: MainAppContext!
+    private var launchContext: LaunchContext!
+
+    /// The result of launching, which needs a window to be shown in.
+    private enum LaunchOutcome {
+        case failure(LaunchFailure)
+        case launchInterface(LaunchInterface)
+    }
+
+    /// Set once the launch has an outcome, and cleared once it's been shown.
+    ///
+    /// The launch can finish (or fail) before the app has a window; if it
+    /// launched in the background, that may never happen.
+    private var pendingLaunchOutcome: LaunchOutcome?
+
     func didFinishLaunching(launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let launchStartedAt = CACurrentMediaTime()
 
@@ -141,6 +156,7 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
         // This should be the first thing we do.
         let mainAppContext = MainAppContext()
         SetCurrentAppContext(mainAppContext, isRunningTests: false)
+        self.mainAppContext = mainAppContext
 
         let debugLogger = DebugLogger.shared
         debugLogger.enableTTYLoggingIfNeeded()
@@ -148,7 +164,6 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
         DebugLogger.registerRingRTC(appContext: mainAppContext)
 
         if mainAppContext.isRunningTests {
-            _ = initializeWindow(mainAppContext: mainAppContext, rootViewController: UIViewController())
             return true
         }
 
@@ -156,6 +171,7 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
         DebugLogger.configureSwiftLogging()
 
         Logger.warn("Launching…")
+        Logger.warn("applicationState: \(UIApplication.shared.applicationState.logString)")
         defer { Logger.info("Launched.") }
 
         BenchEventStart(title: "Presenting HomeView", eventId: "AppStart", logInProduction: true)
@@ -192,28 +208,8 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
             notifyThatPhoneMustBeUnlocked()
         } catch {
             // It's so corrupt that we can't even try to repair it.
-            didAppLaunchFail = true
             Logger.error("Couldn't launch with broken database: \(error.grdbErrorForLogging)")
-            let viewController = terminalErrorViewController()
-            _ = initializeWindow(mainAppContext: mainAppContext, rootViewController: viewController)
-
-            presentLaunchFailureActionSheet(
-                from: viewController,
-                supportTag: "LaunchFailure_DatabaseLoadFailed",
-                logDumper: .preLaunch(),
-                title: OWSLocalizedString(
-                    "APP_LAUNCH_FAILURE_COULD_NOT_LOAD_DATABASE",
-                    comment: "Error indicating that the app could not launch because the database could not be loaded.",
-                ),
-                message: OWSLocalizedString(
-                    "APP_LAUNCH_FAILURE_ALERT_MESSAGE",
-                    comment: "Default message for the 'app launch failed' alert.",
-                ),
-                actions: [
-                    .submitDebugLogsAndCrash,
-                    .wipeAppDataAndCrash(keyFetcher: GRDBKeyFetcher(keychainStorage: keychainStorage)),
-                ],
-            )
+            handleLaunchFailure(.databaseLoadFailed(keychainStorage: keychainStorage))
             return true
         }
 
@@ -247,6 +243,7 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
             keychainStorage: keychainStorage,
             launchStartedAt: launchStartedAt,
         )
+        self.launchContext = launchContext
 
         let userDefaults = mainAppContext.appUserDefaults()
         if appVersion.lastAppVersionForCrashDetection != appVersion.currentAppVersion {
@@ -263,15 +260,7 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
         )
 
         if let preflightError {
-            didAppLaunchFail = true
-            let viewController = terminalErrorViewController()
-            let window = initializeWindow(mainAppContext: mainAppContext, rootViewController: viewController)
-            showPreflightErrorUI(
-                preflightError,
-                launchContext: launchContext,
-                window: window,
-                viewController: viewController,
-            )
+            handleLaunchFailure(.preflight(preflightError))
             return true
         }
 
@@ -348,23 +337,8 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
             }
         }
 
-        // Show LoadingViewController until the database migrations are complete.
-        let loadingViewController = LoadingViewController()
-
-        let window = initializeWindow(mainAppContext: mainAppContext, rootViewController: loadingViewController)
-        self.launchApp(in: window, launchContext: launchContext, loadingViewController: loadingViewController)
+        self.startLaunchPipeline(launchContext: launchContext)
         return true
-    }
-
-    var window: UIWindow?
-
-    private func initializeWindow(mainAppContext: MainAppContext, rootViewController: UIViewController) -> UIWindow {
-        let window = OWSWindow()
-        self.window = window
-        mainAppContext.mainWindow = window
-        window.rootViewController = rootViewController
-        window.makeKeyAndVisible()
-        return window
     }
 
     private struct LaunchContext {
@@ -375,17 +349,121 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
         let launchStartedAt: CFTimeInterval
     }
 
-    private func launchApp(
-        in window: UIWindow,
-        launchContext: LaunchContext,
-        loadingViewController: LoadingViewController,
-    ) {
-        assert(window.rootViewController == loadingViewController)
-        configureGlobalUI(in: window)
+    /// Runs the launch steps that don't need a window: setting up the app's
+    /// environment, and migrating the database.
+    private func startLaunchPipeline(launchContext: LaunchContext) {
+        Logger.info("")
         Task {
-            let (finalContinuation, sleepBlockObject) = await setUpMainAppEnvironment(launchContext: launchContext, loadingViewController: loadingViewController)
-            self.didLoadDatabase(finalContinuation: finalContinuation, launchContext: launchContext, sleepBlockObject: sleepBlockObject, window: window)
+            let (finalContinuation, sleepBlockObject) = await setUpMainAppEnvironment(launchContext: launchContext)
+            self.didLoadDatabase(
+                finalContinuation: finalContinuation,
+                launchContext: launchContext,
+                sleepBlockObject: sleepBlockObject,
+            )
         }
+    }
+
+    // MARK: - UI Launch
+
+    var window: UIWindow?
+
+    /// Gives the app a window in `windowScene`, and shows the launch UI in it.
+    ///
+    /// The launch may not have finished yet, in which case this shows the
+    /// loading view until it does. If the app launched into the background,
+    /// this happens whenever a scene first connects, which may be long after
+    /// the launch finished, or never.
+    func connectUI(in windowScene: UIWindowScene) -> UIWindow {
+        Logger.info("applicationState: \(UIApplication.shared.applicationState.logString)")
+
+        if let window {
+            // Our scene was replaced with a new one. Keep the windows we have,
+            // and move them over to it.
+            Logger.warn("Reconnecting to a new scene.")
+            window.windowScene = windowScene
+            AppEnvironment.shared.windowManagerRef.moveWindows(to: windowScene)
+            return window
+        }
+
+        if mainAppContext.isRunningTests {
+            let window = initializeWindow(in: windowScene, rootViewController: UIViewController())
+            return window
+        }
+
+        switch pendingLaunchOutcome.take() {
+        case .failure(let launchFailure):
+            Logger.info("Showing a launch failure that was waiting for a window.")
+            let viewController = terminalErrorViewController()
+            let window = initializeWindow(in: windowScene, rootViewController: viewController)
+            showLaunchFailureUI(launchFailure, from: viewController)
+            return window
+
+        case .launchInterface(let launchInterface):
+            Logger.info("Showing a launch interface that was waiting for a window.")
+            let window = initializeWindow(in: windowScene, rootViewController: LoadingViewController())
+            configureGlobalUI(in: window)
+            showLaunchInterface(
+                launchInterface,
+                inWindow: window,
+                launchStartedAt: launchContext.launchStartedAt,
+            )
+            return window
+
+        case nil:
+            // Show LoadingViewController until the launch finishes.
+            Logger.info("The launch hasn't finished; showing the loading view.")
+            let window = initializeWindow(in: windowScene, rootViewController: LoadingViewController())
+            configureGlobalUI(in: window)
+            return window
+        }
+    }
+
+    /// The app's scene went away.
+    func disconnectUI() {
+        Logger.info("")
+    }
+
+    private func initializeWindow(
+        in windowScene: UIWindowScene,
+        rootViewController: UIViewController,
+    ) -> UIWindow {
+        let window = OWSWindow(windowScene: windowScene)
+        self.window = window
+        mainAppContext.mainWindow = window
+        window.rootViewController = rootViewController
+        window.makeKeyAndVisible()
+        return window
+    }
+
+    /// Shows the launch interface, or holds onto it until there's a window to
+    /// show it in.
+    private func handleLaunchInterface(
+        _ launchInterface: LaunchInterface,
+        launchStartedAt: CFTimeInterval,
+    ) {
+        guard let window else {
+            Logger.info("The launch finished, but there's no window; waiting for a scene.")
+            self.pendingLaunchOutcome = .launchInterface(launchInterface)
+            return
+        }
+        showLaunchInterface(
+            launchInterface,
+            inWindow: window,
+            launchStartedAt: launchStartedAt,
+        )
+    }
+
+    private func showLaunchInterface(
+        _ launchInterface: LaunchInterface,
+        inWindow window: UIWindow,
+        launchStartedAt: CFTimeInterval,
+    ) {
+        SignalApp.shared.showLaunchInterface(
+            launchInterface,
+            in: window,
+            appReadiness: appReadiness,
+            launchStartedAt: launchStartedAt,
+        )
     }
 
     private func configureGlobalUI(in window: UIWindow) {
@@ -401,7 +479,6 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
 
     private func setUpMainAppEnvironment(
         launchContext: LaunchContext,
-        loadingViewController: LoadingViewController?,
     ) async -> (AppSetup.FinalContinuation, DeviceSleepBlockObject) {
         let sleepBlockObject = DeviceSleepBlockObject(blockReason: "app launch")
         launchContext.deviceSleepManager.addBlock(blockObject: sleepBlockObject)
@@ -461,7 +538,6 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
         finalContinuation: AppSetup.FinalContinuation,
         launchContext: LaunchContext,
         sleepBlockObject: DeviceSleepBlockObject,
-        window: UIWindow,
     ) {
         AssertIsOnMainThread()
 
@@ -496,22 +572,7 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
             canInitiateRegistration: true,
         ) {
         case .corruptRegistrationState:
-            let viewController = terminalErrorViewController()
-            window.rootViewController = viewController
-            presentLaunchFailureActionSheet(
-                from: viewController,
-                supportTag: "CorruptRegistrationState",
-                logDumper: .fromGlobals(),
-                title: OWSLocalizedString(
-                    "APP_LAUNCH_FAILURE_CORRUPT_REGISTRATION_TITLE",
-                    comment: "Title for an error indicating that the app couldn't launch because some unexpected error happened with the user's registration status.",
-                ),
-                message: OWSLocalizedString(
-                    "APP_LAUNCH_FAILURE_CORRUPT_REGISTRATION_MESSAGE",
-                    comment: "Message for an error indicating that the app couldn't launch because some unexpected error happened with the user's registration status.",
-                ),
-                actions: [.submitDebugLogsAndCrash],
-            )
+            handleLaunchFailure(.corruptRegistrationState)
         case nil:
             let backgroundTask = OWSBackgroundTask(label: #function)
             Task { @MainActor in
@@ -892,11 +953,7 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
             object: nil,
         )
 
-        SignalApp.shared.showLaunchInterface(
-            launchInterface,
-            appReadiness: appReadiness,
-            launchStartedAt: launchContext.launchStartedAt,
-        )
+        handleLaunchInterface(launchInterface, launchStartedAt: launchContext.launchStartedAt)
     }
 
     private func scheduleBgAppRefresh() {
@@ -1016,6 +1073,83 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
 
     private var shouldKillAppWhenBackgrounded: Bool = false
 
+    /// A failure that keeps the app from launching.
+    private enum LaunchFailure: CustomStringConvertible {
+        case databaseLoadFailed(keychainStorage: any KeychainStorage)
+        case preflight(LaunchPreflightError)
+        case corruptRegistrationState
+
+        var description: String {
+            switch self {
+            case .databaseLoadFailed: "databaseLoadFailed"
+            case .preflight(let error): "preflight: \(error.supportTag)"
+            case .corruptRegistrationState: "corruptRegistrationState"
+            }
+        }
+    }
+
+    /// Marks the launch as failed, and shows the failure to the user. If there
+    /// isn't a window yet, the failure waits for one.
+    private func handleLaunchFailure(_ launchFailure: LaunchFailure) {
+        Logger.warn("Launch failed: \(launchFailure)")
+
+        didAppLaunchFail = true
+
+        guard let window else {
+            Logger.info("There's no window to show the failure in; waiting for a scene.")
+            self.pendingLaunchOutcome = .failure(launchFailure)
+            return
+        }
+        let viewController = terminalErrorViewController()
+        window.rootViewController = viewController
+        showLaunchFailureUI(launchFailure, from: viewController)
+    }
+
+    private func showLaunchFailureUI(
+        _ launchFailure: LaunchFailure,
+        from viewController: UIViewController,
+    ) {
+        switch launchFailure {
+        case .databaseLoadFailed(let keychainStorage):
+            presentLaunchFailureActionSheet(
+                from: viewController,
+                supportTag: "LaunchFailure_DatabaseLoadFailed",
+                logDumper: .preLaunch(),
+                title: OWSLocalizedString(
+                    "APP_LAUNCH_FAILURE_COULD_NOT_LOAD_DATABASE",
+                    comment: "Error indicating that the app could not launch because the database could not be loaded.",
+                ),
+                message: OWSLocalizedString(
+                    "APP_LAUNCH_FAILURE_ALERT_MESSAGE",
+                    comment: "Default message for the 'app launch failed' alert.",
+                ),
+                actions: [
+                    .submitDebugLogsAndCrash,
+                    .wipeAppDataAndCrash(keyFetcher: GRDBKeyFetcher(keychainStorage: keychainStorage)),
+                ],
+            )
+
+        case .preflight(let preflightError):
+            showPreflightErrorUI(preflightError, from: viewController)
+
+        case .corruptRegistrationState:
+            presentLaunchFailureActionSheet(
+                from: viewController,
+                supportTag: "CorruptRegistrationState",
+                logDumper: .fromGlobals(),
+                title: OWSLocalizedString(
+                    "APP_LAUNCH_FAILURE_CORRUPT_REGISTRATION_TITLE",
+                    comment: "Title for an error indicating that the app couldn't launch because some unexpected error happened with the user's registration status.",
+                ),
+                message: OWSLocalizedString(
+                    "APP_LAUNCH_FAILURE_CORRUPT_REGISTRATION_MESSAGE",
+                    comment: "Message for an error indicating that the app couldn't launch because some unexpected error happened with the user's registration status.",
+                ),
+                actions: [.submitDebugLogsAndCrash],
+            )
+        }
+    }
+
     private enum LaunchPreflightError {
         case unknownDatabaseVersion
         case couldNotRestoreTransferredData
@@ -1083,12 +1217,8 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
 
     private func showPreflightErrorUI(
         _ preflightError: LaunchPreflightError,
-        launchContext: LaunchContext,
-        window: UIWindow,
-        viewController: UIViewController,
+        from viewController: UIViewController,
     ) {
-        Logger.warn("preflightError: \(preflightError)")
-
         let title: String
         let message: String
         let actions: [LaunchFailureActionSheetAction]
@@ -1104,9 +1234,9 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
                 comment: "Message for an action sheet explaining that Signal can't launch because the database is corrupted.",
             )
             actions = [
-                .presentDatabaseRecovery(window: window, launchContext: launchContext),
+                .presentDatabaseRecovery,
                 .submitDebugLogsAndCrash,
-                .launchApp(window: window, launchContext: launchContext),
+                .launchApp,
                 .wipeAppDataAndCrash(keyFetcher: GRDBKeyFetcher(keychainStorage: launchContext.keychainStorage)),
             ]
 
@@ -1142,8 +1272,8 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
                 comment: "Error indicating that the app crashed during the previous launch.",
             )
             actions = [
-                .submitDebugLogsAndLaunchApp(window: window, launchContext: launchContext),
-                .launchApp(window: window, launchContext: launchContext),
+                .submitDebugLogsAndLaunchApp,
+                .launchApp,
             ]
 
         case .lowStorageSpaceAvailable(let bytesRequired):
@@ -1181,12 +1311,10 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
         )
     }
 
-    private func presentDatabaseRecovery(
-        from viewController: UIViewController,
-        window: UIWindow,
-        launchContext: LaunchContext,
-    ) {
-        var launchContext = launchContext
+    private func presentDatabaseRecovery(from viewController: UIViewController) {
+        guard let window = self.window else {
+            owsFail("Missing window!")
+        }
         let recoveryViewController = DatabaseRecoveryViewController<(AppSetup.FinalContinuation, DeviceSleepBlockObject)>(
             appReadiness: appReadiness,
             corruptDatabaseStorage: launchContext.databaseStorage,
@@ -1194,8 +1322,8 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
             keychainStorage: launchContext.keychainStorage,
             setupSskEnvironment: { databaseStorage in
                 return Task {
-                    launchContext.databaseStorage = databaseStorage
-                    return await self.setUpMainAppEnvironment(launchContext: launchContext, loadingViewController: nil)
+                    self.launchContext.databaseStorage = databaseStorage
+                    return await self.setUpMainAppEnvironment(launchContext: self.launchContext)
                 }
             },
             launchApp: { finalContinuation, sleepBlockObject in
@@ -1204,9 +1332,8 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
                 self.configureGlobalUI(in: window)
                 self.didLoadDatabase(
                     finalContinuation: finalContinuation,
-                    launchContext: launchContext,
+                    launchContext: self.launchContext,
                     sleepBlockObject: sleepBlockObject,
-                    window: window,
                 )
             },
         )
@@ -1226,10 +1353,10 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
     private enum LaunchFailureActionSheetAction {
         case exitApp
         case submitDebugLogsAndCrash
-        case submitDebugLogsAndLaunchApp(window: UIWindow, launchContext: LaunchContext)
-        case presentDatabaseRecovery(window: UIWindow, launchContext: LaunchContext)
+        case submitDebugLogsAndLaunchApp
+        case presentDatabaseRecovery
         case wipeAppDataAndCrash(keyFetcher: GRDBKeyFetcher)
-        case launchApp(window: UIWindow, launchContext: LaunchContext)
+        case launchApp
     }
 
     private func presentLaunchFailureActionSheet(
@@ -1264,23 +1391,23 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
             })
         }
 
-        func ignoreErrorAndLaunchApp(in window: UIWindow, launchContext: LaunchContext) {
+        func ignoreErrorAndLaunchApp() {
+            guard let window = self.window else {
+                owsFail("Missing window!")
+            }
+
             // Pretend we didn't fail!
             self.didAppLaunchFail = false
 
             // If we're wrong about this, we'll find out pretty quickly when a
             // database operation fails.
             DatabaseCorruptionState.flagDatabaseAsNotCorrupted(
-                userDefaults: launchContext.appContext.appUserDefaults(),
+                userDefaults: self.launchContext.appContext.appUserDefaults(),
             )
 
-            let loadingViewController = LoadingViewController()
-            window.rootViewController = loadingViewController
-            self.launchApp(
-                in: window,
-                launchContext: launchContext,
-                loadingViewController: loadingViewController,
-            )
+            window.rootViewController = LoadingViewController()
+            self.configureGlobalUI(in: window)
+            self.startLaunchPipeline(launchContext: self.launchContext)
         }
 
         for action in actions {
@@ -1306,28 +1433,24 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
                     }
                 }
 
-            case .submitDebugLogsAndLaunchApp(let window, let launchContext):
-                addSubmitDebugLogsAction { [unowned window] in
+            case .submitDebugLogsAndLaunchApp:
+                addSubmitDebugLogsAction {
                     DebugLogs(dumper: logDumper).promptToSubmitLogs(
                         from: viewController,
                         supportTag: supportTag,
                     ) {
-                        ignoreErrorAndLaunchApp(in: window, launchContext: launchContext)
+                        ignoreErrorAndLaunchApp()
                     }
                 }
 
-            case .presentDatabaseRecovery(let window, let launchContext):
+            case .presentDatabaseRecovery:
                 actionSheet.addAction(.init(
                     title: OWSLocalizedString(
                         "APP_LAUNCH_FAILURE_DATABASE_RECOVERY_ACTION_TITLE",
                         comment: "Action in an action sheet offering to attempt recovery of a corrupted database.",
                     ),
                     handler: { [self] _ in
-                        presentDatabaseRecovery(
-                            from: viewController,
-                            window: window,
-                            launchContext: launchContext,
-                        )
+                        presentDatabaseRecovery(from: viewController)
                     },
                 ))
 
@@ -1364,14 +1487,14 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
                     },
                 ))
 
-            case .launchApp(let window, let launchContext):
+            case .launchApp:
                 actionSheet.addAction(.init(
                     title: OWSLocalizedString(
                         "APP_LAUNCH_FAILURE_CONTINUE",
                         comment: "Button to try launching the app even though the last launch failed",
                     ),
-                    handler: { [unowned window] _ in
-                        ignoreErrorAndLaunchApp(in: window, launchContext: launchContext)
+                    handler: { _ in
+                        ignoreErrorAndLaunchApp()
                     },
                 ))
             }
@@ -2050,6 +2173,19 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
 
             // So that we tear down gracefully.
             await backgroundMessageFetcher.stopAndWaitBeforeSuspending()
+        }
+    }
+}
+
+// MARK: -
+
+private extension UIApplication.State {
+    var logString: String {
+        switch self {
+        case .active: "active"
+        case .inactive: "inactive"
+        case .background: "background"
+        @unknown default: "unknown"
         }
     }
 }
