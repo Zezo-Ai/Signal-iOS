@@ -238,7 +238,7 @@ extension OWSSyncManager: SyncManagerProtocol, SyncManagerProtocolSwift {
         do {
             try DependenciesBridge.shared.svr.storeKeys(
                 fromKeysSyncMessage: syncMessage,
-                authedDevice: .implicit,
+                authedAccount: .implicit(),
                 tx: transaction,
             )
         } catch {
@@ -278,7 +278,7 @@ extension OWSSyncManager: SyncManagerProtocol, SyncManagerProtocolSwift {
             }
         case .storageManifest:
             SSKEnvironment.shared.storageServiceManagerRef.restoreOrCreateManifestIfNecessary(
-                authedDevice: .implicit,
+                authedAccount: .implicit(),
                 masterKeySource: .implicit,
             )
         case .subscriptionStatus:

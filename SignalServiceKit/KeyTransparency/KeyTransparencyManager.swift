@@ -440,7 +440,7 @@ public final class KeyTransparencyManager {
             // we're up to date before our next attempt.
             tx.addSyncCompletion { [self] in
                 storageServiceManager.restoreOrCreateManifestIfNecessary(
-                    authedDevice: .implicit,
+                    authedAccount: .implicit(),
                     masterKeySource: .implicit,
                 )
             }

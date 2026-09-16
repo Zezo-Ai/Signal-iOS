@@ -688,7 +688,6 @@
 		5015B8D82E958783002A156F /* Int+SSKTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5015B8D72E958783002A156F /* Int+SSKTest.swift */; };
 		501631CA2EA03615006F9B0E /* ImageMetadataTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501631C92EA03615006F9B0E /* ImageMetadataTest.swift */; };
 		50169695291B0627007AD709 /* ContactDiscoveryManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50169694291B0627007AD709 /* ContactDiscoveryManagerTest.swift */; };
-		5018B9DD2ADF4157001DFB12 /* AuthedDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5018B9DC2ADF4157001DFB12 /* AuthedDevice.swift */; };
 		501A6C262FFEA7CB0099D9E1 /* SenderKeyStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501A6C252FFEA7CB0099D9E1 /* SenderKeyStoreTest.swift */; };
 		501A6C282FFEB4510099D9E1 /* SenderKeyManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501A6C272FFEB4510099D9E1 /* SenderKeyManagerTest.swift */; };
 		501AD1C42AF17A16001B796A /* ECKeyPairTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501AD1C32AF17A16001B796A /* ECKeyPairTest.swift */; };
@@ -5049,7 +5048,6 @@
 		5015B8D72E958783002A156F /* Int+SSKTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+SSKTest.swift"; sourceTree = "<group>"; };
 		501631C92EA03615006F9B0E /* ImageMetadataTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageMetadataTest.swift; sourceTree = "<group>"; };
 		50169694291B0627007AD709 /* ContactDiscoveryManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDiscoveryManagerTest.swift; sourceTree = "<group>"; };
-		5018B9DC2ADF4157001DFB12 /* AuthedDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthedDevice.swift; sourceTree = "<group>"; };
 		501A6C252FFEA7CB0099D9E1 /* SenderKeyStoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SenderKeyStoreTest.swift; sourceTree = "<group>"; };
 		501A6C272FFEB4510099D9E1 /* SenderKeyManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SenderKeyManagerTest.swift; sourceTree = "<group>"; };
 		501AD1C32AF17A16001B796A /* ECKeyPairTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ECKeyPairTest.swift; sourceTree = "<group>"; };
@@ -15807,7 +15805,6 @@
 				66533E3529B7B53500E8D928 /* WhoAmI */,
 				F915A76D29CB6B4E00EB6F68 /* AccountDataReportRequestFactory.swift */,
 				66533E3B29BA8BB200E8D928 /* AuthedAccount.swift */,
-				5018B9DC2ADF4157001DFB12 /* AuthedDevice.swift */,
 				664160CF29A6D60A00F5BA85 /* ChatServiceAuth.swift */,
 				C18806352BD947970024044A /* OWSRequestFactory+Backups.swift */,
 				D95C39E5296DE9E900A9DA23 /* OWSRequestFactory+BoostPayments.swift */,
@@ -19423,7 +19420,6 @@
 				50552C2A2BAB8E7D00815474 /* AuthCredentialManager.swift in Sources */,
 				50552C2C2BAB8E8500815474 /* AuthCredentialStore.swift in Sources */,
 				66533E3C29BA8BB200E8D928 /* AuthedAccount.swift in Sources */,
-				5018B9DD2ADF4157001DFB12 /* AuthedDevice.swift in Sources */,
 				50D2FC7D2AEB134C002E4589 /* AuthorMergeHelper.swift in Sources */,
 				500AEE092A4E09AD00371F05 /* AuthorMergeObserver.swift in Sources */,
 				5088330A2FE0AD4B00CE51AC /* AutoDownloadPolicy.swift in Sources */,

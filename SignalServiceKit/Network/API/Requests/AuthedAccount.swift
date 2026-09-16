@@ -12,6 +12,7 @@ public class AuthedAccount {
         public let aci: Aci
         public let phoneNumber: LocalIdentifiers.PhoneNumber
         public let deviceId: DeviceId
+        public var isPrimaryDevice: Bool { self.deviceId == .primary }
         public let authPassword: String
 
         public init(
@@ -34,7 +35,7 @@ public class AuthedAccount {
 
     public let info: Info
 
-    private init(_ info: Info) {
+    public init(_ info: Info) {
         self.info = info
     }
 
@@ -83,20 +84,6 @@ public class AuthedAccount {
             return .implicit()
         case let .explicit(info):
             return info.chatServiceAuth
-        }
-    }
-
-    public func authedDevice(isPrimaryDevice: Bool) -> AuthedDevice {
-        switch info {
-        case .implicit:
-            return .implicit
-        case let .explicit(info):
-            return .explicit(AuthedDevice.Explicit(
-                aci: info.aci,
-                phoneNumber: info.phoneNumber,
-                deviceId: info.deviceId,
-                authPassword: info.authPassword,
-            ))
         }
     }
 }

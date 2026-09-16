@@ -1548,7 +1548,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
 
         try? await deps.storageServiceManager.rotateManifest(
             mode: .preservingRecordsIfPossible,
-            authedDevice: accountIdentity.authedDevice,
+            authedAccount: accountIdentity.authedAccount,
         )
 
         await finish(accountIdentity: accountIdentity)
@@ -1692,7 +1692,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         }
         // Do any storage service backups we have pending.
         self.deps.storageServiceManager.backupPendingChanges(
-            authedDevice: accountIdentity.authedDevice,
+            authedAccount: accountIdentity.authedAccount,
         )
     }
 
@@ -4144,7 +4144,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         do {
             try await withUncooperativeTimeout(seconds: 120) {
                 try await self.deps.storageServiceManager.restoreOrCreateManifestIfNecessary(
-                    authedDevice: accountIdentity.authedDevice,
+                    authedAccount: accountIdentity.authedAccount,
                     masterKeySource: masterKeySource,
                 ).awaitable()
             }
@@ -4827,30 +4827,12 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
             )
         }
 
-        var authedDevice: AuthedDevice {
-            return .explicit(AuthedDevice.Explicit(
-                aci: aci,
-                phoneNumber: LocalIdentifiers.PhoneNumber(e164: e164, pni: pni),
-                deviceId: .primary,
-                authPassword: authPassword,
-            ))
-        }
-
         var chatServiceAuth: ChatServiceAuth {
-            return ChatServiceAuth.explicit(
-                aci: aci,
-                deviceId: .primary,
-                password: authPassword,
-            )
+            return authedAccount.chatServiceAuth
         }
 
         var localIdentifiers: LocalIdentifiers {
-            return AuthedDevice.Explicit(
-                aci: aci,
-                phoneNumber: LocalIdentifiers.PhoneNumber(e164: e164, pni: pni),
-                deviceId: .primary,
-                authPassword: authPassword,
-            ).localIdentifiers
+            return LocalIdentifiers(aci: aci, pni: pni, e164: e164)
         }
     }
 

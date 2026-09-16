@@ -96,7 +96,7 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
 
     public func storeKeys(
         fromProvisioningMessage provisioningMessage: LinkingProvisioningMessage,
-        authedDevice: AuthedDevice,
+        authedAccount: AuthedAccount,
         tx: DBWriteTransaction,
     ) {
         Logger.info("")
@@ -107,7 +107,7 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
 
     public func storeKeys(
         fromKeysSyncMessage syncMessage: SSKProtoSyncMessageKeys,
-        authedDevice: AuthedDevice,
+        authedAccount: AuthedAccount,
         tx: DBWriteTransaction,
     ) throws(SVR.KeysError) {
         Logger.info("")
@@ -136,7 +136,7 @@ public class SecureValueRecovery2Impl: SecureValueRecovery {
             // if we've gotten a key that we requested.
             tx.addSyncCompletion { [storageServiceManager] in
                 storageServiceManager.restoreOrCreateManifestIfNecessary(
-                    authedDevice: authedDevice,
+                    authedAccount: authedAccount,
                     masterKeySource: .implicit,
                 )
             }

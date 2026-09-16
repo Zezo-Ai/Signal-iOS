@@ -34,14 +34,14 @@ public protocol StorageServiceManager {
     /// Marks `groupMasterKeys` as needing an update if they don't yet exist.
     func recordPendingInsertions(forGroupMasterKeys groupMasterKeys: [GroupMasterKey])
 
-    func backupPendingChanges(authedDevice: AuthedDevice)
+    func backupPendingChanges(authedAccount: AuthedAccount)
 
     @discardableResult
-    func restoreOrCreateManifestIfNecessary(authedDevice: AuthedDevice, masterKeySource: StorageService.MasterKeySource) -> Promise<Void>
+    func restoreOrCreateManifestIfNecessary(authedAccount: AuthedAccount, masterKeySource: StorageService.MasterKeySource) -> Promise<Void>
 
     func rotateManifest(
         mode: ManifestRotationMode,
-        authedDevice: AuthedDevice,
+        authedAccount: AuthedAccount,
     ) async throws
 
     /// Wipes all local state related to Storage Service, without mutating
@@ -173,7 +173,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
                 // On first launch, back up any pending changes from previous
                 // launches. For the remainder of this launch we're covered by
                 // the willResignActive and didBecomeActive listeners.
-                backupPendingChanges(authedDevice: .implicit)
+                backupPendingChanges(authedAccount: .implicit())
 
                 Task { await self.cleanUpDeletedCallLinks() }
             }
@@ -191,7 +191,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
             mustBeConnected: true,
             operation: {
                 try await self._restoreOrCreateManifestIfNecessary(
-                    authedDevice: .implicit,
+                    authedAccount: .implicit(),
                     masterKeySource: .implicit,
                     isRunningViaCron: true,
                 ).awaitableWithUncooperativeCancellationHandling()
@@ -210,7 +210,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
         // to try and make sure the service doesn't get stale. If for
         // some reason we aren't able to successfully complete this backup
         // while in the background we'll try again on the next app launch.
-        backupPendingChanges(authedDevice: .implicit)
+        backupPendingChanges(authedAccount: .implicit())
     }
 
     @objc
@@ -218,7 +218,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
         // We may have pending changes from before we resigned active that we
         // should back up as soon as we can, rather than waiting for a full app
         // launch.
-        backupPendingChanges(authedDevice: .implicit)
+        backupPendingChanges(authedAccount: .implicit())
     }
 
     @objc
@@ -256,7 +256,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
         var localIdentifiers: LocalIdentifiers?
 
         struct PendingManifestRotation {
-            var authedDevice: AuthedDevice
+            var authedAccount: AuthedAccount
             var masterKeySource: StorageService.MasterKeySource
             var continuations: [CheckedContinuation<Void, Error>]
             var mode: ManifestRotationMode
@@ -271,7 +271,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
             // instantiated with the necessary context to make authenticated requests.
             // This is a middle ground between the current world (implicit auth we grab
             // from tsAccountManager) and explicit auth management.
-            var authedDevice: AuthedDevice
+            var authedAccount: AuthedAccount
             var masterKeySource: StorageService.MasterKeySource
         }
 
@@ -279,7 +279,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
         var pendingBackupTimer: Timer?
 
         struct PendingRestore {
-            var authedDevice: AuthedDevice
+            var authedAccount: AuthedAccount
             var masterKeySource: StorageService.MasterKeySource
             var isRunningViaCron: Bool
             var futures: [Future<Void>]
@@ -356,7 +356,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
                 let rotateManifestOperation = buildOperation(
                     managerState: managerState,
                     mode: .rotateManifest(mode: pendingManifestRotation.mode),
-                    authedDevice: pendingManifestRotation.authedDevice,
+                    authedAccount: pendingManifestRotation.authedAccount,
                     masterKeySource: pendingManifestRotation.masterKeySource,
                 )
             {
@@ -385,7 +385,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
             let cleanUpOperation = buildOperation(
                 managerState: managerState,
                 mode: .cleanUpUnknownData,
-                authedDevice: .implicit,
+                authedAccount: .implicit(),
                 masterKeySource: .implicit,
             )
             if let cleanUpOperation {
@@ -400,7 +400,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
             let restoreOperation = buildOperation(
                 managerState: managerState,
                 mode: .restoreOrCreate(isRunningViaCron: pendingRestore.isRunningViaCron),
-                authedDevice: pendingRestore.authedDevice,
+                authedAccount: pendingRestore.authedAccount,
                 masterKeySource: pendingRestore.masterKeySource,
             )
             if let restoreOperation {
@@ -439,7 +439,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
             let backupOperation = buildOperation(
                 managerState: managerState,
                 mode: .backup,
-                authedDevice: pendingBackup.authedDevice,
+                authedAccount: pendingBackup.authedAccount,
                 masterKeySource: pendingBackup.masterKeySource,
             )
             if let backupOperation {
@@ -453,12 +453,12 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
     private func buildOperation(
         managerState: ManagerState,
         mode: StorageServiceOperation.Mode,
-        authedDevice: AuthedDevice,
+        authedAccount: AuthedAccount,
         masterKeySource: StorageService.MasterKeySource,
     ) -> (() async throws -> Void)? {
         let localIdentifiers: LocalIdentifiers
         let isPrimaryDevice: Bool
-        switch authedDevice {
+        switch authedAccount.info {
         case .explicit(let explicit):
             localIdentifiers = explicit.localIdentifiers
             isPrimaryDevice = explicit.isPrimaryDevice
@@ -486,7 +486,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
                 mode: mode,
                 localIdentifiers: localIdentifiers,
                 isPrimaryDevice: isPrimaryDevice,
-                authedDevice: authedDevice,
+                authedAccount: authedAccount,
                 masterKeySource: masterKeySource,
             ).run()
         }
@@ -562,31 +562,31 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
 
     @discardableResult
     public func restoreOrCreateManifestIfNecessary(
-        authedDevice: AuthedDevice,
+        authedAccount: AuthedAccount,
         masterKeySource: StorageService.MasterKeySource,
     ) -> Promise<Void> {
         return _restoreOrCreateManifestIfNecessary(
-            authedDevice: authedDevice,
+            authedAccount: authedAccount,
             masterKeySource: masterKeySource,
             isRunningViaCron: false,
         )
     }
 
     private func _restoreOrCreateManifestIfNecessary(
-        authedDevice: AuthedDevice,
+        authedAccount: AuthedAccount,
         masterKeySource: StorageService.MasterKeySource,
         isRunningViaCron: Bool,
     ) -> Promise<Void> {
         let (promise, future) = Promise<Void>.pending()
         updateManagerState { managerState in
             var pendingRestore = managerState.pendingRestore ?? .init(
-                authedDevice: .implicit,
+                authedAccount: .implicit(),
                 masterKeySource: .implicit,
                 isRunningViaCron: false,
                 futures: [],
             )
             pendingRestore.futures.append(future)
-            pendingRestore.authedDevice = authedDevice.orIfImplicitUse(pendingRestore.authedDevice)
+            pendingRestore.authedAccount = authedAccount.orIfImplicitUse(pendingRestore.authedAccount)
             pendingRestore.masterKeySource = masterKeySource.orIfImplicitUse(pendingRestore.masterKeySource)
             pendingRestore.isRunningViaCron = isRunningViaCron || pendingRestore.isRunningViaCron
             managerState.pendingRestore = pendingRestore
@@ -596,18 +596,18 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
 
     public func rotateManifest(
         mode: ManifestRotationMode,
-        authedDevice: AuthedDevice,
+        authedAccount: AuthedAccount,
     ) async throws {
         try await withCheckedThrowingContinuation { continuation in
             updateManagerState { managerState in
                 var pendingRotation = managerState.pendingManifestRotation ?? .init(
-                    authedDevice: .implicit,
+                    authedAccount: .implicit(),
                     masterKeySource: .implicit,
                     continuations: [],
                     mode: mode,
                 )
                 pendingRotation.continuations.append(continuation)
-                pendingRotation.authedDevice = authedDevice.orIfImplicitUse(pendingRotation.authedDevice)
+                pendingRotation.authedAccount = authedAccount.orIfImplicitUse(pendingRotation.authedAccount)
                 pendingRotation.mode = pendingRotation.mode.mergeByPrecedence(mode)
 
                 managerState.pendingManifestRotation = pendingRotation
@@ -615,10 +615,10 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
         }
     }
 
-    public func backupPendingChanges(authedDevice: AuthedDevice) {
+    public func backupPendingChanges(authedAccount: AuthedAccount) {
         updateManagerState { managerState in
-            var pendingBackup = managerState.pendingBackup ?? .init(authedDevice: .implicit, masterKeySource: .implicit)
-            pendingBackup.authedDevice = authedDevice.orIfImplicitUse(pendingBackup.authedDevice)
+            var pendingBackup = managerState.pendingBackup ?? .init(authedAccount: .implicit(), masterKeySource: .implicit)
+            pendingBackup.authedAccount = authedAccount.orIfImplicitUse(pendingBackup.authedAccount)
             managerState.pendingBackup = pendingBackup
 
             if let pendingBackupTimer = managerState.pendingBackupTimer {
@@ -680,7 +680,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
     private func backupTimerFired(_ timer: Timer) {
         AssertIsOnMainThread()
 
-        backupPendingChanges(authedDevice: .implicit)
+        backupPendingChanges(authedAccount: .implicit())
     }
 
     // MARK: - Cleanup
@@ -753,22 +753,21 @@ class StorageServiceOperation {
     private let mode: Mode
     private let localIdentifiers: LocalIdentifiers
     private let isPrimaryDevice: Bool
-    private let authedDevice: AuthedDevice
+    private let authedAccount: AuthedAccount
     private let masterKeySource: StorageService.MasterKeySource
     private var masterKey: MasterKey!
-    private var authedAccount: AuthedAccount { authedDevice.authedAccount }
 
     fileprivate init(
         mode: Mode,
         localIdentifiers: LocalIdentifiers,
         isPrimaryDevice: Bool,
-        authedDevice: AuthedDevice,
+        authedAccount: AuthedAccount,
         masterKeySource: StorageService.MasterKeySource,
     ) {
         self.mode = mode
         self.localIdentifiers = localIdentifiers
         self.isPrimaryDevice = isPrimaryDevice
-        self.authedDevice = authedDevice
+        self.authedAccount = authedAccount
         self.masterKeySource = masterKeySource
     }
 
@@ -1761,7 +1760,7 @@ class StorageServiceOperation {
                 case .conflictBackingUp:
                     // If we're merging because we had a conflict while backing
                     // up, reattempt that backup now that we've merged.
-                    storageServiceManager.backupPendingChanges(authedDevice: self.authedDevice)
+                    storageServiceManager.backupPendingChanges(authedAccount: self.authedAccount)
                 }
             }
         } catch let storageError as StorageService.StorageError {

@@ -404,7 +404,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we sync push tokens, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
+            #expect(auth.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(initialMasterKey.rawData == explicitMasterKey.rawData)
@@ -536,7 +536,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we sync push tokens, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
+            #expect(auth.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(initialMasterKey.rawData == explicitMasterKey.rawData)
@@ -906,7 +906,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we back up to svr, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
+            #expect(auth.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(initialMasterKey.rawData == explicitMasterKey.rawData)
@@ -917,7 +917,7 @@ public class RegistrationCoordinatorTest {
         })
 
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
+            #expect(auth.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(finalMasterKey.rawData == explicitMasterKey.rawData)
@@ -1255,7 +1255,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we sync push tokens, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
+            #expect(auth.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(remoteMasterKey.rawData == explicitMasterKey.rawData)
@@ -1575,7 +1575,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we back up to svr, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
+            #expect(auth.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(initialMasterKey.rawData == explicitMasterKey.rawData)
@@ -1854,7 +1854,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we sync push tokens, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
+            #expect(auth.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(newMasterKey.rawData == explicitMasterKey.rawData)
@@ -2884,7 +2884,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we sync push tokens, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
+            #expect(auth.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(newMasterKey.rawData == explicitMasterKey.rawData)
@@ -2996,7 +2996,7 @@ public class RegistrationCoordinatorTest {
         }
 
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
+            #expect(auth.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(newMasterKey.rawData == explicitMasterKey.rawData)

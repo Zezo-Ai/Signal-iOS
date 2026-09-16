@@ -190,7 +190,7 @@ class AccountEntropyPoolManagerImpl: AccountEntropyPoolManager {
         Task {
             try? await storageServiceManager.rotateManifest(
                 mode: rotateRelatedNonDerivedKeys ? .alsoRotatingRecords : .preservingRecordsIfPossible,
-                authedDevice: .implicit,
+                authedAccount: .implicit(),
             )
 
             // Sync our new keys with linked devices, but wait until the storage
