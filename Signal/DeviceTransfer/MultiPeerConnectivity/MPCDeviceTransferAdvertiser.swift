@@ -74,11 +74,12 @@ class MPCDeviceTransferAdvertiser:
     }
 
     @MainActor
-    func stop(error: Error?) {
+    func stop(error: Error?) async {
         advertiser.stopAdvertisingPeer()
+        let session = session
+        await session?.disconnect(error: error)
         lock.withLock {
-            session?.disconnect(error: error)
-            session = nil
+            self.session = nil
             connectionContinuation.take()?.resume(throwing: CancellationError())
         }
     }

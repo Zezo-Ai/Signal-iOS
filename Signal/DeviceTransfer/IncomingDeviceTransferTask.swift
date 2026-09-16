@@ -77,8 +77,8 @@ class IncomingDeviceTransferTask {
         return try newDeviceServiceAdvertiser.start(mode: mode)
     }
 
-    func stopAcceptingTransfersFromOldDevices() {
-        newDeviceServiceAdvertiser.stop(error: nil)
+    func stopAcceptingTransfersFromOldDevices() async {
+        await newDeviceServiceAdvertiser.stop(error: nil)
     }
 
     func waitForTransferFromOldDevice(
@@ -122,11 +122,11 @@ class IncomingDeviceTransferTask {
                 for try await message in session.messages {
                     switch message {
                     case .message(let message):
-                        try self?.processMessage(message: message, session: session)
+                        try await self?.processMessage(message: message, session: session)
                     case .startResource(let fileName, _, let progress):
                         try self?.startReceiving(fileName: fileName, session: session, progress: progress)
                     case .finishResource(let fileName, let localUrl):
-                        try self?.finishReceiving(fileName: fileName, localUrl: localUrl)
+                        try await self?.finishReceiving(fileName: fileName, localUrl: localUrl)
                     }
                 }
             } catch {
@@ -144,23 +144,27 @@ class IncomingDeviceTransferTask {
     }
 
     @MainActor
-    func cancelTransferFromOldDevice() {
+    func cancelTransferFromOldDevice() async {
         waitForConnectionTask?.cancel()
-        stopTransfer(error: CancellationError())
+        await stopTransfer(error: CancellationError())
     }
 
     // MARK: - Private methods
 
-    private func stopTransfer(error: Error? = nil, notifyRegState: Bool = true) {
-        newDeviceServiceAdvertiser.stop(error: error)
+    private func stopTransfer(error: Error? = nil, notifyRegState: Bool = true) async {
+        if let error {
+            switch error {
+            case DeviceTransfer.Error.otherDeviceTerminated:
+                break
+            default:
+                try? session?.send(message: .transferFailed)
+            }
+        }
+        messagesReceiverTask.take()?.cancel()
+        await session.take()?.disconnect(error: error)
+        await newDeviceServiceAdvertiser.stop(error: error)
         throughputMonitor?.stop()
         deviceSleepManager?.removeBlock(blockObject: sleepBlockObject)
-        messagesReceiverTask.take()?.cancel()
-        if let error {
-            transferFinishedContinuation.take()?.resume(throwing: error)
-        } else {
-            transferFinishedContinuation.take()?.resume()
-        }
 
         // It is possible that we get here because the app was backgrounded
         // after a failed launch. In that case, `tsAccountManager` will not be
@@ -168,7 +172,7 @@ class IncomingDeviceTransferTask {
         // simply return in the .idle case above since none of the values being
         // reset should have values if we are idle, but I am scared of it.
         if transferInProgress {
-            db.write { tx in
+            await db.awaitableWrite { tx in
                 self.registrationStateChangeManager.setIsTransferComplete(
                     sendStateUpdateNotification: notifyRegState,
                     tx: tx,
@@ -176,39 +180,44 @@ class IncomingDeviceTransferTask {
             }
             transferInProgress = false
         }
-        session = nil
+
+        if let error {
+            transferFinishedContinuation.take()?.resume(throwing: error)
+        } else {
+            transferFinishedContinuation.take()?.resume()
+        }
     }
 
-    private func failTransfer(_ error: DeviceTransfer.Error, _ reason: String) {
+    private func failTransfer(_ error: DeviceTransfer.Error, _ reason: String) async {
         logger.error("Failed transfer \(reason)")
-        stopTransfer(error: error)
+        await stopTransfer(error: error)
     }
 
-    private func handleReceivedManifest(at localURL: URL) {
+    private func handleReceivedManifest(at localURL: URL) async {
         guard !transferInProgress else {
-            stopTransfer(error: OWSAssertionError("Received manifest in unexpected state"))
+            await stopTransfer(error: OWSAssertionError("Received manifest in unexpected state"))
             return
         }
         guard let fileSize = (try? OWSFileSystem.fileSize(of: localURL)) else {
-            stopTransfer(error: OWSAssertionError("Missing manifest file."))
+            await stopTransfer(error: OWSAssertionError("Missing manifest file."))
             return
         }
         // Not sure why this limit exists in the first place, but 1Gb should be
         // plenty high for file descriptors.
         guard fileSize < 1024 * 1024 * 1024 else {
-            stopTransfer(error: OWSAssertionError("Unexpectedly received a very large manifest \(fileSize)"))
+            await stopTransfer(error: OWSAssertionError("Unexpectedly received a very large manifest \(fileSize)"))
             return
         }
         guard let data = try? Data(contentsOf: localURL) else {
-            stopTransfer(error: OWSAssertionError("Failed to read manifest data"))
+            await stopTransfer(error: OWSAssertionError("Failed to read manifest data"))
             return
         }
         guard let manifest = try? DeviceTransferProtoManifest(serializedData: data) else {
-            stopTransfer(error: OWSAssertionError("Failed to parse manifest proto"))
+            await stopTransfer(error: OWSAssertionError("Failed to parse manifest proto"))
             return
         }
         guard !DependenciesBridge.shared.tsAccountManager.registrationStateWithMaybeSneakyTransaction.isRegistered else {
-            stopTransfer(error: OWSAssertionError("Ignoring incoming transfer to a registered device"))
+            await stopTransfer(error: OWSAssertionError("Ignoring incoming transfer to a registered device"))
             return
         }
 
@@ -223,14 +232,14 @@ class IncomingDeviceTransferTask {
                 ).path,
             )
         } catch {
-            stopTransfer(error: error)
+            await stopTransfer(error: error)
             return
         }
 
         // Check if the device has a newer version of the database than we understand
 
         guard manifest.grdbSchemaVersion <= GRDBSchemaMigrator.grdbSchemaVersionLatest else {
-            return self.failTransfer(
+            return await failTransfer(
                 DeviceTransfer.Error.unsupportedVersion,
                 "Ignoring manifest with unsupported schema version",
             )
@@ -242,14 +251,14 @@ class IncomingDeviceTransferTask {
                 forPath: DeviceTransfer.Constants.pendingTransferDirectory,
             )
         else {
-            return self.failTransfer(
+            return await failTransfer(
                 DeviceTransfer.Error.assertion,
                 "failed to calculate available disk space",
             )
         }
 
         guard freeSpaceInBytes > manifest.estimatedTotalSize else {
-            return self.failTransfer(
+            return await failTransfer(
                 DeviceTransfer.Error.notEnoughSpace,
                 "not enough free space to receive transfer",
             )
@@ -258,7 +267,7 @@ class IncomingDeviceTransferTask {
         self.manifest = manifest
         receivedFileIds.update { $0.append(DeviceTransfer.Constants.manifestIdentifier) }
 
-        db.write { tx in
+        await db.awaitableWrite { tx in
             registrationStateChangeManager.setIsTransferInProgress(tx: tx)
         }
 
@@ -277,13 +286,17 @@ class IncomingDeviceTransferTask {
         // Send an explicit message to the peer (if connected) telling them
         // that's what happened.
         try? session?.send(message: .backgroundApp)
-        stopTransfer(error: CancellationError())
+        Task {
+            await stopTransfer(error: CancellationError())
+        }
     }
 
-    private func processMessage(message: DeviceTransfer.Message, session: DeviceTransfer.Session) throws {
+    private func processMessage(message: DeviceTransfer.Message, session: DeviceTransfer.Session) async throws {
         switch message {
         case DeviceTransfer.Message.backgroundApp:
-            return failTransfer(DeviceTransfer.Error.backgroundedDevice, "Received backgrounded message")
+            return await failTransfer(DeviceTransfer.Error.backgroundedDevice, "Received backgrounded message")
+        case DeviceTransfer.Message.transferFailed:
+            return await failTransfer(DeviceTransfer.Error.otherDeviceTerminated, "Received backgrounded message")
         case DeviceTransfer.Message.done:
             break
         }
@@ -297,7 +310,7 @@ class IncomingDeviceTransferTask {
                 skippedFileIds: skippedFileIds,
             )
         else {
-            return failTransfer(.assertion, "transfer is missing data")
+            return await failTransfer(.assertion, "transfer is missing data")
         }
 
         deviceTransferRestore.markPendingRestore()
@@ -324,7 +337,7 @@ class IncomingDeviceTransferTask {
             owsFail("Restore failed. Will try again on next launch. Error: \(error)")
         }
 
-        stopTransfer(notifyRegState: false)
+        await stopTransfer(notifyRegState: false)
 
         logger.info("Transfer complete")
 
@@ -371,13 +384,13 @@ class IncomingDeviceTransferTask {
         }
     }
 
-    private func finishReceiving(fileName: String, localUrl: URL) throws {
+    private func finishReceiving(fileName: String, localUrl: URL) async throws {
         if !transferInProgress {
             guard fileName == DeviceTransfer.Constants.manifestIdentifier else {
                 return logger.info("Ignoring unexpected incoming file \(fileName)")
             }
 
-            handleReceivedManifest(at: localUrl)
+            await handleReceivedManifest(at: localUrl)
             transferInProgress = true
             return
         }
@@ -418,11 +431,11 @@ class IncomingDeviceTransferTask {
         OWSFileSystem.ensureDirectoryExists(DeviceTransfer.Constants.pendingTransferFilesDirectory.path)
 
         guard let computedHash = try? Cryptography.computeSHA256DigestOfFile(at: localUrl) else {
-            return failTransfer(DeviceTransfer.Error.assertion, "Failed to compute hash for \(file.identifier)")
+            return await failTransfer(DeviceTransfer.Error.assertion, "Failed to compute hash for \(file.identifier)")
         }
 
         guard computedHash.hexadecimalString == fileHash else {
-            return failTransfer(DeviceTransfer.Error.assertion, "Received file with incorrect hash \(file.identifier)")
+            return await failTransfer(DeviceTransfer.Error.assertion, "Received file with incorrect hash \(file.identifier)")
         }
 
         guard computedHash != DeviceTransfer.Constants.missingFileHash else {
@@ -441,7 +454,7 @@ class IncomingDeviceTransferTask {
             )
         } catch {
             logger.warn("Couldn't move file: \(error.shortDescription)")
-            return failTransfer(DeviceTransfer.Error.assertion, "Failed to move file into place \(file.identifier)")
+            return await failTransfer(DeviceTransfer.Error.assertion, "Failed to move file into place \(file.identifier)")
         }
 
         receivedFileIds.update { $0.append(file.identifier) }

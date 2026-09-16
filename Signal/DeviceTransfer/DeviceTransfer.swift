@@ -80,7 +80,7 @@ enum DeviceTransfer {
         case modeMismatch
         case notEnoughSpace
         case unsupportedVersion
-        case cancel
+        case otherDeviceTerminated
     }
 
     enum Mode: String {
@@ -91,11 +91,13 @@ enum DeviceTransfer {
     enum Message {
         case done
         case backgroundApp
+        case transferFailed
 
         var data: Data {
             switch self {
             case .done: return Data("Transfer Complete".utf8)
             case .backgroundApp: return Data("App backgrounded".utf8)
+            case .transferFailed: return Data("Transfer Failed".utf8)
             }
         }
     }
@@ -204,7 +206,7 @@ enum DeviceTransfer {
     @MainActor
     protocol Session {
         func waitForConnection() async throws
-        func disconnect(error: Swift.Error?)
+        func disconnect(error: Swift.Error?) async
 
         var messages: AsyncThrowingStream<SessionMessage, Swift.Error> { get }
 
@@ -228,13 +230,13 @@ enum DeviceTransfer {
     protocol OutgoingConnection: PeerDiscovery {
         var selectedPeer: (any Peer)? { get }
         func connect(peer: any Peer) async throws -> Session
-        func stop(error: Swift.Error?)
+        func stop(error: Swift.Error?) async
     }
 
     @MainActor
     protocol IncomingConnection: PeerDiscovery {
         func start(mode: DeviceTransfer.Mode) throws -> URL
         func waitForConnection(peer: (any Peer)?) async throws -> Session
-        func stop(error: Swift.Error?)
+        func stop(error: Swift.Error?) async
     }
 }

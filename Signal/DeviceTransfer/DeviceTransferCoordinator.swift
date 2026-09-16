@@ -63,7 +63,9 @@ public class DeviceTransferCoordinator: Equatable {
 
     @MainActor
     private func _onSuccess() {
-        stopAcceptingTransfers()
+        Task {
+            await stopAcceptingTransfers()
+        }
     }
 
     @MainActor
@@ -78,7 +80,9 @@ public class DeviceTransferCoordinator: Equatable {
 
     @MainActor
     private func _onFailure(_ error: Error) {
-        stopAcceptingTransfers()
+        Task {
+            await stopAcceptingTransfers()
+        }
     }
 
     @MainActor
@@ -157,7 +161,6 @@ public class DeviceTransferCoordinator: Equatable {
         } catch {
             logger.error("Error during device transfer: \(error)")
             transferStatusViewModel.state = .error(error)
-            throw error
         }
     }
 
@@ -181,12 +184,12 @@ public class DeviceTransferCoordinator: Equatable {
 
     @MainActor
     private func cancelTransfer() async {
-        incomingDeviceTransferTask.cancelTransferFromOldDevice()
+        await incomingDeviceTransferTask.cancelTransferFromOldDevice()
     }
 
     @MainActor
-    public func stopAcceptingTransfers() {
-        incomingDeviceTransferTask.stopAcceptingTransfersFromOldDevices()
+    public func stopAcceptingTransfers() async {
+        await incomingDeviceTransferTask.stopAcceptingTransfersFromOldDevices()
         discoveredPeersListenerTask.take()?.cancel()
     }
 

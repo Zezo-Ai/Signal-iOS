@@ -23,6 +23,7 @@ enum WiFiAware {
         case resourceBegin(file: String, size: UInt64)
         case resourceData(file: String, data: Data)
         case resourceEnd(file: String)
+        case transferFailed
     }
 
     static func createPeerDiscoveryObserver(logger: PrefixedLogger) -> (

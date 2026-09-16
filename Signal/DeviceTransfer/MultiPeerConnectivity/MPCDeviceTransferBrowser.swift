@@ -94,11 +94,12 @@ class MPCDeviceTransferBrowser:
     }
 
     @MainActor
-    func stop(error: Error?) {
+    func stop(error: Error?) async {
         browser.stopBrowsingForPeers()
+        let session = session
+        await session?.disconnect(error: error)
         lock.withLock {
-            session?.disconnect(error: error)
-            session = nil
+            self.session = nil
             inviteContinuation.take()?.resume(throwing: error ?? CancellationError())
         }
     }
@@ -176,14 +177,15 @@ class MPCDeviceTransferBrowser:
     }
 
     @MainActor
-    private func connectionError(_ error: Error) {
+    private func connectionError(_ error: Error) async {
         Logger.warn("Connection error: \(error)")
+        let session = session
+        await session?.disconnect(error: error)
         lock.withLock {
             if let continuation = inviteContinuation.take() {
                 continuation.resume(throwing: error)
-            } else if let session {
-                session.disconnect(error: error)
             }
+            self.session = nil
         }
     }
 
@@ -208,13 +210,13 @@ class MPCDeviceTransferBrowser:
         didNotStartBrowsingForPeers error: Error,
     ) {
         Task { @MainActor in
-            self.connectionError(error)
+            await self.connectionError(error)
         }
     }
 
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerId: MCPeerID) {
         Task { @MainActor in
-            self.connectionError(CancellationError())
+            await self.connectionError(CancellationError())
         }
     }
 }

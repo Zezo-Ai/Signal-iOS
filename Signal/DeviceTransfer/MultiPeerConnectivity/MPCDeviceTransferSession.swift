@@ -73,7 +73,7 @@ class MPCDeviceTransferSession:
     }
 
     @MainActor
-    func disconnect(error: Error?) {
+    func disconnect(error: Error?) async {
         lock.withLock {
             self.connected = false
             self.activeSends.values.forEach { $0.resume(throwing: CancellationError()) }
@@ -90,6 +90,7 @@ class MPCDeviceTransferSession:
         let mode: MCSessionSendDataMode = switch message {
         case .backgroundApp: .unreliable
         case .done: .reliable
+        case .transferFailed: .reliable
         }
         try session.send(
             message.data,

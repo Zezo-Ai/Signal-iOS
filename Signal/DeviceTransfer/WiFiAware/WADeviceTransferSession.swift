@@ -48,15 +48,17 @@ class WADeviceTransferSession: DeviceTransfer.Session {
                     self.messageSink.yield(.message(.backgroundApp))
                 case .resourceBegin(file: let file, size: let size):
                     // Reserve file
-                    let progress = try self.startReceive(file: file, size: size)
+                    let progress = try await self.startReceive(file: file, size: size)
                     self.messageSink.yield(.startResource(file, size, progress))
                 case .resourceData(file: let file, data: let data):
                     // Write file
-                    try writeData(file: file, data: data)
+                    try await writeData(file: file, data: data)
                 case .resourceEnd(file: let file):
                     // Finish file
-                    let fileUrl = try finishReceive(file: file)
+                    let fileUrl = try await finishReceive(file: file)
                     self.messageSink.yield(.finishResource(file, fileUrl))
+                case .transferFailed:
+                    self.messageSink.yield(.message(.transferFailed))
                 }
             }
         }
@@ -65,7 +67,8 @@ class WADeviceTransferSession: DeviceTransfer.Session {
     func waitForConnection() async throws {
     }
 
-    func disconnect(error: Error?) {
+    func disconnect(error: Error?) async {
+        try? await serialTaskSendQueue.enqueue {}.value
         cancellableContinuation.resume(with: error.map { .failure($0) } ?? .success(()))
         self.messageSink.finish(throwing: error)
         self.receiverTask?.cancel()
@@ -85,12 +88,14 @@ class WADeviceTransferSession: DeviceTransfer.Session {
         try await cancellableContinuation.wait()
     }
 
+    private let serialTaskSendQueue = SerialTaskQueue()
     func send(message: DeviceTransfer.Message) throws {
-        Task {
+        serialTaskSendQueue.enqueue { [connection, logger] in
             do {
                 switch message {
                 case .backgroundApp: try await connection.send(WiFiAware.NetworkEvent.appBackgrounded)
                 case .done: try await connection.send(WiFiAware.NetworkEvent.done)
+                case .transferFailed: try await connection.send(WiFiAware.NetworkEvent.transferFailed)
                 }
             } catch {
                 logger.error("Error sending message: \(error)")
@@ -103,7 +108,7 @@ class WADeviceTransferSession: DeviceTransfer.Session {
         do {
             fileData = try Data(contentsOf: url, options: [.mappedIfSafe, .uncached])
         } catch {
-            disconnect(error: error)
+            await disconnect(error: error)
             throw error
         }
 
@@ -126,7 +131,7 @@ class WADeviceTransferSession: DeviceTransfer.Session {
     }
 
     // Start file
-    func startReceive(file: String, size: UInt64) throws -> Progress {
+    func startReceive(file: String, size: UInt64) async throws -> Progress {
         let temporaryURL = OWSFileSystem.temporaryFileUrl(isAvailableWhileDeviceLocked: false)
         guard
             FileManager.default.createFile(
@@ -136,7 +141,7 @@ class WADeviceTransferSession: DeviceTransfer.Session {
             )
         else {
             let error = OWSAssertionError("Cannot access output file.")
-            disconnect(error: error)
+            await disconnect(error: error)
             throw error
         }
         let handle = try FileHandle(forWritingTo: temporaryURL)
@@ -147,10 +152,10 @@ class WADeviceTransferSession: DeviceTransfer.Session {
     }
 
     // receive bit
-    func writeData(file: String, data: Data) throws {
+    func writeData(file: String, data: Data) async throws {
         guard let info = activeFiles.get()[file] else {
             let error = OWSAssertionError("Expected file missing")
-            disconnect(error: error)
+            await disconnect(error: error)
             throw error
         }
         try info.handle.write(contentsOf: data)
@@ -158,10 +163,10 @@ class WADeviceTransferSession: DeviceTransfer.Session {
     }
 
     // finish file
-    func finishReceive(file: String) throws -> URL {
+    func finishReceive(file: String) async throws -> URL {
         guard let info = activeFiles.update(block: { $0.removeValue(forKey: file) }) else {
             let error = OWSAssertionError("Missing file")
-            disconnect(error: error)
+            await disconnect(error: error)
             throw error
         }
         try info.handle.close()

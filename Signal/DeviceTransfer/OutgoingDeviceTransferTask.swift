@@ -67,7 +67,7 @@ class OutgoingDeviceTransferTask {
 
     func connectToNewDevice(peer: any DeviceTransfer.Peer) async throws {
         logger.info("Connecting to new device")
-        stop(error: nil)
+        await stop(error: nil)
         deviceSleepManager?.addBlock(blockObject: sleepBlockObject)
         do {
             if let task = waitTask.get() {
@@ -117,7 +117,7 @@ class OutgoingDeviceTransferTask {
                 for try await message in session.messages {
                     switch message {
                     case .message(let message):
-                        try processMessage(message: message, session: session)
+                        try await processMessage(message: message, session: session)
                     case .startResource(_, let size, let progress):
                         guard let progress, let size else { return }
                         self.throughputMonitor?.progress.addChild(
@@ -152,7 +152,6 @@ class OutgoingDeviceTransferTask {
                     )
                 }
             }
-            transferInProgress = false
             notificationObservers.forEach {
                 NotificationCenter.default.removeObserver($0)
             }
@@ -180,7 +179,8 @@ class OutgoingDeviceTransferTask {
                     if Task.isCancelled {
                         throw CancellationError()
                     }
-                    self.failTransfer(.assertion, "Failed to send manifest to new device \(error)")
+                    await self.failTransfer(.assertion, "Failed to send manifest to new device \(error)")
+                    throw error
                 }
                 logger.debug("finished transfer task")
             }
@@ -203,8 +203,8 @@ class OutgoingDeviceTransferTask {
         }
     }
 
-    func stop(error: Error?) {
-        stopTransfer(error: error)
+    func stop(error: Error?) async {
+        await stopTransfer(error: error)
     }
 
     private func didEnterBackground(_ notification: Notification) {
@@ -212,7 +212,9 @@ class OutgoingDeviceTransferTask {
         // Send an explicit message to the peer (if connected) telling them
         // that's what happened.
         try? session?.send(message: .backgroundApp)
-        stopTransfer(error: CancellationError())
+        Task {
+            await stopTransfer(error: CancellationError())
+        }
     }
 
     // MARK: - Sending
@@ -339,12 +341,20 @@ class OutgoingDeviceTransferTask {
         transferredFileIds.update { $0.append(file.identifier) }
     }
 
-    private func stopTransfer(error: Error? = nil, notifyRegState: Bool = true) {
-        session.take()?.disconnect(error: error)
-        waitTask.swap(nil)?.cancel()
+    private func stopTransfer(error: Error? = nil, notifyRegState: Bool = true) async {
+        if let error {
+            switch error {
+            case DeviceTransfer.Error.otherDeviceTerminated:
+                break
+            default:
+                try? session?.send(message: .transferFailed)
+            }
+        }
         sendTask.swap(nil)?.cancel()
+        await session.take()?.disconnect(error: error)
+        waitTask.swap(nil)?.cancel()
         pairedPeerListenTask.take()?.cancel()
-        newDeviceServiceBrowser.stop(error: error)
+        await newDeviceServiceBrowser.stop(error: error)
         throughputMonitor?.stop()
         deviceSleepManager?.removeBlock(blockObject: sleepBlockObject)
 
@@ -354,7 +364,7 @@ class OutgoingDeviceTransferTask {
         // simply return in the .idle case above since none of the values being
         // reset should have values if we are idle, but I am scared of it.
         if transferInProgress {
-            db.write { tx in
+            await db.awaitableWrite { tx in
                 self.registrationStateChangeManager.setIsTransferComplete(
                     sendStateUpdateNotification: notifyRegState,
                     tx: tx,
@@ -364,20 +374,22 @@ class OutgoingDeviceTransferTask {
         transferInProgress = false
     }
 
-    private func failTransfer(_ error: DeviceTransfer.Error, _ reason: String) {
+    private func failTransfer(_ error: DeviceTransfer.Error, _ reason: String) async {
         logger.error("Failed transfer \(reason)")
-        stopTransfer(error: error)
+        await stopTransfer(error: error)
     }
 
-    private func processMessage(message: DeviceTransfer.Message, session: DeviceTransfer.Session) throws {
+    private func processMessage(message: DeviceTransfer.Message, session: DeviceTransfer.Session) async throws {
         switch message {
         case DeviceTransfer.Message.backgroundApp:
-            return failTransfer(DeviceTransfer.Error.backgroundedDevice, "Received terminate message")
+            return await failTransfer(DeviceTransfer.Error.backgroundedDevice, "Received terminate message")
+        case DeviceTransfer.Message.transferFailed:
+            return await failTransfer(DeviceTransfer.Error.otherDeviceTerminated, "Received terminate message")
         case DeviceTransfer.Message.done:
             break
         }
 
-        stopTransfer()
+        await stopTransfer()
 
         // When the old device receives the done message from the new device,
         // it can be confident that the transfer has completed successfully and

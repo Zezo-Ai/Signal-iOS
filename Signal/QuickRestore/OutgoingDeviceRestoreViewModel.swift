@@ -50,7 +50,9 @@ class OutgoingDeviceRestoreViewModel: ObservableObject {
         self.tsAccountManager = tsAccountManager
 
         transferStatusViewModel.cancelTransferBlock = { [weak self] in
-            self?.cancelTransfer()
+            Task {
+                await self?.cancelTransfer()
+            }
         }
     }
 
@@ -160,7 +162,9 @@ class OutgoingDeviceRestoreViewModel: ObservableObject {
             throw OWSAssertionError("Transfer started before negotiating connection")
         }
         defer {
-            stopListeningForTransfer(error: nil)
+            Task {
+                await stopListeningForTransfer(error: nil)
+            }
         }
         do {
             try await outgoingDeviceTransferTask.transferAccountToNewDevice { [weak self] progress in
@@ -178,17 +182,17 @@ class OutgoingDeviceRestoreViewModel: ObservableObject {
     }
 
     @MainActor
-    private func cancelTransfer() {
+    private func cancelTransfer() async {
         self.pairedPeersListenerTask.take()?.cancel()
         self.discoveredPeersListenerTask.take()?.cancel()
         self.waitForPeerContinuation.swap(nil)?.resume(throwing: CancellationError())
-        stopListeningForTransfer(error: CancellationError())
+        await stopListeningForTransfer(error: CancellationError())
         transferStatusViewModel.state = .cancelled
     }
 
     @MainActor
-    private func stopListeningForTransfer(error: Error?) {
-        outgoingDeviceTransferTask?.stop(error: error)
+    private func stopListeningForTransfer(error: Error?) async {
+        await outgoingDeviceTransferTask?.stop(error: error)
     }
 
     private var progressObserver: NSKeyValueObservation?
