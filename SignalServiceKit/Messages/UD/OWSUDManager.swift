@@ -238,7 +238,7 @@ public class OWSUDManagerImpl: OWSUDManager {
 
         do {
             let senderCertificate = try SenderCertificate(dataValue)
-            try validateCertificate(senderCertificate)
+            try validateCertificate(senderCertificate, aciOnly: aciOnly)
             return senderCertificate
         } catch {
             Logger.warn("Ignoring invalid cached sender certificate: \(error)")
@@ -328,11 +328,11 @@ public class OWSUDManagerImpl: OWSUDManager {
         }()
 
         let senderCertificate = try SenderCertificate(certificateData)
-        try validateCertificate(senderCertificate)
+        try validateCertificate(senderCertificate, aciOnly: aciOnly)
         return senderCertificate
     }
 
-    private func validateCertificate(_ certificate: SenderCertificate) throws {
+    private func validateCertificate(_ certificate: SenderCertificate, aciOnly: Bool) throws {
         guard
             let deviceId = DeviceId(validating: certificate.deviceId),
             self.tsAccountManager.storedDeviceIdWithMaybeTransaction.equals(deviceId)
@@ -344,7 +344,7 @@ public class OWSUDManagerImpl: OWSUDManager {
         let localIdentifiers = registeredState.localIdentifiers
 
         let sender = certificate.sender
-        guard sender.e164 == nil || sender.e164 == localIdentifiers.phoneNumber else {
+        guard sender.e164 == (aciOnly ? nil : localIdentifiers.phoneNumber) else {
             throw OWSUDError.invalidData(description: "Sender certificate has incorrect phone number")
         }
 
