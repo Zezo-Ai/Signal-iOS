@@ -161,7 +161,9 @@ class IncomingDeviceTransferTask {
             }
         }
         messagesReceiverTask.take()?.cancel()
-        await session.take()?.disconnect(error: error)
+        try? await withCooperativeTimeout(seconds: 2) { [weak self] in
+            await self?.session.take()?.disconnect(error: error)
+        }
         await newDeviceServiceAdvertiser.stop(error: error)
         throughputMonitor?.stop()
         deviceSleepManager?.removeBlock(blockObject: sleepBlockObject)

@@ -351,7 +351,9 @@ class OutgoingDeviceTransferTask {
             }
         }
         sendTask.swap(nil)?.cancel()
-        await session.take()?.disconnect(error: error)
+        try? await withCooperativeTimeout(seconds: 2) { [weak self] in
+            await self?.session.take()?.disconnect(error: error)
+        }
         waitTask.swap(nil)?.cancel()
         pairedPeerListenTask.take()?.cancel()
         await newDeviceServiceBrowser.stop(error: error)
