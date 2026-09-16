@@ -11,6 +11,7 @@ enum TransferState {
     case starting
     case connecting
     case transferring(Double)
+    case finishing
     case done
     case cancelled
     case error(Error)
@@ -110,6 +111,7 @@ class TransferStatusViewModel: ObservableObject {
 
         case indefinite(Indefinite)
         case transferring(Double)
+        case finishing
         case error(Error)
     }
 
@@ -124,6 +126,8 @@ class TransferStatusViewModel: ObservableObject {
             case .transferring(let progress):
                 viewState = .transferring(progress)
                 self.progressDidUpdate(currentProgress: progress)
+            case .finishing:
+                viewState = .finishing
             case .done:
                 viewState = .transferring(1)
             case .cancelled:
@@ -219,6 +223,8 @@ extension TransferStatusViewModel {
             state = .transferring(progress)
             try await Task.sleep(nanoseconds: UInt64.random(in: 60...120) * NSEC_PER_MSEC)
         }
+        state = .finishing
+        try await Task.sleep(nanoseconds: 2 * NSEC_PER_SEC)
         state = .done
         onSuccess()
     }

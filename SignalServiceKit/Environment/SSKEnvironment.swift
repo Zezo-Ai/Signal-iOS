@@ -276,7 +276,11 @@ public class SSKEnvironment: NSObject {
         if (!hasPni && mustHavePni) || (!hasPniIdentityKey && mustHavePniIdentityKey) {
             Logger.warn("Deregistering because PNI state is missing (hasPni: \(hasPni); hasPniIdentityKey: \(hasPniIdentityKey))")
             databaseStorage.write { tx in
-                dependenciesBridge.registrationStateChangeManager.setIsDeregisteredOrDelinked(true, tx: tx)
+                dependenciesBridge.registrationStateChangeManager.setIsDeregisteredOrDelinked(
+                    true,
+                    notify: true,
+                    tx: tx,
+                )
             }
         }
     }

@@ -101,7 +101,11 @@ open class MockRegistrationStateChangeManager: RegistrationStateChangeManager {
         owsFail("not implemented")
     }
 
-    open func setIsDeregisteredOrDelinked(_ isDeregisteredOrDelinked: Bool, tx: DBWriteTransaction) {
+    open func setIsDeregisteredOrDelinked(
+        _ isDeregisteredOrDelinked: Bool,
+        notify: Bool,
+        tx: DBWriteTransaction,
+    ) {
         setIsDeregisteredOrDelinkedMock(isDeregisteredOrDelinked)
     }
 

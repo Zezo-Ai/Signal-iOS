@@ -200,7 +200,12 @@ class OutgoingDeviceRestoreViewModel: ObservableObject {
         self.progressObserver = progress.observe(\.fractionCompleted, options: [.new]) { [weak self] _, change in
             Task { @MainActor in
                 let newValue = change.newValue ?? 0
-                self?.transferStatusViewModel.state = .transferring(newValue)
+                // A fuzzy check that the file transfer has completed and the transfer is finializing
+                if newValue >= 1.0 {
+                    self?.transferStatusViewModel.state = .finishing
+                } else {
+                    self?.transferStatusViewModel.state = .transferring(newValue)
+                }
             }
         }
     }

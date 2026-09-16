@@ -1110,7 +1110,11 @@ extension AppSetup.GlobalsContinuation {
             versionedProfiles: versionedProfiles,
         )
         chatConnectionManager.onRegistrationStateChange = { [weak registrationStateChangeManager] isDelinkedOrDeregistered, tx in
-            registrationStateChangeManager?.setIsDeregisteredOrDelinked(isDelinkedOrDeregistered, tx: tx)
+            registrationStateChangeManager?.setIsDeregisteredOrDelinked(
+                isDelinkedOrDeregistered,
+                notify: true,
+                tx: tx,
+            )
         }
 
         let attachmentUploadManager = AttachmentUploadManagerImpl(

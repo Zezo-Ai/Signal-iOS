@@ -190,16 +190,19 @@ class OutgoingDeviceTransferTask {
         try await task.value
         _ = sendTask.swap(nil)
 
+        // Now that everything has been transferred to the new device, mark this device as deregistered.
+        // This helps with the rare case that the transfer is interrupted on the new device before completion,
+        // and allows the user to re-register on the old device and try the transfer again before anything
+        // destructive happens on the old device.
+        await db.awaitableWrite { tx in
+            self.registrationStateChangeManager.setIsDeregisteredOrDelinked(true, notify: true, tx: tx)
+        }
+
         logger.info("Finished sending files to new device")
 
         // wait for message back from caller
         try await withCheckedThrowingContinuation { continuation in
             self.transferFinishedContinuation = continuation
-        }
-
-        // Everything done and acknowledged, mark the local device as transferred
-        await db.awaitableWrite { tx in
-            self.registrationStateChangeManager.setWasTransferred(tx: tx)
         }
     }
 
@@ -392,6 +395,11 @@ class OutgoingDeviceTransferTask {
         }
 
         await stopTransfer()
+
+        // Everything done and acknowledged, mark the local device as transferred
+        await db.awaitableWrite { tx in
+            self.registrationStateChangeManager.setWasTransferred(tx: tx)
+        }
 
         // When the old device receives the done message from the new device,
         // it can be confident that the transfer has completed successfully and

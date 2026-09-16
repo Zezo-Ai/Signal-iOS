@@ -122,9 +122,15 @@ public protocol RegistrationStateChangeManager {
      * When we discover the user is deregistered/delinked via a service response, or conversely
      * discover they are _not_ deregistered, we call this method to update state.
      *
+     * - parameter notify: If true, show a local notification to the user that they have been deregistered.
+     *
      * No-ops if deregistration state is unchanged.
      */
-    func setIsDeregisteredOrDelinked(_ isDeregisteredOrDelinked: Bool, tx: DBWriteTransaction)
+    func setIsDeregisteredOrDelinked(
+        _ isDeregisteredOrDelinked: Bool,
+        notify: Bool,
+        tx: DBWriteTransaction,
+    )
 
     /// Unregisters the local user's account from Signal entirely. (Must be the
     /// primary device!)

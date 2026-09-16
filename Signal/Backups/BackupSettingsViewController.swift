@@ -2334,7 +2334,7 @@ private struct BackupExportProgressView: View {
             let percentUploadCompleted = latestExportProgressUpdate.progress(for: .backupFileUpload)?.percentComplete ?? 0
             let percentComplete = (0.95 * percentExportCompleted) + (0.05 * percentUploadCompleted)
             return ProgressBarState(
-                style: .determinate(percentComplete: percentComplete),
+                style: .determinate(percentComplete: percentComplete, pulse: true),
                 label: String.nonPluralLocalizedStringWithFormat(
                     OWSLocalizedString(
                         "BACKUP_SETTINGS_BACKUP_EXPORT_PROGRESS_DESCRIPTION_PREPARING_BACKUP",
@@ -2346,7 +2346,7 @@ private struct BackupExportProgressView: View {
 
         case .attachmentUpload:
             return ProgressBarState(
-                style: .determinate(percentComplete: latestAttachmentUploadUpdate?.percentageUploaded ?? 0),
+                style: .determinate(percentComplete: latestAttachmentUploadUpdate?.percentageUploaded ?? 0, pulse: true),
                 label: BackupAttachmentUploadProgressView.subtitleText(
                     uploadUpdate: latestAttachmentUploadUpdate,
                 ),
@@ -2419,9 +2419,9 @@ private struct PerformManualBackupButton: View {
 
 // MARK: -
 
-private struct StyledProgressBar: View {
+struct StyledProgressBar: View {
     enum Style {
-        case determinate(percentComplete: Float)
+        case determinate(percentComplete: Float, pulse: Bool)
         case indeterminate
     }
 
@@ -2430,7 +2430,10 @@ private struct StyledProgressBar: View {
     var body: some View {
         VStack {
             switch style {
-            case .determinate(let percentComplete):
+            case .determinate(let percentComplete, pulse: false):
+                LinearProgressView(progress: percentComplete)
+                    .clipShape(RoundedRectangle(cornerRadius: 3))
+            case .determinate(let percentComplete, pulse: true):
                 PulsingProgressBar(value: percentComplete)
                     .tint(.Signal.accent)
                     .clipShape(RoundedRectangle(cornerRadius: 3))

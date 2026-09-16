@@ -179,7 +179,12 @@ public class DeviceTransferCoordinator: Equatable {
         if !hasTransferStarted.swap(true) {
             onTransferStart()
         }
-        transferStatusViewModel.state = .transferring(value)
+        // A fuzzy check that the file transfer has completed and the transfer is finializing
+        if value >= 1.0 {
+            transferStatusViewModel.state = .finishing
+        } else {
+            transferStatusViewModel.state = .transferring(value)
+        }
     }
 
     @MainActor

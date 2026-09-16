@@ -155,7 +155,7 @@ struct TransferWrapperView: View {
             switch viewModel.state {
             case .idle, .starting:
                 TransferPairingView(viewModel: viewModel, isNewDevice: isNewDevice)
-            case .cancelled, .connecting, .done, .error, .transferring:
+            case .cancelled, .connecting, .finishing, .done, .error, .transferring:
                 TransferStatusView(viewModel: viewModel, isNewDevice: isNewDevice)
             }
         } else {
@@ -374,11 +374,41 @@ struct TransferStatusView: View {
                 Text("\(progress.formatted(.owsPercent()))")
                     .font(.body.monospacedDigit())
                     .padding(.bottom, 12)
-                LinearProgressView(progress: progress)
-                    .animation(.smooth, value: progress)
-                    .padding(.bottom, 6)
+                StyledProgressBar(style: .determinate(percentComplete: Float(progress), pulse: false))
                 Text(viewModel.progressEstimateLabel)
                     .foregroundStyle(Color.Signal.secondaryLabel)
+                Spacer()
+                Button(CommonStrings.cancelButton) {
+                    Task {
+                        await viewModel.propmtUserToCancelTransfer()
+                    }
+                }
+                .buttonStyle(Registration.UI.MediumSecondaryButtonStyle())
+                .padding(.bottom, 32)
+            case .finishing:
+                Text(OWSLocalizedString(
+                    "DEVICE_TRANSFER_STATUS_NEW_DEVICE_TRANSFERRING",
+                    comment: "Title for a progress view displayed during device transfer.",
+                ))
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(Color.Signal.label)
+                .padding(.top, 44)
+                .padding(.bottom, 2)
+                Text(OWSLocalizedString(
+                    "DEVICE_TRANSFER_STATUS_NEW_DEVICE_TRANSFERRING_DESCRIPTION",
+                    comment: "Description in the progress view displayed during device transfer.",
+                ))
+                .font(.body)
+                .foregroundStyle(Color.Signal.secondaryLabel)
+
+                Spacer()
+                StyledProgressBar(style: .indeterminate)
+                    .padding(.top, 42)
+                Text(OWSLocalizedString(
+                    "DEVICE_TRANSFER_STATUS_DEVICE_FINISHING",
+                    comment: "Description in the progress view displayed during device transfer finalization.",
+                ))
+                .foregroundStyle(Color.Signal.secondaryLabel)
                 Spacer()
                 Button(CommonStrings.cancelButton) {
                     Task {

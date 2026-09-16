@@ -145,8 +145,15 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
         }
     }
 
-    public func setIsDeregisteredOrDelinked(_ isDeregisteredOrDelinked: Bool, tx: DBWriteTransaction) {
-        let didChange = tsAccountManager.setIsDeregisteredOrDelinked(isDeregisteredOrDelinked, tx: tx)
+    public func setIsDeregisteredOrDelinked(
+        _ isDeregisteredOrDelinked: Bool,
+        notify: Bool,
+        tx: DBWriteTransaction,
+    ) {
+        let didChange = tsAccountManager.setIsDeregisteredOrDelinked(
+            isDeregisteredOrDelinked,
+            tx: tx,
+        )
         let localIdentifiers = tsAccountManager.localIdentifiers(tx: tx)
         guard didChange else {
             return
@@ -156,7 +163,7 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
         if isDeregisteredOrDelinked {
             if self.isUnregisteringFromService.get() {
                 Logger.warn("Skipping notification because we're unregistering ourselves.")
-            } else {
+            } else if notify {
                 notificationPresenter.notifyUserOfDeregistration(tx: tx)
             }
 
