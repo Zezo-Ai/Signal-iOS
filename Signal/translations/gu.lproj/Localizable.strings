@@ -1028,7 +1028,7 @@
 "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_LABEL" = "છેલ્લું બેકઅપ";
 
 /* Label for a cell on the backups landing page explaining when the user's last backup occurred. */
-"BACKUP_SETTINGS_ENABLED_LAST_BACKUP_LABEL_LANDING_PAGE" = "Last backup";
+"BACKUP_SETTINGS_ENABLED_LAST_BACKUP_LABEL_LANDING_PAGE" = "છેલ્લું બેકઅપ";
 
 /* Text explaining that the user's last backup was in the past. Embeds 1:{{ the date of the backup }} and 2:{{ the time of the backup }}. */
 "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_PAST_FORMAT" = "%2$@ પર %1$@";
@@ -2132,19 +2132,19 @@
 "CHAT_LIST_FILTERED_BY_UNREAD_CLEAR_BUTTON" = "ન વાંચેલા અનુસાર ફિલ્ટર કરેલ";
 
 /* Title shown on chat list banner for restoring media from a backup is finished */
-"CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_FINISHED_TITLE" = "જોડાણ રિસ્ટોર કરવાનું પૂર્ણ";
+"CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_FINISHED_TITLE" = "Restore Complete";
 
 /* Progress label showing bytes restored from an on-device backup. Embeds {{ %1$@ formatted bytes restored, %2$@ formatted total bytes to restore }}. */
 "CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_PROGRESS_VIEW_PROGRESS_FORMAT" = "%2$@માંથી %1$@";
 
 /* Title shown on the chat list banner while restoring attachments from an on-device backup. */
-"CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_PROGRESS_VIEW_TITLE" = "જોડાણો રિસ્ટોર કરવા";
+"CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_PROGRESS_VIEW_TITLE" = "Restoring on-device backup";
 
 /* Progress label showing the amount uploaded out of the total. Embeds {{ %1$@ bytes uploaded, %2$@ total bytes to upload }}. */
 "CHAT_LIST_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS_FORMAT" = "%2$@માંથી %1$@";
 
 /* Title label shown in the chat list backup progress view while backup attachments are being uploaded. */
-"CHAT_LIST_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS_TITLE" = "જોડાણો કૉપિ થાય છે";
+"CHAT_LIST_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS_TITLE" = "Creating on-device backup";
 
 /* Title label shown in the chat list local file backup progress view while the attachments are being prepared */
 "CHAT_LIST_LOCAL_FILE_BACKUPS_PROGRESS_PREPARING_ATTACHMENTS" = "જોડાણો તૈયાર થાય છે";
@@ -3167,22 +3167,25 @@
 "DEVICE_TRANSFER_ERROR_UNSUPPORTED_VERSION" = "Signal ના નવીનતમ વર્ઝન પર અપડેટ કરો અને ફરીથી પ્રયાસ કરો";
 
 /* Body of the device transfer screen for pairing a new device, from the new device */
-"DEVICE_TRANSFER_PAIR_NEW_DEVICE_MESSAGE" = "To transfer your account, pair this device with your old device";
+"DEVICE_TRANSFER_PAIR_NEW_DEVICE_MESSAGE" = "તમારા એકાઉન્ટને ટ્રાન્સફર કરવા, આ ડિવાઇસને તમારા જૂના ડિવાઇસ સાથે પેર કરો";
 
 /* Title of the device transfer screen for pairing a new device, from the new device */
-"DEVICE_TRANSFER_PAIR_NEW_DEVICE_TITLE" = "Pair With Your New Device";
+"DEVICE_TRANSFER_PAIR_NEW_DEVICE_TITLE" = "તમારા નવા ડિવાઇસ સાથે પેર કરો";
 
 /* Body of the device transfer screen for pairing a new device, from the old device */
-"DEVICE_TRANSFER_PAIR_OLD_DEVICE_MESSAGE" = "To transfer your account, pair this device with your new device";
+"DEVICE_TRANSFER_PAIR_OLD_DEVICE_MESSAGE" = "તમારા એકાઉન્ટને ટ્રાન્સફર કરવા, આ ડિવાઇસને તમારા નવા ડિવાઇસ સાથે પેર કરો";
 
 /* Title of the device transfer screen for pairing a new device, from the old device */
-"DEVICE_TRANSFER_PAIR_OLD_DEVICE_TITLE" = "Pair With Your Old Device";
+"DEVICE_TRANSFER_PAIR_OLD_DEVICE_TITLE" = "તમારા જૂના ડિવાઇસ સાથે પેર કરો";
 
 /* The explanation on the view that shows receiving progress */
 "DEVICE_TRANSFER_RECEIVING_EXPLANATION" = "બંને ડિવાઇસને એકબીજાની નજીક રાખો. બંને ડિવાઇસ બંધ ન કરો અને Signal ને ખુલ્લા રાખો. ટ્રાન્સફર એન્ડ-ટુ-એન્ડ એન્ક્રિપ્ટ થયેલ છે.";
 
 /* The title on the view that shows receiving progress */
 "DEVICE_TRANSFER_RECEIVING_TITLE" = "ડેટા પ્રાપ્ત કરવો";
+
+/* Description in the progress view displayed during device transfer finalization. */
+"DEVICE_TRANSFER_STATUS_DEVICE_FINISHING" = "Finalizing transfer…";
 
 /* Status message on new device when cancelling transfer. */
 "DEVICE_TRANSFER_STATUS_NEW_DEVICE_CANCELLING" = "નવા iPhone સાથે કનેક્શન રદ કરી રહ્યાં છીએ…";
@@ -3197,7 +3200,7 @@
 "DEVICE_TRANSFER_STATUS_NEW_DEVICE_CONNECTING_WIFI_AWARE_MESSAGE" = "તમારા જૂના ડિવાઇસને નજીકમાં લાવો અને ખાતરી કરો કે વાઇ-ફાઇ અને બ્લુટુથ સક્ષમ છે. જૂના ડિવાઇસ પરના ડિવાઇસ લિસ્ટમાંથી આ ડિવાઇસને પસંદ કરો.  જો જૂના ડિવાઇસ પર ડિવાઇસ દેખાતું ન હોય, તો નીચે 'નવું ડિવાઇસ પેર કરો' પસંદ કરો.";
 
 /* Title for paring an old device to transfer to. */
-"DEVICE_TRANSFER_STATUS_NEW_DEVICE_PAIR_DEVICE" = "Pair This device";
+"DEVICE_TRANSFER_STATUS_NEW_DEVICE_PAIR_DEVICE" = "આ ડિવાઇસને પેર કરો";
 
 /* Status message on new device when transfer is starting. */
 "DEVICE_TRANSFER_STATUS_NEW_DEVICE_STARTING" = "જૂના ડિવાઇસ સાથે કનેક્ટ થવાની રાહ જોઈ રહ્યાં છે…";
@@ -3227,7 +3230,7 @@
 "DEVICE_TRANSFER_STATUS_OLD_DEVICE_CONNECTING_WIFI_AWARE_MESSAGE" = "તમારા નવા ડિવાઇસને નજીકમાં લાવો અને ખાતરી કરો કે વાઇ-ફાઇ અને બ્લુટુથ સક્ષમ છે.";
 
 /* Title for paring an new device to transfer to. */
-"DEVICE_TRANSFER_STATUS_OLD_DEVICE_PAIR_DEVICE" = "Pair With New device";
+"DEVICE_TRANSFER_STATUS_OLD_DEVICE_PAIR_DEVICE" = "નવા ડિવાઇસ સાથે પેર કરો";
 
 /* Status message on old device when transfer is starting. */
 "DEVICE_TRANSFER_STATUS_OLD_DEVICE_STARTING" = "નવા ડિવાઇસ સાથે કનેક્ટ થવાની રાહ જોઈ રહ્યાં છે…";
@@ -3239,19 +3242,22 @@
 "DEVICE_TRANSFER_STATUS_OLD_DEVICE_STARTING_WIFI_AWARE_MESSAGE" = "નીચે આપેલા પેર કરેલા ડિવાઇસના લિસ્ટમાંથી નવું ડિવાઇસ પસંદ કરો. જો નવું ડિવાઇસ દેખાતું ન હોય, તો પ્રક્રિયા શરૂ કરવા માટે 'નવા ડિવાઇસને પેર કરો' પસંદ કરો.";
 
 /* Message informing the user to continue on the old device */
-"DEVICE_TRANSFER_TUTORIAL_CONTINUE_OLD_DEVICE_MESSAGE" = "Continue on your old device";
+"DEVICE_TRANSFER_TUTORIAL_CONTINUE_OLD_DEVICE_MESSAGE" = "તમારા જૂના ડિવાઇસ પર ચાલુ રાખો";
 
 /* Message informing the user to enable wifi and bluetooth on device */
-"DEVICE_TRANSFER_TUTORIAL_ENABLE_WIFI_MESSAGE" = "Enable Wifi and Bluetooth on both devices";
+"DEVICE_TRANSFER_TUTORIAL_ENABLE_WIFI_MESSAGE" = "બંને ડિવાઇસ પર વાઇ-ફાઇ અને બ્લુટુથ ચાલુ કરો";
 
 /* Message informing the user to select the new device when prompted */
-"DEVICE_TRANSFER_TUTORIAL_SELECT_NEW_DEVICE_MESSAGE" = "Select your new device when prompted";
+"DEVICE_TRANSFER_TUTORIAL_SELECT_NEW_DEVICE_MESSAGE" = "કહેવામાં આવે ત્યારે તમારું નવું ડિવાઇસ પસંદ કરો";
 
 /* Message informing the user to tap on the pair device button */
-"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_DEVICE_MESSAGE" = "Tap “Pair This Device” below";
+"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_DEVICE_MESSAGE" = "નીચે \"આ ડિવાઇસ પેર કરો\" પર ટેપ કરો";
 
 /* Message informing the user to tap on the pair device button */
-"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_NEW_DEVICE_MESSAGE" = "Tap “Pair With New Decvice” below";
+"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_NEW_DEVICE_MESSAGE" = "નીચે \"નવા ડિવાઇસ સાથે પેર કરો\" ટેપ કરો";
+
+/* Label for a toast that confirms that local backups are disabled. */
+"DISABLE_LOCAL_FILE_BACKUPS_TOAST_CONFIRM" = "On-device backups are disabled. Turn backups on in Settings";
 
 /* table cell label in conversation settings */
 "DISAPPEARING_MESSAGES" = "અદૃશ્ય થઈ રહેલા મેસેજ";
@@ -3781,14 +3787,8 @@
 /* Full width label displayed when attempting to compose message */
 "EMPTY_CONTACTS_LABEL_LINE2" = "તમે કેમ કોઈને આમંત્રણ આપતા નથી?";
 
-/* Button for a sheet asking the user if they want to enable local file backups */
-"ENABLE_LOCAL_FILE_BACKUPS_HERO_SHEET_BUTTON" = "ડિવાઇસ પરના બેકઅપ સક્ષમ કરો";
-
-/* Message for a sheet asking the user if they want to enable local file backups. */
-"ENABLE_LOCAL_FILE_BACKUPS_HERO_SHEET_MESSAGE" = "ઓન-ડિવાઇસ બેકઅપનો ઉપયોગ કરવાનું ચાલુ રાખવા માટે, તમારે તેમને આ એકાઉન્ટ માટે ચાલુ કરવાની જરૂર પડશે. તમે આ કોઈ પણ સમયે સેટિંગ્સ > બેકઅપમાં જઈને કરી શકો છો.";
-
-/* Title for a sheet asking the user if they want to enable local file backups. */
-"ENABLE_LOCAL_FILE_BACKUPS_HERO_SHEET_TITLE" = "ડિવાઇસ પરના બેકઅપ સક્ષમ કરવા છે?";
+/* Label for a toast that confirms that local backups are enabled. */
+"ENABLE_LOCAL_FILE_BACKUPS_TOAST_CONFIRM" = "On-device backups enabled";
 
 /* Call setup status label */
 "END_CALL_RESPONDER_IS_BUSY" = "વ્યસ્ત";
@@ -5090,10 +5090,10 @@
 "INBOX_VIEW_ARCHIVE_MODE_REMINDER" = "નવો મેસેજ આવે ત્યારે આર્કાઇવ કરેલ ચેટ ઇનબોક્સ પર ખસેડવામાં આવશે.";
 
 /* Body of prompt notifying device transfer will continue on other device. */
-"INCOMING_DEVICE_TRANSFER_CONTINUE_BODY" = "Continue transferring your account on your other device.";
+"INCOMING_DEVICE_TRANSFER_CONTINUE_BODY" = "તમારા અન્ય ડિવાઇસ પર તમારું એકાઉન્ટ ટ્રાન્સફર કરવાનું ચાલુ રાખો.";
 
 /* Title of prompt notifying device transfer will continue on other device. */
-"INCOMING_DEVICE_TRANSFER_CONTINUE_TITLE" = "Continue on your other device";
+"INCOMING_DEVICE_TRANSFER_CONTINUE_TITLE" = "તમારા અન્ય ડિવાઇસ પર ચાલુ રાખો";
 
 /* info message text in conversation view */
 "INCOMING_VIDEO_CALL" = "ઇનકમિંગ વિડિયો કૉલ";
@@ -5484,6 +5484,9 @@
 
 /* Shown to users while the app is loading, asking them not to close the app. */
 "LOADING_VIEW_CONTROLLER_DONT_CLOSE_APP" = "Signal બંધ કરશો નહીં.";
+
+/* Body for a sheet warning users about creating a new Recovery Key. */
+"LOCAL_BACKUP_SETTINGS_CREATE_NEW_KEY_WARNING_SHEET_BODY" = "Creating a new key is only necessary if someone else knows your key. On-Device Backups must first be disabled to create a new key.\n\nAfter disabling On-Device Backups and creating a new key, you will need to re-enable On-Device Backups.";
 
 /* Body for an error sheet shown when the user's folder choice does not contain a backup file. */
 "LOCAL_BACKUPS_MISSING_BACKUP_ACTION_SHEET_BODY" = "પસંદ કરેલા ફોલ્ડરમાં કોઈ Signal બેકઅપ મળ્યું નથી. કૃપા કરીને કોઈ અલગ ફોલ્ડર પસંદ કરો.";
@@ -6791,13 +6794,13 @@
 "OUTGOING_DEVICE_TRANSFER_COMPLETE_TITLE" = "ટ્રાન્સફર પૂર્ણ થયું";
 
 /* Body of prompt confirming the start of device transfer. */
-"OUTGOING_DEVICE_TRANSFER_CONFIRM_BODY" = "Your account will be transferred to a new device. This device will be able to see your groups and contacts, access your chats, and send messages in your name.";
+"OUTGOING_DEVICE_TRANSFER_CONFIRM_BODY" = "તમારું એકાઉન્ટ એક નવા ડિવાઇસ પર ટ્રાન્સફર થશે. આ ડિવાઇસ તમારા ગ્રૂપ અને સંપર્કો જોઈ શકશે, તમારી ચેટને ઍક્સેસ કરી શકશે અને તમારા નામે મેસેજ મોકલી શકશે.";
 
 /* Title of prompt confirming the start of device transfer. */
-"OUTGOING_DEVICE_TRANSFER_CONFIRM_TITLE" = "Transfer Account to \"%1$@\"?";
+"OUTGOING_DEVICE_TRANSFER_CONFIRM_TITLE" = "એકાઉન્ટને \"%1$@\" પર ટ્રાન્સફર કરીએ?";
 
 /* Action prompt confirming the start of device transfer. */
-"OUTGOING_DEVICE_TRANSFER_START_TRANSFER_ACTION" = "Start Transfer";
+"OUTGOING_DEVICE_TRANSFER_START_TRANSFER_ACTION" = "ટ્રાન્સફર શરૂ કરો";
 
 /* info message text in conversation view */
 "OUTGOING_MISSED_VIDEO_CALL" = "ન ઉપાડેલો વિડિયો કૉલ";
@@ -7981,6 +7984,12 @@
 /* Title for a sheet warning users about an incorrect recovery key. */
 "REGISTRATION_BACKUP_RESTORE_ERROR_INCORRECT_KEY_TITLE" = "બેકઅપ શોધી શકાતું નથી";
 
+/* Message for a sheet warning users about an invalid local backup location */
+"REGISTRATION_BACKUP_RESTORE_ERROR_LOCAL_BACKUP_LOCATION_MESSAGE" = "Your on-device backup can’t be restored. This may be because you moved or deleted your backup folder.";
+
+/* Title for a sheet warning users about an invalid local backup location */
+"REGISTRATION_BACKUP_RESTORE_ERROR_LOCAL_BACKUP_LOCATION_TITLE" = "Can’t Restore Backup";
+
 /* Body for a sheet warning users about a network error during backup restore. */
 "REGISTRATION_BACKUP_RESTORE_ERROR_NETWORK_BODY" = "તમારું બેકઅપ હમણાં રિસ્ટોર કરી શકાતું નથી. તમારું ઇન્ટરનેટ તપાસો અને ફરી પ્રયાસ કરો.";
 
@@ -8263,6 +8272,18 @@
 /* Configure reactions reset button text */
 "RESET" = "ફરીથી સેટ કરો";
 
+/* Button on a sheet prompting the user to pick a folder on their device where on-device backups will be saved */
+"RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_CHOOSE_FOLDER_BUTTON" = "Choose Folder";
+
+/* Button for a sheet asking the user if they want to disable local backups */
+"RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_DISABLE_BUTTON" = "Disable Backups";
+
+/* Message for a sheet asking the user if they want to enable local file backups. */
+"RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_MESSAGE" = "To continue using on-device backups, choose a folder on your device where new backups will be saved.";
+
+/* Title for a sheet asking the user if they want to enable local file backups. */
+"RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_TITLE" = "Restore complete";
+
 /* Body for a sheet allowing users to cancel an in-progress media restore. */
 "RESTORING_MEDIA_BANNER_CANCEL_RESTORE_SHEET_1_BODY" = "તમારા મીડિયા રિસ્ટોર કરવાનું પૂર્ણ થયું નથી. જો તમે રદ કરવાનું પસંદ કરો છો, તો તમે આ ડિવાઇસને ફરીથી લિંક કરીને ફરીથી રિસ્ટોર કરી શકો છો.";
 
@@ -8352,6 +8373,9 @@
 
 /* Text for a toast confirming that ringing has been turned on for a call. */
 "RING_ON_CONFIRMATION_TOAST_LABEL" = "રિંગ ચાલુ";
+
+/* Message shown in an action sheet when attempting to disable PIN, but Backups is enabled. */
+"ROTATE_AEP_ACTION_BACKUPS_DISABLE_REQUIRED" = "You must disable Signal Secure Backups before proceeding.";
 
 /* button title to confirm adding a recipient when their safety number has recently changed */
 "SAFETY_NUMBER_CHANGED_CONFIRM_ADD_MEMBER_ACTION" = "કોઈપણ રીતે મોકલો";
@@ -8633,10 +8657,10 @@
 "SELECT_ALL" = "બધા પસંદ કરો";
 
 /* Placeholder text for the search bar on the 'Select Contact' view */
-"SELECT_CONTACT_FOR_SHARING_SEARCH_BAR_PLACEHOLDER" = "Search";
+"SELECT_CONTACT_FOR_SHARING_SEARCH_BAR_PLACEHOLDER" = "શોધો";
 
 /* Title for the 'Select Contact' view */
-"SELECT_CONTACT_FOR_SHARING_VIEW_TITLE" = "Select Contact";
+"SELECT_CONTACT_FOR_SHARING_VIEW_TITLE" = "સંપર્ક પસંદ કરો";
 
 /* No comment provided by engineer. */
 "SEND_AGAIN_BUTTON" = "ફરી થી મોકલો";
@@ -8775,9 +8799,6 @@
 
 /* No comment provided by engineer. */
 "SETTINGS_ADVANCED_PINS_DISABLE_PIN_ACTION" = "PIN ને અક્ષમ કરો";
-
-/* Message shown in an action sheet when attempting to disable PIN, but Backups is enabled. */
-"SETTINGS_ADVANCED_PINS_DISABLE_PIN_ACTION_BACKUPS_DISABLE_REQUIRED" = "તમારો પિન અક્ષમ કરતા પહેલાં તમારે બેકઅપ અક્ષમ કરવા આવશ્યક છે.";
 
 /* Message shown in an action sheet when attempting to disable PIN, but registration lock is enabled. */
 "SETTINGS_ADVANCED_PINS_DISABLE_PIN_ACTION_REGLOCK_DISABLE_REQUIRED" = "તમારો પિન અક્ષમ કરતા પહેલાં તમારે રજીસ્ટ્રેશન લૉક અક્ષમ કરવું આવશ્યક છે.";
@@ -9029,7 +9050,7 @@
 "SETTINGS_LOCAL_FILE_BACKUPS_LOCAL_BACKUP_IN_PROGRESS_MESSAGE" = "ઓન-ડિવાઇસ બેકઅપની પ્રગતિ ચાલુ હોય ત્યારે Signal સુરક્ષિત બેકઅપ કરી શકતા નથી. પછી ફરી પ્રયાસ કરો.";
 
 /* Label for a progress bar while attachments are being copied for an on-device backup. Embeds 1:{{%1$@ completed bytes copied, %2$@ total bytes to copy, %3$@ percentage complete }}. */
-"SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS" = "%2$@માંથી %1$@ જોડાણ રિસ્ટોર થાય છે (%3$@)";
+"SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS" = "Creating on-device backup %1$@ of %2$@ (%3$@)";
 
 /* Label for a progress bar while the attachments are being prepared for an on-device backup. Embeds 1:{{ percentage complete }}. */
 "SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_PREPARING_ATTACHMENTS" = "જોડાણ તૈયાર થાય છે (%1$@)";
@@ -9038,7 +9059,7 @@
 "SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_PREPARING_BACKUP" = "બેકઅપ તૈયાર કરી રહ્યા છીએ (%1$@)";
 
 /* Label for a progress bar while attachments are being restored for an on-device backup. Embeds {{%1$@ completed bytes restored, %2$@ total bytes to restore  }}. */
-"SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_RESTORING_ATTACHMENTS" = "જોડાણ રિસ્ટોર થાય છે (%2$@ માંથી %1$@)";
+"SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_RESTORING_ATTACHMENTS" = "Restoring on-device backup (%1$@ of %2$@)";
 
 /* Message for an action sheet when a user cannot perform a local backup because a remote backup is in progress */
 "SETTINGS_LOCAL_FILE_BACKUPS_REMOTE_BACKUP_IN_PROGRESS_MESSAGE" = "Signal સુરક્ષિત બેકઅપની પ્રગતિ ચાલુ હોય ત્યારે ઓન-ડિવાઇસ બેકઅપ કરી શકતા નથી. પછી ફરી પ્રયાસ કરો.";
@@ -9060,6 +9081,12 @@
 
 /* Message shown on an action sheet when a user's backup fails to delete. Embeds {{ local file backup location }} */
 "SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_MESSAGE_FORMAT" = "એક એરરને કારણે તમારા બેકઅપને ડિલીટ કરી શક્યા નથી. તમારે ફોલ્ડરને જાતે ડિલીટ કરવું પડશે. Files ઍપમાં, “%1$@” પર જાઓ અને ફોલ્ડર અને તેમાં રહેલ વસ્તુઓને જાતે ડિલીટ કરો. કોઈ નવા બેકઅપ બનાવવામાં આવશે નહીં.";
+
+/* Message shown on an action sheet when a user's backup fails to delete because the file isn't found. */
+"SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_NO_FILE_MESSAGE" = "We couldn't confirm your backup was deleted due to an error. This may be because you renamed or moved the folder. In the Files app, manually delete the folder and its contents. No new backups will be created.";
+
+/* Title shown on an action sheet when a user's backup fails to delete because the file isn't found */
+"SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_NO_FILE_TITLE" = "Couldn’t Confirm Deletion";
 
 /* Title shown on an action sheet when a user's backup fails to delete */
 "SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_TITLE" = "બેકઅપ ડિલીટ ન કરી શક્યા";
@@ -9098,19 +9125,19 @@
 "SETTINGS_NAV_BAR_TITLE" = "સેટિંગ્સ";
 
 /* Label for the setting controlling whether the app icon badge counts unread messages or unread chats. */
-"SETTINGS_NOTIFICATION_BADGE_COUNT" = "Badge Count";
+"SETTINGS_NOTIFICATION_BADGE_COUNT" = "બેજ કાઉન્ટ";
 
 /* Explanation for the setting controlling whether the app icon badge counts unread messages or unread chats. */
-"SETTINGS_NOTIFICATION_BADGE_COUNT_FOOTER" = "Select if the badge count displays the number of unread messages or the number of unread chats";
+"SETTINGS_NOTIFICATION_BADGE_COUNT_FOOTER" = "બેજ કાઉન્ટ વાંચ્યા વગરના મેસેજની સંખ્યા દર્શાવે કે વાંચ્યા વગરની ચેટની સંખ્યા દર્શાવે તે પસંદ કરો.";
 
 /* A setting controlling whether muted conversations are shown in the badge count */
 "SETTINGS_NOTIFICATION_BADGE_COUNT_INCLUDES_MUTED_CONVERSATIONS" = "મ્યૂટ કરેલી ચેટ સામેલ કરો";
 
 /* Label for the option that makes the app icon badge show the number of unread chats. */
-"SETTINGS_NOTIFICATION_BADGE_COUNT_UNREAD_CHATS" = "Unread Chats";
+"SETTINGS_NOTIFICATION_BADGE_COUNT_UNREAD_CHATS" = "વાંચ્યા વગરની ચેટ";
 
 /* Label for the option that makes the app icon badge show the number of unread messages. */
-"SETTINGS_NOTIFICATION_BADGE_COUNT_UNREAD_MESSAGES" = "Unread Messages";
+"SETTINGS_NOTIFICATION_BADGE_COUNT_UNREAD_MESSAGES" = "વાંચ્યા વગરના મેસેજ";
 
 /* table section footer */
 "SETTINGS_NOTIFICATION_CONTENT_DESCRIPTION" = "જ્યારે તમારો ફોન લૉક હોય ત્યારે કોલ અને મેસેજ સંબંધી સૂચનાઓ દેખાઈ શકે છે.";
@@ -9812,34 +9839,34 @@
 "SETTINGS_VERSION" = "વર્ઝન";
 
 /* Title for the settings page controlling which notifications are still shown for muted chats. Also used as the label for the rows that link to this page. */
-"SETTINGS_WHILE_MUTED" = "While Muted";
+"SETTINGS_WHILE_MUTED" = "જ્યારે મ્યૂટ હોય";
 
 /* Label for the switch controlling whether calls ring or notify in muted chats. */
-"SETTINGS_WHILE_MUTED_CALLS" = "Calls";
+"SETTINGS_WHILE_MUTED_CALLS" = "કૉલ્સ";
 
 /* Explanation for the switch controlling whether calls ring or notify while this chat is muted. */
-"SETTINGS_WHILE_MUTED_CALLS_CHAT_FOOTER" = "Ring or notify when a call is started while this chat is muted.";
+"SETTINGS_WHILE_MUTED_CALLS_CHAT_FOOTER" = "આ ચેટ મ્યૂટ કરેલ હોય ત્યારે કૉલ શરૂ કરવામાં આવે ત્યારે રિંગ વગાડો અથવા સૂચિત કરો.";
 
 /* Explanation for the switch controlling whether calls ring or notify in muted chats. */
-"SETTINGS_WHILE_MUTED_CALLS_FOOTER" = "Ring or notify when a call is started in muted chats.";
+"SETTINGS_WHILE_MUTED_CALLS_FOOTER" = "મ્યૂટ કરેલી ચેટમાં કૉલ શરૂ કરવામાં આવે ત્યારે રિંગ વગાડો અથવા સૂચિત કરો.";
 
 /* Label for the switch controlling whether mentions of you notify in muted chats. */
-"SETTINGS_WHILE_MUTED_MENTIONS" = "Mentions";
+"SETTINGS_WHILE_MUTED_MENTIONS" = "ઉલ્લેખો";
 
 /* Explanation for the switch controlling whether mentions of you notify while this chat is muted. */
-"SETTINGS_WHILE_MUTED_MENTIONS_CHAT_FOOTER" = "Notify when you are mentioned while this chat is muted.";
+"SETTINGS_WHILE_MUTED_MENTIONS_CHAT_FOOTER" = "આ ચેટ મ્યૂટ હોય ત્યારે તમારો ઉલ્લેખ થાય ત્યારે સૂચના આપો.";
 
 /* Explanation for the switch controlling whether mentions of you notify in muted chats. */
-"SETTINGS_WHILE_MUTED_MENTIONS_FOOTER" = "Notify when you are mentioned in muted chats.";
+"SETTINGS_WHILE_MUTED_MENTIONS_FOOTER" = "તમને મ્યૂટ કરેલી ચેટમાં ઉલ્લેખ કરવામાં આવે ત્યારે સૂચિત કરો.";
 
 /* Label for the switch controlling whether replies to your messages notify in muted chats. */
-"SETTINGS_WHILE_MUTED_REPLIES" = "Replies";
+"SETTINGS_WHILE_MUTED_REPLIES" = "જવાબો";
 
 /* Explanation for the switch controlling whether replies to your messages notify while this chat is muted. */
-"SETTINGS_WHILE_MUTED_REPLIES_CHAT_FOOTER" = "Notify when someone replies to your message while this chat is muted.";
+"SETTINGS_WHILE_MUTED_REPLIES_CHAT_FOOTER" = "આ ચેટ મ્યૂટ હોય ત્યારે કોઈ તમારા મેસેજનો જવાબ આપે ત્યારે સૂચિત કરો.";
 
 /* Explanation for the switch controlling whether replies to your messages notify in muted chats. */
-"SETTINGS_WHILE_MUTED_REPLIES_FOOTER" = "Notify when someone replies to your message in muted chats.";
+"SETTINGS_WHILE_MUTED_REPLIES_FOOTER" = "મ્યૂટ કરેલી ચેટમાં કોઈ તમારા મેસેજનો જવાબ આપે ત્યારે સૂચિત કરો.";
 
 /* action sheet item to open native mail app */
 "SHARE_ACTION_MAIL" = "મેઇલ";

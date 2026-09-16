@@ -1028,7 +1028,7 @@
 "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_LABEL" = "Последняя резервная копия";
 
 /* Label for a cell on the backups landing page explaining when the user's last backup occurred. */
-"BACKUP_SETTINGS_ENABLED_LAST_BACKUP_LABEL_LANDING_PAGE" = "Last backup";
+"BACKUP_SETTINGS_ENABLED_LAST_BACKUP_LABEL_LANDING_PAGE" = "Последняя резервная копия";
 
 /* Text explaining that the user's last backup was in the past. Embeds 1:{{ the date of the backup }} and 2:{{ the time of the backup }}. */
 "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_PAST_FORMAT" = "%1$@ в %2$@";
@@ -2132,19 +2132,19 @@
 "CHAT_LIST_FILTERED_BY_UNREAD_CLEAR_BUTTON" = "Отфильтровано по непрочитанным";
 
 /* Title shown on chat list banner for restoring media from a backup is finished */
-"CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_FINISHED_TITLE" = "Восстановление вложения завершено";
+"CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_FINISHED_TITLE" = "Restore Complete";
 
 /* Progress label showing bytes restored from an on-device backup. Embeds {{ %1$@ formatted bytes restored, %2$@ formatted total bytes to restore }}. */
 "CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_PROGRESS_VIEW_PROGRESS_FORMAT" = "%1$@ из %2$@";
 
 /* Title shown on the chat list banner while restoring attachments from an on-device backup. */
-"CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_PROGRESS_VIEW_TITLE" = "Восстановление вложений";
+"CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_PROGRESS_VIEW_TITLE" = "Restoring on-device backup";
 
 /* Progress label showing the amount uploaded out of the total. Embeds {{ %1$@ bytes uploaded, %2$@ total bytes to upload }}. */
 "CHAT_LIST_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS_FORMAT" = "%1$@ из %2$@";
 
 /* Title label shown in the chat list backup progress view while backup attachments are being uploaded. */
-"CHAT_LIST_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS_TITLE" = "Копирование вложений";
+"CHAT_LIST_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS_TITLE" = "Creating on-device backup";
 
 /* Title label shown in the chat list local file backup progress view while the attachments are being prepared */
 "CHAT_LIST_LOCAL_FILE_BACKUPS_PROGRESS_PREPARING_ATTACHMENTS" = "Подготовка вложений";
@@ -3167,22 +3167,25 @@
 "DEVICE_TRANSFER_ERROR_UNSUPPORTED_VERSION" = "Обновитесь до новейшей версии Signal и попробуйте ещё раз";
 
 /* Body of the device transfer screen for pairing a new device, from the new device */
-"DEVICE_TRANSFER_PAIR_NEW_DEVICE_MESSAGE" = "To transfer your account, pair this device with your old device";
+"DEVICE_TRANSFER_PAIR_NEW_DEVICE_MESSAGE" = "Чтобы перенести учётную запись, установите сопряжение этого устройства со старым";
 
 /* Title of the device transfer screen for pairing a new device, from the new device */
-"DEVICE_TRANSFER_PAIR_NEW_DEVICE_TITLE" = "Pair With Your New Device";
+"DEVICE_TRANSFER_PAIR_NEW_DEVICE_TITLE" = "Установить сопряжение с новым устройством";
 
 /* Body of the device transfer screen for pairing a new device, from the old device */
-"DEVICE_TRANSFER_PAIR_OLD_DEVICE_MESSAGE" = "To transfer your account, pair this device with your new device";
+"DEVICE_TRANSFER_PAIR_OLD_DEVICE_MESSAGE" = "Чтобы перенести учётную запись, установите сопряжение этого устройства с новым";
 
 /* Title of the device transfer screen for pairing a new device, from the old device */
-"DEVICE_TRANSFER_PAIR_OLD_DEVICE_TITLE" = "Pair With Your Old Device";
+"DEVICE_TRANSFER_PAIR_OLD_DEVICE_TITLE" = "Установить сопряжение со старым устройством";
 
 /* The explanation on the view that shows receiving progress */
 "DEVICE_TRANSFER_RECEIVING_EXPLANATION" = "Держите оба устройства рядом друг с другом. Не выключайте ни одно из них и оставьте Signal открытым. Переносы защищены сквозным шифрованием.";
 
 /* The title on the view that shows receiving progress */
 "DEVICE_TRANSFER_RECEIVING_TITLE" = "Получение данных";
+
+/* Description in the progress view displayed during device transfer finalization. */
+"DEVICE_TRANSFER_STATUS_DEVICE_FINISHING" = "Finalizing transfer…";
 
 /* Status message on new device when cancelling transfer. */
 "DEVICE_TRANSFER_STATUS_NEW_DEVICE_CANCELLING" = "Отмена подключения к старому iPhone…";
@@ -3197,7 +3200,7 @@
 "DEVICE_TRANSFER_STATUS_NEW_DEVICE_CONNECTING_WIFI_AWARE_MESSAGE" = "Поднесите поближе своё старое устройство, убедитесь, что Wi-Fi и Bluetooth включены. Выберите это устройство из списка устройств на старом устройстве.  Если устройство не отображается на старом устройстве, выберите «Установить сопряжение с новым устройством» ниже.";
 
 /* Title for paring an old device to transfer to. */
-"DEVICE_TRANSFER_STATUS_NEW_DEVICE_PAIR_DEVICE" = "Pair This device";
+"DEVICE_TRANSFER_STATUS_NEW_DEVICE_PAIR_DEVICE" = "Установить сопряжение для этого устройства";
 
 /* Status message on new device when transfer is starting. */
 "DEVICE_TRANSFER_STATUS_NEW_DEVICE_STARTING" = "Ожидаем подключение к старому устройству…";
@@ -3227,7 +3230,7 @@
 "DEVICE_TRANSFER_STATUS_OLD_DEVICE_CONNECTING_WIFI_AWARE_MESSAGE" = "Поднесите поближе своё новое устройство и убедитесь, что Wi-Fi и Bluetooth включены.";
 
 /* Title for paring an new device to transfer to. */
-"DEVICE_TRANSFER_STATUS_OLD_DEVICE_PAIR_DEVICE" = "Pair With New device";
+"DEVICE_TRANSFER_STATUS_OLD_DEVICE_PAIR_DEVICE" = "Установить сопряжение с новым устройством";
 
 /* Status message on old device when transfer is starting. */
 "DEVICE_TRANSFER_STATUS_OLD_DEVICE_STARTING" = "Ожидаем подключение к новому устройству…";
@@ -3239,19 +3242,22 @@
 "DEVICE_TRANSFER_STATUS_OLD_DEVICE_STARTING_WIFI_AWARE_MESSAGE" = "Выберите новое устройство из списка сопряжённых устройств ниже. Если новое устройство не отображается, выберите «Сопряжение с новым устройством», чтобы начать процесс.";
 
 /* Message informing the user to continue on the old device */
-"DEVICE_TRANSFER_TUTORIAL_CONTINUE_OLD_DEVICE_MESSAGE" = "Continue on your old device";
+"DEVICE_TRANSFER_TUTORIAL_CONTINUE_OLD_DEVICE_MESSAGE" = "Продолжите на старом устройстве";
 
 /* Message informing the user to enable wifi and bluetooth on device */
-"DEVICE_TRANSFER_TUTORIAL_ENABLE_WIFI_MESSAGE" = "Enable Wifi and Bluetooth on both devices";
+"DEVICE_TRANSFER_TUTORIAL_ENABLE_WIFI_MESSAGE" = "Включите Wi-Fi и Bluetooth на обоих устройствах";
 
 /* Message informing the user to select the new device when prompted */
-"DEVICE_TRANSFER_TUTORIAL_SELECT_NEW_DEVICE_MESSAGE" = "Select your new device when prompted";
+"DEVICE_TRANSFER_TUTORIAL_SELECT_NEW_DEVICE_MESSAGE" = "При появлении запроса выберите новое устройство";
 
 /* Message informing the user to tap on the pair device button */
-"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_DEVICE_MESSAGE" = "Tap “Pair This Device” below";
+"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_DEVICE_MESSAGE" = "Нажмите «Установить сопряжение для этого устройства» ниже";
 
 /* Message informing the user to tap on the pair device button */
-"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_NEW_DEVICE_MESSAGE" = "Tap “Pair With New Decvice” below";
+"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_NEW_DEVICE_MESSAGE" = "Нажмите «Установить сопряжение с новым устройством» ниже";
+
+/* Label for a toast that confirms that local backups are disabled. */
+"DISABLE_LOCAL_FILE_BACKUPS_TOAST_CONFIRM" = "On-device backups are disabled. Turn backups on in Settings";
 
 /* table cell label in conversation settings */
 "DISAPPEARING_MESSAGES" = "Исчезающие сообщения";
@@ -3781,14 +3787,8 @@
 /* Full width label displayed when attempting to compose message */
 "EMPTY_CONTACTS_LABEL_LINE2" = "Давайте пригласим кого-нибудь";
 
-/* Button for a sheet asking the user if they want to enable local file backups */
-"ENABLE_LOCAL_FILE_BACKUPS_HERO_SHEET_BUTTON" = "Включить резервное копирование на устройстве";
-
-/* Message for a sheet asking the user if they want to enable local file backups. */
-"ENABLE_LOCAL_FILE_BACKUPS_HERO_SHEET_MESSAGE" = "Чтобы продолжить использование резервного копирования на устройстве, вам необходимо включить его для этой учётной записи. Вы можете сделать это в любое время, выбрав Настройки > Резервное копирование.";
-
-/* Title for a sheet asking the user if they want to enable local file backups. */
-"ENABLE_LOCAL_FILE_BACKUPS_HERO_SHEET_TITLE" = "Включить резервное копирование на устройстве?";
+/* Label for a toast that confirms that local backups are enabled. */
+"ENABLE_LOCAL_FILE_BACKUPS_TOAST_CONFIRM" = "On-device backups enabled";
 
 /* Call setup status label */
 "END_CALL_RESPONDER_IS_BUSY" = "Занято";
@@ -5090,10 +5090,10 @@
 "INBOX_VIEW_ARCHIVE_MODE_REMINDER" = "Архивированные чаты будут перемещены во входящие, если будет получено новое сообщение.";
 
 /* Body of prompt notifying device transfer will continue on other device. */
-"INCOMING_DEVICE_TRANSFER_CONTINUE_BODY" = "Continue transferring your account on your other device.";
+"INCOMING_DEVICE_TRANSFER_CONTINUE_BODY" = "Продолжите перенос учётной записи на другом устройстве.";
 
 /* Title of prompt notifying device transfer will continue on other device. */
-"INCOMING_DEVICE_TRANSFER_CONTINUE_TITLE" = "Continue on your other device";
+"INCOMING_DEVICE_TRANSFER_CONTINUE_TITLE" = "Продолжить на другом устройстве";
 
 /* info message text in conversation view */
 "INCOMING_VIDEO_CALL" = "Входящий видеозвонок";
@@ -5484,6 +5484,9 @@
 
 /* Shown to users while the app is loading, asking them not to close the app. */
 "LOADING_VIEW_CONTROLLER_DONT_CLOSE_APP" = "Не закрывайте Signal.";
+
+/* Body for a sheet warning users about creating a new Recovery Key. */
+"LOCAL_BACKUP_SETTINGS_CREATE_NEW_KEY_WARNING_SHEET_BODY" = "Creating a new key is only necessary if someone else knows your key. On-Device Backups must first be disabled to create a new key.\n\nAfter disabling On-Device Backups and creating a new key, you will need to re-enable On-Device Backups.";
 
 /* Body for an error sheet shown when the user's folder choice does not contain a backup file. */
 "LOCAL_BACKUPS_MISSING_BACKUP_ACTION_SHEET_BODY" = "Резервная копия Signal в выбранной папке не найдена. Пожалуйста, попробуйте другую папку.";
@@ -6791,13 +6794,13 @@
 "OUTGOING_DEVICE_TRANSFER_COMPLETE_TITLE" = "Перенос завершён";
 
 /* Body of prompt confirming the start of device transfer. */
-"OUTGOING_DEVICE_TRANSFER_CONFIRM_BODY" = "Your account will be transferred to a new device. This device will be able to see your groups and contacts, access your chats, and send messages in your name.";
+"OUTGOING_DEVICE_TRANSFER_CONFIRM_BODY" = "Ваша учётная запись будет перенесена на новое устройство. Это устройство сможет видеть ваши группы и контакты, получит доступ к вашим чатам и сможет отправлять сообщения от вашего имени.";
 
 /* Title of prompt confirming the start of device transfer. */
-"OUTGOING_DEVICE_TRANSFER_CONFIRM_TITLE" = "Transfer Account to \"%1$@\"?";
+"OUTGOING_DEVICE_TRANSFER_CONFIRM_TITLE" = "Перенести учётную запись на «%1$@»?";
 
 /* Action prompt confirming the start of device transfer. */
-"OUTGOING_DEVICE_TRANSFER_START_TRANSFER_ACTION" = "Start Transfer";
+"OUTGOING_DEVICE_TRANSFER_START_TRANSFER_ACTION" = "Начать перенос";
 
 /* info message text in conversation view */
 "OUTGOING_MISSED_VIDEO_CALL" = "Неотвеченный видеозвонок";
@@ -7981,6 +7984,12 @@
 /* Title for a sheet warning users about an incorrect recovery key. */
 "REGISTRATION_BACKUP_RESTORE_ERROR_INCORRECT_KEY_TITLE" = "Не удаётся найти резервную копию";
 
+/* Message for a sheet warning users about an invalid local backup location */
+"REGISTRATION_BACKUP_RESTORE_ERROR_LOCAL_BACKUP_LOCATION_MESSAGE" = "Your on-device backup can’t be restored. This may be because you moved or deleted your backup folder.";
+
+/* Title for a sheet warning users about an invalid local backup location */
+"REGISTRATION_BACKUP_RESTORE_ERROR_LOCAL_BACKUP_LOCATION_TITLE" = "Can’t Restore Backup";
+
 /* Body for a sheet warning users about a network error during backup restore. */
 "REGISTRATION_BACKUP_RESTORE_ERROR_NETWORK_BODY" = "В данный момент резервная копия не может быть восстановлена. Проверьте ваше подключение к интернету и попробуйте ещё раз.";
 
@@ -8263,6 +8272,18 @@
 /* Configure reactions reset button text */
 "RESET" = "Сбросить";
 
+/* Button on a sheet prompting the user to pick a folder on their device where on-device backups will be saved */
+"RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_CHOOSE_FOLDER_BUTTON" = "Choose Folder";
+
+/* Button for a sheet asking the user if they want to disable local backups */
+"RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_DISABLE_BUTTON" = "Disable Backups";
+
+/* Message for a sheet asking the user if they want to enable local file backups. */
+"RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_MESSAGE" = "To continue using on-device backups, choose a folder on your device where new backups will be saved.";
+
+/* Title for a sheet asking the user if they want to enable local file backups. */
+"RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_TITLE" = "Restore complete";
+
 /* Body for a sheet allowing users to cancel an in-progress media restore. */
 "RESTORING_MEDIA_BANNER_CANCEL_RESTORE_SHEET_1_BODY" = "Восстановление медиафайлов не завершено. Если вы решите отменить восстановление, то сможете выполнить его повторно, снова привязав это устройство.";
 
@@ -8352,6 +8373,9 @@
 
 /* Text for a toast confirming that ringing has been turned on for a call. */
 "RING_ON_CONFIRMATION_TOAST_LABEL" = "Звонки включены";
+
+/* Message shown in an action sheet when attempting to disable PIN, but Backups is enabled. */
+"ROTATE_AEP_ACTION_BACKUPS_DISABLE_REQUIRED" = "You must disable Signal Secure Backups before proceeding.";
 
 /* button title to confirm adding a recipient when their safety number has recently changed */
 "SAFETY_NUMBER_CHANGED_CONFIRM_ADD_MEMBER_ACTION" = "Всё равно добавить";
@@ -8633,10 +8657,10 @@
 "SELECT_ALL" = "Выбрать всё";
 
 /* Placeholder text for the search bar on the 'Select Contact' view */
-"SELECT_CONTACT_FOR_SHARING_SEARCH_BAR_PLACEHOLDER" = "Search";
+"SELECT_CONTACT_FOR_SHARING_SEARCH_BAR_PLACEHOLDER" = "Поиск";
 
 /* Title for the 'Select Contact' view */
-"SELECT_CONTACT_FOR_SHARING_VIEW_TITLE" = "Select Contact";
+"SELECT_CONTACT_FOR_SHARING_VIEW_TITLE" = "Выберите контакт";
 
 /* No comment provided by engineer. */
 "SEND_AGAIN_BUTTON" = "Отправить еще раз";
@@ -8775,9 +8799,6 @@
 
 /* No comment provided by engineer. */
 "SETTINGS_ADVANCED_PINS_DISABLE_PIN_ACTION" = "Отключить PIN-код";
-
-/* Message shown in an action sheet when attempting to disable PIN, but Backups is enabled. */
-"SETTINGS_ADVANCED_PINS_DISABLE_PIN_ACTION_BACKUPS_DISABLE_REQUIRED" = "Перед отключением Пин-кода необходимо отключить резервное копирование.";
 
 /* Message shown in an action sheet when attempting to disable PIN, but registration lock is enabled. */
 "SETTINGS_ADVANCED_PINS_DISABLE_PIN_ACTION_REGLOCK_DISABLE_REQUIRED" = "Перед отключением Пин-кода необходимо отключить блокировку регистрации.";
@@ -9029,7 +9050,7 @@
 "SETTINGS_LOCAL_FILE_BACKUPS_LOCAL_BACKUP_IN_PROGRESS_MESSAGE" = "Не удалось выполнить Безопасное резервное копирование, так как выполняется резервное копирование на устройстве. Попробуйте ещё раз позже.";
 
 /* Label for a progress bar while attachments are being copied for an on-device backup. Embeds 1:{{%1$@ completed bytes copied, %2$@ total bytes to copy, %3$@ percentage complete }}. */
-"SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS" = "Копирование вложений: %1$@ из %2$@ (%3$@)";
+"SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS" = "Creating on-device backup %1$@ of %2$@ (%3$@)";
 
 /* Label for a progress bar while the attachments are being prepared for an on-device backup. Embeds 1:{{ percentage complete }}. */
 "SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_PREPARING_ATTACHMENTS" = "Подготовка вложений (%1$@)";
@@ -9038,7 +9059,7 @@
 "SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_PREPARING_BACKUP" = "Подготовка резервной копии (%1$@)";
 
 /* Label for a progress bar while attachments are being restored for an on-device backup. Embeds {{%1$@ completed bytes restored, %2$@ total bytes to restore  }}. */
-"SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_RESTORING_ATTACHMENTS" = "Восстановление вложений (%1$@ из %2$@)";
+"SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_RESTORING_ATTACHMENTS" = "Restoring on-device backup (%1$@ of %2$@)";
 
 /* Message for an action sheet when a user cannot perform a local backup because a remote backup is in progress */
 "SETTINGS_LOCAL_FILE_BACKUPS_REMOTE_BACKUP_IN_PROGRESS_MESSAGE" = "Не удалось выполнить резервное копирование на устройстве, так как выполняется Безопасное резервное копирование. Попробуйте ещё раз позже.";
@@ -9060,6 +9081,12 @@
 
 /* Message shown on an action sheet when a user's backup fails to delete. Embeds {{ local file backup location }} */
 "SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_MESSAGE_FORMAT" = "Ваша резервная копия не может быть удалена из-за ошибки. Вы должны удалить папку вручную. В менеджере файлов перейдите в «%1$@» и вручную удалите папку и её содержимое. Новые резервные копии создаваться не будут.";
+
+/* Message shown on an action sheet when a user's backup fails to delete because the file isn't found. */
+"SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_NO_FILE_MESSAGE" = "We couldn't confirm your backup was deleted due to an error. This may be because you renamed or moved the folder. In the Files app, manually delete the folder and its contents. No new backups will be created.";
+
+/* Title shown on an action sheet when a user's backup fails to delete because the file isn't found */
+"SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_NO_FILE_TITLE" = "Couldn’t Confirm Deletion";
 
 /* Title shown on an action sheet when a user's backup fails to delete */
 "SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_TITLE" = "Не удалось удалить резервную копию";
@@ -9098,19 +9125,19 @@
 "SETTINGS_NAV_BAR_TITLE" = "Настройки";
 
 /* Label for the setting controlling whether the app icon badge counts unread messages or unread chats. */
-"SETTINGS_NOTIFICATION_BADGE_COUNT" = "Badge Count";
+"SETTINGS_NOTIFICATION_BADGE_COUNT" = "Значок статистики";
 
 /* Explanation for the setting controlling whether the app icon badge counts unread messages or unread chats. */
-"SETTINGS_NOTIFICATION_BADGE_COUNT_FOOTER" = "Select if the badge count displays the number of unread messages or the number of unread chats";
+"SETTINGS_NOTIFICATION_BADGE_COUNT_FOOTER" = "Выберите, что будет отображаться на значке статистики: количество непрочитанных сообщений или количество непрочитанных чатов";
 
 /* A setting controlling whether muted conversations are shown in the badge count */
 "SETTINGS_NOTIFICATION_BADGE_COUNT_INCLUDES_MUTED_CONVERSATIONS" = "Учитывать беззвучные чаты";
 
 /* Label for the option that makes the app icon badge show the number of unread chats. */
-"SETTINGS_NOTIFICATION_BADGE_COUNT_UNREAD_CHATS" = "Unread Chats";
+"SETTINGS_NOTIFICATION_BADGE_COUNT_UNREAD_CHATS" = "Непрочитанные чаты";
 
 /* Label for the option that makes the app icon badge show the number of unread messages. */
-"SETTINGS_NOTIFICATION_BADGE_COUNT_UNREAD_MESSAGES" = "Unread Messages";
+"SETTINGS_NOTIFICATION_BADGE_COUNT_UNREAD_MESSAGES" = "Непрочитанные сообщения";
 
 /* table section footer */
 "SETTINGS_NOTIFICATION_CONTENT_DESCRIPTION" = "Уведомления о звонках и сообщениях могут появляться, когда ваш телефон заблокирован.";
@@ -9812,34 +9839,34 @@
 "SETTINGS_VERSION" = "Версия";
 
 /* Title for the settings page controlling which notifications are still shown for muted chats. Also used as the label for the rows that link to this page. */
-"SETTINGS_WHILE_MUTED" = "While Muted";
+"SETTINGS_WHILE_MUTED" = "Когда уведомления отключены";
 
 /* Label for the switch controlling whether calls ring or notify in muted chats. */
-"SETTINGS_WHILE_MUTED_CALLS" = "Calls";
+"SETTINGS_WHILE_MUTED_CALLS" = "Звонки";
 
 /* Explanation for the switch controlling whether calls ring or notify while this chat is muted. */
-"SETTINGS_WHILE_MUTED_CALLS_CHAT_FOOTER" = "Ring or notify when a call is started while this chat is muted.";
+"SETTINGS_WHILE_MUTED_CALLS_CHAT_FOOTER" = "Подавать звуковой сигнал или уведомлять о входящем звонке, если в этом чате отключены уведомления.";
 
 /* Explanation for the switch controlling whether calls ring or notify in muted chats. */
-"SETTINGS_WHILE_MUTED_CALLS_FOOTER" = "Ring or notify when a call is started in muted chats.";
+"SETTINGS_WHILE_MUTED_CALLS_FOOTER" = "Подавать звуковой сигнал или уведомлять о начавшемся звонке в чатах с отключёнными уведомлениями.";
 
 /* Label for the switch controlling whether mentions of you notify in muted chats. */
-"SETTINGS_WHILE_MUTED_MENTIONS" = "Mentions";
+"SETTINGS_WHILE_MUTED_MENTIONS" = "Упоминания";
 
 /* Explanation for the switch controlling whether mentions of you notify while this chat is muted. */
-"SETTINGS_WHILE_MUTED_MENTIONS_CHAT_FOOTER" = "Notify when you are mentioned while this chat is muted.";
+"SETTINGS_WHILE_MUTED_MENTIONS_CHAT_FOOTER" = "Уведомлять, когда вас упоминают в чате с отключёнными уведомлениями.";
 
 /* Explanation for the switch controlling whether mentions of you notify in muted chats. */
-"SETTINGS_WHILE_MUTED_MENTIONS_FOOTER" = "Notify when you are mentioned in muted chats.";
+"SETTINGS_WHILE_MUTED_MENTIONS_FOOTER" = "Уведомлять, когда вас упоминают в чатах с отключёнными уведомлениями.";
 
 /* Label for the switch controlling whether replies to your messages notify in muted chats. */
-"SETTINGS_WHILE_MUTED_REPLIES" = "Replies";
+"SETTINGS_WHILE_MUTED_REPLIES" = "Ответы";
 
 /* Explanation for the switch controlling whether replies to your messages notify while this chat is muted. */
-"SETTINGS_WHILE_MUTED_REPLIES_CHAT_FOOTER" = "Notify when someone replies to your message while this chat is muted.";
+"SETTINGS_WHILE_MUTED_REPLIES_CHAT_FOOTER" = "Уведомлять, когда кто-то отвечает на ваше сообщение в чате с отключёнными уведомлениями.";
 
 /* Explanation for the switch controlling whether replies to your messages notify in muted chats. */
-"SETTINGS_WHILE_MUTED_REPLIES_FOOTER" = "Notify when someone replies to your message in muted chats.";
+"SETTINGS_WHILE_MUTED_REPLIES_FOOTER" = "Уведомлять, когда кто-то отвечает на ваше сообщение в чатах с отключёнными уведомлениями.";
 
 /* action sheet item to open native mail app */
 "SHARE_ACTION_MAIL" = "Почта";

@@ -1028,7 +1028,7 @@
 "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_LABEL" = "সর্বশেষ ব্যাকআপ";
 
 /* Label for a cell on the backups landing page explaining when the user's last backup occurred. */
-"BACKUP_SETTINGS_ENABLED_LAST_BACKUP_LABEL_LANDING_PAGE" = "Last backup";
+"BACKUP_SETTINGS_ENABLED_LAST_BACKUP_LABEL_LANDING_PAGE" = "সর্বশেষ ব্যাকআপ";
 
 /* Text explaining that the user's last backup was in the past. Embeds 1:{{ the date of the backup }} and 2:{{ the time of the backup }}. */
 "BACKUP_SETTINGS_ENABLED_LAST_BACKUP_PAST_FORMAT" = "%2$@-এ %1$@";
@@ -2132,19 +2132,19 @@
 "CHAT_LIST_FILTERED_BY_UNREAD_CLEAR_BUTTON" = "'অপঠিত ম্যাসেজ' অনুযায়ী ফিল্টার করা হয়েছে";
 
 /* Title shown on chat list banner for restoring media from a backup is finished */
-"CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_FINISHED_TITLE" = "সংযুক্তি পুনর্বহাল সম্পন্ন হয়েছে";
+"CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_FINISHED_TITLE" = "Restore Complete";
 
 /* Progress label showing bytes restored from an on-device backup. Embeds {{ %1$@ formatted bytes restored, %2$@ formatted total bytes to restore }}. */
 "CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_PROGRESS_VIEW_PROGRESS_FORMAT" = "%1$@ এর %2$@";
 
 /* Title shown on the chat list banner while restoring attachments from an on-device backup. */
-"CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_PROGRESS_VIEW_TITLE" = "সংযুক্তি পুনর্বহাল করা হচ্ছে";
+"CHAT_LIST_LOCAL_FILE_BACKUP_RESTORE_PROGRESS_VIEW_TITLE" = "Restoring on-device backup";
 
 /* Progress label showing the amount uploaded out of the total. Embeds {{ %1$@ bytes uploaded, %2$@ total bytes to upload }}. */
 "CHAT_LIST_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS_FORMAT" = "%1$@ এর %2$@";
 
 /* Title label shown in the chat list backup progress view while backup attachments are being uploaded. */
-"CHAT_LIST_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS_TITLE" = "সংযুক্তি কপি করা হচ্ছে";
+"CHAT_LIST_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS_TITLE" = "Creating on-device backup";
 
 /* Title label shown in the chat list local file backup progress view while the attachments are being prepared */
 "CHAT_LIST_LOCAL_FILE_BACKUPS_PROGRESS_PREPARING_ATTACHMENTS" = "সংযুক্তি প্রস্তুত করা হচ্ছে";
@@ -3167,22 +3167,25 @@
 "DEVICE_TRANSFER_ERROR_UNSUPPORTED_VERSION" = "Signal-এর সর্বশেষতম সংস্করণে আপডেট করুন এবং আবার চেষ্টা করুন";
 
 /* Body of the device transfer screen for pairing a new device, from the new device */
-"DEVICE_TRANSFER_PAIR_NEW_DEVICE_MESSAGE" = "To transfer your account, pair this device with your old device";
+"DEVICE_TRANSFER_PAIR_NEW_DEVICE_MESSAGE" = "আপনার অ্যাকাউন্ট ট্রান্সফার করতে, এই ডিভাইসটিকে আপনার পুরোনো ডিভাইসের সাথে পেয়ার করুন";
 
 /* Title of the device transfer screen for pairing a new device, from the new device */
-"DEVICE_TRANSFER_PAIR_NEW_DEVICE_TITLE" = "Pair With Your New Device";
+"DEVICE_TRANSFER_PAIR_NEW_DEVICE_TITLE" = "আপনার নতুন ডিভাইসের সাথে পেয়ার করুন";
 
 /* Body of the device transfer screen for pairing a new device, from the old device */
-"DEVICE_TRANSFER_PAIR_OLD_DEVICE_MESSAGE" = "To transfer your account, pair this device with your new device";
+"DEVICE_TRANSFER_PAIR_OLD_DEVICE_MESSAGE" = "আপনার অ্যাকাউন্ট ট্রান্সফার করতে, এই ডিভাইসটিকে আপনার নতুন ডিভাইসের সাথে পেয়ার করুন";
 
 /* Title of the device transfer screen for pairing a new device, from the old device */
-"DEVICE_TRANSFER_PAIR_OLD_DEVICE_TITLE" = "Pair With Your Old Device";
+"DEVICE_TRANSFER_PAIR_OLD_DEVICE_TITLE" = "আপনার পুরোনো ডিভাইসের সাথে পেয়ার করুন";
 
 /* The explanation on the view that shows receiving progress */
 "DEVICE_TRANSFER_RECEIVING_EXPLANATION" = "উভয় ডিভাইসই একে অপরের কাছে রাখুন। কোনও ডিভাইস বন্ধ করবেন না এবং Signal খোলা রাখবেন। স্থানান্তরগুলি এক প্রান্ত থেকে অপর প্রান্ত পর্যন্ত এনক্রিপ্ট করা হয়।";
 
 /* The title on the view that shows receiving progress */
 "DEVICE_TRANSFER_RECEIVING_TITLE" = "ডেটা গ্রহণ করা হচ্ছে";
+
+/* Description in the progress view displayed during device transfer finalization. */
+"DEVICE_TRANSFER_STATUS_DEVICE_FINISHING" = "Finalizing transfer…";
 
 /* Status message on new device when cancelling transfer. */
 "DEVICE_TRANSFER_STATUS_NEW_DEVICE_CANCELLING" = "পুরোনো iPhone-এর সাথে সংযোগ বাতিল করা হচ্ছে…";
@@ -3197,7 +3200,7 @@
 "DEVICE_TRANSFER_STATUS_NEW_DEVICE_CONNECTING_WIFI_AWARE_MESSAGE" = "আপনার পুরোনো ডিভাইসটি কাছে আনুন এবং নিশ্চিত করুন যে Wi-Fi ও Bluetooth চালু আছে। পুরানো ডিভাইসের লিস্ট থেকে এই ডিভাইসটি বেছে নিন।  যদি পুরানো ডিভাইসে ডিভাইসটি দেখা না যায়, তাহলে নিচে 'নতুন ডিভাইস যোগ করুন' বেছে নিন।";
 
 /* Title for paring an old device to transfer to. */
-"DEVICE_TRANSFER_STATUS_NEW_DEVICE_PAIR_DEVICE" = "Pair This device";
+"DEVICE_TRANSFER_STATUS_NEW_DEVICE_PAIR_DEVICE" = "এই ডিভাইসটি পেয়ার করুন";
 
 /* Status message on new device when transfer is starting. */
 "DEVICE_TRANSFER_STATUS_NEW_DEVICE_STARTING" = "পুরনো ডিভাইসে সংযোগের জন্য অপেক্ষা করা হচ্ছে…";
@@ -3227,7 +3230,7 @@
 "DEVICE_TRANSFER_STATUS_OLD_DEVICE_CONNECTING_WIFI_AWARE_MESSAGE" = "আপনার নতুন ডিভাইসটি কাছে আনুন এবং নিশ্চিত করুন যে Wi-Fi ও Bluetooth চালু আছে।";
 
 /* Title for paring an new device to transfer to. */
-"DEVICE_TRANSFER_STATUS_OLD_DEVICE_PAIR_DEVICE" = "Pair With New device";
+"DEVICE_TRANSFER_STATUS_OLD_DEVICE_PAIR_DEVICE" = "নতুন ডিভাইসের সাথে পেয়ার করুন";
 
 /* Status message on old device when transfer is starting. */
 "DEVICE_TRANSFER_STATUS_OLD_DEVICE_STARTING" = "নতুন ডিভাইসে সংযোগের জন্য অপেক্ষা করা হচ্ছে…";
@@ -3239,19 +3242,22 @@
 "DEVICE_TRANSFER_STATUS_OLD_DEVICE_STARTING_WIFI_AWARE_MESSAGE" = "নিচের পেয়ার করা ডিভাইসগুলোর লিস্ট থেকে নতুন ডিভাইসটি বেছে নিন। যদি নতুন ডিভাইসটি দেখা না যায়, তাহলে প্রক্রিয়াটি শুরু করতে 'একটি নতুন ডিভাইস পেয়ার করুন' বেছে নিন।";
 
 /* Message informing the user to continue on the old device */
-"DEVICE_TRANSFER_TUTORIAL_CONTINUE_OLD_DEVICE_MESSAGE" = "Continue on your old device";
+"DEVICE_TRANSFER_TUTORIAL_CONTINUE_OLD_DEVICE_MESSAGE" = "আপনার পুরোনো ডিভাইসে চালিয়ে যান";
 
 /* Message informing the user to enable wifi and bluetooth on device */
-"DEVICE_TRANSFER_TUTORIAL_ENABLE_WIFI_MESSAGE" = "Enable Wifi and Bluetooth on both devices";
+"DEVICE_TRANSFER_TUTORIAL_ENABLE_WIFI_MESSAGE" = "উভয় ডিভাইসে Wifi এবং Bluetooth চালু করুন";
 
 /* Message informing the user to select the new device when prompted */
-"DEVICE_TRANSFER_TUTORIAL_SELECT_NEW_DEVICE_MESSAGE" = "Select your new device when prompted";
+"DEVICE_TRANSFER_TUTORIAL_SELECT_NEW_DEVICE_MESSAGE" = "প্রম্পট করা হলে আপনার নতুন ডিভাইসটি বেছে নিন";
 
 /* Message informing the user to tap on the pair device button */
-"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_DEVICE_MESSAGE" = "Tap “Pair This Device” below";
+"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_DEVICE_MESSAGE" = "নিচে \"এই ডিভাইসটি পেয়ার করুন\" অপশনে ট্যাপ করুন";
 
 /* Message informing the user to tap on the pair device button */
-"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_NEW_DEVICE_MESSAGE" = "Tap “Pair With New Decvice” below";
+"DEVICE_TRANSFER_TUTORIAL_TAP_PAIR_NEW_DEVICE_MESSAGE" = "নিচে \"নতুন ডিভাইসের সাথে পেয়ার করুন\" অপশনে ট্যাপ করুন";
+
+/* Label for a toast that confirms that local backups are disabled. */
+"DISABLE_LOCAL_FILE_BACKUPS_TOAST_CONFIRM" = "On-device backups are disabled. Turn backups on in Settings";
 
 /* table cell label in conversation settings */
 "DISAPPEARING_MESSAGES" = "অদৃশ্য বার্তা";
@@ -3781,14 +3787,8 @@
 /* Full width label displayed when attempting to compose message */
 "EMPTY_CONTACTS_LABEL_LINE2" = "আপনি কাউকে আমন্ত্রণ করছেন না কেন?";
 
-/* Button for a sheet asking the user if they want to enable local file backups */
-"ENABLE_LOCAL_FILE_BACKUPS_HERO_SHEET_BUTTON" = "ডিভাইসে ব্যাকআপ চালু করুন";
-
-/* Message for a sheet asking the user if they want to enable local file backups. */
-"ENABLE_LOCAL_FILE_BACKUPS_HERO_SHEET_MESSAGE" = "ডিভাইসে ব্যাকআপ ব্যবহার চালিয়ে যেতে, আপনাকে এই অ্যাকাউন্টের জন্য সেগুলো সক্রিয় করতে হবে। আপনি সেটিংস > ব্যাকআপ থেকে যেকোনো সময় এটি করতে পারবেন।";
-
-/* Title for a sheet asking the user if they want to enable local file backups. */
-"ENABLE_LOCAL_FILE_BACKUPS_HERO_SHEET_TITLE" = "ডিভাইসে ব্যাকআপ চালু করবেন?";
+/* Label for a toast that confirms that local backups are enabled. */
+"ENABLE_LOCAL_FILE_BACKUPS_TOAST_CONFIRM" = "On-device backups enabled";
 
 /* Call setup status label */
 "END_CALL_RESPONDER_IS_BUSY" = "ব্যস্ত";
@@ -5090,10 +5090,10 @@
 "INBOX_VIEW_ARCHIVE_MODE_REMINDER" = "নতুন ম্যাসেজ আসলে আর্কাইভকৃত চ্যাট ইনবক্সে চলে যাবে।";
 
 /* Body of prompt notifying device transfer will continue on other device. */
-"INCOMING_DEVICE_TRANSFER_CONTINUE_BODY" = "Continue transferring your account on your other device.";
+"INCOMING_DEVICE_TRANSFER_CONTINUE_BODY" = "আপনার অন্য ডিভাইসে আপনার অ্যাকাউন্ট ট্রান্সফার চালিয়ে যান।";
 
 /* Title of prompt notifying device transfer will continue on other device. */
-"INCOMING_DEVICE_TRANSFER_CONTINUE_TITLE" = "Continue on your other device";
+"INCOMING_DEVICE_TRANSFER_CONTINUE_TITLE" = "আপনার অন্য ডিভাইসে চালিয়ে যান";
 
 /* info message text in conversation view */
 "INCOMING_VIDEO_CALL" = "ভিডিও কল আসছে";
@@ -5484,6 +5484,9 @@
 
 /* Shown to users while the app is loading, asking them not to close the app. */
 "LOADING_VIEW_CONTROLLER_DONT_CLOSE_APP" = "সিগন্যাল বন্ধ করবেন না।";
+
+/* Body for a sheet warning users about creating a new Recovery Key. */
+"LOCAL_BACKUP_SETTINGS_CREATE_NEW_KEY_WARNING_SHEET_BODY" = "Creating a new key is only necessary if someone else knows your key. On-Device Backups must first be disabled to create a new key.\n\nAfter disabling On-Device Backups and creating a new key, you will need to re-enable On-Device Backups.";
 
 /* Body for an error sheet shown when the user's folder choice does not contain a backup file. */
 "LOCAL_BACKUPS_MISSING_BACKUP_ACTION_SHEET_BODY" = "নির্বাচিত ফোল্ডারে কোনো Signal ব্যাকআপ পাওয়া যায়নি। অনুগ্রহ করে অন্য একটি ফোল্ডার দিয়ে চেষ্টা করুন।";
@@ -6791,13 +6794,13 @@
 "OUTGOING_DEVICE_TRANSFER_COMPLETE_TITLE" = "ট্রান্সফার শেষ হয়েছে";
 
 /* Body of prompt confirming the start of device transfer. */
-"OUTGOING_DEVICE_TRANSFER_CONFIRM_BODY" = "Your account will be transferred to a new device. This device will be able to see your groups and contacts, access your chats, and send messages in your name.";
+"OUTGOING_DEVICE_TRANSFER_CONFIRM_BODY" = "আপনার অ্যাকাউন্টটি একটি নতুন ডিভাইসে ট্রান্সফার হবে। এই ডিভাইসটি আপনার গ্ৰুপ ও কন্টাক্ট দেখতে পাবে, আপনার চ্যাট অ্যাক্সেস করতে পারবে এবং আপনার নামে মেসেজ পাঠাতে সক্ষম হবে।";
 
 /* Title of prompt confirming the start of device transfer. */
-"OUTGOING_DEVICE_TRANSFER_CONFIRM_TITLE" = "Transfer Account to \"%1$@\"?";
+"OUTGOING_DEVICE_TRANSFER_CONFIRM_TITLE" = "অ্যাকাউন্ট \"%1$@\"-এ ট্রান্সফার করবেন?";
 
 /* Action prompt confirming the start of device transfer. */
-"OUTGOING_DEVICE_TRANSFER_START_TRANSFER_ACTION" = "Start Transfer";
+"OUTGOING_DEVICE_TRANSFER_START_TRANSFER_ACTION" = "ট্রান্সফার শুরু করুন";
 
 /* info message text in conversation view */
 "OUTGOING_MISSED_VIDEO_CALL" = "উত্তর না দেওয়া ভিডিও কল";
@@ -7981,6 +7984,12 @@
 /* Title for a sheet warning users about an incorrect recovery key. */
 "REGISTRATION_BACKUP_RESTORE_ERROR_INCORRECT_KEY_TITLE" = "ব্যাকআপ খুঁজে পাওয়া যাচ্ছে না";
 
+/* Message for a sheet warning users about an invalid local backup location */
+"REGISTRATION_BACKUP_RESTORE_ERROR_LOCAL_BACKUP_LOCATION_MESSAGE" = "Your on-device backup can’t be restored. This may be because you moved or deleted your backup folder.";
+
+/* Title for a sheet warning users about an invalid local backup location */
+"REGISTRATION_BACKUP_RESTORE_ERROR_LOCAL_BACKUP_LOCATION_TITLE" = "Can’t Restore Backup";
+
 /* Body for a sheet warning users about a network error during backup restore. */
 "REGISTRATION_BACKUP_RESTORE_ERROR_NETWORK_BODY" = "আপনার ব্যাকআপ এখনই পুনর্বহাল করা যাবে না। আপনার ইন্টারনেট সংযোগ ঠিক আছে কি না দেখুন এবং আবার চেষ্টা করুন।";
 
@@ -8263,6 +8272,18 @@
 /* Configure reactions reset button text */
 "RESET" = "রিসেট করুন";
 
+/* Button on a sheet prompting the user to pick a folder on their device where on-device backups will be saved */
+"RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_CHOOSE_FOLDER_BUTTON" = "Choose Folder";
+
+/* Button for a sheet asking the user if they want to disable local backups */
+"RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_DISABLE_BUTTON" = "Disable Backups";
+
+/* Message for a sheet asking the user if they want to enable local file backups. */
+"RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_MESSAGE" = "To continue using on-device backups, choose a folder on your device where new backups will be saved.";
+
+/* Title for a sheet asking the user if they want to enable local file backups. */
+"RESTORE_COMPLETE_LOCAL_FILE_BACKUPS_HERO_SHEET_TITLE" = "Restore complete";
+
 /* Body for a sheet allowing users to cancel an in-progress media restore. */
 "RESTORING_MEDIA_BANNER_CANCEL_RESTORE_SHEET_1_BODY" = "আপনার মিডিয়া পুনর্বহাল সম্পন্ন হয়নি। যদি আপনি বাতিল করতে চান, তাহলে এই ডিভাইসটি পুনরায় লিংক করে এটি আবার পুনর্বহাল করতে পারবেন।";
 
@@ -8352,6 +8373,9 @@
 
 /* Text for a toast confirming that ringing has been turned on for a call. */
 "RING_ON_CONFIRMATION_TOAST_LABEL" = "রিং চালু করুন";
+
+/* Message shown in an action sheet when attempting to disable PIN, but Backups is enabled. */
+"ROTATE_AEP_ACTION_BACKUPS_DISABLE_REQUIRED" = "You must disable Signal Secure Backups before proceeding.";
 
 /* button title to confirm adding a recipient when their safety number has recently changed */
 "SAFETY_NUMBER_CHANGED_CONFIRM_ADD_MEMBER_ACTION" = "যাই হোক যোগ করুন";
@@ -8633,10 +8657,10 @@
 "SELECT_ALL" = "সবগুলো নির্বাচন";
 
 /* Placeholder text for the search bar on the 'Select Contact' view */
-"SELECT_CONTACT_FOR_SHARING_SEARCH_BAR_PLACEHOLDER" = "Search";
+"SELECT_CONTACT_FOR_SHARING_SEARCH_BAR_PLACEHOLDER" = "অনুসন্ধান";
 
 /* Title for the 'Select Contact' view */
-"SELECT_CONTACT_FOR_SHARING_VIEW_TITLE" = "Select Contact";
+"SELECT_CONTACT_FOR_SHARING_VIEW_TITLE" = "পরিচিতি নির্বাচন করুন";
 
 /* No comment provided by engineer. */
 "SEND_AGAIN_BUTTON" = "আবার পাঠান";
@@ -8775,9 +8799,6 @@
 
 /* No comment provided by engineer. */
 "SETTINGS_ADVANCED_PINS_DISABLE_PIN_ACTION" = "পিন নিষ্ক্রিয় করুন";
-
-/* Message shown in an action sheet when attempting to disable PIN, but Backups is enabled. */
-"SETTINGS_ADVANCED_PINS_DISABLE_PIN_ACTION_BACKUPS_DISABLE_REQUIRED" = "আপনার পিন নিষ্ক্রিয় করার আগে আপনাকে অবশ্যই ব্যাকআপ নিষ্ক্রিয় করতে হবে।";
 
 /* Message shown in an action sheet when attempting to disable PIN, but registration lock is enabled. */
 "SETTINGS_ADVANCED_PINS_DISABLE_PIN_ACTION_REGLOCK_DISABLE_REQUIRED" = "আপনার পিন নিষ্ক্রিয় করার আগে আপনাকে অবশ্যই রেজিস্ট্রেশন লক নিষ্ক্রিয় করতে হবে।";
@@ -9029,7 +9050,7 @@
 "SETTINGS_LOCAL_FILE_BACKUPS_LOCAL_BACKUP_IN_PROGRESS_MESSAGE" = "ডিভাইসে একটি ব্যাকআপ চলমান থাকায় Signal নিরাপদ ব্যাকআপ সম্পন্ন করা সম্ভব হচ্ছে না। পরে আবার চেষ্টা করুন।";
 
 /* Label for a progress bar while attachments are being copied for an on-device backup. Embeds 1:{{%1$@ completed bytes copied, %2$@ total bytes to copy, %3$@ percentage complete }}. */
-"SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS" = "সংযুক্তি কপি করা হচ্ছে %1$@ এর মধ্যে %2$@ (%3$@)";
+"SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_COPYING_ATTACHMENTS" = "Creating on-device backup %1$@ of %2$@ (%3$@)";
 
 /* Label for a progress bar while the attachments are being prepared for an on-device backup. Embeds 1:{{ percentage complete }}. */
 "SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_PREPARING_ATTACHMENTS" = "সংযুক্তি প্রস্তুত করা হচ্ছে (%1$@)";
@@ -9038,7 +9059,7 @@
 "SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_PREPARING_BACKUP" = "ব্যাকআপ প্রস্তুত করা হচ্ছে (%1$@)";
 
 /* Label for a progress bar while attachments are being restored for an on-device backup. Embeds {{%1$@ completed bytes restored, %2$@ total bytes to restore  }}. */
-"SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_RESTORING_ATTACHMENTS" = "সংযুক্তি পুনরুদ্ধার করা হচ্ছে (%2$@-এর মধ্যে %1$@)";
+"SETTINGS_LOCAL_FILE_BACKUPS_PROGRESS_RESTORING_ATTACHMENTS" = "Restoring on-device backup (%1$@ of %2$@)";
 
 /* Message for an action sheet when a user cannot perform a local backup because a remote backup is in progress */
 "SETTINGS_LOCAL_FILE_BACKUPS_REMOTE_BACKUP_IN_PROGRESS_MESSAGE" = "একটি Signal নিরাপদ ব্যাকআপ চালু থাকায় ডিভাইসে ব্যাকআপ নেওয়া সম্ভব নয়। পরে আবার চেষ্টা করুন।";
@@ -9060,6 +9081,12 @@
 
 /* Message shown on an action sheet when a user's backup fails to delete. Embeds {{ local file backup location }} */
 "SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_MESSAGE_FORMAT" = "একটি ত্রুটির কারণে আপনার ব্যাকআপটি মুছে ফেলা যায়নি। আপনাকে অবশ্যই ফোল্ডারটি ম্যানুয়ালি মুছতে হবে। ফাইলস অ্যাপে, “%1$@”-এ যান এবং ফোল্ডার ও এর ভেতরের সবকিছু ম্যানুয়ালি মুছে ফেলুন। কোনো নতুন ব্যাকআপ তৈরি করা হবে না।";
+
+/* Message shown on an action sheet when a user's backup fails to delete because the file isn't found. */
+"SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_NO_FILE_MESSAGE" = "We couldn't confirm your backup was deleted due to an error. This may be because you renamed or moved the folder. In the Files app, manually delete the folder and its contents. No new backups will be created.";
+
+/* Title shown on an action sheet when a user's backup fails to delete because the file isn't found */
+"SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_NO_FILE_TITLE" = "Couldn’t Confirm Deletion";
 
 /* Title shown on an action sheet when a user's backup fails to delete */
 "SETTINGS_LOCAL_FILE_BACKUPS_TURNING_OFF_ERROR_TITLE" = "ব্যাকআপ মুছে ফেলা যায়নি";
@@ -9098,19 +9125,19 @@
 "SETTINGS_NAV_BAR_TITLE" = "সেটিংস";
 
 /* Label for the setting controlling whether the app icon badge counts unread messages or unread chats. */
-"SETTINGS_NOTIFICATION_BADGE_COUNT" = "Badge Count";
+"SETTINGS_NOTIFICATION_BADGE_COUNT" = "ব্যাজের সংখ্যা";
 
 /* Explanation for the setting controlling whether the app icon badge counts unread messages or unread chats. */
-"SETTINGS_NOTIFICATION_BADGE_COUNT_FOOTER" = "Select if the badge count displays the number of unread messages or the number of unread chats";
+"SETTINGS_NOTIFICATION_BADGE_COUNT_FOOTER" = "ব্যাজ কাউন্টটি পড়া হয়নি এমন মেসেজের অপঠিত বার্তার সংখ্যা দেখাবে নাকি পড়া হয়নি এমন চ্যাটের সংখ্যা দেখাবে, তা বেছে নিন";
 
 /* A setting controlling whether muted conversations are shown in the badge count */
 "SETTINGS_NOTIFICATION_BADGE_COUNT_INCLUDES_MUTED_CONVERSATIONS" = "মিউট করা চ্যাট অন্তর্ভুক্ত করুন";
 
 /* Label for the option that makes the app icon badge show the number of unread chats. */
-"SETTINGS_NOTIFICATION_BADGE_COUNT_UNREAD_CHATS" = "Unread Chats";
+"SETTINGS_NOTIFICATION_BADGE_COUNT_UNREAD_CHATS" = "পড়া হয়নি এমন চ্যাট";
 
 /* Label for the option that makes the app icon badge show the number of unread messages. */
-"SETTINGS_NOTIFICATION_BADGE_COUNT_UNREAD_MESSAGES" = "Unread Messages";
+"SETTINGS_NOTIFICATION_BADGE_COUNT_UNREAD_MESSAGES" = "পড়া হয়নি এমন মেসেজ";
 
 /* table section footer */
 "SETTINGS_NOTIFICATION_CONTENT_DESCRIPTION" = "আপনার ফোন লক থাকা অবস্থায় কল ও মেসেজের নোটিফিকেশনগুলি উপস্থিত হতে পারে।";
@@ -9812,34 +9839,34 @@
 "SETTINGS_VERSION" = "সংস্করণ";
 
 /* Title for the settings page controlling which notifications are still shown for muted chats. Also used as the label for the rows that link to this page. */
-"SETTINGS_WHILE_MUTED" = "While Muted";
+"SETTINGS_WHILE_MUTED" = "মিউট থাকা অবস্থায়";
 
 /* Label for the switch controlling whether calls ring or notify in muted chats. */
-"SETTINGS_WHILE_MUTED_CALLS" = "Calls";
+"SETTINGS_WHILE_MUTED_CALLS" = "কল";
 
 /* Explanation for the switch controlling whether calls ring or notify while this chat is muted. */
-"SETTINGS_WHILE_MUTED_CALLS_CHAT_FOOTER" = "Ring or notify when a call is started while this chat is muted.";
+"SETTINGS_WHILE_MUTED_CALLS_CHAT_FOOTER" = "এই চ্যাটটি মিউট থাকা অবস্থায় কল শুরু হলে রিং বা নোটিফাই করুন।";
 
 /* Explanation for the switch controlling whether calls ring or notify in muted chats. */
-"SETTINGS_WHILE_MUTED_CALLS_FOOTER" = "Ring or notify when a call is started in muted chats.";
+"SETTINGS_WHILE_MUTED_CALLS_FOOTER" = "মিউট করা চ্যাটে কল শুরু হলে রিং বা নোটিফাই করুন।";
 
 /* Label for the switch controlling whether mentions of you notify in muted chats. */
-"SETTINGS_WHILE_MUTED_MENTIONS" = "Mentions";
+"SETTINGS_WHILE_MUTED_MENTIONS" = "উল্লেখ";
 
 /* Explanation for the switch controlling whether mentions of you notify while this chat is muted. */
-"SETTINGS_WHILE_MUTED_MENTIONS_CHAT_FOOTER" = "Notify when you are mentioned while this chat is muted.";
+"SETTINGS_WHILE_MUTED_MENTIONS_CHAT_FOOTER" = "এই চ্যাটটি মিউট থাকা অবস্থায় আপনাকে মেনশন করা হলে নোটিফাই করুন।";
 
 /* Explanation for the switch controlling whether mentions of you notify in muted chats. */
-"SETTINGS_WHILE_MUTED_MENTIONS_FOOTER" = "Notify when you are mentioned in muted chats.";
+"SETTINGS_WHILE_MUTED_MENTIONS_FOOTER" = "মিউট করা চ্যাটে আপনাকে মেনশন করা হলে নোটিফাই করুন।";
 
 /* Label for the switch controlling whether replies to your messages notify in muted chats. */
-"SETTINGS_WHILE_MUTED_REPLIES" = "Replies";
+"SETTINGS_WHILE_MUTED_REPLIES" = "রিপ্লাই";
 
 /* Explanation for the switch controlling whether replies to your messages notify while this chat is muted. */
-"SETTINGS_WHILE_MUTED_REPLIES_CHAT_FOOTER" = "Notify when someone replies to your message while this chat is muted.";
+"SETTINGS_WHILE_MUTED_REPLIES_CHAT_FOOTER" = "এই চ্যাটটি মিউট থাকা অবস্থায় কেউ আপনার মেসেজের উত্তর দিলে নোটিফাই করুন।";
 
 /* Explanation for the switch controlling whether replies to your messages notify in muted chats. */
-"SETTINGS_WHILE_MUTED_REPLIES_FOOTER" = "Notify when someone replies to your message in muted chats.";
+"SETTINGS_WHILE_MUTED_REPLIES_FOOTER" = "মিউট করা চ্যাটে কেউ আপনার মেসেজের উত্তর দিলে নোটিফাই করুন।";
 
 /* action sheet item to open native mail app */
 "SHARE_ACTION_MAIL" = "মেইল";
