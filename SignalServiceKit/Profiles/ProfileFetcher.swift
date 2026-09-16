@@ -43,7 +43,7 @@ extension ProfileFetcher {
     public func fetchProfile(
         for serviceId: ServiceId,
         context: ProfileFetchContext = ProfileFetchContext(),
-        authedAccount: AuthedAccount = .implicit(),
+        authedAccount: AuthedAccount = .implicit,
     ) async throws -> FetchedProfile {
         return try await fetchProfileImpl(for: serviceId, context: context, authedAccount: authedAccount)
     }
@@ -51,7 +51,7 @@ extension ProfileFetcher {
     func fetchProfileSync(
         for serviceId: ServiceId,
         context: ProfileFetchContext = ProfileFetchContext(),
-        authedAccount: AuthedAccount = .implicit(),
+        authedAccount: AuthedAccount = .implicit,
     ) -> Task<FetchedProfile, Error> {
         return fetchProfileSyncImpl(for: serviceId, context: context, authedAccount: authedAccount)
     }

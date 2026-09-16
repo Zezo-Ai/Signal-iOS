@@ -4819,12 +4819,12 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         }
 
         var authedAccount: AuthedAccount {
-            return AuthedAccount.explicit(
+            return .explicit(AuthedAccount.Explicit(
                 aci: aci,
                 phoneNumber: LocalIdentifiers.PhoneNumber(e164: e164, pni: pni),
                 deviceId: .primary,
                 authPassword: authPassword,
-            )
+            ))
         }
 
         var chatServiceAuth: ChatServiceAuth {

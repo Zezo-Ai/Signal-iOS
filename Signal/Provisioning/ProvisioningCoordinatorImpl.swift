@@ -350,7 +350,7 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
 
             self.svr.storeKeys(
                 fromProvisioningMessage: provisionMessage,
-                authedAccount: AuthedAccount(.explicit(authedAccount)),
+                authedAccount: .explicit(authedAccount),
                 tx: tx,
             )
 
@@ -493,7 +493,7 @@ class ProvisioningCoordinatorImpl: ProvisioningCoordinator {
         didLinkNSync: Bool,
     ) async throws(CompleteProvisioningError) {
         func doSyncsAndRestores() async throws(CompleteProvisioningError) {
-            try await performInitialStorageServiceRestore(authedAccount: AuthedAccount(.explicit(authedAccount)))
+            try await performInitialStorageServiceRestore(authedAccount: .explicit(authedAccount))
             try await performInitialContactSync(didLinkNSync: didLinkNSync)
         }
 

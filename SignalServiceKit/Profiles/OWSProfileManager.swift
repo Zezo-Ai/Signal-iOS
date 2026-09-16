@@ -39,7 +39,7 @@ public class OWSProfileManager: ProfileManagerProtocol {
             Task {
                 await self.rotateProfileKeyIfNecessary()
             }
-            self.updateProfileOnServiceIfNecessary(authedAccount: .implicit())
+            self.updateProfileOnServiceIfNecessary(authedAccount: .implicit)
             Self.updateStorageServiceIfNecessary()
         }
 
@@ -250,13 +250,13 @@ public class OWSProfileManager: ProfileManagerProtocol {
     @MainActor
     private func applicationDidBecomeActive(_ notification: NSNotification) {
         // TODO: Sync if necessary.
-        updateProfileOnServiceIfNecessary(authedAccount: .implicit())
+        updateProfileOnServiceIfNecessary(authedAccount: .implicit)
     }
 
     @objc
     @MainActor
     private func reachabilityChanged(_ notification: NSNotification) {
-        updateProfileOnServiceIfNecessary(authedAccount: .implicit())
+        updateProfileOnServiceIfNecessary(authedAccount: .implicit)
     }
 
     @objc
@@ -514,7 +514,7 @@ extension OWSProfileManager: ProfileManager {
             return
         }
 
-        await self.rotateProfileKey(triggers: triggers, authedAccount: AuthedAccount.implicit())
+        await self.rotateProfileKey(triggers: triggers, authedAccount: .implicit)
     }
 
     private enum RotateProfileKeyTrigger {
@@ -855,7 +855,7 @@ extension OWSProfileManager: ProfileManager {
                 shouldFetchProfile: true,
                 userProfileWriter: userProfileWriter,
                 localIdentifiers: localIdentifiers,
-                authedAccount: .implicit(),
+                authedAccount: .implicit,
                 tx: tx,
             )
         }
@@ -870,7 +870,7 @@ extension OWSProfileManager: ProfileManager {
                 shouldFetchProfile: true,
                 userProfileWriter: userProfileWriter,
                 localIdentifiers: localIdentifiers,
-                authedAccount: .implicit(),
+                authedAccount: .implicit,
                 tx: tx,
             )
         }
@@ -1015,8 +1015,8 @@ extension OWSProfileManager: ProfileManager {
                 currentRequest = nil
             }
 
-            let authedAccount = currentRequest?.authedAccount ?? .implicit()
-            switch authedAccount.info {
+            let authedAccount = currentRequest?.authedAccount ?? .implicit
+            switch authedAccount {
             case .implicit where isRegistered, .explicit:
                 mutableRequests = Array(mutableRequests.dropFirst())
                 return (canceledRequests, (currentRequest?.requestParameters, authedAccount))

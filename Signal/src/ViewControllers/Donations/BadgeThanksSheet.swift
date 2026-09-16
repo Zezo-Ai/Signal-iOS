@@ -225,7 +225,7 @@ class BadgeThanksSheet: OWSTableSheetViewController {
                 visibleBadgeIds: .setTo(visibleBadgeIds),
                 unsavedRotatedProfileKey: nil,
                 userProfileWriter: .localUser,
-                authedAccount: .implicit(),
+                authedAccount: .implicit,
                 tx: tx,
             )
         }.awaitable()

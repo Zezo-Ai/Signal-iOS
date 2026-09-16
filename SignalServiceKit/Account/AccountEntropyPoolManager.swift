@@ -176,7 +176,7 @@ class AccountEntropyPoolManagerImpl: AccountEntropyPoolManager {
         // reglock and reg recovery password downstream of the master key
         // changing.
         accountAttributesUpdater.scheduleAccountAttributesUpdate(
-            authedAccount: .implicit(),
+            authedAccount: .implicit,
             tx: tx,
         )
 
@@ -190,7 +190,7 @@ class AccountEntropyPoolManagerImpl: AccountEntropyPoolManager {
         Task {
             try? await storageServiceManager.rotateManifest(
                 mode: rotateRelatedNonDerivedKeys ? .alsoRotatingRecords : .preservingRecordsIfPossible,
-                authedAccount: .implicit(),
+                authedAccount: .implicit,
             )
 
             // Sync our new keys with linked devices, but wait until the storage

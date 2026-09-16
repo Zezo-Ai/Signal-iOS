@@ -201,16 +201,16 @@ public class BackupArchiveAvatarFetcher {
                 do {
                     if registeredState.localIdentifiers.contains(serviceId: serviceId) {
                         _ = try await profileManager.fetchLocalUsersProfile(
-                            authedAccount: .implicit(),
+                            authedAccount: .implicit,
                         )
                         try await profileManager.downloadAndDecryptLocalUserAvatarIfNeeded(
-                            authedAccount: .implicit(),
+                            authedAccount: .implicit,
                         )
                     } else {
                         _ = try await profileFetcher.fetchProfileImpl(
                             for: serviceId,
                             context: .init(isOpportunistic: true, userProfileWriter: .backupRestore),
-                            authedAccount: .implicit(),
+                            authedAccount: .implicit,
                         )
                     }
                     return .success

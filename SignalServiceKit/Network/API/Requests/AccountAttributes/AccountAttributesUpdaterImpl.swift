@@ -56,7 +56,7 @@ public class AccountAttributesUpdaterImpl: AccountAttributesUpdater {
             mustBeRegistered: true,
             mustBeConnected: true,
             operation: { () throws -> Bool in
-                return try await self.updateAccountAttributesIfNeeded(authedAccount: .implicit())
+                return try await self.updateAccountAttributesIfNeeded(authedAccount: .implicit)
             },
             handleResult: { result in
                 switch result {

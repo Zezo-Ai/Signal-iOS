@@ -1038,7 +1038,7 @@ public final class MessageReceiver {
             shouldFetchProfile: true,
             userProfileWriter: .localUser,
             localIdentifiers: localIdentifiers,
-            authedAccount: .implicit(),
+            authedAccount: .implicit,
             tx: tx,
         )
     }

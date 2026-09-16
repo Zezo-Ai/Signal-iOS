@@ -145,7 +145,7 @@ public class MessageSenderImpl: MessageSender, DeviceMessageBuilder {
             canUseStoryAuth: false,
             accessKey: sealedSenderParameters?.unidentifiedAccess?.value,
             endorsement: sealedSenderParameters?.endorsement,
-            authedAccount: .implicit(),
+            authedAccount: .implicit,
             options: requestOptions,
         )
 

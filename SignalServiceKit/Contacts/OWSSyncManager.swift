@@ -238,7 +238,7 @@ extension OWSSyncManager: SyncManagerProtocol, SyncManagerProtocolSwift {
         do {
             try DependenciesBridge.shared.svr.storeKeys(
                 fromKeysSyncMessage: syncMessage,
-                authedAccount: .implicit(),
+                authedAccount: .implicit,
                 tx: transaction,
             )
         } catch {
@@ -271,14 +271,14 @@ extension OWSSyncManager: SyncManagerProtocol, SyncManagerProtocolSwift {
             Task {
                 defer { pendingTask.complete() }
                 do {
-                    _ = try await SSKEnvironment.shared.profileManagerRef.fetchLocalUsersProfile(authedAccount: .implicit())
+                    _ = try await SSKEnvironment.shared.profileManagerRef.fetchLocalUsersProfile(authedAccount: .implicit)
                 } catch {
                     Logger.error("Failed to fetch local user profile: \(error)")
                 }
             }
         case .storageManifest:
             SSKEnvironment.shared.storageServiceManagerRef.restoreOrCreateManifestIfNecessary(
-                authedAccount: .implicit(),
+                authedAccount: .implicit,
                 masterKeySource: .implicit,
             )
         case .subscriptionStatus:

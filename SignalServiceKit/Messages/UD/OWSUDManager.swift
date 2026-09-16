@@ -402,7 +402,7 @@ public class OWSUDManagerImpl: OWSUDManager {
         self.keyValueStore.setBool(value, key: self.kUDUnrestrictedAccessKey, transaction: tx)
 
         let accountAttributesUpdater = DependenciesBridge.shared.accountAttributesUpdater
-        accountAttributesUpdater.scheduleAccountAttributesUpdate(authedAccount: .implicit(), tx: tx)
+        accountAttributesUpdater.scheduleAccountAttributesUpdate(authedAccount: .implicit, tx: tx)
     }
 
     // MARK: - Phone Number Sharing
@@ -430,7 +430,7 @@ public class OWSUDManagerImpl: OWSUDManager {
             _ = SSKEnvironment.shared.profileManagerRef.reuploadLocalProfile(
                 unsavedRotatedProfileKey: nil,
                 mustReuploadAvatar: false,
-                authedAccount: .implicit(),
+                authedAccount: .implicit,
                 tx: tx,
             )
         }

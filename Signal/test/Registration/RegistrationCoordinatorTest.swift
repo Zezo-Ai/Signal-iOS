@@ -379,12 +379,12 @@ public class RegistrationCoordinatorTest {
         ))
 
         func expectedAuthedAccount() -> AuthedAccount {
-            return .explicit(
+            return .explicit(AuthedAccount.Explicit(
                 aci: identityResponse.aci,
                 phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: identityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
-            )
+            ))
         }
 
         // When registered, we should create pre-keys.
@@ -514,12 +514,12 @@ public class RegistrationCoordinatorTest {
         ))
 
         func expectedAuthedAccount() -> AuthedAccount {
-            return .explicit(
+            return .explicit(AuthedAccount.Explicit(
                 aci: identityResponse.aci,
                 phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: identityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
-            )
+            ))
         }
 
         // When registered, we should create pre-keys.
@@ -885,12 +885,12 @@ public class RegistrationCoordinatorTest {
         )
 
         func expectedAuthedAccount() -> AuthedAccount {
-            return .explicit(
+            return .explicit(AuthedAccount.Explicit(
                 aci: identityResponse.aci,
                 phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: identityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
-            )
+            ))
         }
 
         // When registered, it should try and sync pre-keys.
@@ -1230,12 +1230,12 @@ public class RegistrationCoordinatorTest {
         ))
 
         func expectedAuthedAccount() -> AuthedAccount {
-            return .explicit(
+            return .explicit(AuthedAccount.Explicit(
                 aci: accountIdentityResponse.aci,
                 phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: accountIdentityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
-            )
+            ))
         }
 
         // When registered, we should create pre-keys.
@@ -1554,12 +1554,12 @@ public class RegistrationCoordinatorTest {
         )
 
         func expectedAuthedAccount() -> AuthedAccount {
-            return .explicit(
+            return .explicit(AuthedAccount.Explicit(
                 aci: accountIdentityResponse.aci,
                 phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: accountIdentityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
-            )
+            ))
         }
 
         // When registered, it should try and create pre-keys.
@@ -1823,12 +1823,12 @@ public class RegistrationCoordinatorTest {
         )
 
         func expectedAuthedAccount() -> AuthedAccount {
-            return .explicit(
+            return .explicit(AuthedAccount.Explicit(
                 aci: accountIdentityResponse.aci,
                 phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: accountIdentityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
-            )
+            ))
         }
 
         // Once we are registered, we should finalize prekeys.
@@ -2848,12 +2848,12 @@ public class RegistrationCoordinatorTest {
         )
 
         func expectedAuthedAccount() -> AuthedAccount {
-            return .explicit(
+            return .explicit(AuthedAccount.Explicit(
                 aci: accountIdentityResponse.aci,
                 phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: accountIdentityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
-            )
+            ))
         }
 
         // Once we are registered, we should finalize prekeys.
@@ -2968,12 +2968,12 @@ public class RegistrationCoordinatorTest {
         )
 
         func expectedAuthedAccount() -> AuthedAccount {
-            return .explicit(
+            return .explicit(AuthedAccount.Explicit(
                 aci: accountIdentityResponse.aci,
                 phoneNumber: LocalIdentifiers.PhoneNumber(e164: Stubs.e164, pni: accountIdentityResponse.pni),
                 deviceId: .primary,
                 authPassword: authPassword,
-            )
+            ))
         }
 
         // Once we are registered, we should finalize prekeys.

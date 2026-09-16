@@ -2320,7 +2320,7 @@ extension AppSetup.FinalContinuation {
                 PhoneNumberDiscoverabilityManager.Constants.discoverabilityDefault,
                 updateAccountAttributes: true,
                 updateStorageService: true,
-                authedAccount: .implicit(),
+                authedAccount: .implicit,
                 tx: tx,
             )
         }

@@ -1306,7 +1306,7 @@ public class GroupManager: NSObject {
         // If we don't have a local profile key credential we should first
         // check if it is simply expired, by asking for a new one (which we
         // would get as part of fetching our local profile).
-        _ = try await SSKEnvironment.shared.profileManagerRef.fetchLocalUsersProfile(authedAccount: .implicit())
+        _ = try await SSKEnvironment.shared.profileManagerRef.fetchLocalUsersProfile(authedAccount: .implicit)
 
         guard !hasProfileKeyCredential() else {
             return
@@ -1323,7 +1323,7 @@ public class GroupManager: NSObject {
             SSKEnvironment.shared.profileManagerRef.reuploadLocalProfile(
                 unsavedRotatedProfileKey: nil,
                 mustReuploadAvatar: false,
-                authedAccount: .implicit(),
+                authedAccount: .implicit,
                 tx: tx,
             )
         }

@@ -78,7 +78,7 @@ public class RegistrationIdMismatchManagerImpl: RegistrationIdMismatchManager {
             canUseStoryAuth: false,
             accessKey: udAccess,
             endorsement: nil,
-            authedAccount: .implicit(),
+            authedAccount: .implicit,
             options: [.allowIdentifiedFallback],
         )
 

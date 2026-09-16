@@ -790,10 +790,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             mustBeConnected: true,
             operation: {
                 do {
-                    _ = try await profileManager.fetchLocalUsersProfile(authedAccount: .implicit())
+                    _ = try await profileManager.fetchLocalUsersProfile(authedAccount: .implicit)
                     // Don't remove this -- fetching the local user's profile is special-cased
                     // and won't download the avatar via the normal mechanism.
-                    try await profileManager.downloadAndDecryptLocalUserAvatarIfNeeded(authedAccount: .implicit())
+                    try await profileManager.downloadAndDecryptLocalUserAvatarIfNeeded(authedAccount: .implicit)
                 } catch {
                     Logger.warn("Couldn't fetch local user profile or avatar: \(error)")
                     throw error

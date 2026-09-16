@@ -6,7 +6,10 @@
 import Foundation
 public import LibSignalClient
 
-public class AuthedAccount {
+public enum AuthedAccount {
+    /// Will use info present on TSAccountManager
+    case implicit
+    case explicit(Explicit)
 
     public struct Explicit {
         public let aci: Aci
@@ -28,38 +31,8 @@ public class AuthedAccount {
         }
     }
 
-    public enum Info {
-        case implicit
-        case explicit(Explicit)
-    }
-
-    public let info: Info
-
-    public init(_ info: Info) {
-        self.info = info
-    }
-
-    /// Will use info present on TSAccountManager
-    public static func implicit() -> AuthedAccount {
-        return AuthedAccount(.implicit)
-    }
-
-    public static func explicit(
-        aci: Aci,
-        phoneNumber: LocalIdentifiers.PhoneNumber,
-        deviceId: DeviceId,
-        authPassword: String,
-    ) -> AuthedAccount {
-        return AuthedAccount(.explicit(Explicit(
-            aci: aci,
-            phoneNumber: phoneNumber,
-            deviceId: deviceId,
-            authPassword: authPassword,
-        )))
-    }
-
     public func orIfImplicitUse(_ other: AuthedAccount) -> AuthedAccount {
-        switch (self.info, other.info) {
+        switch (self, other) {
         case (.explicit, _):
             return self
         case (_, .explicit):
@@ -70,7 +43,7 @@ public class AuthedAccount {
     }
 
     public func isAddressForLocalUser(_ address: SignalServiceAddress) -> Bool {
-        switch info {
+        switch self {
         case .implicit:
             return false
         case let .explicit(info):
@@ -79,7 +52,7 @@ public class AuthedAccount {
     }
 
     public var chatServiceAuth: ChatServiceAuth {
-        switch info {
+        switch self {
         case .implicit:
             return .implicit()
         case let .explicit(info):

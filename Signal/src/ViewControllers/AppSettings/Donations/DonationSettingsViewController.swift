@@ -724,7 +724,7 @@ extension DonationSettingsViewController: BadgeConfigurationDelegate {
                         visibleBadgeIds: .setTo(newVisibleBadgeIds),
                         unsavedRotatedProfileKey: nil,
                         userProfileWriter: .localUser,
-                        authedAccount: .implicit(),
+                        authedAccount: .implicit,
                         tx: tx,
                     )
                 }

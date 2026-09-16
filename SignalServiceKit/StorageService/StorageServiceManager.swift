@@ -173,7 +173,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
                 // On first launch, back up any pending changes from previous
                 // launches. For the remainder of this launch we're covered by
                 // the willResignActive and didBecomeActive listeners.
-                backupPendingChanges(authedAccount: .implicit())
+                backupPendingChanges(authedAccount: .implicit)
 
                 Task { await self.cleanUpDeletedCallLinks() }
             }
@@ -191,7 +191,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
             mustBeConnected: true,
             operation: {
                 try await self._restoreOrCreateManifestIfNecessary(
-                    authedAccount: .implicit(),
+                    authedAccount: .implicit,
                     masterKeySource: .implicit,
                     isRunningViaCron: true,
                 ).awaitableWithUncooperativeCancellationHandling()
@@ -210,7 +210,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
         // to try and make sure the service doesn't get stale. If for
         // some reason we aren't able to successfully complete this backup
         // while in the background we'll try again on the next app launch.
-        backupPendingChanges(authedAccount: .implicit())
+        backupPendingChanges(authedAccount: .implicit)
     }
 
     @objc
@@ -218,7 +218,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
         // We may have pending changes from before we resigned active that we
         // should back up as soon as we can, rather than waiting for a full app
         // launch.
-        backupPendingChanges(authedAccount: .implicit())
+        backupPendingChanges(authedAccount: .implicit)
     }
 
     @objc
@@ -385,7 +385,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
             let cleanUpOperation = buildOperation(
                 managerState: managerState,
                 mode: .cleanUpUnknownData,
-                authedAccount: .implicit(),
+                authedAccount: .implicit,
                 masterKeySource: .implicit,
             )
             if let cleanUpOperation {
@@ -458,7 +458,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
     ) -> (() async throws -> Void)? {
         let localIdentifiers: LocalIdentifiers
         let isPrimaryDevice: Bool
-        switch authedAccount.info {
+        switch authedAccount {
         case .explicit(let explicit):
             localIdentifiers = explicit.localIdentifiers
             isPrimaryDevice = explicit.isPrimaryDevice
@@ -580,7 +580,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
         let (promise, future) = Promise<Void>.pending()
         updateManagerState { managerState in
             var pendingRestore = managerState.pendingRestore ?? .init(
-                authedAccount: .implicit(),
+                authedAccount: .implicit,
                 masterKeySource: .implicit,
                 isRunningViaCron: false,
                 futures: [],
@@ -601,7 +601,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
         try await withCheckedThrowingContinuation { continuation in
             updateManagerState { managerState in
                 var pendingRotation = managerState.pendingManifestRotation ?? .init(
-                    authedAccount: .implicit(),
+                    authedAccount: .implicit,
                     masterKeySource: .implicit,
                     continuations: [],
                     mode: mode,
@@ -617,7 +617,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
 
     public func backupPendingChanges(authedAccount: AuthedAccount) {
         updateManagerState { managerState in
-            var pendingBackup = managerState.pendingBackup ?? .init(authedAccount: .implicit(), masterKeySource: .implicit)
+            var pendingBackup = managerState.pendingBackup ?? .init(authedAccount: .implicit, masterKeySource: .implicit)
             pendingBackup.authedAccount = authedAccount.orIfImplicitUse(pendingBackup.authedAccount)
             managerState.pendingBackup = pendingBackup
 
@@ -680,7 +680,7 @@ public class StorageServiceManagerImpl: NSObject, StorageServiceManager {
     private func backupTimerFired(_ timer: Timer) {
         AssertIsOnMainThread()
 
-        backupPendingChanges(authedAccount: .implicit())
+        backupPendingChanges(authedAccount: .implicit)
     }
 
     // MARK: - Cleanup

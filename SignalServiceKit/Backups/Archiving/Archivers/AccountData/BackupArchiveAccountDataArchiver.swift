@@ -459,7 +459,7 @@ public class BackupArchiveAccountDataArchiver: BackupArchiveProtoStreamWriter {
                 settings.notDiscoverableByPhoneNumber ? .nobody : .everybody,
                 updateAccountAttributes: false, // This should be updated later, similar to storage service
                 updateStorageService: false,
-                authedAccount: .implicit(),
+                authedAccount: .implicit,
                 tx: context.tx,
             )
             sskPreferences.setPreferContactAvatars(value: settings.preferContactAvatars, tx: context.tx)

@@ -718,7 +718,7 @@ class ProfileSettingsViewController: OWSTableViewController2 {
                             visibleBadgeIds: profileValues.visibleBadgeIds.changedValue,
                             unsavedRotatedProfileKey: nil,
                             userProfileWriter: .localUser,
-                            authedAccount: .implicit(),
+                            authedAccount: .implicit,
                             tx: tx,
                         )
                     }

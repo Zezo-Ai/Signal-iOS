@@ -694,11 +694,11 @@ private extension SVR2.AuthMethod {
     var authedAccount: AuthedAccount {
         switch self {
         case .svrAuth(_, let backup):
-            return backup?.authedAccount ?? .implicit()
+            return backup?.authedAccount ?? .implicit
         case .chatServerAuth(let authedAccount):
             return authedAccount
         case .implicit:
-            return .implicit()
+            return .implicit
         }
     }
 }

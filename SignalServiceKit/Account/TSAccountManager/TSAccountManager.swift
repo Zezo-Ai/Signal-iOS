@@ -126,7 +126,7 @@ extension TSAccountManager {
     }
 
     public func localIdentifiersWithMaybeSneakyTransaction(authedAccount: AuthedAccount) throws(NotRegisteredError) -> LocalIdentifiers {
-        switch authedAccount.info {
+        switch authedAccount {
         case .explicit(let info):
             return info.localIdentifiers
         case .implicit:
@@ -135,7 +135,7 @@ extension TSAccountManager {
     }
 
     public func localIdentifiers(authedAccount: AuthedAccount, tx: DBReadTransaction) throws -> LocalIdentifiers {
-        switch authedAccount.info {
+        switch authedAccount {
         case .explicit(let info):
             return info.localIdentifiers
         case .implicit:

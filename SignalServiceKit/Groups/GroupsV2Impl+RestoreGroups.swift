@@ -161,7 +161,7 @@ public extension GroupsV2Impl {
                 // storage service.
                 if let groupRecord {
                     let recordUpdater = StorageServiceGroupV2RecordUpdater(
-                        authedAccount: .implicit(),
+                        authedAccount: .implicit,
                         isPrimaryDevice: isPrimaryDevice,
                         avatarDefaultColorManager: DependenciesBridge.shared.avatarDefaultColorManager,
                         blockingManager: SSKEnvironment.shared.blockingManagerRef,

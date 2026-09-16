@@ -256,7 +256,7 @@ public class PaymentsHelperImpl: PaymentsHelperSwift, PaymentsHelper {
                         _ = SSKEnvironment.shared.profileManagerRef.reuploadLocalProfile(
                             unsavedRotatedProfileKey: nil,
                             mustReuploadAvatar: false,
-                            authedAccount: .implicit(),
+                            authedAccount: .implicit,
                             tx: tx,
                         )
                     }
