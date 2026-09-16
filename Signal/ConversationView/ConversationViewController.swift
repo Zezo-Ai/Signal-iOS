@@ -648,7 +648,6 @@ public final class ConversationViewController: OWSViewController {
 
     override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         AssertIsOnMainThread()
-        self.updateBarButtonItems()
         self.updateNavigationBarSubtitleLabel()
     }
 
