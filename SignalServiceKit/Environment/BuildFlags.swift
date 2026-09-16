@@ -73,9 +73,9 @@ public enum BuildFlags {
     }
 
     public enum LocalFileBackups {
-        public static let archive = build <= .beta
-        public static let restore = build <= .beta
-        public static let settingsUI = build <= .beta
+        public static let archive = true
+        public static let restore = true
+        public static let settingsUI = true
     }
 
     static let hardDeleteGroupThreadsDuringRefresh = true
