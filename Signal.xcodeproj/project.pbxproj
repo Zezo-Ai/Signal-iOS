@@ -3232,6 +3232,7 @@
 		D99554752AF5AFE90001E15C /* BadgeThanksSheetPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D99554742AF5AFE80001E15C /* BadgeThanksSheetPresenter.swift */; };
 		D99655E32C50433800AD29FB /* BackupArchiveLearnedProfileChatUpdateArchiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D99655E22C50433800AD29FB /* BackupArchiveLearnedProfileChatUpdateArchiver.swift */; };
 		D99677952F689E4400F4234D /* AddressableMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D99677942F689E4100F4234D /* AddressableMessage.swift */; };
+		D99744C43040FD240052C54A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D99744C33040FD220052C54A /* AppDelegate.swift */; };
 		D997FA7628F8E3A2003C7B8B /* RemoteMegaphone.swift in Sources */ = {isa = PBXBuildFile; fileRef = D997FA7528F8E3A2003C7B8B /* RemoteMegaphone.swift */; };
 		D99840B32976227100F7ED6D /* UsernameSelectionViewController+UsernameTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D99840B22976227100F7ED6D /* UsernameSelectionViewController+UsernameTextField.swift */; };
 		D99840C829809E9C00F7ED6D /* UsernameSelectionViewController+HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D99840C729809E9C00F7ED6D /* UsernameSelectionViewController+HeaderView.swift */; };
@@ -7623,6 +7624,7 @@
 		D99554742AF5AFE80001E15C /* BadgeThanksSheetPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeThanksSheetPresenter.swift; sourceTree = "<group>"; };
 		D99655E22C50433800AD29FB /* BackupArchiveLearnedProfileChatUpdateArchiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupArchiveLearnedProfileChatUpdateArchiver.swift; sourceTree = "<group>"; };
 		D99677942F689E4100F4234D /* AddressableMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressableMessage.swift; sourceTree = "<group>"; };
+		D99744C33040FD220052C54A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D997FA7528F8E3A2003C7B8B /* RemoteMegaphone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteMegaphone.swift; sourceTree = "<group>"; };
 		D99840B22976227100F7ED6D /* UsernameSelectionViewController+UsernameTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UsernameSelectionViewController+UsernameTextField.swift"; sourceTree = "<group>"; };
 		D99840BE297A04EB00F7ED6D /* Usernames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Usernames.swift; sourceTree = "<group>"; };
@@ -9953,6 +9955,7 @@
 		5045F44129E0DAA400058E5F /* AppLaunch */ = {
 			isa = PBXGroup;
 			children = (
+				D99744C33040FD220052C54A /* AppDelegate.swift */,
 				34D99CE3217509C1000AFB39 /* AppEnvironment.swift */,
 				F92074752888648A00B7F087 /* AppLifecycleManager.swift */,
 				349C3636233D198300D52012 /* LaunchJobs.swift */,
@@ -18442,6 +18445,7 @@
 				45D49115296F69AA00B92BB1 /* AllMediaViewController.swift in Sources */,
 				32E958AA25C12B3800BF12AD /* AnimatedProgressView.swift in Sources */,
 				50A76F562AF573CE00FCF02D /* AppActivePrecondition.swift in Sources */,
+				D99744C43040FD240052C54A /* AppDelegate.swift in Sources */,
 				8827004E23208A1900F01C46 /* AppearanceSettingsTableViewController.swift in Sources */,
 				34D99CE4217509C2000AFB39 /* AppEnvironment.swift in Sources */,
 				052D178A2C7E60340023D56F /* AppIcon.swift in Sources */,

@@ -317,7 +317,7 @@ public class SignalApp {
 
         UserNotificationPresenter().clearAllNotifications()
         UIApplication.shared.applicationIconBadgeNumber = 0
-        AppDelegate.updateApplicationShortcutItems(isRegistered: false)
+        AppLifecycleManager.updateApplicationShortcutItems(isRegistered: false)
 
         DebugLogger.shared.wipeLogsAlways(appContext: CurrentAppContext() as! MainAppContext)
     }
