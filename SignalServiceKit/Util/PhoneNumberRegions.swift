@@ -5,8 +5,8 @@
 
 import Foundation
 
-public class PhoneNumberRegions: Equatable, ExpressibleByArrayLiteral, CustomDebugStringConvertible {
-    private let regions: Set<String>
+public class PhoneNumberRegions: ExpressibleByArrayLiteral, CustomDebugStringConvertible {
+    let regions: Set<String>
     private var previousCachedResult: (e164: String, result: Bool)?
 
     public required init(arrayLiteral: String...) {
@@ -47,10 +47,6 @@ public class PhoneNumberRegions: Equatable, ExpressibleByArrayLiteral, CustomDeb
         }
         previousCachedResult = (e164, result)
         return result
-    }
-
-    public static func ==(lhs: PhoneNumberRegions, rhs: PhoneNumberRegions) -> Bool {
-        lhs.regions == rhs.regions
     }
 
     public var debugDescription: String { regions.debugDescription }
