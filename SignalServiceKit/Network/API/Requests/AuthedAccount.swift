@@ -6,9 +6,9 @@
 import Foundation
 public import LibSignalClient
 
-public class AuthedAccount: Equatable {
+public class AuthedAccount {
 
-    public struct Explicit: Equatable {
+    public struct Explicit {
         public let aci: Aci
         public let phoneNumber: LocalIdentifiers.PhoneNumber
         public let deviceId: DeviceId
@@ -27,7 +27,7 @@ public class AuthedAccount: Equatable {
         }
     }
 
-    public enum Info: Equatable {
+    public enum Info {
         case implicit
         case explicit(Explicit)
     }
@@ -55,10 +55,6 @@ public class AuthedAccount: Equatable {
             deviceId: deviceId,
             authPassword: authPassword,
         )))
-    }
-
-    public static func ==(lhs: AuthedAccount, rhs: AuthedAccount) -> Bool {
-        return lhs.info == rhs.info
     }
 
     public func orIfImplicitUse(_ other: AuthedAccount) -> AuthedAccount {

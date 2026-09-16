@@ -404,7 +404,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we sync push tokens, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount == expectedAuthedAccount())
+            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(initialMasterKey.rawData == explicitMasterKey.rawData)
@@ -536,7 +536,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we sync push tokens, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount == expectedAuthedAccount())
+            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(initialMasterKey.rawData == explicitMasterKey.rawData)
@@ -906,7 +906,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we back up to svr, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount == expectedAuthedAccount())
+            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(initialMasterKey.rawData == explicitMasterKey.rawData)
@@ -917,7 +917,7 @@ public class RegistrationCoordinatorTest {
         })
 
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount == expectedAuthedAccount())
+            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(finalMasterKey.rawData == explicitMasterKey.rawData)
@@ -1164,7 +1164,10 @@ public class RegistrationCoordinatorTest {
         // a previously registered device, and we can skip intros.
         svr.restoreKeysMock = { pin, authMethod in
             #expect(pin == Stubs.pinCode)
-            #expect(authMethod == .svrAuth(Stubs.svr2AuthCredential, backup: nil))
+            if case .svrAuth(Stubs.svr2AuthCredential, backup: nil) = authMethod {
+            } else {
+                Issue.record("wrong authMethod: \(authMethod)")
+            }
             return .value(.success(remoteMasterKey))
         }
 
@@ -1252,7 +1255,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we sync push tokens, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount == expectedAuthedAccount())
+            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(remoteMasterKey.rawData == explicitMasterKey.rawData)
@@ -1365,7 +1368,10 @@ public class RegistrationCoordinatorTest {
 
         svr.restoreKeysMock = { pin, authMethod in
             #expect(pin == Stubs.pinCode)
-            #expect(authMethod == .svrAuth(Stubs.svr2AuthCredential, backup: nil))
+            if case .svrAuth(Stubs.svr2AuthCredential, backup: nil) = authMethod {
+            } else {
+                Issue.record("wrong authMethod: \(authMethod)")
+            }
             return .value(.success(remoteMasterKey))
         }
 
@@ -1509,7 +1515,10 @@ public class RegistrationCoordinatorTest {
         svr.restoreKeysMock = { pin, authMethod in
             self.testRun.addObservedStep(.restoreKeys)
             #expect(pin == Stubs.pinCode)
-            #expect(authMethod == .svrAuth(Stubs.svr2AuthCredential, backup: nil))
+            if case .svrAuth(Stubs.svr2AuthCredential, backup: nil) = authMethod {
+            } else {
+                Issue.record("wrong authMethod: \(authMethod)")
+            }
             return .value(.success(initialMasterKey))
         }
 
@@ -1566,7 +1575,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we back up to svr, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount == expectedAuthedAccount())
+            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(initialMasterKey.rawData == explicitMasterKey.rawData)
@@ -1845,7 +1854,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we sync push tokens, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount == expectedAuthedAccount())
+            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(newMasterKey.rawData == explicitMasterKey.rawData)
@@ -2875,7 +2884,7 @@ public class RegistrationCoordinatorTest {
 
         // Once we sync push tokens, we should restore from storage service.
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount == expectedAuthedAccount())
+            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(newMasterKey.rawData == explicitMasterKey.rawData)
@@ -2987,7 +2996,7 @@ public class RegistrationCoordinatorTest {
         }
 
         storageServiceManagerMock.addRestoreOrCreateManifestIfNecessaryMock({ auth, masterKeySource in
-            #expect(auth.authedAccount == expectedAuthedAccount())
+            #expect(auth.authedAccount.chatServiceAuth == expectedAuthedAccount().chatServiceAuth)
             switch masterKeySource {
             case .explicit(let explicitMasterKey):
                 #expect(newMasterKey.rawData == explicitMasterKey.rawData)
