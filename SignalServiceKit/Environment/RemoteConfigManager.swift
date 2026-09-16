@@ -563,8 +563,8 @@ public class RemoteConfig {
         valueFlags: [String: String],
         flag: ValueFlag,
     ) -> PhoneNumberRegions {
-        guard let valueList = valueFlags[flag.rawValue] else { return [] }
-        return PhoneNumberRegions(fromRemoteConfig: valueList)
+        let regions = PhoneNumberRegions.parseRemoteConfigRegions(valueFlags[flag.rawValue] ?? "")
+        return PhoneNumberRegions(regions)
     }
 
     private static func countryCodeBucketValue(csvString: String, localIdentifiers: LocalIdentifiers) -> String? {

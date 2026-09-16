@@ -19,22 +19,22 @@ struct PhoneNumberRegionsTest {
         ("1,2 345, +6 7,, ,89,٦,6️⃣", ["1", "2345", "67", "89"]),
     ])
     func testRemoteConfig(testCase: (remoteConfigValue: String, regions: [String])) {
-        let actualValue = PhoneNumberRegions(fromRemoteConfig: testCase.remoteConfigValue)
-        #expect(actualValue.regions == Set(testCase.regions))
+        let regions = PhoneNumberRegions.parseRemoteConfigRegions(testCase.remoteConfigValue)
+        #expect(Array(regions) == testCase.regions)
     }
 
     @Test
     func testIsEmpty() {
-        let empty: PhoneNumberRegions = []
+        let empty = PhoneNumberRegions([])
         #expect(empty.isEmpty)
 
-        let notEmpty: PhoneNumberRegions = ["1", "44"]
+        let notEmpty = PhoneNumberRegions(["1", "44"])
         #expect(!notEmpty.isEmpty)
     }
 
     @Test
     func testContains() {
-        let regions: PhoneNumberRegions = ["1", "44"]
+        let regions = PhoneNumberRegions(["1", "44"])
         #expect(regions.contains(e164: "+17345550123"))
         #expect(regions.contains(e164: "+447700900123"))
         #expect(!regions.contains(e164: "+33639981234"))
