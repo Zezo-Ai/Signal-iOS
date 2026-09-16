@@ -6,7 +6,7 @@
 import Foundation
 public import LibSignalClient
 
-public class AuthedAccount: Hashable, Equatable {
+public class AuthedAccount: Equatable {
 
     public struct Explicit: Equatable {
         public let aci: Aci
@@ -55,17 +55,6 @@ public class AuthedAccount: Hashable, Equatable {
             deviceId: deviceId,
             authPassword: authPassword,
         )))
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        switch info {
-        case .implicit:
-            break
-        case let .explicit(info):
-            hasher.combine(info.aci)
-            hasher.combine(info.phoneNumber.e164)
-            hasher.combine(info.authPassword)
-        }
     }
 
     public static func ==(lhs: AuthedAccount, rhs: AuthedAccount) -> Bool {
