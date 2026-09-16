@@ -571,6 +571,68 @@ struct LocalFileBackupManagerTests {
         }
         #expect(exportRecords.isEmpty)
     }
+
+    // MARK: - NSFileCoordinator related tests
+
+    /// Models a file-provider extension holding a pending deletion in memory:
+    /// the deletion is only applied to disk when the coordinator asks the
+    /// presenter to save its pending changes via `savePresentedItemChanges`.
+    private final class PendingDeletionPresenter: NSObject, NSFilePresenter {
+        let directoryURL: URL
+        let pendingDeletionURL: URL
+        var didReceiveSaveRequest = false
+
+        init(directoryURL: URL, pendingDeletionURL: URL) {
+            self.directoryURL = directoryURL
+            self.pendingDeletionURL = pendingDeletionURL
+        }
+
+        var presentedItemURL: URL? { directoryURL }
+        let presentedItemOperationQueue = OperationQueue()
+
+        func savePresentedItemChanges(completionHandler: @escaping (Error?) -> Void) {
+            didReceiveSaveRequest = true
+            do {
+                if FileManager.default.fileExists(atPath: pendingDeletionURL.path) {
+                    try FileManager.default.removeItem(at: pendingDeletionURL)
+                }
+                completionHandler(nil)
+            } catch {
+                completionHandler(error)
+            }
+        }
+    }
+
+    /// Simulates a call to `existingFilesInBackupDirectory` when there's pending deletion.
+    /// Makes sure results are flushed to disk before we read the resulting directory.
+    @Test
+    func testExistingFilesInBackupDirectory_waitForSavePendingDeletion() throws {
+        let backupsRoot = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: backupsRoot, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: backupsRoot) }
+
+        let filesDir = backupsRoot.appendingPathComponent("files")
+        let subDir = filesDir.appendingPathComponent("ab")
+        try FileManager.default.createDirectory(at: subDir, withIntermediateDirectories: true)
+
+        let attachmentName = "abfakeattachment"
+        let attachmentFile = subDir.appendingPathComponent(attachmentName)
+        try Data([0x01, 0x02, 0x03]).write(to: attachmentFile)
+
+        let presenter = PendingDeletionPresenter(
+            directoryURL: backupsRoot,
+            pendingDeletionURL: attachmentFile,
+        )
+        NSFileCoordinator.addFilePresenter(presenter)
+        defer { NSFileCoordinator.removeFilePresenter(presenter) }
+
+        let result = try localFileBackupManager
+            .existingFilesInBackupDirectory(backupsRootDirectory: backupsRoot)
+
+        #expect(presenter.didReceiveSaveRequest == true)
+        #expect(result[attachmentName] == nil)
+    }
 }
 
 public enum LocalFileBackupTestSupport {

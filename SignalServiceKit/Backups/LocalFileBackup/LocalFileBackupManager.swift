@@ -254,13 +254,12 @@ public class LocalFileBackupManager: NSObject, UIDocumentPickerDelegate {
 
     /// - Parameter backupsRootDirectory
     /// The SignalBackups directory.
-    private func existingFilesInBackupDirectory(backupsRootDirectory: URL) throws -> [String: Int] {
+    func existingFilesInBackupDirectory(backupsRootDirectory: URL) throws -> [String: Int] {
         let fileCoordinator = NSFileCoordinator()
 
         var existingFiles: [String: Int] = [:]
         try fileCoordinator.coordinateThrows(
             readingItemAt: backupsRootDirectory,
-            options: .withoutChanges,
             by: { temporaryFileUrl in
                 let filesDirectoryUrl = temporaryFileUrl.appendingPathComponent(FileStructure.attachmentDirectory.rawValue)
                 guard
