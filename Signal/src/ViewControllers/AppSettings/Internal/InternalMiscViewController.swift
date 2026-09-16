@@ -6,14 +6,13 @@
 import SignalServiceKit
 import SignalUI
 
-/// Houses one-off internal actions that are normally performed automatically
-/// (e.g. on a schedule), so they can be triggered manually for testing.
-class InternalMiscActionsViewController: OWSTableViewController2 {
+/// Houses miscellaneous internal-only settings and actions.
+class InternalMiscViewController: OWSTableViewController2 {
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "Misc. Actions"
+        title = "Misc."
 
         updateTableContents()
     }
@@ -69,6 +68,22 @@ class InternalMiscActionsViewController: OWSTableViewController2 {
             ),
         )
         contents.add(releaseNotesSection)
+
+        if ScreenshotBlockingManager.isAvailable {
+            let db = DependenciesBridge.shared.db
+            let screenshotBlockingManager = AppEnvironment.shared.screenshotBlockingManager!
+
+            let screenshotsSection = OWSTableSection(title: "Screenshots")
+            screenshotsSection.add(.switch(
+                withText: "Block Screenshots",
+                subtitle: "Prevent screenshots and screen recordings from capturing Signal",
+                isOn: { db.read { screenshotBlockingManager.isEnabled(tx: $0) } },
+                actionBlock: { uiSwitch in
+                    db.write { screenshotBlockingManager.setIsEnabled(uiSwitch.isOn, tx: $0) }
+                },
+            ))
+            contents.add(screenshotsSection)
+        }
 
         self.contents = contents
     }

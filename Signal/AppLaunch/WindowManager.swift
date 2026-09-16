@@ -50,19 +50,29 @@ class WindowManager {
         // UIWindow.Level._screenBlocking() if active.
         let screenBlocking: UIWindow
 
+        private var blocksScreenshots: Bool
         private var windowScene: UIWindowScene
         private var createdWindows = [UIWindow]()
 
+        private var allWindows: [UIWindow] {
+            return [root, screenBlocking] + createdWindows
+        }
+
         init(
+            blocksScreenshots: Bool,
             root: UIWindow,
             screenBlocking: UIWindow,
             windowScene: UIWindowScene,
         ) {
             AssertIsOnMainThread()
 
+            self.blocksScreenshots = blocksScreenshots
             self.root = root
             self.screenBlocking = screenBlocking
             self.windowScene = windowScene
+
+            ScreenshotBlocking.setBlocksScreenshots(blocksScreenshots, of: root)
+            ScreenshotBlocking.setBlocksScreenshots(blocksScreenshots, of: screenBlocking)
         }
 
         // UIWindow.Level._returnToCall
@@ -108,6 +118,8 @@ class WindowManager {
             window.isHidden = true
             window.isOpaque = true
 
+            ScreenshotBlocking.setBlocksScreenshots(blocksScreenshots, of: window)
+
             createdWindows.append(window)
             return window
         }
@@ -117,8 +129,19 @@ class WindowManager {
             AssertIsOnMainThread()
 
             self.windowScene = windowScene
-            for window in [root, screenBlocking] + createdWindows {
+            for window in allWindows {
                 window.windowScene = windowScene
+            }
+        }
+
+        /// Sets whether the windows that exist, and any created later, are
+        /// blocked from appearing in screenshots.
+        func setBlocksScreenshots(_ blocksScreenshots: Bool) {
+            AssertIsOnMainThread()
+
+            self.blocksScreenshots = blocksScreenshots
+            for window in allWindows {
+                ScreenshotBlocking.setBlocksScreenshots(blocksScreenshots, of: window)
             }
         }
     }
@@ -150,6 +173,7 @@ class WindowManager {
         Logger.info("")
 
         self.windows = SceneWindows(
+            blocksScreenshots: blocksScreenshots,
             root: rootWindow,
             screenBlocking: screenBlockingWindow,
             windowScene: windowScene,
@@ -192,6 +216,25 @@ class WindowManager {
             guard window.frame != desiredFrame else { continue }
             window.frame = desiredFrame
         }
+    }
+
+    // MARK: Screenshot Blocking
+
+    /// Whether the app's windows are blocked from appearing in screenshots.
+    ///
+    /// Starts out matching the default of the preference that drives it,
+    /// since that isn't readable until the database is — which can be after
+    /// the windows exist.
+    private var blocksScreenshots: Bool = ScreenshotBlockingManager.isAvailable
+
+    /// Sets whether the app's windows are blocked from appearing in
+    /// screenshots.
+    func setBlocksScreenshots(_ blocksScreenshots: Bool) {
+        AssertIsOnMainThread()
+        Logger.info("\(blocksScreenshots)")
+
+        self.blocksScreenshots = blocksScreenshots
+        windows?.setBlocksScreenshots(blocksScreenshots)
     }
 
     // MARK: Window State

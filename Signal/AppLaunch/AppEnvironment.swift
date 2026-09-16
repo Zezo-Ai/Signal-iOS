@@ -48,6 +48,7 @@ public class AppEnvironment: NSObject {
     private(set) var provisioningManager: ProvisioningManager!
     private(set) var quickRestoreManager: QuickRestoreManager!
     private var registrationIdMismatchManager: RegistrationIdMismatchManager!
+    private(set) var screenshotBlockingManager: ScreenshotBlockingManager!
     private(set) var senderKeyExpirationJob: SenderKeyExpirationJob!
 
     init(appReadiness: AppReadiness, deviceTransferRestore: DeviceTransferRestore) {
@@ -221,6 +222,11 @@ public class AppEnvironment: NSObject {
             udManager: SSKEnvironment.shared.udManagerRef,
         )
 
+        self.screenshotBlockingManager = ScreenshotBlockingManager(
+            db: DependenciesBridge.shared.db,
+            windowManager: windowManagerRef,
+        )
+
         self.senderKeyExpirationJob = SenderKeyExpirationJob(
             dateProvider: Date.provider,
             db: DependenciesBridge.shared.db,
@@ -353,6 +359,7 @@ public class AppEnvironment: NSObject {
             self.appIconBadgeUpdater.startObserving()
             self.clockSkewMonitoringManager.start()
             self.lowDiskSpaceMonitoringManager.start()
+            self.screenshotBlockingManager.start()
         }
 
         appReadiness.runNowOrWhenAppDidBecomeReadyAsync {

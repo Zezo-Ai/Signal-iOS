@@ -7,13 +7,13 @@ import SignalServiceKit
 import UIKit
 
 enum ScreenshotBlocking {
-    /// Prevent screenshots (or the App Switcher) from capturing the content of
-    /// the given view.
+    /// Set whether screenshots (or the App Switcher) can capture the content
+    /// of the given view.
     ///
     /// This works by taking advantage of `UITextField` internals, which has
     /// built in content redaction when `isSecureTextEntry = true`, and tricking
     /// it into applying that redaction to the given view's layer.
-    static func blockScreenshots(of view: UIView) {
+    static func setBlocksScreenshots(_ blocksScreenshots: Bool, of view: UIView) {
         let textField = UITextField()
 
         guard
@@ -24,16 +24,16 @@ enum ScreenshotBlocking {
             return
         }
 
-        // Swap in the input view's layer for the "canvas view"'s layer, then
-        // toggle isSecureTextEntry. That causes the UITextField to apply the
-        // "redact content" flag to the input view's layer, at which point we're
-        // all set.
+        // Swap in the given view's layer for the "canvas view"'s layer, then
+        // move isSecureTextEntry to the value we want. That causes the
+        // UITextField to set (or clear) the "redact content" flag on the given
+        // view's layer, at which point we're all set.
         let canvasLayer = screenshotBlockingView.layer
         let layerDelegate = view.layer.delegate as AnyObject?
 
         screenshotBlockingView.setValue(view.layer, forKey: "layer")
-        textField.isSecureTextEntry = false
-        textField.isSecureTextEntry = true
+        textField.isSecureTextEntry = !blocksScreenshots
+        textField.isSecureTextEntry = blocksScreenshots
 
         // Hand the canvas view its own layer back before it deallocs, since
         // otherwise it'll tear down a layer it doesn't own.

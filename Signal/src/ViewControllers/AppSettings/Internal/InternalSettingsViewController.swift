@@ -93,9 +93,9 @@ class InternalSettingsViewController: OWSTableViewController2 {
             },
         ))
         debugSection.add(.disclosureItem(
-            withText: "Misc. Actions",
+            withText: "Misc.",
             actionBlock: { [weak self] in
-                let vc = InternalMiscActionsViewController()
+                let vc = InternalMiscViewController()
                 self?.navigationController?.pushViewController(vc, animated: true)
             },
         ))
