@@ -183,7 +183,7 @@ public class RemoteConfig {
 
     // MARK: -
 
-    public func standardMediaQualityLevel(callingCode: Int?) -> ImageQualityLevel? {
+    public func standardMediaQualityLevel(callingCode: PhoneNumberUtil.LocalCallingCode?) -> ImageQualityLevel? {
         guard
             let csvString = self.value(.standardMediaQualityLevel),
             let stringValue = Self.countryCodeValue(csvString: csvString, callingCode: callingCode),
@@ -598,7 +598,7 @@ public class RemoteConfig {
     /// There may be an optional "*" wildcard country code that any unspecified
     /// country codes should use. If we can't parse the country code from our
     /// own phone number, we fall back to this wildcard value.
-    private static func countryCodeValue(csvString: String, callingCode: Int?) -> String? {
+    private static func countryCodeValue(csvString: String, callingCode: PhoneNumberUtil.LocalCallingCode?) -> String? {
         let callingCodeToValueMap = csvString
             .components(separatedBy: ",")
             .reduce(into: [String: String]()) { result, value in
@@ -612,7 +612,14 @@ public class RemoteConfig {
                 result[callingCode] = countryValue
             }
 
-        return callingCode.flatMap({ callingCodeToValueMap[String($0)] }) ?? callingCodeToValueMap["*"]
+        let resolvedCallingCode: String?
+        switch callingCode {
+        case .phoneNumberfull(.some(let callingCode)):
+            resolvedCallingCode = String(callingCode)
+        case .phoneNumberfull(.none), nil:
+            resolvedCallingCode = nil
+        }
+        return resolvedCallingCode.flatMap({ callingCodeToValueMap[$0] }) ?? callingCodeToValueMap["*"]
     }
 
     private static func isBucketEnabled(key: String, countEnabled: UInt64, bucketSize: UInt64, localAci: Aci) -> Bool {

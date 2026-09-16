@@ -41,20 +41,28 @@ public struct IncomingAttachmentLimits {
 /// Limits imposed on attachments we send to others.
 public struct OutgoingAttachmentLimits {
     private let remoteConfig: RemoteConfig
-    private let callingCode: Int?
+    private let callingCode: PhoneNumberUtil.LocalCallingCode?
 
     public static func currentLimits(
         remoteConfig: RemoteConfig = .current,
-        callingCode: Int? = DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction.flatMap({
-            return SSKEnvironment.shared.phoneNumberUtilRef.localCallingCode(localIdentifiers: $0)
-        }),
+        callingCode: PhoneNumberUtil.LocalCallingCode? = Self.currentLocalCallingCode(),
     ) -> Self {
         return Self(remoteConfig: remoteConfig, callingCode: callingCode)
     }
 
+    public static func currentLocalCallingCode() -> PhoneNumberUtil.LocalCallingCode? {
+        let phoneNumberUtil = SSKEnvironment.shared.phoneNumberUtilRef
+        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
+
+        guard let localIdentifiers = tsAccountManager.localIdentifiersWithMaybeSneakyTransaction else {
+            return nil
+        }
+        return phoneNumberUtil.localCallingCode(localIdentifiers: localIdentifiers)
+    }
+
     init(
         remoteConfig: RemoteConfig,
-        callingCode: Int?,
+        callingCode: PhoneNumberUtil.LocalCallingCode?,
     ) {
         self.remoteConfig = remoteConfig
         self.callingCode = callingCode
