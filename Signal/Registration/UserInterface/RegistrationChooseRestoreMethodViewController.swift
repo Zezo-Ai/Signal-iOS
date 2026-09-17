@@ -174,14 +174,14 @@ class RegistrationChooseRestoreMethodViewController: OWSViewController, UIDocume
                 ])
 
             case .none:
-                stackView.addArrangedSubviews([
-                    prominentTransferButton(),
-                    prominentSkipRestoreButton(),
-                ])
+                stackView.addArrangedSubview(prominentTransferButton())
                 if BuildFlags.LocalFileBackups.restore {
                     stackView.addArrangedSubview(localFileBackupRestoreButton())
                 }
-                stackView.addArrangedSubview(.vStretchingSpacer())
+                stackView.addArrangedSubviews([
+                    prominentSkipRestoreButton(),
+                    .vStretchingSpacer(),
+                ])
             }
         case .manualRestore:
             addDefaultTitle(to: stackView)
@@ -191,14 +191,12 @@ class RegistrationChooseRestoreMethodViewController: OWSViewController, UIDocume
                     self?.didTapCancel()
                 },
             )
-            stackView.addArrangedSubviews([
-                prominentRestoreButton(),
-                prominentSkipRestoreButton(),
-            ])
+            stackView.addArrangedSubview(prominentRestoreButton())
             if BuildFlags.LocalFileBackups.restore {
                 stackView.addArrangedSubview(localFileBackupRestoreButton())
             }
             stackView.addArrangedSubviews([
+                prominentSkipRestoreButton(),
                 .vStretchingSpacer(),
                 bottomButton.enclosedInVerticalStackView(isFullWidthButton: false),
             ])
@@ -207,12 +205,14 @@ class RegistrationChooseRestoreMethodViewController: OWSViewController, UIDocume
             stackView.addArrangedSubviews([
                 prominentTransferButton(),
                 prominentRestoreButton(),
-                prominentSkipRestoreButton(),
             ])
             if BuildFlags.LocalFileBackups.restore {
                 stackView.addArrangedSubview(localFileBackupRestoreButton())
             }
-            stackView.addArrangedSubview(.vStretchingSpacer())
+            stackView.addArrangedSubviews([
+                prominentSkipRestoreButton(),
+                .vStretchingSpacer(),
+            ])
         }
     }
 
