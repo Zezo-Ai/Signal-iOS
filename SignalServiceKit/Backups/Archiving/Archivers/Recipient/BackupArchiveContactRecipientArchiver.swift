@@ -141,7 +141,7 @@ public class BackupArchiveContactRecipientArchiver: BackupArchiveProtoStreamWrit
             guard
                 !context.localIdentifiers.containsAnyOf(
                     aci: contactAddress.aci,
-                    phoneNumber: contactAddress.e164,
+                    phoneNumber: contactAddress.e164?.stringValue,
                     pni: contactAddress.pni,
                 )
             else {

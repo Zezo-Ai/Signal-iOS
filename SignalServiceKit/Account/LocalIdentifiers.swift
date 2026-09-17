@@ -83,11 +83,12 @@ public final class LocalIdentifiers {
         return false
     }
 
-    public func containsAnyOf(aci: Aci?, phoneNumber: E164?, pni: Pni?) -> Bool {
+    // TODO: [#less] Accept an E164 (when LocalIdentifiers also accepts one).
+    public func containsAnyOf(aci: Aci?, phoneNumber: String?, pni: Pni?) -> Bool {
         if let aci, self.aci == aci {
             return true
         }
-        if let phoneNumber, self.phoneNumber == phoneNumber.stringValue {
+        if let phoneNumber, self.phoneNumber == phoneNumber {
             return true
         }
         if let pni, self.pni == pni {

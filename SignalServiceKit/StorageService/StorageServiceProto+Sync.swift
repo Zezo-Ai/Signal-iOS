@@ -169,7 +169,7 @@ struct StorageServiceContact {
     }
 
     func matchesAnyLocalIdentifier(in localIdentifiers: LocalIdentifiers) -> Bool {
-        return localIdentifiers.containsAnyOf(aci: aci, phoneNumber: phoneNumber, pni: pni)
+        return localIdentifiers.containsAnyOf(aci: aci, phoneNumber: phoneNumber?.stringValue, pni: pni)
     }
 }
 
