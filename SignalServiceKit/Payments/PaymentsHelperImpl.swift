@@ -26,11 +26,7 @@ public class PaymentsHelperImpl: PaymentsHelperSwift, PaymentsHelper {
         warmCaches()
     }
 
-    public var isKillSwitchActive: Bool {
-        RemoteConfig.current.paymentsResetKillSwitch || !hasValidPhoneNumberForPayments
-    }
-
-    public var hasValidPhoneNumberForPayments: Bool {
+    private func hasValidPhoneNumberForPayments() -> Bool {
         let tsAccountManager = DependenciesBridge.shared.tsAccountManager
         guard let registeredState = try? tsAccountManager.registeredStateWithMaybeSneakyTransaction() else {
             return false
@@ -40,11 +36,11 @@ public class PaymentsHelperImpl: PaymentsHelperSwift, PaymentsHelper {
         return !paymentsDisabledRegions.contains(e164: localNumber)
     }
 
-    public var canEnablePayments: Bool {
-        guard !isKillSwitchActive else {
+    public func canUsePayments() -> Bool {
+        if RemoteConfig.current.paymentsResetKillSwitch {
             return false
         }
-        return hasValidPhoneNumberForPayments
+        return hasValidPhoneNumberForPayments()
     }
 
     // MARK: - PaymentsState
@@ -135,7 +131,7 @@ public class PaymentsHelperImpl: PaymentsHelperSwift, PaymentsHelper {
         // to enable it even if the current device no longer supports enabling payments. This will
         // behave as if the payments kill switch is turned on until the user is on a payments enabled
         // install, but preserve their access to payments in the UI.
-        let canEnablePaymentsLocallyOrRemotely = self.canEnablePayments || !originatedLocally
+        let canEnablePaymentsLocallyOrRemotely = self.canUsePayments() || !originatedLocally
 
         if newPaymentsState.isEnabled, !canEnablePaymentsLocallyOrRemotely {
             // If we cannot enable payments, ensure that any new entropy is always preserved.

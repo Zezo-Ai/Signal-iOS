@@ -128,7 +128,7 @@ public class VersionedProfilesImpl: VersionedProfiles {
         let profilePaymentAddressData: Data? = await {
             guard
                 SSKEnvironment.shared.paymentsHelperRef.arePaymentsEnabled,
-                !SSKEnvironment.shared.paymentsHelperRef.isKillSwitchActive
+                SSKEnvironment.shared.paymentsHelperRef.canUsePayments()
             else {
                 return nil
             }

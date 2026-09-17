@@ -523,7 +523,7 @@ extension ConversationViewController: ConversationInputToolbarDelegate {
 
         dismissKeyBoard()
 
-        if SUIEnvironment.shared.paymentsRef.isKillSwitchActive {
+        guard SUIEnvironment.shared.paymentsRef.canUsePayments() else {
             OWSActionSheets.showErrorAlert(message: OWSLocalizedString(
                 "SETTINGS_PAYMENTS_CANNOT_SEND_PAYMENTS_KILL_SWITCH",
                 comment: "Error message indicating that payments cannot be sent because the feature is not currently available.",
