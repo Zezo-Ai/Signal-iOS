@@ -351,13 +351,14 @@ class AccountSettingsViewController: OWSTableViewController2 {
         navigationController?.pushViewController(vc, animated: true)
     }
 
-    enum ChangeNumberState {
+    private enum ChangeNumberState {
         case disallowed
         case allowed(RegistrationMode.ChangeNumberParams)
     }
 
     private func changeNumberState() -> ChangeNumberState {
-        return SSKEnvironment.shared.databaseStorageRef.read { transaction -> ChangeNumberState in
+        let databaseStorage = SSKEnvironment.shared.databaseStorageRef
+        return databaseStorage.read { transaction -> ChangeNumberState in
             let tsAccountManager = DependenciesBridge.shared.tsAccountManager
             let registeredState = try? tsAccountManager.registeredState(tx: transaction)
             guard let registeredState else {
