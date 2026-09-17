@@ -94,13 +94,7 @@ public struct RegistrationProvisioningMessage {
             privateKey: PrivateKey(proto.pniIdentityKeyPrivate),
         )
 
-        guard
-            let accountEntropyPool = proto.accountEntropyPool.nilIfEmpty,
-            let aep = try? AccountEntropyPool(key: accountEntropyPool)
-        else {
-            throw OWSGenericError("missing master key from provisioning message")
-        }
-        self.accountEntropyPool = aep
+        self.accountEntropyPool = try AccountEntropyPool(key: proto.accountEntropyPool)
 
         self.aci = try Aci.parseFrom(serviceIdBinary: proto.aci)
 
