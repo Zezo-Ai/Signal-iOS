@@ -470,7 +470,7 @@ final class AppLifecycleManager: NSObject, UNUserNotificationCenterDelegate {
         let screenLockUI = AppEnvironment.shared.screenLockUI
         let windowManager = AppEnvironment.shared.windowManagerRef
 
-        Theme.setupSignalAppearance()
+        Theme.setupLegacyAppearance()
 
         screenLockUI.setupWithRootWindow(window)
         windowManager.setupWithRootWindow(window, screenBlockingWindow: screenLockUI.screenBlockingWindow)

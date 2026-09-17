@@ -35,12 +35,13 @@ public final class Theme {
         }
     }
 
-    public class func setupSignalAppearance() {
+    @available(iOS, deprecated: 26)
+    public class func setupLegacyAppearance() {
+        guard #unavailable(iOS 26) else { return }
+
         let primaryIconColor = UIColor(
-            light: .ows_gray75,
-            lightHighContrast: .ows_gray75,
-            dark: .ows_gray15,
-            darkHighContrast: .ows_gray15,
+            light: lightThemeLegacyPrimaryIconColor,
+            dark: darkThemeLegacyPrimaryIconColor,
         )
         UINavigationBar.appearance().barTintColor = UIColor.Signal.background
         UINavigationBar.appearance().tintColor = primaryIconColor
@@ -69,9 +70,7 @@ public final class Theme {
 
         let cursorColor = UIColor(
             light: .Signal.accent,
-            lightHighContrast: .Signal.accent,
             dark: .white,
-            darkHighContrast: .white,
         )
         UITextView.appearance(whenContainedInInstancesOf: [OWSNavigationController.self]).tintColor = cursorColor
         UITextField.appearance(whenContainedInInstancesOf: [OWSNavigationController.self]).tintColor = cursorColor
@@ -242,7 +241,6 @@ public final class Theme {
     }
 
     private func themeDidChange() {
-        Theme.setupSignalAppearance()
         NotificationCenter.default.post(name: .themeDidChange, object: self)
     }
 
