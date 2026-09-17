@@ -38,7 +38,11 @@ public class RemoteConfig {
     ) {
         self.lastKnownClockSkew = clockSkew
         self.valueFlags = valueFlags
-        self.paymentsDisabledRegions = Self.parsePhoneNumberRegions(valueFlags: valueFlags, flag: .paymentsDisabledRegions)
+        self.paymentsDisabledRegions = Self.parsePhoneNumberRegions(
+            valueFlags: valueFlags,
+            flag: .paymentsDisabledRegions,
+            defaultValue: "98,963,53,850,7",
+        )
         self.applePayDisabledRegions = Self.parsePhoneNumberRegions(valueFlags: valueFlags, flag: .applePayDisabledRegions)
         self.creditAndDebitCardDisabledRegions = Self.parsePhoneNumberRegions(valueFlags: valueFlags, flag: .creditAndDebitCardDisabledRegions)
         self.paypalDisabledRegions = Self.parsePhoneNumberRegions(valueFlags: valueFlags, flag: .paypalDisabledRegions)
@@ -562,8 +566,9 @@ public class RemoteConfig {
     fileprivate static func parsePhoneNumberRegions(
         valueFlags: [String: String],
         flag: ValueFlag,
+        defaultValue: String = "",
     ) -> PhoneNumberRegions {
-        let regions = PhoneNumberRegions.parseRemoteConfigRegions(valueFlags[flag.rawValue] ?? "")
+        let regions = PhoneNumberRegions.parseRemoteConfigRegions(valueFlags[flag.rawValue] ?? defaultValue)
         return PhoneNumberRegions(regions)
     }
 

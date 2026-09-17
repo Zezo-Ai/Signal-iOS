@@ -37,44 +37,7 @@ public class PaymentsHelperImpl: PaymentsHelperSwift, PaymentsHelper {
         }
         let localNumber = registeredState.localIdentifiers.phoneNumber
         let paymentsDisabledRegions = RemoteConfig.current.paymentsDisabledRegions
-        if paymentsDisabledRegions.isEmpty {
-            return Self.isValidPhoneNumberForPayments_fixedAllowlist(localNumber)
-        } else {
-            return Self.isValidPhoneNumberForPayments_remoteConfigBlocklist(localNumber, paymentsDisabledRegions: paymentsDisabledRegions)
-        }
-    }
-
-    private static func isValidPhoneNumberForPayments_fixedAllowlist(_ e164: String) -> Bool {
-        guard let phoneNumber = SSKEnvironment.shared.phoneNumberUtilRef.parseE164(e164) else {
-            owsFailDebug("Could not parse phone number: \(e164).")
-            return false
-        }
-        guard let callingCode = phoneNumber.getCallingCode() else {
-            owsFailDebug("Missing callingCode: \(e164).")
-            return false
-        }
-        let validCallingCodes: [Int] = [
-            // France
-            33,
-            // Switzerland
-            41,
-            // Parts of UK.
-            44,
-            // Germany
-            49,
-        ]
-        return validCallingCodes.contains(callingCode)
-    }
-
-    static func isValidPhoneNumberForPayments_remoteConfigBlocklist(
-        _ e164: String,
-        paymentsDisabledRegions: PhoneNumberRegions,
-    ) -> Bool {
-        owsAssertDebug(
-            !paymentsDisabledRegions.isEmpty,
-            "Missing paymentsDisabledRegions. Used the fixed allowlist instead.",
-        )
-        return !paymentsDisabledRegions.contains(e164: e164)
+        return !paymentsDisabledRegions.contains(e164: localNumber)
     }
 
     public var canEnablePayments: Bool {
