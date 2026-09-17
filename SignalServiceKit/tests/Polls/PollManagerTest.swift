@@ -218,8 +218,7 @@ struct PollManagerTest {
         mockTSAccountManager.localIdentifiersMock = {
             return LocalIdentifiers(
                 aci: pollAuthorAci,
-                pni: Pni(fromUUID: UUID()),
-                e164: E164("+16505550101")!,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: E164("+16505550101")!, pni: .randomForTesting()),
             )
         }
 
@@ -276,8 +275,7 @@ struct PollManagerTest {
         mockTSAccountManager.localIdentifiersMock = {
             return LocalIdentifiers(
                 aci: pollAuthorAci,
-                pni: Pni(fromUUID: UUID()),
-                e164: E164("+16505550101")!,
+                phoneNumber: LocalIdentifiers.PhoneNumber(e164: E164("+16505550101")!, pni: .randomForTesting()),
             )
         }
 

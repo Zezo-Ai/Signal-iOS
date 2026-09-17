@@ -68,7 +68,7 @@ extension AuthedAccount.Explicit {
     }
 
     public var localIdentifiers: LocalIdentifiers {
-        return LocalIdentifiers(aci: aci, pni: phoneNumber.pni, e164: phoneNumber.e164)
+        return LocalIdentifiers(aci: aci, phoneNumber: phoneNumber)
     }
 
     public var chatServiceAuth: ChatServiceAuth {

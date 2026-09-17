@@ -26,7 +26,7 @@ open class MockRegistrationStateChangeManager: RegistrationStateChangeManager {
         _ authToken: String,
         _ deviceId: DeviceId,
     ) -> Void = { [weak self] aci, phoneNumber, _, _ in
-        self?.registrationStateMock = { .registered(LocalIdentifiers(aci: aci, pni: phoneNumber.pni, phoneNumber: phoneNumber.e164.stringValue)) }
+        self?.registrationStateMock = { .registered(LocalIdentifiers(aci: aci, phoneNumber: phoneNumber)) }
     }
 
     open func didRegisterOrProvision(

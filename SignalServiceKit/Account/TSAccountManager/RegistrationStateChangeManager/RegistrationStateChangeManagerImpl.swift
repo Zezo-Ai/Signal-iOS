@@ -341,7 +341,7 @@ public class RegistrationStateChangeManagerImpl: RegistrationStateChangeManager 
         authCredentialStore.removeAllCallLinkAuthCredentials(tx: tx)
         cron.resetMostRecentDates(tx: tx)
 
-        storageServiceManager.setLocalIdentifiers(LocalIdentifiers(aci: aci, pni: phoneNumber.pni, e164: phoneNumber.e164))
+        storageServiceManager.setLocalIdentifiers(LocalIdentifiers(aci: aci, phoneNumber: phoneNumber))
 
         var recipient = recipientMerger.applyMergeForLocalAccount(
             aci: aci,

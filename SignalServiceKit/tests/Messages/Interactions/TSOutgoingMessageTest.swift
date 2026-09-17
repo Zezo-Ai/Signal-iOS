@@ -339,10 +339,9 @@ class TSOutgoingMessageTest: SSKBaseTest {
         let aci = DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction!.aci
         SSKEnvironment.shared.databaseStorageRef.write { tx in
             (DependenciesBridge.shared.registrationStateChangeManager as! RegistrationStateChangeManagerImpl).registerForTests(
-                localIdentifiers: .init(
+                localIdentifiers: LocalIdentifiers(
                     aci: aci,
-                    pni: Pni.randomForTesting(),
-                    e164: .init("+17775550199")!,
+                    phoneNumber: LocalIdentifiers.PhoneNumber(e164: E164("+17775550199")!, pni: .randomForTesting()),
                 ),
                 tx: tx,
             )

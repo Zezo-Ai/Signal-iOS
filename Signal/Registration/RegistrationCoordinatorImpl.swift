@@ -4832,7 +4832,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
         }
 
         var localIdentifiers: LocalIdentifiers {
-            return LocalIdentifiers(aci: aci, pni: pni, e164: e164)
+            return LocalIdentifiers(aci: aci, phoneNumber: LocalIdentifiers.PhoneNumber(e164: e164, pni: pni))
         }
     }
 
