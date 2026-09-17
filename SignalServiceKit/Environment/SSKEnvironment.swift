@@ -300,12 +300,18 @@ public class SSKEnvironment: NSObject {
             guard let localIdentifiers = tsAccountManager.localIdentifiers(tx: tx) else {
                 return // Not registered yet.
             }
-            guard let phoneNumber = E164(localIdentifiers.phoneNumber) else {
-                return // Registered with an invalid phone number.
+            let phoneNumberObj: E164?
+            if let phoneNumber = localIdentifiers.phoneNumberAsOptional {
+                guard let _phoneNumberObj = E164(phoneNumber) else {
+                    return // Registered with an invalid phone number.
+                }
+                phoneNumberObj = _phoneNumberObj
+            } else {
+                phoneNumberObj = nil
             }
             let localRecipient = recipientMerger.applyMergeForLocalAccount(
                 aci: localIdentifiers.aci,
-                phoneNumber: phoneNumber,
+                phoneNumber: phoneNumberObj,
                 pni: localIdentifiers.pni,
                 shouldUpdateStorageService: true,
                 tx: tx,

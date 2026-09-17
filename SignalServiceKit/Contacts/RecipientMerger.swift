@@ -12,7 +12,7 @@ public protocol RecipientMerger {
     /// time we're allowed to "merge" the identifiers for our own account.
     func applyMergeForLocalAccount(
         aci: Aci,
-        phoneNumber: E164,
+        phoneNumber: E164?,
         pni: Pni?,
         shouldUpdateStorageService: Bool,
         tx: DBWriteTransaction,
@@ -204,11 +204,20 @@ class RecipientMergerImpl: RecipientMerger {
 
     func applyMergeForLocalAccount(
         aci: Aci,
-        phoneNumber: E164,
+        phoneNumber: E164?,
         pni: Pni?,
         shouldUpdateStorageService: Bool,
         tx: DBWriteTransaction,
     ) -> SignalRecipient {
+        guard let phoneNumber else {
+            var aciResult = recipientFetcher.fetchOrCreate(serviceId: aci, tx: tx)
+            if aciResult.phoneNumber != nil || aciResult.pni != nil {
+                aciResult.phoneNumber = nil
+                aciResult.pni = nil
+                recipientDatabaseTable.updateRecipient(aciResult, transaction: tx)
+            }
+            return aciResult
+        }
         let aciResult = mergeAlways(aci: aci, phoneNumber: phoneNumber, isLocalRecipient: true, shouldUpdateStorageService: shouldUpdateStorageService, tx: tx)
         if let pni {
             return mergeAlways(phoneNumber: phoneNumber, pni: pni, isLocalRecipient: true, shouldUpdateStorageService: shouldUpdateStorageService, tx: tx)
