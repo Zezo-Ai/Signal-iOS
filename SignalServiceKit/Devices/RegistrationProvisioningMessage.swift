@@ -24,6 +24,17 @@ public struct RegistrationProvisioningMessage {
         case wifiaware = "wifiaware"
     }
 
+    /// Wraps state that's only available for accounts with phone numbers.
+    public struct PhoneNumberState {
+        public let phoneNumber: E164
+        public let pniIdentityKeyPair: IdentityKeyPair
+
+        public init(phoneNumber: E164, pniIdentityKeyPair: IdentityKeyPair) {
+            self.phoneNumber = phoneNumber
+            self.pniIdentityKeyPair = pniIdentityKeyPair
+        }
+    }
+
     public enum Platform {
         case ios
         case android
@@ -34,11 +45,10 @@ public struct RegistrationProvisioningMessage {
         case paid
     }
 
-    public let accountEntropyPool: AccountEntropyPool
     public let aci: Aci
     public let aciIdentityKeyPair: IdentityKeyPair
-    public let pniIdentityKeyPair: IdentityKeyPair
-    public let phoneNumber: E164
+    public let phoneNumberState: PhoneNumberState
+    public let accountEntropyPool: AccountEntropyPool
     public let pin: String?
     public let platform: Platform
     public let tier: BackupTier?
@@ -51,11 +61,10 @@ public struct RegistrationProvisioningMessage {
     public let capabilites: [Capability]
 
     public init(
-        accountEntropyPool: AccountEntropyPool,
         aci: Aci,
         aciIdentityKeyPair: IdentityKeyPair,
-        pniIdentityKeyPair: IdentityKeyPair,
-        phoneNumber: E164,
+        phoneNumberState: PhoneNumberState,
+        accountEntropyPool: AccountEntropyPool,
         pin: String?,
         tier: BackupTier?,
         backupVersion: UInt64?,
@@ -70,8 +79,7 @@ public struct RegistrationProvisioningMessage {
         self.accountEntropyPool = accountEntropyPool
         self.aci = aci
         self.aciIdentityKeyPair = aciIdentityKeyPair
-        self.pniIdentityKeyPair = pniIdentityKeyPair
-        self.phoneNumber = phoneNumber
+        self.phoneNumberState = phoneNumberState
         self.pin = pin
         self.tier = tier
         self.backupVersion = backupVersion
@@ -89,7 +97,7 @@ public struct RegistrationProvisioningMessage {
             privateKey: PrivateKey(proto.aciIdentityKeyPrivate),
         )
 
-        self.pniIdentityKeyPair = try IdentityKeyPair(
+        let pniIdentityKeyPair = try IdentityKeyPair(
             publicKey: PublicKey(proto.pniIdentityKeyPublic),
             privateKey: PrivateKey(proto.pniIdentityKeyPrivate),
         )
@@ -98,10 +106,13 @@ public struct RegistrationProvisioningMessage {
 
         self.aci = try Aci.parseFrom(serviceIdBinary: proto.aci)
 
-        guard let e164 = E164(proto.e164) else {
+        guard let phoneNumber = E164(proto.e164) else {
             throw OWSGenericError("missing number from provisioning message")
         }
-        self.phoneNumber = e164
+        self.phoneNumberState = PhoneNumberState(
+            phoneNumber: phoneNumber,
+            pniIdentityKeyPair: pniIdentityKeyPair,
+        )
 
         self.pin = proto.pin
 
@@ -134,7 +145,6 @@ public struct RegistrationProvisioningMessage {
 
         messageBuilder.accountEntropyPool = accountEntropyPool.rawString
         messageBuilder.aci = aci.serviceIdBinary
-        messageBuilder.e164 = phoneNumber.stringValue
         if let pin {
             messageBuilder.pin = pin
         }
@@ -142,8 +152,12 @@ public struct RegistrationProvisioningMessage {
         messageBuilder.aciIdentityKeyPublic = aciIdentityKeyPair.publicKey.serialize()
         messageBuilder.aciIdentityKeyPrivate = aciIdentityKeyPair.privateKey.serialize()
 
-        messageBuilder.pniIdentityKeyPublic = pniIdentityKeyPair.publicKey.serialize()
-        messageBuilder.pniIdentityKeyPrivate = pniIdentityKeyPair.privateKey.serialize()
+        let phoneNumberState = self.phoneNumberState
+        do {
+            messageBuilder.e164 = phoneNumberState.phoneNumber.stringValue
+            messageBuilder.pniIdentityKeyPublic = phoneNumberState.pniIdentityKeyPair.publicKey.serialize()
+            messageBuilder.pniIdentityKeyPrivate = phoneNumberState.pniIdentityKeyPair.privateKey.serialize()
+        }
 
         messageBuilder.platform = .ios
 

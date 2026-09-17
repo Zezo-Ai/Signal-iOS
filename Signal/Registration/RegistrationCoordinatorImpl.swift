@@ -344,7 +344,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
 
         deps.db.write { tx in
             updatePersistedState(tx) {
-                $0.e164 = message.phoneNumber
+                $0.e164 = message.phoneNumberState.phoneNumber
             }
             updateMasterKeyAndLocalState(masterKey: message.accountEntropyPool.getMasterKey(), tx: tx)
         }
@@ -4526,7 +4526,7 @@ public class RegistrationCoordinatorImpl: RegistrationCoordinator {
                 tx: tx,
             )
             deps.identityManager.setIdentityKeyPair(
-                registrationMessage.pniIdentityKeyPair.asECKeyPair,
+                registrationMessage.phoneNumberState.pniIdentityKeyPair.asECKeyPair,
                 for: .pni,
                 tx: tx,
             )

@@ -144,11 +144,13 @@ public class QuickRestoreManager {
         }
 
         let registrationMessage = RegistrationProvisioningMessage(
-            accountEntropyPool: accountEntropyPool,
             aci: myAci,
             aciIdentityKeyPair: aciIdentityKeyPair.identityKeyPair,
-            pniIdentityKeyPair: pniIdentityKeyPair.identityKeyPair,
-            phoneNumber: myPhoneNumber,
+            phoneNumberState: RegistrationProvisioningMessage.PhoneNumberState(
+                phoneNumber: myPhoneNumber,
+                pniIdentityKeyPair: pniIdentityKeyPair.identityKeyPair,
+            ),
+            accountEntropyPool: accountEntropyPool,
             pin: pinCode,
             tier: backupTier,
             backupVersion: BackupArchiveManagerImpl.Constants.supportedBackupVersion,
