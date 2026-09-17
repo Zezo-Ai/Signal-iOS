@@ -37,6 +37,11 @@ public final class LocalIdentifiers {
     /// in prior versions of the application may not be a valid E164.
     public let phoneNumber: String
 
+    /// The phone number for the current user, as an optional.
+    ///
+    /// This is a temporary and will go away when `phoneNumber` is optional.
+    public var phoneNumberAsOptional: String? { self.phoneNumber }
+
     public init(aci: Aci, pni: Pni?, phoneNumber: String) {
         self.aci = aci
         self.pni = pni
