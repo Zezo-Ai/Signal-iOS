@@ -497,6 +497,7 @@ public extension OWSViewController {
 
         if isScrollable {
             let scrollView = UIScrollView()
+            scrollView.clipsToBounds = false
             scrollView.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(scrollView)
             scrollView.addSubview(stackView)
