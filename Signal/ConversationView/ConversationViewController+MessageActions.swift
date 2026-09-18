@@ -210,7 +210,7 @@ extension ConversationViewController: ContextMenuInteractionDelegate {
             componentView.contextMenuPresentationWillBegin?()
         }
 
-        dismissKeyBoard()
+        dismissKeyboard()
     }
 
     public func contextMenuInteraction(_ interaction: ContextMenuInteraction, willEndForConfiguration: ContextMenuConfiguration) {

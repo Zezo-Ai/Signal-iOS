@@ -534,7 +534,7 @@ extension ConversationViewController: CVComponentDelegate {
     ) {
         AssertIsOnMainThread()
 
-        dismissKeyBoard()
+        dismissKeyboard()
 
         guard
             let pageVC = MediaPageViewController(
@@ -797,7 +797,7 @@ extension ConversationViewController: CVComponentDelegate {
 
         // Ensure keyboard isn't hiding the "safety numbers changed" interaction when we
         // return from FingerprintViewController.
-        dismissKeyBoard()
+        dismissKeyboard()
 
         let addressAci: Aci? = address.aci ?? {
             guard let phoneNumber = address.phoneNumber else {
@@ -817,7 +817,7 @@ extension ConversationViewController: CVComponentDelegate {
         AssertIsOnMainThread()
         owsAssertDebug(address.isValid)
 
-        dismissKeyBoard()
+        dismissKeyboard()
 
         let headerImageView = UIImageView(image: UIImage(named: "safety-number-change"))
         let headerView = UIView()
@@ -859,7 +859,7 @@ extension ConversationViewController: CVComponentDelegate {
     }
 
     public func didTapSessionRefreshMessage(_ message: TSErrorMessage) {
-        dismissKeyBoard()
+        dismissKeyboard()
 
         OWSActionSheets.showContactSupportActionSheet(
             title: OWSLocalizedString(
@@ -932,7 +932,7 @@ extension ConversationViewController: CVComponentDelegate {
         alert.addAction(OWSActionSheets.cancelAction)
 
         inputToolbar?.clearDesiredKeyboard()
-        dismissKeyBoard()
+        dismissKeyboard()
         self.presentActionSheet(alert)
     }
 
@@ -979,7 +979,7 @@ extension ConversationViewController: CVComponentDelegate {
         alert.addAction(OWSActionSheets.okayAction)
 
         inputToolbar?.clearDesiredKeyboard()
-        dismissKeyBoard()
+        dismissKeyboard()
         self.presentActionSheet(alert)
     }
 
@@ -1009,7 +1009,7 @@ extension ConversationViewController: CVComponentDelegate {
             databaseStorage: SSKEnvironment.shared.databaseStorageRef,
             messageSenderJobQueue: SSKEnvironment.shared.messageSenderJobQueueRef,
         )
-        dismissKeyBoard()
+        dismissKeyboard()
 
         self.present(promptBuilder.build(for: message, isTerminatedGroup: thread.isTerminatedGroup), animated: true)
     }
@@ -1277,7 +1277,7 @@ extension ConversationViewController: CVComponentDelegate {
         alert.addAction(OWSActionSheets.okayAction)
 
         inputToolbar?.clearDesiredKeyboard()
-        dismissKeyBoard()
+        dismissKeyboard()
         self.presentActionSheet(alert)
     }
 
@@ -1353,7 +1353,7 @@ extension ConversationViewController: CVComponentDelegate {
         alert.addAction(.cancel)
 
         inputToolbar?.clearDesiredKeyboard()
-        dismissKeyBoard()
+        dismissKeyboard()
         presentActionSheet(alert)
     }
 

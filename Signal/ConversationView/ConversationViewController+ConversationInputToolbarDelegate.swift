@@ -509,7 +509,7 @@ extension ConversationViewController: ConversationInputToolbarDelegate {
         locationPicker.delegate = self
         let navigationController = OWSNavigationController(rootViewController: locationPicker)
         navigationController.presentationController?.delegate = self
-        dismissKeyBoard()
+        dismissKeyboard()
         presentFormSheet(navigationController, animated: true)
     }
 
@@ -521,7 +521,7 @@ extension ConversationViewController: ConversationInputToolbarDelegate {
             return
         }
 
-        dismissKeyBoard()
+        dismissKeyboard()
 
         guard SUIEnvironment.shared.paymentsRef.canUsePayments() else {
             OWSActionSheets.showErrorAlert(message: OWSLocalizedString(
@@ -548,7 +548,7 @@ extension ConversationViewController: ConversationInputToolbarDelegate {
     public func pollButtonPressed() {
         AssertIsOnMainThread()
 
-        dismissKeyBoard()
+        dismissKeyboard()
 
         let newPollViewController = NewPollViewController2(
             maxOptionCount: RemoteConfig.current.maxPollOptionSendCount,
@@ -560,7 +560,7 @@ extension ConversationViewController: ConversationInputToolbarDelegate {
     public func didSelectRecentPhoto(asset: PHAsset, attachment: PreviewableAttachment, attachmentLimits: OutgoingAttachmentLimits) {
         AssertIsOnMainThread()
 
-        dismissKeyBoard()
+        dismissKeyboard()
 
         let pickerModal = SendMediaNavigationController.showingApprovalWithPickedLibraryMedia(
             asset: asset,
@@ -626,7 +626,7 @@ private extension ConversationViewController {
     func chooseContactForSending() {
         AssertIsOnMainThread()
 
-        dismissKeyBoard()
+        dismissKeyboard()
         SUIEnvironment.shared.contactsViewHelperRef.checkReadAuthorization(
             purpose: .share,
             performWhenAllowed: {
@@ -665,7 +665,7 @@ private extension ConversationViewController {
         pickerController.delegate = self
         pickerController.presentationController?.delegate = self
 
-        dismissKeyBoard()
+        dismissKeyboard()
         presentFormSheet(pickerController, animated: true)
     }
 
@@ -702,7 +702,7 @@ private extension ConversationViewController {
                 if !pickerHidesStatusBar {
                     pickerModal.modalPresentationCapturesStatusBarAppearance = true
                 }
-                self.dismissKeyBoard()
+                self.dismissKeyboard()
                 self.present(pickerModal, animated: true) {
                     if pickerHidesStatusBar {
                         pickerModal.modalPresentationCapturesStatusBarAppearance = true
@@ -723,7 +723,7 @@ private extension ConversationViewController {
         pickerModal.sendMediaNavDelegate = self
         pickerModal.sendMediaNavDataSource = self
 
-        self.dismissKeyBoard()
+        self.dismissKeyboard()
         let presenter = self.splitViewController ?? self
         presenter.present(pickerModal, animated: false)
     }
@@ -740,7 +740,7 @@ public extension ConversationViewController {
         gifModal.approvalDelegate = self
         gifModal.approvalDataSource = self
         gifModal.presentationController?.delegate = self
-        dismissKeyBoard()
+        dismissKeyboard()
         present(gifModal, animated: true)
     }
 }

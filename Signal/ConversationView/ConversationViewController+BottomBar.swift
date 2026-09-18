@@ -46,7 +46,7 @@ public extension ConversationViewController {
             if viewState.bottomViewType != newValue {
                 if viewState.bottomViewType == .inputToolbar {
                     // Dismiss the keyboard if we're swapping out the input toolbar
-                    dismissKeyBoard()
+                    dismissKeyboard()
                 }
                 viewState.bottomViewType = newValue
                 updateBottomBar()
@@ -409,7 +409,7 @@ public extension ConversationViewController {
         inputToolbar.beginEditingMessage()
     }
 
-    func dismissKeyBoard() {
+    func dismissKeyboard() {
         AssertIsOnMainThread()
 
         guard hasViewWillAppearEverBegun else {

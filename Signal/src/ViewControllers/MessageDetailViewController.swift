@@ -1454,7 +1454,7 @@ private class AnimationController: NSObject, UIViewControllerAnimatedTransitioni
                 // messed with. We don't want the keyboard to present when returning
                 // from message details, so we dismiss it when we leave the view.
                 if let fromViewController = transitionContext.viewController(forKey: .from) as? ConversationViewController {
-                    fromViewController.dismissKeyBoard()
+                    fromViewController.dismissKeyboard()
                 }
             }
 
