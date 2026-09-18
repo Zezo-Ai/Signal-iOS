@@ -201,7 +201,7 @@ class AccountSettingsViewController: OWSTableViewController2 {
                     textColor: .Signal.red,
                     accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "delete_account"),
                     actionBlock: { [weak self] in
-                        self?.unregisterUser()
+                        self?.unregisterUser(registeredState: registeredState)
                     },
                 ))
                 contents.add(accountSection)
@@ -320,8 +320,8 @@ class AccountSettingsViewController: OWSTableViewController2 {
         )
     }
 
-    private func unregisterUser() {
-        let vc = DeleteAccountConfirmationViewController()
+    private func unregisterUser(registeredState: RegisteredState) {
+        let vc = DeleteAccountConfirmationViewController(registeredState: registeredState)
         presentFormSheet(OWSNavigationController(rootViewController: vc), animated: true)
     }
 

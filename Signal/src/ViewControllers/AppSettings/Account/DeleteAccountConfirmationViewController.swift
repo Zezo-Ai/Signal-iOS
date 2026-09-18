@@ -9,6 +9,12 @@ import SignalUI
 class DeleteAccountConfirmationViewController: OWSTableViewController2 {
     private var country: PhoneNumberCountry!
 
+    private let registeredStateAtStart: RegisteredState
+
+    init(registeredState: RegisteredState) {
+        self.registeredStateAtStart = registeredState
+    }
+
     private lazy var nationalNumberTextField: UITextField = {
         let textField = UITextField()
         textField.returnKeyType = .done
@@ -171,9 +177,7 @@ class DeleteAccountConfirmationViewController: OWSTableViewController2 {
     }()
 
     private func didTapDelete() {
-        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
-        let registeredState = tsAccountManager.mustBeRegisteredStateWithMaybeSneakyTransaction()
-        guard hasEnteredLocalNumber(localIdentifiers: registeredState.localIdentifiers) else {
+        guard hasEnteredLocalNumber(localIdentifiers: registeredStateAtStart.localIdentifiers) else {
             OWSActionSheets.showActionSheet(
                 title: OWSLocalizedString(
                     "DELETE_ACCOUNT_CONFIRMATION_WRONG_NUMBER",
@@ -346,19 +350,10 @@ class DeleteAccountConfirmationViewController: OWSTableViewController2 {
         let logger = PrefixedLogger(prefix: "[Backups]")
         let tsAccountManager = DependenciesBridge.shared.tsAccountManager
 
-        let (localIdentifiers, currentBackupPlan): (
-            LocalIdentifiers?,
-            BackupPlan,
-        ) = db.read { tx in
-            return (
-                tsAccountManager.localIdentifiers(tx: tx),
-                backupSettingsStore.backupPlan(tx: tx),
-            )
-        }
+        // Fetch this again in case we got deregistered while the view was visible.
+        let registeredState = try tsAccountManager.registeredStateWithMaybeSneakyTransaction()
 
-        guard let localIdentifiers else {
-            return
-        }
+        let currentBackupPlan = db.read { tx in backupSettingsStore.backupPlan(tx: tx) }
 
         switch currentBackupPlan {
         case .disabled:
@@ -374,7 +369,7 @@ class DeleteAccountConfirmationViewController: OWSTableViewController2 {
 
         logger.info("Attempting to delete Backups!")
         try await backupKeyService.deleteBackupKey(
-            localIdentifiers: localIdentifiers,
+            localIdentifiers: registeredState.localIdentifiers,
             auth: .implicit(),
             logger: logger,
         )
@@ -475,12 +470,10 @@ extension DeleteAccountConfirmationViewController: CountryCodeViewControllerDele
     }
 
     private func populateDefaultCountryCode() {
-        let tsAccountManager = DependenciesBridge.shared.tsAccountManager
         let phoneNumberUtil = SSKEnvironment.shared.phoneNumberUtilRef
-        let registeredState = tsAccountManager.mustBeRegisteredStateWithMaybeSneakyTransaction()
         let defaultCountry: PhoneNumberCountry
         let localCountry = PhoneNumberCountry.buildCountry(
-            forCountryCode: phoneNumberUtil.preferredCountryCode(forLocalNumber: registeredState.localIdentifiers.phoneNumber),
+            forCountryCode: phoneNumberUtil.preferredCountryCode(forLocalNumber: registeredStateAtStart.localIdentifiers.phoneNumber),
         )
         if let localCountry {
             defaultCountry = localCountry
