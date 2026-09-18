@@ -550,6 +550,8 @@ final class CallKitCallUIAdaptee: NSObject, CallUIAdaptee, @preconcurrency CXPro
 
         Logger.info("CallKit: didActivate AVAudioSession")
 
+        SUIEnvironment.shared.audioSessionRef.rtcAudioSessionDidActivate()
+
         _ = SUIEnvironment.shared.audioSessionRef.startAudioActivity(self.audioActivity)
 
         guard let call = self.callService.callServiceState.currentCall else {
@@ -566,6 +568,7 @@ final class CallKitCallUIAdaptee: NSObject, CallUIAdaptee, @preconcurrency CXPro
         }
     }
 
+    @MainActor
     func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
         AssertIsOnMainThread()
 
@@ -573,6 +576,7 @@ final class CallKitCallUIAdaptee: NSObject, CallUIAdaptee, @preconcurrency CXPro
 
         SUIEnvironment.shared.audioSessionRef.isRTCAudioEnabled = false
         SUIEnvironment.shared.audioSessionRef.endAudioActivity(self.audioActivity)
+        SUIEnvironment.shared.audioSessionRef.rtcAudioSessionDidDeactivate()
     }
 
     // MARK: - Util
