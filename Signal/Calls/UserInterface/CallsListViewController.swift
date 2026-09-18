@@ -327,7 +327,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
         let viewController = NewCallViewController()
         viewController.delegate = self
         let modal = OWSNavigationController(rootViewController: viewController)
-        self.navigationController?.presentFormSheet(modal, animated: true)
+        presentFormSheet(modal, animated: true)
     }
 
     // MARK: Cancel multiselect button
