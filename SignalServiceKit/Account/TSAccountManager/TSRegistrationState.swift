@@ -54,18 +54,12 @@ public enum TSRegistrationState {
 
 extension TSRegistrationState {
 
+    public func registeredState() throws(NotRegisteredError) -> RegisteredState {
+        return try RegisteredState(registrationState: self)
+    }
+
     public var isRegistered: Bool {
-        switch self {
-        case
-            .unregistered, .reregistering, .relinking,
-            .deregistered, .delinked,
-            .transferringPrimaryOutgoing, .transferringLinkedOutgoing,
-            .transferringIncoming,
-            .transferred:
-            return false
-        case .registered, .provisioned:
-            return true
-        }
+        return (try? registeredState()) != nil
     }
 
     public var wasEverRegistered: Bool {
@@ -107,20 +101,7 @@ extension TSRegistrationState {
     }
 
     public var isRegisteredPrimaryDevice: Bool {
-        switch self {
-        case .registered:
-            return true
-        case
-            .unregistered,
-            .provisioned,
-            .reregistering,
-            .relinking,
-            .deregistered, .delinked,
-            .transferringPrimaryOutgoing, .transferringLinkedOutgoing,
-            .transferringIncoming,
-            .transferred:
-            return false
-        }
+        return (try? self.registeredState())?.isPrimary == true
     }
 
     public var isDeregistered: Bool {

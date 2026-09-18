@@ -114,7 +114,7 @@ extension TSAccountManager {
     }
 
     public func registeredStateWithMaybeSneakyTransaction() throws(NotRegisteredError) -> RegisteredState {
-        return try RegisteredState(registrationState: self.registrationStateWithMaybeSneakyTransaction)
+        return try self.registrationStateWithMaybeSneakyTransaction.registeredState()
     }
 
     public func mustBeRegisteredState(tx: DBReadTransaction) -> RegisteredState {
@@ -122,7 +122,7 @@ extension TSAccountManager {
     }
 
     public func registeredState(tx: DBReadTransaction) throws(NotRegisteredError) -> RegisteredState {
-        return try RegisteredState(registrationState: self.registrationState(tx: tx))
+        return try self.registrationState(tx: tx).registeredState()
     }
 
     public func localIdentifiersWithMaybeSneakyTransaction(authedAccount: AuthedAccount) throws(NotRegisteredError) -> LocalIdentifiers {
