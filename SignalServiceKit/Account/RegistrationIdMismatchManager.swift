@@ -49,10 +49,12 @@ public class RegistrationIdMismatchManagerImpl: RegistrationIdMismatchManager {
             try await _checkRegistrationIdMatches(identity: .aci, serviceId: registeredState.localIdentifiers.aci)
 
             // Check PNI
-            if let pni = registeredState.localIdentifiers.pni {
-                try await _checkRegistrationIdMatches(identity: .pni, serviceId: pni)
-            } else {
-                owsFailDebug("Missing PNI during registrationId check")
+            if registeredState.localIdentifiers.phoneNumberAsOptional != nil {
+                if let pni = registeredState.localIdentifiers.pni {
+                    try await _checkRegistrationIdMatches(identity: .pni, serviceId: pni)
+                } else {
+                    owsFailDebug("Missing PNI during registrationId check")
+                }
             }
 
             await db.awaitableWrite {
