@@ -39,22 +39,22 @@ class LocalFileBackupOnboardingIntroViewController: OWSViewController {
             ),
         )
 
-        let bulletsStack = UIStackView(arrangedSubviews: [
-            buildBulletView(
+        let bulletsStack = UIStackView.bulletPointsStack(content: [
+            (
                 image: UIImage(resource: .lock),
                 text: OWSLocalizedString(
                     "LOCAL_FILE_BACKUP_ONBOARDING_INTRO_BULLET_1",
                     comment: "Bullet point on a view introducing local file backups during onboarding flow.",
                 ),
             ),
-            buildBulletView(
+            (
                 image: UIImage(resource: .checkSquare),
                 text: OWSLocalizedString(
                     "LOCAL_FILE_BACKUP_ONBOARDING_INTRO_BULLET_2",
                     comment: "Bullet point on a view introducing local file backups during onboarding flow.",
                 ),
             ),
-            buildBulletView(
+            (
                 image: UIImage(resource: .trash),
                 text: OWSLocalizedString(
                     "LOCAL_FILE_BACKUP_ONBOARDING_INTRO_BULLET_3",
@@ -62,10 +62,6 @@ class LocalFileBackupOnboardingIntroViewController: OWSViewController {
                 ),
             ),
         ])
-        bulletsStack.isLayoutMarginsRelativeArrangement = true
-        bulletsStack.directionalLayoutMargins = .init(hMargin: 32, vMargin: 0)
-        bulletsStack.axis = .vertical
-        bulletsStack.spacing = 26
 
         let continueButton = UIButton(
             configuration: .largePrimary(title: CommonStrings.continueButton),
@@ -85,27 +81,6 @@ class LocalFileBackupOnboardingIntroViewController: OWSViewController {
         )
         stackView.spacing = 24
         stackView.setCustomSpacing(36, after: explanationLabel)
-    }
-
-    // MARK: -
-
-    private func buildBulletView(image: UIImage, text: String) -> UIView {
-        let imageView = UIImageView(image: image.withRenderingMode(.alwaysTemplate))
-        imageView.tintColor = .Signal.label
-        imageView.autoSetDimensions(to: .square(24))
-
-        let label = UILabel()
-        label.text = text
-        label.font = .dynamicTypeBodyClamped
-        label.textColor = .Signal.label
-        label.numberOfLines = 0
-
-        let row = UIStackView(arrangedSubviews: [imageView, label])
-        row.axis = .horizontal
-        row.spacing = 12
-        row.alignment = .center
-
-        return row
     }
 
     private func didTapContinue() {
