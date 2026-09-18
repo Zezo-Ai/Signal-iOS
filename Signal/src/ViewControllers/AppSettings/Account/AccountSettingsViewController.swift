@@ -157,90 +157,88 @@ class AccountSettingsViewController: OWSTableViewController2 {
                 },
             ))
             contents.add(accountSection)
-        } else if tsRegistrationState.isRegisteredPrimaryDevice {
-            let accountSection = OWSTableSection()
-            accountSection.headerTitle = accountSettingsTitle
-            switch self.changeNumberState() {
-            case .disallowed:
-                break
-            case .allowed:
+        } else if let registeredState = try? tsRegistrationState.registeredState() {
+            if registeredState.isPrimary {
+                let accountSection = OWSTableSection()
+                accountSection.headerTitle = accountSettingsTitle
+                switch self.changeNumberState() {
+                case .disallowed:
+                    break
+                case .allowed:
+                    accountSection.add(.actionItem(
+                        withText: OWSLocalizedString("SETTINGS_CHANGE_PHONE_NUMBER_BUTTON", comment: "Label for button in settings views to change phone number"),
+                        accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "change_phone_number"),
+                        actionBlock: { [weak self] in
+                            guard let self else {
+                                return
+                            }
+                            // Fetch the state again in case it changed from under us
+                            // between when the button was rendered and when it was tapped.
+                            switch self.changeNumberState() {
+                            case .disallowed:
+                                return
+                            case .allowed(let changeNumberParams):
+                                self.changePhoneNumber(changeNumberParams)
+                            }
+                        },
+                    ))
+                }
                 accountSection.add(.actionItem(
-                    withText: OWSLocalizedString("SETTINGS_CHANGE_PHONE_NUMBER_BUTTON", comment: "Label for button in settings views to change phone number"),
-                    accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "change_phone_number"),
+                    withText: OWSLocalizedString(
+                        "SETTINGS_ACCOUNT_DATA_REPORT_BUTTON",
+                        comment: "Label for button in settings to get your account data report",
+                    ),
+                    accessibilityIdentifier: UIView.accessibilityIdentifier(
+                        in: self,
+                        name: "request_account_data_report",
+                    ),
                     actionBlock: { [weak self] in
-                        guard let self else {
-                            return
-                        }
-                        // Fetch the state again in case it changed from under us
-                        // between when the button was rendered and when it was tapped.
-                        switch self.changeNumberState() {
-                        case .disallowed:
-                            return
-                        case .allowed(let changeNumberParams):
-                            self.changePhoneNumber(changeNumberParams)
-                        }
+                        self?.requestAccountDataReport()
                     },
                 ))
-            }
-            accountSection.add(.actionItem(
-                withText: OWSLocalizedString(
-                    "SETTINGS_ACCOUNT_DATA_REPORT_BUTTON",
-                    comment: "Label for button in settings to get your account data report",
-                ),
-                accessibilityIdentifier: UIView.accessibilityIdentifier(
-                    in: self,
-                    name: "request_account_data_report",
-                ),
-                actionBlock: { [weak self] in
-                    self?.requestAccountDataReport()
-                },
-            ))
-            accountSection.add(.item(
-                name: OWSLocalizedString("SETTINGS_DELETE_ACCOUNT_BUTTON", comment: ""),
-                textColor: .Signal.red,
-                accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "delete_account"),
-                actionBlock: { [weak self] in
-                    self?.unregisterUser()
-                },
-            ))
-            contents.add(accountSection)
-        } else {
-            if tsRegistrationState.isRegistered {
+                accountSection.add(.item(
+                    name: OWSLocalizedString("SETTINGS_DELETE_ACCOUNT_BUTTON", comment: ""),
+                    textColor: .Signal.red,
+                    accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "delete_account"),
+                    actionBlock: { [weak self] in
+                        self?.unregisterUser()
+                    },
+                ))
+                contents.add(accountSection)
+            } else {
                 let cardSection = OWSTableSection()
                 cardSection.add(OWSTableItem(customCellBlock: { [weak self] in
                     guard let self else { return UITableViewCell() }
                     return self.linkedDeviceCardCell()
                 }))
                 contents.add(cardSection)
-            }
 
-            addDeleteLocalDataSection(to: contents)
+                let deleteSection = OWSTableSection()
+                deleteSection.add(.actionItem(
+                    withText: OWSLocalizedString(
+                        "SETTINGS_LINKED_DEVICE_DELETE_DATA_BUTTON",
+                        comment: "Label for a button that deletes all Signal data from a linked device.",
+                    ),
+                    textColor: .Signal.red,
+                    accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "delete_data"),
+                    actionBlock: { [weak self] in
+                        self?.unlinkDevice()
+                    },
+                ))
+                deleteSection.footerTitle = OWSLocalizedString(
+                    "SETTINGS_LINKED_DEVICE_DELETE_DATA_FOOTER",
+                    comment: "Footer below the 'delete app data' button, shown on a linked device's account settings.",
+                )
+                contents.add(deleteSection)
+            }
+        } else {
+            owsFailDebug("can't view account settings for state: \(tsRegistrationState)")
         }
 
         self.contents = contents
     }
 
     // MARK: - Section contents
-
-    private func addDeleteLocalDataSection(to contents: OWSTableContents) {
-        let deleteSection = OWSTableSection()
-        deleteSection.add(.actionItem(
-            withText: OWSLocalizedString(
-                "SETTINGS_LINKED_DEVICE_DELETE_DATA_BUTTON",
-                comment: "Label for a button that deletes all Signal data from a linked device.",
-            ),
-            textColor: .Signal.red,
-            accessibilityIdentifier: UIView.accessibilityIdentifier(in: self, name: "delete_data"),
-            actionBlock: { [weak self] in
-                self?.deleteLinkedData()
-            },
-        ))
-        deleteSection.footerTitle = OWSLocalizedString(
-            "SETTINGS_LINKED_DEVICE_DELETE_DATA_FOOTER",
-            comment: "Footer below the 'delete app data' button, shown on a linked device's account settings.",
-        )
-        contents.add(deleteSection)
-    }
 
     private func linkedDeviceCardCell() -> UITableViewCell {
         let cell = OWSTableItem.newCell()
@@ -296,7 +294,7 @@ class AccountSettingsViewController: OWSTableViewController2 {
 
     // MARK: - Account
 
-    private func deleteLinkedData() {
+    private func unlinkDevice() {
         OWSActionSheets.showConfirmationAlert(
             title: OWSLocalizedString("CONFIRM_DELETE_LINKED_DATA_TITLE", comment: ""),
             message: OWSLocalizedString("CONFIRM_DELETE_LINKED_DATA_TEXT", comment: ""),
