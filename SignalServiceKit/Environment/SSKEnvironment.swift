@@ -249,31 +249,20 @@ public class SSKEnvironment: NSObject {
         let databaseStorage = self.databaseStorageRef
         let tsAccountManager = dependenciesBridge.tsAccountManager
 
-        let mustHavePni: Bool
-        let mustHavePniIdentityKey: Bool
-        switch tsAccountManager.registrationStateWithMaybeSneakyTransaction {
-        case .provisioned:
-            mustHavePni = true
-            mustHavePniIdentityKey = true
-        case .registered:
-            mustHavePni = true
-            mustHavePniIdentityKey = true
-        default:
-            mustHavePni = false
-            mustHavePniIdentityKey = false
-        }
-
-        guard mustHavePni || mustHavePniIdentityKey else {
+        guard
+            let registeredState = try? tsAccountManager.registeredStateWithMaybeSneakyTransaction(),
+            registeredState.localIdentifiers.phoneNumberAsOptional != nil
+        else {
+            // We must be a registered account with a phone number for this check.
             return
         }
 
-        let (hasPni, hasPniIdentityKey) = databaseStorage.read { tx -> (Bool, Bool) in
-            let hasPni = tsAccountManager.localIdentifiers(tx: tx)!.pni != nil
-            let hasPniIdentityKey = dependenciesBridge.identityManager.identityKeyPair(for: .pni, tx: tx) != nil
-            return (hasPni, hasPniIdentityKey)
+        let hasPni = registeredState.localIdentifiers.pni != nil
+        let hasPniIdentityKey = databaseStorage.read { tx in
+            return dependenciesBridge.identityManager.identityKeyPair(for: .pni, tx: tx) != nil
         }
 
-        if (!hasPni && mustHavePni) || (!hasPniIdentityKey && mustHavePniIdentityKey) {
+        if !hasPni || !hasPniIdentityKey {
             Logger.warn("Deregistering because PNI state is missing (hasPni: \(hasPni); hasPniIdentityKey: \(hasPniIdentityKey))")
             databaseStorage.write { tx in
                 dependenciesBridge.registrationStateChangeManager.setIsDeregisteredOrDelinked(
