@@ -465,6 +465,7 @@ final class LinkedDeviceBackupSettingsViewController: OWSTableViewController2 {
             customCellBlock: {
                 OWSTableItem.buildImageCell(
                     image: UIImage(named: "device-phone")?.withRenderingMode(.alwaysTemplate),
+                    tintColor: UIColor.Signal.label,
                     itemName: OWSLocalizedString(
                         "BACKUP_SETTINGS_LANDING_ON_DEVICE_BACKUPS",
                         comment: "Label for the On-Device Backups option on the Backups settings landing page.",

@@ -129,7 +129,11 @@ class ProxySettingsViewController: OWSTableViewController2 {
         let shareSection = OWSTableSection()
         shareSection.add(.init(
             customCellBlock: {
-                let cell = OWSTableItem.buildImageCell(image: Theme.iconImage(.buttonShare), itemName: CommonStrings.shareButton)
+                let cell = OWSTableItem.buildImageCell(
+                    image: Theme.iconImage(.buttonShare),
+                    tintColor: UIColor.Signal.label,
+                    itemName: CommonStrings.shareButton,
+                )
                 cell.selectionStyle = .none
 
                 if !useProxy {
