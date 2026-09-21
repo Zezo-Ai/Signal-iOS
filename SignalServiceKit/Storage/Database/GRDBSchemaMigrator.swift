@@ -7343,7 +7343,7 @@ public class GRDBSchemaMigrator {
         )
     }
 
-    public static func removeInteractionThreadUniqueIdUniqueIdIndex(tx: DBWriteTransaction) throws {
+    private static func removeInteractionThreadUniqueIdUniqueIdIndex(tx: DBWriteTransaction) throws {
         try tx.database.execute(
             sql: """
             DROP INDEX IF EXISTS "index_interactions_on_uniqueId_and_threadUniqueId"
@@ -7351,7 +7351,7 @@ public class GRDBSchemaMigrator {
         )
     }
 
-    public static func rebuildDisappearingMessagesIndex(tx: DBWriteTransaction) throws {
+    private static func rebuildDisappearingMessagesIndex(tx: DBWriteTransaction) throws {
         try tx.database.execute(
             sql: """
             DROP INDEX IF EXISTS "index_interactions_on_expiresInSeconds_and_expiresAt"
@@ -7366,7 +7366,7 @@ public class GRDBSchemaMigrator {
         )
     }
 
-    public static func removeInteractionAttachmentIdsIndex(tx: DBWriteTransaction) throws {
+    private static func removeInteractionAttachmentIdsIndex(tx: DBWriteTransaction) throws {
         try tx.database.execute(
             sql: """
             DROP INDEX IF EXISTS "index_model_TSInteraction_on_uniqueThreadId_and_attachmentIds"
@@ -7374,7 +7374,7 @@ public class GRDBSchemaMigrator {
         )
     }
 
-    public static func rebuildInteractionTimestampIndex(tx: DBWriteTransaction) throws {
+    private static func rebuildInteractionTimestampIndex(tx: DBWriteTransaction) throws {
         try tx.database.execute(
             sql: """
             DROP INDEX IF EXISTS "index_interactions_on_timestamp_sourceDeviceId_and_authorUUID"
@@ -7393,7 +7393,7 @@ public class GRDBSchemaMigrator {
         )
     }
 
-    public static func rebuildInteractionUnendedGroupCallIndex(tx: DBWriteTransaction) throws {
+    private static func rebuildInteractionUnendedGroupCallIndex(tx: DBWriteTransaction) throws {
         try tx.database.execute(
             sql: """
             DROP INDEX IF EXISTS "index_model_TSInteraction_on_uniqueThreadId_and_hasEnded_and_recordType"
@@ -7410,7 +7410,7 @@ public class GRDBSchemaMigrator {
         )
     }
 
-    public static func rebuildInteractionGroupCallEraIdIndex(tx: DBWriteTransaction) throws {
+    private static func rebuildInteractionGroupCallEraIdIndex(tx: DBWriteTransaction) throws {
         try tx.database.execute(
             sql: """
             DROP INDEX IF EXISTS "index_model_TSInteraction_on_uniqueThreadId_and_eraId_and_recordType"
@@ -7425,7 +7425,7 @@ public class GRDBSchemaMigrator {
         )
     }
 
-    public static func rebuildInteractionStoryReplyIndex(tx: DBWriteTransaction) throws {
+    private static func rebuildInteractionStoryReplyIndex(tx: DBWriteTransaction) throws {
         try tx.database.execute(
             sql: """
             DROP INDEX IF EXISTS "index_model_TSInteraction_on_StoryContext"
@@ -7440,7 +7440,7 @@ public class GRDBSchemaMigrator {
         )
     }
 
-    public static func removeInteractionConversationLoadCountIndex(tx: DBWriteTransaction) throws {
+    private static func removeInteractionConversationLoadCountIndex(tx: DBWriteTransaction) throws {
         try tx.database.execute(
             sql: """
             DROP INDEX IF EXISTS "index_model_TSInteraction_ConversationLoadInteractionCount"
@@ -7448,7 +7448,7 @@ public class GRDBSchemaMigrator {
         )
     }
 
-    public static func removeInteractionConversationLoadDistanceIndex(tx: DBWriteTransaction) throws {
+    private static func removeInteractionConversationLoadDistanceIndex(tx: DBWriteTransaction) throws {
         try tx.database.execute(
             sql: """
             DROP INDEX IF EXISTS "index_model_TSInteraction_ConversationLoadInteractionDistance"

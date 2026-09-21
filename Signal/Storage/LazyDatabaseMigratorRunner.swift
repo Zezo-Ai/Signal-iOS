@@ -7,7 +7,6 @@ import GRDB
 import SignalServiceKit
 
 class LazyDatabaseMigratorRunner: BGProcessingTaskRunner {
-    private let indexMigrator: LazyIndexMigrator
     private let infoMessageMigrator: InfoMessageGroupUpdateMigrator
 
     init(
@@ -15,7 +14,6 @@ class LazyDatabaseMigratorRunner: BGProcessingTaskRunner {
         modelReadCaches: @escaping () -> ModelReadCaches,
         tsAccountManager: @escaping () -> TSAccountManager,
     ) {
-        self.indexMigrator = LazyIndexMigrator(databaseStorage: databaseStorage)
         self.infoMessageMigrator = InfoMessageGroupUpdateMigrator(
             db: databaseStorage,
             modelReadCaches: modelReadCaches,
@@ -23,16 +21,12 @@ class LazyDatabaseMigratorRunner: BGProcessingTaskRunner {
         )
     }
 
-    static var taskIdentifier: String = "LazyDatabaseMigratorTask"
+    static let taskIdentifier: String = "LazyDatabaseMigratorTask"
     static let logPrefix: String? = nil
-    static var requiresNetworkConnectivity: Bool = false
+    static let requiresNetworkConnectivity = false
     static let requiresExternalPower = false
 
     func startCondition() -> BGProcessingTaskStartCondition {
-        if indexMigrator.needsToRun() {
-            return .asSoonAsPossible
-        }
-
         if infoMessageMigrator.needsToRun() {
             return .asSoonAsPossible
         }
@@ -45,7 +39,6 @@ class LazyDatabaseMigratorRunner: BGProcessingTaskRunner {
     /// If you encounter an error in this method, you can update
     /// `simulatePriorCancellation` to return true and run on a simulator.
     func run() async throws {
-        try await indexMigrator.run()
         try await infoMessageMigrator.run()
     }
 
@@ -56,38 +49,4 @@ class LazyDatabaseMigratorRunner: BGProcessingTaskRunner {
         return Int.random(in: 0..<10) == 0
     }
 #endif
-}
-
-private struct LazyIndexMigrator {
-    let databaseStorage: SDSDatabaseStorage
-    private let logger = PrefixedLogger(prefix: "LazyIndexMigrator")
-
-    func needsToRun() -> Bool {
-        do {
-            let indexes = try databaseStorage.read { tx in
-                let db = tx.database
-                return Set(try String.fetchAll(db, sql: "SELECT name FROM sqlite_master WHERE type = 'index'"))
-            }
-            _ = indexes
-            return false
-        } catch {
-            logger.warn("Couldn't check if we need to execute.")
-            return false
-        }
-    }
-
-    func run() async throws {
-        // Must be idempotent.
-
-#if DEBUG
-        // If we just ran the migration, we shouldn't need to run it again. If this
-        // fails, the list of indexes and migrations we perform don't match.
-        owsAssertDebug(
-            !needsToRun(),
-            "Needs to run, but just ran!",
-        )
-#endif
-
-        logger.info("Done!")
-    }
 }
