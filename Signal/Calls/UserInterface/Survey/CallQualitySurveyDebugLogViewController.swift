@@ -104,7 +104,7 @@ final class SurveyDebugLogViewController: CallQualitySurveySheetViewController {
                 .removeDuplicates()
                 .sink { [weak self] contentSize in
                     DispatchQueue.main.async {
-                        self?.reloadHeight()
+                        self?.reloadSheetHeight()
                     }
                 }
         }

@@ -115,7 +115,6 @@ final class CallQualitySurveyRatingViewController: CallQualitySurveySheetViewCon
         return stackView
     }
 
-    @available(iOS 16.0, *)
     override func customSheetHeight() -> CGFloat? {
         stackView.bounds.height
     }

@@ -121,10 +121,6 @@ class ContactAboutSheet: StackSheetViewController {
         UIColor.Signal.secondaryBackground
     }
 
-    override var handleBackgroundColor: UIColor {
-        UIColor.Signal.transparentSeparator
-    }
-
     // MARK: - Content
 
     /// Updates the contents with a database read and reloads the view.

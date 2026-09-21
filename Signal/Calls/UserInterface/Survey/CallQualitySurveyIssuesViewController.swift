@@ -109,7 +109,7 @@ final class CallQualitySurveyIssuesViewController: CallQualitySurveySheetViewCon
                     // idk why, but without the dispatch, expansion happens
                     // without an animation, but shrinking does
                     DispatchQueue.main.async {
-                        self?.reloadHeight()
+                        self?.reloadSheetHeight()
                     }
                 }
         }
@@ -200,7 +200,7 @@ final class CallQualitySurveyIssuesViewController: CallQualitySurveySheetViewCon
             UIView.animate(withDuration: 0.3) {
                 self.customIssueEntry.isHiddenInStackView = customIssueEntryShouldBeHidden
                 DispatchQueue.main.async {
-                    self.reloadHeight()
+                    self.reloadSheetHeight()
                 }
             }
         }

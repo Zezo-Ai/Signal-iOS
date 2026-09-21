@@ -1818,6 +1818,7 @@
 		B924DFAA2EE7C6F900B88147 /* CallQualitySurveyIssuesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B924DFA92EE7C6F900B88147 /* CallQualitySurveyIssuesViewController.swift */; };
 		B924DFAC2EE7C8E000B88147 /* CallQualitySurveyDebugLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B924DFAB2EE7C8E000B88147 /* CallQualitySurveyDebugLogViewController.swift */; };
 		B9291BFC2B6058AE006BC25F /* ContactAboutSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9291BFB2B6058AE006BC25F /* ContactAboutSheet.swift */; };
+		E1A0C5D12B647E780095C4DF /* ContentSizedSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A0C5D22B647E780095C4DF /* ContentSizedSheetViewController.swift */; };
 		B92E76A92B647E780095C4DF /* StackSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92E76A82B647E780095C4DF /* StackSheetViewController.swift */; };
 		B92E76AB2B6871520095C4DF /* ProfileDetailLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92E76AA2B6871520095C4DF /* ProfileDetailLabel.swift */; };
 		B9327B3A2BBB76E900CCDBBA /* NicknameManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9327B392BBB76E900CCDBBA /* NicknameManager.swift */; };
@@ -6198,6 +6199,7 @@
 		B924DFA92EE7C6F900B88147 /* CallQualitySurveyIssuesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallQualitySurveyIssuesViewController.swift; sourceTree = "<group>"; };
 		B924DFAB2EE7C8E000B88147 /* CallQualitySurveyDebugLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallQualitySurveyDebugLogViewController.swift; sourceTree = "<group>"; };
 		B9291BFB2B6058AE006BC25F /* ContactAboutSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactAboutSheet.swift; sourceTree = "<group>"; };
+		E1A0C5D22B647E780095C4DF /* ContentSizedSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentSizedSheetViewController.swift; sourceTree = "<group>"; };
 		B92E76A82B647E780095C4DF /* StackSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackSheetViewController.swift; sourceTree = "<group>"; };
 		B92E76AA2B6871520095C4DF /* ProfileDetailLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDetailLabel.swift; sourceTree = "<group>"; };
 		B9327B392BBB76E900CCDBBA /* NicknameManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NicknameManager.swift; sourceTree = "<group>"; };
@@ -9502,6 +9504,7 @@
 		34A95566271B510500B05242 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				E1A0C5D22B647E780095C4DF /* ContentSizedSheetViewController.swift */,
 				508F0345296F72F4001D88D0 /* CustomCellBackgroundColor.swift */,
 				880C2E01262A19DE006650B6 /* InteractiveSheetViewController.swift */,
 				34A95591271B510500B05242 /* ModalActivityIndicatorViewController.swift */,
@@ -18193,6 +18196,7 @@
 				3402AA63271D9DEC0084CBAE /* ContactShareViewModel.swift in Sources */,
 				3402AA7C271D9E180084CBAE /* ContactsViewHelper.swift in Sources */,
 				3402AAB2271D9E180084CBAE /* ContactTableViewCell.swift in Sources */,
+				E1A0C5D12B647E780095C4DF /* ContentSizedSheetViewController.swift in Sources */,
 				B9754F542C73AD49000000E4 /* ConversationAvatarView+SwiftUI.swift in Sources */,
 				3402AA75271D9E180084CBAE /* ConversationAvatarView.swift in Sources */,
 				3402AA37271D9DCD0084CBAE /* ConversationItem.swift in Sources */,
