@@ -13,9 +13,12 @@ import SignalServiceKit
 /// content as arranged subviews. Optionally override `stackViewInsets` and/or
 /// `minimumBottomInsetIncludingSafeArea`.
 ///
-///  - Backed by ``ContentSizedSheetViewController`` on iOS 16+
+/// To use as the content of a ``SheetNavigationController`` instead, use
+/// ``NavStackSheetViewController``.
+///
+///  - Backed by a native content-sized sheet on iOS 16+
 ///  - Backed by ``InteractiveSheetViewController`` on iOS 15
-open class StackSheetViewController: OWSViewController, ContentSizedSheetViewController {
+open class StackSheetViewController: OWSViewController {
 
     // MARK: - Inherited from InteractiveSheetViewController
 
@@ -35,6 +38,7 @@ open class StackSheetViewController: OWSViewController, ContentSizedSheetViewCon
     // MARK: - Properties
 
     private var sizeChangeSubscription: AnyCancellable?
+    private lazy var heightReloader = ContentSizedSheetHeightReloader(viewController: self)
 
     /// Margins for the content in the stack view. The safe area insets for the
     /// bottom will be added to the value specified here. To set a minimum
@@ -114,12 +118,13 @@ open class StackSheetViewController: OWSViewController, ContentSizedSheetViewCon
                 sheet.prefersGrabberVisible = prefersGrabberVisible
                 sheet.prefersEdgeAttachedInCompactHeight = true
             }
-            // Set the height before the presentation animation
-            sheetPresentationController?.setUpContentSizedDetents()
+            sheetPresentationController?.setUpContentSizedDetent { [weak self] in
+                self?.customSheetHeight()
+            }
         }
 
         if navigationController != nil {
-            owsFailDebug("Currently doesn't support being in a nav controller")
+            owsFailDebug("doesn't support being in a nav controller. use NavStackSheetViewController")
         }
 
         contentContainer.addSubview(contentScrollView)
@@ -136,7 +141,7 @@ open class StackSheetViewController: OWSViewController, ContentSizedSheetViewCon
             .publisher(for: \.bounds)
             .removeDuplicates()
             .sink { [weak self] _ in
-                self?.contentSizeDidChange()
+                self?.reloadSheetHeight()
             }
     }
 
@@ -145,7 +150,7 @@ open class StackSheetViewController: OWSViewController, ContentSizedSheetViewCon
         guard legacySheet == nil else { return }
         if #unavailable(iOS 26) {
             DispatchQueue.main.async { [weak self] in
-                self?.reloadSheetHeight(animated: false)
+                self?.sheetPresentationController?.reloadContentSizedHeight(animated: false)
             }
         }
     }
@@ -206,42 +211,23 @@ open class StackSheetViewController: OWSViewController, ContentSizedSheetViewCon
         )
     }
 
-    // MARK: - ContentSizedSheetViewController
+    // MARK: - Sheet height
 
-    open func customSheetHeight() -> CGFloat? {
+    open func customSheetHeight() -> CGFloat {
         contentHeight - view.safeAreaInsets.bottom
     }
 
     public func reloadSheetHeight() {
-        reloadSheetHeight(animated: true)
+        if let legacySheet {
+            legacySheet.reloadHeight()
+        } else {
+            heightReloader.reload()
+        }
     }
-
-    // MARK: -
 
     fileprivate var contentHeight: CGFloat {
         // Opposite of grabberInset
         stackView.bounds.height + (legacySheet == nil ? 0 : InteractiveSheetViewController.Constants.handleHeight)
-    }
-
-    private func reloadSheetHeight(animated: Bool) {
-        if let legacySheet {
-            legacySheet.reloadHeight()
-        } else {
-            sheetPresentationController?.reloadContentSizedHeight(animated: animated)
-        }
-    }
-
-    private func contentSizeDidChange() {
-        if legacySheet != nil {
-            reloadSheetHeight(animated: true)
-        } else if lifecycle == .appeared {
-            // Dispatch needed for animation
-            DispatchQueue.main.async { [weak self] in
-                self?.reloadSheetHeight()
-            }
-        } else {
-            reloadSheetHeight(animated: false)
-        }
     }
 }
 

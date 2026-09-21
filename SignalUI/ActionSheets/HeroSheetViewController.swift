@@ -208,7 +208,7 @@ open class HeroSheetViewController: StackSheetViewController {
     // .formSheet makes a blank sheet appear behind it
     override public var modalPresentationStyle: UIModalPresentationStyle {
         willSet {
-            if newValue == .formSheet {
+            if #unavailable(iOS 16), newValue == .formSheet {
                 owsFailDebug("Can't use formSheet for interactive sheets")
             }
         }

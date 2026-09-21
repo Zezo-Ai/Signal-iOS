@@ -60,6 +60,7 @@ final class CallQualitySurveyIssuesViewController: CallQualitySurveySheetViewCon
         )
         headerLabel.font = .dynamicTypeSubheadline
         headerLabel.textColor = .Signal.secondaryLabel
+        headerLabel.numberOfLines = 0
         headerLabel.textAlignment = .center
         headerContainer.addSubview(headerLabel)
         headerLabel.autoPinEdgesToSuperviewMargins(with: .init(
@@ -101,18 +102,12 @@ final class CallQualitySurveyIssuesViewController: CallQualitySurveySheetViewCon
 
         bottomStackView.addArrangedSubview(continueButton)
 
-        if #available(iOS 16.0, *) {
-            sizeChangeSubscription = collectionView
-                .publisher(for: \.contentSize)
-                .removeDuplicates()
-                .sink { [weak self] contentSize in
-                    // idk why, but without the dispatch, expansion happens
-                    // without an animation, but shrinking does
-                    DispatchQueue.main.async {
-                        self?.reloadSheetHeight()
-                    }
-                }
-        }
+        sizeChangeSubscription = collectionView
+            .publisher(for: \.contentSize)
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                self?.reloadSheetHeight()
+            }
 
         let cellRegistration = UICollectionView.CellRegistration<CapsuleCell, Item> { cell, _, item in
             cell.configure(title: item.title, image: item.image)
@@ -126,7 +121,7 @@ final class CallQualitySurveyIssuesViewController: CallQualitySurveySheetViewCon
         updateViewState()
     }
 
-    override func customSheetHeight() -> CGFloat? {
+    override func customSheetHeight() -> CGFloat {
         let headerHeight = headerContainer.height
         let collectionViewHeight = collectionView.contentSize.height + collectionView.contentInset.totalHeight
         let bottomStackHeight = bottomStackView.height
@@ -199,9 +194,7 @@ final class CallQualitySurveyIssuesViewController: CallQualitySurveySheetViewCon
         if customIssueEntryShouldBeHidden != customIssueEntry.isHiddenInStackView {
             UIView.animate(withDuration: 0.3) {
                 self.customIssueEntry.isHiddenInStackView = customIssueEntryShouldBeHidden
-                DispatchQueue.main.async {
-                    self.reloadSheetHeight()
-                }
+                self.reloadSheetHeight()
             }
         }
     }

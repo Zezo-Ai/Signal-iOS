@@ -68,21 +68,8 @@ final class CallQualitySurveyNavigationController: SheetNavigationController {
 
 // MARK: - CallQualitySurveySheetViewController
 
-class CallQualitySurveySheetViewController: UIViewController, ContentSizedSheetViewController {
+class CallQualitySurveySheetViewController: NavStackSheetViewController {
     var sheetNav: CallQualitySurveyNavigationController? {
         navigationController as? CallQualitySurveyNavigationController
-    }
-
-    func customSheetHeight() -> CGFloat? {
-        // Override this in subclasses
-        owsFailDebug("customSheetHeight not set")
-        return nil
-    }
-
-    override func viewIsAppearing(_ animated: Bool) {
-        super.viewIsAppearing(animated)
-        DispatchQueue.main.async {
-            self.reloadSheetHeight()
-        }
     }
 }
