@@ -2612,7 +2612,7 @@ SOFTWARE.
 			<key>License</key>
 			<string>MIT License</string>
 			<key>Title</key>
-			<string>convert_case 0.10.0, convert_case 0.4.0</string>
+			<string>convert_case 0.10.0</string>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 		</dict>
@@ -3171,7 +3171,7 @@ SOFTWARE.
 			<key>License</key>
 			<string>MIT License</string>
 			<key>Title</key>
-			<string>derive_more 0.99.20, derive_more 2.1.1, derive_more-impl 2.1.1</string>
+			<string>derive_more 2.1.1, derive_more-impl 2.1.1</string>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 		</dict>
@@ -3277,7 +3277,7 @@ DEALINGS IN THE SOFTWARE.
 			<key>License</key>
 			<string>MIT License</string>
 			<key>Title</key>
-			<string>downcast-rs 1.2.1</string>
+			<string>downcast-rs 2.0.2</string>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 		</dict>
@@ -8675,7 +8675,7 @@ SOFTWARE.
 			<key>License</key>
 			<string>MIT License</string>
 			<key>Title</key>
-			<string>mediasan-common 0.5.3, mp4san 0.5.3, mp4san-derive 0.5.3, webpsan 0.5.3</string>
+			<string>mediasan-common 0.5.4, mp4san 0.5.4, mp4san-derive 0.5.4, webpsan 0.5.4</string>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 		</dict>
@@ -10085,7 +10085,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 			<key>License</key>
 			<string>GNU Affero General Public License v3.0 only</string>
 			<key>Title</key>
-			<string>partial-default 0.1.0, partial-default-derive 0.1.0, poksho 0.7.0, signal-crypto 0.1.0, spqr 1.5.3, zkcredential 0.1.0, zkgroup 0.9.0</string>
+			<string>partial-default 0.1.0, partial-default-derive 0.1.0, poksho 0.7.0, signal-crypto 0.1.0, spqr 1.6.0, zkcredential 0.1.0, zkgroup 0.9.0</string>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 		</dict>
