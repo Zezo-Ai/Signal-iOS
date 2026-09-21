@@ -756,10 +756,11 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
 
     class func muteUnmuteMenu(
         for threadViewModel: ThreadViewModel,
+        from viewController: UIViewController,
         actionExecuted: @escaping () -> Void,
     ) -> UIMenu {
         let menuTitle = muteUnmuteMenuTitle(for: threadViewModel)
-        let actions = muteUnmuteActions(for: threadViewModel, actionExecuted: actionExecuted)
+        let actions = muteUnmuteActions(for: threadViewModel, from: viewController, actionExecuted: actionExecuted)
         return UIMenu(title: menuTitle ?? "", children: actions)
     }
 
@@ -809,6 +810,7 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
 
     private class func muteUnmuteActions(
         for threadViewModel: ThreadViewModel,
+        from viewController: UIViewController,
         actionExecuted: @escaping () -> Void,
     ) -> [UIAction] {
         let muteManager = ConversationMuteManager()
@@ -824,7 +826,7 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
         }
 
         return ConversationMuteChoice.Option.all.map { option in
-            UIAction(title: option.title) { _ in
+            UIAction(title: option.title) { [weak viewController] _ in
                 switch option {
                 case .preset(let preset):
                     muteManager.mute(threadViewModel, choice: .preset(preset))
@@ -833,8 +835,11 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
                     muteManager.mute(threadViewModel, choice: .forever)
                     actionExecuted()
                 case .custom:
-                    // TODO: Present the custom mute date picker.
-                    owsFailDebug("Not implemented")
+                    let sheet = MuteUntilSheet { endDate in
+                        muteManager.mute(threadViewModel, choice: .custom(endDate: endDate))
+                        actionExecuted()
+                    }
+                    viewController?.present(sheet, animated: true)
                 }
             }
         }

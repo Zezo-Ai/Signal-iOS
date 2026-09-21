@@ -1813,6 +1813,7 @@
 		B91751DB2EC5556B00FF7A9C /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = B91751DA2EC5556B00FF7A9C /* AppIcon.icon */; };
 		B91ACD9E2A797698000CFBC7 /* StickerPickerKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91ACD9D2A797698000CFBC7 /* StickerPickerKeyboard.swift */; };
 		B92477A8303513780045DEC9 /* ConversationMute.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92477A7303513780045DEC9 /* ConversationMute.swift */; };
+		B92477AB303513780045DEC9 /* MuteUntilSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92477AA303513780045DEC9 /* MuteUntilSheet.swift */; };
 		B924DFA62EE7C42B00B88147 /* CallQualitySurveyNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B924DFA52EE7C42B00B88147 /* CallQualitySurveyNavigation.swift */; };
 		B924DFA82EE7C63400B88147 /* CallQualitySurveyRatingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B924DFA72EE7C63400B88147 /* CallQualitySurveyRatingViewController.swift */; };
 		B924DFAA2EE7C6F900B88147 /* CallQualitySurveyIssuesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B924DFA92EE7C6F900B88147 /* CallQualitySurveyIssuesViewController.swift */; };
@@ -6195,6 +6196,7 @@
 		B91751DA2EC5556B00FF7A9C /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		B91ACD9D2A797698000CFBC7 /* StickerPickerKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerPickerKeyboard.swift; sourceTree = "<group>"; };
 		B92477A7303513780045DEC9 /* ConversationMute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationMute.swift; sourceTree = "<group>"; };
+		B92477AA303513780045DEC9 /* MuteUntilSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuteUntilSheet.swift; sourceTree = "<group>"; };
 		B924DFA52EE7C42B00B88147 /* CallQualitySurveyNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallQualitySurveyNavigation.swift; sourceTree = "<group>"; };
 		B924DFA72EE7C63400B88147 /* CallQualitySurveyRatingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallQualitySurveyRatingViewController.swift; sourceTree = "<group>"; };
 		B924DFA92EE7C6F900B88147 /* CallQualitySurveyIssuesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallQualitySurveyIssuesViewController.swift; sourceTree = "<group>"; };
@@ -8974,6 +8976,7 @@
 				347B83F82436820C0019A52C /* GroupViewHelper.swift */,
 				D92CA9EE2F500EA500FDE32D /* LeaveGroupCoordinator.swift */,
 				88A357B823639384009D6B9A /* MemberActionSheet.swift */,
+				B92477AA303513780045DEC9 /* MuteUntilSheet.swift */,
 				32CBF07C258C939800D56903 /* NameCollisionResolutionViewController.swift */,
 				B9D65E522BAE1DA70067322A /* NicknameEditorViewController.swift */,
 				348433DE243CA94500C7F64A /* ReplaceAdminViewController.swift */,
@@ -18997,6 +19000,7 @@
 				C14FB7E82EF33BEB00850EC5 /* MPCDeviceTransferConnectionFactory.swift in Sources */,
 				C14FB7E62EF33A3200850EC5 /* MPCDeviceTransferPeer.swift in Sources */,
 				C14FB7E42EF3390100850EC5 /* MPCDeviceTransferSession.swift in Sources */,
+				B92477AB303513780045DEC9 /* MuteUntilSheet.swift in Sources */,
 				8840B6E2283F16650036BA4C /* MyStoriesViewController.swift in Sources */,
 				886292122835606D00AA0C3B /* MyStoryCell.swift in Sources */,
 				8862921028355B8000AA0C3B /* MyStoryViewModel.swift in Sources */,

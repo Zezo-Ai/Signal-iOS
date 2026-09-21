@@ -105,8 +105,7 @@ enum ConversationMuteChoice {
         case custom
 
         static var all: [Option] {
-            // TODO: Add .custom when implemented
-            Preset.allCases.map { .preset($0) } + [.forever]
+            Preset.allCases.map { .preset($0) } + [.custom, .forever]
         }
 
         var title: String {
@@ -119,7 +118,10 @@ enum ConversationMuteChoice {
                     comment: "Label for button to mute a thread forever.",
                 )
             case .custom:
-                owsFail("Not implemented")
+                OWSLocalizedString(
+                    "CONVERSATION_SETTINGS_MUTE_CUSTOM_ACTION",
+                    comment: "Label for button to mute a thread until a date the user picks.",
+                )
             }
         }
     }

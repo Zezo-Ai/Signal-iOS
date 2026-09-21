@@ -369,15 +369,17 @@ extension ThreadContextualActionProvider where Self: UIViewController {
         ))
         let muteManager = ConversationMuteManager()
         for option in ConversationMuteChoice.Option.all {
-            alert.addAction(ActionSheetAction(title: option.title, style: .default) { _ in
+            alert.addAction(ActionSheetAction(title: option.title, style: .default) { [weak self] _ in
                 switch option {
                 case .preset(let preset):
                     muteManager.mute(threadViewModel, choice: .preset(preset))
                 case .forever:
                     muteManager.mute(threadViewModel, choice: .forever)
                 case .custom:
-                    // TODO: Present the custom mute date picker after the action sheet dismisses.
-                    owsFailDebug("Not implemented")
+                    let sheet = MuteUntilSheet { endDate in
+                        muteManager.mute(threadViewModel, choice: .custom(endDate: endDate))
+                    }
+                    self?.present(sheet, animated: true)
                 }
             })
         }

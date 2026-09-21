@@ -123,6 +123,7 @@ class SoundAndNotificationsSettingsViewController: OWSTableViewController2 {
             muteContextButton.backgroundColor = .clear
             muteContextButton.menu = ConversationSettingsViewController.muteUnmuteMenu(
                 for: threadViewModel,
+                from: self,
                 actionExecuted: { [weak self] in
                     self?.updateTableContents()
                 },

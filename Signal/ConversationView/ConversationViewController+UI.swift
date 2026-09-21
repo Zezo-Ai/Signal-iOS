@@ -258,6 +258,7 @@ extension ConversationViewController {
             image: icon,
             menu: ConversationSettingsViewController.muteUnmuteMenu(
                 for: threadViewModel,
+                from: self,
                 actionExecuted: {},
             ),
         )

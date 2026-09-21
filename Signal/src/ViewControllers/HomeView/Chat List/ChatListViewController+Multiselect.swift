@@ -166,8 +166,11 @@ extension ChatListViewController {
                 case .forever:
                     self?.performMute(choice: .forever)
                 case .custom:
-                    // TODO: Present the custom mute date picker.
-                    owsFailDebug("Not implemented")
+                    guard let self else { return }
+                    let sheet = MuteUntilSheet { [weak self] endDate in
+                        self?.performMute(choice: .custom(endDate: endDate))
+                    }
+                    present(sheet, animated: true)
                 }
             }
         }
