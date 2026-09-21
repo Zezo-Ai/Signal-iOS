@@ -364,6 +364,7 @@ public class GRDBSchemaMigrator {
         case migrateSomeKeyValueStores
         case removeInteractionConversationLoadCountIndex
         case removeObsoleteThreadReferences
+        case removeInteractionConversationLoadDistanceIndex
 
         // NOTE: Every time we add a migration id, consider
         // incrementing grdbSchemaVersionLatest.
@@ -5643,6 +5644,11 @@ public class GRDBSchemaMigrator {
 
         migrator.registerMigration(.removeObsoleteThreadReferences) { tx in
             try removeObsoleteThreadReferences(tx: tx)
+            return .success(())
+        }
+
+        migrator.registerMigration(.removeInteractionConversationLoadDistanceIndex) { tx in
+            try removeInteractionConversationLoadDistanceIndex(tx: tx)
             return .success(())
         }
 

@@ -68,13 +68,7 @@ private struct LazyIndexMigrator {
                 let db = tx.database
                 return Set(try String.fetchAll(db, sql: "SELECT name FROM sqlite_master WHERE type = 'index'"))
             }
-            let lazilyRemovedIndexes = [
-                "index_model_TSInteraction_ConversationLoadInteractionDistance",
-            ]
-            if !indexes.isDisjoint(with: lazilyRemovedIndexes) {
-                return true
-            }
-
+            _ = indexes
             return false
         } catch {
             logger.warn("Couldn't check if we need to execute.")
@@ -84,12 +78,6 @@ private struct LazyIndexMigrator {
 
     func run() async throws {
         // Must be idempotent.
-
-        try Task.checkCancellation()
-        await databaseStorage.awaitableWrite { tx in
-            logger.info("Removing conversation load distance index.")
-            try! GRDBSchemaMigrator.removeInteractionConversationLoadDistanceIndex(tx: tx)
-        }
 
 #if DEBUG
         // If we just ran the migration, we shouldn't need to run it again. If this
