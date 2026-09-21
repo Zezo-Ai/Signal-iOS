@@ -173,7 +173,7 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
         updateTableContents()
     }
 
-    override func topHeader() -> UIView? {
+    private func makeTopHeaderSection() -> OWSTableSection {
         let label = UILabel()
         label.text = OWSLocalizedString(
             "SETTINGS_LOCAL_FILE_BACKUPS_HEADER_DESCRIPTION",
@@ -185,18 +185,23 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
 
         let container = UIView()
         container.addSubview(label)
-        label.autoPinEdge(toSuperviewEdge: .leading, withInset: 32)
-        label.autoPinEdge(toSuperviewEdge: .trailing, withInset: 32)
-        label.autoPinEdge(toSuperviewEdge: .top, withInset: 12)
-        label.autoPinEdge(toSuperviewEdge: .bottom, withInset: 8)
-        container.backgroundColor = UIColor.Signal.groupedBackground
-        return container
+        label.autoPinEdge(toSuperviewEdge: .leading, withInset: Self.cellHInnerMargin)
+        label.autoPinEdge(toSuperviewEdge: .trailing, withInset: Self.cellHInnerMargin)
+        label.autoPinEdge(toSuperviewEdge: .top, withInset: 16)
+        label.autoPinEdge(toSuperviewEdge: .bottom, withInset: 4)
+
+        let section = OWSTableSection()
+        section.customHeaderView = container
+        return section
     }
 
     private func updateTableContents() {
         let contents = OWSTableContents()
 
         var sections: [OWSTableSection] = []
+
+        sections.append(makeTopHeaderSection())
+
         if let archiveProgressSection = makeArchiveProgressSection() {
             sections.append(archiveProgressSection)
         } else if let restoreProgressSection = makeRestoreProgressSection() {
