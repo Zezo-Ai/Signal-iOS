@@ -352,6 +352,24 @@ extension ConversationSettingsViewController {
 
     // MARK: Middle sections
 
+    private func mediaThumbnailButton(referencedAttachment: ReferencedAttachment) -> UIButton {
+        let button = UIButton(
+            configuration: .plain(),
+            primaryAction: UIAction { [weak self] _ in
+                self?.showMediaPageView(for: referencedAttachment)
+            },
+        )
+        button.configuration?.cornerStyle = .fixed
+        button.configuration?.background = {
+            let imageView = createThumbnailView(for: referencedAttachment)
+            var background = UIBackgroundConfiguration.clear()
+            background.customView = imageView
+            background.cornerRadius = imageView.layer.cornerRadius
+            return background
+        }()
+        return button
+    }
+
     private func addAllMediaSectionIfNecessary(to contents: OWSTableContents) {
         guard !recentMedia.isEmpty else { return }
 
@@ -376,20 +394,8 @@ extension ConversationSettingsViewController {
                 let availableWidth = self.view.width - ((Self.cellHInnerMargin * 2) + self.cellOuterInsets.totalWidth + self.view.safeAreaInsets.totalWidth)
                 let imageWidth = (availableWidth - totalSpacerSize) / CGFloat(self.maximumRecentMedia)
 
-                for (referencedAttachment, imageView) in self.recentMedia.orderedValues {
-                    let button = UIButton(
-                        configuration: .plain(),
-                        primaryAction: UIAction { [weak self] _ in
-                            self?.showMediaPageView(for: referencedAttachment)
-                        },
-                    )
-                    button.configuration?.cornerStyle = .fixed
-                    button.configuration?.background = {
-                        var background = UIBackgroundConfiguration.clear()
-                        background.customView = imageView
-                        background.cornerRadius = imageView.layer.cornerRadius
-                        return background
-                    }()
+                for referencedAttachment in self.recentMedia {
+                    let button = mediaThumbnailButton(referencedAttachment: referencedAttachment)
                     stackView.addArrangedSubview(button)
                     button.autoSetDimensions(to: CGSize(square: imageWidth))
                 }

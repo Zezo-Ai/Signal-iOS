@@ -873,11 +873,29 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
     }
 
     let maximumRecentMedia = 4
-    private(set) var recentMedia = OrderedDictionary<
-        AttachmentReferenceId,
-        (attachment: ReferencedAttachment, imageView: UIImageView),
-    >() {
+    private(set) var recentMedia = [ReferencedAttachment]() {
         didSet { AssertIsOnMainThread() }
+    }
+
+    // Populated lazily as thumbnails are displayed. Used for zoom transition.
+    private(set) var recentMediaThumbnailViews = [AttachmentReferenceId: UIImageView]()
+
+    func createThumbnailView(for referencedAttachment: ReferencedAttachment) -> UIImageView {
+        let imageView = UIImageView()
+        imageView.clipsToBounds = true
+        if #available(iOS 26, *) {
+            imageView.layer.cornerCurve = .continuous
+            imageView.layer.cornerRadius = 11
+        } else {
+            imageView.layer.cornerRadius = 4
+        }
+        imageView.contentMode = .scaleAspectFill
+        imageView.backgroundColor = .Signal.backdrop
+        imageView.image = referencedAttachment.getThumbnailImageSync(quality: .small)
+
+        recentMediaThumbnailViews[referencedAttachment.reference.referenceId] = imageView
+
+        return imageView
     }
 
     private lazy var mediaGalleryFinder = MediaGalleryAttachmentFinder(
@@ -886,25 +904,7 @@ class ConversationSettingsViewController: OWSTableViewController2, BadgeCollecti
     )
 
     func updateRecentAttachments(tx: DBReadTransaction) {
-        let recentAttachments = mediaGalleryFinder.recentMediaAttachments(limit: maximumRecentMedia, tx: tx)
-        recentMedia = recentAttachments.reduce(into: OrderedDictionary()) { result, attachment in
-            let imageView = UIImageView()
-            imageView.clipsToBounds = true
-            if #available(iOS 26, *) {
-                imageView.layer.cornerCurve = .continuous
-                imageView.layer.cornerRadius = 11
-            } else {
-                imageView.layer.cornerRadius = 4
-            }
-            imageView.contentMode = .scaleAspectFill
-            imageView.backgroundColor = .Signal.backdrop
-            imageView.image = attachment.getThumbnailImageSync(quality: .small)
-
-            result.append(
-                key: attachment.reference.referenceId,
-                value: (attachment, imageView),
-            )
-        }
+        recentMedia = mediaGalleryFinder.recentMediaAttachments(limit: maximumRecentMedia, tx: tx)
         shouldRefreshAttachmentsOnReappear = false
     }
 
@@ -1097,7 +1097,7 @@ extension ConversationSettingsViewController: MediaPresentationContextProvider {
         let mediaViewShape: MediaViewShape
         switch item {
         case .gallery(let galleryItem):
-            guard let imageView = recentMedia[galleryItem.referencedAttachment.reference.referenceId]?.imageView else { return nil }
+            guard let imageView = recentMediaThumbnailViews[galleryItem.referencedAttachment.reference.referenceId] else { return nil }
             mediaView = imageView
             mediaViewShape = .rectangle(imageView.layer.cornerRadius)
         case .image:
