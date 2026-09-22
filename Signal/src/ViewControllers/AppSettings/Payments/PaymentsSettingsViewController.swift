@@ -728,6 +728,7 @@ class PaymentsSettingsViewController: OWSTableViewController2, PaymentsHistoryDa
                     label.font = .dynamicTypeBodyClamped
                     label.textColor = .Signal.label
                     cell.contentView.addSubview(label)
+                    label.translatesAutoresizingMaskIntoConstraints = false
                     NSLayoutConstraint.activate([
                         label.topAnchor.constraint(equalTo: cell.contentView.layoutMarginsGuide.topAnchor, constant: 10),
                         label.leadingAnchor.constraint(equalTo: cell.contentView.layoutMarginsGuide.leadingAnchor),
