@@ -925,6 +925,7 @@
 		50DE824B3047766F001955FF /* DeregisteredState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DE824A3047766F001955FF /* DeregisteredState.swift */; };
 		50E39E0E30225D67008E6619 /* GroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E39E0D30225D67008E6619 /* GroupStore.swift */; };
 		50E42FEA2C1BA3B900554BD6 /* CallHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E42FE92C1BA3B900554BD6 /* CallHTTPClient.swift */; };
+		50E458AE3059B7320074446D /* AuthCredentialSalt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E458AD3059B7320074446D /* AuthCredentialSalt.swift */; };
 		50E5E4B129932D9B00E15A1C /* DeviceMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E5E4B029932D9B00E15A1C /* DeviceMessage.swift */; };
 		50E5E4B32993352C00E15A1C /* ChangePhoneNumberPniManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E5E4B22993352C00E15A1C /* ChangePhoneNumberPniManager.swift */; };
 		50E642C929E4E9CD00566D5D /* SSKEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E642C829E4E9CD00566D5D /* SSKEnvironment.swift */; };
@@ -5297,6 +5298,7 @@
 		50E39E0D30225D67008E6619 /* GroupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupStore.swift; sourceTree = "<group>"; };
 		50E42FE52C1B9EB900554BD6 /* CallLinkState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallLinkState.swift; sourceTree = "<group>"; };
 		50E42FE92C1BA3B900554BD6 /* CallHTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallHTTPClient.swift; sourceTree = "<group>"; };
+		50E458AD3059B7320074446D /* AuthCredentialSalt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthCredentialSalt.swift; sourceTree = "<group>"; };
 		50E5E4B029932D9B00E15A1C /* DeviceMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceMessage.swift; sourceTree = "<group>"; };
 		50E5E4B22993352C00E15A1C /* ChangePhoneNumberPniManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangePhoneNumberPniManager.swift; sourceTree = "<group>"; };
 		50E642C829E4E9CD00566D5D /* SSKEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSKEnvironment.swift; sourceTree = "<group>"; };
@@ -15472,6 +15474,7 @@
 				C18D6FDF2D4D8FB40085E3B9 /* AccountEntropyPool.swift */,
 				D9EDF2772E4D2A1E001D4BEC /* AccountEntropyPoolManager.swift */,
 				C14D49CD2D667F830033BA69 /* AccountKeyStore.swift */,
+				50E458AD3059B7320074446D /* AuthCredentialSalt.swift */,
 				504474D4304621050058016E /* DeregisteredLocalIdentifiers.swift */,
 				50DE824A3047766F001955FF /* DeregisteredState.swift */,
 				50F401CB2D483BF40094CA56 /* DeviceId.swift */,
@@ -19450,6 +19453,7 @@
 				669A2FD02BDB068200166DB6 /* AudioWaveformManagerMock.swift in Sources */,
 				50BDC3682C88B7FA002294D0 /* AudioWaveformSampler.swift in Sources */,
 				50552C2A2BAB8E7D00815474 /* AuthCredentialManager.swift in Sources */,
+				50E458AE3059B7320074446D /* AuthCredentialSalt.swift in Sources */,
 				50552C2C2BAB8E8500815474 /* AuthCredentialStore.swift in Sources */,
 				66533E3C29BA8BB200E8D928 /* AuthedAccount.swift in Sources */,
 				50D2FC7D2AEB134C002E4589 /* AuthorMergeHelper.swift in Sources */,
