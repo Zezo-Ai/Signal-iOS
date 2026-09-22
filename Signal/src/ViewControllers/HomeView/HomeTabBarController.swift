@@ -162,12 +162,7 @@ class HomeTabBarController: UITabBarController, UITabBarControllerDelegate, Badg
         } else {
             initializeCustomTabBar(tabs: newTabs)
         }
-        if #available(iOS 26, *) {
-            tabBar.tintColor = .Signal.accent
-            tabBar.unselectedItemTintColor = .Signal.label
-        } else {
-            tabBar.tintColor = .Signal.label
-        }
+        tabBar.tintColor = .Signal.label
     }
 
     @available(iOS, deprecated: 18)
