@@ -165,7 +165,7 @@ class MessageProcessingIntegrationTest: SSKBaseTest {
         envelopeBuilder.setSourceDevice(1)
         envelopeBuilder.setServerTimestamp(NSDate.ows_millisecondTimeStamp())
         envelopeBuilder.setServerGuidBinary(UUID().data)
-        envelopeBuilder.setDestinationServiceIDBinary(DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction!.pni!.serviceIdBinary)
+        envelopeBuilder.setDestinationServiceIDBinary(try! DependenciesBridge.shared.tsAccountManager.registeredStateWithMaybeSneakyTransaction().localIdentifiers.pni!.serviceIdBinary)
         let envelopeData = try! envelopeBuilder.buildSerializedData()
         SSKEnvironment.shared.messageProcessorRef.enqueueReceivedEnvelopeData(
             envelopeData,

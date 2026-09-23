@@ -336,7 +336,7 @@ class TSOutgoingMessageTest: SSKBaseTest {
 
         // Change our PNI, using registerForTests(...) instead of updateLocalPhoneNumber(...) because the latter kicks
         // off a request to check with the server.
-        let aci = DependenciesBridge.shared.tsAccountManager.localIdentifiersWithMaybeSneakyTransaction!.aci
+        let aci = try! DependenciesBridge.shared.tsAccountManager.registeredStateWithMaybeSneakyTransaction().localIdentifiers.aci
         SSKEnvironment.shared.databaseStorageRef.write { tx in
             (DependenciesBridge.shared.registrationStateChangeManager as! RegistrationStateChangeManagerImpl).registerForTests(
                 localIdentifiers: LocalIdentifiers(
