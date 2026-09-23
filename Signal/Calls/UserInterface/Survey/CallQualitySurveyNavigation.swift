@@ -69,6 +69,8 @@ final class CallQualitySurveyNavigationController: SheetNavigationController {
 // MARK: - CallQualitySurveySheetViewController
 
 class CallQualitySurveySheetViewController: NavStackSheetViewController {
+    override var minimumBottomInsetIncludingSafeArea: CGFloat { 24 }
+
     var sheetNav: CallQualitySurveyNavigationController? {
         navigationController as? CallQualitySurveyNavigationController
     }

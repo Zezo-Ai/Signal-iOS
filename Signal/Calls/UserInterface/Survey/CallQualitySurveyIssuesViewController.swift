@@ -11,6 +11,7 @@ import SignalUI
 
 final class CallQualitySurveyIssuesViewController: CallQualitySurveySheetViewController {
     private var sizeChangeSubscription: AnyCancellable?
+    private var bottomConstraint: NSLayoutConstraint?
 
     private let headerContainer = UIView()
     private let bottomStackView = UIStackView()
@@ -94,7 +95,9 @@ final class CallQualitySurveyIssuesViewController: CallQualitySurveySheetViewCon
         bottomStackView.directionalLayoutMargins = .init(hMargin: 12, vMargin: 0)
         view.addSubview(bottomStackView)
         bottomStackView.autoPinEdge(.top, to: .bottom, of: collectionView)
-        bottomStackView.autoPinEdges(toSuperviewMarginsExcludingEdge: .top)
+        bottomStackView.autoPinWidthToSuperviewMargins()
+        bottomConstraint = bottomStackView.autoPinBottomToSuperviewMargin()
+        updateBottomInset()
 
         bottomStackView.addArrangedSubview(customIssueEntry)
         customIssueEntry.isHiddenInStackView = true
@@ -121,11 +124,24 @@ final class CallQualitySurveyIssuesViewController: CallQualitySurveySheetViewCon
         updateViewState()
     }
 
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        updateBottomInset()
+    }
+
     override func customSheetHeight() -> CGFloat {
         let headerHeight = headerContainer.height
         let collectionViewHeight = collectionView.contentSize.height + collectionView.contentInset.totalHeight
         let bottomStackHeight = bottomStackView.height
-        return headerHeight + collectionViewHeight + bottomStackHeight
+        return headerHeight + collectionViewHeight + bottomStackHeight + additionalBottomInset
+    }
+
+    private var additionalBottomInset: CGFloat {
+        max(0, minimumBottomInsetIncludingSafeArea - view.safeAreaInsets.bottom)
+    }
+
+    private func updateBottomInset() {
+        bottomConstraint?.constant = -additionalBottomInset
     }
 
     private func loadInitialSnapshot() {
