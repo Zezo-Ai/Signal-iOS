@@ -109,13 +109,20 @@ class BackupSettingsLandingPageViewController: OWSTableViewController2 {
     private func updateContents() {
         let contents = OWSTableContents()
 
-        let signalBackupsSection = OWSTableSection()
-        signalBackupsSection.customHeaderView = buildSubtitleHeaderView()
-        signalBackupsSection.add(buildSignalBackupsCardItem())
-        contents.add(signalBackupsSection)
+        let titleSection = OWSTableSection()
+        titleSection.footerTitle = OWSLocalizedString(
+            "BACKUP_SETTINGS_LANDING_PAGE_SUBTITLE",
+            comment: "Subtitle on the Backups settings landing page.",
+        )
+        contents.add(titleSection)
+
+        contents.add(OWSTableSection(items: [buildSignalBackupsCardItem()]))
 
         let onDeviceSection = OWSTableSection()
-        onDeviceSection.customHeaderView = buildOtherWaysHeaderView()
+        onDeviceSection.headerTitle = OWSLocalizedString(
+            "BACKUP_SETTINGS_LANDING_OTHER_WAYS_HEADER",
+            comment: "Section header on the Backups settings landing page.",
+        )
         onDeviceSection.footerTitle = OWSLocalizedString(
             "BACKUP_SETTINGS_LANDING_ON_DEVICE_BACKUPS_FOOTER",
             comment: "Footer text below the On-Device Backups row on the Backups settings landing page.",
@@ -124,46 +131,6 @@ class BackupSettingsLandingPageViewController: OWSTableViewController2 {
         contents.add(onDeviceSection)
 
         self.contents = contents
-    }
-
-    // MARK: - Section headers
-
-    private func buildSubtitleHeaderView() -> UIView {
-        let label = UILabel()
-        label.text = OWSLocalizedString(
-            "BACKUP_SETTINGS_LANDING_PAGE_SUBTITLE",
-            comment: "Subtitle on the Backups settings landing page.",
-        )
-        label.font = .dynamicTypeCaption1Clamped
-        label.textColor = .Signal.secondaryLabel
-        label.numberOfLines = 0
-
-        let container = UIView()
-        container.addSubview(label)
-        label.autoPinEdge(toSuperviewEdge: .leading, withInset: Self.cellHInnerMargin)
-        label.autoPinEdge(toSuperviewEdge: .trailing, withInset: Self.cellHInnerMargin)
-        label.autoPinEdge(toSuperviewEdge: .top, withInset: 16)
-        label.autoPinEdge(toSuperviewEdge: .bottom, withInset: 24)
-        return container
-    }
-
-    private func buildOtherWaysHeaderView() -> UIView {
-        let label = UILabel()
-        label.text = OWSLocalizedString(
-            "BACKUP_SETTINGS_LANDING_OTHER_WAYS_HEADER",
-            comment: "Section header on the Backups settings landing page.",
-        )
-        label.font = .dynamicTypeHeadlineClamped
-        label.textColor = .Signal.label
-        label.numberOfLines = 0
-
-        let container = UIView()
-        container.addSubview(label)
-        label.autoPinEdge(toSuperviewEdge: .leading, withInset: Self.cellHInnerMargin)
-        label.autoPinEdge(toSuperviewEdge: .trailing, withInset: Self.cellHInnerMargin)
-        label.autoPinEdge(toSuperviewEdge: .top, withInset: (defaultSpacingBetweenSections ?? 0) + 12)
-        label.autoPinEdge(toSuperviewEdge: .bottom, withInset: 10)
-        return container
     }
 
     // MARK: - Table items
