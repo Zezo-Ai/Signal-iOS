@@ -174,24 +174,11 @@ class LocalFileBackupsSettingsViewController: OWSTableViewController2 {
     }
 
     private func makeTopHeaderSection() -> OWSTableSection {
-        let label = UILabel()
-        label.text = OWSLocalizedString(
+        let section = OWSTableSection()
+        section.footerTitle = OWSLocalizedString(
             "SETTINGS_LOCAL_FILE_BACKUPS_HEADER_DESCRIPTION",
             comment: "Description shown at the top of the on-device backups settings page.",
         )
-        label.font = .dynamicTypeCaption1Clamped
-        label.textColor = .Signal.secondaryLabel
-        label.numberOfLines = 0
-
-        let container = UIView()
-        container.addSubview(label)
-        label.autoPinEdge(toSuperviewEdge: .leading, withInset: Self.cellHInnerMargin)
-        label.autoPinEdge(toSuperviewEdge: .trailing, withInset: Self.cellHInnerMargin)
-        label.autoPinEdge(toSuperviewEdge: .top, withInset: 16)
-        label.autoPinEdge(toSuperviewEdge: .bottom, withInset: 4)
-
-        let section = OWSTableSection()
-        section.customHeaderView = container
         return section
     }
 
