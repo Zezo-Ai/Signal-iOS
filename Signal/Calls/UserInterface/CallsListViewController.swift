@@ -50,6 +50,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
         let groupCallManager: GroupCallManager
         let interactionDeleteManager: InteractionDeleteManager
         let interactionStore: InteractionStore
+        let notificationPreferencesManager: NotificationPreferencesManager
         let searchableNameFinder: SearchableNameFinder
         let threadStore: ThreadStore
         let tsAccountManager: any TSAccountManager
@@ -73,6 +74,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
         groupCallManager: SSKEnvironment.shared.groupCallManagerRef,
         interactionDeleteManager: DependenciesBridge.shared.interactionDeleteManager,
         interactionStore: DependenciesBridge.shared.interactionStore,
+        notificationPreferencesManager: DependenciesBridge.shared.notificationPreferencesManager,
         searchableNameFinder: SearchableNameFinder(
             contactManager: SSKEnvironment.shared.contactManagerRef,
             searchableNameIndexer: DependenciesBridge.shared.searchableNameIndexer,
@@ -146,7 +148,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        updateDisplayedDateForAllCallCells()
+        updateTimeSensitiveStateForAllCallCells()
         clearMissedCallsIfNecessary()
         isPeekingEnabled = true
         schedulePeekTimerIfNeeded()
@@ -541,15 +543,22 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
     }
 
     /// A significant time change has occurred, according to the system. We
-    /// should update the displayed date for all visible calls.
+    /// should update time-sensitive state for all visible calls.
     @objc
     private func significantTimeChangeOccurred() {
-        updateDisplayedDateForAllCallCells()
+        updateTimeSensitiveStateForAllCallCells()
     }
 
-    private func updateDisplayedDateForAllCallCells() {
+    private func updateTimeSensitiveStateForAllCallCells() {
+        // Reload chat mute state
+        viewModelLoader.invalidateCallHistoryViewModels()
+
         for callCell in tableView.visibleCells.compactMap({ $0 as? CallCell }) {
-            callCell.updateDisplayedDateAndScheduleRefresh()
+            guard
+                let indexPath = tableView.indexPath(for: callCell),
+                let viewModel = viewModelLoader.viewModel(at: indexPath.row, sneakyTransactionDb: deps.db)
+            else { continue }
+            callCell.viewModel = viewModel
         }
     }
 
@@ -1014,6 +1023,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
                 // Call links don't disappear.
                 callExpirations: [:],
                 title: callLinkRecord.state.localizedName,
+                isMuted: false,
                 recipientType: .callLink(callLinkRecord.rootKey),
                 direction: .callLink,
                 medium: .link,
@@ -1083,6 +1093,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
         }()
 
         let title: String
+        let isMuted: Bool
         let medium: CallViewModel.Medium
         let recipientType: CallViewModel.RecipientType
 
@@ -1096,6 +1107,9 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
             else {
                 owsFail("Missing thread for call record! This should be impossible, per the DB schema.")
             }
+            isMuted = BuildFlags.improvedNotifications
+                && callThread.isMuted
+                && !deps.notificationPreferencesManager.notifyForCallsWhenMuted(thread: callThread, tx: tx)
             switch callThread {
             case let contactThread as TSContactThread:
                 title = deps.contactsManager.displayName(for: contactThread.contactAddress, tx: tx).resolvedValue()
@@ -1149,6 +1163,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
             callRecords: callRecords,
             callExpirations: callExpirations,
             title: title,
+            isMuted: isMuted,
             recipientType: recipientType,
             direction: callDirection,
             medium: medium,
@@ -1464,6 +1479,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
         let callExpirations: [CallRecord.ID: CallViewModel.CallExpiration]
 
         let title: String
+        let isMuted: Bool
         let recipientType: RecipientType
         let direction: Direction
         let medium: Medium
@@ -1474,6 +1490,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
             callRecords: [CallRecord],
             callExpirations: [CallRecord.ID: CallViewModel.CallExpiration],
             title: String,
+            isMuted: Bool,
             recipientType: RecipientType,
             direction: Direction,
             medium: Medium,
@@ -1483,6 +1500,7 @@ class CallsListViewController: OWSViewController, HomeTabViewController, CallSer
             self.callRecords = callRecords
             self.callExpirations = callExpirations
             self.title = title
+            self.isMuted = isMuted
             self.recipientType = recipientType
             self.direction = direction
             self.medium = medium
@@ -2314,6 +2332,21 @@ private extension CallsListViewController {
             return label
         }()
 
+        private lazy var mutedCallsIndicatorLabel: UILabel = {
+            let label = UILabel()
+            label.attributedText = SignalSymbol.bellSlash.attributedString(
+                for: .body,
+                leadingCharacter: .nonBreakingSpace,
+            )
+            label.textColor = .Signal.secondaryLabel
+            label.isAccessibilityElement = true
+            label.accessibilityLabel = OWSLocalizedString(
+                "MUTED_BADGE",
+                comment: "Badge indicating that the user is muted.",
+            )
+            return label
+        }()
+
         private lazy var subtitleLabel: UILabel = {
             let label = UILabel()
             label.textColor = .Signal.secondaryLabel
@@ -2396,8 +2429,14 @@ private extension CallsListViewController {
             tintColor = .Signal.accent
             automaticallyUpdatesBackgroundConfiguration = false
 
-            let bodyVStack = UIStackView(arrangedSubviews: [
+            let titleHStack = UIStackView(arrangedSubviews: [
                 titleLabel,
+                mutedCallsIndicatorLabel,
+            ])
+            titleHStack.axis = .horizontal
+
+            let bodyVStack = UIStackView(arrangedSubviews: [
+                titleHStack,
                 subtitleLabel,
             ])
             bodyVStack.axis = .vertical
@@ -2508,6 +2547,7 @@ private extension CallsListViewController {
                 }
             }()
             titleLabel.text = titleText
+            mutedCallsIndicatorLabel.isHidden = !viewModel.isMuted
 
             switch viewModel.direction {
             case .incoming, .outgoing, .callLink:
