@@ -8551,6 +8551,9 @@
 /* Indicates that Touch ID/Face ID/Phone Passcode passcode is not set. */
 "SCREEN_LOCK_ERROR_LOCAL_AUTHENTICATION_PASSCODE_NOT_SET" = "You must enable a passcode in your iOS Settings in order to use Screen Lock.";
 
+/* Description of how and why Signal iOS uses Touch ID/Face ID/Phone Passcode to confirm a change to the 'screen lock' settings. */
+"SCREEN_LOCK_REASON_CHANGE_SCREEN_LOCK_SETTINGS" = "Authenticate to change Screen Lock settings.";
+
 /* Description of how and why Signal iOS uses Touch ID/Face ID/Phone Passcode to unlock 'screen lock'. */
 "SCREEN_LOCK_REASON_UNLOCK_SCREEN_LOCK" = "Authenticate to open Signal.";
 
